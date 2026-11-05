@@ -416,3 +416,5 @@ graph TD
 | 13 | 标为“中”和“未核实”的条目，锁定版本时以 nuget.org / 官方仓库再确认 | 待确认 | 第 7 节 |
 | 14 | .NET 10 chiseled-extra 镜像包含时区数据与 ICU，实施时实测 | 待确认 | 第 7 节 |
 | 15 | S3 校验和配置在目标生产存储上验证 | 待确认 | 4.9 |
+
+补充说明（2026-11-05，随阶段 0 S0-04 确认）：全部依赖已按官方一手数据锁定版本并核实许可（`docs/implementation/S0-04-版本与许可.md`）。第 7 节中“中 / 未核实”的条目均已核实：Mediator MIT、openapi-fetch MIT、oasdiff Apache-2.0、Quartz.NET Apache-2.0、Meziantou.Analyzer MIT、Fluid 2.x 维护活跃（2.41.1）。第 12 项：Quartz.NET 4.x 已有正式版（4.7.2），“PG 集群模式可用”在阶段 2 实现时验证。第 4.9 节：AWSSDK.S3 已是 v4（4.0.104.9），完整性校验的配置约束同样适用，按 v4 的配置项落实，并在 08 原型 #14 中验证。第 14 项（chiseled-extra 镜像）仍在实施时实测。

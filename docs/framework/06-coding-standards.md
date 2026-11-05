@@ -754,6 +754,8 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | cspell 许可与版本 | 锁定版本时核实 |
 | PG 克隆模板库对活动连接的要求 | 实现 `Kmic.BuildingBlocks.Testing` 时验证 |
 
+补充说明（2026-11-05，随阶段 0 S0-04 确认）：cspell 10.4.0 为 MIT；Meziantou.Analyzer 锁定 3.0.320，规则 MA0137、MA0138、MA0155 存在且含义与本文一致（`docs/implementation/S0-04-版本与许可.md`）。
+
 ---
 
 ## 附录 A 注释与排版细则（2026-11-04，随 R01 M3 确认）
