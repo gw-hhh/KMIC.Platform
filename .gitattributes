@@ -1,0 +1,17 @@
+# 换行统一为 LF（06 第 3.2 节）；Windows 开发机检出后同样是 LF
+* text=auto eol=lf
+*.sh text eol=lf
+
+# 二进制文件不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.xlsx binary
+*.docx binary
+*.zip binary
+*.woff binary
+*.woff2 binary

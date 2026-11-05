@@ -1,0 +1,44 @@
+# .NET 构建输出与 IDE
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+*.trx
+coverage*.xml
+
+# 前端
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.vite/
+
+# 编辑器与系统文件
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+
+# 本机配置与密钥（密钥不进仓库，ADR-0016）
+.env
+.env.*
+!.env.example
+*.pfx
+*.key
+appsettings.*.local.json
+
+# 运行日志（不提交运行产生的日志）
+*.log
+
+# 副本文件（06 第 3.2 节）
+*_bak.*
+* - 副本.*
+
+# AI 助手的本机设置
+.claude/settings.local.json
