@@ -1,0 +1,122 @@
+#:property RestorePackagesWithLockFile=false
+
+// 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
+// 依次执行：编码与换行 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 拼写；任一步失败即停止并返回非零退出码。
+// CI 流水线只调用本脚本，保证“本地通过即 CI 通过”（S0-06）。
+using System.Diagnostics;
+using System.Text;
+
+var root = FindRepositoryRoot();
+var steps = new (string Name, Func<int> Run)[]
+{
+    ("编码与换行（UTF-8 无 BOM、LF，06 第 3.2 节）", () => CheckEncoding(root)),
+    ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
+    ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
+    ("测试", () => RunWhenProjectsExist(root, "dotnet", "test Kmic.slnx --nologo --no-build")),
+    ("依赖漏洞（含传递依赖）", () => RunWhenProjectsExist(root, "dotnet", "list Kmic.slnx package --vulnerable --include-transitive")),
+    ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
+};
+
+foreach (var (name, run) in steps)
+{
+    Console.WriteLine($"== {name}");
+    var exitCode = run();
+    if (exitCode != 0)
+    {
+        Console.WriteLine($"== 失败：{name}（退出码 {exitCode}）");
+        return exitCode;
+    }
+}
+
+Console.WriteLine("== 全部通过");
+return 0;
+
+static string FindRepositoryRoot()
+{
+    var directory = new DirectoryInfo(Environment.CurrentDirectory);
+    while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Kmic.slnx")))
+    {
+        directory = directory.Parent;
+    }
+
+    return directory?.FullName ?? throw new InvalidOperationException("Kmic.slnx not found; run from inside the repository.");
+}
+
+// 空解决方案（阶段 0）没有项目时跳过 .NET 步骤
+static int RunWhenProjectsExist(string root, string fileName, string arguments)
+{
+    var solution = File.ReadAllText(Path.Combine(root, "Kmic.slnx"));
+    if (!solution.Contains("<Project ", StringComparison.Ordinal))
+    {
+        Console.WriteLine("   解决方案中还没有项目，跳过");
+        return 0;
+    }
+
+    return Run(root, fileName, arguments);
+}
+
+static int Run(string root, string fileName, string arguments)
+{
+    // Windows 上 npx 是批处理文件，需经 cmd 启动；不用外壳方式启动，以便输出留在当前控制台
+    var startInfo = OperatingSystem.IsWindows() && string.Equals(fileName, "npx", StringComparison.Ordinal)
+        ? new ProcessStartInfo("cmd.exe", $"/c npx {arguments}")
+        : new ProcessStartInfo(fileName, arguments);
+    startInfo.WorkingDirectory = root;
+    startInfo.UseShellExecute = false;
+    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Cannot start {fileName}.");
+    process.WaitForExit();
+    return process.ExitCode;
+}
+
+// 只检查 Git 跟踪与待提交的文本文件；二进制文件由 .gitattributes 声明
+static int CheckEncoding(string root)
+{
+    var startInfo = new ProcessStartInfo("git", "-c core.quotepath=off ls-files -z --cached --others --exclude-standard")
+    {
+        WorkingDirectory = root,
+        UseShellExecute = false,
+        RedirectStandardOutput = true,
+        StandardOutputEncoding = Encoding.UTF8,
+    };
+    using var git = Process.Start(startInfo) ?? throw new InvalidOperationException("Cannot start git.");
+    var files = git.StandardOutput.ReadToEnd().Split('\0', StringSplitOptions.RemoveEmptyEntries);
+    git.WaitForExit();
+
+    string[] binaryExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".xlsx", ".docx", ".zip", ".woff", ".woff2"];
+    var problems = 0;
+    foreach (var file in files)
+    {
+        if (binaryExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
+        {
+            continue;
+        }
+
+        // NuGet 在 Windows 上按 CRLF 生成锁定文件；入库时由 .gitattributes 统一为 LF
+        if (string.Equals(Path.GetFileName(file), "packages.lock.json", StringComparison.OrdinalIgnoreCase))
+        {
+            continue;
+        }
+
+        var path = Path.Combine(root, file);
+        if (!File.Exists(path))
+        {
+            continue;
+        }
+
+        var bytes = File.ReadAllBytes(path);
+        if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+        {
+            Console.WriteLine($"   带 BOM：{file}");
+            problems++;
+        }
+
+        if (bytes.AsSpan().IndexOf("\r\n"u8) >= 0)
+        {
+            Console.WriteLine($"   CRLF 换行：{file}");
+            problems++;
+        }
+    }
+
+    Console.WriteLine($"   检查 {files.Length} 个文件，问题 {problems} 处");
+    return problems == 0 ? 0 : 1;
+}

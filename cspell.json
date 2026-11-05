@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
   "language": "en",
-  "files": ["src/**", "tests/**", "web/src/**", "web/tests/**"],
+  "files": ["src/**", "tests/**", "scripts/**", "web/src/**", "web/tests/**"],
   "ignorePaths": [
     "**/bin/**",
     "**/obj/**",

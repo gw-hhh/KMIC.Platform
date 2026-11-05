@@ -167,3 +167,8 @@ dotnet_diagnostic.MA0004.severity = none
 [tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1848.severity = none
+
+# ---------------------------------------------------------------- 单文件脚本（dotnet run scripts/xxx.cs）
+# 顶级语句没有类型名，“文件名与类型名一致”不适用
+[scripts/**.cs]
+dotnet_diagnostic.MA0048.severity = none

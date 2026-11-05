@@ -6,12 +6,15 @@ Fluid
 Kmic
 Mediator
 Meziantou
+nologo
 Npgsql
 Pinia
 Quartz
+quotepath
 Scalar
 Serilog
 Shouldly
+slnx
 Testcontainers
 Vogen
 vueuse
