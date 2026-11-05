@@ -1,0 +1,18 @@
+# 项目词典（06 D3）：标识符中用到、通用词典里没有的词。业务术语先登记 docs/glossary.md，再加到这里。
+# 修改须框架负责人审核。一行一个词，按字母顺序。
+Antdv
+Aspire
+Fluid
+Kmic
+Mediator
+Meziantou
+Npgsql
+Pinia
+Quartz
+Scalar
+Serilog
+Shouldly
+Testcontainers
+Vogen
+vueuse
+vxe

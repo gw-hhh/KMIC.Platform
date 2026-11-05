@@ -1,0 +1,19 @@
+<Project>
+  <!--
+    明确不引入的库（03 第 5 节）：任何项目直接引用即在还原时失败。
+    修改须框架负责人审核（.gitea/CODEOWNERS）。
+  -->
+  <ItemGroup>
+    <KmicBannedPackage Include="MediatR;AutoMapper;Mapster;FluentAssertions;Moq;MassTransit;WolverineFx;NServiceBus;Hangfire.Core;Hangfire.AspNetCore;Newtonsoft.Json;FastEndpoints;Carter;Swashbuckle.AspNetCore;NSwag.AspNetCore;Ardalis.SmartEnum;Stateless;Polly;Polly.Core;Microsoft.EntityFrameworkCore.InMemory;Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+  <Target Name="KmicCheckBannedPackages" BeforeTargets="CollectPackageReferences">
+    <ItemGroup>
+      <_KmicAllowedReference Include="@(PackageReference)" Exclude="@(KmicBannedPackage)" />
+      <_KmicBannedReference Include="@(PackageReference)" Exclude="@(_KmicAllowedReference)" />
+    </ItemGroup>
+    <Error Condition="'@(_KmicBannedReference)' != ''"
+           Code="KMIC0001"
+           Text="不允许引用以下包（03 第 5 节“明确不引入的库”）：@(_KmicBannedReference)" />
+  </Target>
+</Project>

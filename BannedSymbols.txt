@@ -1,0 +1,32 @@
+# 禁用 API：全部项目（06 第 15.2 节）。每行“符号的文档注释 ID;替代做法”。修改须框架负责人审核。
+# 只针对模块或某一层的禁用项（IConfiguration、IMemoryCache、DbContext 写入 API、端点中的 Results.Problem 等）
+# 在阶段 2 建立对应项目时另建分层清单加入；每一条都要有分析器测试证明它确实生效（06 第 16 节）。
+
+# 时间：使用 TimeProvider（ADR-0011、05-13）
+P:System.DateTime.Now;使用 TimeProvider（ADR-0011、05-13）
+P:System.DateTime.UtcNow;使用 TimeProvider（ADR-0011、05-13）
+P:System.DateTime.Today;使用 TimeProvider（ADR-0011、05-13）
+P:System.DateTimeOffset.Now;使用 TimeProvider（ADR-0011、05-13）
+P:System.DateTimeOffset.UtcNow;使用 TimeProvider（ADR-0011、05-13）
+
+# 标识：使用强类型 ID 的 New()（UUID v7，ADR-0009）
+M:System.Guid.NewGuid;使用强类型 ID 的 New()（UUID v7，ADR-0009）
+
+# HTTP：使用 IHttpClientFactory 类型化客户端（ADR-0021）
+M:System.Net.Http.HttpClient.#ctor;使用 IHttpClientFactory 类型化客户端（ADR-0021）
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler);使用 IHttpClientFactory 类型化客户端（ADR-0021）
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler,System.Boolean);使用 IHttpClientFactory 类型化客户端（ADR-0021）
+
+# 同步等待异步结果：使用 await（06 第 7 节）
+M:System.Threading.Tasks.Task.Wait;使用 await（06 第 7 节）
+M:System.Threading.Tasks.Task.Wait(System.Int32);使用 await（06 第 7 节）
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);使用 await（06 第 7 节）
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);使用 await（06 第 7 节）
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);使用 await（06 第 7 节）
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan,System.Threading.CancellationToken);使用 await（06 第 7 节）
+P:System.Threading.Tasks.Task`1.Result;使用 await（06 第 7 节）
+P:System.Threading.Tasks.ValueTask`1.Result;使用 await（06 第 7 节）
+M:System.Runtime.CompilerServices.TaskAwaiter.GetResult;使用 await（06 第 7 节）
+M:System.Runtime.CompilerServices.TaskAwaiter`1.GetResult;使用 await（06 第 7 节）
+M:System.Runtime.CompilerServices.ValueTaskAwaiter.GetResult;使用 await（06 第 7 节）
+M:System.Runtime.CompilerServices.ValueTaskAwaiter`1.GetResult;使用 await（06 第 7 节）

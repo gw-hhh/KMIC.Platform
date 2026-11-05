@@ -1,0 +1,7 @@
+# 禁用 API：测试项目追加（06 第 12.3 节）。测试中等待时间用 FakeTimeProvider，等待异步结果用框架的有超时的轮询辅助方法。
+M:System.Threading.Tasks.Task.Delay(System.Int32);使用 FakeTimeProvider 或轮询辅助方法（06 第 12.3 节）
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan);使用 FakeTimeProvider 或轮询辅助方法（06 第 12.3 节）
+M:System.Threading.Tasks.Task.Delay(System.Int32,System.Threading.CancellationToken);使用 FakeTimeProvider 或轮询辅助方法（06 第 12.3 节）
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan,System.Threading.CancellationToken);使用 FakeTimeProvider 或轮询辅助方法（06 第 12.3 节）
+M:System.Threading.Thread.Sleep(System.Int32);使用 FakeTimeProvider 或轮询辅助方法（06 第 12.3 节）
+M:System.Threading.Thread.Sleep(System.TimeSpan);使用 FakeTimeProvider 或轮询辅助方法（06 第 12.3 节）

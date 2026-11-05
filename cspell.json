@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "files": ["src/**", "tests/**", "web/src/**", "web/tests/**"],
+  "ignorePaths": [
+    "**/bin/**",
+    "**/obj/**",
+    "**/node_modules/**",
+    "**/packages.lock.json",
+    "**/pnpm-lock.yaml",
+    "**/Migrations/**",
+    "**/generated/**",
+    "**/*.verified.*"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "kmic-terms",
+      "path": "./.cspell/kmic-terms.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": ["kmic-terms", "softwareTerms", "companies", "misc", "csharp", "typescript", "node", "npm", "html", "css", "scss"],
+  "ignoreRegExpList": ["/[\u4e00-\u9fff]+/g"]
+}

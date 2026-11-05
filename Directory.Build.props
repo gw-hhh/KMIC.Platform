@@ -1,0 +1,43 @@
+<Project>
+  <!--
+    全部项目共用的构建设置（06 第 3.1 节、ADR-0021）。
+    修改须框架负责人审核（.gitea/CODEOWNERS）。
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- IDE0005（多余的 using）在构建时生效的前提 -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- 依赖锁定与漏洞检查：还原结果写入 packages.lock.json，CI 中必须与之一致；含传递依赖的已知漏洞在还原时即报错 -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
+
+  <!-- 公开成员缺少 XML 注释（CS1591）只在 BuildingBlocks 与模块 Contracts 中报错（06 第 10.3 节） -->
+  <PropertyGroup Condition="'$(MSBuildProjectName.StartsWith(`Kmic.BuildingBlocks.`))' != 'true' And '$(MSBuildProjectName.EndsWith(`.Contracts`))' != 'true'">
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- 测试项目：项目名以 Tests 结尾（06 第 12.3 节） -->
+  <PropertyGroup Condition="'$(MSBuildProjectName.EndsWith(`Tests`))' == 'true'">
+    <KmicIsTestProject>true</KmicIsTestProject>
+  </PropertyGroup>
+
+  <!-- 禁用 API 清单（06 第 15.2 节）；分析器本身由 Directory.Packages.props 的 GlobalPackageReference 引入 -->
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.Tests.txt" Condition="'$(KmicIsTestProject)' == 'true'" />
+  </ItemGroup>
+</Project>

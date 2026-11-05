@@ -1,0 +1,30 @@
+# 代码负责人（06 D1、F04 D1）：改动这些文件的合并请求须框架负责人审核。
+# 本文件按 Gitea 的写法：每行第一项是正则表达式，Gitea 在两端加上 ^ 和 $ 后与文件路径整体匹配；之后是负责人账号。
+# 放在 .gitea/ 下，GitHub 不读取（过渡期间的 GitHub 仓库不受影响）。
+# 单人阶段平台不强制负责人审核（06 D10 补充说明）；迁到 Gitea 时把账号换为 Gitea 账号（实施待办 T-02）。
+
+# 构建与依赖
+global\.json @gw-hhh
+nuget\.config @gw-hhh
+Directory\.Build\.(props|targets) @gw-hhh
+Directory\.Packages\.props @gw-hhh
+
+# 代码规则与检查配置
+\.editorconfig @gw-hhh
+BannedSymbols.*\.txt @gw-hhh
+cspell\.json @gw-hhh
+\.cspell/.* @gw-hhh
+\.gitleaks\.toml @gw-hhh
+
+# 分析器与架构测试
+src/BuildingBlocks/Kmic\.BuildingBlocks\.Analyzers/.* @gw-hhh
+tests/Kmic\.ArchitectureTests/.* @gw-hhh
+
+# CI 流水线与本文件
+\.gitea/.* @gw-hhh
+
+# 前端检查配置（F04 D1）
+web/eslint\.config\.ts @gw-hhh
+web/stylelint\.config\.mjs @gw-hhh
+web/tsconfig.*\.json @gw-hhh
+web/tools/eslint-plugin-kmic/.* @gw-hhh

@@ -1,0 +1,6 @@
+# 密钥扫描（ADR-0032 补充说明）：在 Gitleaks 默认规则上扩展。
+# 例外只能按具体文件或具体值添加，并写明原因；修改须框架负责人审核。
+title = "KMIC.Platform"
+
+[extend]
+useDefault = true

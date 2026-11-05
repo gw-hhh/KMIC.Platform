@@ -1,0 +1,169 @@
+# 仓库唯一的 .editorconfig（06 D1）：规则级别只在这里调整，子目录不得再放 .editorconfig（架构测试检查）。
+# 个别位置的例外只能用带理由的 [SuppressMessage]（06 第 2.3 节）。修改须框架负责人审核（.gitea/CODEOWNERS）。
+root = true
+
+# ---------------------------------------------------------------- 全部文件（06 第 3.2 节）
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,jsonc,yml,yaml,csproj,props,targets,xml,slnx,config,toml}]
+indent_size = 2
+
+# 前端（F04 第 3.1 节）
+[web/**.{ts,vue,scss,json,js,mjs,cjs}]
+indent_size = 2
+
+# ---------------------------------------------------------------- C#：写法偏好（06 第 3.4 节）
+[*.cs]
+# var：内置类型写明类型；类型从右侧显而易见时用 var
+csharp_style_var_for_built_in_types = false
+csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true
+
+# 不使用 this.
+dotnet_style_qualification_for_field = false
+dotnet_style_qualification_for_property = false
+dotnet_style_qualification_for_method = false
+dotnet_style_qualification_for_event = false
+
+# 大括号总是使用（附录 A.7）
+csharp_prefer_braces = true
+
+# 表达式主体：属性、索引器、访问器、单行方法可以用；构造函数不用
+csharp_style_expression_bodied_properties = when_on_single_line
+csharp_style_expression_bodied_indexers = when_on_single_line
+csharp_style_expression_bodied_accessors = when_on_single_line
+csharp_style_expression_bodied_methods = when_on_single_line
+csharp_style_expression_bodied_local_functions = when_on_single_line
+csharp_style_expression_bodied_operators = when_on_single_line
+csharp_style_expression_bodied_lambdas = true
+csharp_style_expression_bodied_constructors = false
+
+# 模式匹配与 switch 表达式
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true
+csharp_style_prefer_pattern_matching = true
+csharp_style_prefer_not_pattern = true
+csharp_style_prefer_switch_expression = true
+
+# 集合表达式
+dotnet_style_prefer_collection_expression = when_types_loosely_match
+
+# 文件范围命名空间，与文件夹路径一致
+csharp_style_namespace_declarations = file_scoped
+dotnet_style_namespace_match_folder = true
+
+# using：System 在前，之后按字母顺序，不分组空行；放在命名空间之外
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_using_directive_placement = outside_namespace
+
+# 主构造函数（06 D5：服务类允许）
+csharp_style_prefer_primary_constructors = true
+
+# 字符串：优先插值
+dotnet_style_prefer_simplified_interpolation = true
+
+# 命名：常量大驼峰（规则在前，优先于私有字段）；私有字段 _camelCase；接口 I 前缀；类型参数 T 前缀；类型与成员大驼峰
+dotnet_naming_symbols.constants.applicable_kinds = field, local
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_style.pascal.capitalization = pascal_case
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_rule.constants_pascal.severity = error
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_rule.private_fields_underscore.severity = error
+
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_style.i_pascal.capitalization = pascal_case
+dotnet_naming_style.i_pascal.required_prefix = I
+dotnet_naming_rule.interfaces_i_prefix.symbols = interfaces
+dotnet_naming_rule.interfaces_i_prefix.style = i_pascal
+dotnet_naming_rule.interfaces_i_prefix.severity = error
+
+dotnet_naming_symbols.type_parameters.applicable_kinds = type_parameter
+dotnet_naming_style.t_pascal.capitalization = pascal_case
+dotnet_naming_style.t_pascal.required_prefix = T
+dotnet_naming_rule.type_parameters_t_prefix.symbols = type_parameters
+dotnet_naming_rule.type_parameters_t_prefix.style = t_pascal
+dotnet_naming_rule.type_parameters_t_prefix.severity = error
+
+dotnet_naming_symbols.types_and_members.applicable_kinds = class, struct, enum, delegate, method, property, event
+dotnet_naming_rule.types_and_members_pascal.symbols = types_and_members
+dotnet_naming_rule.types_and_members_pascal.style = pascal
+dotnet_naming_rule.types_and_members_pascal.severity = error
+
+# ---------------------------------------------------------------- C#：提升为错误的规则（06 第 15.3 节）
+# 风格（构建时由 EnforceCodeStyleInBuild 执行）
+dotnet_diagnostic.IDE0005.severity = error   # 多余的 using
+dotnet_diagnostic.IDE0161.severity = error   # 文件范围命名空间
+dotnet_diagnostic.IDE0130.severity = error   # 命名空间与文件夹一致
+dotnet_diagnostic.IDE0079.severity = error   # 多余的豁免
+dotnet_diagnostic.IDE0011.severity = error   # 大括号
+dotnet_diagnostic.IDE0003.severity = error   # 不使用 this.
+dotnet_diagnostic.IDE0041.severity = error   # is null
+dotnet_diagnostic.IDE1006.severity = error   # 命名
+
+# 类型设计
+dotnet_diagnostic.CA1852.severity = error    # 类型密封
+dotnet_diagnostic.MA0053.severity = error
+dotnet_diagnostic.CS9124.severity = error    # 主构造函数参数重复捕获
+
+# 异常
+dotnet_diagnostic.CA1031.severity = error
+dotnet_diagnostic.CA2200.severity = error
+dotnet_diagnostic.CA1510.severity = error
+dotnet_diagnostic.CA1511.severity = error
+dotnet_diagnostic.CA1512.severity = error
+dotnet_diagnostic.CA1513.severity = error
+
+# 异步与取消
+dotnet_diagnostic.CA1849.severity = error
+dotnet_diagnostic.MA0042.severity = error
+dotnet_diagnostic.CA2016.severity = error
+dotnet_diagnostic.MA0040.severity = error
+dotnet_diagnostic.CA1068.severity = error
+dotnet_diagnostic.CA2012.severity = error
+dotnet_diagnostic.MA0155.severity = error    # 禁止 async void
+dotnet_diagnostic.MA0137.severity = error    # 异步方法加 Async 后缀（测试方法、接口实现除外，06 D4）
+dotnet_diagnostic.MA0138.severity = error    # 非异步方法不加 Async 后缀
+
+# 字符串与文化
+dotnet_diagnostic.CA1307.severity = error
+dotnet_diagnostic.CA1309.severity = error
+dotnet_diagnostic.MA0006.severity = error
+dotnet_diagnostic.CA1304.severity = error
+dotnet_diagnostic.CA1305.severity = error
+dotnet_diagnostic.MA0011.severity = error
+dotnet_diagnostic.MA0009.severity = error
+dotnet_diagnostic.SYSLIB1045.severity = error
+
+# 日志（06 D6：一律 [LoggerMessage]）
+dotnet_diagnostic.CA1848.severity = error
+dotnet_diagnostic.CA2254.severity = error
+dotnet_diagnostic.CA2017.severity = error
+
+# 数据访问
+dotnet_diagnostic.EF1002.severity = error    # SQL 注入风险
+
+# 禁用 API（BannedSymbols*.txt）
+dotnet_diagnostic.RS0030.severity = error
+
+# 关闭：ConfigureAwait（ASP.NET Core 没有同步上下文，06 第 7 节）
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.MA0004.severity = none
+
+# ---------------------------------------------------------------- 测试项目（06 D9：测试方法名为 行为_条件_结果）
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1848.severity = none
