@@ -14,7 +14,7 @@
 | `docs/framework/` | 底层框架设计：需求、选型、架构、各项基础能力、ADR。**从 [`docs/framework/00-README.md`](docs/framework/00-README.md) 开始阅读**，进度表与延后事项表都在那里 | 设计已确认 |
 | `docs/frontend/` | 前端框架设计：旧前端盘点与需求、技术选型、架构、规范。**从 [`docs/frontend/00-README.md`](docs/frontend/00-README.md) 开始阅读** | 设计已确认 |
 | `docs/legacy/` | 旧系统完整分析（含业务模块细节），供设计参考 | 参考资料 |
-| `docs/implementation/` | 实施各阶段的任务清单、进度与操作说明 | 阶段 0 进行中 |
+| `docs/implementation/` | 实施各阶段的任务清单、进度、操作说明与按触发条件的待办。**从 [`docs/implementation/00-README.md`](docs/implementation/00-README.md) 开始阅读** | 阶段 0 进行中 |
 
 以下目录随后续阶段创建（规划，尚未建立）：
 
