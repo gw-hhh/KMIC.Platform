@@ -1,6 +1,6 @@
 # 原型 #8：状态属性只能由状态机改写（分析器 KM0401）
 
-- 状态：结论已得出；D1 待决（2026-11-06）
+- 状态：已确认（2026-11-06）：D1 按建议
 - 来源：08 第 4 节原型 #8（非阻断）；05-01 第 7.3 节“`待确认`：该分析器的实现难度”
 - 原型代码：分支 `spike/08-state-analyzer` 的 `spikes/08-state-analyzer/`（一次性代码，不合入主干）
 - 环境：.NET SDK 10.0.403；Microsoft.CodeAnalysis.CSharp 5.0.0；Microsoft.CodeAnalysis.CSharp.Analyzer.Testing 1.1.4
@@ -40,14 +40,14 @@ error KM0401: 状态属性 Status 的 setter 必须是 private
 | 事项 | 说明 |
 |---|---|
 | 语言版本 | `netstandard2.0` 项目默认 C# 7.3，`Nullable` 等设置直接报错。`Kmic.BuildingBlocks.Analyzers` 项目要写 `<LangVersion>latest</LangVersion>` |
-| 语法限制 | `netstandard2.0` 没有 `System.Index`，列表模式（`[x]`）、范围（`..`）不能用；按普通写法写，不为此引入填充库 |
+| 语法限制 | `netstandard2.0` 没有 `System.Index`、`IsExternalInit` 等类型，列表模式、范围运算符、`record` 不能直接用。按质量原则（2026-11-06）引入 PolySharp 在编译期补上，分析器代码同样用最新写法（06 第 2 节补充说明） |
 | 版本跟踪 | Roslyn 作者规则（RS2000 系）要求 `AnalyzerReleases.Shipped.md` / `Unshipped.md` 登记每个编号，且诊断描述要在字段上直接 `new`，经辅助方法创建的认不出 |
 | 测试写法 | 同一编号有多种提示时，测试按位置标记（`{|#0:…|}`）并写明期望哪一种，比只核对编号更精确 |
 | 编译结束诊断 | 在编译结束时报告的那种提示要带 `CompilationEnd` 标记（RS1037） |
 
-## 4. 待决事项
+## 4. 决定
 
-### D1 `StateMachine` 的 `Define` 写法（待决）
+### D1 `StateMachine` 的 `Define` 写法（已确认，2026-11-06）
 
 05-01 第 7.2 节的写法 `StateMachine<Sample, SampleStatus, SampleAction>.Define(...)` 是泛型类型上的静态方法，被 CA1000（不要在泛型类型上声明静态成员）按错误级别拦下。原型的示例项目实际编译验证了这一点。
 
@@ -56,10 +56,10 @@ error KM0401: 状态属性 Status 的 setter 必须是 private
 | **A 非泛型静态类 + 泛型方法** | `StateMachine.Define<Sample, SampleStatus, SampleAction>(s => s.Status, (s, v) => s.Status = v)`，返回 `StateMachine<Sample, SampleStatus, SampleAction>` 的构建器 | 与 .NET 自身的惯例一致（`ImmutableArray.Create` 与 `ImmutableArray<T>`、`Tuple.Create` 与 `Tuple<T>`）；不需要豁免；调用处长度不变 | 多一个静态类 |
 | B 保持原写法，豁免 CA1000 | 在 `StateMachine<,,>` 上写 `[SuppressMessage]` 并说明理由 | 05-01 示例不变 | 框架代码一开始就带豁免；这条规则要防的“调用处要写全类型参数”在两种写法中一样，豁免换不来任何好处 |
 
-- **建议**：A。
+- **决定（已确认，2026-11-06）**：A。
 - **理由**：只是把类型参数从类型挪到方法上，读起来没有差别，却不需要豁免规则。原型已验证 A 写法编译通过、KM0401 照常生效（分析器识别 `Define` 所在类型这一处随之调整）。
 - **取舍**：多一个只有一个方法的静态类。
-- **确认后要修订**：05-01 第 7.2 节示例、第 7.3 节 `待确认`；07 第 4.1 节示例。
+- **已修订**（2026-11-06）：05-01 第 7.2 节示例与补充说明、第 7.3 节 `待确认` 关闭、类图与规则表；07 第 4.1 节示例只写字段类型，无需改动。
 
 ## 5. 与其他文档的接口（写法修正记录）
 
@@ -69,4 +69,5 @@ error KM0401: 状态属性 Status 的 setter 必须是 private
 |---|---|---|
 | 05-01 第 2.3、3.2、7.2、7.3 节示例 | `Machine` → `_machine`（4 处） | 06 第 4 节：私有静态只读字段也用 `_camelCase`；`.editorconfig` 按错误级别检查（IDE1006），原型中实际报出 |
 | 07 第 4.1、7.1 节示例 | `Machine` → `_machine`（3 处）；测试示例 `Now` → `_now`（3 处） | 同上 |
+| 05-01 第 7.2 节示例 | 去掉 `Permit` 参数间人工纵向对齐的空格；带 `guard` 的那次调用按“一行放不下时每个参数一行”换行 | 06 附录 A.8、A.12 |
 | 06 附录 A.12 冲突表 | 补一行“常量、静态只读字段都用 PascalCase → 本项目私有静态只读字段用 `_camelCase`” | 2026-11-06 吸收参考文档时遗漏了这一处冲突 |
