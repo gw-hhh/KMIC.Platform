@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 故意包含违反 KM0401 的代码，不放进解决方案，单独构建以确认分析器在真实构建中生效 -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/Spike08.Analyzers/Spike08.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>
