@@ -235,7 +235,7 @@ dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.MA0004.severity = none
 
 # ---------------------------------------------------------------- 测试项目（06 D9：测试方法名为 行为_条件_结果）
-[tests/**.cs]
+[{tests,spikes/*/tests}/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1848.severity = none
 
