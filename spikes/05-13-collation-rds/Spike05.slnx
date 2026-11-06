@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/Spike05.Tests/Spike05.Tests.csproj" />
+  </Folder>
+</Solution>
