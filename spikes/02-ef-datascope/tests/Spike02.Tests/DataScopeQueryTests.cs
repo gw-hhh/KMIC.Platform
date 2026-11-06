@@ -66,7 +66,8 @@ public sealed class DataScopeQueryTests(PostgresFixture db) : IClassFixture<Post
     [Fact]
     public async Task Same_query_with_different_scopes_compiles_once()
     {
-        // 三个上下文共用同一份选项（同一个内部服务提供者与查询缓存），与应用中的上下文池一致
+        // 三个上下文共用同一份选项（同一个内部服务提供者与查询缓存），与应用中的上下文池一致。
+        // 同一夹具的其他测试也共用这个缓存，所以查询形状要与它们都不同，否则可能一次也不编译
         var compilations = 0;
         var options = db.CreateOptions(builder =>
             builder.LogTo(_ => Interlocked.Increment(ref compilations), [CoreEventId.QueryCompilationStarting]));
@@ -74,7 +75,7 @@ public sealed class DataScopeQueryTests(PostgresFixture db) : IClassFixture<Post
         foreach (var scope in new[] { FakeDataScope.User(Ids.Me, Ids.East), FakeDataScope.User(Ids.Other, Ids.West, Ids.North), FakeDataScope.User(Ids.Me) })
         {
             await using var context = new SampleDbContext(options, scope);
-            await context.Samples.Select(s => s.Id).ToListAsync(TestContext.Current.CancellationToken);
+            await context.Samples.OrderBy(s => s.Title).Select(s => s.Title).ToListAsync(TestContext.Current.CancellationToken);
         }
 
         compilations.ShouldBe(1);
