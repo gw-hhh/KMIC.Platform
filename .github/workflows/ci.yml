@@ -1,12 +1,11 @@
 # 过渡期 CI（S0 问题 7）：GitHub Actions 在 Linux 上运行与本地相同的检查脚本。
+# 2026-11-06 起暂停自动运行，日常以本机 `dotnet run scripts/check.cs` 为准；需要在 Linux 上验证时在 Actions 页面手动运行（实施待办 T-18）。
+# 恢复自动运行：把下面 on 中的 push、pull_request 加回来。
 # 迁到公司 Gitea 后（实施待办 T-01）由 Gitea Actions 直接读取本文件：语法兼容，执行机标签按 S0-Gitea准备.md 调整。
 # 第三方动作按提交 SHA 固定，标签可以被改写，SHA 不能；行末注释是对应的版本，升级时两处一起改。
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
