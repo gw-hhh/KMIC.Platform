@@ -33,6 +33,8 @@
   <!-- 测试项目：项目名以 Tests 结尾（06 第 12.3 节） -->
   <PropertyGroup Condition="'$(MSBuildProjectName.EndsWith(`Tests`))' == 'true'">
     <KmicIsTestProject>true</KmicIsTestProject>
+    <!-- xUnit v3 生成的程序入口用 GetAwaiter().GetResult()，会被禁用 API 检查拦下；这个常量只让 xUnit 在它自己生成的文件中关闭警告（原型 #1 发现） -->
+    <DefineConstants>$(DefineConstants);XUNIT_GENERATED_DISABLE_WARNINGS</DefineConstants>
   </PropertyGroup>
 
   <!-- 禁用 API 清单（06 第 15.2 节）；分析器本身由 Directory.Packages.props 的 GlobalPackageReference 引入 -->

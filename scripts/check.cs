@@ -12,7 +12,7 @@ var steps = new (string Name, Func<int> Run)[]
     ("编码与换行（UTF-8 无 BOM、LF，06 第 3.2 节）", () => CheckEncoding(root)),
     ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
-    ("测试", () => RunWhenProjectsExist(root, "dotnet", "test Kmic.slnx --nologo --no-build")),
+    ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
     ("依赖漏洞（含传递依赖）", () => RunWhenProjectsExist(root, "dotnet", "list Kmic.slnx package --vulnerable --include-transitive")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
