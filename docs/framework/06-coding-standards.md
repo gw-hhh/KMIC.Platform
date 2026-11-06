@@ -143,6 +143,8 @@ graph LR
 
 补充说明（2026-11-05，随前端 F04 确认）：前端（`web/`）与本文共用 D3（标识符英文 + 术语表 + cspell）、D7（文字语言按读者区分）、D10（版本控制）、本节的编码与换行、附录 A 的注释原则，具体见 F04 第 0.3 节。为此：根 `.editorconfig` 增加 `[web/**.{ts,vue,scss,json}]` 配置节（2 个空格缩进），仍只有根目录这一份（D1）；cspell 的检查范围加入 `web/src`、`web/tests`，词典共用；`CODEOWNERS` 增加前端检查配置（`web/eslint.config.ts`、Stylelint 配置、`web/tsconfig*.json`、`web/tools/eslint-plugin-kmic/`、组件库允许名单），修改须框架负责人审核（F04 D1）。前端的规则总表在 F04 第 14 节，不并入本文第 15 节。
 
+补充说明（2026-11-06，随原型 #11 确认，`docs/framework/spikes/11-module-template.md` D3）：Windows 上的 `dotnet sln`、`dotnet new`、`dotnet ef` 等工具按 CRLF 写文件，EF 迁移还带 BOM。本节规则不开例外，用 `dotnet run scripts/check.cs -- --fix` 一次规整（去掉 BOM、CRLF 改为 LF），用过这些工具后运行一次；忘了也会被检查拦下。EF 迁移（`src/**/Migrations/*.cs`）在 `.editorconfig` 中标为生成代码，不受代码规则约束，人工审查生成的 SQL（05-03 第 9 节）。
+
 ### 3.3 D2 格式化工具
 
 ADR-0021 已定 `.editorconfig` + `dotnet format --verify-no-changes`。这里确认是否再引入独立的格式化工具。

@@ -244,6 +244,11 @@ dotnet_diagnostic.CA1848.severity = none
 [src/**/*{Id,Ref}.cs]
 dotnet_diagnostic.MA0097.severity = none
 
+# ---------------------------------------------------------------- EF 迁移（原型 #11 D3）
+# 由 dotnet ef 生成，人工审查的是生成的 SQL（05-03 第 9 节），C# 写法不受代码规则约束
+[src/**/Migrations/*.cs]
+generated_code = true
+
 # ---------------------------------------------------------------- 单文件脚本（dotnet run scripts/xxx.cs）
 # 顶级语句没有类型名，“文件名与类型名一致”不适用
 [scripts/**.cs]

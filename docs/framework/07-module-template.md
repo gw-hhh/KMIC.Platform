@@ -673,13 +673,19 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 - **理由**：“标准写法”的价值在于始终正确；只有参与编译和测试的样板才能长期保持正确。
 - **取舍**：多维护一个模块；它也承担了框架端到端测试的作用，这部分维护本来就要做。
 
+补充说明（2026-11-06，随原型 #11 确认，`docs/framework/spikes/11-module-template.md`）：
+
+1. **新建模块用脚本**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号 → `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 构建 → 生成初始迁移 → `check.cs --fix` → 格式检查 → 运行模块测试，任一步失败即停止。模板本身不再“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
+2. **初始迁移由脚本调用 EF 工具生成**，代替上面“模板生成初始迁移”：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 同为 10.0.14），脚本自动执行 `dotnet tool restore`。
+3. 迁移文件按生成代码处理，编码由 `check.cs --fix` 规整（06 第 3.2 节补充说明）。
+
 ### 6.2 步骤
 
 | 步骤 | 内容 |
 |---|---|
 | 1 | 写模块设计文档 `docs/modules/<模块>/README.md`（第 8 节格式），评审通过 |
 | 2 | 模块登记表（2.4）登记模块名、schema、编号、依赖、负责人 |
-| 3 | `dotnet new kmic-module -n <模块>` |
+| 3 | `dotnet new kmic-module -n <模块>`（2026-11-06 补充说明：改为 `dotnet run scripts/new-module.cs -- <模块> <编号>`，见 6.1） |
 | 4 | 宿主 `Program.cs` 中 `AddModule<XxxModule, XxxEndpoints>()`；测试宿主同步注册 |
 | 5 | `CODEOWNERS` 增加模块目录的负责人 |
 | 6 | 按设计文档逐个用例实现（第 5 节） |

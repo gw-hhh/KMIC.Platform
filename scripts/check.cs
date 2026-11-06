@@ -3,13 +3,15 @@
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
 // 依次执行：编码与换行 → 注释格式 → 临时设计引用的格式 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 拼写；任一步失败即停止并返回非零退出码
 // CI 流水线只调用本脚本，本地通过即 CI 通过
+// 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查：Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次；CI 不加
 using System.Diagnostics;
 using System.Text;
 
 var root = FindRepositoryRoot();
+var fix = args.Contains("--fix", StringComparer.Ordinal);
 var steps = new (string Name, Func<int> Run)[]
 {
-    ("编码与换行（UTF-8 无 BOM、LF，06 第 3.2 节）", () => CheckEncoding(root)),
+    ("编码与换行（UTF-8 无 BOM、LF，06 第 3.2 节）", () => CheckEncoding(root, fix)),
     ("注释格式（summary 三行、末尾不加句号）", () => CheckCommentStyle(root)),
     ("临时设计引用的格式（06 第 10.3 节）", () => CheckDesignCitations(root)),
     ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
@@ -71,12 +73,13 @@ static int Run(string root, string fileName, string arguments)
 }
 
 // 只检查 Git 跟踪与待提交的文本文件；二进制文件由 .gitattributes 声明
-static int CheckEncoding(string root)
+static int CheckEncoding(string root, bool fix)
 {
     var files = ListFiles(root);
 
     string[] binaryExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".xlsx", ".docx", ".zip", ".woff", ".woff2"];
     var problems = 0;
+    var fixedFiles = 0;
     foreach (var file in files)
     {
         if (binaryExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
@@ -97,20 +100,38 @@ static int CheckEncoding(string root)
         }
 
         var bytes = File.ReadAllBytes(path);
-        if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+        var hasBom = bytes.AsSpan().StartsWith("﻿"u8);
+        var hasCrlf = bytes.AsSpan().IndexOf("\r\n"u8) >= 0;
+        if (!hasBom && !hasCrlf)
+        {
+            continue;
+        }
+
+        if (fix)
+        {
+            var text = Encoding.UTF8.GetString(hasBom ? bytes.AsSpan(3) : bytes);
+            File.WriteAllText(path, text.Replace("\r\n", "\n", StringComparison.Ordinal), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            Console.WriteLine($"   已规整：{file}");
+            fixedFiles++;
+            continue;
+        }
+
+        if (hasBom)
         {
             Console.WriteLine($"   带 BOM：{file}");
             problems++;
         }
 
-        if (bytes.AsSpan().IndexOf("\r\n"u8) >= 0)
+        if (hasCrlf)
         {
             Console.WriteLine($"   CRLF 换行：{file}");
             problems++;
         }
     }
 
-    Console.WriteLine($"   检查 {files.Length} 个文件，问题 {problems} 处");
+    Console.WriteLine(fix
+        ? $"   检查 {files.Length} 个文件，规整 {fixedFiles} 个"
+        : $"   检查 {files.Length} 个文件，问题 {problems} 处");
     return problems == 0 ? 0 : 1;
 }
 

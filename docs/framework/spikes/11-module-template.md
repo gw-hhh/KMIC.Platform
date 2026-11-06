@@ -1,6 +1,6 @@
 # 原型 #11：`dotnet new` 多项目模块模板与解决方案过滤文件
 
-- 状态：结论已得出；D1～D3 待决（2026-11-06）
+- 状态：已确认（2026-11-06）：D1～D3 均按建议
 - 来源：08 第 4 节原型 #11（非阻断）；07 D3、第 10 节“`dotnet new` 模板对多项目 + 解决方案过滤文件的生成能力”
 - 原型代码：分支 `spike/11-module-template` 的 `spikes/11-module-template/`（模板、新建模块脚本、沙盒的工具清单；一次性代码，不合入主干）
 - 环境：.NET SDK 10.0.403；dotnet-ef 10.0.14（沙盒内的本地工具）
@@ -32,9 +32,9 @@
 | 生成的测试项目出现程序集版本冲突（MSB3277）：Npgsql 的 EF 提供程序依赖较低版本的 `Microsoft.EntityFrameworkCore.Relational`，与 EF 设计时工具引入的 10.0.14 冲突 | `Directory.Packages.props` 锁定 `Microsoft.EntityFrameworkCore.Relational` 10.0.14 |
 | 上述冲突只是警告，**没有让构建失败**：`TreatWarningsAsErrors` 只管编译器警告，MSBuild 自己的警告不受它控制，ADR-0021 的“零警告”有漏洞 | `Directory.Build.props` 加 `MSBuildTreatWarningsAsErrors`；已验证去掉版本锁定后构建以 MSB3277 失败 |
 
-## 4. 待决事项
+## 4. 决定
 
-### D1 新建模块由脚本完成（待决）
+### D1 新建模块由脚本完成（已确认，2026-11-06）
 
 | 选项 | 做法 | 优点 | 缺点 |
 |---|---|---|---|
@@ -42,10 +42,10 @@
 | B 模板的“运行脚本”创建后操作 | 模板里写命令 | 仍是一条 `dotnet new` | 使用者每次要加 `--allow-scripts`；校验与多步流程写在 JSON 里，难读难测 |
 | C 文档列出手工步骤 | — | 不写代码 | 步骤多，容易漏，正是模板要解决的问题 |
 
-- **建议**：A。原型脚本已验证可行（`spikes/11-module-template/scripts/new-module.cs`）。
+- **决定（已确认，2026-11-06）**：A。原型脚本已验证可行（`spikes/11-module-template/scripts/new-module.cs`）；正式脚本在阶段 2 与模板正式内容一起写。
 - **取舍**：新建模块不再是“只运行 `dotnet new`”，而是运行脚本；模板仍可单独使用，但不会加入解决方案。
 
-### D2 初始迁移由脚本调用 EF 工具生成（待决，修订 07 D3 的一项）
+### D2 初始迁移由脚本调用 EF 工具生成（已确认，2026-11-06；修订 07 D3 的一项）
 
 07 D3 原定“模板生成初始迁移（`InitializeModuleSchema`）”。
 
@@ -54,10 +54,10 @@
 | **A 脚本生成后立即运行 `dotnet ef migrations add InitializeModuleSchema`** | EF 工具作为仓库本地工具锁定版本（`dotnet-tools.json`，与 EF Core 同为 10.0.14），所有机器和 CI 用同一版本 | 迁移内容永远与当时的模型一致：框架表（Outbox、Inbox、幂等记录等）的结构以后变化时，新模块自动得到最新结构 | 新建模块要求先还原本地工具（`dotnet tool restore`，脚本可自动执行） |
 | B 迁移文件写死在模板里 | 用时间戳占位符生成文件名 | 不依赖 EF 工具 | 框架表每改一次就要同步改模板中的迁移，漏改则新模块的迁移与模型不一致——与 07 D3 否定“模板中放示例代码”是同一个问题 |
 
-- **建议**：A。
+- **决定（已确认，2026-11-06）**：A。本地工具清单已加入主干（根目录 `dotnet-tools.json`，dotnet-ef 10.0.14；.NET 10 的 `dotnet new tool-manifest` 把清单放在根目录，不再是 `.config/`）。
 - **取舍**：多一个本地工具；这个工具在日常生成迁移时本来就要用（05-03 第 9 节）。
 
-### D3 工具生成的文件与编码规则（待决）
+### D3 工具生成的文件与编码规则（已确认，2026-11-06）
 
 Windows 上的 .NET 工具写文件用 CRLF 换行：`dotnet sln add` 改写的 `Kmic.slnx`、`dotnet new tool-manifest` 生成的清单、EF 生成的迁移都是如此，EF 的迁移还带 BOM。另外，EF 迁移的主文件没有“自动生成”标记，会被 IDE0161（文件范围命名空间）、MA0048（文件名与类型名一致，而迁移文件名带时间戳）拦下。
 
@@ -67,7 +67,7 @@ Windows 上的 .NET 工具写文件用 CRLF 换行：`dotnet sln add` 改写的 
 | B 检查脚本对迁移文件不查 BOM | 只开例外 | 简单 | `dotnet sln` 等产生的 CRLF 仍会被拦，问题没有解决完 |
 | C 手工修正 | — | — | 每次都要手工处理 |
 
-- **建议**：A。原型已验证 `generated_code = true` 后迁移通过构建与格式检查；`--fix` 在实现时按 S0-06 的方式验证。
+- **决定（已确认，2026-11-06）**：A。`.editorconfig` 与 `scripts/check.cs -- --fix` 已加入主干；`--fix` 实测能规整 `dotnet` 生成的 CRLF 清单和带 BOM + CRLF 的文件，规整后检查通过。
 - **取舍**：迁移的 C# 写法不受代码规则约束（本来就由工具生成，人工只审查 SQL）。
 
 ## 5. 留到阶段 2 的事项
