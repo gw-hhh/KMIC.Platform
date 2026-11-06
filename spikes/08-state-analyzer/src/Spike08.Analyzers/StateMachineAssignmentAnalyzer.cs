@@ -17,8 +17,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
 
     private const string Title = "状态属性只能由状态机改写";
     private const string Category = "Kmic.Domain";
-    private const string StateMachineMetadataName = "Kmic.BuildingBlocks.Domain.StateMachine`3";
-    private const string StateMachineFactoryMetadataName = "Kmic.BuildingBlocks.Domain.StateMachine";
+    private const string StateMachineMetadataName = "Kmic.BuildingBlocks.Domain.StateMachine";
     private const string DefineMethodName = "Define";
 
     internal static readonly DiagnosticDescriptor DirectAssignment = new(
@@ -46,8 +45,8 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor InvalidSetter = new(
         DiagnosticId, Title, "Define 的第二个参数只能给第一个参数中的属性赋值，如 (s, v) => s.Status = v", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
-        DirectAssignment, AssignmentOutsideAggregate, SetterNotPrivate, NotAutoProperty, InvalidGetter, InvalidSetter);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
+        [DirectAssignment, AssignmentOutsideAggregate, SetterNotPrivate, NotAutoProperty, InvalidGetter, InvalidSetter];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -55,16 +54,12 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(start =>
         {
-            // 原型同时识别两种写法：泛型类型上的静态 Define，以及非泛型静态类上的泛型 Define
-            var stateMachine = start.Compilation.GetTypeByMetadataName(StateMachineMetadataName);
-            var factory = start.Compilation.GetTypeByMetadataName(StateMachineFactoryMetadataName);
-            ImmutableArray<INamedTypeSymbol> defineOwners = [.. new[] { stateMachine, factory }.OfType<INamedTypeSymbol>()];
-            if (defineOwners.IsEmpty) { return; }
+            if (start.Compilation.GetTypeByMetadataName(StateMachineMetadataName) is not { } stateMachine) { return; }
 
             var allRegistrations = new ConcurrentBag<Registration>();
             var outsideAssignments = new ConcurrentBag<Assignment>();
             start.RegisterSymbolStartAction(
-                typeStart => AnalyzeType(typeStart, defineOwners, allRegistrations, outsideAssignments),
+                typeStart => AnalyzeType(typeStart, stateMachine, allRegistrations, outsideAssignments),
                 SymbolKind.NamedType);
             start.RegisterCompilationEndAction(end =>
             {
@@ -80,7 +75,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     // 类型的分析范围不含嵌套类型，属性所属类型之外的赋值留到编译结束再判断
     private static void AnalyzeType(
         SymbolStartAnalysisContext context,
-        ImmutableArray<INamedTypeSymbol> defineOwners,
+        INamedTypeSymbol stateMachine,
         ConcurrentBag<Registration> allRegistrations,
         ConcurrentBag<Assignment> outsideAssignments)
     {
@@ -91,7 +86,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         context.RegisterOperationAction(
             c =>
             {
-                if (FindRegistration(c, defineOwners) is { } registration)
+                if (FindRegistration(c, stateMachine) is { } registration)
                 {
                     registrations.Add(registration);
                     allRegistrations.Add(registration);
@@ -120,12 +115,12 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         });
     }
 
-    private static Registration? FindRegistration(OperationAnalysisContext context, ImmutableArray<INamedTypeSymbol> defineOwners)
+    private static Registration? FindRegistration(OperationAnalysisContext context, INamedTypeSymbol stateMachine)
     {
         var invocation = (IInvocationOperation)context.Operation;
         var method = invocation.TargetMethod;
         if (!string.Equals(method.Name, DefineMethodName, StringComparison.Ordinal)
-            || !defineOwners.Contains(method.ContainingType.OriginalDefinition, SymbolEqualityComparer.Default))
+            || !SymbolEqualityComparer.Default.Equals(method.ContainingType, stateMachine))
         {
             return null;
         }
@@ -171,46 +166,29 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     private static bool IsAutoProperty(IPropertySymbol property, CancellationToken cancellationToken) =>
         property.DeclaringSyntaxReferences.All(reference =>
             reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }
-            && accessors.Accessors.All(a => a.Body is null && a.ExpressionBody is null));
+            && accessors.Accessors.All(a => a is { Body: null, ExpressionBody: null }));
 
     // s => s.Status：只接受直接返回 lambda 参数的一个属性
-    private static IPropertySymbol? FindDefinedProperty(IOperation getter)
-    {
-        if (AsLambda(getter) is not { Symbol.Parameters.Length: 1 } lambda)
-        {
-            return null;
-        }
-
-        // netstandard2.0 没有 System.Index，不能用列表模式
-        var statements = ExplicitStatements(lambda);
-        return statements.Length == 1
-            && statements[0] is IReturnOperation { ReturnedValue: { } returned }
-            && SkipConversions(returned) is IPropertyReferenceOperation reference
-            && IsParameter(reference.Instance, lambda.Symbol.Parameters[0])
+    private static IPropertySymbol? FindDefinedProperty(IOperation getter) =>
+        AsLambda(getter) is { Symbol.Parameters: [var entity] } lambda
+        && ExplicitStatements(lambda) is [IReturnOperation { ReturnedValue: { } returned }]
+        && SkipConversions(returned) is IPropertyReferenceOperation reference
+        && IsParameter(reference.Instance, entity)
             ? reference.Property.OriginalDefinition
             : null;
-    }
 
     // (s, v) => s.Status = v：只接受把第二个参数赋给同一个属性
-    private static bool AssignsOnly(IAnonymousFunctionOperation setter, IPropertySymbol property)
-    {
-        if (setter.Symbol.Parameters.Length != 2)
-        {
-            return false;
-        }
-
-        var statements = ExplicitStatements(setter);
-        return statements.Length == 1
-            && statements[0] is IExpressionStatementOperation { Operation: ISimpleAssignmentOperation assignment }
-            && assignment.Target is IPropertyReferenceOperation target
-            && SymbolEqualityComparer.Default.Equals(target.Property.OriginalDefinition, property)
-            && IsParameter(target.Instance, setter.Symbol.Parameters[0])
-            && IsParameter(assignment.Value, setter.Symbol.Parameters[1]);
-    }
+    private static bool AssignsOnly(IAnonymousFunctionOperation setter, IPropertySymbol property) =>
+        setter.Symbol.Parameters is [var entity, var value]
+        && ExplicitStatements(setter) is [IExpressionStatementOperation { Operation: ISimpleAssignmentOperation assignment }]
+        && assignment.Target is IPropertyReferenceOperation target
+        && SymbolEqualityComparer.Default.Equals(target.Property.OriginalDefinition, property)
+        && IsParameter(target.Instance, entity)
+        && IsParameter(assignment.Value, value);
 
     // 表达式体 lambda 的方法体中，编译器会补一个隐式 return，比较前去掉
     private static IOperation[] ExplicitStatements(IAnonymousFunctionOperation lambda) =>
-        lambda.Body.Operations.Where(o => !(o is IReturnOperation { ReturnedValue: null, IsImplicit: true })).ToArray();
+        [.. lambda.Body.Operations.Where(o => o is not IReturnOperation { ReturnedValue: null, IsImplicit: true })];
 
     private static IAnonymousFunctionOperation? AsLambda(IOperation operation) =>
         SkipConversions(operation) switch
@@ -264,17 +242,16 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
 
     private static void CollectTupleTargets(IOperation target, Action<Assignment> add)
     {
-        if (target is ITupleOperation tuple)
+        if (target is not ITupleOperation tuple)
         {
-            foreach (var element in tuple.Elements)
-            {
-                CollectTupleTargets(element, add);
-            }
-
+            CollectTarget(target, add);
             return;
         }
 
-        CollectTarget(target, add);
+        foreach (var element in tuple.Elements)
+        {
+            CollectTupleTargets(element, add);
+        }
     }
 
     private static void CollectTarget(IOperation target, Action<Assignment> add)
@@ -291,7 +268,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         var settersByProperty = registrations.ToLookup(r => r.Property, SymbolEqualityComparer.Default);
         foreach (var assignment in assignments)
         {
-            var setters = settersByProperty[assignment.Property].ToArray();
+            Registration[] setters = [.. settersByProperty[assignment.Property]];
             var insideSetter = setters.Any(r =>
                 r.Setter.SyntaxTree == assignment.Syntax.SyntaxTree && r.Setter.Span.Contains(assignment.Syntax.Span));
             if (setters.Length > 0 && !insideSetter)
@@ -301,17 +278,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private sealed class Registration(IPropertySymbol property, SyntaxNode setter)
-    {
-        public IPropertySymbol Property { get; } = property;
+    private sealed record Registration(IPropertySymbol Property, SyntaxNode Setter);
 
-        public SyntaxNode Setter { get; } = setter;
-    }
-
-    private sealed class Assignment(IPropertySymbol property, SyntaxNode syntax)
-    {
-        public IPropertySymbol Property { get; } = property;
-
-        public SyntaxNode Syntax { get; } = syntax;
-    }
+    private sealed record Assignment(IPropertySymbol Property, SyntaxNode Syntax);
 }

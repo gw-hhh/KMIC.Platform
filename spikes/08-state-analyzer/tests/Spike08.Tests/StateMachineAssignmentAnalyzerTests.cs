@@ -14,11 +14,15 @@ public sealed class StateMachineAssignmentAnalyzerTests
 
         namespace Kmic.BuildingBlocks.Domain
         {
+            public static class StateMachine
+            {
+                public static StateMachine<TAggregate, TState, TAction> Define<TAggregate, TState, TAction>(
+                    Func<TAggregate, TState> getter,
+                    Action<TAggregate, TState> setter) => new();
+            }
+
             public sealed class StateMachine<TAggregate, TState, TAction>
             {
-                public static StateMachine<TAggregate, TState, TAction> Define(Func<TAggregate, TState> getter, Action<TAggregate, TState> setter) =>
-                    new StateMachine<TAggregate, TState, TAction>();
-
                 public StateMachine<TAggregate, TState, TAction> Permit(TState from, TAction action, TState to) => this;
 
                 public StateMachine<TAggregate, TState, TAction> Build() => this;
@@ -28,7 +32,7 @@ public sealed class StateMachineAssignmentAnalyzerTests
         }
         """;
 
-    private const string StandardDefine = ".Define(s => s.Status, (s, v) => s.Status = v)";
+    private const string StandardDefine = "(s => s.Status, (s, v) => s.Status = v)";
     private const string StandardStatus = "public SampleStatus Status { get; private set; }";
 
     [Fact]
@@ -37,7 +41,7 @@ public sealed class StateMachineAssignmentAnalyzerTests
         var source = Aggregate("""
             public void Rename(string title) => Title = title;
 
-            public void Submit() => Machine.Fire(this, SampleAction.Submit);
+            public void Submit() => _machine.Fire(this, SampleAction.Submit);
             """) + """
 
             namespace Sample
@@ -143,7 +147,7 @@ public sealed class StateMachineAssignmentAnalyzerTests
     {
         var source = Aggregate(
             "public void Approve() => Status = SampleStatus.Approved;",
-            define: ".Define({|#0:s => s.Title.Length > 0 ? s.Status : SampleStatus.Draft|}, (s, v) => s.Status = v)");
+            define: "({|#0:s => s.Title.Length > 0 ? s.Status : SampleStatus.Draft|}, (s, v) => s.Status = v)");
 
         await VerifyAsync([source], Expect(StateMachineAssignmentAnalyzer.InvalidGetter, 0));
     }
@@ -153,7 +157,7 @@ public sealed class StateMachineAssignmentAnalyzerTests
     {
         var source = Aggregate(
             string.Empty,
-            define: """.Define(s => s.Status, {|#0:(s, v) => { s.Status = v; s.Title = "已改"; }|})""");
+            define: """(s => s.Status, {|#0:(s, v) => { s.Status = v; s.Title = "已改"; }|})""");
 
         await VerifyAsync([source], Expect(StateMachineAssignmentAnalyzer.InvalidSetter, 0));
     }
@@ -162,8 +166,8 @@ public sealed class StateMachineAssignmentAnalyzerTests
     public async Task TwoStateProperties_EachChecked()
     {
         var source = Aggregate("""
-            private static readonly StateMachine<Sample, PaymentStatus, SampleAction> PaymentMachine =
-                StateMachine<Sample, PaymentStatus, SampleAction>.Define(s => s.Payment, (s, v) => s.Payment = v).Build();
+            private static readonly StateMachine<Sample, PaymentStatus, SampleAction> _paymentMachine =
+                StateMachine.Define<Sample, PaymentStatus, SampleAction>(s => s.Payment, (s, v) => s.Payment = v).Build();
 
             public PaymentStatus Payment { get; private set; }
 
@@ -263,9 +267,8 @@ public sealed class StateMachineAssignmentAnalyzerTests
 
             public sealed partial class Sample
             {
-                private static readonly StateMachine<Sample, SampleStatus, SampleAction> Machine =
-                    StateMachine<Sample, SampleStatus, SampleAction>
-                        {{define}}
+                private static readonly StateMachine<Sample, SampleStatus, SampleAction> _machine =
+                    StateMachine.Define<Sample, SampleStatus, SampleAction>{{define}}
                         .Permit(SampleStatus.Draft, SampleAction.Submit, SampleStatus.Submitted)
                         .Build();
 
