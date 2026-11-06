@@ -277,7 +277,7 @@ tests/Kmic.Api.Tests/Sample/        端点与授权矩阵（ADR-0021：API 测�
 // Kmic.Sample.Domain/Samples/Sample.cs
 public sealed class Sample : AggregateRoot<SampleId>, IHasOwner, IHasOrgUnit, ISoftDeletable
 {
-    private static readonly StateMachine<Sample, SampleStatus, SampleAction> Machine = /* 05-01 第 7.2 节 */;
+    private static readonly StateMachine<Sample, SampleStatus, SampleAction> _machine = /* 05-01 第 7.2 节 */;
 
     private readonly List<SampleItem> _items = [];
 
@@ -300,14 +300,14 @@ public sealed class Sample : AggregateRoot<SampleId>, IHasOwner, IHasOrgUnit, IS
         {
             Number = number, Title = title.Trim(), OwnerId = owner, OrgUnitId = orgUnit, DueDate = dueDate,
         };
-        Machine.Start(sample, reason: null);
+        _machine.Start(sample, reason: null);
         sample.Raise(new SampleCreated(sample.Id));
         return sample;
     }
 
     public Result Submit(DateTimeOffset now, string? reason)
     {
-        var fired = Machine.Fire(this, SampleAction.Submit, reason);
+        var fired = _machine.Fire(this, SampleAction.Submit, reason);
         if (fired.IsFailure) return fired;
 
         Raise(new SampleSubmitted(Id, now));
@@ -717,14 +717,14 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 // tests/Modules/Sample/Kmic.Sample.Domain.Tests/Samples/SampleTests.cs
 public sealed class SampleTests
 {
-    private static readonly DateTimeOffset Now = new(2026, 11, 4, 2, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset _now = new(2026, 11, 4, 2, 0, 0, TimeSpan.Zero);
 
     [Fact]
     public void Submit_WhenDraftWithItems_ChangesStatusAndRaisesSubmitted()
     {
         var sample = SampleBuilder.Draft().WithItems(1).Build();
 
-        var result = sample.Submit(Now, reason: null);
+        var result = sample.Submit(_now, reason: null);
 
         result.ShouldBeSuccess();
         sample.Status.ShouldBe(SampleStatus.Submitted);
@@ -736,7 +736,7 @@ public sealed class SampleTests
     {
         var sample = SampleBuilder.Draft().Build();
 
-        sample.Submit(Now, reason: null).ShouldBeFailure(SampleErrors.NoItems);
+        sample.Submit(_now, reason: null).ShouldBeFailure(SampleErrors.NoItems);
     }
 }
 ```

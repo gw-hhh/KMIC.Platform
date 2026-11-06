@@ -88,6 +88,7 @@ graph LR
 | `KM90xx`～`KM99xx` | 全部项目通用 |
 
 - 分析器项目：`src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers`（`netstandard2.0`，Roslyn 要求），通过 `Directory.Build.props` 以分析器方式引用到全部项目。
+- 补充说明（2026-11-06，随原型 #8 与质量原则确认）：分析器项目只能编译为 `netstandard2.0`，但代码同样用最新语言特性：项目中写 `<LangVersion>latest</LangVersion>`（`netstandard2.0` 默认是 C# 7.3），并引用 PolySharp（编译期为 `netstandard2.0` 补上 `record`、`init`、`required`、列表模式、范围运算符等需要的类型，不带进运行时，MIT）。另需 `AnalyzerReleases.Shipped.md` / `Unshipped.md` 登记规则编号（RS2000 系），诊断描述在字段上直接创建；细节见 `docs/framework/spikes/08-state-analyzer.md` 第 3 节。
 - 每条规则有对应的分析器测试（`Microsoft.CodeAnalysis.Testing`），至少覆盖“触发”与“不触发”各一例。
 
 ### 2.3 D1 规则豁免怎么写
@@ -169,6 +170,19 @@ ADR-0021 已定 `.editorconfig` + `dotnet format --verify-no-changes`。这里�
 | 字符串 | 优先插值字符串（日志除外，第 10.1 节） |
 
 完整配置在实施时写入 `.editorconfig`，Meziantou 规则逐条确认级别（03 第 4.10 节取舍）。
+
+补充说明（2026-11-06，随质量原则确认）：**现代写法由“建议”提升为构建时检查**。新写法更清楚、更简洁或更可靠的，写成旧写法即构建失败；大多可用 `dotnet format` 自动改正。
+
+| 类别 | 规则 |
+|---|---|
+| 创建与初始化 | `new()`（IDE0090）、对象初始化器（IDE0017）、集合表达式（IDE0028、IDE0300～IDE0304）、自动属性（IDE0032）、`field` 访问器简化（IDE0360）、主构造函数（IDE0290，见第 5.3 节补充说明） |
+| 模式匹配 | `is 1 or 2`、`is > 0 and < 10`（IDE0078）、`is not`（IDE0083）、`as` / `is` 加转换改为模式（IDE0019、IDE0020、IDE0038、IDE0260）、`is not null` 代替类型判断（IDE0150）、扩展属性模式（IDE0170）、`switch` 表达式（IDE0066） |
+| 空值 | `??`（IDE0029、IDE0030）、`?.`（IDE0031）、`??=`（IDE0074）、`?? throw`（IDE0270）、throw 表达式（IDE0016） |
+| 其他 | `using` 声明（IDE0063）、索引与范围运算符（IDE0056、IDE0057）、复合赋值（IDE0054）、简化插值与条件（IDE0071、IDE0075）、`nameof`（IDE0082）、元组交换（IDE0180）、方法组（IDE0200）、`readonly` 结构与成员（IDE0250、IDE0251）、`nameof(List<>)`（IDE0340，C# 14）、隐式类型 lambda（IDE0350） |
+
+- **仍只作建议**：把 `if` 改成三元（IDE0045、IDE0046，容易写出嵌套三元，附录 A.7）；链式调用末尾的 `ToList()` 改成 `[.. ]`（IDE0305，长查询反而难读）。`var`、表达式主体等偏好维持上表，对真实代码的效果在阶段 2 复核。
+- **已验证**（SDK 10.0.403，临时项目逐条用旧写法触发）：上表规则均实际报出；IDE0038、IDE0260 为同类规则的变体，未单独构造例子。实体的 `private` 构造函数不会被要求改成主构造函数。
+- 参数判空时 IDE0016（throw 表达式）与 CA1510（`ThrowIfNull`）会同时报出，按第 6 节用 `ArgumentNullException.ThrowIfNull`，两条都消除。
 
 ---
 
@@ -289,6 +303,7 @@ C# 12 的主构造函数可以省去“字段 + 构造函数赋值”的样板�
 - **决定（已确认，2026-11-04）**：A。配套规则：主构造函数参数不得被重新赋值（KM9005）；CS9124（参数既被捕获又用于初始化字段）→ Error；IDE0290（建议使用主构造函数）设为建议级别，不强制把旧写法改掉。
 - **理由**：注入依赖是这些类的唯一用途，主构造函数恰好表达这件事；唯一的风险（被重新赋值）可以用一条很简单的分析器规则消除。
 - **取舍**：需要维护一条自定义分析器规则。
+- 补充说明（2026-11-06，随质量原则确认）：IDE0290 由“建议”改为**错误**。原定建议级别是为了不强制改写旧代码，新项目没有旧代码，统一写法更重要；只有构造函数仅做参数赋值时才会报出，需要校验或私有构造函数（05-01 的实体）的不受影响（第 3.4 节补充说明已验证）。
 
 ### 5.4 其他约定
 
@@ -673,7 +688,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | KM0101～KM0105 | 错误目录、领域异常、实体构造与属性、可变集合 | Domain / 全部 | 05-01 第 11 节 |
 | KM0201～KM0205 | 值对象写法 | Domain | 05-01 第 5.1 节 |
 | KM0301 | 智能枚举写法 | Domain | 05-01 第 6 节 |
-| KM0401 | 状态属性只能由状态机改写（`待确认` 实现难度） | Domain | 05-01 第 7 节 |
+| KM0401 | 状态属性只能由状态机改写（2026-11-06 原型 #8 验证可实现） | Domain | 05-01 第 7 节 |
 | KM0501 | 领域事件不得携带实体对象 | Domain | 05-01 第 8 节 |
 | KM2001 | 查询表达式中不得用 `ToLower` / `ToUpper` / `Contains` / `StartsWith` / `EndsWith` 做文本匹配 | Application、Infrastructure | 本文 11.1 |
 | KM9001 | `[SuppressMessage]` 必须填写 `Justification` | 全部 | 本文 D1 |
@@ -723,6 +738,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | 规则 | 处理 | 原因 |
 |---|---|---|
 | CA1716（标识符与语言关键字同名） | 全局关闭 | 它保护的是 VB 等其他语言的使用者；本系统只用 C#，而 05-01 的 `Error`、05-05 的 `IDataScope.For(...)` 都会被它拦下 |
+| 现代写法 IDE0016～IDE0360（共 39 条） | 提升为错误 | 质量原则：新写法更清楚、更简洁或更可靠的，构建时检查；清单与仍只作建议的例外见第 3.4 节补充说明 |
 | MA0097（实现 `IComparable` 时要求比较运算符） | 只对强类型 ID 文件关闭：`.editorconfig` 的 `[src/**/*{Id,Ref}.cs]` 节（依赖 05-01 第 4.1 节“以 `Id` / `Ref` 结尾”的命名约定，该约定由架构测试守护） | Vogen 默认生成 `IComparable` 但不生成运算符；键集分页（05-06 第 6.3 节）用 `CompareTo` 即可翻译为 SQL 的 `<`（原型 #2 验证），不需要运算符；其他手写类型仍检查 |
 
 其余 Meziantou 规则在实施时逐条确认级别（03 第 4.10 节）。`待确认`：上表中 Meziantou 规则编号以锁定版本的文档为准（MA0137 / MA0138 / MA0155 为较新的规则）。
@@ -1051,3 +1067,4 @@ var dueAt = useBusinessCalendar
 | 测试中替换仓储 | 仓储、DbContext 用真实实现 + 真实数据库 | 第 12.3 节 |
 | `async void` 可用于事件处理 | 一律禁止 | 第 7 节 |
 | 行宽约 140 | 约 120，不强制 | 第 3.2 节 |
+| 常量、静态只读字段都用 PascalCase | 常量 PascalCase；私有静态只读字段与其他私有字段一样用 `_camelCase`（2026-11-06 原型 #8 中补列，此前遗漏） | 第 4 节 |
