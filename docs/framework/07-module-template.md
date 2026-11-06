@@ -393,7 +393,7 @@ internal sealed class CreateSampleCommandValidator : AbstractValidator<CreateSam
 }
 
 // Create/CreateSampleCommandHandler.cs
-internal sealed class CreateSampleCommandHandler(
+public sealed class CreateSampleCommandHandler(
     ISampleRepository repository,
     IExecutionContext context,
     INumberGenerator numbers) : ICommandHandler<CreateSampleCommand, CreatedResponse<SampleId>>
@@ -449,7 +449,7 @@ if (submitted.IsFailure) return submitted.Error;
 [RequirePermission(SamplePermissions.View)]
 public sealed record GetSampleDetailQuery(SampleId SampleId) : IQuery<SampleDetailResponse>;
 
-internal sealed class GetSampleDetailQueryHandler(ISampleQueryDb db, IAllowedActions<Sample> allowedActions)
+public sealed class GetSampleDetailQueryHandler(ISampleQueryDb db, IAllowedActions<Sample> allowedActions)
     : IQueryHandler<GetSampleDetailQuery, SampleDetailResponse>
 {
     public async ValueTask<Result<SampleDetailResponse>> Handle(GetSampleDetailQuery q, CancellationToken ct)
@@ -471,7 +471,7 @@ public sealed record ListSamplesQuery(
     string? Q, IReadOnlyList<string>? Status, DateOnly? CreatedFrom, DateOnly? CreatedTo,
     int Page = 1, int PageSize = 20, string? Sort = null) : IQuery<PagedResult<SampleListItem>>;
 
-internal sealed class ListSamplesQueryHandler(ISampleQueryDb db, IBusinessCalendar calendar)
+public sealed class ListSamplesQueryHandler(ISampleQueryDb db, IBusinessCalendar calendar)
     : IQueryHandler<ListSamplesQuery, PagedResult<SampleListItem>>
 {
     public async ValueTask<Result<PagedResult<SampleListItem>>> Handle(ListSamplesQuery q, CancellationToken ct)
@@ -505,6 +505,8 @@ internal sealed class ListSamplesQueryHandler(ISampleQueryDb db, IBusinessCalend
 | 数据量可能很大的列表声明上限计数（`CountMode.Capped`），响应带 `totalCountExact` | 05-06 第 6.1 节（R01 M4） |
 
 > `ListSamplesQuery` 的参数形态、`PagedResult<T>`、`FindByIdOrNotFoundAsync` 的签名以 05-06 第 6 节与框架实现为准；此处只示意调用顺序。
+
+补充说明（2026-11-06，随原型 #1 确认）：第 4.3、4.4 节示例中的命令、查询处理器已由 `internal sealed` 改为 `public sealed`，原因与守护方式见 05-02 第 2.2 节补充说明；校验器、端点、EF 配置等仍为 `internal sealed`。
 
 ### 4.5 授权声明（05-05）
 

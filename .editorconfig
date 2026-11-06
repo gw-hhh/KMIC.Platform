@@ -156,6 +156,9 @@ dotnet_diagnostic.CA2017.severity = error
 # 数据访问
 dotnet_diagnostic.EF1002.severity = error    # SQL 注入风险
 
+# 本系统只用 C#：标识符与 VB 等语言的关键字同名（Error、IDataScope.For）没有影响（06 第 15.3 节补充说明）
+dotnet_diagnostic.CA1716.severity = none
+
 # 禁用 API（BannedSymbols*.txt）
 dotnet_diagnostic.RS0030.severity = error
 
@@ -167,6 +170,11 @@ dotnet_diagnostic.MA0004.severity = none
 [tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1848.severity = none
+
+# ---------------------------------------------------------------- 强类型 ID（文件名以 Id / Ref 结尾，05-01 第 4.1 节）
+# Vogen 生成 IComparable 但不生成比较运算符；键集分页只用 CompareTo（06 第 15.3 节补充说明）
+[src/**/*{Id,Ref}.cs]
+dotnet_diagnostic.MA0097.severity = none
 
 # ---------------------------------------------------------------- 单文件脚本（dotnet run scripts/xxx.cs）
 # 顶级语句没有类型名，“文件名与类型名一致”不适用
