@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Spike01.BuildingBlocks/Spike01.BuildingBlocks.csproj" />
+    <Project Path="src/Spike01.Customers/Spike01.Customers.csproj" />
+    <Project Path="src/Spike01.Quotations/Spike01.Quotations.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Spike01.Tests/Spike01.Tests.csproj" />
+  </Folder>
+</Solution>

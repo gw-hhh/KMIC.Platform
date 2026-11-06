@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Spike01.Customers/Spike01.Customers.csproj" />
+    <ProjectReference Include="../Spike01.BuildingBlocks/Spike01.BuildingBlocks.csproj" />
+  </ItemGroup>
+</Project>

@@ -156,6 +156,9 @@ dotnet_diagnostic.CA2017.severity = error
 # 数据访问
 dotnet_diagnostic.EF1002.severity = error    # SQL 注入风险
 
+# 本系统只用 C#，类型名 Error 等与 VB 关键字冲突无影响（05-01 的 Error 类型；原型 #1 结论，待确认后改入主干）
+dotnet_diagnostic.CA1716.severity = none
+
 # 禁用 API（BannedSymbols*.txt）
 dotnet_diagnostic.RS0030.severity = error
 
@@ -164,7 +167,7 @@ dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.MA0004.severity = none
 
 # ---------------------------------------------------------------- 测试项目（06 D9：测试方法名为 行为_条件_结果）
-[tests/**.cs]
+[{tests,spikes/*/tests}/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1848.severity = none
 
