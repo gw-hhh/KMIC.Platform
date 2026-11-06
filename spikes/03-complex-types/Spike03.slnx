@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Spike03.Domain/Spike03.Domain.csproj" />
+    <Project Path="src/Spike03.Infrastructure/Spike03.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Spike03.Tests/Spike03.Tests.csproj" />
+  </Folder>
+</Solution>
