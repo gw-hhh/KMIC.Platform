@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.ModuleName.Domain/Kmic.ModuleName.Domain.csproj" />
+    <ProjectReference Include="../Kmic.ModuleName.Contracts/Kmic.ModuleName.Contracts.csproj" />
+  </ItemGroup>
+</Project>

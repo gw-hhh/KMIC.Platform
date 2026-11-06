@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "../../../Kmic.slnx",
+    "projects": [
+      "src/Modules/ModuleName/Kmic.ModuleName.Domain/Kmic.ModuleName.Domain.csproj",
+      "src/Modules/ModuleName/Kmic.ModuleName.Contracts/Kmic.ModuleName.Contracts.csproj",
+      "src/Modules/ModuleName/Kmic.ModuleName.Application/Kmic.ModuleName.Application.csproj",
+      "src/Modules/ModuleName/Kmic.ModuleName.Infrastructure/Kmic.ModuleName.Infrastructure.csproj",
+      "src/Modules/ModuleName/Kmic.ModuleName.Presentation/Kmic.ModuleName.Presentation.csproj",
+      "tests/Modules/ModuleName/Kmic.ModuleName.IntegrationTests/Kmic.ModuleName.IntegrationTests.csproj"
+    ]
+  }
+}

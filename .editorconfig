@@ -235,7 +235,7 @@ dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.MA0004.severity = none
 
 # ---------------------------------------------------------------- 测试项目（06 D9：测试方法名为 行为_条件_结果）
-[tests/**.cs]
+[{tests,spikes/*/tests,spikes/*/sandbox/tests}/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1848.severity = none
 
@@ -244,7 +244,11 @@ dotnet_diagnostic.CA1848.severity = none
 [src/**/*{Id,Ref}.cs]
 dotnet_diagnostic.MA0097.severity = none
 
+# ---------------------------------------------------------------- EF 迁移：工具生成的代码，审查生成的 SQL 而不是 C# 写法（05-03 第 9 节）
+[{src,spikes}/**/Migrations/*.cs]
+generated_code = true
+
 # ---------------------------------------------------------------- 单文件脚本（dotnet run scripts/xxx.cs）
 # 顶级语句没有类型名，“文件名与类型名一致”不适用
-[scripts/**.cs]
+[{scripts,spikes/*/scripts}/**.cs]
 dotnet_diagnostic.MA0048.severity = none

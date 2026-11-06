@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KMIC",
+  "classifications": [
+    "KMIC",
+    "Module"
+  ],
+  "identity": "Kmic.Templates.Module",
+  "name": "KMIC 模块骨架",
+  "description": "生成一个模块的 5 个项目、测试项目、注册类、DbContext 与解决方案过滤文件；加入解决方案、初始迁移由 new-module 脚本完成",
+  "shortName": "kmic-module",
+  "sourceName": "ModuleName",
+  "preferNameDirectory": false,
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "symbols": {
+    "number": {
+      "type": "parameter",
+      "datatype": "integer",
+      "isRequired": true,
+      "description": "模块编号，两位数字，见模块登记表",
+      "replaces": "99",
+      "onlyIf": [
+        {
+          "after": "Number = "
+        }
+      ]
+    },
+    "moduleSlug": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "name",
+        "toLower": true
+      },
+      "replaces": "modulename"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "src/Modules/ModuleName/Kmic.ModuleName.Domain/Kmic.ModuleName.Domain.csproj"
+    },
+    {
+      "path": "src/Modules/ModuleName/Kmic.ModuleName.Contracts/Kmic.ModuleName.Contracts.csproj"
+    },
+    {
+      "path": "src/Modules/ModuleName/Kmic.ModuleName.Application/Kmic.ModuleName.Application.csproj"
+    },
+    {
+      "path": "src/Modules/ModuleName/Kmic.ModuleName.Infrastructure/Kmic.ModuleName.Infrastructure.csproj"
+    },
+    {
+      "path": "src/Modules/ModuleName/Kmic.ModuleName.Presentation/Kmic.ModuleName.Presentation.csproj"
+    },
+    {
+      "path": "tests/Modules/ModuleName/Kmic.ModuleName.IntegrationTests/Kmic.ModuleName.IntegrationTests.csproj"
+    }
+  ]
+}
