@@ -1,7 +1,8 @@
 #:property RestorePackagesWithLockFile=false
 
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
-// 依次执行：编码与换行 → 注释格式 → 临时设计引用的格式 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 拼写；任一步失败即停止并返回非零退出码
+// 依次执行：编码与换行 → 注释格式 → 临时设计引用的格式 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 密钥扫描 → 拼写；任一步失败即停止并返回非零退出码
+// 需要 Docker：数据库测试用测试容器，密钥扫描用 Gitleaks 的官方镜像
 // CI 流水线只调用本脚本，本地通过即 CI 通过
 // 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查：Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次；CI 不加
 using System.Diagnostics;
@@ -18,6 +19,8 @@ var steps = new (string Name, Func<int> Run)[]
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
     ("依赖漏洞（含传递依赖）", () => RunWhenProjectsExist(root, "dotnet", "list Kmic.slnx package --vulnerable --include-transitive")),
+    // 扫描全部提交历史（CI 检出时要取完整历史）；在推送之前发现，密钥就不会离开本机
+    ("密钥扫描（Gitleaks，ADR-0032）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
 

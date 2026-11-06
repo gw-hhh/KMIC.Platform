@@ -1,0 +1,37 @@
+# 过渡期 CI（S0 问题 7）：GitHub Actions 在 Linux 上运行与本地相同的检查脚本。
+# 迁到公司 Gitea 后（实施待办 T-01）由 Gitea Actions 直接读取本文件：语法兼容，执行机标签按 S0-Gitea准备.md 调整。
+# 第三方动作按提交 SHA 固定，标签可以被改写，SHA 不能；行末注释是对应的版本，升级时两处一起改。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # 密钥扫描要看全部提交历史
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.22.2 # 拼写检查用 npx 运行 cspell
+
+      - name: 检查
+        run: dotnet run scripts/check.cs
