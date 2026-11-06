@@ -119,6 +119,7 @@ graph LR
 | `Nullable` | `enable` | |
 | `ImplicitUsings` | `enable` | 项目共用的 `using` 放各项目的 `GlobalUsings.cs` |
 | `TreatWarningsAsErrors` | `true` | ADR-0021 零警告 |
+| `MSBuildTreatWarningsAsErrors` | `true` | 补充说明（2026-11-06，随原型 #11）：`TreatWarningsAsErrors` 只管编译器警告，程序集版本冲突（MSB3277）等 MSBuild 警告由它让构建失败 |
 | `AnalysisLevel` | `latest-recommended` | 03 第 4.10 节 |
 | `EnforceCodeStyleInBuild` | `true` | `IDExxxx` 代码风格规则在构建时生效，不只在 IDE 中提示 |
 | `GenerateDocumentationFile` | `true` | IDE0005（多余的 `using`）在构建时生效的前提；CS1591（缺少 XML 注释）只在 `BuildingBlocks.*` 与模块 `Contracts` 中为 Error，其余项目关闭（第 10.3 节） |
