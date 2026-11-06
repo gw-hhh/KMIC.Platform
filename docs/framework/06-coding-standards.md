@@ -1051,3 +1051,4 @@ var dueAt = useBusinessCalendar
 | 测试中替换仓储 | 仓储、DbContext 用真实实现 + 真实数据库 | 第 12.3 节 |
 | `async void` 可用于事件处理 | 一律禁止 | 第 7 节 |
 | 行宽约 140 | 约 120，不强制 | 第 3.2 节 |
+| 常量、静态只读字段都用 PascalCase | 常量 PascalCase；私有静态只读字段与其他私有字段一样用 `_camelCase`（2026-11-06 原型 #8 中补列，此前遗漏） | 第 4 节 |
