@@ -1,7 +1,7 @@
 #:property RestorePackagesWithLockFile=false
 
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
-// 依次执行：编码与换行 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 拼写；任一步失败即停止并返回非零退出码。
+// 依次执行：编码与换行 → 临时设计引用的格式 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 拼写；任一步失败即停止并返回非零退出码。
 // CI 流水线只调用本脚本，保证“本地通过即 CI 通过”（S0-06）。
 using System.Diagnostics;
 using System.Text;
@@ -10,6 +10,7 @@ var root = FindRepositoryRoot();
 var steps = new (string Name, Func<int> Run)[]
 {
     ("编码与换行（UTF-8 无 BOM、LF，06 第 3.2 节）", () => CheckEncoding(root)),
+    ("临时设计引用的格式（06 第 10.3 节）", () => CheckDesignCitations(root)),
     ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
@@ -71,16 +72,7 @@ static int Run(string root, string fileName, string arguments)
 // 只检查 Git 跟踪与待提交的文本文件；二进制文件由 .gitattributes 声明
 static int CheckEncoding(string root)
 {
-    var startInfo = new ProcessStartInfo("git", "-c core.quotepath=off ls-files -z --cached --others --exclude-standard")
-    {
-        WorkingDirectory = root,
-        UseShellExecute = false,
-        RedirectStandardOutput = true,
-        StandardOutputEncoding = Encoding.UTF8,
-    };
-    using var git = Process.Start(startInfo) ?? throw new InvalidOperationException("Cannot start git.");
-    var files = git.StandardOutput.ReadToEnd().Split('\0', StringSplitOptions.RemoveEmptyEntries);
-    git.WaitForExit();
+    var files = ListFiles(root);
 
     string[] binaryExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".xlsx", ".docx", ".zip", ".woff", ".woff2"];
     var problems = 0;
@@ -119,4 +111,93 @@ static int CheckEncoding(string root)
 
     Console.WriteLine($"   检查 {files.Length} 个文件，问题 {problems} 处");
     return problems == 0 ? 0 : 1;
+}
+
+// Git 跟踪与待提交（未被忽略）的文件，路径相对仓库根目录、以 / 分隔
+static string[] ListFiles(string root)
+{
+    var startInfo = new ProcessStartInfo("git", "-c core.quotepath=off ls-files -z --cached --others --exclude-standard")
+    {
+        WorkingDirectory = root,
+        UseShellExecute = false,
+        RedirectStandardOutput = true,
+        StandardOutputEncoding = Encoding.UTF8,
+    };
+    using var git = Process.Start(startInfo) ?? throw new InvalidOperationException("Cannot start git.");
+    var files = git.StandardOutput.ReadToEnd().Split('\0', StringSplitOptions.RemoveEmptyEntries);
+    git.WaitForExit();
+    return files;
+}
+
+// 临时设计引用只能写在 // 注释行末，前面必须有原因；阶段 2 验收时统一删除（待办 T-17）
+static int CheckDesignCitations(string root)
+{
+    string[] extensions = [".cs", ".ts", ".vue"];
+    var citations = 0;
+    var problems = 0;
+    foreach (var file in ListFiles(root))
+    {
+        // 本脚本中的标记是检查规则本身
+        if (!extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)
+            || string.Equals(file, "scripts/check.cs", StringComparison.Ordinal))
+        {
+            continue;
+        }
+
+        var path = Path.Combine(root, file);
+        if (!File.Exists(path))
+        {
+            continue;
+        }
+
+        var lines = File.ReadAllLines(path);
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var marker = lines[i].IndexOf("【引用", StringComparison.Ordinal);
+            if (marker < 0)
+            {
+                continue;
+            }
+
+            citations++;
+            if (DescribeCitationProblem(lines[i], marker) is { } problem)
+            {
+                Console.WriteLine($"   {file}:{i + 1} {problem}");
+                problems++;
+            }
+        }
+    }
+
+    Console.WriteLine($"   临时引用 {citations} 处，格式问题 {problems} 处");
+    return problems == 0 ? 0 : 1;
+}
+
+static string? DescribeCitationProblem(string line, int marker)
+{
+    // 从标记往前找最近的 //；“///” 中最近的一个 // 前面还有一个 /
+    var comment = line.LastIndexOf("//", marker, StringComparison.Ordinal);
+    if (comment < 0)
+    {
+        return "不在 // 注释中";
+    }
+
+    if (comment > 0 && line[comment - 1] == '/')
+    {
+        return "不能写在 /// XML 注释中";
+    }
+
+    if (line[(comment + 2)..marker].Trim().Length == 0)
+    {
+        return "引用前面没有写原因";
+    }
+
+    const string Prefix = "【引用：";
+    var citation = line[marker..].TrimEnd();
+    var closing = citation.IndexOf('】', StringComparison.Ordinal);
+    if (!citation.StartsWith(Prefix, StringComparison.Ordinal) || closing != citation.Length - 1 || closing == Prefix.Length)
+    {
+        return "格式应为行末的【引用：文档与节号】";
+    }
+
+    return null;
 }
