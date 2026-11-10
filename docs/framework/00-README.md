@@ -15,17 +15,17 @@
 | 05 | 05-infrastructure/ | 各项基础能力设计，13 份：[05-01](05-infrastructure/05-01-领域基础构件.md)、[05-02](05-infrastructure/05-02-应用层与中介者管道.md)、[05-03](05-infrastructure/05-03-数据访问.md)、[05-04](05-infrastructure/05-04-认证与会话.md)、[05-05](05-infrastructure/05-05-授权.md)、[05-06](05-infrastructure/05-06-接口层.md)、[05-07](05-infrastructure/05-07-模块间通信.md)、[05-08](05-infrastructure/05-08-后台处理.md)、[05-09](05-infrastructure/05-09-审计与业务历史.md)、[05-10](05-infrastructure/05-10-配置与缓存.md)、[05-11](05-infrastructure/05-11-文件与通知.md)、[05-12](05-infrastructure/05-12-可观测性.md)、[05-13](05-infrastructure/05-13-编号服务与时间.md) | 已确认（2026-11-04）；阻断原型已验证（见 spikes） | 未开始 | 未开始 |
 | 06 | [06-coding-standards.md](06-coding-standards.md) | 编码规范（开头为编码速查） | 已确认（2026-11-04） | 工程配置已落地（S0-05）；自定义分析器未开始 | 未开始 |
 | 07 | [07-module-template.md](07-module-template.md) | 业务模块标准写法 | 已确认（2026-11-04） | 未开始（模板与参考模块 `Sample` 为阶段 2 交付物） | 未开始 |
-| 08 | [08-roadmap.md](08-roadmap.md) | 实施计划 | 已确认（2026-11-04） | 阶段 0、1 进行中 | — |
+| 08 | [08-roadmap.md](08-roadmap.md) | 实施计划 | 已确认（2026-11-04） | 阶段 0 完成（过渡方式），阶段 1 进行中 | — |
 | 09 | [09-runtime-environment.md](09-runtime-environment.md) | 运行环境架构（阿里云） | 已确认（2026-11-04） | 未开始 | 未开始 |
 | R01 | [reviews/R01-后端框架复盘.md](reviews/R01-后端框架复盘.md) | 后端底层框架复盘 | 已确认（2026-11-04），修订已落实 | — | — |
 | R02 | [reviews/R02-设计复核决定登记.md](reviews/R02-设计复核决定登记.md) | 设计复核决定登记（读模型、消息、附件、授权缓存、幂等、容量、恢复） | 已确认（2026-11-05），修订已落实 | — | — |
 | 原型 | [spikes/](spikes/) | 阶段 1 原型验证的结论（编号 = 08 第 4 节） | 阻断项除 #13 在 RDS 上运行外均有结论；部分结论有待决事项（见各页） | — | — |
-| S0 | [../implementation/S0-开工准备.md](../implementation/S0-开工准备.md) | 实施阶段 0（开工准备）的任务清单与进度 | — | 进行中（2026-11-05 起） | — |
+| S0 | [../implementation/S0-开工准备.md](../implementation/S0-开工准备.md) | 实施阶段 0（开工准备）的任务清单与进度 | — | 完成（2026-11-10，过渡方式） | — |
 | — | adr/ | 架构决策记录 | 见下表 | — | — |
 
 ## 当前阶段
 
-阶段 0（开工准备）与阶段 1（原型验证）并行进行，任务与进度见 `docs/implementation/S0-开工准备.md`，按触发条件要做的事见 `docs/implementation/00-README.md`。阶段 2（框架实现）的开始条件：08 第 4 节标为“阻断”的原型全部有结论。
+阶段 0（开工准备）已按过渡方式完成（2026-11-10，见 `docs/implementation/S0-开工准备.md`），阶段 1（原型验证）进行中，按触发条件要做的事见 `docs/implementation/00-README.md`。阶段 2（框架实现）的开始条件：08 第 4 节标为“阻断”的原型全部有结论。
 
 ## 架构决策记录
 
