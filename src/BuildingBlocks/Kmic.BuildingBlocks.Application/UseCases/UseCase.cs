@@ -66,6 +66,11 @@ public sealed record UseCase
     public bool AuditedRead { get; init; }
 
     /// <summary>
+    /// 处理器绕过数据范围的原因；不绕过时为空
+    /// </summary>
+    public string? BypassesDataScope { get; init; }
+
+    /// <summary>
     /// 消息名，用于日志与追踪：“模块.类名”
     /// </summary>
     public string Name => $"{Module}.{MessageType.Name}";

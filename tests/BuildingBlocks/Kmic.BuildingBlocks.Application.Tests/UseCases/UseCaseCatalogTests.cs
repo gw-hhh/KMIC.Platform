@@ -41,7 +41,7 @@ public sealed class UseCaseCatalogTests
     [InlineData(typeof(CatalogSamples.IdempotentQuery), "只能用于命令")]
     public void Build_WrongDeclaration_RefusesWithReason(Type messageType, string reason)
     {
-        var thrown = Should.Throw<UseCaseCatalogException>(() => UseCaseCatalog.Build([messageType]));
+        var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.Build([messageType]));
 
         thrown.Problems.ShouldContain(p => p.Contains(reason, StringComparison.Ordinal) && p.Contains(messageType.Name, StringComparison.Ordinal));
     }
@@ -49,7 +49,7 @@ public sealed class UseCaseCatalogTests
     [Fact]
     public void Build_SeveralProblems_ReportsAllAtOnce()
     {
-        var thrown = Should.Throw<UseCaseCatalogException>(
+        var thrown = Should.Throw<DeclarationException>(
             () => UseCaseCatalog.Build([typeof(CatalogSamples.NoDeclarationCommand), typeof(CatalogSamples.IdempotentQuery)]));
 
         thrown.Problems.Count.ShouldBe(2);
@@ -61,5 +61,38 @@ public sealed class UseCaseCatalogTests
         var catalog = UseCaseCatalog.Build([typeof(GetThingQuery)]);
 
         Should.Throw<InvalidOperationException>(() => catalog.Get(typeof(SubmitThingCommand)));
+    }
+
+    [Fact]
+    public void Build_HandlerBypassesDataScope_RecordsReasonOnUseCase()
+    {
+        var catalog = UseCaseCatalog.Build([typeof(CatalogSamples.CheckNumberQuery), typeof(CatalogSamples.CheckNumberQueryHandler), typeof(GetThingQuery)]);
+
+        catalog.Get(typeof(CatalogSamples.CheckNumberQuery)).BypassesDataScope.ShouldBe("编号唯一性要在全部数据中判断");
+        catalog.Get(typeof(GetThingQuery)).BypassesDataScope.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Build_WrongBypassDeclaration_Refuses()
+    {
+        var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.Build(
+        [
+            typeof(CatalogSamples.BlankBypassReasonQuery),
+            typeof(CatalogSamples.BlankBypassReasonQueryHandler),
+            typeof(CatalogSamples.NotAHandler),
+        ]));
+
+        thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.BlankBypassReasonQueryHandler), StringComparison.Ordinal) && p.Contains("必须写明原因", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.NotAHandler), StringComparison.Ordinal) && p.Contains("只能标在命令或查询处理器上", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void FromAssemblies_DoesNotSkipMalformedTypes()
+    {
+        // 测试程序集里有故意写错的样例：扫描必须把它们都找出来，而不是悄悄跳过
+        var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.FromAssemblies([typeof(CatalogSamples).Assembly]));
+
+        thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.NoDeclarationCommand), StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.NotAHandler), StringComparison.Ordinal));
     }
 }

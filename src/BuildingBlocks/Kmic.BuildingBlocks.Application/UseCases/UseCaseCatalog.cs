@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.Reflection;
+using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Messaging;
 
 namespace Kmic.BuildingBlocks.Application.UseCases;
@@ -22,26 +23,28 @@ public sealed class UseCaseCatalog
     public IReadOnlyCollection<UseCase> All => _byType.Values;
 
     /// <summary>
-    /// 扫描程序集中的全部命令与查询
+    /// 扫描程序集中的全部命令、查询与处理器
     /// </summary>
     public static UseCaseCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
-        return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()).Where(IsMessage));
+        return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()).Where(t => IsMessage(t) || t.IsDefined(typeof(BypassesDataScopeAttribute), inherit: false)));
     }
 
     /// <summary>
-    /// 读取并校验给定消息类型的声明；有任何问题都汇总后一次报出
+    /// 读取并校验给定类型中消息的声明，以及处理器上的 [BypassesDataScope]；有任何问题都汇总后一次报出
     /// </summary>
-    public static UseCaseCatalog Build(IEnumerable<Type> messageTypes)
+    public static UseCaseCatalog Build(IEnumerable<Type> types)
     {
-        ArgumentNullException.ThrowIfNull(messageTypes);
+        ArgumentNullException.ThrowIfNull(types);
 
+        var distinct = types.Distinct().ToList();
         var problems = new List<string>();
+        var bypasses = ReadBypasses(distinct.Where(t => !IsMessage(t)), problems);
         var useCases = new List<UseCase>();
-        foreach (var type in messageTypes.Distinct())
+        foreach (var type in distinct.Where(IsMessage))
         {
-            var useCase = Read(type, problems);
+            var useCase = Read(type, bypasses.GetValueOrDefault(type), problems);
             if (useCase is not null)
             {
                 useCases.Add(useCase);
@@ -50,7 +53,7 @@ public sealed class UseCaseCatalog
 
         if (problems.Count > 0)
         {
-            throw new UseCaseCatalogException(problems);
+            throw new DeclarationException("用例声明", problems);
         }
 
         return new UseCaseCatalog(useCases);
@@ -64,23 +67,24 @@ public sealed class UseCaseCatalog
             ? useCase
             : throw new InvalidOperationException($"{messageType.FullName} 不在用例目录中，检查宿主是否注册了它所在的模块。");
 
+    // 同时是命令和查询的类型也要进入 Read 报错，不能在扫描时漏掉；宿主中 Mediator 编译期已拒绝这种类型（MSG0004）
     private static bool IsMessage(Type type) =>
-        type is { IsClass: true, IsAbstract: false } && KindOf(type) is not null;
+        type is { IsClass: true, IsAbstract: false } && (IsCommand(type) || IsQuery(type));
 
-    private static MessageKind? KindOf(Type type)
+    private static MessageKind? KindOf(Type type) => (IsCommand(type), IsQuery(type)) switch
     {
-        var interfaces = type.GetInterfaces();
-        var isCommand = interfaces.Any(i => i == typeof(ICommand) || (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommand<>)));
-        var isQuery = interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQuery<>));
-        return (isCommand, isQuery) switch
-        {
-            (true, false) => MessageKind.Command,
-            (false, true) => MessageKind.Query,
-            _ => null,
-        };
-    }
+        (true, false) => MessageKind.Command,
+        (false, true) => MessageKind.Query,
+        _ => null,
+    };
 
-    private static UseCase? Read(Type type, List<string> problems)
+    private static bool IsCommand(Type type) =>
+        type.GetInterfaces().Any(i => i == typeof(ICommand) || (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommand<>)));
+
+    private static bool IsQuery(Type type) =>
+        type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQuery<>));
+
+    private static UseCase? Read(Type type, string? bypassesDataScope, List<string> problems)
     {
         var name = type.FullName ?? type.Name;
         if (KindOf(type) is not { } kind)
@@ -112,8 +116,47 @@ public sealed class UseCaseCatalog
             Audited = kind == MessageKind.Command ? audit.Audited is not null : null,
             AuditAction = audit.Audited is null ? null : audit.Audited.Action ?? $"{module}.{TrimSuffix(type.Name, "Command")}",
             AuditedRead = audit.AuditedRead,
+            BypassesDataScope = bypassesDataScope,
         };
     }
+
+    // [BypassesDataScope] 标在处理器上，记到它处理的消息名下
+    private static Dictionary<Type, string> ReadBypasses(IEnumerable<Type> types, List<string> problems)
+    {
+        var bypasses = new Dictionary<Type, string>();
+        foreach (var type in types)
+        {
+            if (type.GetCustomAttribute<BypassesDataScopeAttribute>() is not { } attribute)
+            {
+                continue;
+            }
+
+            var name = type.FullName ?? type.Name;
+            var messages = HandledMessages(type).ToList();
+            if (messages.Count == 0)
+            {
+                problems.Add($"{name}：[BypassesDataScope] 只能标在命令或查询处理器上。");
+            }
+
+            if (string.IsNullOrWhiteSpace(attribute.Reason))
+            {
+                problems.Add($"{name}：[BypassesDataScope] 必须写明原因。");
+            }
+
+            foreach (var message in messages)
+            {
+                bypasses[message] = attribute.Reason;
+            }
+        }
+
+        return bypasses;
+    }
+
+    private static IEnumerable<Type> HandledMessages(Type type) =>
+        type.GetInterfaces()
+            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() is var definition
+                && (definition == typeof(Mediator.ICommandHandler<,>) || definition == typeof(Mediator.IQueryHandler<,>)))
+            .Select(i => i.GetGenericArguments()[0]);
 
     // 规则 1：授权声明必须且只能有一种；AllowSystem、AllowWhenPasswordChangeRequired 只能与特定声明叠加
     private static AccessDeclaration ReadAccess(Type type, string name, MessageKind kind, List<string> problems)

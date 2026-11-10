@@ -333,8 +333,7 @@
           "Mediator.Abstractions": "[3.0.2, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.14, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.14, )",
-          "Microsoft.Extensions.Options": "[10.0.14, )",
-          "Vogen": "[8.0.7, )"
+          "Microsoft.Extensions.Options": "[10.0.14, )"
         }
       },
       "kmic.buildingblocks.contracts": {
@@ -344,7 +343,10 @@
         }
       },
       "kmic.buildingblocks.domain": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Vogen": "[8.0.7, )"
+        }
       },
       "FluentValidation": {
         "type": "CentralTransitive",

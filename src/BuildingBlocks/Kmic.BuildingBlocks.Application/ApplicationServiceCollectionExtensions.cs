@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using FluentValidation;
+using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
@@ -19,16 +20,24 @@ namespace Kmic.BuildingBlocks.Application;
 public static class ApplicationServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册执行上下文、发送入口、用例目录与校验器
+    /// 注册执行上下文、发送入口、各类声明目录、校验器与资源授权
     /// </summary>
     /// <param name="services">服务集合</param>
-    /// <param name="applicationAssemblies">各模块的 Application 程序集，用例目录与校验器从中扫描</param>
+    /// <param name="applicationAssemblies">各模块的 Application 程序集，声明与校验器从中扫描</param>
     public static IServiceCollection AddKmicApplication(this IServiceCollection services, IReadOnlyCollection<Assembly> applicationAssemblies)
     {
+        ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(applicationAssemblies);
 
-        // 用例目录在注册时构建：声明有误时宿主启动即失败
-        return services.AddKmicApplication(UseCaseCatalog.FromAssemblies(applicationAssemblies), applicationAssemblies);
+        // 目录在注册时构建并互相核对：声明有误时宿主启动即失败
+        var useCases = UseCaseCatalog.FromAssemblies(applicationAssemblies);
+        var permissions = PermissionCatalog.FromAssemblies(applicationAssemblies);
+        var resourceActionPermissions = services.AddResourceAuthorization(applicationAssemblies.Distinct().SelectMany(a => a.GetTypes()));
+        permissions.Verify(useCases, resourceActionPermissions);
+
+        services.AddSingleton(permissions);
+        services.AddSingleton(DataScopeObjectCatalog.FromAssemblies(applicationAssemblies));
+        return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 
     // 测试只注册自己需要的消息：测试程序集里还有故意写错声明的样例

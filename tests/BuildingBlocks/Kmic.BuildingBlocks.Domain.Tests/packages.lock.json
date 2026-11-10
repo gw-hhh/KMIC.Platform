@@ -219,7 +219,10 @@
         }
       },
       "kmic.buildingblocks.domain": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Vogen": "[8.0.7, )"
+        }
       }
     }
   }

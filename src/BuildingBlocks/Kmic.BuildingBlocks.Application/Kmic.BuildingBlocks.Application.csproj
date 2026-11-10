@@ -10,7 +10,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Options" />
-    <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />

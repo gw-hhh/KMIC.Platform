@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Domain.Results;
@@ -42,6 +43,15 @@ public static class CatalogSamples
     [Idempotent]
     public sealed record IdempotentQuery : IQuery<int>;
 
+    [RequirePermission("Test.Thing.View")]
+    public sealed record CheckNumberQuery : IQuery<bool>;
+
+    [RequirePermission("Test.Thing.View")]
+    public sealed record BlankBypassReasonQuery : IQuery<bool>;
+
+    [BypassesDataScope("测试：不是处理器")]
+    public sealed class NotAHandler;
+
     public sealed class NoDeclarationCommandHandler : ICommandHandler<NoDeclarationCommand>
     {
         public ValueTask<Result> Handle(NoDeclarationCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
@@ -80,5 +90,17 @@ public static class CatalogSamples
     public sealed class IdempotentQueryHandler : IQueryHandler<IdempotentQuery, int>
     {
         public ValueTask<Result<int>> Handle(IdempotentQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<int>>(0);
+    }
+
+    [BypassesDataScope("编号唯一性要在全部数据中判断")]
+    public sealed class CheckNumberQueryHandler : IQueryHandler<CheckNumberQuery, bool>
+    {
+        public ValueTask<Result<bool>> Handle(CheckNumberQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<bool>>(false);
+    }
+
+    [BypassesDataScope(" ")]
+    public sealed class BlankBypassReasonQueryHandler : IQueryHandler<BlankBypassReasonQuery, bool>
+    {
+        public ValueTask<Result<bool>> Handle(BlankBypassReasonQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<bool>>(false);
     }
 }

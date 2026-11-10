@@ -1,7 +1,6 @@
-using Kmic.BuildingBlocks.Domain.Identifiers;
 using Vogen;
 
-namespace Kmic.BuildingBlocks.Application.Access;
+namespace Kmic.BuildingBlocks.Domain.Identifiers;
 
 /// <summary>
 /// 角色 ID
