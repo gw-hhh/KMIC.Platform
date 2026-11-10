@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    测试基础设施（06 D8、05-05 第 12.1 节）：数据库克隆夹具、测试身份、结果断言与轮询等待。
+    只给测试项目引用，产品代码不得引用（架构测试）
+  -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.extensibility.core" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.BuildingBlocks.Application/Kmic.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>
