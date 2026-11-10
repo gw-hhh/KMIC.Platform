@@ -12,4 +12,10 @@ public interface IAfterCommit
     /// 登记动作；执行失败只记警告，不影响已返回的结果
     /// </summary>
     void Enqueue(Func<CancellationToken, ValueTask> action);
+
+    /// <summary>
+    /// 提交后按标签失效缓存：本实例失效并广播到其他实例；同一事务中的标签合并后一次处理
+    /// </summary>
+    /// <param name="tags">标签，由模块的 CacheKeys 生成</param>
+    void InvalidateTags(params IEnumerable<string> tags);
 }

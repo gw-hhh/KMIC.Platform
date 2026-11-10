@@ -101,7 +101,7 @@ public sealed class UseCaseCatalog
             return null;
         }
 
-        var module = ModuleOf(type);
+        var module = ModuleNames.Of(type);
         return new UseCase
         {
             MessageType = type,
@@ -247,10 +247,6 @@ public sealed class UseCaseCatalog
 
         return new AuditDeclaration(idempotent, audited, false);
     }
-
-    // 模块的消息在 Kmic.{模块}.Application 中
-    private static string ModuleOf(Type type) =>
-        type.Assembly.GetName().Name?.Split('.') is ["Kmic", var module, ..] ? module : type.Assembly.GetName().Name ?? "Unknown";
 
     private static string TrimSuffix(string name, string suffix) =>
         name.EndsWith(suffix, StringComparison.Ordinal) ? name[..^suffix.Length] : name;

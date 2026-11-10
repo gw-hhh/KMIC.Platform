@@ -9,9 +9,9 @@ namespace Kmic.BuildingBlocks.Application.Authorization;
 internal static class ResourceAuthorizationRegistration
 {
     /// <summary>
-    /// 注册策略、授权器与 allowedActions，返回动作目录引用的全部权限点
+    /// 注册策略、授权器与 allowedActions，返回动作目录对权限点的引用
     /// </summary>
-    public static IReadOnlyList<string> AddResourceAuthorization(this IServiceCollection services, IEnumerable<Type> types)
+    public static IReadOnlyList<PermissionReference> AddResourceAuthorization(this IServiceCollection services, IEnumerable<Type> types)
     {
         var candidates = types.Where(t => t is { IsClass: true, IsAbstract: false, IsGenericTypeDefinition: false }).Distinct().ToList();
         var problems = new List<string>();
@@ -31,15 +31,15 @@ internal static class ResourceAuthorizationRegistration
                 typeof(ResourceAuthorizer<,>).MakeGenericType(resource, action));
         }
 
-        var permissions = new List<string>();
+        var references = new List<PermissionReference>();
         foreach (var (resource, action, catalog) in catalogs)
         {
             services.AddSingleton(catalog.GetType().BaseType!, catalog);
             services.AddScoped(typeof(IAllowedActions<>).MakeGenericType(resource), typeof(AllowedActions<,>).MakeGenericType(resource, action));
-            permissions.AddRange(catalog.Permissions);
+            references.AddRange(catalog.Permissions.Select(p => new PermissionReference(p, $"资源动作 {catalog.GetType().Name}")));
         }
 
-        return permissions;
+        return references;
     }
 
     private static Dictionary<(Type Resource, Type Action), Type> ReadPolicies(List<Type> candidates, List<string> problems)

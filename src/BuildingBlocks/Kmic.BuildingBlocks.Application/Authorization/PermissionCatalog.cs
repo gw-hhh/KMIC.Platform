@@ -67,12 +67,14 @@ public sealed partial class PermissionCatalog
     public bool Contains(string code) => _byCode.ContainsKey(code);
 
     /// <summary>
-    /// 与用例目录、资源动作核对：引用的权限点都存在、没有无人使用的权限点、敏感权限点的用例都审计
+    /// 与用例目录及其他引用核对：引用的权限点都存在、没有无人使用的权限点、敏感权限点的用例都审计
     /// </summary>
-    public void Verify(UseCaseCatalog useCases, IEnumerable<string> resourceActionPermissions)
+    /// <param name="useCases">用例目录</param>
+    /// <param name="references">用例以外的引用，如资源动作、设置的修改权限</param>
+    public void Verify(UseCaseCatalog useCases, IEnumerable<PermissionReference> references)
     {
         ArgumentNullException.ThrowIfNull(useCases);
-        ArgumentNullException.ThrowIfNull(resourceActionPermissions);
+        ArgumentNullException.ThrowIfNull(references);
 
         var problems = new List<string>();
         var used = new HashSet<string>(StringComparer.Ordinal);
@@ -96,12 +98,12 @@ public sealed partial class PermissionCatalog
             }
         }
 
-        foreach (var code in resourceActionPermissions.Distinct(StringComparer.Ordinal))
+        foreach (var reference in references.Distinct())
         {
-            used.Add(code);
-            if (!_byCode.ContainsKey(code))
+            used.Add(reference.Permission);
+            if (!_byCode.ContainsKey(reference.Permission))
             {
-                problems.Add($"资源动作引用的权限点 {code} 不存在。");
+                problems.Add($"{reference.Source}：引用的权限点 {reference.Permission} 不存在。");
             }
         }
 

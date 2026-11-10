@@ -5,6 +5,8 @@ using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Numbering;
+using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -32,11 +34,15 @@ public static class ApplicationServiceCollectionExtensions
         // 目录在注册时构建并互相核对：声明有误时宿主启动即失败
         var useCases = UseCaseCatalog.FromAssemblies(applicationAssemblies);
         var permissions = PermissionCatalog.FromAssemblies(applicationAssemblies);
-        var resourceActionPermissions = services.AddResourceAuthorization(applicationAssemblies.Distinct().SelectMany(a => a.GetTypes()));
-        permissions.Verify(useCases, resourceActionPermissions);
+        var settings = SystemSettingCatalog.FromAssemblies(applicationAssemblies);
+        var resourceActions = services.AddResourceAuthorization(applicationAssemblies.Distinct().SelectMany(a => a.GetTypes()));
+        permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences]);
 
         services.AddSingleton(permissions);
+        services.AddSingleton(settings);
         services.AddSingleton(DataScopeObjectCatalog.FromAssemblies(applicationAssemblies));
+        services.AddSingleton(PreferenceCatalog.FromAssemblies(applicationAssemblies));
+        services.AddSingleton(NumberRuleCatalog.FromAssemblies(applicationAssemblies));
         return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 

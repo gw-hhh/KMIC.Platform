@@ -21,9 +21,13 @@ public sealed class ResourceAuthorizationRegistrationTests
         services.AddScoped<ExecutionScope>();
         services.AddScoped<IExecutionContext>(sp => sp.GetRequiredService<ExecutionScope>());
 
-        var permissions = services.AddResourceAuthorization([typeof(ThingPolicy), typeof(ThingActions)]);
+        var references = services.AddResourceAuthorization([typeof(ThingPolicy), typeof(ThingActions)]);
 
-        permissions.ShouldBe([ThingActions.EditPermission, ThingActions.ViewPermission]);
+        references.ShouldBe(
+        [
+            new PermissionReference(ThingActions.EditPermission, "资源动作 ThingActions"),
+            new PermissionReference(ThingActions.ViewPermission, "资源动作 ThingActions"),
+        ]);
         await using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
         await using var scope = provider.CreateAsyncScope();
         var access = TestAccess.WithPermissions(ThingActions.EditPermission);

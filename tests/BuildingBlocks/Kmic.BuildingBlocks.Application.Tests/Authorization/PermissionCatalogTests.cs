@@ -38,22 +38,22 @@ public sealed class PermissionCatalogTests
         var catalog = PermissionCatalog.Build([typeof(GoodPermissions)]);
         var useCases = UseCaseCatalog.Build([typeof(PurgeThingCommand), typeof(ExportAllThingsQuery), typeof(UnknownPermissionQuery)]);
 
-        var thrown = Should.Throw<DeclarationException>(() => catalog.Verify(useCases, ["Thing.Thing.Gone"]));
+        var thrown = Should.Throw<DeclarationException>(() => catalog.Verify(useCases, [new PermissionReference("Thing.Thing.Gone", "资源动作 GadgetActions")]));
 
         thrown.Problems.ShouldContain(p => p.Contains("PurgeThingCommand", StringComparison.Ordinal) && p.Contains("必须 [Audited]", StringComparison.Ordinal));
         thrown.Problems.ShouldContain(p => p.Contains("ExportAllThingsQuery", StringComparison.Ordinal) && p.Contains("必须 [AuditedRead]", StringComparison.Ordinal));
-        thrown.Problems.ShouldContain(p => p.Contains("资源动作引用的权限点 Thing.Thing.Gone 不存在", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains("资源动作 GadgetActions：引用的权限点 Thing.Thing.Gone 不存在", StringComparison.Ordinal));
         thrown.Problems.ShouldContain(p => p.Contains("Thing.Thing.Missing 不存在", StringComparison.Ordinal));
         thrown.Problems.ShouldContain(p => p.Contains("Thing.Thing.View 没有被任何用例或资源动作使用", StringComparison.Ordinal));
     }
 
     [Fact]
-    public void Verify_PermissionUsedByResourceActionOnly_Passes()
+    public void Verify_PermissionReferencedOutsideUseCases_Passes()
     {
         var catalog = PermissionCatalog.Build([typeof(GoodPermissions)]);
         var useCases = UseCaseCatalog.Build([typeof(AuditedPurgeThingCommand)]);
 
-        Should.NotThrow(() => catalog.Verify(useCases, [GoodPermissions.View]));
+        Should.NotThrow(() => catalog.Verify(useCases, [new PermissionReference(GoodPermissions.View, "系统设置 Thing.Display.Mode")]));
     }
 
     [PermissionGroup("Thing", "东西")]
