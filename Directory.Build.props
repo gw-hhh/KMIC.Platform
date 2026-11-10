@@ -27,8 +27,8 @@
     <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 
-  <!-- 公开成员缺少 XML 注释（CS1591）只在 BuildingBlocks 与模块 Contracts 中报错（06 第 10.3 节） -->
-  <PropertyGroup Condition="'$(MSBuildProjectName.StartsWith(`Kmic.BuildingBlocks.`))' != 'true' And '$(MSBuildProjectName.EndsWith(`.Contracts`))' != 'true'">
+  <!-- 公开成员缺少 XML 注释（CS1591）只在 BuildingBlocks 与模块 Contracts 的产品代码中报错（06 第 10.3 节），测试项目除外 -->
+  <PropertyGroup Condition="('$(MSBuildProjectName.StartsWith(`Kmic.BuildingBlocks.`))' != 'true' And '$(MSBuildProjectName.EndsWith(`.Contracts`))' != 'true') Or '$(MSBuildProjectName.EndsWith(`Tests`))' == 'true'">
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
@@ -38,6 +38,11 @@
     <!-- xUnit v3 生成的程序入口用 GetAwaiter().GetResult()，会被禁用 API 检查拦下；这个常量只让 xUnit 在它自己生成的文件中关闭警告（原型 #1 发现） -->
     <DefineConstants>$(DefineConstants);XUNIT_GENERATED_DISABLE_WARNINGS</DefineConstants>
   </PropertyGroup>
+
+  <!-- 测试项目统一引入 xUnit 的命名空间，测试文件里不必每个都写 using Xunit -->
+  <ItemGroup Condition="'$(KmicIsTestProject)' == 'true'">
+    <Using Include="Xunit" />
+  </ItemGroup>
 
   <!-- 禁用 API 清单（06 第 15.2 节）；分析器本身由 Directory.Packages.props 的 GlobalPackageReference 引入 -->
   <ItemGroup>

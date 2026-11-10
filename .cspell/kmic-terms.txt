@@ -19,3 +19,4 @@ Testcontainers
 Vogen
 vueuse
 vxe
+xunit

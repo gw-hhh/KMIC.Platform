@@ -134,7 +134,7 @@
 - **建议**：Vogen。
 - **理由**：强类型 ID 的价值在于“不可能传错、不可能未初始化”。Vogen 是唯一在编译期同时保证这两点的选项；自建方案要达到同等保证，等于重写一个 Vogen。
 - **符合选型原则 4**：Vogen 是源码生成器，生成的代码在本模块程序集内。
-- **核实结果**：Apache-2.0 许可；8.0.x 为稳定版（所见最新 8.0.7）。官方说明：引用时设置 `PrivateAssets="all"` 和 `ExcludeAssets="runtime"`，`Vogen.SharedTypes.dll` 不会复制到输出目录，运行时不需要它。框架统一采用这种引用方式，Domain 项目因此没有 Vogen 的运行时依赖。
+- **核实结果**：Apache-2.0 许可；8.0.x 为稳定版（所见最新 8.0.7）。引用方式：`PrivateAssets="all"`（不向引用方传递），**保留运行时程序集** `Vogen.SharedTypes.dll`。官方说明中“设置 `ExcludeAssets="runtime"` 后运行时不需要它”只在 ID 不写 `Validate` 方法时成立；本框架的每个 ID 都用 `Validate` 拒绝 `Guid.Empty`（05-01 第 4.1 节），它返回的 `Validation` 类型与 `From` 抛出的 `ValueObjectValidationException` 都在这个程序集中，排除后运行时即抛 `FileNotFoundException`（2026-11-10 阶段 2 实测）。所以模块 Domain 有一个很小的第三方运行时依赖（Vogen.SharedTypes，Apache-2.0）。
 - **取舍**：引入一个外部源码生成器，升级时需要回归验证生成代码；ID 的生成仍由框架统一提供（`Guid.CreateVersion7()`，ADR-0009）。
 - **状态**：已确认（2026-11-03）
 
@@ -324,7 +324,7 @@
 ```mermaid
 graph TD
     subgraph BD[BuildingBlocks.Domain]
-        BD1[无第三方运行时依赖<br/>Vogen 生成器]
+        BD1[Vogen 生成器<br/>+ Vogen.SharedTypes 运行时程序集]
     end
     subgraph BA[BuildingBlocks.Application]
         BA1[Mediator 抽象<br/>FluentValidation<br/>Microsoft.Extensions.* 抽象<br/>EF Core（仅查询 LINQ，05-03 D1）]
@@ -340,7 +340,7 @@ graph TD
     BP --> BA
 ```
 
-- 模块的 Domain 项目只引用 `BuildingBlocks.Domain` 和 Vogen。
+- 模块的 Domain 项目只引用 `BuildingBlocks.Domain` 和 Vogen（生成器 + `Vogen.SharedTypes` 运行时程序集，见 4.2）。
 - 模块的 Application 项目可以引用 FluentValidation（编写校验器），以及框架包装的中介者接口；不直接引用 Mediator 的类型（4.1）。
 - 模块的 Application 项目可以引用 `Microsoft.EntityFrameworkCore`（不含 Npgsql），**仅用于查询处理器**通过模块的 `IXxxQueryDb` 接口编写 LINQ 查询；`DbContext`、`SaveChanges`、`ExecuteUpdate`、`ExecuteDelete`、`FromSql` 等由 BannedApiAnalyzers 禁止（2026-11-04 补充，见 05-03 D1）。
 - Serilog、Quartz、MailKit、Fluid、AWSSDK.S3 只出现在 `BuildingBlocks.Infrastructure` 中，模块不直接引用（选型原则 5）。
@@ -356,7 +356,7 @@ graph TD
 | PostgreSQL 18 | PostgreSQL 许可 | 2025-09 发布，内置 `uuidv7()`（遵循 RFC 9562） | 高 | 支持第 2 节建议 |
 | Npgsql EF Core 提供程序 | PostgreSQL 许可 | 10.0.x 稳定版（10.0.0 于 2025-11 发布），11.0 预览中 | 高 | 无 |
 | Mediator（martinothamar） | MIT | 3.0.x 稳定（所见 3.0.2），3.1 RC | 高 | 锁定 3.0.x |
-| Vogen | Apache-2.0 | 8.0.x 稳定（所见 8.0.7）；`SharedTypes` 在运行时非必需 | 高 | 采用 `PrivateAssets` + `ExcludeAssets="runtime"` 引用 |
+| Vogen | Apache-2.0 | 8.0.x 稳定（所见 8.0.7）；`SharedTypes` 在运行时非必需（阶段 2 更正：写了 `Validate` 时必需，见 4.2） | 高 | 采用 `PrivateAssets` 引用，保留运行时程序集 |
 | StronglyTypedId | MIT | 1.0 仍是 beta（beta08，2024-04） | 高 | 支持不选它 |
 | Fluid | MIT | 稳定 2.25.0（2025-07）；3.0 beta.7（2026-08） | 中 | 锁定 2.x；关注维护节奏 |
 | ArchUnitNET | Apache-2.0 | 0.13.x，2026 年仍有发布；有 xUnit v3 包 | 高 | 无 |
@@ -427,3 +427,4 @@ graph TD
 | 2026-11-04 | 第 4.10 节：镜像扫描工具定为 Grype + Syft，CI 平台为 Gitea Actions | ADR-0032 |
 | 2026-11-05 | 版本锁定与许可复核：第 8 节第 12、13 项关闭；第 4.9 节 AWSSDK.S3 为 v4 | S0-04 |
 | 2026-11-10 | 文档整合：以上补充说明并入正文，决定不变 | R01 L2（S0-08） |
+| 2026-11-10 | 第 4.2、6、7 节：更正 Vogen 的引用方式——ID 写了 `Validate`，运行时需要 `Vogen.SharedTypes`，不能排除运行时程序集；选型不变 | 阶段 2 S2-01 实测 |

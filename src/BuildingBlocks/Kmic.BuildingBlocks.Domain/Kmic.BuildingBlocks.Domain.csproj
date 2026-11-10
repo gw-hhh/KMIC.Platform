@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 领域层基础构件（05-01）：只依赖 BCL，模块的 Domain 只能引用本项目 -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Domain.Tests" />
+  </ItemGroup>
+</Project>

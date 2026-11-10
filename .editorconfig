@@ -241,7 +241,7 @@ dotnet_diagnostic.CA1848.severity = none
 
 # ---------------------------------------------------------------- 强类型 ID（文件名以 Id / Ref 结尾，05-01 第 4.1 节）
 # Vogen 生成 IComparable 但不生成比较运算符；键集分页只用 CompareTo（06 第 15.3 节补充说明）
-[src/**/*{Id,Ref}.cs]
+[{src,tests}/**/*{Id,Ref}.cs]
 dotnet_diagnostic.MA0097.severity = none
 
 # ---------------------------------------------------------------- EF 迁移（原型 #11 D3）
