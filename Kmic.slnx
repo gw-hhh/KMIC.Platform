@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers/Kmic.BuildingBlocks.Analyzers.csproj" />
+    <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Contracts/Kmic.BuildingBlocks.Contracts.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
   </Folder>
   <Folder Name="/tests/" />

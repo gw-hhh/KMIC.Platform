@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    模块 Contracts 能引用的唯一框架项目（05-07 D1）：消息标记、引用信息、快照源与框架消息。
+    引用 BuildingBlocks.Domain 只为使用 Result / Error；实体、强类型 ID 等不得出现在 Contracts 中（架构测试）
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+</Project>
