@@ -1,6 +1,6 @@
 # 07 业务模块标准写法
 
-- 状态：已确认（2026-11-04，D1～D3 均按建议确定）；2026-11-05 随 R02 新增第 6.3 节、补充第 8、9 节（已确认，2026-11-05）
+- 状态：已确认（2026-11-04，D1～D3 均按建议确定）；之后的修订见文末“修订记录”
 - 日期：2026-11-04
 - 适用范围：每个业务模块与平台模块的项目结构、注册方式、文件组织、各构件的标准写法、测试写法、模块设计文档格式
 - 依据：ADR-0003、ADR-0004、ADR-0006、ADR-0021；05 系列全部；06 编码规范
@@ -87,7 +87,7 @@ ADR-0021 规定每个模块提供一个 `IModule`，负责注册服务、端点�
 
 - **决定（已确认，2026-11-04）**：A。
 - **理由**：A 是唯一既不改引用规则、又完全显式的做法；“两个注册类”恰好对应“服务端组装”与“HTTP 暴露”两件事，与 Api / Worker 两种角色的分工一致。
-- **取舍**：每个模块多一个很小的类（通常只有一行）。已修订 05-06 D1 的表述（`MapEndpoints` 由 `ModuleEndpoints` 承担）与 ADR-0021 第 2 节的示例（`AddModule<QuotationModule>()` → `AddModule<QuotationModule, QuotationEndpoints>()`）；05-07 的 `DependsOn<CustomerModule>()` 已改为按模块名声明（见下），因为模块之间只能引用 Contracts，拿不到对方的 `CustomerModule` 类型。
+- **取舍**：每个模块多一个很小的类（通常只有一行）。相应地，05-06 D1 中端点扫描由 `ModuleEndpoints` 承担，ADR-0021 第 2 节的注册写法为 `AddModule<QuotationModule, QuotationEndpoints>()`；05-07 的模块依赖按模块名声明（见下），因为模块之间只能引用 Contracts，拿不到对方的 `CustomerModule` 类型。
 
 ### 2.3 注册类的形态
 
@@ -367,7 +367,7 @@ public interface ISampleQueryDb
 | 数据范围在配置中声明 | 05-05 第 5.4 节 |
 | 敏感字段在配置中标注数据分类 | 05-09 第 3.3 节、05-12 D2 |
 | 表、列、人工索引写中文数据库注释（`HasComment`），缺失时启动失败 | 05-03 第 3.9 节（R01 M1） |
-| 迁移：`dotnet ef migrations add <名称> -p Kmic.Sample.Infrastructure -c SampleDbContext`；初始迁移由模板生成，含 `InitializeModuleSchema` | 05-03 第 9 节 |
+| 迁移：`dotnet ef migrations add <名称> -p Kmic.Sample.Infrastructure -c SampleDbContext`；初始迁移由新建模块的脚本生成（第 6.1 节），含 `InitializeModuleSchema` | 05-03 第 9 节 |
 
 ### 4.3 命令（05-02）
 
@@ -506,7 +506,7 @@ public sealed class ListSamplesQueryHandler(ISampleQueryDb db, IBusinessCalendar
 
 > `ListSamplesQuery` 的参数形态、`PagedResult<T>`、`FindByIdOrNotFoundAsync` 的签名以 05-06 第 6 节与框架实现为准；此处只示意调用顺序。
 
-补充说明（2026-11-06，随原型 #1 确认）：第 4.3、4.4 节示例中的命令、查询处理器已由 `internal sealed` 改为 `public sealed`，原因与守护方式见 05-02 第 2.2 节补充说明；校验器、端点、EF 配置等仍为 `internal sealed`。
+> 可见性：第 4.3、4.4 节示例中的命令、查询处理器是 `public sealed`，原因与守护方式见 05-02 第 2.2 节；校验器、端点、EF 配置等为 `internal sealed`。
 
 ### 4.5 授权声明（05-05）
 
@@ -626,7 +626,7 @@ internal sealed class PublishSampleApproved(IIntegrationEventPublisher publisher
 | 管理员可改的系统设置、用户偏好 | Application 中声明设置 / `[Preference]` | 05-10 第 6、7 节 |
 | 字典取值校验 | 注入 `IDictionaries`，`EnsureSelectableAsync` | 05-10 D3 |
 | 业务编号 | `SampleNumberRules` 中 `[NumberRule]` 常量；处理器最后一步 `NextAsync` | 05-13 第 2 节 |
-| 附件 | `[UploadProfile]` 声明；命令引用临时文件 ID，`publisher.Send(AttachFiles…)` | 05-11 第 3 节 |
+| 附件 | `[UploadProfile]` 声明；命令引用临时文件 ID，经 `IFileAttachments.AttachAsync(owner, fileIds)` 关联（直接发送 `AttachFiles` 由分析器拦截） | 05-11 第 3 节 |
 | 通知 | `[NotificationTemplate]` 模型；`publisher.Send(SendNotification.For(...))` | 05-11 第 7、8 节 |
 | 外部系统 | Application 中定义接口，Infrastructure `Clients/` 中 `AddKmicHttpClient` | 05-11 第 9 节 |
 | 日志 | 每个类旁边的 `{类名}Log` 静态 partial 类，`[LoggerMessage]`，`EventId` 在本模块编号段 | 06 D6 |
@@ -663,21 +663,21 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 | 选项 | 做法 | 优点 | 缺点 |
 |---|---|---|---|
 | A 模板生成完整示例代码 | 新模块生成后就带一个完整的示例聚合和全部用例，开发者改名或删除 | 新模块马上能运行 | 每个新模块都要删一遍示例代码，漏删就留在生产代码中；模板中的示例不参与编译和测试，框架改动后会悄悄过时 |
-| B 模板只生成空骨架，写法只在本文中 | 模板生成项目、引用、注册类、初始迁移、空的权限点 / 错误目录 | 生成物干净 | 文档中的示例代码同样不经编译，会与框架实现逐渐脱节 |
+| B 模板只生成空骨架，写法只在本文中 | 模板生成项目、引用、注册类、空的权限点 / 错误目录 | 生成物干净 | 文档中的示例代码同样不经编译，会与框架实现逐渐脱节 |
 | **C 空骨架模板 + 仓库中常驻一个可运行的参考模块 `Sample`** | 模板同 B；`src/Modules/Sample` 是一个真实、完整、随 CI 编译和测试的模块，覆盖本文第 4 节全部构件；只在开发与测试环境注册，生产不注册 | 写法样板始终能编译、测试通过，框架改动若破坏写法会在 CI 中立刻暴露；同时是框架的端到端集成测试；新模块不带任何多余代码 | 需要维护一个不上生产的模块；需要一条规则保证它不会被生产环境注册 |
 
 - **决定（已确认，2026-11-04）**：C。
-  - 模板：`dotnet new kmic-module -n Customer`，生成 5 个项目、测试项目、`CustomerModuleInfo`、`CustomerModule`、`CustomerEndpoints`、两个 DbContext、`ICustomerQueryDb`、空的 `CustomerPermissions` / `CustomerScopes` / `CustomerErrors`、初始迁移（`InitializeModuleSchema`）、解决方案过滤文件 `Customer.slnf`。
+  - 模板：`kmic-module`，生成 5 个项目、测试项目、`CustomerModuleInfo`、`CustomerModule`、`CustomerEndpoints`、两个 DbContext、`ICustomerQueryDb`、空的 `CustomerPermissions` / `CustomerScopes` / `CustomerErrors`、解决方案过滤文件 `Customer.slnf`。模板经下文的脚本调用，不直接运行 `dotnet new`。
   - 参考模块：`Sample` 编号 99；宿主中以 `AddModule<SampleModule, SampleEndpoints>(onlyIn: KmicEnvironments.NonProduction)` 注册，生产环境启动校验发现 `Sample` 被注册即拒绝启动。
   - 本文第 4 节的示例在实施后改为引用 `Sample` 模块中的真实文件，文档只保留要点，避免两份代码。
 - **理由**：“标准写法”的价值在于始终正确；只有参与编译和测试的样板才能长期保持正确。
 - **取舍**：多维护一个模块；它也承担了框架端到端测试的作用，这部分维护本来就要做。
 
-补充说明（2026-11-06，随原型 #11 确认，`docs/framework/spikes/11-module-template.md`）：
+新建模块的方式（原型 #11，`docs/framework/spikes/11-module-template.md`）：
 
-1. **新建模块用脚本**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号 → `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 构建 → 生成初始迁移 → `check.cs --fix` → 格式检查 → 运行模块测试，任一步失败即停止。模板本身不再“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
-2. **初始迁移由脚本调用 EF 工具生成**，代替上面“模板生成初始迁移”：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 同为 10.0.14），脚本自动执行 `dotnet tool restore`。
-3. 迁移文件按生成代码处理，编码由 `check.cs --fix` 规整（06 第 3.2 节补充说明）。
+- **用脚本新建模块**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号 → `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 构建 → 生成初始迁移 → `check.cs --fix` → 格式检查 → 运行模块测试，任一步失败即停止。模板本身不做“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
+- **初始迁移由脚本调用 EF 工具生成**，不是模板中的静态文件：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 同为 10.0.14），脚本自动执行 `dotnet tool restore`。
+- 迁移文件按生成代码处理，编码由 `check.cs --fix` 规整（06 第 3.2 节）。
 
 ### 6.2 步骤
 
@@ -685,13 +685,13 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 |---|---|
 | 1 | 写模块设计文档 `docs/modules/<模块>/README.md`（第 8 节格式），评审通过 |
 | 2 | 模块登记表（2.4）登记模块名、schema、编号、依赖、负责人 |
-| 3 | `dotnet new kmic-module -n <模块>`（2026-11-06 补充说明：改为 `dotnet run scripts/new-module.cs -- <模块> <编号>`，见 6.1） |
+| 3 | `dotnet run scripts/new-module.cs -- <模块> <编号>`（6.1） |
 | 4 | 宿主 `Program.cs` 中 `AddModule<XxxModule, XxxEndpoints>()`；测试宿主同步注册 |
 | 5 | `CODEOWNERS` 增加模块目录的负责人 |
 | 6 | 按设计文档逐个用例实现（第 5 节） |
 | 7 | 迁移脚本随 CI 生成，人工审查（05-03 第 9.2 节） |
 
-### 6.3 模块划分检查表（2026-11-05 随 R02 新增，已确认）
+### 6.3 模块划分检查表
 
 “一个事务只改一个模块”（ADR-0006）不变，模块之间只有最终一致（事件、请求型消息）。因此，**必须在同一次提交中成立的规则（强不变量）决定模块边界**：它涉及的数据必须归同一个模块。发现一条强不变量跨了两个模块时，合并模块或调整数据归属，不在框架中增加跨模块事务。
 
@@ -709,7 +709,7 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 | 6 | 模块之间的依赖是否单向、无环（`DependsOn`，05-07 第 4.1 节） | 调整职责，或改用事件反转依赖 |
 | 7 | 拆成两个模块的理由（团队分工、变更频率、数据量、权限边界）是否大于因此失去的事务一致性 | 不拆 |
 
-- 检查结论写进模块设计文档第 0 节（第 8 节补充说明），评审时逐项确认。
+- 检查结论写进模块设计文档第 0 节（第 8 节），评审时逐项确认。
 
 ---
 
@@ -786,11 +786,12 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 
 | 节 | 内容 | 必填 |
 |---|---|---|
-| 0 概述 | 模块职责、边界（做什么、不做什么）、模块名 / schema / 编号 | ✓ |
+| 0 概述 | 模块职责、边界（做什么、不做什么）、模块名 / schema / 编号；第 6.3 节模块划分检查表的逐项结论（含本模块的强不变量清单） | ✓ |
 | 1 旧系统对照 | 旧系统中对应的页面、表、规则；哪些保留、哪些改变、哪些不做 | ✓ |
 | 2 术语 | 本模块新增的术语（同时登记 `docs/glossary.md`） | ✓ |
 | 3 聚合 | 每个聚合：字段、不变量、状态机（Mermaid 状态图）、所属人 / 所属组织的业务含义 | ✓ |
-| 4 用例 | 命令与查询清单：名称、权限点、幂等、审计、资源策略规则 | ✓ |
+| 4 用例 | 命令与查询清单：名称、权限点、幂等、审计、资源策略规则；修改金额、额度、库存这类数值的操作，写明对应的业务单据（05-02 第 5.4 节） | ✓ |
+| 4A 前端 | 页面清单（路由名、页面类型、菜单归属、权限点、新建与编辑的打开方式及理由）、列表、表单、动作、旧系统页面对照，格式见前端 F05 第 17 节。编号用 4A，是为了不改动其后各节的编号 | ✓ |
 | 5 授权 | 权限点、范围对象、资源策略、敏感权限点 | ✓ |
 | 6 跨模块 | 依赖的模块与 Contracts；对外提供的 Contracts；发布与订阅的事件 | 按需 |
 | 7 后台处理 | 定时任务、后台作业 | 按需 |
@@ -800,18 +801,14 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 | 11 框架负责 / 业务负责 | 本模块用到的框架能力与本模块自己的规则分界 | ✓ |
 | 12 待决 | 需要业务负责人拍板的事项，附选项与建议 | ✓ |
 
-补充说明（2026-11-05，随 R02 确认）：第 0 节“概述”必须附第 6.3 节模块划分检查表的逐项结论（含本模块的强不变量清单）；第 4 节“用例”中修改金额、额度、库存这类数值的操作，写明对应的业务单据（05-02 第 5.4 节）。
-
-补充说明（2026-11-05，随前端 F05 确认）：在第 4 节“用例”之后增加一节“4A 前端”（必填；不改其后各节编号），内容为页面清单（路由名、页面类型、菜单归属、权限点、新建与编辑的打开方式及理由）、列表、表单、动作、旧系统页面对照，格式见前端 F05 第 17 节。
-
 ---
 
 ## 9. 与其他文档的接口
 
 | 本文提供 / 需要 | 对方 |
 |---|---|
-| `IModule` + `ModuleEndpoints` 两个注册类、`AddModule<TModule, TEndpoints>()` | 05-06 D1 表述、ADR-0021（已修订 / 补充说明） |
-| `DependsOn(模块名)` 代替 `DependsOn<TModule>()` | 05-07 第 4.1 节（已修订） |
+| `IModule` + `ModuleEndpoints` 两个注册类、`AddModule<TModule, TEndpoints>()` | 05-06 D1、ADR-0021 |
+| `DependsOn(模块名)`，不用 `DependsOn<TModule>()` | 05-07 第 4.1 节 |
 | `XxxModuleInfo.Name` 放在 Contracts | 05-07 第 3 节 |
 | 模块编号与 `EventId` 分段 | 06 D6 |
 | 参考模块 `Sample`、`dotnet new kmic-module` 模板 | 08 实施计划（框架阶段的交付物） |
@@ -826,8 +823,6 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 | 05-07、05-08、05-10 | 示例中的命令 / 查询补上 `Command` / `Query` 后缀（05-02 命名规则）；`ICommand<Result<T>>` 改为 `ICommand<T>`、`IQuery<Result<T>>` 改为 `IQuery<T>`（05-02 第 2.1 节的接口定义）；`new CustomerId(...)` 改为 `CustomerId.From(...)`（Vogen 禁止 `new`）；`SendBatch` 改为 `SendBatchAsync` |
 | 06 | 集成事件命名改为与 05-07 第 3.3 节一致（无后缀）；配置节、注册方法名与 05-10 一致；测试基础设施项目名统一为 `Kmic.BuildingBlocks.Testing` |
 
-补充说明（2026-11-05，随 R02 确认）：新增第 6.3 节模块划分检查表（R02-14）、第 8 节设计文档的检查结论要求。修正记录：第 4.9 节“附件”一行的 `publisher.Send(AttachFiles…)` 与 05-11 第 3.3 节（R02 第 4 批）不一致，改为：`[UploadProfile]` 声明；命令引用临时文件 ID，经 `IFileAttachments.AttachAsync(owner, fileIds)` 关联（直接发送 `AttachFiles` 由分析器拦截）。
-
 ---
 
 ## 10. 决策汇总
@@ -836,9 +831,21 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 |---|---|---|
 | D1 | 模块注册类放在哪里 | 两个注册类：Infrastructure 的 `IModule` + Presentation 的 `ModuleEndpoints`，宿主 `AddModule<TModule, TEndpoints>()` 配对 |
 | D2 | 一个用例的文件粒度 | 一个类型一个文件、一个用例一个文件夹；例外只有“请求模型 + 端点”和“只服务于一个消息的内嵌 DTO” |
-| D3 | 模块模板与参考模块 | 空骨架模板 + 仓库中常驻、随 CI 编译测试、生产不注册的参考模块 `Sample` |
+| D3 | 模块模板与参考模块 | 空骨架模板（经 `scripts/new-module.cs` 调用，初始迁移由脚本生成）+ 仓库中常驻、随 CI 编译测试、生产不注册的参考模块 `Sample` |
 
 | 待确认 | 处理方式 |
 |---|---|
 | 第 4 节示例中框架 API 的确切签名（`FindByIdOrNotFoundAsync`、`ToPagedAsync`、`AddModuleDbContexts`、`EfRepository.Aggregate`） | 实现框架时确定；参考模块落地后本文改为引用真实文件（D3） |
-| `dotnet new` 模板对多项目 + 解决方案过滤文件的生成能力 | 实施时原型验证 |
+
+---
+
+## 11. 修订记录
+
+| 日期 | 内容 | 来源 |
+|---|---|---|
+| 2026-11-05 | 新增第 6.3 节模块划分检查表；第 8 节设计文档第 0 节附检查结论、第 4 节写明数值操作对应的业务单据 | R02-14 |
+| 2026-11-05 | 修正：第 4.9 节“附件”一行的 `publisher.Send(AttachFiles…)` 与 05-11 第 3.3 节不一致，改为经 `IFileAttachments.AttachAsync` 关联 | R02 第 4 批 |
+| 2026-11-05 | 第 8 节设计文档模板增加“4A 前端” | 前端 F05 |
+| 2026-11-06 | 第 4.3、4.4 节示例中的命令、查询处理器改为 `public sealed` | 原型 #1 D1 |
+| 2026-11-06 | 第 6.1、6.2 节：新建模块用 `scripts/new-module.cs`；初始迁移由脚本调用 EF 工具生成（D3 中“模板生成初始迁移”相应修订）；模板生成能力的待确认关闭 | 原型 #11 D1～D3 |
+| 2026-11-10 | 文档整合：以上补充说明并入正文，决定不变 | R01 L2（S0-08） |
