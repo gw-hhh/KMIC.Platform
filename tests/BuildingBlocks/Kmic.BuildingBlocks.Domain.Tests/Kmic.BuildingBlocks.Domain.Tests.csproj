@@ -7,7 +7,7 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="Vogen" PrivateAssets="all" />
+    <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    应用层基础构件（05-02、05-04、05-05、05-09、05-10、05-13 中标为 BuildingBlocks.Application 的部分）。
+    只引用 Mediator 的抽象；分发代码由宿主中的 Mediator.SourceGenerator 生成（原型 #1）
+  -->
+  <ItemGroup>
+    <PackageReference Include="Mediator.Abstractions" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="../Kmic.BuildingBlocks.Contracts/Kmic.BuildingBlocks.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Application.Tests" />
+  </ItemGroup>
+</Project>

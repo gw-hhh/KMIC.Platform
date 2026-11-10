@@ -134,7 +134,7 @@
 - **建议**：Vogen。
 - **理由**：强类型 ID 的价值在于“不可能传错、不可能未初始化”。Vogen 是唯一在编译期同时保证这两点的选项；自建方案要达到同等保证，等于重写一个 Vogen。
 - **符合选型原则 4**：Vogen 是源码生成器，生成的代码在本模块程序集内。
-- **核实结果**：Apache-2.0 许可；8.0.x 为稳定版（所见最新 8.0.7）。引用方式：`PrivateAssets="all"`（不向引用方传递），**保留运行时程序集** `Vogen.SharedTypes.dll`。官方说明中“设置 `ExcludeAssets="runtime"` 后运行时不需要它”只在 ID 不写 `Validate` 方法时成立；本框架的每个 ID 都用 `Validate` 拒绝 `Guid.Empty`（05-01 第 4.1 节），它返回的 `Validation` 类型与 `From` 抛出的 `ValueObjectValidationException` 都在这个程序集中，排除后运行时即抛 `FileNotFoundException`（2026-11-10 阶段 2 实测）。所以模块 Domain 有一个很小的第三方运行时依赖（Vogen.SharedTypes，Apache-2.0）。
+- **核实结果**：Apache-2.0 许可；8.0.x 为稳定版（所见最新 8.0.7）。引用方式：`PrivateAssets="analyzers;build;buildtransitive;contentfiles"`——生成器与分析器不传给引用方，**运行时程序集** `Vogen.SharedTypes.dll` 照常传递（写成 `PrivateAssets="all"` 时它不会到达引用方，测试项目运行即缺失）。官方说明中“设置 `ExcludeAssets="runtime"` 后运行时不需要它”只在 ID 不写 `Validate` 方法时成立；本框架的每个 ID 都用 `Validate` 拒绝 `Guid.Empty`（05-01 第 4.1 节），它返回的 `Validation` 类型与 `From` 抛出的 `ValueObjectValidationException` 都在这个程序集中，排除后运行时即抛 `FileNotFoundException`（2026-11-10 阶段 2 实测）。所以模块 Domain 有一个很小的第三方运行时依赖（Vogen.SharedTypes，Apache-2.0）。
 - **取舍**：引入一个外部源码生成器，升级时需要回归验证生成代码；ID 的生成仍由框架统一提供（`Guid.CreateVersion7()`，ADR-0009）。
 - **状态**：已确认（2026-11-03）
 

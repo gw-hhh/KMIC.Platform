@@ -3,7 +3,7 @@ namespace Kmic.BuildingBlocks.Domain.Results;
 /// <summary>
 /// 带返回值的操作结果：成功时有 Value，失败时有 Error
 /// </summary>
-public sealed class Result<T> : Result
+public sealed class Result<T> : Result, IResultFactory<Result<T>>
 {
     private readonly T _value;
 
@@ -31,6 +31,9 @@ public sealed class Result<T> : Result
         ArgumentNullException.ThrowIfNull(error);
         return new Result<T>(error);
     }
+
+    // 显式接口实现：不是公开的静态成员，泛型类型上也不触发 CA1000
+    static Result<T> IResultFactory<Result<T>>.Fail(Error error) => error;
 
     /// <summary>
     /// 成功时转换值，失败时原样传递错误

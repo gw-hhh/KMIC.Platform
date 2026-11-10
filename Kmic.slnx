@@ -2,12 +2,14 @@
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers/Kmic.BuildingBlocks.Analyzers.csproj" />
+    <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Application/Kmic.BuildingBlocks.Application.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Contracts/Kmic.BuildingBlocks.Contracts.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Analyzers.Tests/Kmic.BuildingBlocks.Analyzers.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Application.Tests/Kmic.BuildingBlocks.Application.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Domain.Tests/Kmic.BuildingBlocks.Domain.Tests.csproj" />
   </Folder>
 </Solution>

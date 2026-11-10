@@ -2,6 +2,8 @@
 # 修改须框架负责人审核。一行一个词，按字母顺序。
 Antdv
 Aspire
+buildtransitive
+contentfiles
 Fluid
 gitea
 Kmic

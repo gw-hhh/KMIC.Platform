@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Domain.Results;
 /// <remarks>
 /// 用类而不是结构体：default 不会被误当成“成功”，Result&lt;T&gt; 也能继承它，管道行为只需处理一种类型。
 /// </remarks>
-public class Result
+public class Result : IResultFactory<Result>
 {
     private static readonly Result _success = new(null);
 
@@ -69,6 +69,8 @@ public class Result
     /// 让错误目录中的 Error 可以直接作为失败结果返回
     /// </summary>
     public static implicit operator Result(Error error) => Failure(error);
+
+    static Result IResultFactory<Result>.Fail(Error error) => Failure(error);
 
     /// <summary>
     /// 两个分支归一，主要给接口层把结果转成响应
