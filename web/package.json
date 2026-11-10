@@ -1,0 +1,49 @@
+{
+  "name": "kmic-web-spike",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.13.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tanstack/vue-form": "1.33.5",
+    "@tanstack/vue-query": "5.106.1",
+    "@vxe-ui/core": "4.5.6",
+    "antdv-next": "1.8.0",
+    "openapi-fetch": "0.17.0",
+    "pinia": "4.1.0",
+    "vue": "3.5.45",
+    "vue-router": "5.4.0",
+    "vxe-table": "4.23.15",
+    "xe-utils": "4.1.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vitest/browser-playwright": "5.1.0",
+    "@vue/test-utils": "2.5.1",
+    "eslint": "10.14.0",
+    "eslint-import-resolver-typescript": "4.4.5",
+    "eslint-plugin-boundaries": "7.4.1",
+    "eslint-plugin-vue": "10.12.0",
+    "msw": "3.0.3",
+    "playwright": "1.64.1",
+    "sass": "1.107.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "8.3.6",
+    "vitest": "5.1.0",
+    "vue-eslint-parser": "10.4.1",
+    "vue-tsc": "3.3.14",
+    "vxe-pc-ui": "4.20.38"
+  }
+}

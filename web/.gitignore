@@ -1,0 +1,3 @@
+.vitest/
+*.png
+public/mockServiceWorker.js
