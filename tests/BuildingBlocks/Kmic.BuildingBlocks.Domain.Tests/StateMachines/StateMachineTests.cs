@@ -128,8 +128,7 @@ public sealed class StateMachineTests
     [Fact]
     public void Define_WhenStateIsNotEnumeration_Throws()
     {
-        Should.Throw<NotSupportedException>(
-            () => StateMachine.Define<Lamp, string, Switch>(l => l.Text, (l, v) => l.Text = v));
+        Should.Throw<NotSupportedException>(Lamp.DefineByText);
     }
 
     [Fact]
@@ -152,8 +151,7 @@ public sealed class StateMachineTests
 
     private static readonly Error _invalid = Error.BusinessRule("Lamp.InvalidTransition", "不能这样切换");
 
-    private static StateMachineBuilder<Lamp, Light, Switch> Define() =>
-        StateMachine.Define<Lamp, Light, Switch>(l => l.State, (l, v) => l.State = v);
+    private static StateMachineBuilder<Lamp, Light, Switch> Define() => Lamp.DefineMachine();
 
     private enum Light
     {
@@ -166,10 +164,16 @@ public sealed class StateMachineTests
         Toggle,
     }
 
+    // 状态属性的 setter 必须私有（KM0401），声明状态机的代码因此放在类型内部
     private sealed class Lamp() : AggregateRoot<Guid>(Guid.CreateVersion7())
     {
-        public Light State { get; set; }
+        public Light State { get; private set; }
 
-        public string Text { get; set; } = "";
+        public string Text { get; private set; } = null!;
+
+        public static StateMachineBuilder<Lamp, Light, Switch> DefineMachine() =>
+            StateMachine.Define<Lamp, Light, Switch>(l => l.State, (l, v) => l.State = v);
+
+        public static void DefineByText() => StateMachine.Define<Lamp, string, Switch>(l => l.Text, (l, v) => l.Text = v);
     }
 }

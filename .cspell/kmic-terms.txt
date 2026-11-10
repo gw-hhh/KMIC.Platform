@@ -3,9 +3,11 @@
 Antdv
 Aspire
 Fluid
+gitea
 Kmic
 Mediator
 Meziantou
+netstandard
 nologo
 Npgsql
 Pinia

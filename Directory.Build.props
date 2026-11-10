@@ -39,6 +39,20 @@
     <DefineConstants>$(DefineConstants);XUNIT_GENERATED_DISABLE_WARNINGS</DefineConstants>
   </PropertyGroup>
 
+  <!--
+    框架自定义分析器 KMxxxx（06 第 2.2 节）以分析器方式引用到 src、tests 下的全部项目；分析器项目自身除外，
+    scripts 下的单文件脚本不经过它
+  -->
+  <PropertyGroup>
+    <_KmicRelativeDirectory>$([MSBuild]::MakeRelative($(MSBuildThisFileDirectory), $(MSBuildProjectDirectory)))</_KmicRelativeDirectory>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Kmic.BuildingBlocks.Analyzers' And ($(_KmicRelativeDirectory.StartsWith('src')) Or $(_KmicRelativeDirectory.StartsWith('tests')))">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers/Kmic.BuildingBlocks.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+  </ItemGroup>
+
   <!-- 测试项目统一引入 xUnit 的命名空间，测试文件里不必每个都写 using Xunit -->
   <ItemGroup Condition="'$(KmicIsTestProject)' == 'true'">
     <Using Include="Xunit" />

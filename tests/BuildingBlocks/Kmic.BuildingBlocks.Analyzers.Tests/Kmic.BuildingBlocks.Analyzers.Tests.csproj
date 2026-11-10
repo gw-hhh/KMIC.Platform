@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers/Kmic.BuildingBlocks.Analyzers.csproj" />
+    <!-- 被测代码引用真实的领域基础构件，规则按真实的类型名识别 -->
+    <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+</Project>
