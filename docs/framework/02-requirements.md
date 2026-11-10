@@ -69,7 +69,7 @@
 | FR-MOD-01 | 单一宿主 `Kmic.Api`，所有模块打包为一个镜像 | P0 | ADR-0002 |
 | FR-MOD-02 | 每个模块拆为 Domain / Application / Infrastructure / Presentation / Contracts 五个项目 | P0 | ADR-0004 |
 | FR-MOD-03 | `IModule` 注册机制：服务、端点、权限点、定时任务、迁移；宿主显式注册，可按配置停用模块 | P0 | ADR-0021 |
-| FR-MOD-04 | 框架构件按层拆为 BuildingBlocks 项目（Domain / Application / Infrastructure / Presentation / Contracts，另有 Analyzers 与 Testing），模块只能引用同层或更内层构件 | P0 | ADR-0021（含 05-07、06 的补充说明） |
+| FR-MOD-04 | 框架构件按层拆为 BuildingBlocks 项目（Domain / Application / Infrastructure / Presentation / Contracts，另有 Analyzers 与 Testing），模块只能引用同层或更内层构件 | P0 | ADR-0021 |
 | FR-MOD-05 | `dotnet new kmic-module` 模块模板，一条命令生成 5 个项目、标准目录、框架表与初始迁移；另有常驻的参考模块 `Sample` | P1 | ADR-0004、ADR-0018、07 D3 |
 | FR-MOD-06 | 架构测试覆盖 ADR-0008 全部规则，进入 CI 阻断合并 | P0 | ADR-0008 |
 | FR-MOD-07 | 统一构建配置（`Directory.Build.props`）、集中包版本、`.editorconfig`、零警告 | P0 | ADR-0021 |
