@@ -97,7 +97,7 @@ flowchart TB
 - **理由**：数据库是唯一不能丢、恢复最难的部分，交给托管服务换来的确定性最大。
 - **取舍**：费用；以及下表中依赖 RDS 行为的项要在阶段 1 实测。
 
-**05 系列依赖、需要在 RDS 上实测的项**（08 第 4 节原型 #13；检查已写成测试，见 `docs/framework/spikes/13-rds-compatibility.md`，另含 `SKIP LOCKED` 与事务级咨询锁；本机 PG 18 对照全部通过，**尚待在 RDS 上执行**，实施待办 T-20）：
+**05 系列依赖、需要在 RDS 上实测的项**（08 第 4 节原型 #13；检查已写成测试，见 `docs/framework/spikes/13-rds-compatibility.md`，另含 `SKIP LOCKED` 与事务级咨询锁；本机 PG 18 对照全部通过，**阿里云 RDS 上待验证**；按用户 2026-11-10 的安排，前期不开 RDS，云端验证在部署阿里云测试环境前完成，实施待办 T-20）：
 
 | 依赖 | 来源 | 实测方法 | 不成立时 |
 |---|---|---|---|
@@ -109,7 +109,7 @@ flowchart TB
 | 约束 | 内容 |
 |---|---|
 | 账号 | 迁移账号（建表、授权）与运行账号分开（ADR-0029）；RDS 高权限账号只用于初始化，日常不用 |
-| 连接数 | 实例连接上限 ≥ 应用主机数 × 4 个连接池上限之和（前台事务池、前台读池、后台事务池、后台读池，05-03 第 2.1 节）+ 监听连接 + 迁移与运维余量；规格随压测确定 |
+| 连接数 | 实例连接上限 ≥ 应用主机数 × 4 个连接池上限之和（前台事务池、前台读池、后台事务池、后台读池，05-03 第 2.1 节）+ Worker 副本数 × 流式池上限（导出，05-08 D2）+ 监听连接 + 迁移与运维余量；规格随压测确定 |
 | 网络 | 只开放生产 VPC 内应用主机所在安全组；白名单不含 `0.0.0.0/0` |
 | 参数 | `timezone = UTC`；开启 `pg_stat_statements`（05-12 第 3.3 节） |
 
@@ -365,7 +365,7 @@ RPO / RTO 的目标值随 08 第 3.1 节在阶段 5 前定；这里先定机制�
 | 待确认 | 处理方式 |
 |---|---|
 | 同时在线用户数、数据量（决定主机与 RDS 规格） | 从旧系统统计（用户表行数、日活）后与业务确认；08 第 3.1 节截止阶段 3 结束 |
-| RDS 上 ICU 非确定性排序规则、`pg_trgm`、`LISTEN/NOTIFY` | 原型 #13 已写好、本机对照通过，待在 RDS 上运行（实施待办 T-20） |
+| RDS 上 ICU 非确定性排序规则、`pg_trgm`、`LISTEN/NOTIFY`，迁移账号在 `public` 建排序规则的权限 | 原型 #13 已写好、本机 PG 18 对照通过；部署阿里云测试环境前在 RDS 上运行（实施待办 T-20） |
 | OSS 对 `IFileStorage` 全部操作的兼容性；ECS RAM 角色凭据提供程序 | 阶段 1 原型验证 |
 | 告警渠道（邮件 / 钉钉 / 企业微信）、Grafana 登录方式 | 运维提供 |
 | 现有 Gitea 的备份方式 | 阶段 0 盘点 |
@@ -383,3 +383,4 @@ RPO / RTO 的目标值随 08 第 3.1 节在阶段 5 前定；这里先定机制�
 
 - 阿里云 RDS PostgreSQL：[支持 PostgreSQL 18 的发布消息](https://www.alibabacloud.com/en/news/product/rds-for-postgresql-supports-postgresql-18-mik?_p_lc=1)、[AliPG 内核小版本发布记录（PostgreSQL 14～18）](https://help.aliyun.com/zh/rds/apsaradb-rds-for-postgresql/release-notes-for-alipg)、[大版本生命周期说明](https://help.aliyun.com/zh/rds/apsaradb-rds-for-postgresql/lifecycles-of-major-engine-versions)、[支持的扩展列表](https://help.aliyun.com/en/rds/apsaradb-rds-for-postgresql/extensions-supported-by-apsaradb-rds-for-postgresql)
 - 阿里云 OSS：[使用 AWS SDK 访问 OSS](https://help.aliyun.com/zh/oss/developer-reference/use-aws-sdks-to-access-oss)
+| 2026-11-10 | 第 3 节：连接数计入流式池；RDS 云端验证改到部署阿里云测试环境前 | 原型 #15 D2；用户安排 |
