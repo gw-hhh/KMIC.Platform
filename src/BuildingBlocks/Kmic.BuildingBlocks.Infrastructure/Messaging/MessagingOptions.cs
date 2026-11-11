@@ -31,6 +31,19 @@ public sealed class MessagingOptions
     public TimeSpan OutboxLease { get; set; } = TimeSpan.FromSeconds(30);
 
     /// <summary>
+    /// 处理时每次领取的条数
+    /// </summary>
+    public int InboxBatchSize { get; set; } = 20;
+
+    /// <summary>
+    /// 处理时领取后的占用时长
+    /// </summary>
+    /// <remarks>
+    /// 处理器要在这段时间内完成，耗时的工作改成后台作业
+    /// </remarks>
+    public TimeSpan InboxLease { get; set; } = TimeSpan.FromMinutes(2);
+
+    /// <summary>
     /// 第一次重试前的等待时长
     /// </summary>
     public TimeSpan RetryBaseDelay { get; set; } = TimeSpan.FromSeconds(5);

@@ -36,6 +36,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<OutboxWriter>();
         services.TryAddSingleton<ModuleMessageTables>();
         services.TryAddSingleton<OutboxDispatcher>();
+        services.TryAddScoped<CurrentInboxMessage>();
+        services.TryAddSingleton<InboxProcessor>();
         services.AddOptions<MessagingOptions>();
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
         services.TryAddScoped<DomainEventDispatcher>();

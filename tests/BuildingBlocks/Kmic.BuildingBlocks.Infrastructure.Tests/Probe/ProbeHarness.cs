@@ -20,6 +20,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 /// </summary>
 internal sealed class ProbeHarness : IAsyncDisposable
 {
+    public const string MirrorSubscription = "Echo.MirrorTicket";
+
     private readonly ServiceProvider _services;
 
     public ProbeHarness(string connectionString, Action<DatabaseOptions>? configure = null, Action<MessagingOptions>? messaging = null)
@@ -27,7 +29,14 @@ internal sealed class ProbeHarness : IAsyncDisposable
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(Time);
         services.AddSingleton<ISecurityEventWriter>(SecurityEvents);
-        services.AddKmicApplication([typeof(ProbeScopes).Assembly]);
+        services.AddKmicApplication([typeof(ProbeScopes).Assembly, typeof(EchoHooks).Assembly]);
+
+        // Echo 有序处理 Probe 发布的单据快照
+        services.AddKmicSubscriptions("Echo", m => m.Subscribe<TicketChanged, MirrorTicketCommand>(
+            MirrorSubscription,
+            (e, envelope) => new MirrorTicketCommand(e.Ticket.Id, e.Ticket.Title, envelope.SourceVersion ?? 0),
+            o => o.Ordered()));
+        services.AddSingleton(Echo);
         services.AddKmicPersistence(o =>
         {
             o.ConnectionString = connectionString;
@@ -65,6 +74,8 @@ internal sealed class ProbeHarness : IAsyncDisposable
     public RecordingSecurityEventWriter SecurityEvents { get; } = new();
 
     public ProbeHooks Hooks { get; } = new();
+
+    public EchoHooks Echo { get; } = new();
 
     /// <summary>
     /// 宿主的服务，测试要直接取框架内部服务（如数据源）时用

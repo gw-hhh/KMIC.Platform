@@ -22,6 +22,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 internal sealed class OutboxWriter(
     IntegrationEventPublisher publisher,
     IExecutionContext execution,
+    CurrentInboxMessage inbox,
     TimeProvider time,
     IOptions<MessagingOptions> options)
 {
@@ -37,7 +38,7 @@ internal sealed class OutboxWriter(
 
         var limits = options.Value;
         var now = time.GetUtcNow();
-        var headers = JsonSerializer.Serialize(Headers(module, execution.User), KmicJsonOptions.Stored);
+        var headers = JsonSerializer.Serialize(Headers(module, execution.User, inbox.MessageId), KmicJsonOptions.Stored);
         var versions = AggregateVersions(context);
         var total = 0;
         foreach (var message in LatestSnapshots(pending))
@@ -81,14 +82,14 @@ internal sealed class OutboxWriter(
         await context.Database.ExecuteSqlAsync($"SELECT pg_notify({MessagingChannels.Outbox}, {module})", ct);
     }
 
-    private static MessageHeaders Headers(string module, ICurrentUser user)
+    private static MessageHeaders Headers(string module, ICurrentUser user, Guid? causationId)
     {
         var activity = Activity.Current;
         return new MessageHeaders(
             module,
             (user.IsSystem ? user.OnBehalfOf : user.UserId)?.Value,
             user.ActualUserId?.Value,
-            CausationId: null,
+            causationId,
             activity?.Id,
             activity?.TraceStateString,
             Purged: false);
