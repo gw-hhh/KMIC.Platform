@@ -4,6 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
@@ -39,11 +40,12 @@ internal sealed class ApiHost : IAsyncDisposable
     /// <summary>
     /// 建好但不启动：校验失败的测试要看启动时抛什么
     /// </summary>
-    public static ApiHost Create(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false)
+    public static ApiHost Create(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = environment, ContentRootPath = AppContext.BaseDirectory });
         builder.WebHost.UseTestServer();
         builder.Logging.ClearProviders();
+        builder.Configuration.AddInMemoryCollection(configuration ?? new Dictionary<string, string?>(StringComparer.Ordinal));
 
         var script = new SenderScript();
         builder.Services.AddAuthentication(TestAuthHandler.SchemeName).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
@@ -68,16 +70,18 @@ internal sealed class ApiHost : IAsyncDisposable
 
         var app = builder.Build();
         app.UseKmicErrorHandling();
+        app.UseRouting();
         app.UseAuthentication();
+        app.UseKmicLimits();
         app.UseAuthorization();
         beforeEndpoints?.Invoke(app);
         app.MapKmicEndpoints();
         return new ApiHost(app, script);
     }
 
-    public static async Task<ApiHost> StartAsync(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false)
+    public static async Task<ApiHost> StartAsync(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null)
     {
-        var host = Create(modules, messages, environment, services, beforeEndpoints, skipValidation);
+        var host = Create(modules, messages, environment, services, beforeEndpoints, skipValidation, configuration);
         await host.StartAsync();
         return host;
     }
@@ -88,6 +92,16 @@ internal sealed class ApiHost : IAsyncDisposable
         Anonymous = App.GetTestClient();
         Client = App.GetTestClient();
         Client.DefaultRequestHeaders.Add(TestAuthHandler.Header, "alice");
+    }
+
+    /// <summary>
+    /// 以另一个用户登录的客户端，由测试释放
+    /// </summary>
+    public HttpClient ClientFor(string user)
+    {
+        var client = App.GetTestClient();
+        client.DefaultRequestHeaders.Add(TestAuthHandler.Header, user);
+        return client;
     }
 
     public async ValueTask DisposeAsync()

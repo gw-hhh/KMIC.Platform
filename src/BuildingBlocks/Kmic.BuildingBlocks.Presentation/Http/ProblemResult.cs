@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Presentation.Limits;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
@@ -10,9 +11,6 @@ namespace Kmic.BuildingBlocks.Presentation.Http;
 /// </remarks>
 internal sealed class ProblemResult(Error error) : IResult
 {
-    // 暂时不可用的错误告诉调用方多久后再试：没有更准确的信息时用一个短的固定值，避免立即重试压垮刚恢复的依赖
-    private const int RetryAfterSeconds = 5;
-
     public async Task ExecuteAsync(HttpContext httpContext)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
@@ -21,7 +19,7 @@ internal sealed class ProblemResult(Error error) : IResult
         httpContext.Response.StatusCode = details.Status!.Value;
         if (error.Type == ErrorType.Unavailable)
         {
-            httpContext.Response.Headers.RetryAfter = RetryAfterSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            RetryAfter.Set(httpContext.Response);
         }
 
         await httpContext.RequestServices.GetRequiredService<IProblemDetailsService>()

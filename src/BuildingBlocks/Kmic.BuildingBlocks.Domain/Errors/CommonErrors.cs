@@ -134,6 +134,12 @@ public static class CommonErrors
         Error.Unavailable("Common.MessagingSuspended", "系统繁忙，请稍后再试");
 
     /// <summary>
+    /// 请求的页超出了上限计数的范围
+    /// </summary>
+    public static readonly Error PageOutOfRange =
+        Error.Validation("Common.PageOutOfRange", "要查看的页超出了范围，请缩小筛选条件，或者改用导出");
+
+    /// <summary>
     /// 带字段错误的校验失败
     /// </summary>
     public static Error ValidationFailedWith(IReadOnlyList<FieldError> fieldErrors) =>

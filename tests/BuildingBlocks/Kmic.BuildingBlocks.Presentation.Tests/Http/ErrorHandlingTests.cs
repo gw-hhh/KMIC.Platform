@@ -124,8 +124,8 @@ public sealed class ErrorHandlingTests : IAsyncLifetime
     [Fact]
     public void GatewayStatuses_AreRetryable()
     {
+        FrameworkProblems.ForStatus(502).Retryable.ShouldBeTrue();
         FrameworkProblems.ForStatus(503).Retryable.ShouldBeTrue();
-        FrameworkProblems.ForStatus(504).Retryable.ShouldBeTrue();
     }
 
     [Fact]

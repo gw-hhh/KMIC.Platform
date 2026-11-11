@@ -22,7 +22,7 @@ internal sealed class TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOption
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.ToString())], SchemeName);
+        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.ToString()), new Claim(ClaimTypes.NameIdentifier, user.ToString())], SchemeName);
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
     }
 }

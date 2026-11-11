@@ -50,6 +50,14 @@ public static class FrameworkProblems
     public static readonly FrameworkProblem InternalError = new("Common.InternalError", StatusCodes.Status500InternalServerError, "系统出错了，请稍后再试");
 
     /// <summary>
+    /// 请求处理超过了请求超时
+    /// </summary>
+    /// <remarks>
+    /// 不可重试：无法判断操作是否已经生效。要处理这么久的操作应该做成后台作业
+    /// </remarks>
+    public static readonly FrameworkProblem RequestTimeout = new("Common.RequestTimeout", StatusCodes.Status504GatewayTimeout, "处理时间太长，请缩小范围后再试");
+
+    /// <summary>
     /// 路由不存在
     /// </summary>
     public static readonly FrameworkProblem RouteNotFound = new("Common.RouteNotFound", StatusCodes.Status404NotFound, "接口不存在");
@@ -72,6 +80,7 @@ public static class FrameworkProblems
         UnsupportedMediaType,
         TooManyRequests,
         InternalError,
+        RequestTimeout,
         RouteNotFound,
         MethodNotAllowed,
         new FrameworkProblem(CommonErrors.MissingPermission.Code, StatusCodes.Status403Forbidden, CommonErrors.MissingPermission.Message),
@@ -81,11 +90,11 @@ public static class FrameworkProblems
     /// 全部框架层错误，给错误码目录导出用
     /// </summary>
     public static IReadOnlyCollection<FrameworkProblem> All { get; } =
-        [Unauthenticated, MalformedRequest, PayloadTooLarge, UnsupportedMediaType, TooManyRequests, TooBusy, InternalError, RouteNotFound, MethodNotAllowed, _other];
+        [Unauthenticated, MalformedRequest, PayloadTooLarge, UnsupportedMediaType, TooManyRequests, TooBusy, InternalError, RequestTimeout, RouteNotFound, MethodNotAllowed, _other];
 
     /// <summary>
     /// 状态码对应的错误：中间件只设置了状态码、没有写内容时使用
     /// </summary>
     internal static FrameworkProblem ForStatus(int status) =>
-        _byStatus.TryGetValue(status, out var problem) ? problem : _other with { Status = status, Retryable = status is 502 or 503 or 504 };
+        _byStatus.TryGetValue(status, out var problem) ? problem : _other with { Status = status, Retryable = status is 502 or 503 };
 }

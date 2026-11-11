@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Application;
+using Kmic.BuildingBlocks.Presentation.Limits;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
@@ -36,6 +37,7 @@ public static class EndpointRouteBuilderExtensions
         {
             var group = v1.MapGroup("/" + RouteNames.Segment(module.Module));
             group.RequireAuthorization()
+                .RequireRateLimiting(RateLimitPolicies.Default)
                 .WithTags(module.Module)
                 .WithMetadata(new ModuleMetadata(module.Module))
                 .AddEndpointFilter<ModuleEndpointFilter>();
