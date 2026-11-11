@@ -43,6 +43,27 @@ public sealed class MigrationTests(ClassDatabase<ProbeTemplate> database, ProbeT
         error.SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
     }
 
+    [Fact]
+    public async Task RuntimeAccount_AppendOnlyTable_InsertsAndReadsButCannotUpdateOrDelete()
+    {
+        await using var connection = new NpgsqlConnection(template.RuntimeConnectionString(database.Name));
+        await connection.OpenAsync(Ct);
+
+        await ExecuteAsync(
+            connection,
+            """
+            INSERT INTO "Probe"."ReviewStateHistory" ("Id", "AggregateId", "StateName", "ToCode", "ActionCode", "OccurredAt", "TraceId")
+            VALUES (gen_random_uuid(), gen_random_uuid(), 'Status', 'Draft', 'Create', now(), '00000000000000000000000000000000')
+            """);
+        await ExecuteAsync(connection, """SELECT count(*) FROM "Probe"."ReviewStateHistory" """);
+
+        foreach (var sql in new[] { """UPDATE "Probe"."ReviewStateHistory" SET "Reason" = 'x'""", """DELETE FROM "Probe"."ReviewStateHistory" """ })
+        {
+            var error = await Should.ThrowAsync<PostgresException>(() => ExecuteAsync(connection, sql));
+            error.SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+        }
+    }
+
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
     {
         await using var command = connection.CreateCommand();

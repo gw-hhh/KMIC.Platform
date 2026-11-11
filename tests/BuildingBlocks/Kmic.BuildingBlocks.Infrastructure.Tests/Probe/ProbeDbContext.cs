@@ -12,5 +12,5 @@ internal sealed class ProbeDbContext(DbContextOptions<ProbeDbContext> options, M
         configurationBuilder.RegisterAllInProbeIdConverters();
 
     protected override void ConfigureModel(ModelBuilder modelBuilder) =>
-        modelBuilder.ApplyConfiguration(new TicketConfiguration()).ApplyConfiguration(new TicketLineConfiguration());
+        modelBuilder.ApplyConfiguration(new TicketConfiguration()).ApplyConfiguration(new TicketLineConfiguration()).ApplyConfiguration(new ReviewConfiguration());
 }

@@ -455,6 +455,61 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer")
+                        .HasComment("业务版本");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("状态");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasComment("标题");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("Review", "Probe", t =>
+                        {
+                            t.HasComment("测试评审；Probe 模块；一行代表一次评审；有状态流转");
+
+                            t.HasCheckConstraint("CK_Review_Status", "\"Status\" IN ('Draft', 'Submitted', 'Approved')");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
@@ -636,6 +691,72 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                         {
                             t.HasComment("测试单据的明细；Probe 模块；一行代表一条明细，随单据保存");
                         });
+                });
+
+            modelBuilder.Entity("ReviewStateHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActionCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActualUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AggregateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FromCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("OnBehalfOfUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int?>("Revision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StateName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ToCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TraceId")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AggregateId", "OccurredAt");
+
+                    b.ToTable("ReviewStateHistory", "Probe", t =>
+                        {
+                            t.HasComment("Review 的状态流转记录，只追加");
+                        });
+
+                    b.HasAnnotation("Kmic:AppendOnly", true);
                 });
 
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Tests.Probe.TicketLine", b =>

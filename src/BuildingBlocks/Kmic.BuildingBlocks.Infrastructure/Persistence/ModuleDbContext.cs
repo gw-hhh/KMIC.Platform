@@ -2,6 +2,7 @@ using System.Reflection;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Domain.Events;
 using Kmic.BuildingBlocks.Domain.StateMachines;
+using Kmic.BuildingBlocks.Infrastructure.History;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -64,7 +65,9 @@ public abstract class ModuleDbContext : DbContext
 
         // 先检测变更：离开集合的子实体要到这一步才变成 Deleted
         ChangeTracker.DetectChanges();
-        SaveRules.Apply(this, Services.Execution, Services.Time.GetUtcNow());
+        var now = Services.Time.GetUtcNow();
+        SaveRules.Apply(this, Services.Execution, now);
+        StateHistory.Write(this, Services.Execution, now);
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
@@ -76,7 +79,9 @@ public abstract class ModuleDbContext : DbContext
         ArgumentNullException.ThrowIfNull(optionsBuilder);
 
         // 迁移历史放在本模块的 schema 里，各模块互不影响
-        optionsBuilder.UseNpgsql(npgsql => npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Module));
+        optionsBuilder
+            .UseNpgsql(npgsql => npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Module))
+            .ReplaceService<IMigrationsSqlGenerator, AppendOnlyMigrationsSqlGenerator>();
     }
 
     /// <inheritdoc />
@@ -104,6 +109,7 @@ public abstract class ModuleDbContext : DbContext
         modelBuilder.HasDefaultSchema(Module);
         ConfigureModel(modelBuilder);
         FrameworkTables.Apply(modelBuilder);
+        StateHistory.Map(modelBuilder);
         ModelConventions.Apply(modelBuilder);
         DataScopeFilters.Apply(modelBuilder, this);
     }
