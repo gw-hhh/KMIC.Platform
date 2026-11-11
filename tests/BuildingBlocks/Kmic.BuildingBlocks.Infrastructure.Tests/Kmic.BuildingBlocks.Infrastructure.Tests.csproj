@@ -6,6 +6,8 @@
     <!-- 与宿主相同：组装应用的项目引用源码生成器，管道顺序与宿主一致 -->
     <PackageReference Include="Mediator.SourceGenerator" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
+    <!-- dotnet ef 为 Probe 生成迁移时以本项目为启动项目 -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

@@ -26,6 +26,7 @@ Mediator
 Meziantou
 Navigations
 netstandard
+NOLOGIN
 nologo
 Npgsql
 nspname

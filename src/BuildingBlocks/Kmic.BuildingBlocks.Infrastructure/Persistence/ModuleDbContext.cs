@@ -5,6 +5,7 @@ using Kmic.BuildingBlocks.Domain.StateMachines;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
@@ -68,6 +69,15 @@ public abstract class ModuleDbContext : DbContext
     }
 
     internal EffectiveScope DataScopeFor(string scopeObject) => Services.DataScope.For(scopeObject);
+
+    /// <inheritdoc />
+    protected sealed override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(optionsBuilder);
+
+        // 迁移历史放在本模块的 schema 中：各模块的迁移各自记录，互不影响
+        optionsBuilder.UseNpgsql(npgsql => npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Module));
+    }
 
     /// <inheritdoc />
     protected sealed override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
