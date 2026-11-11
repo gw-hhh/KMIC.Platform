@@ -64,6 +64,10 @@ public sealed class IntegrationMessageCatalog
 
     internal IntegrationMessageType? Find(string name, int version) => _byName.GetValueOrDefault((name, version));
 
+    internal IntegrationMessageType? Find(Type messageType) => _byType.GetValueOrDefault(messageType);
+
+    internal IEnumerable<IntegrationMessageType> All => _byType.Values;
+
     private static bool IsContracts(AssemblyName name) =>
         name.Name is { } n && n.StartsWith("Kmic.", StringComparison.Ordinal) && n.EndsWith(".Contracts", StringComparison.Ordinal);
 

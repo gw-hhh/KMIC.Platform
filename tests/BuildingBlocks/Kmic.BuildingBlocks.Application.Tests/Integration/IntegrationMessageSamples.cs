@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Contracts.Messaging;
+using Kmic.BuildingBlocks.Contracts.Snapshots;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Integration;
 
@@ -34,4 +35,6 @@ internal static class IntegrationMessageSamples
     public sealed record EventWithSubjects(IReadOnlyList<Guid> Ids) : IIntegrationEvent;
 
     public sealed record AttachLike(Guid Owner, IReadOnlyList<Guid> FileIds);
+
+    public interface IThingSnapshotSource : ISnapshotSource<ThingChanged>;
 }

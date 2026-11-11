@@ -51,6 +51,27 @@ public static class ApplicationServiceCollectionExtensions
         return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 
+    /// <summary>
+    /// 登记一个模块的订阅
+    /// </summary>
+    /// <remarks>
+    /// 校验在第一次取订阅目录时统一做，宿主启动时要取一次
+    /// </remarks>
+    /// <param name="services">服务集合</param>
+    /// <param name="module">订阅方模块名</param>
+    /// <param name="configure">订阅声明</param>
+    public static IServiceCollection AddKmicSubscriptions(this IServiceCollection services, string module, Action<IMessagingBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(module);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var subscriptions = new ModuleSubscriptions(module);
+        configure(subscriptions);
+        services.AddSingleton(subscriptions);
+        return services;
+    }
+
     // 测试程序集里有故意写错声明的样例，所以测试只注册自己用到的消息
     internal static IServiceCollection AddKmicApplication(
         this IServiceCollection services,
@@ -73,6 +94,8 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(IntegrationMessageCatalog.Empty);
         services.AddScoped<IntegrationEventPublisher>();
         services.AddScoped<IIntegrationEventPublisher>(sp => sp.GetRequiredService<IntegrationEventPublisher>());
+        services.TryAddSingleton(sp => SubscriptionCatalog.Build(
+            sp.GetServices<ModuleSubscriptions>(), sp.GetRequiredService<UseCaseCatalog>(), sp.GetRequiredService<IntegrationMessageCatalog>()));
 
         ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.GetCultureInfo("zh-CN");
         foreach (var assembly in validatorAssemblies)
