@@ -38,6 +38,14 @@ public sealed class ExecutionScope : IExecutionContext
     public bool InCommand => _commandDepth.Value > 0;
 
     /// <summary>
+    /// 当前这条异步调用链是否正在执行命令
+    /// </summary>
+    /// <remarks>
+    /// 不依赖具体的作用域，类型化 HTTP 客户端的处理器不在请求的作用域里，要用它判断
+    /// </remarks>
+    public static bool CurrentlyInCommand => _commandDepth.Value > 0;
+
+    /// <summary>
     /// 设置来源和身份，每个作用域只能设置一次
     /// </summary>
     public void Initialize(CallOrigin origin, ICurrentUser user, IAccessContext? access = null)

@@ -5,6 +5,7 @@ using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Contracts.References;
+using Kmic.BuildingBlocks.Infrastructure.External;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
@@ -48,6 +49,9 @@ internal sealed class ProbeHarness : IAsyncDisposable
 
         AddEchoSubscription(collection, withRebuild);
         collection.AddSingleton(Echo);
+        collection.AddKmicHttpClient<IPartnerClient, PartnerClient>("Partner")
+            .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://partner.example.com"))
+            .ConfigurePrimaryHttpMessageHandler(() => PartnerServer);
         collection.AddKmicScheduling("BuildingBlocks", s => s.Schedule(
             DailyStamp, "0 0 7 * * ?", run => new StampTicketsCommand(run.ScheduledFireTime), o => o.DisplayName("每日盖章")));
         collection.AddKmicStartupTasks();
@@ -96,6 +100,11 @@ internal sealed class ProbeHarness : IAsyncDisposable
     public ProbeHooks Hooks { get; } = new();
 
     public EchoHooks Echo { get; } = new();
+
+    /// <summary>
+    /// 外部合作方的客户端连到的假服务器，一直返回 200
+    /// </summary>
+    public FakePartnerServer PartnerServer { get; } = new(System.Net.HttpStatusCode.OK);
 
     /// <summary>
     /// Echo 重建读模型时拉取快照的来源，数据由测试摆放

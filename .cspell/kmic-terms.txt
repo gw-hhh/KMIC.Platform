@@ -49,3 +49,5 @@ hashtext
 timestamptz
 xact
 qrtz
+AWSSDK
+presign
