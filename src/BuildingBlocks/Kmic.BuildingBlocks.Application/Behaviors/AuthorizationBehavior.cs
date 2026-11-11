@@ -73,7 +73,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
             return Deny(useCase, CommonErrors.ImpersonationReadOnly, "ImpersonationReadOnly");
         }
 
-        if (useCase.Requirement == AccessRequirement.Authenticated || access.Permissions.Contains(useCase.Permission!))
+        if (useCase.Requirement == AccessRequirement.Authenticated || useCase.Permission is { } permission && access.Permissions.Contains(permission))
         {
             return null;
         }
