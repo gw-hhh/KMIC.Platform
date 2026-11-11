@@ -3,6 +3,7 @@ using System.Reflection;
 using FluentValidation;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Behaviors;
+using Kmic.BuildingBlocks.Application.Dictionaries;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Numbering;
@@ -41,6 +42,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton(permissions);
         services.AddSingleton(settings);
         services.AddSingleton(DataScopeObjectCatalog.FromAssemblies(applicationAssemblies));
+        services.AddSingleton(DictionaryTypeCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(PreferenceCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(NumberRuleCatalog.FromAssemblies(applicationAssemblies));
         return services.AddKmicApplication(useCases, applicationAssemblies);
