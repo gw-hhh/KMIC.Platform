@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Querying;
 using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
@@ -16,10 +17,13 @@ internal static class Messages
     [
         typeof(GetThingQuery), typeof(CreateThingCommand), typeof(DeleteThingCommand), typeof(StartExportCommand),
         typeof(RenameThingCommand), typeof(EchoCommand), typeof(SystemCommand), typeof(ContractThingQuery),
-        typeof(PublicQuery), typeof(MeQuery),
+        typeof(PublicQuery), typeof(MeQuery), typeof(ListThingsQuery),
     ];
 
     internal sealed record ThingDto(ThingId Id, string Name);
+
+    [RequirePermission("Test.Thing.Read")]
+    internal sealed record ListThingsQuery(PageRequest Page, SortRequest Sort) : IQuery<PagedResult<ThingDto>>;
 
     [RequirePermission("Test.Thing.Read")]
     internal sealed record GetThingQuery(ThingId Id) : IQuery<ThingDto>;

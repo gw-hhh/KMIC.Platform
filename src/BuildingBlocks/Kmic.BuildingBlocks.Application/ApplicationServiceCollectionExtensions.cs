@@ -4,6 +4,7 @@ using FluentValidation;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Dictionaries;
+using Kmic.BuildingBlocks.Application.Errors;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
@@ -54,6 +55,7 @@ public static class ApplicationServiceCollectionExtensions
         }
 
         services.AddSingleton(permissions);
+        services.AddSingleton(ErrorCatalog.FromAssemblies(ErrorAssemblies(applicationAssemblies)));
         services.AddSingleton(settings);
         services.AddSingleton(DataScopeObjectCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(DictionaryTypeCatalog.FromAssemblies(applicationAssemblies));
@@ -145,4 +147,15 @@ public static class ApplicationServiceCollectionExtensions
 
         return services;
     }
+
+    // 错误声明在框架的 Domain 程序集和各模块的 Domain 程序集里（Application 引用着它们，按命名约定找），模块的 Application 里也可以有
+    private static IEnumerable<Assembly> ErrorAssemblies(IReadOnlyCollection<Assembly> applicationAssemblies) =>
+    [
+        typeof(Kmic.BuildingBlocks.Domain.Results.Error).Assembly,
+        .. applicationAssemblies,
+        .. applicationAssemblies
+            .SelectMany(a => a.GetReferencedAssemblies())
+            .Where(name => name.Name is { } n && n.StartsWith("Kmic.", StringComparison.Ordinal) && n.EndsWith(".Domain", StringComparison.Ordinal))
+            .Select(Assembly.Load),
+    ];
 }

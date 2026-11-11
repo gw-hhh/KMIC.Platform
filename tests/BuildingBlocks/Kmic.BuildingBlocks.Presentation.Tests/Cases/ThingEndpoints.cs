@@ -1,4 +1,6 @@
+using Kmic.BuildingBlocks.Application.Dictionaries;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Querying;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
 using Kmic.BuildingBlocks.Presentation.Http;
 using Kmic.BuildingBlocks.Presentation.Tests.Support;
@@ -14,12 +16,16 @@ internal static class ThingEndpoints
     public static readonly Type[] All =
     [
         typeof(GetThingEndpoint), typeof(CreateThingEndpoint), typeof(DeleteThingEndpoint), typeof(ExportThingsEndpoint),
-        typeof(RenameThingEndpoint), typeof(EchoEndpoint), typeof(BoomEndpoint), typeof(PayloadTooLargeEndpoint), typeof(MeEndpoint),
+        typeof(RenameThingEndpoint), typeof(EchoEndpoint), typeof(BoomEndpoint), typeof(PayloadTooLargeEndpoint), typeof(MeEndpoint), typeof(ListThingsEndpoint),
     ];
 
     public static ListedModule Module(string name = "Samples") => new(name, All);
 
-    internal sealed record CreateThingRequest(string Name);
+    internal static readonly SortMap<ThingDto> Sort = SortMap<ThingDto>.Field("name", x => x.Name).Default("name");
+
+    internal sealed record CreateThingRequest(string Name, [property: Dictionary("Test.Industry")] string? Industry = null);
+
+    internal sealed record ListThingsRequest(int Page = 1, int PageSize = 20, string? Sort = null);
 
     internal sealed record RenameThingRequest(long ExpectedVersion, string Name);
 
@@ -100,5 +106,14 @@ internal static class ThingEndpoints
 
         private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
             (await sender.SendAsync(new MeQuery(), ct)).ToOk();
+    }
+
+    internal sealed class ListThingsEndpoint : IEndpoint
+    {
+        public void Map(IEndpointRouteBuilder group) =>
+            group.MapGet("/things", HandleAsync).Sends<ListThingsQuery>().Sortable(Sort).WithSummary("列表");
+
+        private static async Task<IResult> HandleAsync([AsParameters] ListThingsRequest request, IQuerySender sender, CancellationToken ct) =>
+            (await sender.SendAsync(new ListThingsQuery(new PageRequest(request.Page, request.PageSize), new SortRequest(request.Sort)), ct)).ToOk();
     }
 }
