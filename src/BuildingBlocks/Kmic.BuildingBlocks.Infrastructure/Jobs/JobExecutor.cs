@@ -3,6 +3,7 @@ using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Jobs;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Identifiers;
@@ -24,6 +25,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 internal sealed class JobExecutor(
     JobStore store,
     BackgroundJobCatalog catalog,
+    FrameworkMetrics metrics,
     IExecutionScopeFactory scopes,
     IEnumerable<IAccessContextLoader> loaders,
     IOptions<JobOptions> options,
@@ -101,6 +103,7 @@ internal sealed class JobExecutor(
     private async Task<JobRunResult> ExecuteAsync(
         string module, ClaimedJob job, Guid token, BackgroundJobType type, object args, (ICurrentUser User, IAccessContext? Access) identity, CancellationToken shutdown)
     {
+        var started = TimeProvider.System.GetTimestamp();
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(shutdown);
         var context = new JobContext(store, scopes, Options, module, job, token, identity.User, identity.Access, stop);
         var (result, failure) = await InvokeAsync(module, job, token, type, args, identity, context, stop);
@@ -135,6 +138,11 @@ internal sealed class JobExecutor(
             _ when result is { IsSuccess: true } => await FinishAsync(module, job, token, JobStatus.Succeeded, null, result.Value),
             _ => await FailAsync(module, job, token, result?.Error ?? CommonErrors.JobFailed),
         };
+
+        if (finished is JobRunResult.Succeeded or JobRunResult.Failed or JobRunResult.Cancelled)
+        {
+            metrics.BackgroundJobFinished(module, type.Name, finished.ToString(), TimeProvider.System.GetElapsedTime(started));
+        }
 
         if (type.Attribute.Audited && finished is JobRunResult.Succeeded or JobRunResult.Failed or JobRunResult.Cancelled)
         {

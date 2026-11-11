@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Results;
@@ -21,6 +22,7 @@ internal sealed class ReadModelRebuildHandler(
     RebuildRunStore runs,
     IServiceProvider services,
     IOptions<MessagingOptions> options,
+    FrameworkMetrics metrics,
     ILogger<ReadModelRebuildHandler> logger) : IJobHandler<ReadModelRebuildJob>
 {
     public async Task<Result<JobOutcome>> ExecuteAsync(ReadModelRebuildJob job, IJobContext context, CancellationToken ct)
@@ -47,7 +49,7 @@ internal sealed class ReadModelRebuildHandler(
                 var page = await rebuild.GetPageAsync(services, after, settings.PageSize, ct);
                 scanned += page.Rows.Count;
                 var written = await pages.WritePageAsync(
-                    async (scope, token) => await ScanAsync(scope, rebuild, page.Rows, job, token),
+                    async (scope, token) => await ScanAsync(scope, rebuild, page.Rows, job, definition.Module, token),
                     new RebuildCheckpoint(page.Next is null, page.Next, scanned),
                     scanned);
                 if (written.IsFailure)
@@ -88,7 +90,7 @@ internal sealed class ReadModelRebuildHandler(
             missing.AddRange(candidates.Where(c => !foundIds.Contains(c.Id)));
             if (found.Count > 0)
             {
-                var written = await pages.WritePageAsync(async (scope, token) => await ScanAsync(scope, rebuild, found, job, token), done, scanned);
+                var written = await pages.WritePageAsync(async (scope, token) => await ScanAsync(scope, rebuild, found, job, definition.Module, token), done, scanned);
                 if (written.IsFailure)
                 {
                     return written.Error;
@@ -99,6 +101,7 @@ internal sealed class ReadModelRebuildHandler(
         if (missing.Count > limit)
         {
             await runs.PauseAsync(definition.Module, job.RunId, scanned, missing.Count, ct);
+            metrics.RebuildPaused(definition.Module, rebuild.ReadModel.Name);
             MessagingLog.RebuildPaused(logger, definition.Name, missing.Count, limit);
             return new JobOutcome(Summary: new RebuildSummary(scanned, 0, missing.Count, AwaitingConfirmation: true));
         }
@@ -119,7 +122,7 @@ internal sealed class ReadModelRebuildHandler(
     }
 
     // 终态的行不修改。源端还返回它说明终态可能是误标，只记日志，由运维核实
-    private async Task ScanAsync(IServiceProvider scope, IReadModelRebuild rebuild, IReadOnlyList<IReadModel> rows, ReadModelRebuildJob job, CancellationToken ct)
+    private async Task ScanAsync(IServiceProvider scope, IReadModelRebuild rebuild, IReadOnlyList<IReadModel> rows, ReadModelRebuildJob job, string module, CancellationToken ct)
     {
         var skipped = 0;
         foreach (var row in rows)
@@ -132,6 +135,7 @@ internal sealed class ReadModelRebuildHandler(
 
         if (skipped > 0)
         {
+            metrics.TerminalConflicts(module, rebuild.ReadModel.Name, skipped);
             MessagingLog.RebuildTerminalRowsReturned(logger, job.Subscription, skipped);
         }
     }

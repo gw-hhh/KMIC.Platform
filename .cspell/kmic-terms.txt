@@ -51,3 +51,4 @@ xact
 qrtz
 AWSSDK
 presign
+readmodel

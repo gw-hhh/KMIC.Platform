@@ -4,6 +4,7 @@ using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Identifiers;
@@ -29,6 +30,7 @@ internal sealed class InboxProcessor(
     ModuleFrameworkTables tables,
     DataSources dataSources,
     SubscriptionCatalog subscriptions,
+    FrameworkMetrics metrics,
     IExecutionScopeFactory scopes,
     IOptions<MessagingOptions> options,
     ILogger<InboxProcessor> logger)
@@ -113,6 +115,14 @@ internal sealed class InboxProcessor(
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "处理器的任何异常都只影响这一条消息，记为可重试的失败，循环继续处理别的消息")]
     public async Task<InboxResult> ProcessAsync(string module, ClaimedInboxMessage message, Guid token, CancellationToken ct)
+    {
+        var started = TimeProvider.System.GetTimestamp();
+        var result = await HandleAsync(module, message, token, ct);
+        metrics.MessageHandled(message.Subscription, result.ToString(), TimeProvider.System.GetElapsedTime(started));
+        return result;
+    }
+
+    private async Task<InboxResult> HandleAsync(string module, ClaimedInboxMessage message, Guid token, CancellationToken ct)
     {
         if (subscriptions.Find(message.Subscription, message.SchemaVersion) is not { } subscription)
         {

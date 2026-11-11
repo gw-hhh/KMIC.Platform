@@ -1,3 +1,5 @@
+using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Domain.Entities;
 using Kmic.BuildingBlocks.Domain.Errors;
@@ -20,6 +22,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// </remarks>
 public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
+    IExecutionContext execution,
+    FrameworkMetrics metrics,
     ILogger<ExceptionTranslationBehavior<TMessage, TResponse>> logger) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
@@ -43,6 +47,7 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         catch (CommitOutcomeUnknownException exception)
         {
             // 幂等命令能走到这里，说明内层已确认没有提交，可以用原键重试。非幂等命令提示刷新后确认
+            metrics.CommitOutcomeUnknown(execution.Origin.ToString());
             PipelineLog.CommitOutcomeUnknown(logger, exception, typeof(TMessage).Name);
             return TResponse.Fail(CommonErrors.ResultUnknown.WithMetadata(ErrorMetadataKeys.Retryable, catalog.Get(typeof(TMessage)).Idempotent));
         }

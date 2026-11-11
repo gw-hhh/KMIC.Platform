@@ -1,3 +1,5 @@
+using System.Diagnostics.Metrics;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
@@ -89,12 +91,16 @@ public sealed class MessagingListenerTests(ClassDatabase<ProbeTemplate> database
                 NewHybridCache(),
                 new DataSources(Options.Create(new DatabaseOptions { ConnectionString = database.ConnectionString })),
                 Options.Create(new CacheOptions()),
+                Metrics,
                 NullLogger<CacheInvalidator>.Instance),
+            Metrics,
             NullLogger<MessagingListener>.Instance);
         listener.Start();
         return listener;
     }
 
+
+    private static FrameworkMetrics Metrics { get; } = new(new ServiceCollection().AddMetrics().BuildServiceProvider().GetRequiredService<IMeterFactory>());
 
     private static HybridCache NewHybridCache()
     {

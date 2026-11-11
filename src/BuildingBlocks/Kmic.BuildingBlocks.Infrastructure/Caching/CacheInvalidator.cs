@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -17,7 +18,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 /// 提交之后先清本实例，再用数据库通知告诉其他实例清它们的本地缓存，不依赖 Redis。通知只在连接着的实例上有效，
 /// 监听连接断开重连后，本实例清空全部本地缓存：宁可多查一次库，也不读到旧值
 /// </remarks>
-internal sealed class CacheInvalidator(HybridCache cache, DataSources dataSources, IOptions<CacheOptions> options, ILogger<CacheInvalidator> logger)
+internal sealed class CacheInvalidator(
+    HybridCache cache, DataSources dataSources, IOptions<CacheOptions> options, FrameworkMetrics metrics, ILogger<CacheInvalidator> logger)
 {
     // 标签之间的分隔符，标签本身不会含换行
     private const char Separator = '\n';
@@ -93,6 +95,7 @@ internal sealed class CacheInvalidator(HybridCache cache, DataSources dataSource
             command.Parameters.AddWithValue("channel", MessagingChannels.Cache);
             command.Parameters.AddWithValue("payload", payload);
             await command.ExecuteNonQueryAsync(ct);
+            metrics.CacheInvalidationBroadcast();
         }
     }
 

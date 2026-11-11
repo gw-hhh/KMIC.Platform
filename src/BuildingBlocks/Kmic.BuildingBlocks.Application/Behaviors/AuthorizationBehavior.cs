@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Domain.Errors;
@@ -16,7 +17,8 @@ namespace Kmic.BuildingBlocks.Application.Behaviors;
 public sealed class AuthorizationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     IExecutionContext context,
-    ISecurityEventWriter securityEvents) : IPipelineBehavior<TMessage, TResponse>
+    ISecurityEventWriter securityEvents,
+    FrameworkMetrics metrics) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
 {
@@ -101,6 +103,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
 
     private Error Deny(UseCase useCase, Error error, string reason)
     {
+        metrics.AuthzDenied(reason);
         securityEvents.Write(new SecurityEvent("AuthorizationDenied", SecuritySeverity.Warning, reason)
         {
             Details = new Dictionary<string, string>(StringComparer.Ordinal) { ["useCase"] = useCase.Name },

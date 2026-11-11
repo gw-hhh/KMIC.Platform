@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 /// <remarks>
 /// 不等待、不抛异常：写不进去只记日志，不能因为记录安全事件让原来的请求失败
 /// </remarks>
-internal sealed class SecurityEventWriter(IExecutionContext execution, TimeProvider time, SecurityEventQueue queue, ILogger<SecurityEventWriter> logger) : ISecurityEventWriter
+internal sealed class SecurityEventWriter(
+    IExecutionContext execution, TimeProvider time, SecurityEventQueue queue, FrameworkMetrics metrics, ILogger<SecurityEventWriter> logger) : ISecurityEventWriter
 {
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "记录安全事件不能让原来的请求失败，出任何错都只记日志")]
     public void Write(SecurityEvent securityEvent)
@@ -24,8 +26,10 @@ internal sealed class SecurityEventWriter(IExecutionContext execution, TimeProvi
         try
         {
             var record = Build(securityEvent);
+            metrics.SecurityEvent(record.Type, securityEvent.Severity.ToString());
             if (!queue.TryWrite(record))
             {
+                metrics.SecurityEventDropped();
                 SecurityEventLog.Dropped(logger, record.Type, record.Severity, record.Reason);
             }
         }

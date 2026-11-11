@@ -10,6 +10,7 @@ using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Numbering;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Application.Time;
@@ -114,6 +115,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton(catalog);
         services.TryAddSingleton(TimeProvider.System);
         services.AddOptions<PipelineOptions>();
+        services.AddMetrics();
+        services.TryAddSingleton<FrameworkMetrics>();
         services.AddScoped<ExecutionScope>();
         services.AddScoped<IExecutionContext>(sp => sp.GetRequiredService<ExecutionScope>());
         services.AddSingleton<IExecutionScopeFactory, ExecutionScopeFactory>();

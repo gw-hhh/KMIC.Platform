@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
@@ -16,6 +17,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// </remarks>
 public sealed class ReadAuditBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
+    FrameworkMetrics metrics,
     // 从容器取框架服务：宿主要直接引用行为类型，所以行为只能是 public，构造函数里就放不了 internal 的服务
     IServiceProvider services,
     ILogger<ReadAuditBehavior<TMessage, TResponse>> logger) : IPipelineBehavior<TMessage, TResponse>
@@ -40,6 +42,7 @@ public sealed class ReadAuditBehavior<TMessage, TResponse>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
+            metrics.ReadAuditFailed();
             PipelineLog.ReadAuditFailed(logger, exception, typeof(TMessage).Name);
         }
 

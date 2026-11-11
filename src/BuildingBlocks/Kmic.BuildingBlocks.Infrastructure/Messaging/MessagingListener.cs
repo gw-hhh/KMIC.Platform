@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ internal sealed class MessagingListener(
     IOptions<MessagingOptions> options,
     MessagingSignals signals,
     CacheInvalidator cache,
+    FrameworkMetrics metrics,
     ILogger<MessagingListener> logger) : IDisposable
 {
     public const string ApplicationName = "kmic-listener";
@@ -71,6 +73,7 @@ internal sealed class MessagingListener(
     private void Run()
     {
         var failures = 0;
+        var connectedBefore = false;
         while (!_stopping.IsSet)
         {
             try
@@ -89,6 +92,12 @@ internal sealed class MessagingListener(
                 // 刚连上（包括重连）时补查一次：断开期间的通知收不到
                 signals.WakeAll();
                 cache.OnReconnected();
+                if (connectedBefore)
+                {
+                    metrics.ListenerReconnected();
+                }
+
+                connectedBefore = true;
                 while (!_stopping.IsSet)
                 {
                     if (!connection.Wait(options.Value.PollInterval))

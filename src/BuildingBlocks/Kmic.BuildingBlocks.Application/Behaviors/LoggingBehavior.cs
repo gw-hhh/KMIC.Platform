@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Domain.Results;
 using Mediator;
@@ -17,6 +18,7 @@ public sealed class LoggingBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     IExecutionContext context,
     TimeProvider time,
+    FrameworkMetrics metrics,
     IOptions<PipelineOptions> options,
     ILogger<LoggingBehavior<TMessage, TResponse>> logger) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
@@ -44,6 +46,7 @@ public sealed class LoggingBehavior<TMessage, TResponse>(
         {
             var elapsed = time.GetElapsedTime(started);
             activity?.SetTag("kmic.result", outcome);
+            metrics.Request(useCase.Module, useCase.Name, outcome, elapsed);
             var user = context.User;
             if (elapsed > options.Value.SlowMessageThreshold)
             {
