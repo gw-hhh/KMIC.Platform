@@ -105,7 +105,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             : ResponseValues<TResponse>.Create(receipt.WithConcurrencyVersion(aggregate.Entity.ConcurrencyVersion));
     }
 
-    // 事件处理器可能修改别的聚合并产生新事件，一直处理到没有新事件为止
+    // 事件处理器可能修改别的聚合根并产生新事件，一直处理到没有新事件为止
     private async Task<Error?> DispatchDomainEventsAsync(ModuleDbContext context, CancellationToken ct)
     {
         var dispatcher = services.GetRequiredService<DomainEventDispatcher>();

@@ -4,7 +4,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 数据库配置
 /// </summary>
 /// <remarks>
-/// 调整连接池时要保证：实例数 ×（Api + Worker + 1）+ Worker 副本数 × 流式池上限，不超过数据库的 max_connections 减去预留
+/// 调整连接池时要保证：实例数 ×（Api 和 Worker 的事务池、读池上限之和 + 1 个 LISTEN 连接）+ Worker 副本数 × 流式池上限，
+/// 不超过数据库的 max_connections 减去预留
 /// </remarks>
 public sealed class DatabaseOptions
 {

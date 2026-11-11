@@ -104,7 +104,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
         var number = TicketNumbers.Next();
         _harness.Hooks.OnBeforeReturn(async ct =>
         {
-            // 模拟处理器还在运行时，租约被另一个请求接管
+            // 模拟处理器还在运行时，记录被另一个请求接管
             await using var command = database.DataSource.CreateCommand(
                 """UPDATE "Probe"."IdempotencyRecord" SET "LeaseToken" = $1 WHERE "Key" = $2""");
             command.Parameters.Add(new NpgsqlParameter { Value = Guid.CreateVersion7() });

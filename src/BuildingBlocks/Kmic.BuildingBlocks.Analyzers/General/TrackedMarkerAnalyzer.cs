@@ -35,7 +35,7 @@ public sealed class TrackedMarkerAnalyzer : DiagnosticAnalyzer
         "待办与跳过必须带跟踪编号",
         "跳过测试必须在 Skip 中写明跟踪编号，如 Skip = \"#123 等待接口上线\"");
 
-    // 这几个模式不会回溯，超时只是兜底；并行编译时线程会被挤占，100 毫秒曾经误超时
+    // 超时给 1 秒：并行编译时线程会被挤占，100 毫秒曾经误报超时。这几个模式不会回溯，正常用不到超时
     private static readonly TimeSpan _matchTimeout = TimeSpan.FromSeconds(1);
     private static readonly Regex _marker = new(@"\b(?<marker>TODO|FIXME)\b(?!\(#\d+\))", RegexOptions.CultureInvariant, _matchTimeout);
     private static readonly Regex _hack = new(@"\bHACK\b", RegexOptions.CultureInvariant, _matchTimeout);

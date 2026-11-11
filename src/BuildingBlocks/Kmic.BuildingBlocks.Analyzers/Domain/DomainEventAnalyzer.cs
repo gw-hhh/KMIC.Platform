@@ -9,7 +9,7 @@ namespace Kmic.BuildingBlocks.Analyzers.Domain;
 /// KM0501：领域事件不能带实体对象
 /// </summary>
 /// <remarks>
-/// 带了实体，事件处理器就能直接改另一个聚合的内存对象，绕过它的业务方法
+/// 带了实体，事件处理器就能直接改这个实体，绕过它的业务方法
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainEventAnalyzer : DiagnosticAnalyzer

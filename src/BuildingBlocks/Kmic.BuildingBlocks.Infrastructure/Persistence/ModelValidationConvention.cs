@@ -8,8 +8,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 模型校验约定
 /// </summary>
 /// <remarks>
-/// 不能在 OnModelCreating 里校验：EF 读取模块配置前，会先把值对象这类类型临时当成实体，
-/// 要到定稿阶段才清理掉。这个约定加在最后，在 EF 清理之后运行
+/// 不在 OnModelCreating 里校验：那时值对象这类类型还被 EF 临时当成实体，要到 ModelFinalizing 才清理掉。
+/// 这个约定最后加入，在 EF 清理之后运行
 /// </remarks>
 internal sealed class ModelValidationConvention(string module, DataScopeObjectCatalog scopeObjects) : IModelFinalizingConvention
 {

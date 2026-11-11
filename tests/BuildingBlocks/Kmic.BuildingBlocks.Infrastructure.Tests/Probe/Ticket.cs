@@ -7,7 +7,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 /// 单据
 /// </summary>
 /// <remarks>
-/// 测试用的聚合：可以软删除，有子实体，按所属人和所属组织控制数据权限
+/// 测试用的单据：可以软删除，有子实体，按所属人和所属组织控制数据权限
 /// </remarks>
 internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwner, IHasOrgUnit
 {

@@ -87,7 +87,7 @@ public abstract class ModuleDbContext : DbContext
         // 表名取实体类名，不取 DbSet 属性名
         configurationBuilder.Conventions.Remove<TableNameFromDbSetConvention>();
 
-        // 领域事件和状态流转只在内存里传递；不忽略的话，EF 会顺着聚合根的属性把它们当成实体
+        // 领域事件和状态流转只在内存里传递，不忽略的话，EF 会顺着聚合根的属性把它们当成实体
         configurationBuilder.IgnoreAny<IDomainEvent>();
         configurationBuilder.IgnoreAny<StateTransition>();
         configurationBuilder.RegisterAllInFrameworkIdConverters();

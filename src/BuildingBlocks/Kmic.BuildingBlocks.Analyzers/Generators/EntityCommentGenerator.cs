@@ -122,7 +122,8 @@ public sealed class EntityCommentGenerator : IIncrementalGenerator
         source.AppendLine("        new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.Ordinal)");
         source.AppendLine("        {");
 
-        // 分部类型会被收集多次；排好序，生成文件才不会因为顺序变化而变
+        // 分部类型会被收集多次，先去重
+        // 再按键排序，生成的文件才不会随收集顺序变化
         foreach (var (key, comment) in entries.GroupBy(e => e.Key, StringComparer.Ordinal).Select(g => g.First()).OrderBy(e => e.Key, StringComparer.Ordinal))
         {
             source.Append("            [").Append(SymbolDisplay.FormatLiteral(key, quote: true)).Append("] = ")

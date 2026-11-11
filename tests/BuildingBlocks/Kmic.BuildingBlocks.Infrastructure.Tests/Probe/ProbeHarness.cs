@@ -38,7 +38,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
         services.AddSingleton(Hooks);
         services.AddLogging();
 
-        // 选项必须是编译期常量，源码生成器要读取；数组顺序就是执行顺序
+        // 选项必须是编译期常量，源码生成器要读取。数组顺序就是执行顺序
         services.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;

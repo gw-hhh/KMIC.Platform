@@ -44,12 +44,12 @@ internal sealed class IdempotencyRecord
     public string Status { get; set; } = "";
 
     /// <summary>
-    /// 租约令牌
+    /// 占用令牌
     /// </summary>
     public Guid LeaseToken { get; set; }
 
     /// <summary>
-    /// 租约到期时间
+    /// 占用到期时间
     /// </summary>
     public DateTimeOffset LeaseExpiresAt { get; set; }
 

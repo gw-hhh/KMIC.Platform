@@ -10,8 +10,8 @@ namespace Kmic.BuildingBlocks.Analyzers.Domain;
 /// KM0201～KM0205：Domain 里的 record 都按值对象检查，领域事件除外
 /// </summary>
 /// <remarks>
-/// 值对象只能通过返回 Result 的工厂方法创建，创建后不可变。属性写成 { get; private init; }：
-/// 只有 getter 的属性 EF 不会映射，漏了也不报错；private init 又能挡住类型外的 with 表达式
+/// 值对象只能通过返回 Result 的工厂方法创建，创建后不可变。
+/// 属性要写成 { get; private init; }。只有 getter 的属性 EF 不会映射，漏了也不报错。private init 还能挡住类型外的 with 表达式
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer

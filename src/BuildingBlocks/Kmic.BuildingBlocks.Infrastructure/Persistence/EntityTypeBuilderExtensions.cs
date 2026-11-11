@@ -14,7 +14,7 @@ public static class EntityTypeBuilderExtensions
     /// 值对象集合，存为一个 jsonb 列
     /// </summary>
     /// <remarks>
-    /// EF 要求复杂类型集合是 IList&lt;T&gt;，聚合只公开 IReadOnlyList&lt;T&gt;，所以映射同名的私有字段，如 Contacts 对应 _contacts。
+    /// EF 要求复杂类型集合是 IList&lt;T&gt;，实体只公开 IReadOnlyList&lt;T&gt;，所以映射同名的私有字段，如 Contacts 对应 _contacts。
     /// 查询时写 EF.Property&lt;List&lt;T&gt;&gt;(e, "_contacts")。经常要按元素查询的数据应该建成子实体
     /// </remarks>
     /// <exception cref="InvalidOperationException">找不到对应的私有字段，或字段不是 List&lt;T&gt;</exception>

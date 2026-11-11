@@ -11,10 +11,10 @@ public sealed class IdempotencyOptions
     public const string Section = "Kmic:Idempotency";
 
     /// <summary>
-    /// 租约时长
+    /// 处理中记录的占用时长
     /// </summary>
     /// <remarks>
-    /// 进程崩溃后，租约到期才能被同键请求接管
+    /// 进程崩溃后，要等占用到期，同一个键的请求才能接管
     /// </remarks>
     public TimeSpan LeaseDuration { get; set; } = TimeSpan.FromMinutes(2);
 

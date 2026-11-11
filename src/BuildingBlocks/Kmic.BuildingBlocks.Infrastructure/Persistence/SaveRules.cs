@@ -49,7 +49,7 @@ internal static class SaveRules
         }
     }
 
-    // 模拟登录时记实际操作人；系统身份和匿名请求（如登录）记系统用户
+    // 模拟登录时记实际操作人，系统身份和匿名请求（如登录）记系统用户
     public static UserId Actor(ICurrentUser user) => user.ActualUserId ?? user.UserId ?? UserId.System;
 
     private static void StampAudit(EntityEntry entry, UserId actor, DateTimeOffset now)
@@ -66,7 +66,7 @@ internal static class SaveRules
         }
     }
 
-    // 新增的从 0 开始；删除时靠 DELETE 条件里的原版本号检查冲突。两种情况都不加一
+    // 新增和删除的聚合根不加版本号：新增的从 0 开始，删除靠 DELETE 条件里的原版本号检查冲突
     private static List<EntityEntry> AffectedRoots(DbContext context, List<EntityEntry> changed)
     {
         var roots = new List<EntityEntry>();

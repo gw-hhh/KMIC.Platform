@@ -61,7 +61,7 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         return null;
     }
 
-    // 冲突的是聚合根那一行，查一次当前版本号返回给前端；数据已被删除时不带版本号
+    // 错误里带上聚合根的当前版本号，数据已被删除时不带
     private static async Task<Error> VersionConflictAsync(DbUpdateConcurrencyException exception)
     {
         if (exception.Entries.FirstOrDefault(e => e.Entity is IAggregateRoot) is not { } root

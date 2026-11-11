@@ -7,7 +7,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 聚合里任何实体有变化，聚合根的版本号都加一
+/// 聚合根或任何子实体有变化，聚合根的版本号都加一
 /// </summary>
 public sealed class ConcurrencyVersionTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {

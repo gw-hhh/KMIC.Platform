@@ -24,7 +24,7 @@ internal static class ModelConventions
         {
             var entity = modelBuilder.Entity(entityType.ClrType);
 
-            // ID 由程序生成；不关掉的话，EF 会把带着 ID 的新子实体当成已有的行去更新
+            // 关掉数据库生成：ID 由程序生成，不关的话 EF 会把带着 ID 的新子实体当成已有的行去更新
             entity.Property(nameof(Entity<>.Id)).ValueGeneratedNever();
             AddAuditColumns(entity);
 
@@ -151,7 +151,7 @@ internal static class ModelConventions
         }
         else if (EntityKinds.IsAggregateRoot(foreignKey.PrincipalEntityType.ClrType))
         {
-            // 还被别的聚合引用时，不允许物理删除
+            // 聚合根还被别的数据引用时，不允许物理删除
             foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
         }
     }

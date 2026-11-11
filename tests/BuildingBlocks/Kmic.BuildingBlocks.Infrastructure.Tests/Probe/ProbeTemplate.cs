@@ -10,8 +10,11 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 public sealed class ProbeTemplate : PostgresTemplateDatabase
 {
     /// <summary>
-    /// 运行账号的登录名；角色属于整个 PostgreSQL 实例，克隆库里同样能用
+    /// 运行账号的登录名
     /// </summary>
+    /// <remarks>
+    /// 角色属于整个 PostgreSQL 实例，克隆库里同样能用
+    /// </remarks>
     public const string RuntimeLogin = "kmic_app";
 
     // 每次启动容器时随机生成，不写进代码

@@ -67,7 +67,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         return await ReadSingleAsync(command, ct);
     }
 
-    // 租约已到期、令牌还是读到的那个才接管，两个请求同时接管只有一个能成功
+    // 占用已到期、令牌还是读到的那个才接管，两个请求同时接管只有一个能成功
     public async Task<bool> TryTakeOverAsync(IdempotencySnapshot existing, Guid newToken, DateTimeOffset leaseExpiresAt, DateTimeOffset now, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand($"""

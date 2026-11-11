@@ -58,7 +58,7 @@ internal static class ModelValidator
 
         foreach (var navigation in entityType.GetDeclaredNavigations())
         {
-            // 先认出子实体指回父实体的导航：父实体可能就是聚合根，不能当成聚合之间的导航
+            // 先认出子实体指回父实体的导航：父实体可能就是聚合根，不能当成两个聚合根之间的导航
             if (navigation.IsOnDependent && navigation.Inverse is not null)
             {
                 problems.Add($"{name}.{navigation.Name}：导航只能从父实体指向子实体。");
@@ -160,7 +160,7 @@ internal static class ModelValidator
 
         if (!isRoot || !hasOwnership)
         {
-            // 子实体没有自己的过滤器，只能通过聚合根访问；没有归属的数据无法判断范围
+            // 子实体只能通过聚合根访问，没有自己的过滤器。没有归属的数据无法判断范围
             problems.Add($"{name}：只有实现 IHasOwner 或 IHasOrgUnit 的聚合根能声明 HasDataScope。");
         }
 

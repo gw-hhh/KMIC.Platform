@@ -14,7 +14,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 仓储基类：读取整个聚合、版本号比较、无权限时记安全事件、加锁读取、恢复、按条件更新
+/// 仓储基类：读取聚合根及子实体、版本号比较、无权限时记安全事件、加锁读取、恢复、按条件更新
 /// </summary>
 public sealed class RepositoryTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {

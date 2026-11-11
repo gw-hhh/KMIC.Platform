@@ -112,7 +112,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
         }
     }
 
-    // 尽量释放；删不掉就等租约到期，让同键请求接管
+    // 尽量删掉记录。删不掉就等占用到期，由同一个键的下一个请求接管
     private static async Task TryReleaseAsync(IdempotencyStore store, Guid id, Guid token)
     {
         try

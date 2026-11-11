@@ -9,7 +9,7 @@ namespace Kmic.BuildingBlocks.Domain.Tests.Fakes;
 /// </summary>
 internal sealed class Order : AggregateRoot<OrderId>, IHasRevision
 {
-    // 测试要直接调用 CanFire、PermittedActions，所以公开成属性；业务代码里写成 private static readonly 字段
+    // 公开成属性，测试才能直接调用 CanFire、PermittedActions。业务代码里写成 private static readonly 字段
     public static StateMachine<Order, OrderStatus, OrderAction> Machine { get; } =
         StateMachine.Define<Order, OrderStatus, OrderAction>(o => o.Status, (o, v) => o.Status = v)
             .Initial(OrderStatus.Draft)

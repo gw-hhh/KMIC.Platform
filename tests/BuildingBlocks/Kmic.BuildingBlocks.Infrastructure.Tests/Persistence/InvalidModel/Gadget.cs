@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence.InvalidModel;
 
 /// <summary>
-/// 故意违反映射规则的聚合，见 ModelValidationTests
+/// 故意违反映射规则的聚合根，见 ModelValidationTests
 /// </summary>
 internal sealed class Gadget : AggregateRoot<TicketId>, IHasOwner
 {
