@@ -1,6 +1,7 @@
 using System.Data.Common;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,11 +15,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 每个模块一个投递循环，有订阅的模块另有几个处理循环。没有可领取的消息时等数据库通知或兜底轮询
 /// </remarks>
 internal sealed class MessagingWorker(
-    MessagingListener listener,
     MessagingSignals signals,
     OutboxDispatcher dispatcher,
     InboxProcessor processor,
-    ModuleMessageTables tables,
+    ModuleFrameworkTables tables,
     SubscriptionCatalog subscriptions,
     StartupState startup,
     TimeProvider time,
@@ -49,15 +49,7 @@ internal sealed class MessagingWorker(
             }
         }
 
-        listener.Start();
-        try
-        {
-            await Task.WhenAll(loops);
-        }
-        finally
-        {
-            listener.Stop();
-        }
+        await Task.WhenAll(loops);
     }
 
     private async Task RunAsync(Func<CancellationToken, Task<int>> batch, AsyncSignal signal, CancellationToken stopping, CancellationToken processing)

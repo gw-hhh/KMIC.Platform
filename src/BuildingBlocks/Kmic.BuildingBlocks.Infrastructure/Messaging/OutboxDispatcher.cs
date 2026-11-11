@@ -16,7 +16,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 这样已经被别人接管、标记或清理的消息，任何迟到的投递者都写不进 Inbox
 /// </remarks>
 internal sealed class OutboxDispatcher(
-    ModuleMessageTables tables,
+    ModuleFrameworkTables tables,
     DataSources dataSources,
     IOptions<MessagingOptions> options,
     ILogger<OutboxDispatcher> logger)

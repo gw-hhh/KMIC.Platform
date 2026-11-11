@@ -26,7 +26,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 占用被别的处理者接管时整个命令回滚，所以业务效果只有一次
 /// </remarks>
 internal sealed class InboxProcessor(
-    ModuleMessageTables tables,
+    ModuleFrameworkTables tables,
     DataSources dataSources,
     SubscriptionCatalog subscriptions,
     IExecutionScopeFactory scopes,

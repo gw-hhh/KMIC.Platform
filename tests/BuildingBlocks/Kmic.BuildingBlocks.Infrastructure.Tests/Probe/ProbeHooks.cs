@@ -19,4 +19,19 @@ internal sealed class ProbeHooks
     public void OnBeforeReturn(Func<CancellationToken, Task>? action) => _beforeReturn = action;
 
     public Task BeforeReturnAsync(CancellationToken ct) => _beforeReturn?.Invoke(ct) ?? Task.CompletedTask;
+
+    /// <summary>
+    /// 作业在第几批（从 0 开始）返回失败
+    /// </summary>
+    public int? JobFailAtBatch { get; set; }
+
+    /// <summary>
+    /// 作业在第几批（从 0 开始）抛出异常
+    /// </summary>
+    public int? JobThrowAtBatch { get; set; }
+
+    /// <summary>
+    /// 作业每一批开始前执行，参数是批次序号
+    /// </summary>
+    public Func<int, CancellationToken, Task>? BeforeJobBatch { get; set; }
 }

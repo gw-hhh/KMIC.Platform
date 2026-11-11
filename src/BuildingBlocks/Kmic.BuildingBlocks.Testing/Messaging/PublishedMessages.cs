@@ -23,7 +23,7 @@ public static class PublishedMessages
         ArgumentNullException.ThrowIfNull(services);
 
         var type = services.GetRequiredService<IntegrationMessageCatalog>().Describe(typeof(T));
-        var outbox = services.GetRequiredService<ModuleMessageTables>().For(PublisherOf(services, type)).Outbox;
+        var outbox = services.GetRequiredService<ModuleFrameworkTables>().For(PublisherOf(services, type)).Outbox;
         await using var command = services.GetRequiredService<DataSources>().Reads(CallOrigin.Inbox).CreateCommand(
             $"""
             SELECT "Id", "SchemaVersion", "Payload"::text, "Headers"::text, "OccurredAt", "SourceId", "SourceVersion"
@@ -49,7 +49,7 @@ public static class PublishedMessages
 
     // 目录里的模块名是定义消息的模块；框架消息（Framework.*）由各模块自己发布，这里不支持
     private static string PublisherOf(IServiceProvider services, IntegrationMessageType type) =>
-        services.GetRequiredService<ModuleMessageTables>().Contains(type.Module)
+        services.GetRequiredService<ModuleFrameworkTables>().Contains(type.Module)
             ? type.Module
             : throw new InvalidOperationException($"{type.Name} 由 {type.Module} 模块定义，这个宿主没有注册它的写入上下文。");
 }

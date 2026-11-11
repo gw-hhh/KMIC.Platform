@@ -24,7 +24,7 @@ public static class MessagingHarness
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        var tables = services.GetRequiredService<ModuleMessageTables>();
+        var tables = services.GetRequiredService<ModuleFrameworkTables>();
         var dispatcher = services.GetRequiredService<OutboxDispatcher>();
         var processor = services.GetRequiredService<InboxProcessor>();
         var subscriptions = services.GetRequiredService<SubscriptionCatalog>();

@@ -37,12 +37,15 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<ModuleWriteContexts>();
         services.TryAddScoped<CommandTransaction>();
         services.TryAddScoped<OutboxWriter>();
-        services.TryAddSingleton<ModuleMessageTables>();
+        services.TryAddSingleton<ModuleFrameworkTables>();
         services.TryAddSingleton<OutboxDispatcher>();
         services.TryAddScoped<CurrentInboxMessage>();
         services.TryAddSingleton<InboxProcessor>();
         services.TryAddScoped(typeof(IReadModelWriter<>), typeof(ReadModelWriter<>));
         services.TryAddScoped<IBackgroundJobs, BackgroundJobs>();
+        services.TryAddSingleton<JobStore>();
+        services.TryAddSingleton<JobExecutor>();
+        services.AddOptions<JobOptions>();
         services.AddOptions<MessagingOptions>();
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
         services.TryAddScoped<DomainEventDispatcher>();

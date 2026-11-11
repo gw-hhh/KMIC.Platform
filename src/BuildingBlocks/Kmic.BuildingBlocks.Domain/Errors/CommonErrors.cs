@@ -98,6 +98,30 @@ public static class CommonErrors
         Error.Conflict("Common.TooManyJobs", "同时进行的任务太多，请等前面的完成后再提交");
 
     /// <summary>
+    /// 作业的提交人已被禁用，或不再有这项权限
+    /// </summary>
+    public static readonly Error JobSubmitterUnavailable =
+        Error.Forbidden("Common.JobSubmitterUnavailable", "提交人已被禁用或不再有这项权限，任务没有执行");
+
+    /// <summary>
+    /// 作业执行时出错
+    /// </summary>
+    public static readonly Error JobFailed =
+        Error.Unavailable("Common.JobFailed", "任务执行出错，请稍后重新提交");
+
+    /// <summary>
+    /// 作业被中断，又不能续跑
+    /// </summary>
+    public static readonly Error JobInterrupted =
+        Error.Conflict("Common.JobInterrupted", "任务被中断，请重新提交；已经完成的部分会保留");
+
+    /// <summary>
+    /// 作业超过最长运行时间
+    /// </summary>
+    public static readonly Error JobTimedOut =
+        Error.Conflict("Common.JobTimedOut", "任务运行时间太长被停止，请缩小范围后重新提交；已经完成的部分会保留");
+
+    /// <summary>
     /// 数据库空间不足
     /// </summary>
     public static readonly Error MessagingSuspended =

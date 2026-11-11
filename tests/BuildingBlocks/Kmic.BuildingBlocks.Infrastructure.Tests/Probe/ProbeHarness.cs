@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Application;
+using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
@@ -45,6 +46,8 @@ internal sealed class ProbeHarness : IAsyncDisposable
         collection.AddSingleton(Echo);
         collection.AddKmicStartupTasks();
         collection.AddKmicMessagingWorker();
+        collection.AddKmicJobWorker();
+        collection.AddSingleton<IAccessContextLoader>(Access);
         services?.Invoke(collection);
         collection.AddKmicPersistence(o =>
         {
@@ -85,6 +88,11 @@ internal sealed class ProbeHarness : IAsyncDisposable
     public ProbeHooks Hooks { get; } = new();
 
     public EchoHooks Echo { get; } = new();
+
+    /// <summary>
+    /// 作业执行时按它重新加载提交人的身份
+    /// </summary>
+    public TestAccessContextLoader Access { get; } = new();
 
     /// <summary>
     /// 宿主的服务，测试要直接取框架内部服务（如数据源）时用
