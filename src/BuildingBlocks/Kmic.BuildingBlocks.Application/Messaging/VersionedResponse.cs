@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Messaging;
@@ -6,11 +7,12 @@ namespace Kmic.BuildingBlocks.Application.Messaging;
 /// 修改结果
 /// </summary>
 /// <param name="Id">ID</param>
-/// <param name="ConcurrencyVersion">保存后的版本号</param>
-public sealed record VersionedResponse<TId>(TId Id, long ConcurrencyVersion = 0) : IHasConcurrencyVersion
+/// <param name="ConcurrencyVersion">保存后的版本号，输出为 version</param>
+public sealed record VersionedResponse<TId>(TId Id, [property: JsonPropertyName("version")] long ConcurrencyVersion = 0) : IHasConcurrencyVersion
     where TId : struct, IStronglyTypedId
 {
     /// <inheritdoc />
+    [JsonIgnore]
     public Guid AggregateId => Id.Value;
 
     /// <inheritdoc />

@@ -67,7 +67,10 @@ public sealed class UseCaseCatalog
             ? useCase
             : throw new InvalidOperationException($"{messageType.FullName} 不在用例目录中，检查宿主是否注册了它所在的模块。");
 
-    internal UseCase? Find(Type messageType) => _byType.GetValueOrDefault(messageType);
+    /// <summary>
+    /// 取消息的用例，不在目录里时返回空
+    /// </summary>
+    public UseCase? Find(Type messageType) => _byType.GetValueOrDefault(messageType);
 
     // 既是命令又是查询的类型也要读进来，才能报错
     private static bool IsMessage(Type type) =>

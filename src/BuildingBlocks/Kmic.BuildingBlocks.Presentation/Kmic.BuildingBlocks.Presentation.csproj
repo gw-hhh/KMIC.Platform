@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    接口层基础构件（05-06 中标为 BuildingBlocks.Presentation 的部分）：端点约定、Result 转 HTTP、ProblemDetails、HTTP 管道。
+    只引用 Application；Infrastructure 不会被接口层引用（ADR-0004），模块的服务由宿主组装
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.BuildingBlocks.Application/Kmic.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+  <!-- 类库项目没有 Web SDK 的隐式命名空间，这里补上端点代码常用的几个 -->
+  <ItemGroup>
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.AspNetCore.Routing" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Presentation.Tests" />
+  </ItemGroup>
+</Project>
