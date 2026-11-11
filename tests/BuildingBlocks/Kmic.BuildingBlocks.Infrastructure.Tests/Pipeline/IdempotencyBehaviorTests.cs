@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Results;
-using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 using Kmic.BuildingBlocks.Testing.Assertions;
@@ -162,7 +162,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
         object[] values =
         [
             Guid.CreateVersion7(), _alice.UserId.Value, _alice.RoleId.Value, Operation, key,
-            SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(command, IdempotencyJson.Options)),
+            SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(command, KmicJsonOptions.Default)),
             Guid.CreateVersion7(), leaseExpiresAt, now.AddMinutes(-5), now.AddHours(24),
         ];
         foreach (var value in values)

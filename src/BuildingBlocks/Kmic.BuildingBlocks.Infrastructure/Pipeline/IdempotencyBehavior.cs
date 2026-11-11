@@ -2,6 +2,7 @@ using System.Data.Common;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Results;
@@ -89,7 +90,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(
         return response.IsSuccess ? response : await ResolveAsync(store, id, token, response) ?? response;
     }
 
-    private static string? Serialize(object? value) => value is null ? null : JsonSerializer.Serialize(value, value.GetType(), IdempotencyJson.Options);
+    private static string? Serialize(object? value) => value is null ? null : JsonSerializer.Serialize(value, value.GetType(), KmicJsonOptions.Stored);
 
     // 失败时删掉自己的记录；删不掉就重新读取再判断，不猜测结果
     private async Task<TResponse?> ResolveAsync(IdempotencyStore store, Guid id, Guid token, TResponse? failure)
@@ -133,7 +134,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(
         services.GetRequiredService<RequestMetadata>().Replayed = true;
         var value = record.ResponseBody is null || ResponseValues<TResponse>.ValueType is not { } type
             ? null
-            : JsonSerializer.Deserialize(record.ResponseBody, type, IdempotencyJson.Options);
+            : JsonSerializer.Deserialize(record.ResponseBody, type, KmicJsonOptions.Stored);
         return ResponseValues<TResponse>.Create(value);
     }
 
@@ -148,7 +149,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(
             RoleId = roleId,
             Operation = useCase.Name,
             Key = key,
-            RequestHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(message, IdempotencyJson.Options)),
+            RequestHash = SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(message, KmicJsonOptions.Default)),
             LeaseToken = Guid.CreateVersion7(),
             LeaseExpiresAt = now + options.LeaseDuration,
             CreatedAt = now,
