@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
@@ -10,10 +11,12 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// <remarks>
 /// 登记提交前要和业务数据一起写入的记录（如幂等完成标记），以及提交成功后才执行的动作
 /// </remarks>
-internal sealed class CommandTransaction : IAfterCommit
+internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
 {
     private readonly List<Func<ModuleDbContext, object?, CancellationToken, Task<Error?>>> _beforeCommit = [];
     private readonly List<Func<CancellationToken, ValueTask>> _afterCommit = [];
+    private readonly HashSet<string> _tags = new(StringComparer.Ordinal);
+    private bool _invalidationQueued;
 
     /// <summary>
     /// 当前命令所在的模块，只有这个模块的写入上下文会被保存
@@ -26,9 +29,24 @@ internal sealed class CommandTransaction : IAfterCommit
         _afterCommit.Add(action);
     }
 
-    // 暂不支持：缓存失效要广播到其他实例，等缓存功能一起实现
-    public void InvalidateTags(params IEnumerable<string> tags) =>
-        throw new NotSupportedException("暂不支持缓存失效。");
+    // 提交成功之后才失效：提交前清掉的话，并发的请求会用旧数据把缓存重新填上。同一事务登记的标签合并去重
+    public void InvalidateTags(params IEnumerable<string> tags)
+    {
+        ArgumentNullException.ThrowIfNull(tags);
+        _tags.UnionWith(tags);
+        if (_invalidationQueued)
+        {
+            return;
+        }
+
+        _invalidationQueued = true;
+        _afterCommit.Add(async ct =>
+        {
+            var pending = _tags.ToArray();
+            _tags.Clear();
+            await cache.InvalidateAsync(pending, ct);
+        });
+    }
 
     /// <summary>
     /// 登记提交前的动作
@@ -59,6 +77,7 @@ internal sealed class CommandTransaction : IAfterCommit
     {
         var actions = _afterCommit.ToArray();
         _afterCommit.Clear();
+        _invalidationQueued = false;
         return actions;
     }
 
@@ -67,5 +86,7 @@ internal sealed class CommandTransaction : IAfterCommit
     {
         _beforeCommit.Clear();
         _afterCommit.Clear();
+        _tags.Clear();
+        _invalidationQueued = false;
     }
 }

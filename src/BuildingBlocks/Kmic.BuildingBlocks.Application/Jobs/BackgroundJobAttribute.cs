@@ -42,4 +42,12 @@ public sealed class BackgroundJobAttribute(string name) : Attribute
     /// 每个用户同时排队或运行的上限
     /// </summary>
     public int MaxConcurrentPerUser { get; init; } = 3;
+
+    /// <summary>
+    /// 作业结束时是否写一条审计事件
+    /// </summary>
+    /// <remarks>
+    /// 名称里有 Export 的作业必须审计。作业里每一批发送的命令按各自的 [Audited] 另行审计
+    /// </remarks>
+    public bool Audited { get; init; }
 }

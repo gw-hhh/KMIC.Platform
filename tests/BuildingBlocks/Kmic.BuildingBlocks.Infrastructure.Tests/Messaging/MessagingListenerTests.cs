@@ -1,7 +1,10 @@
+using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Testing.Database;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Shouldly;
@@ -82,11 +85,23 @@ public sealed class MessagingListenerTests(ClassDatabase<ProbeTemplate> database
             Options.Create(new DatabaseOptions { ConnectionString = database.ConnectionString }),
             Options.Create(new MessagingOptions { PollInterval = poll }),
             _signals,
+            new CacheInvalidator(
+                NewHybridCache(),
+                new DataSources(Options.Create(new DatabaseOptions { ConnectionString = database.ConnectionString })),
+                Options.Create(new CacheOptions()),
+                NullLogger<CacheInvalidator>.Instance),
             NullLogger<MessagingListener>.Instance);
         listener.Start();
         return listener;
     }
 
+
+    private static HybridCache NewHybridCache()
+    {
+        var services = new ServiceCollection();
+        services.AddHybridCache();
+        return services.BuildServiceProvider().GetRequiredService<HybridCache>();
+    }
     private static async Task ConnectedAsync(params AsyncSignal[] signals)
     {
         foreach (var signal in signals)

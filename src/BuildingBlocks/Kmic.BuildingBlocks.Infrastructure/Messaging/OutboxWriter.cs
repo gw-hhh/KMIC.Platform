@@ -28,9 +28,14 @@ internal sealed class OutboxWriter(
 {
     public void Discard() => publisher.Discard();
 
-    public async Task WriteAsync(ModuleDbContext context, string module, CancellationToken ct)
+    public Task WriteAsync(ModuleDbContext context, string module, CancellationToken ct) =>
+        WriteAsync(context, module, publisher.TakePending(), ct);
+
+    /// <summary>
+    /// 写入给定的消息，读审计这类不在命令里的写入用它
+    /// </summary>
+    public async Task WriteAsync(ModuleDbContext context, string module, IReadOnlyList<PendingMessage> pending, CancellationToken ct)
     {
-        var pending = publisher.TakePending();
         if (pending.Count == 0)
         {
             return;

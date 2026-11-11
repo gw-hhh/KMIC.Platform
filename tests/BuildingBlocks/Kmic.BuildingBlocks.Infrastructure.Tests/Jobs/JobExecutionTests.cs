@@ -1,6 +1,9 @@
 using System.Text.Json;
+using Kmic.BuildingBlocks.Application.Serialization;
+using Kmic.BuildingBlocks.Contracts.Auditing;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 using Kmic.BuildingBlocks.Testing.Assertions;
@@ -268,6 +271,25 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         (await JobAsync(jobId)).ErrorCode.ShouldBe(CommonErrors.JobInterrupted.Code);
     }
 
+
+    [Fact]
+    public async Task AuditedJob_OneAuditAtTheEnd_WithStatusAndSummary()
+    {
+        var (_, jobId) = await SubmitAsync(batches: 1, export: true);
+
+        await _harness.Services.RunJobsAsync(Ct);
+
+        await using var check = _harness.BeginAsSystem();
+        var rows = await check.Db.Set<OutboxMessage>().AsNoTracking().Where(m => m.MessageType == "Framework.AuditRecorded").ToListAsync(Ct);
+        var audit = rows
+            .Select(r => JsonSerializer.Deserialize<AuditRecorded>(r.Payload, KmicJsonOptions.Stored)!)
+            .Single(a => string.Equals(a.Details.GetValueOrDefault("jobId"), jobId.ToString("D"), StringComparison.Ordinal));
+        audit.Action.ShouldBe("BuildingBlocks.ExportTicket");
+        audit.Details["status"].ShouldBe("Succeeded");
+        audit.Details.ContainsKey("summary").ShouldBeTrue();
+        audit.ActorUserId.ShouldBe(_user.UserId.Value);
+        audit.Changes.ShouldBeEmpty();
+    }
     public ValueTask DisposeAsync() => _harness.DisposeAsync();
 
     private static async Task UntilCancelledAsync(CancellationToken ct)

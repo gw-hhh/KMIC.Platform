@@ -10,4 +10,6 @@ internal static class MessagingChannels
     public const string Inbox = "kmic_inbox";
 
     public const string Jobs = "kmic_jobs";
+
+    public const string Cache = "kmic_cache";
 }

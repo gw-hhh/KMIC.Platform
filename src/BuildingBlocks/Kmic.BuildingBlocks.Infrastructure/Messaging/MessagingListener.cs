@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,6 +18,7 @@ internal sealed class MessagingListener(
     IOptions<DatabaseOptions> database,
     IOptions<MessagingOptions> options,
     MessagingSignals signals,
+    CacheInvalidator cache,
     ILogger<MessagingListener> logger) : IDisposable
 {
     public const string ApplicationName = "kmic-listener";
@@ -75,8 +77,8 @@ internal sealed class MessagingListener(
             {
                 using var connection = new NpgsqlConnection(ConnectionString());
                 connection.Open();
-                connection.Notification += (_, e) => signals.Wake(e.Channel, e.Payload);
-                using (var listen = new NpgsqlCommand($"LISTEN {MessagingChannels.Outbox}; LISTEN {MessagingChannels.Inbox}; LISTEN {MessagingChannels.Jobs};", connection))
+                connection.Notification += (_, e) => Dispatch(e.Channel, e.Payload);
+                using (var listen = new NpgsqlCommand($"LISTEN {MessagingChannels.Outbox}; LISTEN {MessagingChannels.Inbox}; LISTEN {MessagingChannels.Jobs}; LISTEN {MessagingChannels.Cache};", connection))
                 {
                     listen.ExecuteNonQuery();
                 }
@@ -86,6 +88,7 @@ internal sealed class MessagingListener(
 
                 // 刚连上（包括重连）时补查一次：断开期间的通知收不到
                 signals.WakeAll();
+                cache.OnReconnected();
                 while (!_stopping.IsSet)
                 {
                     if (!connection.Wait(options.Value.PollInterval))
@@ -109,6 +112,19 @@ internal sealed class MessagingListener(
             {
                 Volatile.Write(ref _connection, null);
             }
+        }
+    }
+
+    // 缓存失效通知交给缓存，其余的唤醒对应的处理循环
+    private void Dispatch(string channel, string payload)
+    {
+        if (string.Equals(channel, MessagingChannels.Cache, StringComparison.Ordinal))
+        {
+            cache.OnNotification(payload);
+        }
+        else
+        {
+            signals.Wake(channel, payload);
         }
     }
 

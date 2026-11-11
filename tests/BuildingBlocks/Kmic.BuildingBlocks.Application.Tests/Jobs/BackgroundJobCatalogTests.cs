@@ -32,6 +32,14 @@ public sealed class BackgroundJobCatalogTests
         job.HandlerType.ShouldBeNull();
     }
 
+
+    [Fact]
+    public void Build_ExportJobNotAudited_Rejected()
+    {
+        var thrown = Should.Throw<DeclarationException>(() => BackgroundJobCatalog.Build([typeof(UnauditedExport), typeof(UnauditedExportHandler)]));
+
+        thrown.Problems.ShouldHaveSingleItem().ShouldContain("Audited = true");
+    }
     [Fact]
     public void Build_WrongDeclarations_ListsEveryProblem()
     {
@@ -48,9 +56,17 @@ public sealed class BackgroundJobCatalogTests
         thrown.Problems.Count.ShouldBe(6);
     }
 
-    [BackgroundJob("BuildingBlocks.Export", Permission = "BuildingBlocks.Thing.Export")]
+    [BackgroundJob("BuildingBlocks.Export", Permission = "BuildingBlocks.Thing.Export", Audited = true)]
     private sealed record Export : IBackgroundJob;
 
+
+    [BackgroundJob("BuildingBlocks.ExportAll", Permission = "BuildingBlocks.Thing.Export")]
+    private sealed record UnauditedExport : IBackgroundJob;
+
+    private sealed class UnauditedExportHandler : IJobHandler<UnauditedExport>
+    {
+        public Task<Result<JobOutcome>> ExecuteAsync(UnauditedExport job, IJobContext context, CancellationToken ct) => Task.FromResult<Result<JobOutcome>>(new JobOutcome());
+    }
     private sealed record Unnamed : IBackgroundJob;
 
     [BackgroundJob("Sales.WrongPrefix", SystemOnly = true)]

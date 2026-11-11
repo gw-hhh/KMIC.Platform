@@ -85,6 +85,11 @@ public sealed class BackgroundJobCatalog
             problems.Add($"{type.Name} 的作业名称“{name}”要以“{module}.”开头。");
         }
 
+        if (!attribute.Audited && name.Contains("Export", StringComparison.Ordinal))
+        {
+            problems.Add($"作业 {name} 是导出作业，必须声明 Audited = true，谁导出了什么要留下记录。");
+        }
+
         if (attribute.Version < 1 || attribute.MaxConcurrentPerUser < 1)
         {
             problems.Add($"作业 {name} 的版本号和每人同时运行的上限都要从 1 开始。");

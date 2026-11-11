@@ -141,6 +141,40 @@ public sealed class AuditEventTests(ClassDatabase<ProbeTemplate> database) : ICl
     }
 
     [Fact]
+    public async Task SensitiveQuery_Succeeded_OneAuditWithoutChanges()
+    {
+        var ticket = await NewTicketAsync();
+
+        (await QueryAsync(new ReadTicketDetailQuery(ticket.Id))).ShouldBeSuccess().ShouldBe("测试单据");
+
+        var audit = (await AuditsAsync(ticket.Id.Value)).ShouldHaveSingleItem();
+        audit.Action.ShouldBe("BuildingBlocks.ReadTicketDetail");
+        audit.ActorUserId.ShouldBe(_alice.UserId.Value);
+        audit.Changes.ShouldBeEmpty();
+        audit.Details.ShouldBe(new Dictionary<string, string>(StringComparer.Ordinal) { ["filter"] = "只看标题" });
+    }
+
+    [Fact]
+    public async Task SensitiveQuery_Failed_NoAudit()
+    {
+        var before = (await AllAuditsAsync()).Count;
+
+        (await QueryAsync(new ReadTicketDetailQuery(TicketId.New()))).ShouldBeFailure(TicketErrors.NotFound);
+
+        (await AllAuditsAsync()).Count.ShouldBe(before);
+    }
+
+    [Fact]
+    public async Task SensitiveQuery_AuditCannotBeWritten_ResultStillReturned()
+    {
+        var ticket = await NewTicketAsync();
+
+        (await QueryAsync(new ReadTicketDetailQuery(ticket.Id, TooManyDetails: true))).ShouldBeSuccess().ShouldBe("测试单据");
+
+        (await AuditsAsync(ticket.Id.Value)).ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task LongValue_Truncated_WithHashOfWhole()
     {
         var ticket = await NewTicketAsync();
@@ -162,6 +196,12 @@ public sealed class AuditEventTests(ClassDatabase<ProbeTemplate> database) : ICl
     {
         await using var work = _harness.Begin(_alice);
         return await work.Sender.SendAsync(command, Ct);
+    }
+
+    private async Task<Result<string>> QueryAsync(ReadTicketDetailQuery query)
+    {
+        await using var work = _harness.Begin(_alice);
+        return await work.Sender.SendAsync(query, Ct);
     }
 
     private async Task<TicketId> OpenAsync(string title)

@@ -7,6 +7,7 @@ using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
+using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Numbering;
@@ -39,6 +40,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<DataSources>();
         services.TryAddScoped<SaveChangesGate>();
         services.TryAddScoped<ModuleDbContextServices>();
+        services.AddKmicCache();
         services.TryAddScoped<ModuleWriteContexts>();
         services.TryAddScoped<CommandTransaction>();
         services.TryAddScoped<OutboxWriter>();
@@ -53,6 +55,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<RebuildRunStore>();
         services.TryAddScoped<INumberGenerator, NumberGenerator>();
         services.TryAddScoped<AuditRecorder>();
+        services.TryAddScoped<ReadAuditWriter>();
         services.TryAddScoped<IAuditContext>(provider => provider.GetRequiredService<AuditRecorder>());
         services.AddOptions<AuditOptions>();
         services.TryAddSingleton<JobExecutor>();

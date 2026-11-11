@@ -116,7 +116,7 @@ public sealed class UseCaseCatalog
             ContractAccess = access.ContractAccess,
             Idempotent = audit.Idempotent,
             Audited = kind == MessageKind.Command ? audit.Audited is not null : null,
-            AuditAction = audit.Audited is null ? null : audit.Audited.Action ?? $"{module}.{TrimSuffix(type.Name, "Command")}",
+            AuditAction = AuditActionOf(audit, module, type),
             AuditedRead = audit.AuditedRead,
             BypassesDataScope = bypassesDataScope,
         };
@@ -250,6 +250,17 @@ public sealed class UseCaseCatalog
         return new AuditDeclaration(idempotent, audited, false);
     }
 
+
+    // 命令按 [Audited] 的 Action 或“模块.命令名”，敏感查询按“模块.查询名”
+    private static string? AuditActionOf(AuditDeclaration audit, string module, Type type)
+    {
+        if (audit.Audited is { } audited)
+        {
+            return audited.Action ?? $"{module}.{TrimSuffix(type.Name, "Command")}";
+        }
+
+        return audit.AuditedRead ? $"{module}.{TrimSuffix(type.Name, "Query")}" : null;
+    }
     private static string TrimSuffix(string name, string suffix) =>
         name.EndsWith(suffix, StringComparison.Ordinal) ? name[..^suffix.Length] : name;
 

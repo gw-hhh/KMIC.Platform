@@ -7,6 +7,7 @@ using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -102,6 +103,60 @@ internal sealed class JobExecutor(
     {
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(shutdown);
         var context = new JobContext(store, scopes, Options, module, job, token, identity.User, identity.Access, stop);
+        var (result, failure) = await InvokeAsync(module, job, token, type, args, identity, context, stop);
+
+        if (context.TakenOver)
+        {
+            return JobRunResult.TakenOver;
+        }
+
+        if (context.OutcomeUnknown)
+        {
+            JobsLog.BatchOutcomeUnknown(logger, job.Id, job.JobType);
+            return JobRunResult.OutcomeUnknown;
+        }
+
+        if (shutdown.IsCancellationRequested)
+        {
+            if (!type.Attribute.Resumable)
+            {
+                return await FailAsync(module, job, token, CommonErrors.JobInterrupted);
+            }
+
+            return await store.ReleaseAsync(module, job.Id, token, CancellationToken.None) ? JobRunResult.Released : JobRunResult.TakenOver;
+        }
+
+        var finished = context.CancellationReason switch
+        {
+            JobCancellationReason.Timeout => await FailAsync(module, job, token, CommonErrors.JobTimedOut),
+            JobCancellationReason.SubmitterDisabled => await FailAsync(module, job, token, CommonErrors.JobSubmitterUnavailable),
+            JobCancellationReason.UserRequested => await FinishAsync(module, job, token, JobStatus.Cancelled, null, null),
+            _ when failure is not null => await FailAsync(module, job, token, CommonErrors.JobFailed, failure),
+            _ when result is { IsSuccess: true } => await FinishAsync(module, job, token, JobStatus.Succeeded, null, result.Value),
+            _ => await FailAsync(module, job, token, result?.Error ?? CommonErrors.JobFailed),
+        };
+
+        if (type.Attribute.Audited && finished is JobRunResult.Succeeded or JobRunResult.Failed or JobRunResult.Cancelled)
+        {
+            await AuditAsync(module, job, type, identity, finished, result);
+        }
+
+        return finished;
+    }
+
+
+    // 调用处理器，同时按间隔续期占用。处理器的异常和取消都在这里收住，由调用方按原因决定作业的结局
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "处理器的任何异常都只让这个作业失败，执行器继续处理别的作业，详细信息在日志里")]
+    private async Task<(Result<JobOutcome>? Result, Exception? Failure)> InvokeAsync(
+        string module,
+        ClaimedJob job,
+        Guid token,
+        BackgroundJobType type,
+        object args,
+        (ICurrentUser User, IAccessContext? Access) identity,
+        JobContext context,
+        CancellationTokenSource stop)
+    {
         using var renewing = new CancellationTokenSource();
         var renewal = RenewAsync(module, job, token, context, identity.Access, renewing.Token);
 
@@ -127,38 +182,33 @@ internal sealed class JobExecutor(
             await renewal;
         }
 
-        if (context.TakenOver)
-        {
-            return JobRunResult.TakenOver;
-        }
-
-        if (context.OutcomeUnknown)
-        {
-            JobsLog.BatchOutcomeUnknown(logger, job.Id, job.JobType);
-            return JobRunResult.OutcomeUnknown;
-        }
-
-        if (shutdown.IsCancellationRequested)
-        {
-            if (!type.Attribute.Resumable)
-            {
-                return await FailAsync(module, job, token, CommonErrors.JobInterrupted);
-            }
-
-            return await store.ReleaseAsync(module, job.Id, token, CancellationToken.None) ? JobRunResult.Released : JobRunResult.TakenOver;
-        }
-
-        return context.CancellationReason switch
-        {
-            JobCancellationReason.Timeout => await FailAsync(module, job, token, CommonErrors.JobTimedOut),
-            JobCancellationReason.SubmitterDisabled => await FailAsync(module, job, token, CommonErrors.JobSubmitterUnavailable),
-            JobCancellationReason.UserRequested => await FinishAsync(module, job, token, JobStatus.Cancelled, null, null),
-            _ when failure is not null => await FailAsync(module, job, token, CommonErrors.JobFailed, failure),
-            _ when result is { IsSuccess: true } => await FinishAsync(module, job, token, JobStatus.Succeeded, null, result.Value),
-            _ => await FailAsync(module, job, token, result?.Error ?? CommonErrors.JobFailed),
-        };
+        return (result, failure);
     }
 
+    // 作业结束后写一条审计事件，是尽力而为：作业的结果已经写好，审计写不进去只记日志
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "审计写不进去不能改变已经写好的作业结果，只记错误日志")]
+    private async Task AuditAsync(
+        string module, ClaimedJob job, BackgroundJobType type, (ICurrentUser User, IAccessContext? Access) identity, JobRunResult finished, Result<JobOutcome>? result)
+    {
+        try
+        {
+            await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, identity.User, identity.Access);
+            var recorder = scope.ServiceProvider.GetRequiredService<AuditRecorder>();
+            recorder.Add("jobId", job.Id.ToString("D"));
+            recorder.Add("status", finished.ToString());
+            recorder.Add("args", job.Args);
+            if (result is { IsSuccess: true, Value.Summary: { } summary })
+            {
+                recorder.Add("summary", JsonSerializer.Serialize(summary, summary.GetType(), KmicJsonOptions.Stored));
+            }
+
+            await scope.ServiceProvider.GetRequiredService<ReadAuditWriter>().WriteAsync(recorder.BuildForJob(module, type.Name), module, CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            JobsLog.AuditFailed(logger, exception, job.Id, job.JobType);
+        }
+    }
     // 每过占用时长的三分之一续期一次，顺便发现用户的取消请求、超时和提交人被禁用。
     // 占用以数据库时钟为准，这里按真实时间等待，不用注入的时钟（测试里它是固定的）
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "续期出错只记日志，占用到期前还有两次机会；到期后由别的实例接管")]

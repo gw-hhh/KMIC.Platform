@@ -15,4 +15,7 @@ internal static partial class JobsLog
 
     [LoggerMessage(EventId = 2303, Level = LogLevel.Warning, Message = "Lease renewal of background job {JobId} failed")]
     public static partial void RenewFailed(ILogger logger, Exception exception, Guid jobId);
+
+    [LoggerMessage(EventId = 2304, Level = LogLevel.Error, Message = "Writing the audit event of background job {JobId} ({JobType}) failed")]
+    public static partial void AuditFailed(ILogger logger, Exception exception, Guid jobId, string jobType);
 }

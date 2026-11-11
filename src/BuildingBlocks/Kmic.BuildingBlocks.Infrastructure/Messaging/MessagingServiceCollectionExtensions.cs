@@ -46,7 +46,7 @@ public static class MessagingServiceCollectionExtensions
     }
 
     // 投递、处理和作业执行共用一个监听连接，谁先注册都只注册一次
-    private static void AddListener(IServiceCollection services)
+    internal static void AddListener(IServiceCollection services)
     {
         services.TryAddSingleton<StartupState>();
         services.TryAddSingleton<MessagingSignals>();

@@ -46,13 +46,47 @@ internal sealed class AuditRecorder(
     public void Publish(ModuleDbContext context, UseCase useCase)
     {
         var (changes, targets) = AuditChanges.Collect(context, options.Value.MaxValueLength);
+        publisher.Add(Build(useCase, changes, targets));
+        Clear();
+    }
+
+    /// <summary>
+    /// 敏感查询成功之后的审计事件：没有数据变更，查询条件等由查询用 IAuditContext 补充
+    /// </summary>
+    public AuditRecorded BuildForRead(UseCase useCase)
+    {
+        var audit = Build(useCase, [], []);
+        Clear();
+        return audit;
+    }
+
+    /// <summary>
+    /// 命令回滚时丢弃已收集的补充信息
+    /// </summary>
+    public void Discard() => Clear();
+
+    /// <summary>
+    /// 作业结束时的审计事件，作业名作为动作，说明由调用方通过 Add 补充
+    /// </summary>
+    public AuditRecorded BuildForJob(string module, string jobName)
+    {
+        var audit = Build(module, jobName, [], []);
+        Clear();
+        return audit;
+    }
+
+    private AuditRecorded Build(UseCase useCase, IReadOnlyList<EntityChange> changes, IReadOnlyList<AuditTarget> targets) =>
+        Build(useCase.Module, useCase.AuditAction ?? useCase.Module, changes, targets);
+
+    private AuditRecorded Build(string module, string action, IReadOnlyList<EntityChange> changes, IReadOnlyList<AuditTarget> targets)
+    {
         var user = execution.User;
-        publisher.Add(new AuditRecorded
+        return new AuditRecorded
         {
             AuditId = Guid.CreateVersion7(),
             OccurredAt = time.GetUtcNow(),
-            Module = useCase.Module,
-            Action = useCase.AuditAction ?? useCase.Module,
+            Module = module,
+            Action = action,
             Origin = execution.Origin.ToString(),
             ActorUserId = user.UserId?.Value,
             ActualUserId = user.ActualUserId?.Value,
@@ -63,15 +97,10 @@ internal sealed class AuditRecorder(
             Targets = [.. targets.Concat(_targets).Distinct()],
             Changes = changes,
             Details = new Dictionary<string, string>(_details, StringComparer.Ordinal),
-        });
-        _targets.Clear();
-        _details.Clear();
+        };
     }
 
-    /// <summary>
-    /// 命令回滚时丢弃已收集的补充信息
-    /// </summary>
-    public void Discard()
+    private void Clear()
     {
         _targets.Clear();
         _details.Clear();

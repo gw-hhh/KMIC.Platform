@@ -81,6 +81,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
                 typeof(ExceptionTranslationBehavior<,>),
                 typeof(ValidationBehavior<,>),
                 typeof(AuthorizationBehavior<,>),
+                typeof(ReadAuditBehavior<,>),
                 typeof(IdempotencyBehavior<,>),
                 typeof(TransactionBehavior<,>),
             ];
