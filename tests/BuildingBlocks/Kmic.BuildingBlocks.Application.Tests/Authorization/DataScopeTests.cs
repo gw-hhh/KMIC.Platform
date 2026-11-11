@@ -7,7 +7,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Application.Tests.Authorization;
 
 /// <summary>
-/// 数据范围的计算：等级 × 起点（05-05 第 5.2、5.3 节）
+/// 数据权限的计算：等级和起点组织
 /// </summary>
 public sealed class DataScopeTests
 {
@@ -89,7 +89,7 @@ public sealed class DataScopeTests
     [Fact]
     public void For_CalledRepeatedly_ComputedOnce()
     {
-        // EF 每执行一次查询要读取 All、Owner、OrgUnits 三次
+        // 每执行一次查询，EF 要读 All、Owner、OrgUnits 三次
         var scope = ScopeOf(_shanghaiSales.WithRole(r => r.Scope(ScopeLevel.OrgUnitAndBelow)));
 
         scope.For(Orders).ShouldBeSameAs(scope.For(Orders));

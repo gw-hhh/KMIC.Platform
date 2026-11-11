@@ -13,10 +13,10 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 管道第 2 位：把可以归因于业务的数据库异常转换为错误结果，其余异常原样抛出（全局异常处理返回 500）
+/// 异常转换
 /// </summary>
 /// <remarks>
-/// 排在事务外层，提交时抛出的并发冲突、唯一约束冲突同样能转换
+/// 把并发冲突、唯一约束冲突这类数据库异常转成错误结果，其他异常照常抛出。放在事务外层，提交时抛出的异常也能转换
 /// </remarks>
 public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
@@ -42,7 +42,7 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         }
         catch (CommitOutcomeUnknownException exception)
         {
-            // 幂等命令已在内层按幂等记录判断过，走到这里说明没有提交，用原键重试是安全的；非幂等命令提示刷新后确认
+            // 幂等命令能走到这里，说明内层已确认没有提交，可以用原键重试。非幂等命令提示刷新后确认
             PipelineLog.CommitOutcomeUnknown(logger, exception, typeof(TMessage).Name);
             return TResponse.Fail(CommonErrors.ResultUnknown.WithMetadata(ErrorMetadataKeys.Retryable, catalog.Get(typeof(TMessage)).Idempotent));
         }
@@ -61,7 +61,7 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         return null;
     }
 
-    // 冲突的是聚合根的那一行；用一次只读查询取数据库中的最新版本，聚合已被删除时不带版本
+    // 冲突的是聚合根那一行，查一次当前版本号返回给前端；数据已被删除时不带版本号
     private static async Task<Error> VersionConflictAsync(DbUpdateConcurrencyException exception)
     {
         if (exception.Entries.FirstOrDefault(e => e.Entity is IAggregateRoot) is not { } root

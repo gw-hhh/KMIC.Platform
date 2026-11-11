@@ -9,10 +9,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
 /// <summary>
-/// KM9003：TODO、FIXME 与测试的 Skip 必须带跟踪编号；不使用 HACK
+/// KM9003：TODO、FIXME 和测试的 Skip 必须带跟踪编号，不能用 HACK
 /// </summary>
 /// <remarks>
-/// 没有编号的待办没人跟进，会永远留在代码里（06 第 10.3、12.3 节）
+/// 没有编号的待办没人跟进，会一直留在代码里
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TrackedMarkerAnalyzer : DiagnosticAnalyzer
@@ -35,7 +35,8 @@ public sealed class TrackedMarkerAnalyzer : DiagnosticAnalyzer
         "待办与跳过必须带跟踪编号",
         "跳过测试必须在 Skip 中写明跟踪编号，如 Skip = \"#123 等待接口上线\"");
 
-    private static readonly TimeSpan _matchTimeout = TimeSpan.FromMilliseconds(100);
+    // 这几个模式不会回溯，超时只是兜底；并行编译时线程会被挤占，100 毫秒曾经误超时
+    private static readonly TimeSpan _matchTimeout = TimeSpan.FromSeconds(1);
     private static readonly Regex _marker = new(@"\b(?<marker>TODO|FIXME)\b(?!\(#\d+\))", RegexOptions.CultureInvariant, _matchTimeout);
     private static readonly Regex _hack = new(@"\bHACK\b", RegexOptions.CultureInvariant, _matchTimeout);
     private static readonly Regex _ticket = new(@"#\d+", RegexOptions.CultureInvariant, _matchTimeout);

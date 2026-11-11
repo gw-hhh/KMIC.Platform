@@ -1,7 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
 /// <summary>
-/// 查询成功后写审计事件；需要敏感权限点的查询必须使用
+/// 记录读取审计
 /// </summary>
+/// <remarks>
+/// 需要敏感权限点的查询必须加
+/// </remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class AuditedReadAttribute : Attribute;

@@ -4,13 +4,16 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 在不知道具体值类型的管道中读取、构造 Result 与 Result&lt;T&gt; 的值：幂等重放、版本回填要用
+/// 读取和构造结果里的值
 /// </summary>
+/// <remarks>
+/// 管道不知道具体的值类型，幂等重放和版本号回填要用它
+/// </remarks>
 internal static class ResponseValues<TResponse>
     where TResponse : Result
 {
     /// <summary>
-    /// 成功时的值类型；Result 没有值，为空
+    /// 值类型，Result 没有值时为空
     /// </summary>
     public static Type? ValueType { get; } = typeof(TResponse).IsGenericType ? typeof(TResponse).GetGenericArguments()[0] : null;
 
@@ -30,7 +33,7 @@ internal static class ResponseValues<TResponse>
         return Expression.Lambda<Func<TResponse, object?>>(value, response).Compile();
     }
 
-    // Result<T> 由 T 的隐式转换构造
+    // Result<T> 通过 T 的隐式转换构造
     private static Func<object?, TResponse> BuildCreate()
     {
         if (ValueType is null)
@@ -43,7 +46,7 @@ internal static class ResponseValues<TResponse>
         return Expression.Lambda<Func<object?, TResponse>>(response, value).Compile();
     }
 
-    // 放在嵌套类中：等外层的 ValueType 初始化之后，第一次使用时才编译
+    // 放在嵌套类里，等外层的 ValueType 初始化后，第一次用到时才编译
     private static class Compiled
     {
         public static readonly Func<TResponse, object?> Read = BuildRead();

@@ -12,7 +12,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Pipeline;
 
 /// <summary>
-/// 完整管道中的事务行为与异常转换：提交、回滚、领域事件、提交后动作、版本回填、数据库异常转换
+/// 命令事务和异常转换
 /// </summary>
 public sealed class TransactionBehaviorTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -94,7 +94,7 @@ public sealed class TransactionBehaviorTests(ClassDatabase<ProbeTemplate> databa
     {
         var created = (await OpenAsync(TicketNumbers.Next())).ShouldBeSuccess();
 
-        // 处理器加载之后、保存之前，另一个连接把这一行改掉了
+        // 处理器读取之后、保存之前，另一个连接改了这一行
         _harness.Hooks.OnBeforeReturn(async ct =>
         {
             await using var command = database.DataSource.CreateCommand(

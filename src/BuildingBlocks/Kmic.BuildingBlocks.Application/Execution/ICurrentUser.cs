@@ -3,32 +3,32 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Execution;
 
 /// <summary>
-/// 当前执行身份
+/// 当前身份
 /// </summary>
 public interface ICurrentUser
 {
     /// <summary>
-    /// 用户；系统身份与匿名请求为空
+    /// 用户 ID，系统身份和匿名请求时为空
     /// </summary>
     UserId? UserId { get; }
 
     /// <summary>
-    /// 当前角色
+    /// 角色
     /// </summary>
     RoleId? RoleId { get; }
 
     /// <summary>
-    /// 是否系统身份（定时任务、事件处理、启动任务）
+    /// 是否系统身份
     /// </summary>
     bool IsSystem { get; }
 
     /// <summary>
-    /// 是否在模拟其他用户
+    /// 是否在模拟登录
     /// </summary>
     bool IsImpersonating { get; }
 
     /// <summary>
-    /// 模拟身份时的实际操作人，否则为空
+    /// 实际操作人
     /// </summary>
     UserId? ActualUserId { get; }
 
@@ -38,7 +38,10 @@ public interface ICurrentUser
     SessionId? SessionId { get; }
 
     /// <summary>
-    /// 系统身份处理事件时，引发它的原始操作人；只用于审计
+    /// 原始操作人
     /// </summary>
+    /// <remarks>
+    /// 系统身份处理事件时，引发事件的用户。只用于审计
+    /// </remarks>
     UserId? OnBehalfOf { get; }
 }

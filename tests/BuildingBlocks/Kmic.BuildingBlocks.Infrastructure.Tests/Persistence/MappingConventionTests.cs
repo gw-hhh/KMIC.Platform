@@ -9,7 +9,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 映射约定：编码列与 CHECK、单值与多值值对象、值对象集合、不区分大小写的列、唯一约束到错误的映射
+/// 映射约定：编码列和检查约束、值对象、值对象集合、不区分大小写的列、唯一约束对应的错误
 /// </summary>
 public sealed class MappingConventionTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -100,7 +100,7 @@ public sealed class MappingConventionTests(ClassDatabase<ProbeTemplate> database
         var number = $"dup-{TicketNumbers.Next()}";
         await _harness.AddAsync(_alice, Ticket.Create(number, _alice.UserId, _org["总部"]));
 
-        // 只差大小写同样冲突：编号列不区分大小写
+        // 编号不区分大小写，只差大小写也算重复
         var error = await Should.ThrowAsync<DbUpdateException>(() =>
             _harness.AddAsync(_alice, Ticket.Create(number.ToUpperInvariant(), _alice.UserId, _org["总部"])));
 

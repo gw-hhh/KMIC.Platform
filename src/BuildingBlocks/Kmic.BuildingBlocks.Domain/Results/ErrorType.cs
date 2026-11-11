@@ -1,17 +1,17 @@
 namespace Kmic.BuildingBlocks.Domain.Results;
 
 /// <summary>
-/// 错误的大类，决定对外的 HTTP 状态码（映射在接口层）
+/// 错误类型
 /// </summary>
 public enum ErrorType
 {
     /// <summary>
-    /// 输入不合法（400），只有这一类可以携带字段错误
+    /// 输入不合法（400）
     /// </summary>
     Validation,
 
     /// <summary>
-    /// 不存在或不可见（404）；数据范围之外的资源同样归为这一类
+    /// 不存在或无权查看（404）
     /// </summary>
     NotFound,
 
@@ -31,7 +31,7 @@ public enum ErrorType
     BusinessRule,
 
     /// <summary>
-    /// 可重试的瞬时故障（503），只供框架的 CommonErrors 使用
+    /// 暂时不可用（503）
     /// </summary>
     Unavailable,
 }

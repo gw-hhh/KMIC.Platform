@@ -6,22 +6,21 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 不区分大小写的排序规则 public."CaseInsensitive"：迁移程序在执行模块迁移之前创建并核对定义，迁移之后核对各列的绑定
+/// 不区分大小写的排序规则
 /// </summary>
 /// <remarks>
-/// 列在建表时按当时的 search_path 解析不带 schema 的排序规则名并绑定到具体对象（Npgsql 的 UseCollation 不支持带 schema 的名称）。
-/// 只靠 IF NOT EXISTS 会沿用一个已存在、但区分大小写的同名对象，唯一约束的行为就与设计不同，所以要核对，而不只是创建
+/// 列在建表时就绑定到具体的排序规则对象。只靠 IF NOT EXISTS 的话，库里已有一个区分大小写的同名对象时会直接沿用，唯一约束就不再忽略大小写，所以创建之后还要核对
 /// </remarks>
 public static class CaseInsensitiveCollation
 {
     private const string Locale = "und-u-ks-level2";
 
     /// <summary>
-    /// 创建（已存在则跳过）并核对定义；public 以外出现同名排序规则同样失败
+    /// 创建并核对 public."CaseInsensitive"
     /// </summary>
     /// <param name="connection">迁移账号的连接</param>
     /// <param name="ct">取消</param>
-    /// <exception cref="InvalidOperationException">定义不符或有同名对象</exception>
+    /// <exception cref="InvalidOperationException">定义不对，或别的 schema 里有同名对象</exception>
     public static async Task EnsureAsync(NpgsqlConnection connection, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(connection);
@@ -66,12 +65,12 @@ public static class CaseInsensitiveCollation
     }
 
     /// <summary>
-    /// 核对模型中声明为不区分大小写的列，实际绑定的都是 public."CaseInsensitive"
+    /// 核对不区分大小写的列，确认都绑定到 public."CaseInsensitive"
     /// </summary>
     /// <param name="connection">数据库连接</param>
-    /// <param name="context">模块的写入上下文；排序规则只在设计时模型中，从它取</param>
+    /// <param name="context">模块的写入上下文</param>
     /// <param name="ct">取消</param>
-    /// <exception cref="InvalidOperationException">有列绑定到其他排序规则</exception>
+    /// <exception cref="InvalidOperationException">有列绑定到了别的排序规则</exception>
     public static async Task VerifyColumnsAsync(NpgsqlConnection connection, DbContext context, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(connection);

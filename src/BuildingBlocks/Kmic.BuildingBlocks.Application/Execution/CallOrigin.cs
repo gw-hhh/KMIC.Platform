@@ -1,22 +1,22 @@
 namespace Kmic.BuildingBlocks.Application.Execution;
 
 /// <summary>
-/// 调用来源，决定授权语义、幂等是否生效以及使用哪个数据源
+/// 请求来源
 /// </summary>
 public enum CallOrigin
 {
     /// <summary>
-    /// HTTP 请求，身份为令牌中的用户与会话的当前角色
+    /// HTTP 请求
     /// </summary>
     Http,
 
     /// <summary>
-    /// 其他模块经 Contracts 查询调用，身份沿用调用方
+    /// 其他模块通过 Contracts 调用
     /// </summary>
     ModuleCall,
 
     /// <summary>
-    /// 处理集成事件，系统身份
+    /// 集成事件处理
     /// </summary>
     Inbox,
 
@@ -26,12 +26,12 @@ public enum CallOrigin
     ScheduledJob,
 
     /// <summary>
-    /// 后台作业，身份为提交作业的用户
+    /// 后台作业
     /// </summary>
     BackgroundJob,
 
     /// <summary>
-    /// 启动任务，系统身份
+    /// 启动任务
     /// </summary>
     Startup,
 }

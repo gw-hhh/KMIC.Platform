@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 当前命令事务的挂接点：提交前与业务数据一起写入的框架记录（幂等完成标记等），以及提交成功后才执行的动作
+/// 命令事务
 /// </summary>
 /// <remarks>
-/// 每个作用域一个，事务行为在提交前后依次取出执行
+/// 登记提交前要和业务数据一起写入的记录（如幂等完成标记），以及提交成功后才执行的动作
 /// </remarks>
 internal sealed class CommandTransaction : IAfterCommit
 {
@@ -21,13 +21,16 @@ internal sealed class CommandTransaction : IAfterCommit
         _afterCommit.Add(action);
     }
 
-    // 缓存失效经 PG NOTIFY 广播到其他实例，随配置与缓存一起实现（S2-09）
+    // 暂不支持：缓存失效要广播到其他实例，等缓存功能一起实现
     public void InvalidateTags(params IEnumerable<string> tags) =>
-        throw new NotSupportedException("缓存失效随配置与缓存（S2-09）实现。");
+        throw new NotSupportedException("暂不支持缓存失效。");
 
     /// <summary>
-    /// 登记提交前的动作：在业务事务中执行，参数是上下文与成功响应的值；返回错误则整个命令回滚
+    /// 登记提交前的动作
     /// </summary>
+    /// <remarks>
+    /// 在业务事务里执行，返回错误时整个命令回滚
+    /// </remarks>
     public void BeforeCommit(Func<ModuleDbContext, object?, CancellationToken, Task<Error?>> hook)
     {
         ArgumentNullException.ThrowIfNull(hook);
@@ -54,7 +57,7 @@ internal sealed class CommandTransaction : IAfterCommit
         return actions;
     }
 
-    // 回滚时丢弃：失败的命令不该留下任何提交后的动作
+    // 回滚时丢弃，失败的命令不该留下提交后的动作
     public void Discard()
     {
         _beforeCommit.Clear();

@@ -15,7 +15,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Pipeline;
 
 /// <summary>
-/// 幂等：同键的副作用只发生一次；失败、崩溃、租约过期、并发各路径都不推断成功（05-02 第 5.3 节）
+/// 幂等处理
 /// </summary>
 public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -66,7 +66,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
         var number = TicketNumbers.Next();
         (await SendAsync(new OpenTicketCommand(number, OpenTicketCommand.RejectedTitle), key)).Result.ShouldBeFailure(TicketErrors.Rejected);
 
-        // 失败没有留下任何影响，记录已删除：用户修正后用同一个键重试
+        // 失败后记录已删除，同一个键可以再用
         (await SendAsync(new OpenTicketCommand(number, "修正后"), key)).Result.ShouldBeSuccess();
         _harness.Hooks.Handled.ShouldBe(2);
     }
@@ -87,7 +87,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
     [Fact]
     public async Task ProcessingWithExpiredLease_TakenOver()
     {
-        // 原执行在提交前崩溃，只留下处理中的记录
+        // 原来的请求在提交前崩溃了，只留下一条处理中的记录
         var key = NewKey();
         var command = new OpenTicketCommand(TicketNumbers.Next(), "接管");
         await InsertProcessingAsync(command, key, leaseExpiresAt: _harness.Time.GetUtcNow().AddSeconds(-1));
@@ -104,7 +104,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
         var number = TicketNumbers.Next();
         _harness.Hooks.OnBeforeReturn(async ct =>
         {
-            // 原执行还在处理器中，租约已被别人接管：换掉令牌
+            // 模拟处理器还在运行时，租约被另一个请求接管
             await using var command = database.DataSource.CreateCommand(
                 """UPDATE "Probe"."IdempotencyRecord" SET "LeaseToken" = $1 WHERE "Key" = $2""");
             command.Parameters.Add(new NpgsqlParameter { Value = Guid.CreateVersion7() });

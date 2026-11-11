@@ -8,10 +8,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
 /// <summary>
-/// 管道第 1 位：为每个消息建立 Activity，记录一条结果日志，超过阈值记警告
+/// 请求日志
 /// </summary>
 /// <remarks>
-/// 不记录消息内容：可能含敏感字段，排查时按追踪 ID 关联请求日志
+/// 不记录消息内容，里面可能有敏感字段。排查时按追踪 ID 找请求日志
 /// </remarks>
 public sealed class LoggingBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,

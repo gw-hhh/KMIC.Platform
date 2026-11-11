@@ -9,7 +9,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 聚合根的删除改写为标记删除，子实体随之保留；唯一约束只约束未删除的行
+/// 软删除：聚合根标记删除，子实体保留；唯一约束只管没删除的行
 /// </summary>
 public sealed class SoftDeleteTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -62,7 +62,7 @@ public sealed class SoftDeleteTests(ClassDatabase<ProbeTemplate> database) : ICl
         (await work.Query.Tickets.AnyAsync(t => t.Id == ticket.Id, Ct)).ShouldBeFalse();
         (await work.Query.Tickets.IgnoreQueryFilters([QueryFilters.SoftDelete]).AnyAsync(t => t.Id == ticket.Id, Ct)).ShouldBeTrue();
 
-        // 回收站只关闭软删除，看不到别人的数据
+        // 回收站只关掉软删除过滤，别人的数据仍然看不到
         await using var stranger = _harness.Begin(TestIdentity.User("丙").InTree(_org).InOrgUnit(_org["总部"]));
         (await stranger.Query.Tickets.IgnoreQueryFilters([QueryFilters.SoftDelete]).AnyAsync(t => t.Id == ticket.Id, Ct)).ShouldBeFalse();
     }

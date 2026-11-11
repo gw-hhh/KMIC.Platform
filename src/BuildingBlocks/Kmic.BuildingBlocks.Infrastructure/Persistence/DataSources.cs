@@ -5,11 +5,11 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 运行账号的连接池：前台、后台各分事务池与读池，Worker 另有流式池
+/// 连接池
 /// </summary>
 /// <remarks>
-/// 写入上下文只用事务池，查询上下文只用读池：命令持有事务连接时，嵌套查询从读池借，读池的连接从不等待别的连接，
-/// 所以并发命令数达到事务池上限也不会自锁（原型 #15）。数据源创建时不连接数据库
+/// 写入上下文只用事务池，查询上下文只用读池。命令占着事务连接时，嵌套查询从读池借，不会等事务池，
+/// 所以并发命令把事务池占满也不会互相卡死。创建时不连接数据库
 /// </remarks>
 internal sealed class DataSources : IAsyncDisposable
 {
@@ -36,12 +36,12 @@ internal sealed class DataSources : IAsyncDisposable
     }
 
     /// <summary>
-    /// 导出主查询用的流式池
+    /// 流式池，导出用
     /// </summary>
     public NpgsqlDataSource Stream =>
-        _workerStream ?? throw new InvalidOperationException("没有配置流式池（Kmic:Database:Worker:StreamMaxPoolSize），只有 Worker 角色能执行导出。");
+        _workerStream ?? throw new InvalidOperationException("没有配置流式池（Kmic:Database:Worker:StreamMaxPoolSize）。");
 
-    // 只有 HTTP 请求用前台池；Contracts 调用沿用入口的来源，入口不会是 ModuleCall
+    // 只有 HTTP 请求用前台池。Contracts 调用沿用入口的来源，入口不会是 ModuleCall
     public NpgsqlDataSource Transactions(CallOrigin entry) => entry == CallOrigin.Http ? _apiTransactions : _workerTransactions;
 
     public NpgsqlDataSource Reads(CallOrigin entry) => entry == CallOrigin.Http ? _apiReads : _workerReads;
@@ -67,10 +67,10 @@ internal sealed class DataSources : IAsyncDisposable
 
         var connection = new NpgsqlConnectionStringBuilder(connectionString);
 
-        // 数据范围条件要按实际参数值做计划才能用上索引，预备语句的通用计划会退化为全表扫描（原型 #2 D2）
+        // 关闭自动预编译：数据权限条件要按实际参数值做执行计划才用得上索引，预编译的通用计划会退化成全表扫描
         return connection.MaxAutoPrepare == 0
             ? connection
-            : throw new InvalidOperationException("连接串开启了 Max Auto Prepare，框架要求保持为 0：数据范围查询依赖按实际参数值生成的执行计划。");
+            : throw new InvalidOperationException("连接串里的 Max Auto Prepare 必须为 0。");
     }
 
     private static NpgsqlDataSource Create(NpgsqlConnectionStringBuilder connection, string applicationName, int maxPoolSize)

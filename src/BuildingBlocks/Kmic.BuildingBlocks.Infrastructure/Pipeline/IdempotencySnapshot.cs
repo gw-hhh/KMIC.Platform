@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 读到的幂等记录
+/// 幂等记录
 /// </summary>
 internal sealed record IdempotencySnapshot(
     Guid Id,

@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 代码中声明、值存在数据库中的一项配置；Configuration 模块经它取默认值、校验管理员写入的值
+/// 设置定义
 /// </summary>
 public abstract class DeclaredValueDefinition
 {
@@ -30,7 +30,7 @@ public abstract class DeclaredValueDefinition
     public string Module { get; }
 
     /// <summary>
-    /// 显示名
+    /// 显示名称
     /// </summary>
     public string DisplayName { get; }
 
@@ -45,7 +45,7 @@ public abstract class DeclaredValueDefinition
     public object DefaultValue { get; }
 
     /// <summary>
-    /// 执行值类型的 Validate
+    /// 校验值
     /// </summary>
     public Result Validate(object value)
     {

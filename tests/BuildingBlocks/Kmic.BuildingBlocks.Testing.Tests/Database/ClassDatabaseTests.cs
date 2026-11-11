@@ -35,7 +35,7 @@ public sealed class ClassDatabaseTests(ProbeTemplate template)
         await database.InitializeAsync();
         var name = database.Name;
 
-        // 留着一个打开的连接：删除库时要能强制断开
+        // 故意留一个打开的连接，删除库时要能强制断开
         await using var open = await database.DataSource.OpenConnectionAsync(cancellationToken);
         await database.DisposeAsync();
 

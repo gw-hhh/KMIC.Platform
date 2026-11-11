@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 按执行身份计算数据范围：等级取角色对该范围对象的覆盖或默认等级，起点取授予锚点或所属组织
+/// 数据权限
 /// </summary>
 /// <remarks>
-/// 每个作用域一个实例；EF 每执行一次查询会读取多次，结果按范围对象缓存在实例内
+/// 一次查询会读取多次，结果按范围对象缓存在实例里
 /// </remarks>
 internal sealed class DataScope(IExecutionContext execution) : IDataScope
 {
@@ -37,7 +37,7 @@ internal sealed class DataScope(IExecutionContext execution) : IDataScope
             return EffectiveScope.Unrestricted;
         }
 
-        // 匿名请求看不到任何带归属的数据
+        // 匿名请求看不到任何有归属的数据
         if (execution.Access is not { } access)
         {
             return _nothing;
@@ -55,7 +55,7 @@ internal sealed class DataScope(IExecutionContext execution) : IDataScope
         };
     }
 
-    // 授予上配置了锚点就从锚点算起，代替用户所属组织
+    // 配置了起点组织就从起点算，不用用户所属组织
     private static IReadOnlyList<OrgUnitId> Anchors(IAccessContext access)
     {
         if (access.DataScopeGrant.Anchors.Count > 0)

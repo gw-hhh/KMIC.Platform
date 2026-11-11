@@ -4,7 +4,7 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
-// 推进假时钟模拟耗时，不真的等待
+// 拨快假时钟来模拟耗时，不真的等待
 public sealed class SlowThingQueryHandler(TimeProvider time) : IQueryHandler<SlowThingQuery, int>
 {
     public ValueTask<Result<int>> Handle(SlowThingQuery query, CancellationToken cancellationToken)

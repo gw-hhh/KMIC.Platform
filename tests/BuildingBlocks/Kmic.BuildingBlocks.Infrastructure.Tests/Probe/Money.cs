@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 多值值对象：每个成员一列，列名为“属性名 + 成员名”
+/// 金额
 /// </summary>
 internal sealed record Money
 {
@@ -12,12 +12,12 @@ internal sealed record Money
     }
 
     /// <summary>
-    /// 金额
+    /// 数额
     /// </summary>
     public decimal Amount { get; private init; }
 
     /// <summary>
-    /// 币种，ISO 4217 三位代码
+    /// 币种
     /// </summary>
     public string Currency { get; private init; }
 

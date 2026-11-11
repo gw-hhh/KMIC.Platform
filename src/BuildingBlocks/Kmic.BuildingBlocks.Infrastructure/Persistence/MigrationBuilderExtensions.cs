@@ -3,20 +3,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模块迁移中使用的框架步骤
+/// 迁移扩展
 /// </summary>
 public static class MigrationBuilderExtensions
 {
     /// <summary>
-    /// 运行账号的组角色；实际登录的运行账号是它的成员，迁移脚本中不出现环境相关的账号名
+    /// 运行账号的组角色
     /// </summary>
+    /// <remarks>
+    /// 实际登录的账号是它的成员，迁移脚本里就不会出现和环境有关的账号名
+    /// </remarks>
     public const string RuntimeRole = "kmic_runtime";
 
     /// <summary>
-    /// 建立模块 schema 并授权给运行账号：之后新建的表自动可读写，但运行账号不能执行 DDL；写在模块初始迁移的最前面
+    /// 建立模块 schema 并授权给运行账号
     /// </summary>
+    /// <remarks>
+    /// 写在模块初始迁移的最前面。之后建的表运行账号自动可读写，但不能改表结构
+    /// </remarks>
     /// <param name="migrationBuilder">迁移</param>
-    /// <param name="schema">模块名，也是 schema 名</param>
+    /// <param name="schema">模块名</param>
     public static void InitializeModuleSchema(this MigrationBuilder migrationBuilder, string schema)
     {
         ArgumentNullException.ThrowIfNull(migrationBuilder);

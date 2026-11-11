@@ -3,10 +3,10 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
 /// <summary>
-/// 修改类命令的收据：聚合的 ID 与保存后的版本，前端下次修改时带回
+/// 修改结果
 /// </summary>
-/// <param name="Id">聚合的 ID</param>
-/// <param name="ConcurrencyVersion">保存后的版本，由事务行为回填</param>
+/// <param name="Id">ID</param>
+/// <param name="ConcurrencyVersion">保存后的版本号</param>
 public sealed record VersionedResponse<TId>(TId Id, long ConcurrencyVersion = 0) : IHasConcurrencyVersion
     where TId : struct, IStronglyTypedId
 {

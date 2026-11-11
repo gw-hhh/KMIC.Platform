@@ -6,7 +6,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 全部模块的系统设置定义，启动时汇总到内存，不同步到数据库
+/// 系统设置目录
 /// </summary>
 public sealed class SystemSettingCatalog
 {
@@ -27,13 +27,13 @@ public sealed class SystemSettingCatalog
     public IReadOnlyCollection<SystemSettingDefinition> All => _byKey.Values;
 
     /// <summary>
-    /// 各设置的修改权限点，供权限点目录核对
+    /// 修改设置用到的权限点
     /// </summary>
     public IEnumerable<PermissionReference> PermissionReferences =>
         All.Select(s => new PermissionReference(s.EditPermission, $"系统设置 {s.Key}"));
 
     /// <summary>
-    /// 扫描程序集中标了 [SystemSetting] 的类型
+    /// 从程序集中读取
     /// </summary>
     public static SystemSettingCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -42,7 +42,7 @@ public sealed class SystemSettingCatalog
     }
 
     /// <summary>
-    /// 读取并校验给定类型的声明
+    /// 从给定类型中读取
     /// </summary>
     public static SystemSettingCatalog Build(IEnumerable<Type> settingTypes)
     {
@@ -69,7 +69,7 @@ public sealed class SystemSettingCatalog
             ?? throw new InvalidOperationException($"{typeof(T).Name} 不在设置目录中，检查它是否标了 [SystemSetting]、所在模块是否已注册。");
 
     /// <summary>
-    /// 按键取定义；代码中已删除的设置返回空（数据库中可能还留着它的值）
+    /// 按键取定义，代码里已删除的设置返回空
     /// </summary>
     public SystemSettingDefinition? Find(string key) => _byKey.GetValueOrDefault(key);
 
@@ -96,7 +96,7 @@ public sealed class SystemSettingCatalog
         return problems.Count > countBefore ? null : new SystemSettingDefinition(declaration, type, defaultValue, validate);
     }
 
-    // 静态抽象成员只能在泛型上下文中调用，这里把它们包成不需要类型参数的委托
+    // 静态抽象成员只能在泛型上下文里调用，这里包成不需要类型参数的委托
     private static (object Default, Func<object, Result> Validate) Bind<T>()
         where T : class, ISystemSetting<T> =>
         (T.Default, value => T.Validate((T)value));

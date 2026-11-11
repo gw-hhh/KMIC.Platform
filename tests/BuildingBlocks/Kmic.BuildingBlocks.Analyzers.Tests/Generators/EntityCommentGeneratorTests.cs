@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Kmic.BuildingBlocks.Analyzers.Tests.Generators;
 
 /// <summary>
-/// 实体与值对象公开属性的 summary 收集为注释表；其他类型、没有注释或不公开的属性不收集
+/// 只收集实体和值对象里有注释的公开属性
 /// </summary>
 public sealed class EntityCommentGeneratorTests
 {
@@ -95,7 +95,7 @@ public sealed class EntityCommentGeneratorTests
         return string.Concat(result.GeneratedTrees.Select(t => t.ToString()));
     }
 
-    // 运行测试的框架程序集足以编译这些源码
+    // 测试进程加载的框架程序集已经够编译这段源码
     private static IEnumerable<MetadataReference> PlatformReferences() =>
         (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string ?? "")
             .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)

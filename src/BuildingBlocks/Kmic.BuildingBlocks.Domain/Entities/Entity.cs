@@ -1,10 +1,10 @@
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
 /// <summary>
-/// 实体基类：同一运行时类型且 Id 相同即相等
+/// 实体基类
 /// </summary>
 /// <remarks>
-/// ID 在创建时就生成（UUID v7），不存在“未保存时 Id 为空”的实体，相等性不需要为临时实体特殊处理
+/// 类型和 ID 都相同即相等
 /// </remarks>
 public abstract class Entity<TId> : IEquatable<Entity<TId>>
     where TId : notnull
@@ -15,12 +15,12 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
     protected Entity(TId id) => Id = id;
 
     /// <summary>
-    /// 只供 EF 物化使用，派生类以私有无参构造函数调用
+    /// 只供 EF 使用
     /// </summary>
     protected Entity() => Id = default!;
 
     /// <summary>
-    /// 实体标识
+    /// ID
     /// </summary>
     public TId Id { get; protected init; }
 

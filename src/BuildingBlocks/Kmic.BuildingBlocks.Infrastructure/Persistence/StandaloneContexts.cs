@@ -7,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 在 DI 之外创建模块上下文：设计时工具（dotnet ef）与迁移程序用，身份为启动任务的系统身份
+/// 在依赖注入之外创建模块上下文
 /// </summary>
+/// <remarks>
+/// 给 dotnet ef 和迁移程序用，身份是系统身份
+/// </remarks>
 internal static class StandaloneContexts
 {
     public static TContext Create<TContext>(string connectionString)
@@ -18,7 +21,7 @@ internal static class StandaloneContexts
         return (TContext)Activator.CreateInstance(typeof(TContext), options, Services(typeof(TContext)))!;
     }
 
-    // 模型校验要核对范围对象：从上下文所在程序集及其引用的 Kmic.* 程序集中读取声明
+    // 模型校验要核对范围对象，从上下文所在程序集及其引用的 Kmic.* 程序集里读取
     private static ModuleDbContextServices Services(Type contextType)
     {
         var execution = new ExecutionScope();

@@ -6,7 +6,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 数据库注释：表注释来自配置，列注释默认来自属性的 XML 注释，框架列由约定补上
+/// 表注释来自配置，列注释默认来自属性的 XML 注释，框架列由约定补上
 /// </summary>
 public sealed class CommentTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
@@ -14,10 +14,10 @@ public sealed class CommentTests(ClassDatabase<ProbeTemplate> database) : IClass
 
     [Theory]
     [InlineData("Ticket", "Title", "标题")]
-    [InlineData("Ticket", "BudgetAmount", "预算；为空表示未设定：金额")]
-    [InlineData("Ticket", "Id", "主键，由程序生成的 UUID v7")]
-    [InlineData("Ticket", "CreatedAt", "创建时刻")]
-    [InlineData("TicketLine", "TicketId", "所属Ticket的 ID")]
+    [InlineData("Ticket", "BudgetAmount", "预算：数额")]
+    [InlineData("Ticket", "Id", "ID")]
+    [InlineData("Ticket", "CreatedAt", "创建时间")]
+    [InlineData("TicketLine", "TicketId", "Ticket ID")]
     public async Task Column_HasComment(string table, string column, string expected)
     {
         await using var command = database.DataSource.CreateCommand("""

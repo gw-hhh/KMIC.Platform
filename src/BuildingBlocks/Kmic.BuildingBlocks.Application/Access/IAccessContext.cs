@@ -3,15 +3,15 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Access;
 
 /// <summary>
-/// 一次请求的访问上下文：每个请求从数据库加载状态，权限内容按授权版本缓存（ADR-0026）
+/// 访问上下文
 /// </summary>
 /// <remarks>
-/// 结构定义在框架中，由 Identity 模块的加载器实现；授权行为与数据范围只读取它，不查库
+/// 由 Identity 模块加载，每个请求一份。授权和数据权限只读它，不再查库
 /// </remarks>
 public interface IAccessContext
 {
     /// <summary>
-    /// 用户；模拟身份时为被模拟的用户
+    /// 用户
     /// </summary>
     UserId UserId { get; }
 
@@ -21,42 +21,42 @@ public interface IAccessContext
     SessionId SessionId { get; }
 
     /// <summary>
-    /// 当前角色
+    /// 角色
     /// </summary>
     RoleId RoleId { get; }
 
     /// <summary>
-    /// 当前角色的授权版本，通过响应头返回给前端
+    /// 授权版本号
     /// </summary>
     long AuthorizationVersion { get; }
 
     /// <summary>
-    /// 当前角色的权限点编码
+    /// 权限点
     /// </summary>
     IReadOnlySet<string> Permissions { get; }
 
     /// <summary>
-    /// 用户所属组织单元；未分配时为空
+    /// 所属组织
     /// </summary>
     OrgUnitId? OrgUnitId { get; }
 
     /// <summary>
-    /// 数据范围授予
+    /// 数据权限授予
     /// </summary>
     DataScopeGrant DataScopeGrant { get; }
 
     /// <summary>
-    /// 当前树版本的组织树快照
+    /// 组织树
     /// </summary>
     IOrgHierarchy OrgHierarchy { get; }
 
     /// <summary>
-    /// 模拟身份时的实际操作人，否则为空
+    /// 实际操作人
     /// </summary>
     UserId? ImpersonatorUserId { get; }
 
     /// <summary>
-    /// 模拟会话是否允许修改；非模拟会话恒为 true
+    /// 是否允许修改数据
     /// </summary>
     bool ImpersonationAllowsWrite { get; }
 

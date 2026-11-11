@@ -1,27 +1,30 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 幂等记录：每个模块 schema 中一张，与业务数据同一事务标记完成；只用来建表，读写都是框架的原生 SQL
+/// 幂等记录
 /// </summary>
+/// <remarks>
+/// 只用来建表，读写都是框架里的 SQL
+/// </remarks>
 internal sealed class IdempotencyRecord
 {
     /// <summary>
-    /// 主键
+    /// ID
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// 发起请求的用户
+    /// 用户
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// 发起请求时的当前角色
+    /// 角色
     /// </summary>
     public Guid RoleId { get; set; }
 
     /// <summary>
-    /// 消息全名，如 Sample.SubmitSampleCommand
+    /// 消息名
     /// </summary>
     public string Operation { get; set; } = "";
 
@@ -31,42 +34,42 @@ internal sealed class IdempotencyRecord
     public string Key { get; set; } = "";
 
     /// <summary>
-    /// 请求摘要（SHA-256），同键不同请求时拒绝
+    /// 请求摘要
     /// </summary>
     public byte[] RequestHash { get; set; } = [];
 
     /// <summary>
-    /// Processing 或 Completed
+    /// 状态
     /// </summary>
     public string Status { get; set; } = "";
 
     /// <summary>
-    /// 当前持有者的令牌
+    /// 租约令牌
     /// </summary>
     public Guid LeaseToken { get; set; }
 
     /// <summary>
-    /// 租约到期时刻，到期后其他请求可以接管
+    /// 租约到期时间
     /// </summary>
     public DateTimeOffset LeaseExpiresAt { get; set; }
 
     /// <summary>
-    /// 成功时响应值的 JSON；没有值的命令为空
+    /// 响应值
     /// </summary>
     public string? ResponseBody { get; set; }
 
     /// <summary>
-    /// 创建时刻
+    /// 创建时间
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
-    /// 完成时刻
+    /// 完成时间
     /// </summary>
     public DateTimeOffset? CompletedAt { get; set; }
 
     /// <summary>
-    /// 过期时刻，之后同一个键按新请求处理，由清理任务删除
+    /// 过期时间
     /// </summary>
     public DateTimeOffset ExpiresAt { get; set; }
 }

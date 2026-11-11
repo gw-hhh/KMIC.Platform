@@ -1,22 +1,25 @@
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
 /// <summary>
-/// 带聚合版本的命令收据：事务行为在保存之后用聚合的新版本回填，处理器按当前值填写即可
+/// 带版本号的命令结果
 /// </summary>
+/// <remarks>
+/// 保存后会换成新版本号，处理器按当前值填写即可
+/// </remarks>
 public interface IHasConcurrencyVersion
 {
     /// <summary>
-    /// 版本所属的聚合
+    /// 版本号所属的聚合根
     /// </summary>
     Guid AggregateId { get; }
 
     /// <summary>
-    /// 聚合的并发版本
+    /// 版本号
     /// </summary>
     long ConcurrencyVersion { get; }
 
     /// <summary>
-    /// 换上新版本的收据
+    /// 换成新版本号
     /// </summary>
     IHasConcurrencyVersion WithConcurrencyVersion(long version);
 }

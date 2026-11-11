@@ -1,28 +1,31 @@
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 偏好允许设置的层；解析顺序为 用户 + 角色 → 角色 → 系统 → 代码默认值
+/// 偏好层级
 /// </summary>
+/// <remarks>
+/// 读取顺序：用户在角色下的设置、角色、系统、默认值
+/// </remarks>
 [Flags]
 public enum PreferenceLayers
 {
     /// <summary>
-    /// 不允许任何层，声明时不能使用
+    /// 无，声明时不能用
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// 系统层
+    /// 系统
     /// </summary>
     System = 1,
 
     /// <summary>
-    /// 角色层
+    /// 角色
     /// </summary>
     Role = 2,
 
     /// <summary>
-    /// 用户在某个角色下的设置
+    /// 用户在角色下的设置
     /// </summary>
     UserRole = 4,
 

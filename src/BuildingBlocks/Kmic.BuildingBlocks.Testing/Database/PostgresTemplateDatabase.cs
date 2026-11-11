@@ -5,16 +5,16 @@ using Xunit;
 namespace Kmic.BuildingBlocks.Testing.Database;
 
 /// <summary>
-/// 程序集级夹具：启动 PostgreSQL 容器并生成模板库，测试类从它克隆自己的数据库（06 D8）
+/// 模板数据库
 /// </summary>
 /// <remarks>
-/// 集成测试项目派生一个类实现 InitializeTemplateAsync，并用 [assembly: AssemblyFixture(typeof(派生类))] 注册；
-/// 测试类通过 IClassFixture&lt;ClassDatabase&lt;派生类&gt;&gt; 取得克隆库
+/// 程序集级夹具：启动 PostgreSQL 容器并建好模板库。测试项目派生一个类实现 InitializeTemplateAsync，用 [assembly: AssemblyFixture(typeof(派生类))] 注册，
+/// 测试类再通过 IClassFixture&lt;ClassDatabase&lt;派生类&gt;&gt; 拿到克隆库
 /// </remarks>
 public abstract class PostgresTemplateDatabase : IAsyncLifetime
 {
     /// <summary>
-    /// 镜像版本与生产的 PostgreSQL 小版本一致（S0-04）
+    /// 和生产环境的 PostgreSQL 小版本保持一致
     /// </summary>
     public const string Image = "postgres:18.6";
 
@@ -29,7 +29,7 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
         await _container.StartAsync(cancellationToken);
         await ExecuteAsync($"CREATE DATABASE {TemplateName}", cancellationToken);
 
-        // 不进连接池，连接关闭即断开：池中空闲的物理连接同样会让克隆失败（55006，原型 #10）
+        // 不用连接池：池里空闲的连接也会让克隆失败
         await InitializeTemplateAsync(ConnectionString(TemplateName, pooling: false), cancellationToken);
     }
 
@@ -41,7 +41,7 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     }
 
     /// <summary>
-    /// 从模板库克隆一个新数据库，返回库名
+    /// 克隆数据库，返回库名
     /// </summary>
     public async Task<string> CloneAsync(CancellationToken cancellationToken)
     {
@@ -51,20 +51,23 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     }
 
     /// <summary>
-    /// 删除克隆库，仍有连接时强制断开
+    /// 删除克隆库，有连接时强制断开
     /// </summary>
     public Task DropAsync(string database, CancellationToken cancellationToken) =>
         ExecuteAsync($"DROP DATABASE IF EXISTS \"{database}\" WITH (FORCE)", cancellationToken);
 
     /// <summary>
-    /// 某个数据库的连接串
+    /// 连接串
     /// </summary>
     public string ConnectionString(string database, bool pooling = true) =>
         new NpgsqlConnectionStringBuilder(_container.GetConnectionString()) { Database = database, Pooling = pooling }.ConnectionString;
 
     /// <summary>
-    /// 在模板库上建立结构（执行迁移等）；连接串不进连接池，不要另外建立池化的连接
+    /// 建立模板库的结构，如执行迁移
     /// </summary>
+    /// <remarks>
+    /// 连接串不用连接池，不要另外建池化的连接
+    /// </remarks>
     protected abstract Task InitializeTemplateAsync(string connectionString, CancellationToken cancellationToken);
 
     private async Task ExecuteAsync(string sql, CancellationToken cancellationToken)

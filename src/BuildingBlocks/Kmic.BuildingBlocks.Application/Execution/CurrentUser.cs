@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Execution;
 
 /// <summary>
-/// 执行身份的标准实现；由各入口在建立执行上下文时创建
+/// 当前身份
 /// </summary>
 public sealed record CurrentUser : ICurrentUser
 {
@@ -39,12 +39,12 @@ public sealed record CurrentUser : ICurrentUser
     public UserId? OnBehalfOf { get; private init; }
 
     /// <summary>
-    /// 系统身份；处理事件时带上引发它的原始操作人
+    /// 系统身份
     /// </summary>
     public static CurrentUser System(UserId? onBehalfOf = null) => new() { IsSystem = true, OnBehalfOf = onBehalfOf };
 
     /// <summary>
-    /// 来自访问上下文的用户身份
+    /// 用户身份
     /// </summary>
     public static CurrentUser From(IAccessContext access)
     {

@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
 /// <summary>
-/// KM9007：手写代码禁止嵌套三元运算，加括号也不行
+/// KM9007：不能嵌套三元运算，加括号也不行
 /// </summary>
 /// <remarks>
-/// 多条件的结果用 switch 表达式；涉及顺序或副作用用平铺的 if / else（06 附录 A.7）
+/// 多个条件用 switch 表达式；涉及顺序或副作用时用平铺的 if / else
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class NestedConditionalAnalyzer : DiagnosticAnalyzer
@@ -33,7 +33,7 @@ public sealed class NestedConditionalAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(Analyze, SyntaxKind.ConditionalExpression);
     }
 
-    // 只看到最近的函数边界为止：lambda 里的三元与外面的三元不算嵌套
+    // 只看到最近的函数边界：lambda 里的三元和外面的三元不算嵌套
     private static void Analyze(SyntaxNodeAnalysisContext context)
     {
         for (var parent = context.Node.Parent; parent is not null; parent = parent.Parent)

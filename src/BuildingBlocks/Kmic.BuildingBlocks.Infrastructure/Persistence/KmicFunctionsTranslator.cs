@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Query;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 把 KmicFunctions 翻译为 ("列" COLLATE "C") ILIKE 模式 ESCAPE '\'
+/// KmicFunctions 翻译器
 /// </summary>
 /// <remarks>
-/// 转义在数据库端完成（replace），term 始终是参数，翻译器拿不到它的值；
-/// 显式的 "C" 让默认列与不区分大小写的列写法相同（非确定性排序规则不支持 ILIKE），ILIKE 在 "C" 下只折叠 ASCII 字母
+/// 翻译为 ("列" COLLATE "C") ILIKE 模式 ESCAPE '\'。term 始终是参数，转义放在数据库里做。
+/// 显式转成 "C"：不区分大小写的列用的是非确定性排序规则，不支持 ILIKE
 /// </remarks>
 internal sealed class KmicFunctionsTranslator(NpgsqlSqlExpressionFactory sql) : IMethodCallTranslator
 {

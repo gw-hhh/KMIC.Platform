@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0103～KM0105：实体与聚合根经工厂方法创建、属性对外只读、不公开可变集合
+/// KM0103～KM0105：实体通过工厂方法创建，属性对外只读，不公开可变集合
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EntityShapeAnalyzer : DiagnosticAnalyzer
@@ -63,7 +63,7 @@ public sealed class EntityShapeAnalyzer : DiagnosticAnalyzer
                 || (type.IsAbstract && constructor.DeclaredAccessibility is Accessibility.Protected or Accessibility.ProtectedAndInternal);
             if (!allowed)
             {
-                // 没写构造函数时编译器补一个公开的无参构造函数，位置报在类型上
+                // 没写构造函数时编译器会补一个公开的无参构造函数，报在类型上
                 var location = constructor.IsImplicitlyDeclared ? type.Locations[0] : constructor.Locations[0];
                 context.ReportDiagnostic(Diagnostic.Create(NonPrivateConstructor, location, type.Name));
             }

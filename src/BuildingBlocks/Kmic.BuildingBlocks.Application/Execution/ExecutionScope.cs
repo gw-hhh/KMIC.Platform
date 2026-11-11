@@ -3,14 +3,14 @@ using Kmic.BuildingBlocks.Application.Access;
 namespace Kmic.BuildingBlocks.Application.Execution;
 
 /// <summary>
-/// 每个 DI 作用域一个执行上下文，由入口（HTTP 中间件、后台入口）初始化一次
+/// 执行上下文
 /// </summary>
 /// <remarks>
-/// 模块代码只注入 IExecutionContext；Initialize 只供框架的入口调用（架构测试）
+/// 模块代码只注入 IExecutionContext，Initialize 只给框架入口调用
 /// </remarks>
 public sealed class ExecutionScope : IExecutionContext
 {
-    // Contracts 调用与“命令内”都按异步调用链生效，同一作用域内并行的其他调用链不受影响
+    // 按异步调用链生效，同一作用域里并行的其他调用不受影响
     private static readonly AsyncLocal<int> _moduleCallDepth = new();
     private static readonly AsyncLocal<int> _commandDepth = new();
 
@@ -20,8 +20,11 @@ public sealed class ExecutionScope : IExecutionContext
     public CallOrigin Origin => _moduleCallDepth.Value > 0 ? CallOrigin.ModuleCall : EntryOrigin;
 
     /// <summary>
-    /// 入口设置的来源；Contracts 调用期间 Origin 是 ModuleCall，这里仍是入口的来源，框架据此选择数据源
+    /// 入口的来源
     /// </summary>
+    /// <remarks>
+    /// Contracts 调用期间 Origin 会变成 ModuleCall，这里仍是入口的来源，用来选数据源
+    /// </remarks>
     public CallOrigin EntryOrigin =>
         _origin ?? throw new InvalidOperationException("执行上下文尚未初始化，入口应先调用 ExecutionScope.Initialize。");
 
@@ -35,7 +38,7 @@ public sealed class ExecutionScope : IExecutionContext
     public bool InCommand => _commandDepth.Value > 0;
 
     /// <summary>
-    /// 设置来源与身份；每个作用域只能设置一次
+    /// 设置来源和身份，每个作用域只能设置一次
     /// </summary>
     public void Initialize(CallOrigin origin, ICurrentUser user, IAccessContext? access = null)
     {
@@ -56,7 +59,7 @@ public sealed class ExecutionScope : IExecutionContext
     {
         if (InCommand)
         {
-            throw new InvalidOperationException("命令内不能再发送命令：需要复用的逻辑提取到领域服务，需要对方改数据就发集成事件（05-02 D5）。");
+            throw new InvalidOperationException("命令里不能再发命令。要复用的逻辑放进领域服务，要别的模块改数据就发集成事件。");
         }
 
         return new DepthMarker(_commandDepth);

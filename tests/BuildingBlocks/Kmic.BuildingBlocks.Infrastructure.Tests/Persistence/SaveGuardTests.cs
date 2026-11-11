@@ -7,7 +7,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 只有事务行为能保存；查询上下文不跟踪、不能保存
+/// 只有命令事务能保存；查询上下文不跟踪，也不能保存
 /// </summary>
 public sealed class SaveGuardTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -25,7 +25,7 @@ public sealed class SaveGuardTests(ClassDatabase<ProbeTemplate> database) : ICla
         work.Db.Add(NewTicket());
 
         var error = await Should.ThrowAsync<InvalidOperationException>(() => work.Db.SaveChangesAsync(Ct));
-        error.Message.ShouldContain("只有事务行为能保存");
+        error.Message.ShouldContain("处理器不能自己保存");
     }
 
     [Fact]

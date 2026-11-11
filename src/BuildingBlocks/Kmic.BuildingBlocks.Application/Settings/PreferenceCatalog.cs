@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 全部模块声明的偏好，启动时汇总到内存
+/// 偏好目录
 /// </summary>
 public sealed class PreferenceCatalog
 {
@@ -26,7 +26,7 @@ public sealed class PreferenceCatalog
     public IReadOnlyCollection<PreferenceDefinition> All => _byKey.Values;
 
     /// <summary>
-    /// 扫描程序集中标了 [Preference] 的类型
+    /// 从程序集中读取
     /// </summary>
     public static PreferenceCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -35,7 +35,7 @@ public sealed class PreferenceCatalog
     }
 
     /// <summary>
-    /// 读取并校验给定类型的声明
+    /// 从给定类型中读取
     /// </summary>
     public static PreferenceCatalog Build(IEnumerable<Type> preferenceTypes)
     {
@@ -62,7 +62,7 @@ public sealed class PreferenceCatalog
             ?? throw new InvalidOperationException($"{typeof(T).Name} 不在偏好目录中，检查它是否标了 [Preference]、所在模块是否已注册。");
 
     /// <summary>
-    /// 按键取定义；代码中已删除的偏好返回空
+    /// 按键取定义，代码里已删除的偏好返回空
     /// </summary>
     public PreferenceDefinition? Find(string key) => _byKey.GetValueOrDefault(key);
 
@@ -89,7 +89,7 @@ public sealed class PreferenceCatalog
         return problems.Count > countBefore ? null : new PreferenceDefinition(declaration, type, defaultValue, validate);
     }
 
-    // 静态抽象成员只能在泛型上下文中调用，这里把它们包成不需要类型参数的委托
+    // 静态抽象成员只能在泛型上下文里调用，这里包成不需要类型参数的委托
     private static (object Default, Func<object, Result> Validate) Bind<T>()
         where T : class, IPreference<T> =>
         (T.Default, value => T.Validate((T)value));

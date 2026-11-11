@@ -14,7 +14,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 仓储基类：加载完整聚合、版本比较、范围外的真实原因、加锁加载、恢复、原子条件更新
+/// 仓储基类：读取整个聚合、版本号比较、无权限时记安全事件、加锁读取、恢复、按条件更新
 /// </summary>
 public sealed class RepositoryTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -130,7 +130,7 @@ public sealed class RepositoryTests(ClassDatabase<ProbeTemplate> database) : ICl
         ticket.Fund(100m);
         await _harness.AddAsync(_alice, ticket);
 
-        // 两个事务同时扣 70：后者等前者提交后重新判断条件，扣不成
+        // 两个事务同时扣 70：后一个等前一个提交后重新判断条件，扣不成
         var results = await Task.WhenAll(DeductAsync(ticket.Id, 70m), DeductAsync(ticket.Id, 70m));
 
         results.Count(deducted => deducted).ShouldBe(1);

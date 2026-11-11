@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模型定稿时执行模型校验，再收集唯一约束的错误映射，最后删掉框架的临时注解
+/// 模型校验约定
 /// </summary>
 /// <remarks>
-/// 不能在 OnModelCreating 中校验：EF 在读取模块配置之前，会把值对象等类型按约定临时发现为实体，
-/// 这些类型要到定稿阶段才被清理掉。本约定追加在最后，运行在 EF 的清理之后
+/// 不能在 OnModelCreating 里校验：EF 读取模块配置前，会先把值对象这类类型临时当成实体，
+/// 要到定稿阶段才清理掉。这个约定加在最后，在 EF 清理之后运行
 /// </remarks>
 internal sealed class ModelValidationConvention(string module, DataScopeObjectCatalog scopeObjects) : IModelFinalizingConvention
 {

@@ -17,7 +17,7 @@ internal sealed class RenameTicketCommandHandler(TicketRepository tickets, Probe
         loaded.Value.Rename(command.Title);
         await hooks.BeforeReturnAsync(cancellationToken);
 
-        // 按当前值填写，提交后的版本由事务行为回填
+        // 按当前值填写，保存后会换成新版本号
         return new VersionedResponse<TicketId>(loaded.Value.Id, loaded.Value.ConcurrencyVersion);
     }
 }

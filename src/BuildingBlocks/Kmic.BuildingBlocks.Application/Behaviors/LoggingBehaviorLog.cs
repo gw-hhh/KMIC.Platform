@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
 /// <summary>
-/// LoggingBehavior 的日志方法
+/// 请求日志的日志方法
 /// </summary>
 internal static partial class LoggingBehaviorLog
 {

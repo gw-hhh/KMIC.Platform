@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Application.Access;
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
 /// <summary>
-/// 声明测试身份的当前角色：权限点、默认范围等级与按范围对象的覆盖
+/// 测试角色
 /// </summary>
 public sealed class TestRoleBuilder
 {
@@ -16,7 +16,7 @@ public sealed class TestRoleBuilder
     }
 
     /// <summary>
-    /// 增加权限点
+    /// 添加权限点
     /// </summary>
     public TestRoleBuilder Permissions(params IEnumerable<string> permissions)
     {
@@ -25,7 +25,7 @@ public sealed class TestRoleBuilder
     }
 
     /// <summary>
-    /// 默认范围等级，不设置时为“本人”
+    /// 默认数据权限等级，不设置时只能看本人数据
     /// </summary>
     public TestRoleBuilder Scope(ScopeLevel level)
     {

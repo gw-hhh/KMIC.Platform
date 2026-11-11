@@ -8,12 +8,11 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.Data;
 
 /// <summary>
-/// KM2001：查询表达式中不得用 ToLower / ToUpper / Contains / StartsWith / EndsWith 做文本匹配
+/// KM2001：查询里不能用 ToLower、ToUpper、Contains、StartsWith、EndsWith 匹配文本
 /// </summary>
 /// <remarks>
-/// 这些写法在数据库里要么用不上索引（函数包裹列），要么在不区分大小写的列上失败（非确定性排序规则不支持 ILIKE）；
-/// 统一用 KmicFunctions，以后调整翻译方式不必改调用方（06 第 11.2 节）。只检查转成表达式树的 lambda 与
-/// IQueryable 上的查询语法，内存中的 LINQ 不受影响
+/// 这些写法要么用不上索引，要么在不区分大小写的列上直接报错，统一改用 KmicFunctions。
+/// 只检查会转成表达式树的 lambda 和 IQueryable 上的查询语法，内存里的 LINQ 不受影响
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TextMatchingAnalyzer : DiagnosticAnalyzer

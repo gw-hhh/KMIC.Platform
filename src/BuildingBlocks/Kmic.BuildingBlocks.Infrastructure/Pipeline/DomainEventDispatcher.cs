@@ -8,10 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 按事件的运行时类型找到全部处理器并依次执行，任何一个失败即停止，整个命令随之失败
+/// 领域事件分发
 /// </summary>
 /// <remarks>
-/// 领域事件不经 Mediator（05-01 第 8 节）；同一事件的多个处理器不保证顺序
+/// 依次执行事件的全部处理器，有一个失败就停止。领域事件不经过 Mediator，多个处理器之间不保证顺序
 /// </remarks>
 internal sealed class DomainEventDispatcher(IServiceProvider services)
 {

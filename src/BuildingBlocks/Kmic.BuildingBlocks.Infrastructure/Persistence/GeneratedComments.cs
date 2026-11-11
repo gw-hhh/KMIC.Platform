@@ -5,8 +5,11 @@ using System.Reflection;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 读取编译时由属性 XML 注释生成的注释表（Kmic.Generated.EntityComments），按程序集缓存
+/// 实体属性注释
 /// </summary>
+/// <remarks>
+/// 读取编译时生成的 Kmic.Generated.EntityComments，按程序集缓存
+/// </remarks>
 internal static class GeneratedComments
 {
     private const string TypeName = "Kmic.Generated.EntityComments";

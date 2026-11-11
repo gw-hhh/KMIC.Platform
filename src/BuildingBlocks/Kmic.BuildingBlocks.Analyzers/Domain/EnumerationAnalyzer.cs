@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0301：智能枚举派生类 sealed、构造函数私有、取值为 static readonly 字段
+/// KM0301：智能枚举要 sealed、构造函数私有、取值是 static readonly 字段
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EnumerationAnalyzer : DiagnosticAnalyzer

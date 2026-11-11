@@ -13,7 +13,7 @@ public sealed class ExecutionScopeTests
 
         using (ExecutionScope.EnterModuleCall())
         {
-            // 数据源按入口来源选择：后台作业中的 Contracts 调用仍用后台连接池
+            // 后台作业里的 Contracts 调用仍然用后台连接池
             scope.Origin.ShouldBe(CallOrigin.ModuleCall);
             scope.EntryOrigin.ShouldBe(CallOrigin.BackgroundJob);
         }

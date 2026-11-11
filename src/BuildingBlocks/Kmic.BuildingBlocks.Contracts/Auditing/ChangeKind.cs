@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Contracts.Auditing;
 
 /// <summary>
-/// 实体的变更方式
+/// 变更类型
 /// </summary>
 public enum ChangeKind
 {
@@ -21,12 +21,12 @@ public enum ChangeKind
     Deleted,
 
     /// <summary>
-    /// 软删除（标记删除，可恢复）
+    /// 软删除
     /// </summary>
     SoftDeleted,
 
     /// <summary>
-    /// 从软删除中恢复
+    /// 恢复
     /// </summary>
     Restored,
 }

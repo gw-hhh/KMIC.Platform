@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// decimal 列的精度与小数位
+/// 小数精度
 /// </summary>
 /// <param name="Precision">总位数</param>
 /// <param name="Scale">小数位数</param>

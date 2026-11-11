@@ -4,7 +4,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Testing.Assertions;
 
 /// <summary>
-/// Result 的断言：失败时把错误码和消息写进断言信息
+/// Result 断言
 /// </summary>
 public static class ResultAssertions
 {
@@ -30,7 +30,7 @@ public static class ResultAssertions
     }
 
     /// <summary>
-    /// 断言失败，且错误码与类型都与预期相同；返回实际的错误，供继续检查字段错误等细节
+    /// 断言失败且错误码、错误类型都符合，返回实际的错误
     /// </summary>
     public static Error ShouldBeFailure(this Result result, Error expected)
     {
@@ -50,7 +50,7 @@ public static class ResultAssertions
     }
 
     /// <summary>
-    /// 断言失败且错误类型相同，不关心错误码
+    /// 断言失败且错误类型符合，不管错误码
     /// </summary>
     public static Error ShouldBeFailure(this Result result, ErrorType expectedType)
     {

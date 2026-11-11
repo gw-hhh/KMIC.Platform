@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
 /// <summary>
-/// 处理器里又发命令：用来验证 05-02 D5 的运行时守卫
+/// 在处理器里再发命令，用来验证运行时的拦截
 /// </summary>
 [AllowAuthenticated]
 [AllowSystem]

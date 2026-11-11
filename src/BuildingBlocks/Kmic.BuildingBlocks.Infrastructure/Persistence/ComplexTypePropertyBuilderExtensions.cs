@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 值对象（复杂类型）成员的框架映射扩展，含义与 PropertyBuilderExtensions 相同
+/// 值对象成员的映射扩展
 /// </summary>
 public static class ComplexTypePropertyBuilderExtensions
 {
     /// <summary>
-    /// 长文本，映射为 text
+    /// 不限长度的文本列
     /// </summary>
-    /// <exception cref="InvalidOperationException">成员不是字符串</exception>
+    /// <exception cref="InvalidOperationException">不是字符串</exception>
     public static ComplexTypePropertyBuilder<TProperty> IsUnboundedText<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -22,7 +22,7 @@ public static class ComplexTypePropertyBuilderExtensions
     /// <summary>
     /// 不区分大小写
     /// </summary>
-    /// <exception cref="InvalidOperationException">成员不是字符串</exception>
+    /// <exception cref="InvalidOperationException">不是字符串</exception>
     public static ComplexTypePropertyBuilder<TProperty> IsCaseInsensitive<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -31,7 +31,7 @@ public static class ComplexTypePropertyBuilderExtensions
     }
 
     /// <summary>
-    /// 按框架的精度常量声明 decimal 的精度
+    /// 设置小数精度
     /// </summary>
     public static ComplexTypePropertyBuilder<TProperty> HasPrecision<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder, DecimalPrecision precision)
     {

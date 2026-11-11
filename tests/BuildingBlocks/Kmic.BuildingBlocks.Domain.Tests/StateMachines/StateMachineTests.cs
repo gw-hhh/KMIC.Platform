@@ -164,7 +164,7 @@ public sealed class StateMachineTests
         Toggle,
     }
 
-    // 状态属性的 setter 必须私有（KM0401），声明状态机的代码因此放在类型内部
+    // 状态属性的 setter 必须私有，所以声明状态机的代码要放在类型内部
     private sealed class Lamp() : AggregateRoot<Guid>(Guid.CreateVersion7())
     {
         public Light State { get; private set; }

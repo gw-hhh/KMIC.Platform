@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 模块名到写入上下文的登记；事务行为按用例所属模块取得要开启事务的上下文
+/// 各模块的写入上下文
 /// </summary>
 internal sealed class ModuleWriteContexts(IEnumerable<ModuleWriteContext> registrations, IServiceProvider services)
 {
@@ -13,5 +13,5 @@ internal sealed class ModuleWriteContexts(IEnumerable<ModuleWriteContext> regist
     public ModuleDbContext Get(string module) =>
         _byModule.TryGetValue(module, out var type)
             ? (ModuleDbContext)services.GetRequiredService(type)
-            : throw new InvalidOperationException($"{module} 模块没有注册写入上下文（AddModuleDbContexts），它的命令无法开启事务。");
+            : throw new InvalidOperationException($"{module} 模块没有注册写入上下文，请调用 AddModuleDbContexts。");
 }

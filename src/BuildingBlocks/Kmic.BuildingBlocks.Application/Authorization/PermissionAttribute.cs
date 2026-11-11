@@ -1,19 +1,22 @@
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 标在权限点常量上，声明显示名与是否敏感；编码就是常量的值，格式“模块.资源.动作”
+/// 权限点
 /// </summary>
-/// <param name="displayName">角色管理界面中的显示名</param>
+/// <param name="displayName">显示名称</param>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class PermissionAttribute(string displayName) : Attribute
 {
     /// <summary>
-    /// 显示名
+    /// 显示名称
     /// </summary>
     public string DisplayName { get; } = displayName;
 
     /// <summary>
-    /// 是否敏感：物理删除、模拟身份、导出全部数据类必须标记；角色管理界面单独提示，用到它的命令必须审计
+    /// 是否敏感
     /// </summary>
+    /// <remarks>
+    /// 物理删除、模拟登录、导出全部数据这类权限要标为敏感，用到它的命令必须审计
+    /// </remarks>
     public bool Sensitive { get; init; }
 }

@@ -6,13 +6,12 @@ using NpgsqlTypes;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 幂等记录的读写：领取、接管、释放各用一个独立的短语句（不在业务事务中），完成标记在业务事务中写入
+/// 幂等记录读写
 /// </summary>
 /// <remarks>
-/// 所有改写都带状态与令牌条件：不带条件的话，提交已生效而确认丢失时，失败路径会删掉已经是 Completed 的记录，
-/// 客户端用原键重试就会重新执行（05-02 第 5.3 节）
+/// 每条改写都带上状态和令牌条件。否则提交其实成功了、只是确认没传回来，失败处理会把已完成的记录删掉，客户端一重试就会再执行一遍
 /// </remarks>
-/// <param name="dataSource">事务池；只在命令不持有业务连接时借用</param>
+/// <param name="dataSource">事务连接池</param>
 /// <param name="table">带引号的完整表名，如 "Sample"."IdempotencyRecord"</param>
 internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table)
 {
@@ -68,7 +67,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         return await ReadSingleAsync(command, ct);
     }
 
-    // 只有租约已到期、令牌仍是读到的那个时才接管，两个请求同时接管只有一个成功
+    // 租约已到期、令牌还是读到的那个才接管，两个请求同时接管只有一个能成功
     public async Task<bool> TryTakeOverAsync(IdempotencySnapshot existing, Guid newToken, DateTimeOffset leaseExpiresAt, DateTimeOffset now, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand($"""
@@ -83,7 +82,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         return await command.ExecuteNonQueryAsync(ct) == 1;
     }
 
-    // 提交中的事务持有这一行的行锁，删除会等它结束后再判断，不会把“正在提交”误判为“未提交”
+    // 正在提交的事务锁着这一行，删除会等它结束再判断，不会把正在提交误当成没提交
     public async Task<bool> TryReleaseAsync(Guid id, Guid token, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand($"""DELETE FROM {table} WHERE "Id" = @id AND "Status" = '{Processing}' AND "LeaseToken" = @token""");
@@ -100,7 +99,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         await command.ExecuteNonQueryAsync(ct);
     }
 
-    // 在业务事务中执行：完成标记与业务数据一起提交；令牌不符说明已被接管，整个命令回滚
+    // 在业务事务里写完成标记。令牌不符说明已被别的请求接管，整个命令回滚
     public async Task<bool> TryCompleteAsync(ModuleDbContext context, Guid id, Guid token, string? responseBody, DateTimeOffset now, CancellationToken ct)
     {
         var sql = $"""

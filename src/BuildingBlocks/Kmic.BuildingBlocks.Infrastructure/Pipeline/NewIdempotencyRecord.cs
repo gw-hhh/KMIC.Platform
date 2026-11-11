@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 领取幂等键时写入的一行
+/// 新的幂等记录
 /// </summary>
 internal sealed record NewIdempotencyRecord
 {

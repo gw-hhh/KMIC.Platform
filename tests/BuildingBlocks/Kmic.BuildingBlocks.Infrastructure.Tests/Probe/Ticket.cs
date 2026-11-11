@@ -4,8 +4,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 测试用的聚合：可软删除，有子实体，按所属人与所属组织控制可见范围
+/// 单据
 /// </summary>
+/// <remarks>
+/// 测试用的聚合：可以软删除，有子实体，按所属人和所属组织控制数据权限
+/// </remarks>
 internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwner, IHasOrgUnit
 {
     private readonly List<TicketLine> _lines = [];
@@ -21,7 +24,7 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     }
 
     /// <summary>
-    /// 单据编号；不区分大小写，未删除的单据中唯一
+    /// 单据编号
     /// </summary>
     public string Number { get; private set; }
 
@@ -41,17 +44,17 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     public OrgUnitId OrgUnitId { get; private set; }
 
     /// <summary>
-    /// 可用额度，单位元
+    /// 可用额度
     /// </summary>
     public decimal Amount { get; private set; }
 
     /// <summary>
-    /// 截止时刻；为空表示不限
+    /// 截止时间
     /// </summary>
     public DateTimeOffset? DueAt { get; private set; }
 
     /// <summary>
-    /// 备注，长文本
+    /// 备注
     /// </summary>
     public string? Note { get; private set; }
 
@@ -66,12 +69,12 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     public TicketPriority Priority { get; private set; }
 
     /// <summary>
-    /// 联系邮箱；为空表示未填写
+    /// 联系邮箱
     /// </summary>
     public EmailAddress? ContactEmail { get; private set; }
 
     /// <summary>
-    /// 预算；为空表示未设定
+    /// 预算
     /// </summary>
     public Money? Budget { get; private set; }
 
@@ -81,7 +84,7 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     public IReadOnlyList<Watcher> Watchers => _watchers;
 
     /// <summary>
-    /// 明细行
+    /// 明细
     /// </summary>
     public IReadOnlyList<TicketLine> Lines => _lines;
 

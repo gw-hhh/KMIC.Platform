@@ -4,7 +4,7 @@ using Verifier = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.Build
 namespace Kmic.BuildingBlocks.Analyzers.Tests.Data;
 
 /// <summary>
-/// KM2001：只拦查询（表达式树、IQueryable 上的查询语法）中的字符串匹配，内存中的 LINQ 照常可用
+/// 只拦截数据库查询里的字符串匹配，内存里的 LINQ 照常可用
 /// </summary>
 public sealed class TextMatchingAnalyzerTests
 {

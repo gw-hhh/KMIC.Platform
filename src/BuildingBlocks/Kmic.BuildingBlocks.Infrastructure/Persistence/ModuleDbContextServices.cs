@@ -5,14 +5,17 @@ using Kmic.BuildingBlocks.Application.Security;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模块上下文依赖的框架服务，合成一个参数，模块上下文的构造函数不必逐个列出
+/// 模块上下文依赖的框架服务
 /// </summary>
-/// <param name="execution">执行上下文：审计列的操作人</param>
-/// <param name="dataScope">当前请求的数据范围，由命名过滤器读取</param>
-/// <param name="scopeObjects">范围对象目录，构建模型时核对 HasDataScope 引用的编码</param>
+/// <remarks>
+/// 合成一个参数，模块上下文的构造函数就不用逐个列出
+/// </remarks>
+/// <param name="execution">执行上下文</param>
+/// <param name="dataScope">数据权限</param>
+/// <param name="scopeObjects">范围对象目录</param>
 /// <param name="time">时间来源</param>
-/// <param name="saveGate">保存守卫</param>
-/// <param name="securityEvents">安全事件：仓储加载到范围外的聚合时记录真实原因</param>
+/// <param name="saveGate">保存入口控制</param>
+/// <param name="securityEvents">安全事件</param>
 public sealed class ModuleDbContextServices(
     IExecutionContext execution,
     IDataScope dataScope,

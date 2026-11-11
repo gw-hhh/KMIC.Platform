@@ -7,11 +7,11 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 系统设置与偏好共用的声明规则：值以 jsonb 存储，由管理界面编辑
+/// 设置声明的校验规则
 /// </summary>
 internal static partial class DeclaredValueRules
 {
-    // 限定成员类型，序列化结果才稳定，管理界面才能直接编辑
+    // 限制成员类型，序列化结果才稳定，管理界面才能直接编辑
     private static readonly FrozenSet<Type> _scalars = new[]
     {
         typeof(bool), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(string), typeof(Guid),
@@ -60,7 +60,7 @@ internal static partial class DeclaredValueRules
         }
     }
 
-    // 不能用 MakeGenericType 构造接口再比较：类型不满足约束时它会直接抛异常
+    // 不用 MakeGenericType 构造接口再比较：类型不满足约束时它会直接抛异常
     public static bool ImplementsSelf(Type type, Type interfaceDefinition) =>
         type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceDefinition && i.GenericTypeArguments[0] == type);
 

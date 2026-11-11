@@ -8,7 +8,7 @@ internal sealed class AllowedActions<TResource, TAction>(
     IExecutionContext context) : IAllowedActions<TResource>
     where TAction : notnull
 {
-    // 系统身份与匿名请求没有按钮可显示
+    // 系统身份和匿名请求没有按钮要显示
     public IReadOnlyList<string> For(TResource resource) =>
         context.Access is { } access ? catalog.Evaluate(access, policy, resource) : [];
 }

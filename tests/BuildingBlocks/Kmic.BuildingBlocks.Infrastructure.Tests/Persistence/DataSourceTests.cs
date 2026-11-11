@@ -10,7 +10,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 按入口来源选择连接池；查询可重试但借连接超时不重试；不允许自动预备语句
+/// 按请求来源选连接池；查询可以重试，但连接池耗尽时不重试；不允许自动预编译
 /// </summary>
 public sealed class DataSourceTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
@@ -51,7 +51,7 @@ public sealed class DataSourceTests(ClassDatabase<ProbeTemplate> database) : ICl
 
         var error = await Should.ThrowAsync<Exception>(() => work.Query.Tickets.CountAsync(Ct));
 
-        // EF 默认策略会把借连接超时当作暂时性故障重试，这组参数下约 65 秒才失败（原型 #15）
+        // EF 默认会把连接池耗尽当成暂时故障去重试，这组参数下要约 65 秒才失败
         QueryRetryStrategy.IsPoolExhausted(error).ShouldBeTrue(error.ToString());
         TimeProvider.System.GetElapsedTime(started).ShouldBeLessThan(TimeSpan.FromSeconds(10));
     }

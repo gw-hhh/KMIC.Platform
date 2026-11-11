@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.StateMachines;
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
 /// <summary>
-/// 聚合根基类：持有并发版本，暂存领域事件与状态流转，等事务行为和拦截器取走
+/// 聚合根基类
 /// </summary>
 public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, ITransitionRecorder
     where TId : notnull
@@ -21,14 +21,14 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, ITransit
     }
 
     /// <summary>
-    /// 只供 EF 物化使用
+    /// 只供 EF 使用
     /// </summary>
     protected AggregateRoot()
     {
     }
 
     /// <summary>
-    /// 并发版本：每次保存递增，详情与命令结果都返回给前端，修改时带回比较
+    /// 并发版本号
     /// </summary>
     public long ConcurrencyVersion { get; private set; }
 
@@ -38,7 +38,7 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, ITransit
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents;
 
     /// <summary>
-    /// 尚未写入业务历史的状态流转
+    /// 尚未记录的状态流转
     /// </summary>
     public IReadOnlyList<StateTransition> StateTransitions => _stateTransitions;
 
@@ -51,7 +51,7 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, ITransit
     void ITransitionRecorder.RecordTransition(StateTransition transition) => _stateTransitions.Add(transition);
 
     /// <summary>
-    /// 产生一个领域事件，在本次命令的事务内分发
+    /// 发布领域事件
     /// </summary>
     protected void Raise(IDomainEvent domainEvent)
     {

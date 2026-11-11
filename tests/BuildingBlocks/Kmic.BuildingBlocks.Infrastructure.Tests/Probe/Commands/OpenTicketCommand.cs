@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 
 /// <summary>
-/// 新建单据；标题为 Reject 时处理器返回业务失败
+/// 新建单据，标题为 Reject 时返回业务失败
 /// </summary>
 [AllowAuthenticated]
 [Idempotent]

@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 偏好目录中的一项
+/// 偏好定义
 /// </summary>
 public sealed class PreferenceDefinition : DeclaredValueDefinition
 {

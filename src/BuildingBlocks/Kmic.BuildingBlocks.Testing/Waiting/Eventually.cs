@@ -1,10 +1,10 @@
 namespace Kmic.BuildingBlocks.Testing.Waiting;
 
 /// <summary>
-/// 等待后台处理（Outbox 投递、后台作业等）完成：按间隔轮询，超时即失败
+/// 等待后台处理完成
 /// </summary>
 /// <remarks>
-/// 测试项目禁止直接 Task.Delay / Thread.Sleep（06 第 12.3 节）；这里按真实时间等待，与宿主中的 FakeTimeProvider 无关
+/// 测试里不能直接 Task.Delay 或 Thread.Sleep，等后台处理要用它。按真实时间轮询，和宿主里的 FakeTimeProvider 无关
 /// </remarks>
 public static class Eventually
 {
@@ -16,12 +16,12 @@ public static class Eventually
     private static readonly TimeSpan _interval = TimeSpan.FromMilliseconds(50);
 
     /// <summary>
-    /// 反复读取，直到结果满足条件；返回满足条件的那次结果
+    /// 反复读取，直到结果满足条件，返回那次的结果
     /// </summary>
     /// <param name="probe">读取当前状态</param>
     /// <param name="done">是否已完成</param>
-    /// <param name="because">超时时的说明，写明在等什么</param>
-    /// <param name="timeout">超时，默认 10 秒</param>
+    /// <param name="because">在等什么，超时时显示</param>
+    /// <param name="timeout">超时时间，默认 10 秒</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <exception cref="TimeoutException">超时仍未满足</exception>
     public static async Task<T> UntilAsync<T>(

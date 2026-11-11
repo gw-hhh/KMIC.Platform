@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 全部模块的范围对象目录：角色上的范围覆盖、实体的 HasDataScope 都只能引用其中的编码
+/// 数据范围对象目录
 /// </summary>
 public sealed class DataScopeObjectCatalog
 {
@@ -19,7 +19,7 @@ public sealed class DataScopeObjectCatalog
     public IReadOnlyCollection<DataScopeObjectDefinition> All => _byCode.Values;
 
     /// <summary>
-    /// 扫描程序集中标了 [DataScopeObjectGroup] 的常量类
+    /// 从程序集中读取
     /// </summary>
     public static DataScopeObjectCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -28,7 +28,7 @@ public sealed class DataScopeObjectCatalog
     }
 
     /// <summary>
-    /// 读取并校验格式、归属与唯一性
+    /// 从分组类型中读取
     /// </summary>
     public static DataScopeObjectCatalog Build(IEnumerable<Type> groupTypes)
     {
@@ -50,7 +50,7 @@ public sealed class DataScopeObjectCatalog
     }
 
     /// <summary>
-    /// 范围对象是否存在
+    /// 是否包含该范围对象
     /// </summary>
     public bool Contains(string code) => _byCode.ContainsKey(code);
 }

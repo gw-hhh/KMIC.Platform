@@ -14,7 +14,7 @@ using Microsoft.Extensions.Time.Testing;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 按真实宿主的方式注册 Probe 模块的数据访问；每个工作单元一个 DI 作用域
+/// 按真实宿主的方式注册 Probe 模块，每个工作单元一个依赖注入作用域
 /// </summary>
 internal sealed class ProbeHarness : IAsyncDisposable
 {
@@ -38,7 +38,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
         services.AddSingleton(Hooks);
         services.AddLogging();
 
-        // 选项必须是编译期常量，由源码生成器读取；数组顺序即执行顺序（05-02 第 4.1 节）
+        // 选项必须是编译期常量，源码生成器要读取；数组顺序就是执行顺序
         services.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
@@ -63,7 +63,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
     public ProbeHooks Hooks { get; } = new();
 
     /// <summary>
-    /// 宿主的服务，测试中直接取框架内部服务（如数据源）时用
+    /// 宿主的服务，测试要直接取框架内部服务（如数据源）时用
     /// </summary>
     public IServiceProvider Services => _services;
 

@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
 /// <summary>
-/// 包装 Mediator，并在发送命令期间标记“当前在命令内”
+/// 消息发送
 /// </summary>
 internal sealed class Sender(Mediator.ISender mediator, ExecutionScope scope) : ISender
 {
@@ -28,7 +28,7 @@ internal sealed class Sender(Mediator.ISender mediator, ExecutionScope scope) : 
 
     private async ValueTask<TResult> SendCommandAsync<TResult>(Func<ValueTask<TResult>> send)
     {
-        // 一个请求 = 一个命令 = 一个事务；命令内再发命令说明代码写错了（05-02 D5）
+        // 一个请求只执行一个命令，命令里再发命令是代码写错了
         using var marker = scope.EnterCommand();
         return await send();
     }

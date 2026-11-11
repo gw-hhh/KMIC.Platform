@@ -5,11 +5,11 @@ using System.Text.RegularExpressions;
 namespace Kmic.BuildingBlocks.Application.Numbering;
 
 /// <summary>
-/// 全部模块的编号规则，启动时扫描并校验
+/// 编号规则目录
 /// </summary>
 public sealed partial class NumberRuleCatalog
 {
-    // 计数表的 Rule 列为 varchar(100)
+    // 和计数表 Rule 列的长度一致
     private const int MaxNameLength = 100;
 
     private readonly FrozenDictionary<string, NumberRule> _byName;
@@ -22,7 +22,7 @@ public sealed partial class NumberRuleCatalog
     public IReadOnlyCollection<NumberRule> All => _byName.Values;
 
     /// <summary>
-    /// 扫描程序集中标了 [NumberRule] 的常量
+    /// 从程序集中读取
     /// </summary>
     public static NumberRuleCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -31,7 +31,7 @@ public sealed partial class NumberRuleCatalog
     }
 
     /// <summary>
-    /// 读取给定类型中声明的规则并校验
+    /// 从给定类型中读取
     /// </summary>
     public static NumberRuleCatalog Build(IEnumerable<Type> types)
     {
@@ -61,7 +61,7 @@ public sealed partial class NumberRuleCatalog
     }
 
     /// <summary>
-    /// 取规则；规则名不存在说明调用方写错了常量，属于程序缺陷
+    /// 按名称取规则，不存在时抛异常
     /// </summary>
     public NumberRule Get(string name) =>
         _byName.TryGetValue(name, out var rule) ? rule : throw new InvalidOperationException($"编号规则 {name} 不存在。");

@@ -4,8 +4,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
 /// <summary>
-/// 测试用的组织树快照：按名称建树，按名称取 ID
+/// 测试组织树
 /// </summary>
+/// <remarks>
+/// 按名称建树，按名称取 ID
+/// </remarks>
 /// <example>
 /// <code>
 /// var org = TestOrgTree.Create(t => t.Unit("总部", hq => hq.Unit("华东", east => east.Unit("上海").Unit("杭州"))));
@@ -25,7 +28,7 @@ public sealed class TestOrgTree : IOrgHierarchy
     }
 
     /// <summary>
-    /// 没有任何组织单元的树
+    /// 空树
     /// </summary>
     public static TestOrgTree Empty { get; } = new([], [], 1);
 
@@ -33,16 +36,16 @@ public sealed class TestOrgTree : IOrgHierarchy
     public long Version { get; }
 
     /// <summary>
-    /// 按名称取组织单元
+    /// 按名称取组织 ID
     /// </summary>
     public OrgUnitId this[string name] =>
         _byName.TryGetValue(name, out var id) ? id : throw new KeyNotFoundException($"测试组织树中没有“{name}”。");
 
     /// <summary>
-    /// 建树；同一棵树中名称不能重复
+    /// 建树，同一棵树里名称不能重复
     /// </summary>
-    /// <param name="build">从根一级开始声明组织单元</param>
-    /// <param name="version">树版本</param>
+    /// <param name="build">从第一级开始声明组织</param>
+    /// <param name="version">树版本号</param>
     public static TestOrgTree Create(Action<TestOrgTreeBuilder> build, long version = 1)
     {
         ArgumentNullException.ThrowIfNull(build);

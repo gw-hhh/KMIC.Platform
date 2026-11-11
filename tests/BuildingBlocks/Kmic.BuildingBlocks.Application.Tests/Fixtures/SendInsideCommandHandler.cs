@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
-// 正式代码中命令处理器不得注入 ISender（架构测试）；这里故意违反，验证运行时守卫
+// 正式代码的命令处理器不能注入 ISender，这里故意违反，验证运行时的拦截
 public sealed class SendInsideCommandHandler(ISender sender) : ICommandHandler<SendInsideCommand>
 {
     public async ValueTask<Result> Handle(SendInsideCommand command, CancellationToken cancellationToken)

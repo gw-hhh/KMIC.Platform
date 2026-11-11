@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Operations;
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
 /// <summary>
-/// KM9005：主构造函数的参数不得被重新赋值
+/// KM9005：主构造函数的参数不能重新赋值
 /// </summary>
 /// <remarks>
-/// 主构造函数参数在整个类型中可见，一旦被改写，读代码的人无法确定它在某处的值（06 D5）
+/// 主构造函数参数在整个类型里都能用，被改过之后，读代码的人就没法确定它在某处的值
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PrimaryConstructorParameterAnalyzer : DiagnosticAnalyzer

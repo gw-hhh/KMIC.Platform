@@ -1,10 +1,10 @@
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
 /// <summary>
-/// 聚合内部不变量被破坏：理论上不会发生，发生即程序缺陷
+/// 领域不变量被破坏
 /// </summary>
 /// <remarks>
-/// 领域层唯一允许显式抛出的自定义异常；业务失败一律返回 Result
+/// 只用于程序缺陷，业务失败要返回 Result
 /// </remarks>
 public sealed class DomainInvariantException : Exception
 {

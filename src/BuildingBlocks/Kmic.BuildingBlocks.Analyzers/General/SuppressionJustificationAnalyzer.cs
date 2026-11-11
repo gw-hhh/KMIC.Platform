@@ -11,7 +11,7 @@ namespace Kmic.BuildingBlocks.Analyzers.General;
 /// KM9001：[SuppressMessage] 必须写明理由
 /// </summary>
 /// <remarks>
-/// 豁免本身就是需要评审的设计决定，理由让每个例外都能被找到和复查（06 D1）
+/// 每个豁免都是要评审的决定，写了理由才能被找到和复查
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class SuppressionJustificationAnalyzer : DiagnosticAnalyzer

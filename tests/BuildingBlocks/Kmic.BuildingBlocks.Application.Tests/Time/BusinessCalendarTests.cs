@@ -8,7 +8,7 @@ public sealed class BusinessCalendarTests
 {
     private static readonly TimeZoneInfo _plus8 = TimeZoneInfo.CreateCustomTimeZone("Test/Plus8", TimeSpan.FromHours(8), "UTC+8", "UTC+8");
 
-    // 9 月 6 日零点跳到 1 点，4 月 5 日 1 点退回零点：两个边界都落在零点
+    // 9 月 6 日零点跳到 1 点，4 月 5 日 1 点退回零点，两个边界都在零点
     private static readonly TimeZoneInfo _midnightDst = TimeZoneInfo.CreateCustomTimeZone(
         "Test/MidnightDst",
         TimeSpan.FromHours(-4),

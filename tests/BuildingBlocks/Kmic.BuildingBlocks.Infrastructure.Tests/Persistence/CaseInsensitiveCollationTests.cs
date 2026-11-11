@@ -7,10 +7,10 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 排序规则不只是创建：已存在的定义、同名对象、列的实际绑定都要核对
+/// 排序规则不只要创建，已有的定义、同名对象、列的实际绑定都要核对
 /// </summary>
 /// <remarks>
-/// 每个测试改坏一处，用的是各自新克隆的库
+/// 每个测试改坏一处，各用一个新克隆的库
 /// </remarks>
 public sealed class CaseInsensitiveCollationTests(ProbeTemplate template)
 {

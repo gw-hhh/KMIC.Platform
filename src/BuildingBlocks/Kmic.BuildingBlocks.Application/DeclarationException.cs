@@ -1,12 +1,12 @@
 namespace Kmic.BuildingBlocks.Application;
 
 /// <summary>
-/// 启动时读取的声明（用例、权限点等）有误，宿主拒绝启动；消息中列出全部问题
+/// 声明错误
 /// </summary>
 public sealed class DeclarationException : InvalidOperationException
 {
     /// <summary>
-    /// 汇总全部问题
+    /// 用全部问题创建
     /// </summary>
     public DeclarationException(string subject, IReadOnlyList<string> problems)
         : base($"{subject}有误，拒绝启动：" + Environment.NewLine + string.Join(Environment.NewLine, problems ?? [])) =>
@@ -33,7 +33,7 @@ public sealed class DeclarationException : InvalidOperationException
         : base(message, innerException) => Problems = [message];
 
     /// <summary>
-    /// 每条一个问题，指明出问题的类型或成员与原因
+    /// 问题列表
     /// </summary>
     public IReadOnlyList<string> Problems { get; }
 }

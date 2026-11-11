@@ -4,12 +4,12 @@ using Xunit;
 namespace Kmic.BuildingBlocks.Testing.Database;
 
 /// <summary>
-/// 类级夹具：每个测试类一个从模板克隆的数据库，类结束时删除
+/// 测试类的数据库
 /// </summary>
 /// <remarks>
-/// 同一个类中的测试共用这个库，各自创建并只断言自己的数据；需要空库语义的测试放进单独的类
+/// 每个测试类一个，从模板库克隆，类结束时删除。同一个类里的测试共用它，各自只断言自己的数据；需要空库的测试放进单独的类
 /// </remarks>
-/// <typeparam name="TTemplate">本测试程序集注册的模板库夹具</typeparam>
+/// <typeparam name="TTemplate">模板库</typeparam>
 public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetime
     where TTemplate : PostgresTemplateDatabase
 {
@@ -27,7 +27,7 @@ public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetim
     public string ConnectionString => template.ConnectionString(Name);
 
     /// <summary>
-    /// 直接执行 SQL 用的数据源，如准备数据、检查结果
+    /// 数据源，用来直接执行 SQL
     /// </summary>
     public NpgsqlDataSource DataSource => _dataSource ?? throw NotInitialized();
 
@@ -46,7 +46,7 @@ public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetim
             await _dataSource.DisposeAsync();
         }
 
-        // 测试已经结束，取消令牌可能已触发；删除必须做完，否则长时间运行的本地容器会积累克隆库
+        // 测试已结束，取消令牌可能已经触发，但删除必须做完，不然本地容器里的克隆库会越积越多
         if (_name is not null)
         {
             await template.DropAsync(_name, CancellationToken.None);

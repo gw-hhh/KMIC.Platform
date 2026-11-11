@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
 /// <summary>
-/// Build 检查通过后的完整声明
+/// 状态机定义
 /// </summary>
 internal sealed record StateMachineDefinition<TAggregate, TState, TAction>(
     string StateName,

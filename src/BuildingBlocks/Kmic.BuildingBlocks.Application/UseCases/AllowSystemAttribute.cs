@@ -1,7 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
 /// <summary>
-/// 也允许以系统身份执行（定时任务、事件处理）；只能与 [RequirePermission]、[AllowAuthenticated] 叠加
+/// 允许系统身份执行
 /// </summary>
+/// <remarks>
+/// 只能和 [RequirePermission] 或 [AllowAuthenticated] 一起用
+/// </remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class AllowSystemAttribute : Attribute;

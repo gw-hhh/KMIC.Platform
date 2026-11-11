@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Query;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 把 KmicFunctions 的翻译器注册进 EF 的内部服务
+/// 注册 KmicFunctions 的翻译器
 /// </summary>
 internal sealed class KmicFunctionsExtension : IDbContextOptionsExtension
 {

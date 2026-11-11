@@ -3,8 +3,11 @@ using Microsoft.CodeAnalysis;
 namespace Kmic.BuildingBlocks.Analyzers.Common;
 
 /// <summary>
-/// 创建诊断描述；框架规则一律为错误级别（05-01 第 11 节、06 第 15 节）
+/// 诊断规则
 /// </summary>
+/// <remarks>
+/// 框架规则一律是错误级别
+/// </remarks>
 internal static class Rules
 {
     public const string DomainCategory = "Kmic.Domain";
@@ -15,7 +18,7 @@ internal static class Rules
         new(id, title, message, category, DiagnosticSeverity.Error, isEnabledByDefault: true, customTags: customTags);
 
     /// <summary>
-    /// 集合类型中可以从外部增删元素的那些；只读接口、不可变集合、冻结集合不算
+    /// 外部能增删元素的集合类型；只读接口、不可变集合、冻结集合不算
     /// </summary>
     public static bool IsMutableCollection(ITypeSymbol type)
     {

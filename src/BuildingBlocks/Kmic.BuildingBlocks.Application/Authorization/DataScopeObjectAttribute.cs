@@ -1,14 +1,14 @@
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 标在范围对象常量上：按同一规则控制可见性的一类数据，管理员在角色上按它配置范围
+/// 数据范围对象
 /// </summary>
-/// <param name="displayName">角色管理界面中的显示名</param>
+/// <param name="displayName">显示名称</param>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class DataScopeObjectAttribute(string displayName) : Attribute
 {
     /// <summary>
-    /// 显示名
+    /// 显示名称
     /// </summary>
     public string DisplayName { get; } = displayName;
 }

@@ -8,7 +8,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Pipeline;
 
 /// <summary>
-/// 命令修改后再发送本模块查询：开发与测试环境抛异常；先查询后修改照常
+/// 命令改了数据再查本模块会抛异常，先查后改不受影响
 /// </summary>
 public sealed class QueryVisibilityGuardTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -27,7 +27,7 @@ public sealed class QueryVisibilityGuardTests(ClassDatabase<ProbeTemplate> datab
 
         var error = await Should.ThrowAsync<InvalidOperationException>(async () =>
             await work.Sender.SendAsync(new RetitleAndReadCommand(ticket.Id, "新标题", ReadFirst: false), Ct));
-        error.Message.ShouldContain("读不到这些修改");
+        error.Message.ShouldContain("读不到命令里还没保存的修改");
     }
 
     [Fact]

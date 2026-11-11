@@ -5,7 +5,7 @@ using Verify = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.Buildin
 namespace Kmic.BuildingBlocks.Analyzers.Tests.Domain;
 
 /// <summary>
-/// 场景来自原型 #8，改为引用真实的状态机类型（Define 的第一个参数是表达式树）
+/// 状态属性赋值规则
 /// </summary>
 public sealed class StateMachineAssignmentAnalyzerTests
 {
@@ -68,7 +68,7 @@ public sealed class StateMachineAssignmentAnalyzerTests
     [Fact]
     public async Task PlaceholderInitializer_NoDiagnostic()
     {
-        // 智能枚举（引用类型）的状态属性写 = null!，普通枚举写 = default!，都只是给 EF 物化用的占位
+        // 智能枚举的状态属性写 = null!，普通枚举写 = default!，都只是给 EF 用的占位
         var plainEnum = Aggregate(string.Empty, status: "public SampleStatus Status { get; private set; } = default!;");
         const string SmartEnum = """
             using System;

@@ -1,15 +1,15 @@
 namespace Kmic.BuildingBlocks.Contracts.Messaging;
 
 /// <summary>
-/// 快照事件 {聚合}Changed：携带聚合对外公开的完整快照，读模型按来源版本取最新
+/// 快照事件
 /// </summary>
 /// <remarks>
-/// 来源版本不在载荷中，由保存时的拦截器取聚合递增后的版本写入信封
+/// 来源版本号不在事件里，在消息信封上
 /// </remarks>
 public interface ISnapshotEvent : IIntegrationEvent
 {
     /// <summary>
-    /// 快照所属聚合的 ID
+    /// 快照对应的 ID
     /// </summary>
     Guid SourceId { get; }
 }

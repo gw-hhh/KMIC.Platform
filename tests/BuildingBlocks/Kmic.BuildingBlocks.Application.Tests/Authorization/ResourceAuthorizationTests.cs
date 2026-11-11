@@ -9,7 +9,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Application.Tests.Authorization;
 
 /// <summary>
-/// 资源策略（第 3 层）与 allowedActions：同一份策略既用于处理器检查，也用于计算按钮
+/// 资源策略和可用动作用的是同一份策略
 /// </summary>
 public sealed class ResourceAuthorizationTests
 {

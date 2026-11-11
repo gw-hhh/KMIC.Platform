@@ -13,11 +13,11 @@ using Microsoft.Extensions.Options;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 管道第 5 位（只对标了 [Idempotent] 的 HTTP 命令）：同一个幂等键的副作用只发生一次，重试得到首次结果
+/// 幂等处理
 /// </summary>
 /// <remarks>
-/// 领取记录用独立的短语句；“标记已完成”与业务数据在同一个事务中提交，否则两次提交之间崩溃就会出现
-/// “业务已生效、记录仍是处理中”。任何情况都不推断成功，也不换键重新执行（05-02 第 5.3 节）
+/// 只处理标了 [Idempotent] 的 HTTP 命令：同一个幂等键只执行一次，重复请求返回第一次的结果。
+/// 完成标记和业务数据在同一个事务里提交，否则两次提交之间崩溃，就会出现业务已生效、记录却还是处理中
 /// </remarks>
 public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog catalog, IServiceProvider services) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IBaseCommand
@@ -32,7 +32,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
     {
         ArgumentNullException.ThrowIfNull(next);
 
-        // 非 HTTP 来源各有自己的幂等保证：Inbox 按事件 ID 去重，后台作业按作业 ID 领取
+        // 非 HTTP 来源不走这里：Inbox 按事件 ID 去重，后台作业按作业 ID 领取
         var useCase = catalog.Get(typeof(TMessage));
         var execution = services.GetRequiredService<ExecutionScope>();
         if (!useCase.Idempotent || execution.Origin != CallOrigin.Http)
@@ -47,7 +47,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
         }
 
         var userId = execution.User.UserId
-            ?? throw new InvalidOperationException($"{useCase.Name} 标了 [Idempotent]，但请求没有用户身份：幂等记录按用户隔离，匿名用例不能声明幂等。");
+            ?? throw new InvalidOperationException($"{useCase.Name} 标了 [Idempotent]，但请求没有用户身份。匿名用例不能声明幂等。");
         var context = services.GetRequiredService<ModuleWriteContexts>().Get(useCase.Module);
         var store = IdempotencyStore.For(context, services.GetRequiredService<DataSources>().Transactions(execution.EntryOrigin));
         var claim = await ClaimAsync(store, NewRecord(useCase, userId.Value, execution.User.RoleId?.Value ?? Guid.Empty, key, message), cancellationToken);
@@ -68,7 +68,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
         }
         catch (CommitOutcomeUnknownException)
         {
-            // 提交结果未知：按记录判断。仍能删掉自己的记录说明没有提交，交给外层按“结果未知、可用原键重试”返回
+            // 提交结果未知时按记录判断：还能删掉自己的记录，说明没有提交，交给外层提示用原键重试
             if (await ResolveAsync(store, id, token, failure: null) is { } resolved)
             {
                 return resolved;
@@ -78,7 +78,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
         }
         catch
         {
-            // 含客户端断开引起的取消：业务事务已回滚，释放后同键可以立即重试
+            // 包括客户端断开引起的取消：业务事务已回滚，释放记录后同一个键马上可以重试
             await TryReleaseAsync(store, id, token);
             throw;
         }
@@ -88,7 +88,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
 
     private static string? Serialize(object? value) => value is null ? null : JsonSerializer.Serialize(value, value.GetType(), IdempotencyJson.Options);
 
-    // 失败路径：条件删除自己的记录；删不掉时重新读取再分类，不做推断
+    // 失败时删掉自己的记录；删不掉就重新读取再判断，不猜测结果
     private async Task<TResponse?> ResolveAsync(IdempotencyStore store, Guid id, Guid token, TResponse? failure)
     {
         try
@@ -112,7 +112,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
         }
     }
 
-    // 尽力释放；删不掉就等租约到期，由同键请求接管
+    // 尽量释放；删不掉就等租约到期，让同键请求接管
     private static async Task TryReleaseAsync(IdempotencyStore store, Guid id, Guid token)
     {
         try
@@ -121,7 +121,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
         }
         catch (DbException)
         {
-            // 原异常更重要，继续向外抛它
+            // 原来的异常更重要，继续往外抛它
         }
     }
 
@@ -155,7 +155,7 @@ public sealed class IdempotencyBehavior<TMessage, TResponse>(UseCaseCatalog cata
 
     private async Task<Claim> ClaimAsync(IdempotencyStore store, NewIdempotencyRecord record, CancellationToken ct)
     {
-        // 第二轮只发生在读到已过期的旧记录、删掉之后
+        // 只有读到过期的旧记录并删掉之后，才会进入第二轮
         for (var attempt = 0; attempt < 2; attempt++)
         {
             if (await store.TryClaimAsync(record, ct))

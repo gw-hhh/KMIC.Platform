@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Operations;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0101：Error 只能在错误目录（*Errors 静态类）中创建；Error.Unavailable 只能在框架的 CommonErrors 中使用
+/// KM0101：Error 只能在 *Errors 静态类里创建，Error.Unavailable 只能在 CommonErrors 里用
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ErrorCatalogAnalyzer : DiagnosticAnalyzer
@@ -37,7 +37,7 @@ public sealed class ErrorCatalogAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(start =>
         {
-            // 测试需要随手构造错误来验证 Result 与转换逻辑
+            // 测试要随手构造错误来验证 Result 和转换逻辑
             if (KmicProject.IsTestProject(start.Compilation.AssemblyName)
                 || start.Compilation.GetTypeByMetadataName(KnownTypes.Error) is not { } error)
             {

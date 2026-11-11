@@ -11,14 +11,14 @@ internal sealed class ResourceAuthorizer<TResource, TAction>(
 {
     public Result Check(TResource resource, TAction action)
     {
-        // 系统身份只能执行声明了 [AllowSystem] / [SystemOnly] 的用例，到这里已经过了第 1 层
+        // 系统身份直接放行：能走到这里，说明用例已声明允许系统调用
         if (context.User.IsSystem)
         {
             return Result.Success();
         }
 
         var access = context.Access
-            ?? throw new InvalidOperationException("用户身份缺少访问上下文，资源策略无法判定。");
+            ?? throw new InvalidOperationException("用户身份没有访问上下文。");
         var decision = policy.Evaluate(access, resource, action);
         if (decision.Allowed)
         {

@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Analyzers.Common;
 
 /// <summary>
-/// 按程序集名判断代码所在的模块与层；框架、测试、脚本不属于任何模块层
+/// 按程序集名判断所在的模块和层
 /// </summary>
 internal static class KmicProject
 {
@@ -10,7 +10,7 @@ internal static class KmicProject
     private static readonly string[] _layers = ["Domain", "Application", "Infrastructure", "Presentation", "Contracts"];
 
     /// <summary>
-    /// 模块的某一层，如 Kmic.Sample.Domain 返回 Domain；BuildingBlocks 与测试项目返回 null
+    /// 模块的层，如 Kmic.Sample.Domain 返回 Domain；框架和测试项目返回 null
     /// </summary>
     public static string? ModuleLayer(string? assemblyName)
     {

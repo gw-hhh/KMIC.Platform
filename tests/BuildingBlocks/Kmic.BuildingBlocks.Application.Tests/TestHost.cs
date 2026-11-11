@@ -13,7 +13,7 @@ using Microsoft.Extensions.Time.Testing;
 namespace Kmic.BuildingBlocks.Application.Tests;
 
 /// <summary>
-/// 相当于宿主中组装应用的部分；管道顺序与 05-02 第 4.1 节一致（异常转换、幂等、事务在 Infrastructure 实现后加入）
+/// 相当于宿主里组装应用的部分，管道顺序和宿主一致；异常转换、幂等、事务在 Infrastructure 的测试里覆盖
 /// </summary>
 internal sealed class TestHost : IAsyncDisposable
 {
@@ -39,7 +39,7 @@ internal sealed class TestHost : IAsyncDisposable
         ]);
         services.AddKmicApplication(catalog, [typeof(TestHost).Assembly]);
 
-        // 选项必须是编译期常量，由源码生成器读取；数组顺序即执行顺序
+        // 选项必须是编译期常量，源码生成器要读取；数组顺序就是执行顺序
         services.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;

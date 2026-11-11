@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// Infrastructure 中管道行为的日志方法
+/// 管道日志
 /// </summary>
 internal static partial class PipelineLog
 {

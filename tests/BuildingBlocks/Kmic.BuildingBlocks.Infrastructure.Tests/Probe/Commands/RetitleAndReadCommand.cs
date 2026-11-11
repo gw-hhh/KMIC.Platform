@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 
 /// <summary>
-/// 改标题并经 IQuerySender 读取标题；ReadFirst 决定先读还是先改
+/// 改标题并通过 IQuerySender 读取标题，ReadFirst 决定先读还是先改
 /// </summary>
 [AllowAuthenticated]
 [NotAudited("测试命令")]

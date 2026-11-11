@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.Security;
 namespace Kmic.BuildingBlocks.Testing.Security;
 
 /// <summary>
-/// 记下写入的安全事件，供断言；阶段 3 之前也代替 Identity 的实现
+/// 记录安全事件，供测试断言
 /// </summary>
 public sealed class RecordingSecurityEventWriter : ISecurityEventWriter
 {

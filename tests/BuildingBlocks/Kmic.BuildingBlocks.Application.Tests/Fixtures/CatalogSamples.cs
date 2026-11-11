@@ -6,7 +6,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
 /// <summary>
-/// 故意写错声明的消息，只交给 UseCaseCatalog.Build 校验；Mediator 要求每个消息都有处理器，所以一并提供
+/// 故意写错声明的消息，只交给 UseCaseCatalog.Build 校验。Mediator 要求每个消息都有处理器，所以也一并提供
 /// </summary>
 public static class CatalogSamples
 {

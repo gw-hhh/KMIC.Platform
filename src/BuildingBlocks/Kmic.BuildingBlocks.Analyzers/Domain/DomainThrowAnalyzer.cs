@@ -7,10 +7,10 @@ using Microsoft.CodeAnalysis.Operations;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0102：模块的 Domain 中只能抛出参数异常、InvalidOperationException 与 DomainInvariantException
+/// KM0102：Domain 里只能抛参数异常、InvalidOperationException 和 DomainInvariantException
 /// </summary>
 /// <remarks>
-/// 业务失败一律返回 Result；能抛的只有“调用方违反契约”和“不变量被破坏”两类程序缺陷
+/// 业务失败要返回 Result。能抛的只有调用方用错和不变量被破坏这两类程序缺陷
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainThrowAnalyzer : DiagnosticAnalyzer
@@ -48,7 +48,7 @@ public sealed class DomainThrowAnalyzer : DiagnosticAnalyzer
 
     private static void Analyze(OperationAnalysisContext context, ImmutableArray<INamedTypeSymbol?> allowed)
     {
-        // throw; 重新抛出原异常，不引入新的异常类型
+        // throw; 抛的是原异常，不算新的异常类型
         if (((IThrowOperation)context.Operation).Exception is not { } exception)
         {
             return;

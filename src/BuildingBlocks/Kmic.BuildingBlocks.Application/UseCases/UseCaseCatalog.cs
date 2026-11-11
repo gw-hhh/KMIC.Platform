@@ -6,10 +6,10 @@ using Kmic.BuildingBlocks.Application.Messaging;
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
 /// <summary>
-/// 全部消息的横切声明，启动时构建一次并校验；行为在运行时只查这张表
+/// 用例目录
 /// </summary>
 /// <remarks>
-/// 声明缺失或冲突即拒绝启动，不存在“忘了写授权所以默认放行”（05-02 第 3 节）；同一套规则也作为架构测试进入检查
+/// 声明缺失或冲突时拒绝启动，不会因为漏写授权就默认放行
 /// </remarks>
 public sealed class UseCaseCatalog
 {
@@ -23,7 +23,7 @@ public sealed class UseCaseCatalog
     public IReadOnlyCollection<UseCase> All => _byType.Values;
 
     /// <summary>
-    /// 扫描程序集中的全部命令、查询与处理器
+    /// 从程序集中读取
     /// </summary>
     public static UseCaseCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -32,7 +32,7 @@ public sealed class UseCaseCatalog
     }
 
     /// <summary>
-    /// 读取并校验给定类型中消息的声明，以及处理器上的 [BypassesDataScope]；有任何问题都汇总后一次报出
+    /// 从给定类型中读取，问题汇总后一次报出
     /// </summary>
     public static UseCaseCatalog Build(IEnumerable<Type> types)
     {
@@ -60,14 +60,14 @@ public sealed class UseCaseCatalog
     }
 
     /// <summary>
-    /// 取消息的用例；不在目录中说明宿主没有扫描到它所在的程序集，属于程序缺陷
+    /// 取消息的用例，不在目录里时抛异常
     /// </summary>
     public UseCase Get(Type messageType) =>
         _byType.TryGetValue(messageType, out var useCase)
             ? useCase
             : throw new InvalidOperationException($"{messageType.FullName} 不在用例目录中，检查宿主是否注册了它所在的模块。");
 
-    // 同时是命令和查询的类型也要进入 Read 报错，不能在扫描时漏掉；宿主中 Mediator 编译期已拒绝这种类型（MSG0004）
+    // 既是命令又是查询的类型也要读进来，才能报错
     private static bool IsMessage(Type type) =>
         type is { IsClass: true, IsAbstract: false } && (IsCommand(type) || IsQuery(type));
 
@@ -158,7 +158,7 @@ public sealed class UseCaseCatalog
                 && (definition == typeof(Mediator.ICommandHandler<,>) || definition == typeof(Mediator.IQueryHandler<,>)))
             .Select(i => i.GetGenericArguments()[0]);
 
-    // 规则 1：授权声明必须且只能有一种；AllowSystem、AllowWhenPasswordChangeRequired 只能与特定声明叠加
+    // 授权声明必须有且只有一种，AllowSystem、AllowWhenPasswordChangeRequired 只能和特定声明一起用
     private static AccessDeclaration ReadAccess(Type type, string name, MessageKind kind, List<string> problems)
     {
         var permission = type.GetCustomAttribute<RequirePermissionAttribute>();
@@ -206,7 +206,7 @@ public sealed class UseCaseCatalog
         return new AccessDeclaration(requirement, permission?.Permission, allowSystem, allowWhenPasswordChangeRequired, contractQuery?.Access);
     }
 
-    // 规则 2：幂等与审计声明只能用于命令（读取审计只能用于查询）；每个命令必须声明是否审计
+    // 幂等和审计只能用于命令，读取审计只能用于查询，每个命令都要声明是否审计
     private static AuditDeclaration ReadAudit(Type type, string name, MessageKind kind, List<string> problems)
     {
         var audited = type.GetCustomAttribute<AuditedAttribute>();

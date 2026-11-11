@@ -6,10 +6,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0501：领域事件只携带 ID 与必要的值，不携带实体对象
+/// KM0501：领域事件不能带实体对象
 /// </summary>
 /// <remarks>
-/// 携带实体会让事件处理器修改另一个聚合的内存对象，从而绕过它的业务方法
+/// 带了实体，事件处理器就能直接改另一个聚合的内存对象，绕过它的业务方法
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainEventAnalyzer : DiagnosticAnalyzer
@@ -59,7 +59,7 @@ public sealed class DomainEventAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    // 集合、可空、元组中的实体同样不允许
+    // 集合、可空、元组里的实体同样不允许
     private static ITypeSymbol? FindEntity(ITypeSymbol type, INamedTypeSymbol entity)
     {
         if (KnownTypes.InheritsFrom(type, entity))

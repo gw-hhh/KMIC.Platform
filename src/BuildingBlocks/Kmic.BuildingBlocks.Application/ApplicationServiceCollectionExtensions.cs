@@ -15,24 +15,24 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Kmic.BuildingBlocks.Application;
 
 /// <summary>
-/// 注册应用层框架服务
+/// 应用层服务注册
 /// </summary>
 /// <remarks>
-/// 管道行为由宿主的 AddMediator 按顺序声明（Mediator 源码生成器要求在宿主中写成常量，原型 #1），这里只注册它们依赖的服务
+/// 管道行为在宿主的 AddMediator 里按顺序声明，Mediator 源码生成器要求这样写。这里只注册它们依赖的服务
 /// </remarks>
 public static class ApplicationServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册执行上下文、发送入口、各类声明目录、校验器与资源授权
+    /// 注册应用层服务
     /// </summary>
     /// <param name="services">服务集合</param>
-    /// <param name="applicationAssemblies">各模块的 Application 程序集，声明与校验器从中扫描</param>
+    /// <param name="applicationAssemblies">各模块的 Application 程序集</param>
     public static IServiceCollection AddKmicApplication(this IServiceCollection services, IReadOnlyCollection<Assembly> applicationAssemblies)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(applicationAssemblies);
 
-        // 目录在注册时构建并互相核对：声明有误时宿主启动即失败
+        // 各目录在注册时互相核对，声明有误时宿主直接启动失败
         var useCases = UseCaseCatalog.FromAssemblies(applicationAssemblies);
         var permissions = PermissionCatalog.FromAssemblies(applicationAssemblies);
         var settings = SystemSettingCatalog.FromAssemblies(applicationAssemblies);
@@ -48,7 +48,7 @@ public static class ApplicationServiceCollectionExtensions
         return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 
-    // 测试只注册自己需要的消息：测试程序集里还有故意写错声明的样例
+    // 测试程序集里有故意写错声明的样例，所以测试只注册自己用到的消息
     internal static IServiceCollection AddKmicApplication(
         this IServiceCollection services,
         UseCaseCatalog catalog,

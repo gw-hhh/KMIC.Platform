@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 唯一约束到模块错误的映射：构建模型时从 MapsToError 收集，异常转换按 schema 与约束名查找
+/// 唯一约束对应的错误
 /// </summary>
 /// <remarks>
-/// 声明不留在模型注解里，否则会写进迁移快照（Error 不能生成为代码）。EF 按上下文类型在进程内缓存模型，
-/// 收集同样只发生一次，所以映射也放在进程级
+/// 建模时从 MapsToError 收集，异常转换时按 schema 和约束名查找。不放在模型注解里，否则会写进迁移快照。
+/// EF 在进程内缓存模型，收集只发生一次，所以映射也放在进程级
 /// </remarks>
 internal static class UniqueConstraintErrors
 {

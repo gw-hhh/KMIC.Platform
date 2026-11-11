@@ -4,8 +4,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
 /// <summary>
-/// 测试身份：直接构造访问上下文，不经过登录；每个方法返回新实例，原实例不变
+/// 测试身份
 /// </summary>
+/// <remarks>
+/// 直接构造访问上下文，不经过登录。每个方法都返回新实例
+/// </remarks>
 /// <example>
 /// <code>
 /// var actor = TestIdentity.User("销售甲")
@@ -19,7 +22,7 @@ public sealed record TestIdentity : IAccessContext
     private TestIdentity(string displayName) => DisplayName = displayName;
 
     /// <summary>
-    /// 显示名，只用于测试输出
+    /// 显示名称
     /// </summary>
     public string DisplayName { get; }
 
@@ -61,7 +64,7 @@ public sealed record TestIdentity : IAccessContext
     public bool PasswordChangeRequired { get; init; }
 
     /// <summary>
-    /// 新用户：没有权限点，范围为“本人”，不属于任何组织
+    /// 新用户，没有权限点，只能看本人数据，不属于任何组织
     /// </summary>
     public static TestIdentity User(string displayName)
     {
@@ -70,7 +73,7 @@ public sealed record TestIdentity : IAccessContext
     }
 
     /// <summary>
-    /// 使用的组织树快照
+    /// 使用的组织树
     /// </summary>
     public TestIdentity InTree(IOrgHierarchy tree)
     {
@@ -79,7 +82,7 @@ public sealed record TestIdentity : IAccessContext
     }
 
     /// <summary>
-    /// 所属组织单元；必须在当前组织树中
+    /// 所属组织，必须在当前组织树里
     /// </summary>
     public TestIdentity InOrgUnit(OrgUnitId orgUnit) =>
         OrgHierarchy.Exists(orgUnit)
@@ -87,7 +90,7 @@ public sealed record TestIdentity : IAccessContext
             : throw new ArgumentException("组织单元不在当前测试组织树中，先调用 InTree。", nameof(orgUnit));
 
     /// <summary>
-    /// 切换到一个新角色：角色 ID 与授权版本随之变化，锚点保留
+    /// 换成新角色，角色 ID 和授权版本号随之变化，起点组织保留
     /// </summary>
     public TestIdentity WithRole(Action<TestRoleBuilder> configure)
     {
@@ -105,21 +108,21 @@ public sealed record TestIdentity : IAccessContext
     }
 
     /// <summary>
-    /// 授予上的锚点，代替所属组织作为范围的起点（05-05 D5）
+    /// 数据权限的起点组织，代替所属组织
     /// </summary>
     public TestIdentity WithAnchors(params IEnumerable<OrgUnitId> anchors) =>
         this with { DataScopeGrant = DataScopeGrant with { Anchors = [.. anchors] } };
 
     /// <summary>
-    /// 由另一个用户模拟登录
+    /// 模拟登录
     /// </summary>
     /// <param name="impersonator">实际操作人</param>
-    /// <param name="allowWrite">模拟会话是否允许修改</param>
+    /// <param name="allowWrite">是否允许修改数据</param>
     public TestIdentity ImpersonatedBy(UserId impersonator, bool allowWrite = false) =>
         this with { ImpersonatorUserId = impersonator, ImpersonationAllowsWrite = allowWrite };
 
     /// <summary>
-    /// 处于“必须先修改密码”状态
+    /// 需要先修改密码
     /// </summary>
     public TestIdentity MustChangePassword() => this with { PasswordChangeRequired = true };
 

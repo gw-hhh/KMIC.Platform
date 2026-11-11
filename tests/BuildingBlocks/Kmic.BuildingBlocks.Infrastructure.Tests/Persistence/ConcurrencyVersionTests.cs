@@ -7,7 +7,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 聚合内任何实体变化都让聚合根版本加一，UPDATE 条件带原版本
+/// 聚合里任何实体有变化，聚合根的版本号都加一
 /// </summary>
 public sealed class ConcurrencyVersionTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -69,7 +69,7 @@ public sealed class ConcurrencyVersionTests(ClassDatabase<ProbeTemplate> databas
         mine.Rename("先保存");
         await first.SaveAsync();
 
-        // 后保存的一方只改了子实体，同样被版本拦下
+        // 后保存的一方只改了子实体，同样会被版本号拦下
         theirs.ChangeLine(line.Id, "后保存");
         await Should.ThrowAsync<DbUpdateConcurrencyException>(second.SaveAsync);
     }

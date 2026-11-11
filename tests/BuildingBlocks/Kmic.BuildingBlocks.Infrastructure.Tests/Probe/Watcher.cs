@@ -1,8 +1,11 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 值对象集合的元素，整个集合存为一个 jsonb 列
+/// 关注人
 /// </summary>
+/// <remarks>
+/// 整个集合存为一个 jsonb 列
+/// </remarks>
 internal sealed record Watcher
 {
     private Watcher(string name, TicketPriority notifyFrom)

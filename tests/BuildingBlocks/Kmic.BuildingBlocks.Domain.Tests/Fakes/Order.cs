@@ -5,11 +5,11 @@ using Kmic.BuildingBlocks.Domain.StateMachines;
 namespace Kmic.BuildingBlocks.Domain.Tests.Fakes;
 
 /// <summary>
-/// 测试用的聚合：按 05-01 示例的写法，有明细才能提交
+/// 测试用的订单：有明细才能提交
 /// </summary>
 internal sealed class Order : AggregateRoot<OrderId>, IHasRevision
 {
-    // 测试需要直接调用 CanFire、PermittedActions，所以公开为属性；业务聚合中写成 private static readonly 字段 _machine
+    // 测试要直接调用 CanFire、PermittedActions，所以公开成属性；业务代码里写成 private static readonly 字段
     public static StateMachine<Order, OrderStatus, OrderAction> Machine { get; } =
         StateMachine.Define<Order, OrderStatus, OrderAction>(o => o.Status, (o, v) => o.Status = v)
             .Initial(OrderStatus.Draft)

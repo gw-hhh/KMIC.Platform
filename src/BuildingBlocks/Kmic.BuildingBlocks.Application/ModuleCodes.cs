@@ -4,12 +4,12 @@ using System.Text.RegularExpressions;
 namespace Kmic.BuildingBlocks.Application;
 
 /// <summary>
-/// 读取“模块.名称”形式的编码常量：范围对象、字典类型都这样声明
+/// 读取“模块.名称”格式的编码常量
 /// </summary>
 internal static partial class ModuleCodes
 {
     /// <summary>
-    /// 读出分组类型中标了 TAttribute 的 string 常量；格式不对、不属于本模块的记为问题并跳过
+    /// 读取分组类型里标了 TAttribute 的常量，格式不对或不属于本模块的记为问题
     /// </summary>
     public static IEnumerable<(string Code, TAttribute Attribute)> Read<TAttribute>(Type group, string module, string kind, List<string> problems)
         where TAttribute : Attribute
@@ -39,7 +39,7 @@ internal static partial class ModuleCodes
     }
 
     /// <summary>
-    /// 编码全系统唯一，显示名在模块内唯一
+    /// 编码全系统唯一，显示名称在模块内唯一
     /// </summary>
     public static void CheckUnique<T>(IReadOnlyList<T> items, Func<T, string> code, Func<T, (string Module, string DisplayName)> name, string kind, List<string> problems)
     {

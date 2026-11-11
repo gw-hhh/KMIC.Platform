@@ -12,7 +12,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Application.Tests.Behaviors;
 
 /// <summary>
-/// 经 Mediator 生成的真实管道（日志 → 校验 → 授权）发送消息
+/// 通过 Mediator 生成的真实管道发送消息
 /// </summary>
 public sealed class PipelineTests : IAsyncLifetime
 {
@@ -50,7 +50,7 @@ public sealed class PipelineTests : IAsyncLifetime
     [Fact]
     public async Task Validation_RunsBeforeAuthorization_WithJsonPathsAndCodes()
     {
-        // 没有权限点也先得到校验错误：校验在授权之前（05-02 第 4.1 节）
+        // 没有权限点时也先返回校验错误，因为校验在授权之前
         var result = await SendAsync(TestAccess.WithPermissions(), new SubmitThingCommand("", [new ThingItem(1), new ThingItem(0)]));
 
         result.Error.Code.ShouldBe(CommonErrors.ValidationFailed.Code);

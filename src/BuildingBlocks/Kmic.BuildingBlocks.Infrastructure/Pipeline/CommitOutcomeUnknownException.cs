@@ -1,10 +1,10 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 提交已经发出、但没有收到确认（如连接在确认返回前断开）：业务可能已经生效，也可能没有
+/// 提交结果未知
 /// </summary>
 /// <remarks>
-/// 各入口先用自己的记录重新读取判断，判断不了就保持“结果未知”，既不推断成功，也不按回滚处理
+/// 提交已发出但没收到确认，比如连接在确认返回前断了。业务可能已经生效，也可能没有，不能当成功或回滚处理
 /// </remarks>
 public sealed class CommitOutcomeUnknownException : Exception
 {

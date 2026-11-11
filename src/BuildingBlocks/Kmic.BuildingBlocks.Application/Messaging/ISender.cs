@@ -1,6 +1,9 @@
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
 /// <summary>
-/// 端点与后台入口使用的发送入口；业务代码不直接使用 Mediator 的类型
+/// 消息发送
 /// </summary>
+/// <remarks>
+/// 给端点和后台入口用，业务代码不直接用 Mediator 的类型
+/// </remarks>
 public interface ISender : ICommandSender, IQuerySender;

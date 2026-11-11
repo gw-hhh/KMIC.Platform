@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
 /// <summary>
-/// 一个聚合的状态机：执行流转、产生业务历史所需的流转记录、回答当前可用的动作
+/// 状态机
 /// </summary>
 /// <remarks>
-/// 声明为聚合的 private static readonly 字段（_machine），所有实例共用；状态机本身不保存任何聚合的数据
+/// 声明为聚合根的 private static readonly 字段，所有实例共用
 /// </remarks>
 public sealed class StateMachine<TAggregate, TState, TAction>
     where TAggregate : class, IAggregateRoot
@@ -25,7 +25,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
     }
 
     /// <summary>
-    /// 在工厂方法中调用：设置初始状态，并记录一条原状态为空的流转，业务历史由此从创建开始完整
+    /// 在工厂方法里设置初始状态
     /// </summary>
     public void Start(TAggregate aggregate, string? reason)
     {
@@ -35,10 +35,10 @@ public sealed class StateMachine<TAggregate, TState, TAction>
     }
 
     /// <summary>
-    /// 执行一个动作：当前状态不允许时返回 OnInvalid 的错误，守卫不通过时返回守卫的错误，两种情况状态都不变
+    /// 执行动作
     /// </summary>
     /// <remarks>
-    /// 不发布领域事件：流转是否需要通知其他部分是业务决定，由聚合方法显式 Raise
+    /// 这里不发布领域事件：要不要通知别处由业务决定，聚合根的方法自己 Raise
     /// </remarks>
     public Result Fire(TAggregate aggregate, TAction action, string? reason)
     {
@@ -58,7 +58,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
     }
 
     /// <summary>
-    /// 判断当前能否执行该动作，不改变状态
+    /// 当前能否执行该动作
     /// </summary>
     public Result CanFire(TAggregate aggregate, TAction action)
     {
@@ -70,7 +70,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
     }
 
     /// <summary>
-    /// 当前状态下声明了且守卫通过的全部动作，按声明顺序；allowedActions 由它与资源策略的结果取交集
+    /// 当前可执行的动作，按声明顺序
     /// </summary>
     public IReadOnlyList<TAction> PermittedActions(TAggregate aggregate)
     {
@@ -87,7 +87,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
     }
 
     /// <summary>
-    /// 导出 Mermaid 状态图；模块的文档测试用它保证文档与代码一致
+    /// 导出 Mermaid 状态图
     /// </summary>
     public string ToMermaid()
     {
@@ -116,9 +116,9 @@ public sealed class StateMachine<TAggregate, TState, TAction>
 
     private string CurrentCode(TAggregate aggregate)
     {
-        // 状态属性为空只可能是工厂方法漏调了 Start，属于程序缺陷
+        // 状态为空说明工厂方法漏调了 Start
         var current = _definition.GetState(aggregate)
-            ?? throw new InvalidOperationException($"{typeof(TAggregate).Name}.{_definition.StateName} 尚未设置，工厂方法中应先调用 Start。");
+            ?? throw new InvalidOperationException($"{typeof(TAggregate).Name}.{_definition.StateName} 没有初始值，工厂方法里要先调用 Start。");
         return StateCodes.Of(current);
     }
 

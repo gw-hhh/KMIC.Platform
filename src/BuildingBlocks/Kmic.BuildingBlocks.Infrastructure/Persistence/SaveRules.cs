@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 保存前按固定顺序执行的规则（05-03 第 7.4 节的 1～3）：软删除 → 审计字段 → 聚合版本
+/// 保存前的规则
 /// </summary>
 /// <remarks>
-/// 软删除必须最先：删除被改写成修改后，才会被审计和版本计为一次修改
+/// 依次处理软删除、审计列、版本号。软删除要最先：删除改成修改后，审计和版本号才会按一次修改处理
 /// </remarks>
 internal static class SaveRules
 {
@@ -37,7 +37,7 @@ internal static class SaveRules
 
         foreach (var root in AffectedRoots(context, changed))
         {
-            // 只改了子实体时，聚合根本身也算被修改：版本加一，修改人和时间一并更新
+            // 只改了子实体时，聚合根也算修改：版本号加一，修改人和修改时间一起更新
             if (root.State == EntityState.Unchanged)
             {
                 root.Property(AuditColumns.UpdatedAt).CurrentValue = now;
@@ -49,7 +49,7 @@ internal static class SaveRules
         }
     }
 
-    // 模拟身份记实际操作人（05-03 D4）；系统身份与匿名请求（登录等）记系统账号
+    // 模拟登录时记实际操作人；系统身份和匿名请求（如登录）记系统用户
     public static UserId Actor(ICurrentUser user) => user.ActualUserId ?? user.UserId ?? UserId.System;
 
     private static void StampAudit(EntityEntry entry, UserId actor, DateTimeOffset now)
@@ -66,7 +66,7 @@ internal static class SaveRules
         }
     }
 
-    // 新增的聚合根从 0 开始，删除的聚合根靠 DELETE 条件中的原版本做检查，两者都不递增
+    // 新增的从 0 开始；删除时靠 DELETE 条件里的原版本号检查冲突。两种情况都不加一
     private static List<EntityEntry> AffectedRoots(DbContext context, List<EntityEntry> changed)
     {
         var roots = new List<EntityEntry>();
@@ -89,13 +89,13 @@ internal static class SaveRules
         {
             current = ParentOf(context, current)
                 ?? throw new InvalidOperationException(
-                    $"{current.Metadata.DisplayName()} 被修改，但它所属的聚合根没有被跟踪：子实体只能经仓储加载完整聚合后修改。");
+                    $"{current.Metadata.DisplayName()} 被修改了，但它的聚合根没有被跟踪。子实体要通过仓储读取整个聚合后再修改。");
         }
 
         return current;
     }
 
-    // 父子关系取自 EF 模型中父实体指向子实体的导航，子实体不需要额外声明
+    // 父子关系取自模型里父实体指向子实体的导航，子实体不用另外声明
     private static EntityEntry? ParentOf(DbContext context, EntityEntry child)
     {
         var foreignKey = child.Metadata.GetForeignKeys().FirstOrDefault(fk => fk.PrincipalToDependent is not null);
@@ -110,7 +110,7 @@ internal static class SaveRules
             && foreignKey.PrincipalKey.Properties.Select(p => e.Property(p.Name).CurrentValue).SequenceEqual(parentKey));
     }
 
-    // 从集合中移除的子实体在保存前仍是 Modified，外键已被置空，要按原值找到它原来的聚合根
+    // 离开集合的子实体在保存前还是 Modified，外键已经被清空，要用原值找到它的聚合根
     private static object? ParentKeyValue(PropertyEntry foreignKey) =>
         foreignKey.EntityEntry.State == EntityState.Deleted || foreignKey.CurrentValue is null ? foreignKey.OriginalValue : foreignKey.CurrentValue;
 }

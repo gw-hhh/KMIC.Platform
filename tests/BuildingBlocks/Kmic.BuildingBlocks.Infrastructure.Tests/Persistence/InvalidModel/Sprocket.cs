@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence.InvalidModel;
 
 /// <summary>
-/// 引用了其他模块的范围对象
+/// 故意引用了其他模块的范围对象
 /// </summary>
 internal sealed class Sprocket : AggregateRoot<TicketId>, IHasOrgUnit
 {

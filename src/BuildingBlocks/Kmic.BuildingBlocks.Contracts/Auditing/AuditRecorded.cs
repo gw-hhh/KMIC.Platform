@@ -3,10 +3,10 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 namespace Kmic.BuildingBlocks.Contracts.Auditing;
 
 /// <summary>
-/// 一次被审计的操作：随业务事务写入本模块 Outbox，唯一订阅方是 Operations 的 AuditLog
+/// 审计记录
 /// </summary>
 /// <remarks>
-/// 框架消息，是“消息名以本模块名开头”的唯一例外；定义在这里是因为框架不能引用 Operations 模块
+/// 框架不能引用 Operations 模块，所以定义在这里
 /// </remarks>
 [IntegrationMessage("Framework.AuditRecorded")]
 public sealed record AuditRecorded : IIntegrationEvent
@@ -17,52 +17,52 @@ public sealed record AuditRecorded : IIntegrationEvent
     public required Guid AuditId { get; init; }
 
     /// <summary>
-    /// 操作发生的时刻（UTC），同一命令内取同一时刻
+    /// 操作时间
     /// </summary>
     public required DateTimeOffset OccurredAt { get; init; }
 
     /// <summary>
-    /// 执行操作的模块名
+    /// 模块
     /// </summary>
     public required string Module { get; init; }
 
     /// <summary>
-    /// 动作名，默认为“模块.命令名去掉 Command 后缀”，可用 [Audited(Action = ...)] 固定
+    /// 操作名
     /// </summary>
     public required string Action { get; init; }
 
     /// <summary>
-    /// 调用来源：Http、Inbox、ScheduledJob、BackgroundJob、Startup、ModuleCall
+    /// 请求来源
     /// </summary>
     public required string Origin { get; init; }
 
     /// <summary>
-    /// 操作人；模拟身份时为被模拟的用户，系统身份时为空
+    /// 操作人
     /// </summary>
     public Guid? ActorUserId { get; init; }
 
     /// <summary>
-    /// 模拟身份时的实际操作人，否则为空
+    /// 实际操作人
     /// </summary>
     public Guid? ActualUserId { get; init; }
 
     /// <summary>
-    /// 操作时的当前角色
+    /// 角色
     /// </summary>
     public Guid? RoleId { get; init; }
 
     /// <summary>
-    /// 操作所在的会话
+    /// 会话
     /// </summary>
     public Guid? SessionId { get; init; }
 
     /// <summary>
-    /// 事件处理中再次操作时，原始请求的用户
+    /// 发起原始请求的用户
     /// </summary>
     public Guid? OnBehalfOfUserId { get; init; }
 
     /// <summary>
-    /// HTTP 来源时经转发头处理后的客户端地址，其他来源为空
+    /// 客户端 IP
     /// </summary>
     public string? ClientIp { get; init; }
 
@@ -72,17 +72,17 @@ public sealed record AuditRecorded : IIntegrationEvent
     public required string TraceId { get; init; }
 
     /// <summary>
-    /// 被操作的资源：本事务中修改过的聚合根，以及命令补充的目标
+    /// 操作对象
     /// </summary>
     public required IReadOnlyList<AuditTarget> Targets { get; init; }
 
     /// <summary>
-    /// 字段级变更，敏感字段已按映射配置遮盖或隐藏
+    /// 字段变更
     /// </summary>
     public required IReadOnlyList<EntityChange> Changes { get; init; }
 
     /// <summary>
-    /// 命令补充的说明，如导出的筛选条件、批量操作的条数；不含命令参数
+    /// 补充说明，如导出的筛选条件
     /// </summary>
     public required IReadOnlyDictionary<string, string> Details { get; init; }
 }

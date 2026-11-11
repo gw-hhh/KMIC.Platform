@@ -9,8 +9,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 在模块配置之后统一加上的框架约定：审计列、软删除、并发版本、关系的删除规则、值对象列名、编码列的 CHECK 约束
+/// 框架的模型约定
 /// </summary>
+/// <remarks>
+/// 在模块配置之后统一加上：审计列、软删除、并发版本号、删除规则、值对象列名、编码列的检查约束
+/// </remarks>
 internal static class ModelConventions
 {
     private static readonly string _notDeleted = $"\"{SoftDeleteColumns.IsDeleted}\" = false";
@@ -21,20 +24,20 @@ internal static class ModelConventions
         {
             var entity = modelBuilder.Entity(entityType.ClrType);
 
-            // ID 由程序生成（ADR-0009）；否则 EF 会把带着 ID 的新子实体当成已存在的行去更新
+            // ID 由程序生成；不关掉的话，EF 会把带着 ID 的新子实体当成已有的行去更新
             entity.Property(nameof(Entity<>.Id)).ValueGeneratedNever();
             AddAuditColumns(entity);
 
             if (EntityKinds.IsAggregateRoot(entityType.ClrType))
             {
-                // 领域事件与状态流转只在内存中传递，由事务行为与拦截器取走，不映射到表
+                // 领域事件和状态流转只在内存里传递，不映射到表
                 entity.Ignore(nameof(IAggregateRoot.DomainEvents));
                 entity.Ignore(nameof(IAggregateRoot.StateTransitions));
                 entity.Property(nameof(IAggregateRoot.ConcurrencyVersion))
                     .IsConcurrencyToken()
-                    .HasComment("并发版本：聚合内任何实体新增、修改、删除都加一");
+                    .HasComment("并发版本号");
 
-                // 列表默认按创建时间排序（ADR-0009：不按 ID 排序）
+                // 列表默认按创建时间排序，所以要有索引
                 entity.HasIndex(AuditColumns.CreatedAt);
             }
 
@@ -58,13 +61,13 @@ internal static class ModelConventions
         }
     }
 
-    // 列注释默认取属性的 XML 注释（编译时生成）；配置中显式写了 HasComment 的不覆盖
+    // 列注释默认取属性的 XML 注释，配置里写了 HasComment 的不覆盖
     private static void AddColumnComments(IMutableEntityType entityType)
     {
         foreach (var property in entityType.GetDeclaredProperties().Where(p => p.GetComment() is null))
         {
             property.SetComment(property.IsPrimaryKey() && string.Equals(property.Name, nameof(Entity<>.Id), StringComparison.Ordinal)
-                ? "主键，由程序生成的 UUID v7"
+                ? "ID"
                 : GeneratedComments.Of(property.PropertyInfo) ?? ParentKeyComment(property));
         }
 
@@ -74,7 +77,7 @@ internal static class ModelConventions
         }
     }
 
-    // 值对象的列注释是“属性的注释：成员的注释”，如“预算：金额”
+    // 值对象的列注释是“属性注释：成员注释”，如“预算：金额”
     private static void CommentValueObjectColumns(IMutableComplexProperty complexProperty, string? owner)
     {
         foreach (var property in complexProperty.ComplexType.GetDeclaredProperties().Where(p => p.GetComment() is null))
@@ -90,13 +93,13 @@ internal static class ModelConventions
         }
     }
 
-    // 子实体指向父实体的影子外键
+    // 子实体指向父实体的外键
     private static string? ParentKeyComment(IMutableProperty property) =>
         property.IsShadowProperty() && property.GetContainingForeignKeys().FirstOrDefault(fk => fk.PrincipalToDependent is not null) is { } foreignKey
-            ? $"所属{foreignKey.PrincipalEntityType.ClrType.Name}的 ID"
+            ? $"{foreignKey.PrincipalEntityType.ClrType.Name} ID"
             : null;
 
-    // 值对象的列名是“属性名 + 成员名”，不带下划线，如 BudgetAmount；存为 jsonb 的值对象不是列
+    // 值对象的列名是属性名加成员名，如 BudgetAmount。存成 jsonb 的值对象只有一列，不用处理
     private static void NameValueObjectColumns(IMutableComplexProperty complexProperty, string prefix)
     {
         if (complexProperty.IsCollection || complexProperty.ComplexType.IsMappedToJson())
@@ -115,7 +118,7 @@ internal static class ModelConventions
         }
     }
 
-    // 智能枚举与普通枚举的列只能存已定义的编码；新增取值时迁移中会出现约束变更
+    // 枚举列只能存已定义的编码，新增取值时迁移里会出现约束变更
     private static void AddCodeChecks(IMutableEntityType entityType)
     {
         var table = entityType.GetTableName();
@@ -138,37 +141,37 @@ internal static class ModelConventions
             .Where(c => !c.IsCollection && !c.ComplexType.IsMappedToJson())
             .SelectMany(c => ColumnProperties(c.ComplexType)));
 
-    // 父实体 → 子实体：外键必填并级联删除，从集合中移除的子实体随保存删除，而不是留下外键为空的行；
-    // 聚合之间只存 ID：外键 Restrict，仍被引用的聚合不能物理删除
     private static void ApplyDeleteRule(IMutableForeignKey foreignKey)
     {
         if (foreignKey.PrincipalToDependent is not null && !EntityKinds.IsAggregateRoot(foreignKey.DeclaringEntityType.ClrType))
         {
+            // 外键可空的话，子实体离开集合时 EF 只会把外键置空，行还留在表里
             foreignKey.IsRequired = true;
             foreignKey.DeleteBehavior = DeleteBehavior.Cascade;
         }
         else if (EntityKinds.IsAggregateRoot(foreignKey.PrincipalEntityType.ClrType))
         {
+            // 还被别的聚合引用时，不允许物理删除
             foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
         }
     }
 
     private static void AddAuditColumns(EntityTypeBuilder entity)
     {
-        entity.Property<DateTimeOffset>(AuditColumns.CreatedAt).HasComment("创建时刻");
-        entity.Property<UserId>(AuditColumns.CreatedBy).HasComment("创建人；模拟身份时为实际操作人，系统身份为系统账号");
-        entity.Property<DateTimeOffset?>(AuditColumns.UpdatedAt).HasComment("最后修改时刻；新增后未修改过为空");
-        entity.Property<UserId?>(AuditColumns.UpdatedBy).HasComment("最后修改人");
+        entity.Property<DateTimeOffset>(AuditColumns.CreatedAt).HasComment("创建时间");
+        entity.Property<UserId>(AuditColumns.CreatedBy).HasComment("创建人");
+        entity.Property<DateTimeOffset?>(AuditColumns.UpdatedAt).HasComment("修改时间");
+        entity.Property<UserId?>(AuditColumns.UpdatedBy).HasComment("修改人");
     }
 
     private static void AddSoftDelete(EntityTypeBuilder entity, IMutableEntityType entityType)
     {
-        entity.Property<bool>(SoftDeleteColumns.IsDeleted).HasDefaultValue(false).HasComment("是否已删除（软删除）");
-        entity.Property<DateTimeOffset?>(SoftDeleteColumns.DeletedAt).HasComment("删除时刻");
+        entity.Property<bool>(SoftDeleteColumns.IsDeleted).HasDefaultValue(false).HasComment("是否已删除");
+        entity.Property<DateTimeOffset?>(SoftDeleteColumns.DeletedAt).HasComment("删除时间");
         entity.Property<UserId?>(SoftDeleteColumns.DeletedBy).HasComment("删除人");
         entity.HasQueryFilter(QueryFilters.SoftDelete, NotDeleted(entityType.ClrType));
 
-        // 删除后要能新建同编号的数据：唯一约束只约束未删除的行
+        // 唯一约束只管没删除的行，删除后才能新建同编号的数据
         foreach (var index in entityType.GetIndexes().Where(i => i.IsUnique))
         {
             index.SetFilter(index.GetFilter() is { } existing ? $"({existing}) AND {_notDeleted}" : _notDeleted);

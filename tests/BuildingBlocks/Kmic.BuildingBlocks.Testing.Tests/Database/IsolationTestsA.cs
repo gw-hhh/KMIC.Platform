@@ -4,7 +4,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Testing.Tests.Database;
 
 /// <summary>
-/// 与 IsolationTestsB 并行运行：两个类各有自己的克隆库，互相看不到对方写入的行
+/// 和 IsolationTestsB 并行运行，两个类各有自己的克隆库，互相看不到对方写的数据
 /// </summary>
 public sealed class IsolationTestsA(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {

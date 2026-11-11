@@ -10,10 +10,10 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// DataScope 命名过滤器：同一个查询按执行身份得到不同的可见集合，范围值都是参数
+/// 数据权限过滤：同一个查询，不同身份看到不同的数据
 /// </summary>
 /// <remarks>
-/// 每个测试开始时在上海、杭州、广州各建一张，所有者分别是销售甲、乙、丙；同一个类的测试共用数据库，断言按标题去重
+/// 每个测试开始时在上海、杭州、广州各建一张单据，所有者分别是销售甲、乙、丙。同一个类的测试共用数据库，断言按标题去重
 /// </remarks>
 public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
     : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
@@ -81,7 +81,7 @@ public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
     [Fact]
     public async Task WriteContext_AlsoFiltered()
     {
-        // 仓储经写入上下文加载，范围外的聚合同样加载不到
+        // 仓储通过写入上下文读取，范围外的数据同样读不到
         await using var work = _harness.Begin(_shanghai);
 
         (await work.Db.Set<Ticket>().AnyAsync(t => t.Id == _tickets["广州"], Ct)).ShouldBeFalse();
@@ -110,7 +110,7 @@ public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
         var manager = _shanghai.WithRole(r => r.Scope(ScopeLevel.OrgUnitAndBelow)).WithAnchors(_org["华东"]);
         await using var work = _harness.Begin(manager);
 
-        // 开头的注释行列出参数值，只检查语句本身
+        // 开头的注释行里有参数值，只检查语句本身
         var sql = string.Join('\n', work.Query.Tickets.Select(t => t.Title).ToQueryString()
             .Split('\n')
             .Where(line => !line.StartsWith("--", StringComparison.Ordinal)));

@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
 /// <summary>
-/// KM9006：不得使用 dynamic
+/// KM9006：不能用 dynamic
 /// </summary>
 /// <remarks>
-/// dynamic 让编译器的类型检查失效，错误要到运行时才暴露（06 第 5.2 节）
+/// dynamic 让编译器的类型检查失效，错误要到运行时才暴露
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DynamicAnalyzer : DiagnosticAnalyzer

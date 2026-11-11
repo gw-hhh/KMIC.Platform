@@ -10,7 +10,7 @@ using PrimaryParameter = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Km
 namespace Kmic.BuildingBlocks.Analyzers.Tests.General;
 
 /// <summary>
-/// 06 第 15 节的全部项目通用规则（KM9001～KM9007），每条“触发”与“不触发”各至少一例
+/// 通用规则 KM9001～KM9007，每条规则至少各有一个触发和不触发的例子
 /// </summary>
 public sealed class GeneralRuleTests
 {

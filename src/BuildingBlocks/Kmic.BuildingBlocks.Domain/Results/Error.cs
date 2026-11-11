@@ -4,11 +4,10 @@ using System.Text.RegularExpressions;
 namespace Kmic.BuildingBlocks.Domain.Results;
 
 /// <summary>
-/// 一次业务失败的描述：稳定的错误码、大类和给用户看的文字
+/// 业务错误
 /// </summary>
 /// <remarks>
-/// 业务代码只能在 *Errors 静态类（错误目录）中创建它。实例不可变，WithDetail、WithMetadata 返回新实例，
-/// 所以错误目录里的静态字段可以放心共享。
+/// 只在各模块的 *Errors 类里创建。实例不可变，可以放在静态字段里共享
 /// </remarks>
 public sealed partial record Error
 {
@@ -28,37 +27,37 @@ public sealed partial record Error
     }
 
     /// <summary>
-    /// 错误码，格式为“模块.错误名”，如 Sample.NoItems；前端只依据它做判断
+    /// 错误码，如 Sample.NoItems
     /// </summary>
     public string Code { get; }
 
     /// <summary>
-    /// 错误大类
+    /// 错误类型
     /// </summary>
     public ErrorType Type { get; }
 
     /// <summary>
-    /// 固定的提示文字，对应 ProblemDetails 的 title
+    /// 提示文字
     /// </summary>
     public string Message { get; }
 
     /// <summary>
-    /// 带具体参数的说明，对应 ProblemDetails 的 detail；没有时为空
+    /// 详细说明
     /// </summary>
     public string? Detail { get; private init; }
 
     /// <summary>
-    /// 说明文字的参数，为将来的多语言预留，目前总是空集合
+    /// 说明文字的参数
     /// </summary>
     public IReadOnlyList<object?> DetailArgs { get; private init; } = [];
 
     /// <summary>
-    /// 字段错误，只有 Validation 类错误才有内容
+    /// 字段错误
     /// </summary>
     public IReadOnlyList<FieldError> FieldErrors { get; }
 
     /// <summary>
-    /// 框架附加的数据，键见 ErrorMetadataKeys
+    /// 附加数据
     /// </summary>
     public IReadOnlyDictionary<string, object?> Metadata { get; private init; } = FrozenDictionary<string, object?>.Empty;
 
@@ -89,12 +88,12 @@ public sealed partial record Error
     public static Error BusinessRule(string code, string message) => new(code, ErrorType.BusinessRule, message, []);
 
     /// <summary>
-    /// 可重试的瞬时故障；业务错误目录不得使用
+    /// 暂时不可用，可以重试
     /// </summary>
     public static Error Unavailable(string code, string message) => new(code, ErrorType.Unavailable, message, []);
 
     /// <summary>
-    /// 返回带具体说明的新实例
+    /// 附上详细说明
     /// </summary>
     public Error WithDetail(string detail)
     {
@@ -103,7 +102,7 @@ public sealed partial record Error
     }
 
     /// <summary>
-    /// 返回附加了一项框架数据的新实例
+    /// 附加一项数据
     /// </summary>
     public Error WithMetadata(string key, object? value)
     {

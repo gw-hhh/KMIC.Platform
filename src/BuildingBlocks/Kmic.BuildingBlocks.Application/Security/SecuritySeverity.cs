@@ -1,17 +1,17 @@
 namespace Kmic.BuildingBlocks.Application.Security;
 
 /// <summary>
-/// 安全事件的严重程度
+/// 严重程度
 /// </summary>
 public enum SecuritySeverity
 {
     /// <summary>
-    /// 一般记录
+    /// 一般
     /// </summary>
     Info,
 
     /// <summary>
-    /// 值得关注
+    /// 需要关注
     /// </summary>
     Warning,
 

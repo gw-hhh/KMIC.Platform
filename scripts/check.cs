@@ -1,26 +1,27 @@
 #:property RestorePackagesWithLockFile=false
 
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
-// 依次执行：编码与换行 → 注释格式 → 临时设计引用的格式 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 密钥扫描 → 拼写；任一步失败即停止并返回非零退出码
+// 依次执行：编码与换行 → 注释格式 → 设计文档引用 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 密钥扫描 → 拼写；任一步失败即停止并返回非零退出码
 // 需要 Docker：数据库测试用测试容器，密钥扫描用 Gitleaks 的官方镜像
 // CI 流水线只调用本脚本，本地通过即 CI 通过
 // 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查：Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次；CI 不加
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 
 var root = FindRepositoryRoot();
 var fix = args.Contains("--fix", StringComparer.Ordinal);
 var steps = new (string Name, Func<int> Run)[]
 {
-    ("编码与换行（UTF-8 无 BOM、LF，06 第 3.2 节）", () => CheckEncoding(root, fix)),
+    ("编码与换行（UTF-8 无 BOM、LF）", () => CheckEncoding(root, fix)),
     ("注释格式（summary 三行、末尾不加句号）", () => CheckCommentStyle(root)),
-    ("临时设计引用的格式（06 第 10.3 节）", () => CheckDesignCitations(root)),
+    ("设计文档引用（只能用行末的临时【引用：…】）", () => CheckDesignCitations(root)),
     ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
     ("依赖漏洞（含传递依赖）", () => RunWhenProjectsExist(root, "dotnet", "list Kmic.slnx package --vulnerable --include-transitive")),
     // 扫描全部提交历史（CI 检出时要取完整历史）；在推送之前发现，密钥就不会离开本机
-    ("密钥扫描（Gitleaks，ADR-0032）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
+    ("密钥扫描（Gitleaks）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
 
@@ -154,7 +155,8 @@ static string[] ListFiles(string root)
     return files;
 }
 
-// 临时设计引用只能写在 // 注释行末，前面必须有原因；阶段 2 验收删除全部引用后，改为不允许出现
+// 代码里不写设计文档的节号、决定编号：读代码的人不一定读过文档，文档改版后编号也会失效。
+// 阶段 2 验收前允许 // 注释行末的临时【引用：…】，前面必须写原因；验收删除全部引用后，改为不允许出现
 static int CheckDesignCitations(string root)
 {
     string[] extensions = [".cs", ".ts", ".vue"];
@@ -179,6 +181,12 @@ static int CheckDesignCitations(string root)
         for (var i = 0; i < lines.Length; i++)
         {
             var marker = lines[i].IndexOf("【引用", StringComparison.Ordinal);
+            if (Kmic.Scripts.Patterns.DesignReference().Match(marker < 0 ? lines[i] : lines[i][..marker]) is { Success: true } reference)
+            {
+                Console.WriteLine($"   {file}:{i + 1} 写了设计文档编号“{reference.Value}”，直接说明原因");
+                problems++;
+            }
+
             if (marker < 0)
             {
                 continue;
@@ -193,7 +201,7 @@ static int CheckDesignCitations(string root)
         }
     }
 
-    Console.WriteLine($"   临时引用 {citations} 处，格式问题 {problems} 处");
+    Console.WriteLine($"   临时引用 {citations} 处，问题 {problems} 处");
     return problems == 0 ? 0 : 1;
 }
 
@@ -281,4 +289,14 @@ static string? DescribeCommentProblem(string[] lines, int index)
     }
 
     return null;
+}
+
+namespace Kmic.Scripts
+{
+    internal static partial class Patterns
+    {
+        // 节号（第 5.3 节）、带文档号的决定（05-02 D5）、括号里的文档号（05-03 …）、原型编号、实施任务号
+        [GeneratedRegex(@"第 ?\d+(\.\d+)* ?节|\b[FR]?\d{2}(-\d{2})? ?D\d+\b|（[FR]?\d{2}-\d{2}[ ）]|原型 ?#\d+|\bS\d-\d{2}\b|实施待办", RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
+        public static partial Regex DesignReference();
+    }
 }

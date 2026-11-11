@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Kmic.BuildingBlocks.Application.Dictionaries;
 
 /// <summary>
-/// 全部模块声明的字典类型；Configuration 启动时据此登记类型，[Dictionary] 只能引用其中的编码
+/// 字典类型目录
 /// </summary>
 public sealed class DictionaryTypeCatalog
 {
@@ -19,7 +19,7 @@ public sealed class DictionaryTypeCatalog
     public IReadOnlyCollection<DictionaryTypeDefinition> All => _byCode.Values;
 
     /// <summary>
-    /// 扫描程序集中标了 [DictionaryTypeGroup] 的常量类
+    /// 从程序集中读取
     /// </summary>
     public static DictionaryTypeCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -28,7 +28,7 @@ public sealed class DictionaryTypeCatalog
     }
 
     /// <summary>
-    /// 读取并校验格式、归属与唯一性
+    /// 从分组类型中读取
     /// </summary>
     public static DictionaryTypeCatalog Build(IEnumerable<Type> groupTypes)
     {
@@ -50,7 +50,7 @@ public sealed class DictionaryTypeCatalog
     }
 
     /// <summary>
-    /// 字典类型是否存在
+    /// 是否包含该字典类型
     /// </summary>
     public bool Contains(string code) => _byCode.ContainsKey(code);
 }

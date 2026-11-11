@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
 /// <summary>
-/// 状态与动作只能是智能枚举或普通枚举；这里统一取编码与全部取值
+/// 状态和动作的编码与全部取值，支持智能枚举和普通枚举
 /// </summary>
 internal static class StateCodes
 {
@@ -13,7 +13,7 @@ internal static class StateCodes
     {
         if (!typeof(T).IsEnum && !typeof(IEnumeration).IsAssignableFrom(typeof(T)))
         {
-            throw new NotSupportedException($"状态机的状态与动作只能是智能枚举或普通枚举，{typeof(T).Name} 两者都不是。");
+            throw new NotSupportedException($"{typeof(T).Name} 不是智能枚举或普通枚举。");
         }
     }
 

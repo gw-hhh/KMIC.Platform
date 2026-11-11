@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace Kmic.BuildingBlocks.Application.Numbering;
 
 /// <summary>
-/// 解析过的编号规则：计算周期键、分组键并生成编号；取号时的计数由基础设施完成
+/// 编号规则
 /// </summary>
 public sealed partial class NumberRule
 {
@@ -41,7 +41,7 @@ public sealed partial class NumberRule
     public string Name { get; }
 
     /// <summary>
-    /// 所属模块
+    /// 模块
     /// </summary>
     public string Module { get; }
 
@@ -61,19 +61,22 @@ public sealed partial class NumberRule
     public bool Partitioned { get; }
 
     /// <summary>
-    /// 序号的最少位数
+    /// 序号最少位数
     /// </summary>
     public int SequenceDigits { get; }
 
     /// <summary>
-    /// 序号达到这个值时记警告：最少位数快用完，编号即将变长
+    /// 序号告警值
     /// </summary>
+    /// <remarks>
+    /// 序号到这个值时记警告，再往后编号就会变长
+    /// </remarks>
     public long WarningThreshold => 9 * (long)Math.Pow(10, SequenceDigits - 1);
 
     /// <summary>
-    /// 计数表中的周期键
+    /// 周期键
     /// </summary>
-    /// <param name="businessDate">取号时刻在业务时区下的日期</param>
+    /// <param name="businessDate">取号日期（业务时区）</param>
     public string PeriodKey(DateOnly businessDate) => Reset switch
     {
         NumberReset.Never => "-",
@@ -84,9 +87,9 @@ public sealed partial class NumberRule
     };
 
     /// <summary>
-    /// 计数表中的分组键；不分组的规则固定为 "-"
+    /// 分组键，不分组的规则固定为 "-"
     /// </summary>
-    /// <exception cref="ArgumentException">分组规则缺少分组键、格式不对，或不分组的规则传了分组键</exception>
+    /// <exception cref="ArgumentException">分组键缺失、格式不对，或不分组的规则传了分组键</exception>
     public string PartitionKey(string? partition)
     {
         if (!Partitioned)
@@ -100,10 +103,10 @@ public sealed partial class NumberRule
     }
 
     /// <summary>
-    /// 按格式生成编号
+    /// 生成编号
     /// </summary>
-    /// <param name="businessDate">取号时刻在业务时区下的日期，与周期键用同一个值</param>
-    /// <param name="sequence">本周期内的序号，从 1 开始</param>
+    /// <param name="businessDate">取号日期（业务时区）</param>
+    /// <param name="sequence">序号，从 1 开始</param>
     /// <param name="partition">分组键</param>
     public string Render(DateOnly businessDate, long sequence, string? partition)
     {
@@ -130,7 +133,7 @@ public sealed partial class NumberRule
     }
 
     /// <summary>
-    /// 解析并校验格式；有问题时追加到 problems 并返回空
+    /// 解析格式，有问题时记入 problems 并返回空
     /// </summary>
     internal static NumberRule? Parse(string name, string module, NumberRuleAttribute declaration, List<string> problems)
     {
@@ -154,7 +157,7 @@ public sealed partial class NumberRule
             problems.Add($"{name}：Partitioned = true 时格式中必须有且只有一个 {{partition}}，否则不能有。");
         }
 
-        // 周期内序号从 1 重新开始：格式中缺少区分周期的日期段，不同周期会生成相同的编号
+        // 格式里没有区分周期的日期段时不能重置，否则不同周期会生成相同的编号
         var hasYear = kinds.Contains(SegmentKind.Year4) || kinds.Contains(SegmentKind.Year2);
         var periodDistinct = declaration.Reset switch
         {

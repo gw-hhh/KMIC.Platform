@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Application.Access;
 
 /// <summary>
-/// 数据范围等级，等级之间是累加关系
+/// 数据权限等级
 /// </summary>
 public enum ScopeLevel
 {
@@ -11,12 +11,12 @@ public enum ScopeLevel
     Self,
 
     /// <summary>
-    /// 本人 + 锚点组织单元
+    /// 本人和本组织
     /// </summary>
     OrgUnit,
 
     /// <summary>
-    /// 本人 + 锚点组织单元及其全部下级
+    /// 本人、本组织及下级
     /// </summary>
     OrgUnitAndBelow,
 

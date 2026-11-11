@@ -5,10 +5,10 @@ using System.Reflection;
 namespace Kmic.BuildingBlocks.Domain.Enumerations;
 
 /// <summary>
-/// 智能枚举基类：以英文编码存储和传输，可以带行为
+/// 智能枚举基类
 /// </summary>
 /// <remarks>
-/// 派生类必须 sealed、构造函数私有、实例为 public static readonly 字段；All 按字段声明顺序排列
+/// 派生类要 sealed，构造函数私有，取值声明为 public static readonly 字段
 /// </remarks>
 [SuppressMessage(
     "Design",
@@ -29,7 +29,7 @@ public abstract class Enumeration<TSelf> : IEnumeration, IEquatable<TSelf>
     }
 
     /// <summary>
-    /// 全部取值，按字段声明顺序
+    /// 全部取值，按声明顺序
     /// </summary>
     public static IReadOnlyList<TSelf> All => Registry.All;
 
@@ -50,7 +50,7 @@ public abstract class Enumeration<TSelf> : IEnumeration, IEquatable<TSelf>
     public static bool operator !=(Enumeration<TSelf>? left, Enumeration<TSelf>? right) => !Equals(left, right);
 
     /// <summary>
-    /// 按编码取值；找不到说明数据已损坏，属于程序缺陷，会抛出异常
+    /// 按编码取值，找不到时抛异常
     /// </summary>
     public static TSelf FromCode(string code) =>
         TryFromCode(code, out var value)
@@ -58,7 +58,7 @@ public abstract class Enumeration<TSelf> : IEnumeration, IEquatable<TSelf>
             : throw new InvalidOperationException($"{typeof(TSelf).Name} 没有编码为“{code}”的取值。");
 
     /// <summary>
-    /// 按编码取值；用于外部输入，找不到时返回 false
+    /// 按编码取值，找不到时返回 false
     /// </summary>
     public static bool TryFromCode(string? code, [NotNullWhen(true)] out TSelf? value)
     {
@@ -83,7 +83,7 @@ public abstract class Enumeration<TSelf> : IEnumeration, IEquatable<TSelf>
     /// <inheritdoc />
     public override string ToString() => Code;
 
-    // 放在嵌套静态类中：等派生类的静态字段全部初始化之后，第一次访问 All 时才反射收集
+    // 放在嵌套类里，第一次用到时才收集，那时派生类的静态字段已经初始化完
     private static class Registry
     {
         public static readonly IReadOnlyList<TSelf> All = Collect();

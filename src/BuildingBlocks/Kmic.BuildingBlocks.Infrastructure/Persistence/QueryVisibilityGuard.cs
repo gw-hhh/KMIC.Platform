@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 开发与测试环境的守卫：命令已经修改了聚合、尚未保存时，再发送本模块的查询即抛异常
+/// 查询可见性检查
 /// </summary>
 /// <remarks>
-/// 查询上下文用读池的另一个连接，看不到本命令尚未提交的修改；命令中用于判断与修改的数据要经仓储读取（05-03 第 2.1 节）。
-/// 先查询、后修改不受影响；其他模块的 Contracts 查询不检查
+/// 查询上下文用的是另一个连接，查不到本命令还没提交的修改。开发和测试环境下，命令改了数据之后再查本模块就抛异常，
+/// 提醒改为从仓储读取。先查后改不受影响，Contracts 查询不检查
 /// </remarks>
 internal sealed class QueryVisibilityGuard(ExecutionScope execution, ModuleWriteContexts writeContexts) : DbCommandInterceptor
 {
@@ -58,7 +58,7 @@ internal sealed class QueryVisibilityGuard(ExecutionScope execution, ModuleWrite
         if (writeContexts.Get(module).ChangeTracker.HasChanges())
         {
             throw new InvalidOperationException(
-                $"命令已修改 {query.Module} 模块的数据、尚未保存，此时的查询读不到这些修改：命令中用于判断的数据要经仓储读取，查询放到修改之前。");
+                "这次查询读不到命令里还没保存的修改。要用刚改的数据就从仓储取，或者把查询放到修改之前。");
         }
     }
 }

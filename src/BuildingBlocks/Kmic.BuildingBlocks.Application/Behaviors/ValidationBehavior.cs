@@ -8,16 +8,16 @@ using Mediator;
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
 /// <summary>
-/// 管道第 3 位：执行消息的全部校验器，汇总后返回 Common.ValidationFailed，字段路径与请求 JSON 一致
+/// 请求校验
 /// </summary>
 /// <remarks>
-/// 校验器只检查形状与基本取值，不读数据库或其他模块（架构测试）；没有校验器的消息直接通过
+/// 校验器只检查格式和取值范围，不读数据库或其他模块
 /// </remarks>
 public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
 {
-    // FluentValidation 内置规则的错误码换成框架约定的短码；自定义规则用 WithErrorCode 写明
+    // 内置规则的错误码换成短码，自定义规则用 WithErrorCode 写明
     private static readonly FrozenDictionary<string, string> _builtInCodes = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["NotNullValidator"] = "Required",
@@ -70,14 +70,14 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
         return TResponse.Fail(CommonErrors.ValidationFailedWith(fieldErrors));
     }
 
-    // Items[2].Quantity → items[2].quantity，与 JSON 的小驼峰一致
+    // Items[2].Quantity 转成 items[2].quantity，和请求 JSON 一致
     internal static string ToJsonPath(string propertyName) =>
         string.Join('.', propertyName.Split('.').Select(segment => segment.Length == 0 ? segment : char.ToLowerInvariant(segment[0]) + segment[1..]));
 
     private static string ToCode(string errorCode) =>
         _builtInCodes.TryGetValue(errorCode, out var code) ? code : TrimValidatorSuffix(errorCode);
 
-    // 未映射的内置规则去掉 Validator 后缀；自定义规则的错误码原样保留
+    // 没有对应短码的内置规则去掉 Validator 后缀，自定义规则原样保留
     private static string TrimValidatorSuffix(string errorCode) =>
         errorCode.EndsWith("Validator", StringComparison.Ordinal) ? errorCode[..^"Validator".Length] : errorCode;
 }

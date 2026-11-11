@@ -40,34 +40,34 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                 {
                     table.PrimaryKey("PK_IdempotencyRecord", x => x.Id);
                 },
-                comment: "幂等记录；框架表；一行代表一次带幂等键的命令；同一用户、角色、操作、键唯一；过期后由清理任务删除");
+                comment: "幂等记录");
 
             migrationBuilder.CreateTable(
                 name: "Ticket",
                 schema: "Probe",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false, comment: "主键，由程序生成的 UUID v7"),
-                    Number = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, comment: "单据编号；不区分大小写，未删除的单据中唯一", collation: "CaseInsensitive"),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, comment: "ID"),
+                    Number = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, comment: "单据编号", collation: "CaseInsensitive"),
                     Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false, comment: "标题"),
                     OwnerId = table.Column<Guid>(type: "uuid", nullable: false, comment: "所属人"),
                     OrgUnitId = table.Column<Guid>(type: "uuid", nullable: false, comment: "所属组织"),
-                    Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false, comment: "可用额度，单位元"),
-                    DueAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "截止时刻；为空表示不限"),
-                    Note = table.Column<string>(type: "text", nullable: true, comment: "备注，长文本"),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false, comment: "可用额度"),
+                    DueAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "截止时间"),
+                    Note = table.Column<string>(type: "text", nullable: true, comment: "备注"),
                     Status = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false, comment: "状态"),
                     Priority = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false, comment: "优先级"),
-                    ContactEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true, comment: "联系邮箱；为空表示未填写"),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "创建时刻"),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false, comment: "创建人；模拟身份时为实际操作人，系统身份为系统账号"),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "删除时刻"),
+                    ContactEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true, comment: "联系邮箱"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "创建时间"),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false, comment: "创建人"),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "删除时间"),
                     DeletedBy = table.Column<Guid>(type: "uuid", nullable: true, comment: "删除人"),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "是否已删除（软删除）"),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "最后修改时刻；新增后未修改过为空"),
-                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true, comment: "最后修改人"),
-                    BudgetAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true, comment: "预算；为空表示未设定：金额"),
-                    BudgetCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true, comment: "预算；为空表示未设定：币种，ISO 4217 三位代码"),
-                    ConcurrencyVersion = table.Column<long>(type: "bigint", nullable: false, comment: "并发版本：聚合内任何实体新增、修改、删除都加一"),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false, comment: "是否已删除"),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "修改时间"),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true, comment: "修改人"),
+                    BudgetAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true, comment: "预算：数额"),
+                    BudgetCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true, comment: "预算：币种"),
+                    ConcurrencyVersion = table.Column<long>(type: "bigint", nullable: false, comment: "并发版本号"),
                     Watchers = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
@@ -83,13 +83,13 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                 schema: "Probe",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false, comment: "主键，由程序生成的 UUID v7"),
-                    Text = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, comment: "明细内容"),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "创建时刻"),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false, comment: "创建人；模拟身份时为实际操作人，系统身份为系统账号"),
-                    TicketId = table.Column<Guid>(type: "uuid", nullable: false, comment: "所属Ticket的 ID"),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "最后修改时刻；新增后未修改过为空"),
-                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true, comment: "最后修改人")
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, comment: "ID"),
+                    Text = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, comment: "内容"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, comment: "创建时间"),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false, comment: "创建人"),
+                    TicketId = table.Column<Guid>(type: "uuid", nullable: false, comment: "Ticket ID"),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true, comment: "修改时间"),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true, comment: "修改人")
                 },
                 constraints: table =>
                 {

@@ -1,15 +1,15 @@
 namespace Kmic.BuildingBlocks.Domain.Identifiers;
 
 /// <summary>
-/// 强类型 ID 的标记，供 EF 约定、OpenAPI 架构转换器与架构测试识别
+/// 强类型 ID
 /// </summary>
 /// <remarks>
-/// 由 Vogen 生成的 readonly partial struct 实现，底层为 UUID v7；命名以 Id 结尾，跨模块引用以 Ref 结尾
+/// 用 Vogen 生成，底层是 UUID v7。类型名以 Id 结尾，引用其他模块的以 Ref 结尾
 /// </remarks>
 public interface IStronglyTypedId
 {
     /// <summary>
-    /// 底层的 Guid 值
+    /// Guid 值
     /// </summary>
     Guid Value { get; }
 }

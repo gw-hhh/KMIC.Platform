@@ -7,11 +7,11 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0201～KM0205：模块 Domain 中的 record（领域事件除外）都按值对象检查
+/// KM0201～KM0205：Domain 里的 record 都按值对象检查，领域事件除外
 /// </summary>
 /// <remarks>
-/// 值对象只能经返回 Result 的工厂方法创建，创建后不可变；属性写成 { get; private init; }，
-/// 既让 EF 能映射（只有 getter 的属性不会被映射，漏掉也不报错），又挡住类型外的 with 表达式
+/// 值对象只能通过返回 Result 的工厂方法创建，创建后不可变。属性写成 { get; private init; }：
+/// 只有 getter 的属性 EF 不会映射，漏了也不报错；private init 又能挡住类型外的 with 表达式
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
@@ -122,7 +122,7 @@ public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
             && SymbolEqualityComparer.Default.Equals(returned.OriginalDefinition, resultOfT)
             && SymbolEqualityComparer.Default.Equals(value, type));
 
-    // 计算属性（有方法体或表达式体）不受 KM0203 约束，它们本来就不映射
+    // 计算属性本来就不映射，不受 KM0203 约束
     private static bool IsAutoProperty(IPropertySymbol property, CancellationToken cancellationToken) =>
         property.DeclaringSyntaxReferences.All(reference =>
             reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }

@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.ValueObjects;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 单值值对象：存为一列，读库时经私有构造函数还原
+/// 邮箱地址
 /// </summary>
 internal sealed record EmailAddress : ISingleValueObject<string>
 {

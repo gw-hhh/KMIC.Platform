@@ -5,9 +5,6 @@ namespace Kmic.BuildingBlocks.Domain.Identifiers;
 /// <summary>
 /// 角色 ID
 /// </summary>
-/// <remarks>
-/// 横切所有模块的身份标识，属于框架概念；对应 Identity 模块中的同名实体
-/// </remarks>
 [ValueObject<Guid>(
     conversions: Conversions.SystemTextJson | Conversions.TypeConverter,
     parsableForPrimitives: ParsableForPrimitives.HoistMethodsAndInterfaces,
@@ -16,7 +13,7 @@ namespace Kmic.BuildingBlocks.Domain.Identifiers;
 public readonly partial struct RoleId : IStronglyTypedId
 {
     /// <summary>
-    /// 生成新的 ID（UUID v7）
+    /// 生成新 ID
     /// </summary>
     public static RoleId New() => From(Guid.CreateVersion7());
 

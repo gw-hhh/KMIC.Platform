@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 
 /// <summary>
-/// 与命令同一事务：给单据加一行备注；测试可以让它失败，整个命令随之回滚
+/// 和命令在同一个事务里给单据加一行备注；测试可以让它失败，整个命令随之回滚
 /// </summary>
 internal sealed class TicketClosedHandler(TicketRepository tickets, ProbeHooks hooks) : IDomainEventHandler<TicketClosed>
 {

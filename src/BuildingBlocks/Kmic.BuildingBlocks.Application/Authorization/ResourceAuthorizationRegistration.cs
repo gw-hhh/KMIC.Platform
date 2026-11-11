@@ -4,12 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 注册模块的资源策略与动作目录；它们是模块内部类型，只能由框架扫描
+/// 资源授权注册
 /// </summary>
 internal static class ResourceAuthorizationRegistration
 {
     /// <summary>
-    /// 注册策略、授权器与 allowedActions，返回动作目录对权限点的引用
+    /// 注册策略、授权器和可用动作，返回动作目录引用的权限点
     /// </summary>
     public static IReadOnlyList<PermissionReference> AddResourceAuthorization(this IServiceCollection services, IEnumerable<Type> types)
     {
@@ -22,7 +22,7 @@ internal static class ResourceAuthorizationRegistration
             throw new DeclarationException("资源策略或动作目录", problems);
         }
 
-        // 策略是纯函数，按单例注册：注入数据库上下文等作用域服务会在构建容器时报错
+        // 策略按单例注册：误注入数据库上下文这类作用域服务时，构建容器就会报错
         foreach (var ((resource, action), policy) in policies)
         {
             services.AddSingleton(typeof(IResourcePolicy<,>).MakeGenericType(resource, action), policy);

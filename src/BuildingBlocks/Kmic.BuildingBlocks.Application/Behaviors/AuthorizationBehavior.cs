@@ -8,10 +8,10 @@ using Mediator;
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
 /// <summary>
-/// 管道第 4 位：授权第 1 层（功能资格），只读用例目录与访问上下文，不查库
+/// 权限点检查
 /// </summary>
 /// <remarks>
-/// 数据范围、资源策略、领域规则、并发条件（第 2～5 层）在处理器中依次完成（05-02 第 4.5 节）
+/// 数据权限、资源策略和状态检查在处理器里做
 /// </remarks>
 public sealed class AuthorizationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
@@ -40,7 +40,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
         var user = context.User;
         if (user.IsSystem)
         {
-            // 系统身份执行了只给用户用的用例，说明代码写错了（例如定时任务发错了命令）
+            // 系统身份执行了只给用户用的用例，是代码写错了，比如定时任务发错了命令
             return useCase.AllowSystem || useCase.Requirement == AccessRequirement.SystemOnly
                 ? null
                 : throw new InvalidOperationException($"{useCase.Name} 没有声明 [AllowSystem]，不能以系统身份执行。");
@@ -56,7 +56,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
             return null;
         }
 
-        // 认证中间件已先拒绝匿名请求；走到这里是第二道检查。ErrorType 没有 401，按无权处理
+        // 认证中间件已经拒绝了匿名请求，这里是兜底。ErrorType 没有 401，按无权限处理
         var access = context.Access;
         if (access is null)
         {
@@ -85,7 +85,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
     {
         if (context.Origin != CallOrigin.ModuleCall)
         {
-            // Contracts 查询不能被端点绑定；HTTP 走到这里按无权处理，其他来源是代码写错了
+            // 端点不能绑定 Contracts 查询，HTTP 请求走到这里按无权限处理，其他来源是代码写错了
             return context.Origin == CallOrigin.Http
                 ? Deny(useCase, CommonErrors.MissingPermission, "ContractQueryOutsideModuleCall")
                 : throw new InvalidOperationException($"{useCase.Name} 是 Contracts 查询，只能经 IContractQuerySender 调用。");

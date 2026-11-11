@@ -10,16 +10,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模块 DbContext 基类：写入上下文直接继承，查询上下文继承 ModuleQueryDbContext；两者共用同一套模型
+/// 模块 DbContext 基类
 /// </summary>
 /// <remarks>
-/// 模型的构建顺序固定：默认 schema → 模块的实体配置 → 模块内框架表 → 框架约定（审计、软删除、并发版本、值对象列名、CHECK）→ 数据范围过滤器 → 定稿时模型校验。
-/// 保存只能由事务行为发起，并依次执行软删除、审计字段、聚合版本三步
+/// 写入上下文直接继承它，查询上下文继承 ModuleQueryDbContext，两者共用同一个模型。
+/// 只有命令事务能保存，处理器自己调用 SaveChangesAsync 会抛异常
 /// </remarks>
 public abstract class ModuleDbContext : DbContext
 {
     /// <summary>
-    /// 由模块上下文调用
+    /// 供模块上下文调用
     /// </summary>
     protected ModuleDbContext(DbContextOptions options, ModuleDbContextServices services)
         : base(options)
@@ -31,18 +31,18 @@ public abstract class ModuleDbContext : DbContext
     }
 
     /// <summary>
-    /// 模块名，也是 schema 名
+    /// 模块名
     /// </summary>
     public abstract string Module { get; }
 
-    // 数据范围过滤器经这两个成员读取当前请求的范围
+    // 数据权限过滤器通过这两个成员读取当前请求的范围
     internal bool DataScopeUnrestricted => Services.DataScope.Unrestricted;
 
-    // 仓储基类经它取得执行身份、时间与安全事件
+    // 仓储基类通过它取当前身份、时间和安全事件
     internal ModuleDbContextServices Services { get; }
 
     /// <summary>
-    /// 从中查找智能枚举与单值值对象的程序集：上下文所在程序集及其引用的 Kmic.* 程序集（模块的 Domain 在其中）
+    /// 智能枚举和单值值对象所在的程序集：上下文所在程序集，以及它引用的 Kmic.* 程序集
     /// </summary>
     protected virtual IEnumerable<Assembly> ModelAssemblies =>
         GetType().Assembly.GetReferencedAssemblies()
@@ -51,18 +51,18 @@ public abstract class ModuleDbContext : DbContext
             .Prepend(GetType().Assembly);
 
     /// <summary>
-    /// 只支持异步保存
+    /// 不支持同步保存
     /// </summary>
     /// <exception cref="NotSupportedException">总是抛出</exception>
     public sealed override int SaveChanges(bool acceptAllChangesOnSuccess) =>
-        throw new NotSupportedException("只支持 SaveChangesAsync，由事务行为调用。");
+        throw new NotSupportedException("不支持同步保存，请用 SaveChangesAsync。");
 
     /// <inheritdoc />
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         Services.SaveGate.EnsureOpen();
 
-        // 先检测变更：从聚合集合中移除的子实体要在这一步才变成 Deleted
+        // 先检测变更：离开集合的子实体要到这一步才变成 Deleted
         ChangeTracker.DetectChanges();
         SaveRules.Apply(this, Services.Execution, Services.Time.GetUtcNow());
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -75,7 +75,7 @@ public abstract class ModuleDbContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(optionsBuilder);
 
-        // 迁移历史放在本模块的 schema 中：各模块的迁移各自记录，互不影响
+        // 迁移历史放在本模块的 schema 里，各模块互不影响
         optionsBuilder.UseNpgsql(npgsql => npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Module));
     }
 
@@ -87,7 +87,7 @@ public abstract class ModuleDbContext : DbContext
         // 表名取实体类名，不取 DbSet 属性名
         configurationBuilder.Conventions.Remove<TableNameFromDbSetConvention>();
 
-        // 领域事件与状态流转只在内存中传递；不忽略类型的话 EF 会经聚合根的属性把它们发现为实体
+        // 领域事件和状态流转只在内存里传递；不忽略的话，EF 会顺着聚合根的属性把它们当成实体
         configurationBuilder.IgnoreAny<IDomainEvent>();
         configurationBuilder.IgnoreAny<StateTransition>();
         configurationBuilder.RegisterAllInFrameworkIdConverters();
@@ -109,12 +109,15 @@ public abstract class ModuleDbContext : DbContext
     }
 
     /// <summary>
-    /// 注册本模块强类型 ID 的转换器：调用 Vogen 按 [EfCoreConverter&lt;T&gt;] 标记生成的 RegisterAllIn{标记类}()
+    /// 注册本模块强类型 ID 的转换器
     /// </summary>
+    /// <remarks>
+    /// 调用 Vogen 按 [EfCoreConverter&lt;T&gt;] 生成的 RegisterAllIn{标记类}()
+    /// </remarks>
     protected abstract void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder);
 
     /// <summary>
-    /// 应用本模块的实体配置，默认是上下文所在程序集中的全部 IEntityTypeConfiguration
+    /// 应用实体配置，默认是上下文所在程序集里的全部配置
     /// </summary>
     protected virtual void ConfigureModel(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);

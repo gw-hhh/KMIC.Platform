@@ -1,7 +1,7 @@
 namespace Kmic.BuildingBlocks.Application.Time;
 
 /// <summary>
-/// 按给定时区计算的业务日历；时区由宿主按配置 Kmic:BusinessTimeZone 提供
+/// 业务日历
 /// </summary>
 /// <param name="time">时间来源</param>
 /// <param name="zone">业务时区</param>
@@ -42,13 +42,13 @@ public sealed class BusinessCalendar(TimeProvider time, TimeZoneInfo zone) : IBu
 
     private TimeSpan OffsetAtMidnight(DateTime midnight)
     {
-        // 零点出现两次（夏令时结束）：一天从较早的那次开始
+        // 夏令时结束那天零点出现两次，从较早的那次算起
         if (Zone.IsAmbiguousTime(midnight))
         {
             return Zone.GetAmbiguousTimeOffsets(midnight).Max();
         }
 
-        // 零点被跳过（夏令时开始）：按跳变前的偏移换算，正好是跳变的那一刻
+        // 夏令时开始那天零点被跳过，按跳变前的偏移换算，正好落在跳变那一刻
         return Zone.IsInvalidTime(midnight) ? Zone.GetUtcOffset(midnight.AddDays(-1)) : Zone.GetUtcOffset(midnight);
     }
 }

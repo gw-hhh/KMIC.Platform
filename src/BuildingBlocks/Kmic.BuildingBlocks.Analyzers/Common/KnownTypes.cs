@@ -3,8 +3,11 @@ using Microsoft.CodeAnalysis;
 namespace Kmic.BuildingBlocks.Analyzers.Common;
 
 /// <summary>
-/// 分析器按元数据名识别框架类型，不引用框架程序集
+/// 框架类型的元数据名
 /// </summary>
+/// <remarks>
+/// 分析器按名称识别框架类型，不引用框架程序集
+/// </remarks>
 internal static class KnownTypes
 {
     public const string Error = "Kmic.BuildingBlocks.Domain.Results.Error";
@@ -18,7 +21,7 @@ internal static class KnownTypes
     public const string StateMachine = "Kmic.BuildingBlocks.Domain.StateMachines.StateMachine";
 
     /// <summary>
-    /// 类型是否（直接或间接）继承自给定的泛型类型定义
+    /// 是否继承自给定的泛型类型，含间接继承
     /// </summary>
     public static bool InheritsFrom(ITypeSymbol? type, INamedTypeSymbol? genericDefinition)
     {

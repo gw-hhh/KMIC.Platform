@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 单值值对象存为它包装的原始值
+/// 单值值对象转换器
 /// </summary>
 /// <remarks>
-/// 读库时调用值对象的私有构造函数，不经过工厂方法的校验：规则收紧后旧数据仍能读出来修正（05-01 第 5.3 节）
+/// 读取时调用私有构造函数，不走工厂方法的校验：规则收紧后，旧数据仍然能读出来再修正
 /// </remarks>
 internal sealed class SingleValueConverter<TObject, TValue>() : ValueConverter<TObject, TValue>(_toProvider, _fromProvider)
     where TObject : class, ISingleValueObject<TValue>
@@ -21,7 +21,7 @@ internal sealed class SingleValueConverter<TObject, TValue>() : ValueConverter<T
     private static Expression<Func<TValue, TObject>> BuildFromProvider()
     {
         var constructor = typeof(TObject).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, [typeof(TValue)])
-            ?? throw new InvalidOperationException($"单值值对象 {typeof(TObject).Name} 需要一个只接收 {typeof(TValue).Name} 的私有构造函数，供读库时使用。");
+            ?? throw new InvalidOperationException($"{typeof(TObject).Name} 缺少只接收 {typeof(TValue).Name} 的私有构造函数。");
         var value = Expression.Parameter(typeof(TValue), "value");
         return Expression.Lambda<Func<TValue, TObject>>(Expression.New(constructor, value), value);
     }

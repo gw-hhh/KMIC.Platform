@@ -6,7 +6,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 全部模块的权限点目录：启动时扫描并校验，同步到 Identity、导出给前端都以它为准
+/// 权限点目录
 /// </summary>
 public sealed partial class PermissionCatalog
 {
@@ -21,7 +21,7 @@ public sealed partial class PermissionCatalog
     public IReadOnlyCollection<PermissionDefinition> All => _byCode.Values;
 
     /// <summary>
-    /// 扫描程序集中标了 [PermissionGroup] 的常量类
+    /// 从程序集中读取
     /// </summary>
     public static PermissionCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -30,7 +30,7 @@ public sealed partial class PermissionCatalog
     }
 
     /// <summary>
-    /// 读取并校验格式、归属与唯一性
+    /// 从分组类型中读取
     /// </summary>
     public static PermissionCatalog Build(IEnumerable<Type> groupTypes)
     {
@@ -62,15 +62,18 @@ public sealed partial class PermissionCatalog
     }
 
     /// <summary>
-    /// 权限点是否存在
+    /// 是否包含该权限点
     /// </summary>
     public bool Contains(string code) => _byCode.ContainsKey(code);
 
     /// <summary>
-    /// 与用例目录及其他引用核对：引用的权限点都存在、没有无人使用的权限点、敏感权限点的用例都审计
+    /// 核对权限点的使用
     /// </summary>
+    /// <remarks>
+    /// 引用的权限点都要存在，每个权限点都要有人用，用到敏感权限点的命令都要审计
+    /// </remarks>
     /// <param name="useCases">用例目录</param>
-    /// <param name="references">用例以外的引用，如资源动作、设置的修改权限</param>
+    /// <param name="references">用例以外的引用，如资源动作</param>
     public void Verify(UseCaseCatalog useCases, IEnumerable<PermissionReference> references)
     {
         ArgumentNullException.ThrowIfNull(useCases);
@@ -92,7 +95,7 @@ public sealed partial class PermissionCatalog
             }
             else if (permission.Sensitive && !IsAudited(useCase))
             {
-                // 敏感操作必须留痕（05-09 D1、D5）
+                // 敏感操作必须留下审计记录
                 var required = useCase.Kind == MessageKind.Command ? "[Audited]" : "[AuditedRead]";
                 problems.Add($"{useCase.Name}：需要敏感权限点 {code}，必须 {required}。");
             }

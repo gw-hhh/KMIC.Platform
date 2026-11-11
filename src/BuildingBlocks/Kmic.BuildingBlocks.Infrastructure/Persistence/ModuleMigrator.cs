@@ -4,15 +4,15 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 以迁移账号执行迁移：先做数据库级的框架步骤，再逐个模块迁移，最后核对不区分大小写的列
+/// 模块迁移
 /// </summary>
 /// <remarks>
-/// 只由迁移程序（与测试的模板库）使用；应用启动时只检查有没有未执行的迁移
+/// 用迁移账号执行，只给迁移程序和测试模板库用。应用启动时只检查有没有未执行的迁移
 /// </remarks>
 public static class ModuleMigrator
 {
     /// <summary>
-    /// 数据库级的框架步骤：创建并核对 public."CaseInsensitive"；在任何模块迁移之前执行
+    /// 执行数据库级的准备，要在所有模块迁移之前
     /// </summary>
     public static async Task PrepareDatabaseAsync(string connectionString, CancellationToken ct)
     {
@@ -22,7 +22,7 @@ public static class ModuleMigrator
     }
 
     /// <summary>
-    /// 执行一个模块的全部迁移，并核对该模块不区分大小写的列
+    /// 执行模块迁移
     /// </summary>
     public static async Task MigrateAsync<TContext>(string connectionString, CancellationToken ct)
         where TContext : ModuleDbContext

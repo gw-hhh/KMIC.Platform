@@ -9,7 +9,7 @@ internal sealed class TicketLine : Entity<TicketLineId>
         Text = text;
 
     /// <summary>
-    /// 明细内容
+    /// 内容
     /// </summary>
     public string Text { get; private set; }
 

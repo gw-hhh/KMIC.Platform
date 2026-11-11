@@ -3,19 +3,22 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 系统设置的值类型：不可变 record，同时标 [SystemSetting]
+/// 系统设置
 /// </summary>
+/// <remarks>
+/// 用不可变 record 实现，同时标 [SystemSetting]
+/// </remarks>
 /// <typeparam name="TSelf">值类型自身</typeparam>
 public interface ISystemSetting<TSelf>
     where TSelf : class, ISystemSetting<TSelf>
 {
     /// <summary>
-    /// 数据库中没有值时使用，新环境开箱可用
+    /// 默认值
     /// </summary>
     static abstract TSelf Default { get; }
 
     /// <summary>
-    /// 写入时的校验，失败返回模块错误目录中的错误
+    /// 校验
     /// </summary>
     static abstract Result Validate(TSelf value);
 }

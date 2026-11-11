@@ -9,10 +9,10 @@ using Microsoft.CodeAnalysis.Operations;
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
 /// <summary>
-/// KM0401：状态属性只能由状态机改写
+/// KM0401：状态属性只能由状态机修改
 /// </summary>
 /// <remarks>
-/// 绕过状态机赋值会跳过流转检查，也不会产生业务历史（原型 #8）
+/// 绕过状态机直接赋值，会跳过流转检查，也不会留下业务历史
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
@@ -26,7 +26,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor DirectAssignment = new(
         DiagnosticId, Title, "状态属性 {0} 只能经状态机的 Start 或 Fire 改写，不能直接赋值", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
 
-    // 要等整个编译结束才能和 Define 对上，IDE 默认不实时显示，构建时一定报告
+    // 要等整个编译结束才能和 Define 对上，IDE 默认不实时显示，构建时一定会报
     internal static readonly DiagnosticDescriptor AssignmentOutsideAggregate = new(
         DiagnosticId,
         Title,
@@ -79,8 +79,8 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         });
     }
 
-    // 绝大多数赋值写在聚合类型自身之内，按类型分析即可在 IDE 中即时提示；
-    // 类型的分析范围不含嵌套类型，属性所属类型之外的赋值留到编译结束再判断
+    // 绝大多数赋值写在聚合根自己的类型里，按类型分析，IDE 里就能马上提示。
+    // 按类型分析不包括嵌套类型，类型之外的赋值留到编译结束再判断
     private static void AnalyzeType(
         SymbolStartAnalysisContext context,
         INamedTypeSymbol stateMachine,
@@ -133,7 +133,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
             return null;
         }
 
-        // 按参数位置取，不按书写顺序：调用方可能用命名参数调换顺序
+        // 按参数位置取，不按书写顺序：调用方可能用命名参数调换了顺序
         var getter = invocation.Arguments.FirstOrDefault(a => a.Parameter?.Ordinal == 0)?.Value;
         var setter = invocation.Arguments.FirstOrDefault(a => a.Parameter?.Ordinal == 1)?.Value;
         if (getter is null || setter is null)
@@ -176,7 +176,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
             reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }
             && accessors.Accessors.All(a => a is { Body: null, ExpressionBody: null }));
 
-    // s => s.Status：只接受直接返回 lambda 参数的一个属性；Define 的这个参数是表达式树，lambda 外面包着一层转换
+    // s => s.Status：只接受直接返回参数的某个属性。这个参数是表达式树，lambda 外面还包着一层转换
     private static IPropertySymbol? FindDefinedProperty(IOperation getter) =>
         AsLambda(getter) is { Symbol.Parameters: [var entity] } lambda
         && ExplicitStatements(lambda) is [IReturnOperation { ReturnedValue: { } returned }]
@@ -194,7 +194,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         && IsParameter(target.Instance, entity)
         && IsParameter(assignment.Value, value);
 
-    // 表达式体 lambda 的方法体中，编译器会补一个隐式 return，比较前去掉
+    // 表达式体 lambda 里编译器会补一个隐式 return，比较前先去掉
     private static IOperation[] ExplicitStatements(IAnonymousFunctionOperation lambda) =>
         [.. lambda.Body.Operations.Where(o => o is not IReturnOperation { ReturnedValue: null, IsImplicit: true })];
 
@@ -225,7 +225,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     {
         switch (operation)
         {
-            // = null! 只是给 EF 物化用的占位（05-01 第 3.2 节示例），不设置任何状态
+            // = null! 只是给 EF 用的占位，不算设置状态
             case IPropertyInitializerOperation initializer when IsPlaceholder(initializer.Value):
                 break;
 
@@ -237,7 +237,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
 
                 break;
 
-            // 解构赋值也是 IAssignmentOperation，必须先于下一个分支判断
+            // 解构赋值也是 IAssignmentOperation，要先于下一个分支判断
             case IDeconstructionAssignmentOperation deconstruction:
                 CollectTupleTargets(deconstruction.Target, add);
                 break;
@@ -277,7 +277,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    // 给已注册的状态属性赋值，且不在该属性的 Define setter 之内
+    // 给已注册的状态属性赋值，并且不在它的 Define setter 里
     private static IEnumerable<Assignment> FindViolations(IEnumerable<Registration> registrations, IEnumerable<Assignment> assignments)
     {
         var settersByProperty = registrations.ToLookup(r => r.Property, SymbolEqualityComparer.Default);

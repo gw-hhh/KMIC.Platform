@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
 /// <summary>
-/// KM9002：非生成代码中禁止 #pragma warning disable
+/// KM9002：不能用 #pragma warning disable
 /// </summary>
 /// <remarks>
-/// 忘写 restore 会悄悄扩大豁免范围，而且豁免理由不留痕；改用带理由的 [SuppressMessage]（06 D1）
+/// 忘了 restore 会悄悄扩大豁免范围，也不留理由。改用带理由的 [SuppressMessage]
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PragmaWarningAnalyzer : DiagnosticAnalyzer

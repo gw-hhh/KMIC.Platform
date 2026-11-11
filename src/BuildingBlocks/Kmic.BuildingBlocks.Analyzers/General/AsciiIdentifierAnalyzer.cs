@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
 /// <summary>
-/// KM9004：标识符只能使用 ASCII 字符
+/// KM9004：标识符只能用 ASCII 字符
 /// </summary>
 /// <remarks>
-/// 同一概念只能有一个名字：代码、测试、术语表都用同一个英文名（06 D3、D9）
+/// 同一个概念只用一个英文名，代码、测试、术语表保持一致
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AsciiIdentifierAnalyzer : DiagnosticAnalyzer
@@ -38,7 +38,7 @@ public sealed class AsciiIdentifierAnalyzer : DiagnosticAnalyzer
         var root = context.Tree.GetRoot(context.CancellationToken);
         foreach (var token in root.DescendantTokens())
         {
-            // 只报声明处；引用处（IdentifierName）指向的是同一个声明，不重复报
+            // 只报声明处，引用处指向的是同一个声明，不重复报
             if (token.IsKind(SyntaxKind.IdentifierToken)
                 && token.Parent is not IdentifierNameSyntax
                 && token.ValueText.Any(c => c > 127))

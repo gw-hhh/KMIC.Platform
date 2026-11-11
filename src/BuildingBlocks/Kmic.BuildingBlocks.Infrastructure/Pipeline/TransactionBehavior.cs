@@ -17,10 +17,10 @@ using Microsoft.Extensions.Logging;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 管道第 6 位（只对命令）：在用例所属模块的写入上下文上开启事务，处理器成功后分发领域事件、保存、提交
+/// 命令事务
 /// </summary>
 /// <remarks>
-/// 固定 Read Committed；处理器失败即回滚并清空变更跟踪器。提交本身不可取消：提交发出后再取消只会造成结果未知
+/// 处理器、领域事件处理器和保存在同一个事务里，任何一步失败都整体回滚。提交本身不能取消，提交发出后再取消只会让结果变成未知
 /// </remarks>
 public sealed class TransactionBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
@@ -29,7 +29,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
     where TMessage : IBaseCommand
     where TResponse : Result, IResultFactory<TResponse>
 {
-    // 超过这么多轮仍有新事件，说明事件处理器之间互相触发
+    // 超过这么多轮还有新事件，说明事件处理器在互相触发
     private const int MaxDispatchRounds = 10;
 
     /// <inheritdoc />
@@ -47,7 +47,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         }
         catch
         {
-            // 异常同样要丢弃本次的修改与挂接的动作；事务由 await using 回滚
+            // 出异常时同样丢弃本次的修改和登记的动作，事务由 await using 回滚
             context.ChangeTracker.Clear();
             transaction.Discard();
             throw;
@@ -85,12 +85,12 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             return TResponse.Fail(hookFailure);
         }
 
-        await CommitAsync(context.Database.CurrentTransaction ?? throw new InvalidOperationException("事务在提交前已结束：处理器不能自己提交或回滚事务。"));
+        await CommitAsync(context.Database.CurrentTransaction ?? throw new InvalidOperationException("事务在提交前已结束，处理器不能自己提交或回滚。"));
         await RunAfterCommitAsync(transaction.TakeAfterCommit());
         return response;
     }
 
-    // 回填的是本次保存后的版本：版本在保存规则中递增，晚于处理器返回
+    // 版本号在保存时才递增，所以要在保存后回填
     private static TResponse WithSavedVersion(ModuleDbContext context, TResponse response)
     {
         if (ResponseValues<TResponse>.Read(response) is not IHasConcurrencyVersion receipt)
@@ -105,7 +105,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             : ResponseValues<TResponse>.Create(receipt.WithConcurrencyVersion(aggregate.Entity.ConcurrencyVersion));
     }
 
-    // 事件处理器可能修改其他聚合并产生新事件，循环到没有新事件为止
+    // 事件处理器可能修改别的聚合并产生新事件，一直处理到没有新事件为止
     private async Task<Error?> DispatchDomainEventsAsync(ModuleDbContext context, CancellationToken ct)
     {
         var dispatcher = services.GetRequiredService<DomainEventDispatcher>();
@@ -133,12 +133,12 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             }
         }
 
-        throw new InvalidOperationException($"领域事件分发超过 {MaxDispatchRounds} 轮仍有新事件：事件处理器之间在互相触发。");
+        throw new InvalidOperationException($"领域事件分发超过 {MaxDispatchRounds} 轮仍有新事件，事件处理器可能在互相触发。");
     }
 
     private static async Task RollBackAsync(ModuleDbContext context, CommandTransaction transaction)
     {
-        // 清空变更跟踪器：同一作用域里残留的已修改实体不能被后续操作误保存
+        // 清空变更跟踪，免得同一作用域里残留的修改被后面的操作误保存
         await context.Database.RollbackTransactionAsync(CancellationToken.None);
         context.ChangeTracker.Clear();
         transaction.Discard();
@@ -156,7 +156,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         }
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "提交后的动作限定为失败也无妨的事（05-02 D6），任何失败都只记警告，不能影响已经提交的结果")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "提交后的动作失败了也没关系，只记警告，不能影响已提交的结果")]
     private async Task RunAfterCommitAsync(IReadOnlyList<Func<CancellationToken, ValueTask>> actions)
     {
         foreach (var action in actions)

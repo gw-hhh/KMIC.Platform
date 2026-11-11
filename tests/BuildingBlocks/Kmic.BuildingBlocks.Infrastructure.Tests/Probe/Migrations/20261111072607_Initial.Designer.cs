@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 {
     [DbContext(typeof(ProbeDbContext))]
-    [Migration("20261111040337_Initial")]
+    [Migration("20261111072607_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -84,7 +84,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.ToTable("IdempotencyRecord", "Probe", t =>
                         {
-                            t.HasComment("幂等记录；框架表；一行代表一次带幂等键的命令；同一用户、角色、操作、键唯一；过期后由清理任务删除");
+                            t.HasComment("幂等记录");
                         });
                 });
 
@@ -92,34 +92,34 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
-                        .HasComment("主键，由程序生成的 UUID v7");
+                        .HasComment("ID");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
-                        .HasComment("可用额度，单位元");
+                        .HasComment("可用额度");
 
                     b.Property<long>("ConcurrencyVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("bigint")
-                        .HasComment("并发版本：聚合内任何实体新增、修改、删除都加一");
+                        .HasComment("并发版本号");
 
                     b.Property<string>("ContactEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasComment("联系邮箱；为空表示未填写");
+                        .HasComment("联系邮箱");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("创建时刻");
+                        .HasComment("创建时间");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid")
-                        .HasComment("创建人；模拟身份时为实际操作人，系统身份为系统账号");
+                        .HasComment("创建人");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("删除时刻");
+                        .HasComment("删除时间");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid")
@@ -127,23 +127,23 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.Property<DateTimeOffset?>("DueAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("截止时刻；为空表示不限");
+                        .HasComment("截止时间");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
-                        .HasComment("是否已删除（软删除）");
+                        .HasComment("是否已删除");
 
                     b.Property<string>("Note")
                         .HasColumnType("text")
-                        .HasComment("备注，长文本");
+                        .HasComment("备注");
 
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
-                        .HasComment("单据编号；不区分大小写，未删除的单据中唯一")
+                        .HasComment("单据编号")
                         .UseCollation("CaseInsensitive");
 
                     b.Property<Guid>("OrgUnitId")
@@ -174,11 +174,11 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("最后修改时刻；新增后未修改过为空");
+                        .HasComment("修改时间");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid")
-                        .HasComment("最后修改人");
+                        .HasComment("修改人");
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Budget", "Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Ticket.Budget#Money", b1 =>
                         {
@@ -186,14 +186,14 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                                 .HasPrecision(18, 2)
                                 .HasColumnType("numeric(18,2)")
                                 .HasColumnName("BudgetAmount")
-                                .HasComment("预算；为空表示未设定：金额");
+                                .HasComment("预算：数额");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
                                 .HasColumnName("BudgetCurrency")
-                                .HasComment("预算；为空表示未设定：币种，ISO 4217 三位代码");
+                                .HasComment("预算：币种");
                         });
 
                     b.ComplexCollection(typeof(List<Dictionary<string, object>>), "_watchers", "Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Ticket._watchers#Watcher", b1 =>
@@ -233,33 +233,33 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
-                        .HasComment("主键，由程序生成的 UUID v7");
+                        .HasComment("ID");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("创建时刻");
+                        .HasComment("创建时间");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid")
-                        .HasComment("创建人；模拟身份时为实际操作人，系统身份为系统账号");
+                        .HasComment("创建人");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
-                        .HasComment("明细内容");
+                        .HasComment("内容");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uuid")
-                        .HasComment("所属Ticket的 ID");
+                        .HasComment("Ticket ID");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("最后修改时刻；新增后未修改过为空");
+                        .HasComment("修改时间");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid")
-                        .HasComment("最后修改人");
+                        .HasComment("修改人");
 
                     b.HasKey("Id");
 

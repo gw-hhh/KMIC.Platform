@@ -11,7 +11,7 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 审计列由保存规则统一写入：时间取 TimeProvider，操作人取执行上下文
+/// 审计列：时间取 TimeProvider，操作人取执行上下文
 /// </summary>
 public sealed class AuditColumnTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
@@ -79,7 +79,7 @@ public sealed class AuditColumnTests(ClassDatabase<ProbeTemplate> database) : IC
     [Fact]
     public async Task Add_Anonymous_WritesSystemUser()
     {
-        // 登录、找回密码等匿名请求写入的数据记在系统账号下
+        // 登录、找回密码这类匿名请求写的数据，记在系统用户名下
         var ticket = NewTicket();
         await using (var work = _harness.Begin(CallOrigin.Http, CurrentUser.Anonymous))
         {

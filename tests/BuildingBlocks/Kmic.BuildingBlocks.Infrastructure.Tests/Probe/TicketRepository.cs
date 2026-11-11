@@ -8,7 +8,7 @@ internal sealed class TicketRepository(ProbeDbContext context) : EfRepository<Pr
 {
     protected override Error NotFound => TicketErrors.NotFound;
 
-    // 额度扣减的标准写法：条件成立才扣，返回是否扣成
+    // 扣减额度：条件成立才扣，返回是否扣成
     public async Task<bool> TryDeductAsync(TicketId id, decimal amount, CancellationToken ct) =>
         await UpdateWhereAsync(t => t.Id == id && t.Amount >= amount, s => s.SetProperty(t => t.Amount, t => t.Amount - amount), ct) == 1;
 

@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 设置目录中的一项
+/// 系统设置定义
 /// </summary>
 public sealed class SystemSettingDefinition : DeclaredValueDefinition
 {
@@ -15,7 +15,7 @@ public sealed class SystemSettingDefinition : DeclaredValueDefinition
     }
 
     /// <summary>
-    /// 管理界面中的分组
+    /// 分组
     /// </summary>
     public string? Group { get; }
 

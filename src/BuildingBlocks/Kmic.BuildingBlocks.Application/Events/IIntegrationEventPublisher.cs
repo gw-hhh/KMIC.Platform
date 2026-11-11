@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 namespace Kmic.BuildingBlocks.Application.Events;
 
 /// <summary>
-/// 在命令内登记要发出的集成事件与请求型消息，保存时随业务数据写入本模块 Outbox
+/// 集成事件发布
 /// </summary>
 public interface IIntegrationEventPublisher
 {
@@ -13,7 +13,7 @@ public interface IIntegrationEventPublisher
     void Add(IIntegrationEvent integrationEvent);
 
     /// <summary>
-    /// 发送请求型消息（只能发给定义它的平台模块）
+    /// 发送请求消息
     /// </summary>
     void Send(IIntegrationRequest request);
 }

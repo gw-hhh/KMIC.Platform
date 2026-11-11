@@ -8,8 +8,11 @@ using Microsoft.CodeAnalysis.Testing;
 namespace Kmic.BuildingBlocks.Analyzers.Tests;
 
 /// <summary>
-/// 在指定程序集名下编译源码并核对诊断；规则按程序集名判断模块的层
+/// 分析器测试工具
 /// </summary>
+/// <remarks>
+/// 按指定的程序集名编译源码，规则按程序集名判断模块和层
+/// </remarks>
 internal static class AnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
 {
@@ -34,7 +37,7 @@ internal static class AnalyzerVerifier<TAnalyzer>
 
         test.TestState.AdditionalReferences.Add(MetadataReference.CreateFromFile(typeof(Error).Assembly.Location));
         test.SolutionTransforms.Add((solution, projectId) => solution.WithProjectAssemblyName(projectId, assemblyName));
-        // 测试框架会在文件开头插入 #pragma warning disable 来检验分析器是否尊重豁免，而 KM9002 禁止的正是这句
+        // 测试框架会在文件开头插入 #pragma warning disable，检查分析器是否尊重豁免，而 KM9002 禁止的正是这一句
         if (typeof(TAnalyzer) == typeof(PragmaWarningAnalyzer))
         {
             test.TestBehaviors |= TestBehaviors.SkipSuppressionCheck;

@@ -1,10 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 声明一项偏好
+/// 偏好声明
 /// </summary>
-/// <param name="key">键，以本模块名开头，如 "Sample.List.PageSize"</param>
-/// <param name="displayName">管理界面中的显示名</param>
+/// <param name="key">键，如 "Sample.List.PageSize"</param>
+/// <param name="displayName">显示名称</param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class PreferenceAttribute(string key, string displayName) : Attribute
 {
@@ -14,7 +14,7 @@ public sealed class PreferenceAttribute(string key, string displayName) : Attrib
     public string Key { get; } = key;
 
     /// <summary>
-    /// 显示名
+    /// 显示名称
     /// </summary>
     public string DisplayName { get; } = displayName;
 

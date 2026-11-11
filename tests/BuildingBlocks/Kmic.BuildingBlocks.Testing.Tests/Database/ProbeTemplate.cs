@@ -4,7 +4,7 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Testing.Tests.Database;
 
 /// <summary>
-/// 本测试程序集的模板库：只有一张探测表，代替真实迁移
+/// 本测试项目的模板库，只有一张探测表
 /// </summary>
 public sealed class ProbeTemplate : PostgresTemplateDatabase
 {
