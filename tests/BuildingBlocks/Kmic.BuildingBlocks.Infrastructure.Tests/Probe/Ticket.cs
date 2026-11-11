@@ -53,6 +53,8 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
 
     public void SetDue(DateTimeOffset dueAt) => DueAt = dueAt;
 
+    public void Fund(decimal amount) => Amount = amount;
+
     public void Annotate(string note) => Note = note;
 
     public void Close() => Status = TicketStatus.Closed;

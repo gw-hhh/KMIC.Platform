@@ -94,6 +94,7 @@
           "Kmic.BuildingBlocks.Contracts": "[1.0.0, )",
           "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
           "Mediator.Abstractions": "[3.0.2, )",
+          "Microsoft.EntityFrameworkCore": "[10.0.14, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.14, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.14, )",
           "Microsoft.Extensions.Options": "[10.0.14, )"

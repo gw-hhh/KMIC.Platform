@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application.Execution;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -46,14 +47,17 @@ public static class PersistenceServiceCollectionExtensions
 
         // 按入口的来源选连接池，在作用域内第一次使用上下文时确定
         services.AddDbContext<TContext>((provider, options) =>
-            options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider))));
+            AddFrameworkExtensions(options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider)))));
         services.AddDbContext<TQueryContext>((provider, options) =>
-            options.UseNpgsql(
+            AddFrameworkExtensions(options.UseNpgsql(
                 provider.GetRequiredService<DataSources>().Reads(EntryOrigin(provider)),
-                npgsql => npgsql.ExecutionStrategy(dependencies => new QueryRetryStrategy(dependencies))));
+                npgsql => npgsql.ExecutionStrategy(dependencies => new QueryRetryStrategy(dependencies)))));
         services.AddScoped<TQueryDb>(provider => provider.GetRequiredService<TQueryContext>());
         return services;
     }
+
+    private static void AddFrameworkExtensions(DbContextOptionsBuilder options) =>
+        ((IDbContextOptionsBuilderInfrastructure)options).AddOrUpdateExtension(new KmicFunctionsExtension());
 
     private static CallOrigin EntryOrigin(IServiceProvider provider) => provider.GetRequiredService<ExecutionScope>().EntryOrigin;
 }

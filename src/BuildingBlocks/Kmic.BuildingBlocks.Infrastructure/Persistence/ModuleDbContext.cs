@@ -17,15 +17,13 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// </remarks>
 public abstract class ModuleDbContext : DbContext
 {
-    private readonly ModuleDbContextServices _services;
-
     /// <summary>
     /// 由模块上下文调用
     /// </summary>
     protected ModuleDbContext(DbContextOptions options, ModuleDbContextServices services)
         : base(options)
     {
-        _services = services ?? throw new ArgumentNullException(nameof(services));
+        Services = services ?? throw new ArgumentNullException(nameof(services));
 
         // 级联删除推迟到保存时：软删除先把聚合根的删除改成修改，子实体就不会被级联删掉
         base.ChangeTracker.CascadeDeleteTiming = CascadeTiming.OnSaveChanges;
@@ -37,7 +35,10 @@ public abstract class ModuleDbContext : DbContext
     public abstract string Module { get; }
 
     // 数据范围过滤器经这两个成员读取当前请求的范围
-    internal bool DataScopeUnrestricted => _services.DataScope.Unrestricted;
+    internal bool DataScopeUnrestricted => Services.DataScope.Unrestricted;
+
+    // 仓储基类经它取得执行身份、时间与安全事件
+    internal ModuleDbContextServices Services { get; }
 
     /// <summary>
     /// 从中查找智能枚举与单值值对象的程序集：上下文所在程序集及其引用的 Kmic.* 程序集（模块的 Domain 在其中）
@@ -58,15 +59,15 @@ public abstract class ModuleDbContext : DbContext
     /// <inheritdoc />
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        _services.SaveGate.EnsureOpen();
+        Services.SaveGate.EnsureOpen();
 
         // 先检测变更：从聚合集合中移除的子实体要在这一步才变成 Deleted
         ChangeTracker.DetectChanges();
-        SaveRules.Apply(this, _services.Execution, _services.Time.GetUtcNow());
+        SaveRules.Apply(this, Services.Execution, Services.Time.GetUtcNow());
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    internal EffectiveScope DataScopeFor(string scopeObject) => _services.DataScope.For(scopeObject);
+    internal EffectiveScope DataScopeFor(string scopeObject) => Services.DataScope.For(scopeObject);
 
     /// <inheritdoc />
     protected sealed override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -81,7 +82,7 @@ public abstract class ModuleDbContext : DbContext
         configurationBuilder.IgnoreAny<StateTransition>();
         configurationBuilder.RegisterAllInFrameworkIdConverters();
         ValueTypeConventions.Register(configurationBuilder, ModelAssemblies);
-        configurationBuilder.Conventions.Add(_ => new ModelValidationConvention(Module, _services.ScopeObjects));
+        configurationBuilder.Conventions.Add(_ => new ModelValidationConvention(Module, Services.ScopeObjects));
         ConfigureModuleConventions(configurationBuilder);
     }
 

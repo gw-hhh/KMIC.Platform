@@ -18,6 +18,7 @@ KM0205 | Kmic.Domain | Error | ValueObjectAnalyzer
 KM0301 | Kmic.Domain | Error | EnumerationAnalyzer
 KM0401 | Kmic.Domain | Error | StateMachineAssignmentAnalyzer
 KM0501 | Kmic.Domain | Error | DomainEventAnalyzer
+KM2001 | Kmic.Data | Error | TextMatchingAnalyzer
 KM9001 | Kmic.General | Error | SuppressionJustificationAnalyzer
 KM9002 | Kmic.General | Error | PragmaWarningAnalyzer
 KM9003 | Kmic.General | Error | TrackedMarkerAnalyzer

@@ -12,6 +12,8 @@ internal sealed class ProbeWork(AsyncServiceScope scope) : IAsyncDisposable
 
     public IProbeQueryDb Query => scope.ServiceProvider.GetRequiredService<IProbeQueryDb>();
 
+    public TicketRepository Tickets => scope.ServiceProvider.GetRequiredService<TicketRepository>();
+
     public async Task SaveAsync()
     {
         using (scope.ServiceProvider.GetRequiredService<SaveChangesGate>().Open())

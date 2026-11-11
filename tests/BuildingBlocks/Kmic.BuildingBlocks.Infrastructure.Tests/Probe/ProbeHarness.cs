@@ -1,7 +1,9 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Testing.Identity;
+using Kmic.BuildingBlocks.Testing.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
@@ -18,6 +20,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
     {
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(Time);
+        services.AddSingleton<ISecurityEventWriter>(SecurityEvents);
         services.AddKmicApplication([typeof(ProbeScopes).Assembly]);
         services.AddKmicPersistence(o =>
         {
@@ -25,10 +28,13 @@ internal sealed class ProbeHarness : IAsyncDisposable
             configure?.Invoke(o);
         });
         services.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();
+        services.AddScoped<TicketRepository>();
         _services = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
     }
 
     public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 11, 10, 2, 0, 0, TimeSpan.Zero));
+
+    public RecordingSecurityEventWriter SecurityEvents { get; } = new();
 
     /// <summary>
     /// 宿主的服务，测试中直接取框架内部服务（如数据源）时用

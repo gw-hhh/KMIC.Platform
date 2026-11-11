@@ -4,6 +4,7 @@ using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Application.Tests.Fixtures;
 using Kmic.BuildingBlocks.Application.UseCases;
+using Kmic.BuildingBlocks.Testing.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;

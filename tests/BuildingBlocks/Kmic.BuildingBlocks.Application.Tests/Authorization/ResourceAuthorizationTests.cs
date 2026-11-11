@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Testing.Security;
 using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Authorization;

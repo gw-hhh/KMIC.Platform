@@ -4,6 +4,7 @@ using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Persistence.InvalidModel;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
+using Kmic.BuildingBlocks.Testing.Security;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
@@ -65,7 +66,8 @@ public sealed class ModelValidationTests
             new UnrestrictedScope(),
             DataScopeObjectCatalog.Build([typeof(ProbeScopes), typeof(OtherScopes)]),
             TimeProvider.System,
-            new SaveChangesGate());
+            new SaveChangesGate(),
+            new RecordingSecurityEventWriter());
     }
 
     private sealed class UnrestrictedScope : IDataScope

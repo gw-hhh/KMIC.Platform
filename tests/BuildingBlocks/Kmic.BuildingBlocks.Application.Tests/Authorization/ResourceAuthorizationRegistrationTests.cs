@@ -2,6 +2,7 @@ using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
+using Kmic.BuildingBlocks.Testing.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using static Kmic.BuildingBlocks.Application.Tests.Authorization.ResourceAuthorizationTests;

@@ -9,6 +9,7 @@ internal static class Rules
 {
     public const string DomainCategory = "Kmic.Domain";
     public const string GeneralCategory = "Kmic.General";
+    public const string DataCategory = "Kmic.Data";
 
     public static DiagnosticDescriptor Create(string id, string category, string title, string message, params string[] customTags) =>
         new(id, title, message, category, DiagnosticSeverity.Error, isEnabledByDefault: true, customTags: customTags);

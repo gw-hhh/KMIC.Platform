@@ -50,7 +50,7 @@ internal static class SaveRules
     }
 
     // 模拟身份记实际操作人（05-03 D4）；系统身份与匿名请求（登录等）记系统账号
-    private static UserId Actor(ICurrentUser user) => user.ActualUserId ?? user.UserId ?? UserId.System;
+    public static UserId Actor(ICurrentUser user) => user.ActualUserId ?? user.UserId ?? UserId.System;
 
     private static void StampAudit(EntityEntry entry, UserId actor, DateTimeOffset now)
     {

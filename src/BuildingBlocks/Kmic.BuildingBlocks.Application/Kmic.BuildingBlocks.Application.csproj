@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
     应用层基础构件（05-02、05-04、05-05、05-09、05-10、05-13 中标为 BuildingBlocks.Application 的部分）。
-    只引用 Mediator 的抽象；分发代码由宿主中的 Mediator.SourceGenerator 生成（原型 #1）
+    只引用 Mediator 的抽象；分发代码由宿主中的 Mediator.SourceGenerator 生成（原型 #1）。
+    引用 EF Core 只为查询处理器的 LINQ（05-03 D1），写入类 API 由禁用 API 清单拦截
   -->
   <ItemGroup>
     <PackageReference Include="Mediator.Abstractions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />

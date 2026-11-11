@@ -21,6 +21,7 @@ Fluid
 gitea
 ILIKE
 Kmic
+LINQ
 Mediator
 Meziantou
 Navigations

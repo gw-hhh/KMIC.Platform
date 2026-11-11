@@ -89,7 +89,7 @@ public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
     }
 
     [Fact]
-    public async Task IgnoringDataScope_KeepsSoftDeleteFilter()
+    public async Task WithoutDataScope_KeepsSoftDeleteFilter()
     {
         var deleted = await _harness.AddAsync(_shanghai, Ticket.Create(TicketNumbers.Next(), _shanghai.UserId, _org["上海"], title: "已删除"));
         await using (var remove = _harness.Begin(_shanghai))
@@ -99,7 +99,7 @@ public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
         }
 
         await using var work = _harness.Begin(_guangzhou);
-        var titles = await TitlesAsync(work.Query.Tickets.IgnoreQueryFilters([QueryFilters.DataScope]));
+        var titles = await TitlesAsync(work.Query.Tickets.WithoutDataScope());
 
         titles.ShouldBe(["上海", "杭州", "广州"], ignoreOrder: true);
     }
