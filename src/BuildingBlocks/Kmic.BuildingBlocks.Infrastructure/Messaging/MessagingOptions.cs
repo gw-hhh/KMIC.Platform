@@ -67,4 +67,22 @@ public sealed class MessagingOptions
     /// 等待时长的随机浮动比例
     /// </summary>
     public double RetryJitter { get; set; } = 0.2;
+
+    /// <summary>
+    /// 兜底轮询的间隔
+    /// </summary>
+    /// <remarks>
+    /// 平时靠数据库通知唤醒，这个间隔只在通知丢失（如连接断开）时起作用
+    /// </remarks>
+    public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// 每个模块同时处理 Inbox 消息的数量
+    /// </summary>
+    public int InboxParallelism { get; set; } = 4;
+
+    /// <summary>
+    /// 停机时等待进行中的处理完成的时长，超时就取消
+    /// </summary>
+    public TimeSpan ShutdownGrace { get; set; } = TimeSpan.FromSeconds(30);
 }

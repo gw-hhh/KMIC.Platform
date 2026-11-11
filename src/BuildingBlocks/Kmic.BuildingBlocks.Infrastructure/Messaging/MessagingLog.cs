@@ -24,4 +24,10 @@ internal static partial class MessagingLog
 
     [LoggerMessage(EventId = 2106, Level = LogLevel.Warning, Message = "Outcome of message {MessageId} for {Subscription} could not be determined, leaving it to lease expiry")]
     public static partial void HandlingOutcomeUnknown(ILogger logger, Exception? exception, Guid messageId, string subscription);
+
+    [LoggerMessage(EventId = 2107, Level = LogLevel.Warning, Message = "Messaging listener disconnected, reconnecting in {DelaySeconds} s")]
+    public static partial void ListenerDisconnected(ILogger logger, Exception exception, double delaySeconds);
+
+    [LoggerMessage(EventId = 2108, Level = LogLevel.Warning, Message = "Database unavailable for messaging loop, retrying in {DelaySeconds} s")]
+    public static partial void LoopDatabaseUnavailable(ILogger logger, Exception exception, double delaySeconds);
 }

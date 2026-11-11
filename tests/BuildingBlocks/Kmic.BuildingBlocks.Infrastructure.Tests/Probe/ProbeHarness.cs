@@ -37,6 +37,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
             (e, envelope) => new MirrorTicketCommand(e.Ticket.Id, e.Ticket.Title, envelope.SourceVersion ?? 0),
             o => o.Ordered()));
         services.AddSingleton(Echo);
+        services.AddKmicMessagingWorker();
         services.AddKmicPersistence(o =>
         {
             o.ConnectionString = connectionString;
