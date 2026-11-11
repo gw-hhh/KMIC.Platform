@@ -88,11 +88,13 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasComment("主键，由程序生成的 UUID v7");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
+                        .HasColumnType("numeric(18,2)")
+                        .HasComment("可用额度，单位元");
 
                     b.Property<long>("ConcurrencyVersion")
                         .IsConcurrencyToken()
@@ -101,7 +103,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.Property<string>("ContactEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasComment("联系邮箱；为空表示未填写");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -120,7 +123,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                         .HasComment("删除人");
 
                     b.Property<DateTimeOffset?>("DueAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("截止时刻；为空表示不限");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -129,34 +133,41 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                         .HasComment("是否已删除（软删除）");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasComment("备注，长文本");
 
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
+                        .HasComment("单据编号；不区分大小写，未删除的单据中唯一")
                         .UseCollation("CaseInsensitive");
 
                     b.Property<Guid>("OrgUnitId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasComment("所属组织");
 
                     b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasComment("所属人");
 
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasComment("优先级");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasComment("状态");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasComment("标题");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -171,13 +182,15 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                             b1.Property<decimal>("Amount")
                                 .HasPrecision(18, 2)
                                 .HasColumnType("numeric(18,2)")
-                                .HasColumnName("BudgetAmount");
+                                .HasColumnName("BudgetAmount")
+                                .HasComment("预算；为空表示未设定：金额");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("character varying(3)")
-                                .HasColumnName("BudgetCurrency");
+                                .HasColumnName("BudgetCurrency")
+                                .HasComment("预算；为空表示未设定：币种，ISO 4217 三位代码");
                         });
 
                     b.ComplexCollection(typeof(List<Dictionary<string, object>>), "_watchers", "Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Ticket._watchers#Watcher", b1 =>
@@ -205,6 +218,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.ToTable("Ticket", "Probe", t =>
                         {
+                            t.HasComment("测试单据；Probe 模块；一行代表一张单据；可软删除");
+
                             t.HasCheckConstraint("CK_Ticket_Priority", "\"Priority\" IN ('Normal', 'Urgent')");
 
                             t.HasCheckConstraint("CK_Ticket_Status", "\"Status\" IN ('Open', 'Closed')");
@@ -214,7 +229,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Tests.Probe.TicketLine", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasComment("主键，由程序生成的 UUID v7");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -227,10 +243,12 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasComment("明细内容");
 
                     b.Property<Guid>("TicketId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasComment("所属Ticket的 ID");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -244,7 +262,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("TicketLine", "Probe");
+                    b.ToTable("TicketLine", "Probe", t =>
+                        {
+                            t.HasComment("测试单据的明细；Probe 模块；一行代表一条明细，随单据保存");
+                        });
                 });
 
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Tests.Probe.TicketLine", b =>

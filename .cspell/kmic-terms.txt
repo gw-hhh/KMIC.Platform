@@ -33,6 +33,7 @@ nspname
 Pinia
 Quartz
 quotepath
+regclass
 relname
 relnamespace
 Scalar

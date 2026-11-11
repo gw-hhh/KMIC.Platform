@@ -12,10 +12,10 @@
 | 02 | [02-requirements.md](02-requirements.md) | 新框架需求清单 | 已确认（2026-11-04） | 未开始 | 未开始 |
 | 03 | [03-tech-selection.md](03-tech-selection.md) | 技术选型及理由 | 已确认（2026-11-03）；版本已锁定（S0-04） | — | — |
 | 04 | [04-architecture.md](04-architecture.md) | 整体架构 | 已确认（2026-11-03） | 未开始 | 未开始 |
-| 05 | 05-infrastructure/ | 各项基础能力设计，13 份：[05-01](05-infrastructure/05-01-领域基础构件.md)、[05-02](05-infrastructure/05-02-应用层与中介者管道.md)、[05-03](05-infrastructure/05-03-数据访问.md)、[05-04](05-infrastructure/05-04-认证与会话.md)、[05-05](05-infrastructure/05-05-授权.md)、[05-06](05-infrastructure/05-06-接口层.md)、[05-07](05-infrastructure/05-07-模块间通信.md)、[05-08](05-infrastructure/05-08-后台处理.md)、[05-09](05-infrastructure/05-09-审计与业务历史.md)、[05-10](05-infrastructure/05-10-配置与缓存.md)、[05-11](05-infrastructure/05-11-文件与通知.md)、[05-12](05-infrastructure/05-12-可观测性.md)、[05-13](05-infrastructure/05-13-编号服务与时间.md) | 已确认（2026-11-04）；阻断原型已验证（见 spikes） | 未开始 | 未开始 |
-| 06 | [06-coding-standards.md](06-coding-standards.md) | 编码规范（开头为编码速查） | 已确认（2026-11-04） | 工程配置已落地（S0-05）；自定义分析器未开始 | 未开始 |
+| 05 | 05-infrastructure/ | 各项基础能力设计，13 份：[05-01](05-infrastructure/05-01-领域基础构件.md)、[05-02](05-infrastructure/05-02-应用层与中介者管道.md)、[05-03](05-infrastructure/05-03-数据访问.md)、[05-04](05-infrastructure/05-04-认证与会话.md)、[05-05](05-infrastructure/05-05-授权.md)、[05-06](05-infrastructure/05-06-接口层.md)、[05-07](05-infrastructure/05-07-模块间通信.md)、[05-08](05-infrastructure/05-08-后台处理.md)、[05-09](05-infrastructure/05-09-审计与业务历史.md)、[05-10](05-infrastructure/05-10-配置与缓存.md)、[05-11](05-infrastructure/05-11-文件与通知.md)、[05-12](05-infrastructure/05-12-可观测性.md)、[05-13](05-infrastructure/05-13-编号服务与时间.md) | 已确认（2026-11-04）；阻断原型已验证（见 spikes） | 进行中：05-01、05-03 及 05-02 的管道已实现，05-05、05-10、05-13 的应用层部分已实现（S2-01～S2-06，见 `../implementation/S2-框架骨架.md`） | 未开始 |
+| 06 | [06-coding-standards.md](06-coding-standards.md) | 编码规范（开头为编码速查） | 已确认（2026-11-04） | 工程配置已落地（S0-05）；自定义分析器第一批（S2-02）与 KM2001（S2-06）已实现 | 未开始 |
 | 07 | [07-module-template.md](07-module-template.md) | 业务模块标准写法 | 已确认（2026-11-04） | 未开始（模板与参考模块 `Sample` 为阶段 2 交付物） | 未开始 |
-| 08 | [08-roadmap.md](08-roadmap.md) | 实施计划 | 已确认（2026-11-04） | 阶段 0 完成（过渡方式），阶段 1 进行中 | — |
+| 08 | [08-roadmap.md](08-roadmap.md) | 实施计划 | 已确认（2026-11-04） | 阶段 0 完成（过渡方式），阶段 1 完成，阶段 2 进行中 | — |
 | 09 | [09-runtime-environment.md](09-runtime-environment.md) | 运行环境架构（阿里云） | 已确认（2026-11-04） | 未开始 | 未开始 |
 | R01 | [reviews/R01-后端框架复盘.md](reviews/R01-后端框架复盘.md) | 后端底层框架复盘 | 已确认（2026-11-04），修订已落实 | — | — |
 | R02 | [reviews/R02-设计复核决定登记.md](reviews/R02-设计复核决定登记.md) | 设计复核决定登记（读模型、消息、附件、授权缓存、幂等、容量、恢复） | 已确认（2026-11-05），修订已落实 | — | — |
@@ -25,7 +25,7 @@
 
 ## 当前阶段
 
-阶段 0（开工准备）已按过渡方式完成（2026-11-10，见 `docs/implementation/S0-开工准备.md`）；阶段 1（原型验证）的结论与待决事项全部确认，阶段 2 可以开始（数据库用本机 Docker 中的 PostgreSQL 18，阿里云 RDS 的验证在部署阿里云测试环境前完成），按触发条件要做的事见 `docs/implementation/00-README.md`。阶段 2（框架实现）的开始条件：08 第 4 节标为“阻断”的原型全部有结论。
+阶段 2（框架骨架 + 参考模块）进行中（2026-11-10 起，任务与进度见 `docs/implementation/S2-框架骨架.md`）。阶段 0（开工准备）已按过渡方式完成（2026-11-10，见 `docs/implementation/S0-开工准备.md`）；阶段 1（原型验证）的结论与待决事项全部确认（数据库用本机 Docker 中的 PostgreSQL 18，阿里云 RDS 的验证在部署阿里云测试环境前完成），按触发条件要做的事见 `docs/implementation/00-README.md`。阶段 2（框架实现）的开始条件：08 第 4 节标为“阻断”的原型全部有结论。
 
 ## 架构决策记录
 

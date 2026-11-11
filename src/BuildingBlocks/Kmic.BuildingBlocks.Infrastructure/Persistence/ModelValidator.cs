@@ -49,6 +49,7 @@ internal static class ModelValidator
 
         if (EntityKinds.IsBusinessEntity(entityType.ClrType))
         {
+            ValidateComments(entityType, name, problems);
             foreach (var index in entityType.GetDeclaredIndexes().Where(i => i.IsUnique && i.FindAnnotation(ModelAnnotations.UniqueError) is null))
             {
                 problems.Add($"{name}：唯一索引（{string.Join(", ", index.Properties.Select(p => p.Name))}）要用 MapsToError 声明冲突时返回的模块错误。");
@@ -81,6 +82,23 @@ internal static class ModelValidator
         if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType) && !EntityKinds.IsAggregateRoot(entityType.ClrType))
         {
             problems.Add($"{name}：只有聚合根能实现 ISoftDeletable。");
+        }
+    }
+
+    // 数据库注释是数据字典的唯一来源（05-03 第 3.9 节）；存为 jsonb 的值对象集合是一列，成员没有列注释
+    private static void ValidateComments(IReadOnlyEntityType entityType, string name, List<string> problems)
+    {
+        if (entityType.GetComment() is null)
+        {
+            problems.Add($"{name}：表缺少注释，在实体配置中写 ToTable(t => t.HasComment(\"…\"))：中文名称、所属模块、一行代表什么、生命周期。");
+        }
+
+        foreach (var (path, property, inJson) in AllProperties(entityType, name, inJson: false))
+        {
+            if (!inJson && property.GetComment() is null)
+            {
+                problems.Add($"{path}：列缺少注释，给属性写 XML 注释（summary），说法需要不同时在配置中写 HasComment。");
+            }
         }
     }
 

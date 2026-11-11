@@ -8,6 +8,7 @@ internal sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
 {
     public void Configure(EntityTypeBuilder<Ticket> builder)
     {
+        builder.ToTable(t => t.HasComment("测试单据；Probe 模块；一行代表一张单据；可软删除"));
         builder.Property(t => t.Number).HasMaxLength(20).IsCaseInsensitive();
         builder.HasIndex(t => t.Number).IsUnique().MapsToError(TicketErrors.NumberDuplicated);
         builder.Property(t => t.ContactEmail).HasMaxLength(256);

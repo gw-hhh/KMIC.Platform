@@ -54,8 +54,47 @@ internal static class ModelConventions
             }
 
             AddCodeChecks(entityType);
+            AddColumnComments(entityType);
         }
     }
+
+    // 列注释默认取属性的 XML 注释（编译时生成）；配置中显式写了 HasComment 的不覆盖
+    private static void AddColumnComments(IMutableEntityType entityType)
+    {
+        foreach (var property in entityType.GetDeclaredProperties().Where(p => p.GetComment() is null))
+        {
+            property.SetComment(property.IsPrimaryKey() && string.Equals(property.Name, nameof(Entity<>.Id), StringComparison.Ordinal)
+                ? "主键，由程序生成的 UUID v7"
+                : GeneratedComments.Of(property.PropertyInfo) ?? ParentKeyComment(property));
+        }
+
+        foreach (var complexProperty in entityType.GetDeclaredComplexProperties().Where(c => !c.IsCollection && !c.ComplexType.IsMappedToJson()))
+        {
+            CommentValueObjectColumns(complexProperty, GeneratedComments.Of(complexProperty.PropertyInfo));
+        }
+    }
+
+    // 值对象的列注释是“属性的注释：成员的注释”，如“预算：金额”
+    private static void CommentValueObjectColumns(IMutableComplexProperty complexProperty, string? owner)
+    {
+        foreach (var property in complexProperty.ComplexType.GetDeclaredProperties().Where(p => p.GetComment() is null))
+        {
+            var member = GeneratedComments.Of(property.PropertyInfo);
+            property.SetComment(owner is null || member is null ? owner ?? member : $"{owner}：{member}");
+        }
+
+        foreach (var nested in complexProperty.ComplexType.GetDeclaredComplexProperties().Where(c => !c.IsCollection && !c.ComplexType.IsMappedToJson()))
+        {
+            var member = GeneratedComments.Of(nested.PropertyInfo);
+            CommentValueObjectColumns(nested, owner is null || member is null ? owner ?? member : $"{owner}：{member}");
+        }
+    }
+
+    // 子实体指向父实体的影子外键
+    private static string? ParentKeyComment(IMutableProperty property) =>
+        property.IsShadowProperty() && property.GetContainingForeignKeys().FirstOrDefault(fk => fk.PrincipalToDependent is not null) is { } foreignKey
+            ? $"所属{foreignKey.PrincipalEntityType.ClrType.Name}的 ID"
+            : null;
 
     // 值对象的列名是“属性名 + 成员名”，不带下划线，如 BudgetAmount；存为 jsonb 的值对象不是列
     private static void NameValueObjectColumns(IMutableComplexProperty complexProperty, string prefix)

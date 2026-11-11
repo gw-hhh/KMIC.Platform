@@ -11,8 +11,14 @@ internal sealed record Money
         Currency = currency;
     }
 
+    /// <summary>
+    /// 金额
+    /// </summary>
     public decimal Amount { get; private init; }
 
+    /// <summary>
+    /// 币种，ISO 4217 三位代码
+    /// </summary>
     public string Currency { get; private init; }
 
     public static Money Of(decimal amount, string currency) => new(amount, currency);

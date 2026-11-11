@@ -20,30 +20,69 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
         OrgUnitId = orgUnitId;
     }
 
+    /// <summary>
+    /// 单据编号；不区分大小写，未删除的单据中唯一
+    /// </summary>
     public string Number { get; private set; }
 
+    /// <summary>
+    /// 标题
+    /// </summary>
     public string Title { get; private set; }
 
+    /// <summary>
+    /// 所属人
+    /// </summary>
     public UserId OwnerId { get; private set; }
 
+    /// <summary>
+    /// 所属组织
+    /// </summary>
     public OrgUnitId OrgUnitId { get; private set; }
 
+    /// <summary>
+    /// 可用额度，单位元
+    /// </summary>
     public decimal Amount { get; private set; }
 
+    /// <summary>
+    /// 截止时刻；为空表示不限
+    /// </summary>
     public DateTimeOffset? DueAt { get; private set; }
 
+    /// <summary>
+    /// 备注，长文本
+    /// </summary>
     public string? Note { get; private set; }
 
+    /// <summary>
+    /// 状态
+    /// </summary>
     public TicketStatus Status { get; private set; } = TicketStatus.Open;
 
+    /// <summary>
+    /// 优先级
+    /// </summary>
     public TicketPriority Priority { get; private set; }
 
+    /// <summary>
+    /// 联系邮箱；为空表示未填写
+    /// </summary>
     public EmailAddress? ContactEmail { get; private set; }
 
+    /// <summary>
+    /// 预算；为空表示未设定
+    /// </summary>
     public Money? Budget { get; private set; }
 
+    /// <summary>
+    /// 关注人
+    /// </summary>
     public IReadOnlyList<Watcher> Watchers => _watchers;
 
+    /// <summary>
+    /// 明细行
+    /// </summary>
     public IReadOnlyList<TicketLine> Lines => _lines;
 
     public static Ticket Create(string number, UserId ownerId, OrgUnitId orgUnitId, string title = "测试单据") =>

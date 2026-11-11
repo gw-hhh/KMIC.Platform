@@ -8,6 +8,9 @@ internal sealed class TicketLine : Entity<TicketLineId>
         : base(id) =>
         Text = text;
 
+    /// <summary>
+    /// 明细内容
+    /// </summary>
     public string Text { get; private set; }
 
     internal static TicketLine Create(string text) => new(TicketLineId.New(), text);
