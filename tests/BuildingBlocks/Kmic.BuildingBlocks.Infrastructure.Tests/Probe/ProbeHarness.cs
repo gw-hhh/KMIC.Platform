@@ -8,6 +8,7 @@ using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
+using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 using Kmic.BuildingBlocks.Testing.Identity;
 using Kmic.BuildingBlocks.Testing.Security;
@@ -24,6 +25,11 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 internal sealed class ProbeHarness : IAsyncDisposable
 {
     public const string MirrorSubscription = "Echo.MirrorTicket";
+
+    /// <summary>
+    /// 每天业务时间 7 点执行的定时任务
+    /// </summary>
+    public const string DailyStamp = "BuildingBlocks.DailyStamp";
 
     private readonly ServiceProvider _services;
 
@@ -44,9 +50,12 @@ internal sealed class ProbeHarness : IAsyncDisposable
             (e, envelope) => new MirrorTicketCommand(e.Ticket.Id, e.Ticket.Title, envelope.SourceVersion ?? 0),
             o => o.Ordered()));
         collection.AddSingleton(Echo);
+        collection.AddKmicScheduling("BuildingBlocks", s => s.Schedule(
+            DailyStamp, "0 0 7 * * ?", run => new StampTicketsCommand(run.ScheduledFireTime), o => o.DisplayName("每日盖章")));
         collection.AddKmicStartupTasks();
         collection.AddKmicMessagingWorker();
         collection.AddKmicJobWorker();
+        collection.AddKmicScheduler();
         collection.AddSingleton<IAccessContextLoader>(Access);
         services?.Invoke(collection);
         collection.AddKmicPersistence(o =>

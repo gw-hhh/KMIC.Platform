@@ -10,10 +10,13 @@ using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Numbering;
+using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Application.Settings;
+using Kmic.BuildingBlocks.Application.Time;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Application;
 
@@ -81,6 +84,27 @@ public static class ApplicationServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// 登记一个模块的定时任务
+    /// </summary>
+    /// <remarks>
+    /// 校验在第一次取定时任务目录时统一做，启动时同步到调度器那一步会取
+    /// </remarks>
+    /// <param name="services">服务集合</param>
+    /// <param name="module">模块名</param>
+    /// <param name="configure">定时任务声明</param>
+    public static IServiceCollection AddKmicScheduling(this IServiceCollection services, string module, Action<ISchedulingBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(module);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var schedules = new ModuleSchedules(module);
+        configure(schedules);
+        services.AddSingleton(schedules);
+        return services;
+    }
+
     // 测试程序集里有故意写错声明的样例，所以测试只注册自己用到的消息
     internal static IServiceCollection AddKmicApplication(
         this IServiceCollection services,
@@ -100,6 +124,10 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IContractQuerySender, ContractQuerySender>();
         services.AddScoped<IDataScope, DataScope>();
         services.AddScoped<RequestMetadata>();
+        services.AddOptions<BusinessTimeOptions>();
+        services.TryAddSingleton<IBusinessCalendar>(sp => new BusinessCalendar(
+            sp.GetRequiredService<TimeProvider>(),
+            TimeZoneInfo.FindSystemTimeZoneById(sp.GetRequiredService<IOptions<BusinessTimeOptions>>().Value.BusinessTimeZone)));
         services.TryAddSingleton(IntegrationMessageCatalog.Empty);
         services.TryAddSingleton(BackgroundJobCatalog.Empty);
         services.AddScoped<IntegrationEventPublisher>();

@@ -4,6 +4,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Quartz" />
     <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
   </ItemGroup>
   <ItemGroup>

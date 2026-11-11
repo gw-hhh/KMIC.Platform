@@ -48,3 +48,4 @@ xunit
 hashtext
 timestamptz
 xact
+qrtz

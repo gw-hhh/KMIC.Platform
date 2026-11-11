@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
@@ -34,4 +36,19 @@ internal sealed class ProbeHooks
     /// 作业每一批开始前执行，参数是批次序号
     /// </summary>
     public Func<int, CancellationToken, Task>? BeforeJobBatch { get; set; }
+
+    /// <summary>
+    /// 定时任务命令收到的计划触发时刻，按执行顺序
+    /// </summary>
+    public ConcurrentQueue<DateTimeOffset> ScheduledFires { get; } = new();
+
+    /// <summary>
+    /// 定时任务命令给这张单据加一行
+    /// </summary>
+    public TicketId? StampTicket { get; set; }
+
+    /// <summary>
+    /// 定时任务命令返回失败
+    /// </summary>
+    public bool FailScheduled { get; set; }
 }

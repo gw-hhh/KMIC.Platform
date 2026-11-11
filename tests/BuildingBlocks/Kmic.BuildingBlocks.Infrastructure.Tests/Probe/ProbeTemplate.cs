@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
+using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.Echo.Probe;
 using Npgsql;
@@ -45,12 +46,12 @@ public sealed class ProbeTemplate : PostgresTemplateDatabase
         await ModuleMigrator.MigrateAsync<ProbeDbContext>(connectionString, ct);
         await ModuleMigrator.MigrateAsync<EchoDbContext>(connectionString, ct);
 
-        // 路由表属于 Operations 模块，框架测试里没有这个模块，直接建表
+        // 路由表、Quartz 表和定时任务的两张表属于 Operations 模块，框架测试里没有这个模块，直接建表
         await using (var connection = new NpgsqlConnection(connectionString))
         {
             await connection.OpenAsync(ct);
             await using var routes = connection.CreateCommand();
-            routes.CommandText = """CREATE SCHEMA "Operations";""" + MessageRouteTable.CreateSql;
+            routes.CommandText = """CREATE SCHEMA "Operations";""" + MessageRouteTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql();
             await routes.ExecuteNonQueryAsync(ct);
         }
     }
