@@ -11,41 +11,51 @@ using Microsoft.Extensions.Logging;
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
 /// <summary>
-/// 以系统身份发送定时任务的命令，前后写执行记录
+/// 执行一次定时任务，前后写执行记录
 /// </summary>
-internal sealed class ScheduledCommandRunner(ScheduledJobRuns runs, IExecutionScopeFactory scopes, ILogger<ScheduledCommandRunner> logger)
+/// <remarks>
+/// 模块的任务以系统身份发送命令；框架任务直接执行
+/// </remarks>
+internal sealed class ScheduledCommandRunner(ScheduledTasks tasks, ScheduledJobRuns runs, IExecutionScopeFactory scopes, ILogger<ScheduledCommandRunner> logger)
 {
-    /// <param name="job">定时任务</param>
+    /// <param name="name">任务名</param>
     /// <param name="run">这次触发</param>
     /// <param name="actualFireTime">实际触发时刻</param>
     /// <param name="triggeredBy">手动执行的人</param>
     /// <param name="instance">执行它的调度器实例</param>
     /// <param name="ct">停机时取消</param>
     public async Task<Result<ScheduledJobOutcome>> RunAsync(
-        ScheduledJobDefinition job, ScheduledRun run, DateTimeOffset actualFireTime, UserId? triggeredBy, string instance, CancellationToken ct)
+        string name, ScheduledRun run, DateTimeOffset actualFireTime, UserId? triggeredBy, string instance, CancellationToken ct)
     {
-        var id = await runs.StartAsync(job.Name, run, actualFireTime, triggeredBy, instance, Activity.Current?.TraceId.ToString(), ct);
+        var id = await runs.StartAsync(name, run, actualFireTime, triggeredBy, instance, Activity.Current?.TraceId.ToString(), ct);
         try
         {
-            Result<ScheduledJobOutcome> result;
-            await using (var scope = scopes.CreateScope(CallOrigin.ScheduledJob, CurrentUser.System()))
-            {
-                result = await scope.ServiceProvider.GetRequiredService<ISender>().SendAsync(job.Create(run), ct);
-            }
-
-            await FinishAsync(id, job, result);
+            var result = await ExecuteAsync(name, run, ct);
+            await FinishAsync(id, name, result);
             return result;
         }
         catch (Exception exception)
         {
-            // 命令管道已经把处理器里的异常换成了结果，能到这里的是构造命令、建作用域这类框架层面的问题
-            SchedulingLog.RunThrew(logger, exception, job.Name);
+            // 命令管道已经把处理器里的异常换成了结果，能到这里的是框架任务的数据库错误、建作用域失败这类问题
+            SchedulingLog.RunThrew(logger, exception, name);
             await runs.FinishAsync(id, ScheduledRunStatus.Failed, null, exception.GetType().Name, exception.Message, CancellationToken.None);
             throw;
         }
     }
 
-    private async Task FinishAsync(Guid id, ScheduledJobDefinition job, Result<ScheduledJobOutcome> result)
+    private async Task<Result<ScheduledJobOutcome>> ExecuteAsync(string name, ScheduledRun run, CancellationToken ct)
+    {
+        if (tasks.FindFrameworkTask(name) is { } task)
+        {
+            return await task.ExecuteAsync(ct);
+        }
+
+        var job = tasks.FindModuleJob(name) ?? throw new InvalidOperationException($"本实例没有声明定时任务 {name}。");
+        await using var scope = scopes.CreateScope(CallOrigin.ScheduledJob, CurrentUser.System());
+        return await scope.ServiceProvider.GetRequiredService<ISender>().SendAsync(job.Create(run), ct);
+    }
+
+    private async Task FinishAsync(Guid id, string name, Result<ScheduledJobOutcome> result)
     {
         if (result.IsSuccess)
         {
@@ -56,11 +66,11 @@ internal sealed class ScheduledCommandRunner(ScheduledJobRuns runs, IExecutionSc
         var unknown = string.Equals(result.Error.Code, CommonErrors.ResultUnknown.Code, StringComparison.Ordinal);
         if (unknown)
         {
-            SchedulingLog.RunOutcomeUnknown(logger, job.Name);
+            SchedulingLog.RunOutcomeUnknown(logger, name);
         }
         else
         {
-            SchedulingLog.RunFailed(logger, job.Name, result.Error.Code);
+            SchedulingLog.RunFailed(logger, name, result.Error.Code);
         }
 
         await runs.FinishAsync(

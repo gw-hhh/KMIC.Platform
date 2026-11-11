@@ -17,7 +17,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// </remarks>
 internal sealed class ScheduleSynchronizer(
     ISchedulerFactory schedulers,
-    ScheduledJobCatalog catalog,
+    ScheduledTasks tasks,
     ScheduledJobSettings settings,
     IBusinessCalendar calendar,
     DataSources dataSources,
@@ -41,7 +41,7 @@ internal sealed class ScheduleSynchronizer(
             var scheduler = await schedulers.GetScheduler(ct);
             var overrides = await settings.ReadAsync(ct);
             var changed = 0;
-            foreach (var job in catalog.All)
+            foreach (var job in tasks.All)
             {
                 if (await SyncOneAsync(scheduler, job, overrides.GetValueOrDefault(job.Name), build, ct))
                 {
@@ -80,7 +80,7 @@ internal sealed class ScheduleSynchronizer(
     /// <summary>
     /// 按默认值和覆盖值得到的 Cron 触发器
     /// </summary>
-    internal static ITrigger BuildTrigger(ScheduledJobDefinition job, string cron, TimeZoneInfo zone) =>
+    internal static ITrigger BuildTrigger(ScheduleEntry job, string cron, TimeZoneInfo zone) =>
         TriggerBuilder.Create()
             .WithIdentity(job.Name, CommandJob.Group)
             .ForJob(job.Name, CommandJob.Group)
@@ -104,7 +104,7 @@ internal sealed class ScheduleSynchronizer(
         return Version.TryParse(build.Split('+', '-')[0], out var version) ? version : null;
     }
 
-    private async Task<bool> SyncOneAsync(IScheduler scheduler, ScheduledJobDefinition job, ScheduledJobSetting? setting, string build, CancellationToken ct)
+    private async Task<bool> SyncOneAsync(IScheduler scheduler, ScheduleEntry job, ScheduledJobSetting? setting, string build, CancellationToken ct)
     {
         var jobKey = new JobKey(job.Name, CommandJob.Group);
         var existing = await scheduler.GetJobDetail(jobKey, ct);
@@ -159,7 +159,7 @@ internal sealed class ScheduleSynchronizer(
         var removed = 0;
         foreach (var key in await scheduler.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(CommandJob.Group), ct))
         {
-            if (catalog.Find(key.Name) is not null)
+            if (tasks.Contains(key.Name))
             {
                 continue;
             }

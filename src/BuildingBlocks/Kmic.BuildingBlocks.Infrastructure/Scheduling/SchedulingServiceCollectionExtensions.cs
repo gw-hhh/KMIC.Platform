@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Application.Startup;
 using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
+using Kmic.BuildingBlocks.Infrastructure.Maintenance;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,7 +17,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 public static class SchedulingServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册调度器（待机）、定时任务目录和启动时的同步，Api、Worker 两种角色都要调用
+    /// 注册调度器（待机）、定时任务目录、框架的清理任务和启动时的同步，Api、Worker 两种角色都要调用
     /// </summary>
     /// <remarks>
     /// 调度器使用 Operations 里的 Quartz 表，集群模式，多个实例同一次触发只执行一次。
@@ -29,6 +30,12 @@ public static class SchedulingServiceCollectionExtensions
 
         services.TryAddSingleton(sp => ScheduledJobCatalog.Build(
             sp.GetServices<ModuleSchedules>(), sp.GetRequiredService<UseCaseCatalog>(), CheckCron));
+        services.AddOptions<PurgeOptions>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFrameworkTask, PurgeIdempotencyTask>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFrameworkTask, PurgeMessagesTask>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFrameworkTask, PurgeJobsTask>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFrameworkTask, PurgeScheduledJobRunsTask>());
+        services.TryAddSingleton<ScheduledTasks>();
         services.TryAddSingleton<ScheduledJobRuns>();
         services.TryAddSingleton<ScheduledJobSettings>();
         services.TryAddSingleton<ScheduledCommandRunner>();

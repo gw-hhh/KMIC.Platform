@@ -109,6 +109,9 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExpiresAt")
+                        .HasFilter("\"ExpiresAt\" IS NOT NULL");
+
                     b.HasIndex("LeaseUntil")
                         .HasFilter("\"Status\" IN (0, 1, 4)");
 
@@ -207,6 +210,9 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     b.HasIndex("NextAttemptAt")
                         .HasFilter("\"Status\" IN (0, 1)");
+
+                    b.HasIndex("ReceivedAt")
+                        .HasFilter("\"Status\" = 2");
 
                     b.HasIndex("SubjectIds")
                         .HasFilter("\"SubjectIds\" IS NOT NULL AND \"Status\" IN (0, 1, 3)");

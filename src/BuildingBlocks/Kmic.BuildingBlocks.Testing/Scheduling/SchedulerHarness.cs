@@ -11,7 +11,7 @@ namespace Kmic.BuildingBlocks.Testing.Scheduling;
 public static class SchedulerHarness
 {
     /// <summary>
-    /// 不经过 Quartz，直接按计划时刻发送一次定时任务的命令，照常写执行记录
+    /// 不经过 Quartz，直接按计划时刻执行一次定时任务（模块的命令或框架任务），照常写执行记录
     /// </summary>
     /// <remarks>
     /// 业务模块的定时任务测试用它：触发一次断言结果，再按同一时刻触发一次，结果应当不变
@@ -24,9 +24,12 @@ public static class SchedulerHarness
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        var job = services.GetRequiredService<ScheduledJobCatalog>().Find(name)
-            ?? throw new InvalidOperationException($"没有声明定时任务 {name}。");
+        if (!services.GetRequiredService<ScheduledTasks>().Contains(name))
+        {
+            throw new InvalidOperationException($"没有声明定时任务 {name}。");
+        }
+
         return services.GetRequiredService<ScheduledCommandRunner>().RunAsync(
-            job, new ScheduledRun(scheduledFireTime, ScheduledTrigger.Schedule), scheduledFireTime, null, "test", ct);
+            name, new ScheduledRun(scheduledFireTime, ScheduledTrigger.Schedule), scheduledFireTime, null, "test", ct);
     }
 }

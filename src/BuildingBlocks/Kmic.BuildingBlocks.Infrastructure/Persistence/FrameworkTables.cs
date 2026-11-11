@@ -34,6 +34,15 @@ internal static class FrameworkTables
         "Status" IN (0, 1, 3) AND "OrderingKey" IS NOT NULL
         """;
 
+    // 清理时只找已完成的：Inbox 的去重凭证、到期的作业记录
+    private const string Done = """
+        "Status" = 2
+        """;
+
+    private const string Finished = """
+        "ExpiresAt" IS NOT NULL
+        """;
+
     private const string Unfinished = """
         "Status" IN (0, 1, 4)
         """;
@@ -74,23 +83,27 @@ internal static class FrameworkTables
             message.HasIndex(m => new { m.MessageId, m.Subscription }).IsUnique();
             message.HasIndex(m => m.NextAttemptAt).HasFilter(Claimable);
             message.HasIndex(m => new { m.Subscription, m.OrderingKey, m.Seq }).HasFilter(OrderedUnfinished);
+            message.HasIndex(m => m.ReceivedAt).HasFilter(Done);
             message.HasIndex(m => m.SubjectIds).HasMethod("gin").HasFilter(UnfinishedWithSubjects);
         });
 
-        modelBuilder.Entity<BackgroundJobRecord>(job =>
-        {
-            job.ToTable(Jobs, t => t.HasComment("后台作业"));
-            job.Property(j => j.Id).ValueGeneratedNever();
-            job.Property(j => j.JobType).HasMaxLength(200);
-            job.Property(j => j.Args).HasColumnType(ColumnTypes.Json);
-            job.Property(j => j.Checkpoint).HasColumnType(ColumnTypes.Json);
-            job.Property(j => j.ResultSummary).HasColumnType(ColumnTypes.Json);
-            job.Property(j => j.ProgressMessage).HasMaxLength(500);
-            job.Property(j => j.ErrorCode).HasMaxLength(200);
-            job.Property(j => j.ErrorMessage).HasMaxLength(2000);
-            job.HasIndex(j => j.LeaseUntil).HasFilter(Unfinished);
-            job.HasIndex(j => new { j.SubmittedBy, j.SubmittedAt }).IsDescending(false, true);
-        });
+        modelBuilder.Entity<BackgroundJobRecord>(MapJobs);
+    }
+
+    private static void MapJobs(EntityTypeBuilder<BackgroundJobRecord> job)
+    {
+        job.ToTable(Jobs, t => t.HasComment("后台作业"));
+        job.Property(j => j.Id).ValueGeneratedNever();
+        job.Property(j => j.JobType).HasMaxLength(200);
+        job.Property(j => j.Args).HasColumnType(ColumnTypes.Json);
+        job.Property(j => j.Checkpoint).HasColumnType(ColumnTypes.Json);
+        job.Property(j => j.ResultSummary).HasColumnType(ColumnTypes.Json);
+        job.Property(j => j.ProgressMessage).HasMaxLength(500);
+        job.Property(j => j.ErrorCode).HasMaxLength(200);
+        job.Property(j => j.ErrorMessage).HasMaxLength(2000);
+        job.HasIndex(j => j.LeaseUntil).HasFilter(Unfinished);
+        job.HasIndex(j => j.ExpiresAt).HasFilter(Finished);
+        job.HasIndex(j => new { j.SubmittedBy, j.SubmittedAt }).IsDescending(false, true);
     }
 
     // 两张表共有的列。时间默认取数据库时钟，各实例的时钟有偏差也不影响

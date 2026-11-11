@@ -37,6 +37,7 @@ internal sealed class ModuleFrameworkTables(IEnumerable<ModuleWriteContext> regi
             {
                 var model = ((ModuleDbContext)scope.ServiceProvider.GetRequiredService(r.ContextType)).Model;
                 return new FrameworkTableNames(
+                    TableOf(model, typeof(IdempotencyRecord)),
                     TableOf(model, typeof(OutboxMessage)), TableOf(model, typeof(InboxMessage)), TableOf(model, typeof(BackgroundJobRecord)));
             },
             StringComparer.Ordinal);

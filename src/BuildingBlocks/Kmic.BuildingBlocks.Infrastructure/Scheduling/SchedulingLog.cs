@@ -27,4 +27,7 @@ internal static partial class SchedulingLog
 
     [LoggerMessage(EventId = 2407, Level = LogLevel.Information, Message = "Scheduled jobs synced: {Changed} changed, {Removed} removed")]
     public static partial void Synced(ILogger logger, int changed, int removed);
+
+    [LoggerMessage(EventId = 2408, Level = LogLevel.Warning, Message = "{Count} scheduled job runs were still running after their instance went away, marked as abandoned")]
+    public static partial void RunsAbandoned(ILogger logger, int count);
 }
