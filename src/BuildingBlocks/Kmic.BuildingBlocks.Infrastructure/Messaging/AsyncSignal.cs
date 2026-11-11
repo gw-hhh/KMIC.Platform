@@ -31,7 +31,7 @@ internal sealed class AsyncSignal
         {
         }
 
-        // 换一个新的等待；在这之前到达的唤醒落在旧的上面，但调用方接着就会去查一次，不会漏掉数据
+        // 换一个新的等待。换之前到达的唤醒落在旧的上面，调用方接下来本来就要查一次，不会漏掉数据
         Interlocked.CompareExchange(ref _pending, new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously), pending);
         return woken;
     }

@@ -275,6 +275,48 @@ namespace Kmic.Echo.Probe.Migrations
                             t.HasComment("幂等记录");
                         });
                 });
+
+            modelBuilder.Entity("Kmic.Echo.Probe.TicketSummary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsTerminal")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("RebuildRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("SourceVersion")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("SyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("TerminalAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TerminalReason")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketSummary", "Echo", t =>
+                        {
+                            t.HasComment("Probe 单据的读模型");
+                        });
+                });
 #pragma warning restore 612, 618
         }
     }

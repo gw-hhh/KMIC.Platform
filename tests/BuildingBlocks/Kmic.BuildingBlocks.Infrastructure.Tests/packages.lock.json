@@ -573,6 +573,7 @@
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
           "Npgsql": "[10.0.3, )",
           "Shouldly": "[4.3.0, )",
           "Testcontainers.PostgreSql": "[4.16.0, )",

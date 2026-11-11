@@ -20,6 +20,8 @@ internal sealed class ProbeWork(AsyncServiceScope scope) : IAsyncDisposable
 
     public RequestMetadata Request => scope.ServiceProvider.GetRequiredService<RequestMetadata>();
 
+    public IServiceProvider Services => scope.ServiceProvider;
+
     public async Task SaveAsync()
     {
         using (scope.ServiceProvider.GetRequiredService<SaveChangesGate>().Open())

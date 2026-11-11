@@ -11,5 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Kmic.BuildingBlocks.Infrastructure.Tests" />
+    <!-- 测试工具要直接驱动投递和处理 -->
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Testing" />
   </ItemGroup>
 </Project>

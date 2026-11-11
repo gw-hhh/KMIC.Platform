@@ -11,4 +11,7 @@ internal sealed class EchoDbContext(DbContextOptions<EchoDbContext> options, Mod
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder)
     {
     }
+
+    protected override void ConfigureModel(ModelBuilder modelBuilder) =>
+        modelBuilder.ApplyConfiguration(new TicketSummaryConfiguration());
 }

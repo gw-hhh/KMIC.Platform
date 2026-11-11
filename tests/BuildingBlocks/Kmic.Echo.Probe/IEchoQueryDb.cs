@@ -1,3 +1,6 @@
 namespace Kmic.Echo.Probe;
 
-internal interface IEchoQueryDb;
+internal interface IEchoQueryDb
+{
+    IQueryable<TicketSummary> Tickets { get; }
+}

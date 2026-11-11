@@ -11,4 +11,9 @@ internal sealed class EchoQueryDbContext(DbContextOptions<EchoQueryDbContext> op
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder)
     {
     }
+
+    public IQueryable<TicketSummary> Tickets => Set<TicketSummary>();
+
+    protected override void ConfigureModel(ModelBuilder modelBuilder) =>
+        modelBuilder.ApplyConfiguration(new TicketSummaryConfiguration());
 }

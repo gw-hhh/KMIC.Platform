@@ -21,5 +21,7 @@
     <InternalsVisibleTo Include="Kmic.BuildingBlocks.Application.Tests" />
     <!-- 管道中依赖数据库的行为在 Infrastructure，与应用层共用用例目录的模块名推导与执行上下文的内部入口 -->
     <InternalsVisibleTo Include="Kmic.BuildingBlocks.Infrastructure" />
+    <!-- 测试工具要读消息目录 -->
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Testing" />
   </ItemGroup>
 </Project>
