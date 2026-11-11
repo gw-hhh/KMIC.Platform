@@ -15,14 +15,16 @@ public sealed class ErrorCatalogAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor OutsideCatalog = Rules.Create(
         "KM0101",
         Rules.DomainCategory,
-        "错误只能在错误目录中创建",
-        "Error.{0} 只能在命名为 *Errors 的静态类中调用，业务代码引用错误目录中的错误");
+        "错误只能在错误目录里创建",
+        "Error.{0} 只能在命名为 *Errors 的静态类里调用，这里改为引用错误目录中的错误",
+        "错误都在错误目录里，架构测试才能检查错误码全局唯一，前端也能按固定的错误码判断.");
 
     internal static readonly DiagnosticDescriptor UnavailableOutsideFramework = Rules.Create(
         "KM0101",
         Rules.DomainCategory,
-        "错误只能在错误目录中创建",
-        "Error.Unavailable 只供框架的 CommonErrors 使用，业务错误目录不得使用");
+        "错误只能在错误目录里创建",
+        "Error.Unavailable 只给框架的 CommonErrors 用，业务错误目录里不能用",
+        "Unavailable 表示死锁、序列化失败这类暂时故障，只由框架转为可重试的 503.");
 
     private static readonly ImmutableHashSet<string> _factories =
         ImmutableHashSet.Create(StringComparer.Ordinal, "Validation", "NotFound", "Conflict", "Forbidden", "BusinessRule", "Unavailable");

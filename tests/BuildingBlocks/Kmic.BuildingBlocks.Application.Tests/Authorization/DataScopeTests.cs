@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Authorization;
 
-/// <summary>
-/// 数据权限的计算：等级和起点组织
-/// </summary>
 public sealed class DataScopeTests
 {
     private const string Orders = "Sales.Order";

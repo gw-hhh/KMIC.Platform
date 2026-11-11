@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 建模时执行模型校验，一次列出全部问题，不需要数据库
-/// </summary>
 public sealed class ModelValidationTests
 {
     [Fact]

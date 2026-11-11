@@ -10,18 +10,15 @@ namespace Kmic.BuildingBlocks.Analyzers.Data;
 /// <summary>
 /// KM2001：查询里不能用 ToLower、ToUpper、Contains、StartsWith、EndsWith 匹配文本
 /// </summary>
-/// <remarks>
-/// 这些写法要么用不上索引，要么在不区分大小写的列上直接报错，统一改用 KmicFunctions。
-/// 只检查会转成表达式树的 lambda 和 IQueryable 上的查询语法，内存里的 LINQ 不受影响
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TextMatchingAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM2001",
         Rules.DataCategory,
-        "查询中不得用字符串方法做文本匹配",
-        "查询中不得用 string.{0} 做文本匹配：模糊匹配用 KmicFunctions.ContainsText / StartsWithText，忽略大小写的等值比较把列声明为 IsCaseInsensitive()");
+        "查询里不能用字符串方法匹配文本",
+        "查询里不能用 string.{0} 匹配文本，模糊匹配改用 KmicFunctions.ContainsText 或 StartsWithText，忽略大小写的等值比较把列声明为 IsCaseInsensitive()",
+        "这些写法要么用不上索引，要么在不区分大小写的列上直接报错。只检查会翻译成 SQL 的查询，内存里的 LINQ 不受影响.");
 
     private static readonly ImmutableHashSet<string> _methods = ImmutableHashSet.Create(
         StringComparer.Ordinal,

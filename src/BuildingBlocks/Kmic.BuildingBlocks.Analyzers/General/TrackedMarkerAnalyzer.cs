@@ -11,29 +11,29 @@ namespace Kmic.BuildingBlocks.Analyzers.General;
 /// <summary>
 /// KM9003：TODO、FIXME 和测试的 Skip 必须带跟踪编号，不能用 HACK
 /// </summary>
-/// <remarks>
-/// 没有编号的待办没人跟进，会一直留在代码里
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TrackedMarkerAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor UntrackedMarker = Rules.Create(
         "KM9003",
         Rules.GeneralCategory,
-        "待办与跳过必须带跟踪编号",
-        "{0} 必须带跟踪编号，写成 {0}(#123): 说明");
+        "待办和跳过的测试必须带跟踪编号",
+        "{0} 要带跟踪编号，写成 {0}(#123): 说明",
+        "没有编号的待办没人跟进，会一直留在代码里.");
 
     internal static readonly DiagnosticDescriptor Hack = Rules.Create(
         "KM9003",
         Rules.GeneralCategory,
-        "待办与跳过必须带跟踪编号",
-        "不使用 HACK：改写成说明原因的普通注释，需要以后清理的加 TODO(#编号)");
+        "待办和跳过的测试必须带跟踪编号",
+        "不用 HACK，改写成说明原因的普通注释，需要以后清理的加 TODO(#编号)",
+        "HACK 只说明这里有问题，不说明原因，也没人跟进.");
 
     internal static readonly DiagnosticDescriptor UntrackedSkip = Rules.Create(
         "KM9003",
         Rules.GeneralCategory,
-        "待办与跳过必须带跟踪编号",
-        "跳过测试必须在 Skip 中写明跟踪编号，如 Skip = \"#123 等待接口上线\"");
+        "待办和跳过的测试必须带跟踪编号",
+        "跳过的测试要在 Skip 里写明跟踪编号，如 Skip = \"#123 等待接口上线\"",
+        "没有编号的跳过没人跟进，测试会一直不运行.");
 
     // 超时给 1 秒：并行编译时线程会被挤占，100 毫秒曾经误报超时。这几个模式不会回溯，正常用不到超时
     private static readonly TimeSpan _matchTimeout = TimeSpan.FromSeconds(1);

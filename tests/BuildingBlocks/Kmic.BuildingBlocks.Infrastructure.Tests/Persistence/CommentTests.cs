@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 表注释来自配置，列注释默认来自属性的 XML 注释，框架列由约定补上
-/// </summary>
 public sealed class CommentTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

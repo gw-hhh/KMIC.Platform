@@ -8,11 +8,11 @@ namespace Kmic.BuildingBlocks.Testing.Tests.Database;
 /// </summary>
 public sealed class ProbeTemplate : PostgresTemplateDatabase
 {
-    protected override async Task InitializeTemplateAsync(string connectionString, CancellationToken cancellationToken)
+    protected override async Task InitializeTemplateAsync(string connectionString, CancellationToken ct)
     {
         await using var connection = new NpgsqlConnection(connectionString);
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(ct);
         await using var command = new NpgsqlCommand("""CREATE TABLE "Probe" ("Id" uuid PRIMARY KEY, "Owner" text NOT NULL)""", connection);
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await command.ExecuteNonQueryAsync(ct);
     }
 }

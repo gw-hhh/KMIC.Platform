@@ -10,9 +10,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 保存前的规则
 /// </summary>
-/// <remarks>
-/// 依次处理软删除、审计列、版本号。软删除要最先：删除改成修改后，审计和版本号才会按一次修改处理
-/// </remarks>
 internal static class SaveRules
 {
     public static void Apply(DbContext context, IExecutionContext execution, DateTimeOffset now)
@@ -22,6 +19,7 @@ internal static class SaveRules
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted && EntityKinds.IsBusinessEntity(e.Metadata.ClrType))
             .ToList();
 
+        // 软删除放在最前面：删除改成修改后，审计列和版本号才会按一次修改处理
         foreach (var entry in changed.Where(e => e is { State: EntityState.Deleted, Entity: ISoftDeletable }))
         {
             entry.State = EntityState.Modified;

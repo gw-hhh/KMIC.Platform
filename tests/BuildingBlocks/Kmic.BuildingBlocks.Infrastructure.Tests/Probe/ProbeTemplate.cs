@@ -26,20 +26,20 @@ public sealed class ProbeTemplate : PostgresTemplateDatabase
     public string RuntimeConnectionString(string database) =>
         new NpgsqlConnectionStringBuilder(ConnectionString(database, pooling: false)) { Username = RuntimeLogin, Password = RuntimePassword }.ConnectionString;
 
-    protected override async Task InitializeTemplateAsync(string connectionString, CancellationToken cancellationToken)
+    protected override async Task InitializeTemplateAsync(string connectionString, CancellationToken ct)
     {
         await using (var connection = new NpgsqlConnection(connectionString))
         {
-            await connection.OpenAsync(cancellationToken);
+            await connection.OpenAsync(ct);
             await using var roles = connection.CreateCommand();
             roles.CommandText = $"""
                 CREATE ROLE {MigrationBuilderExtensions.RuntimeRole} NOLOGIN;
                 CREATE ROLE {RuntimeLogin} LOGIN PASSWORD '{RuntimePassword}' IN ROLE {MigrationBuilderExtensions.RuntimeRole};
                 """;
-            await roles.ExecuteNonQueryAsync(cancellationToken);
+            await roles.ExecuteNonQueryAsync(ct);
         }
 
-        await ModuleMigrator.PrepareDatabaseAsync(connectionString, cancellationToken);
-        await ModuleMigrator.MigrateAsync<ProbeDbContext>(connectionString, cancellationToken);
+        await ModuleMigrator.PrepareDatabaseAsync(connectionString, ct);
+        await ModuleMigrator.MigrateAsync<ProbeDbContext>(connectionString, ct);
     }
 }

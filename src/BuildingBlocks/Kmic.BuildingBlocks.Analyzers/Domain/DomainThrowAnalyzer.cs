@@ -9,17 +9,15 @@ namespace Kmic.BuildingBlocks.Analyzers.Domain;
 /// <summary>
 /// KM0102：Domain 里只能抛参数异常、InvalidOperationException 和 DomainInvariantException
 /// </summary>
-/// <remarks>
-/// 业务失败要返回 Result。能抛的只有调用方用错和不变量被破坏这两类程序缺陷
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainThrowAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM0102",
         Rules.DomainCategory,
-        "领域层只能抛出程序缺陷类异常",
-        "领域层不能抛出 {0}：业务失败返回 Result；程序缺陷只能用 ArgumentException 系、InvalidOperationException 或 DomainInvariantException");
+        "领域层只能抛表示程序缺陷的异常",
+        "领域层不能抛 {0}，业务失败改为返回 Result",
+        "能抛的只有两类程序缺陷：调用方用错（ArgumentException 及其子类、InvalidOperationException）和不变量被破坏（DomainInvariantException）.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

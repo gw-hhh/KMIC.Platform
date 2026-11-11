@@ -9,9 +9,6 @@ using PrimaryParameter = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Km
 
 namespace Kmic.BuildingBlocks.Analyzers.Tests.General;
 
-/// <summary>
-/// 通用规则 KM9001～KM9007，每条规则至少各有一个触发和不触发的例子
-/// </summary>
 public sealed class GeneralRuleTests
 {
     private const string Project = "Kmic.Sample.Application";

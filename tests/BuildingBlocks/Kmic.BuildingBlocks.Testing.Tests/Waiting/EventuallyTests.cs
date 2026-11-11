@@ -14,7 +14,7 @@ public sealed class EventuallyTests
             _ => Task.FromResult(++calls),
             count => count >= 3,
             "第三次读取",
-            cancellationToken: TestContext.Current.CancellationToken);
+            ct: TestContext.Current.CancellationToken);
 
         value.ShouldBe(3);
         calls.ShouldBe(3);

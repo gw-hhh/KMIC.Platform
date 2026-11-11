@@ -59,10 +59,10 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         MessageHandlerDelegate<TMessage, TResponse> next,
         ModuleDbContext context,
         CommandTransaction transaction,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
-        var response = await next(message, cancellationToken);
-        if (response.IsSuccess && await DispatchDomainEventsAsync(context, cancellationToken) is { } eventFailure)
+        var response = await next(message, ct);
+        if (response.IsSuccess && await DispatchDomainEventsAsync(context, ct) is { } eventFailure)
         {
             response = TResponse.Fail(eventFailure);
         }
@@ -75,11 +75,11 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
 
         using (context.Services.SaveGate.Open())
         {
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(ct);
         }
 
         response = WithSavedVersion(context, response);
-        if (await transaction.RunBeforeCommitAsync(context, ResponseValues<TResponse>.Read(response), cancellationToken) is { } hookFailure)
+        if (await transaction.RunBeforeCommitAsync(context, ResponseValues<TResponse>.Read(response), ct) is { } hookFailure)
         {
             await RollBackAsync(context, transaction);
             return TResponse.Fail(hookFailure);

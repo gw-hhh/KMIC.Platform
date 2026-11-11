@@ -8,6 +8,6 @@ public interface ISettings
     /// <summary>
     /// 读取设置，没改过时返回默认值
     /// </summary>
-    ValueTask<T> GetAsync<T>(CancellationToken cancellationToken)
+    ValueTask<T> GetAsync<T>(CancellationToken ct)
         where T : class, ISystemSetting<T>;
 }

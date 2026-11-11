@@ -14,9 +14,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Pipeline;
 
-/// <summary>
-/// 幂等处理
-/// </summary>
 public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string Operation = "BuildingBlocks.OpenTicketCommand";

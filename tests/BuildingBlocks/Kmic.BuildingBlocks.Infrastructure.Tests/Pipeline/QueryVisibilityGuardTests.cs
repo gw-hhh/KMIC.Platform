@@ -7,9 +7,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Pipeline;
 
-/// <summary>
-/// 命令改了数据再查本模块会抛异常，先查后改不受影响
-/// </summary>
 public sealed class QueryVisibilityGuardTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

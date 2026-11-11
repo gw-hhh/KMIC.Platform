@@ -22,14 +22,14 @@ public static class Eventually
     /// <param name="done">是否已完成</param>
     /// <param name="because">在等什么，超时时显示</param>
     /// <param name="timeout">超时时间，默认 10 秒</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <param name="ct">取消令牌</param>
     /// <exception cref="TimeoutException">超时仍未满足</exception>
     public static async Task<T> UntilAsync<T>(
         Func<CancellationToken, Task<T>> probe,
         Func<T, bool> done,
         string because,
         TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(probe);
         ArgumentNullException.ThrowIfNull(done);
@@ -38,7 +38,7 @@ public static class Eventually
         var started = TimeProvider.System.GetTimestamp();
         while (true)
         {
-            var current = await probe(cancellationToken);
+            var current = await probe(ct);
             if (done(current))
             {
                 return current;
@@ -49,7 +49,7 @@ public static class Eventually
                 throw new TimeoutException($"等待 {limit.TotalSeconds:0.#} 秒仍未完成：{because}。最后一次读取到：{current}");
             }
 
-            await Task.Delay(_interval, TimeProvider.System, cancellationToken);
+            await Task.Delay(_interval, TimeProvider.System, ct);
         }
     }
 
@@ -61,6 +61,6 @@ public static class Eventually
         Func<CancellationToken, Task<bool>> condition,
         string because,
         TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default) =>
-        UntilAsync(condition, satisfied => satisfied, because, timeout, cancellationToken);
+        CancellationToken ct = default) =>
+        UntilAsync(condition, satisfied => satisfied, because, timeout, ct);
 }

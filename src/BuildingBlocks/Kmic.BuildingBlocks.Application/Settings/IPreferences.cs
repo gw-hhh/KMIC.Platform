@@ -11,6 +11,6 @@ public interface IPreferences
     /// <summary>
     /// 读取偏好
     /// </summary>
-    ValueTask<T> GetAsync<T>(CancellationToken cancellationToken)
+    ValueTask<T> GetAsync<T>(CancellationToken ct)
         where T : class, IPreference<T>;
 }

@@ -119,7 +119,7 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
     /// </remarks>
     /// <param name="condition">更新条件，如 q => q.Id == id &amp;&amp; q.Remaining &gt;= amount</param>
     /// <param name="setters">要更新的列，如 s => s.SetProperty(q => q.Remaining, q => q.Remaining - amount)</param>
-    /// <param name="ct">取消</param>
+    /// <param name="ct">取消令牌</param>
     /// <exception cref="InvalidOperationException">不在事务里</exception>
     protected async Task<int> UpdateWhereAsync(
         Expression<Func<TAggregate, bool>> condition,

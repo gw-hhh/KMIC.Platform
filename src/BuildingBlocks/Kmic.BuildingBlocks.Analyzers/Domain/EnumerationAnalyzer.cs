@@ -14,20 +14,23 @@ public sealed class EnumerationAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor NotSealed = Rules.Create(
         "KM0301",
         Rules.DomainCategory,
-        "智能枚举的写法",
-        "智能枚举 {0} 必须是 sealed");
+        "智能枚举的取值只能由类型自身声明",
+        "智能枚举 {0} 要声明为 sealed",
+        "框架通过反射收集类型里的静态字段作为全部取值。派生类型或外部构造的实例不在其中，按编码就找不到.");
 
     internal static readonly DiagnosticDescriptor NonPrivateConstructor = Rules.Create(
         "KM0301",
         Rules.DomainCategory,
-        "智能枚举的写法",
-        "智能枚举 {0} 的构造函数必须是 private，取值只能由类型自身声明");
+        "智能枚举的取值只能由类型自身声明",
+        "智能枚举 {0} 的构造函数要改为 private",
+        "框架通过反射收集类型里的静态字段作为全部取值。派生类型或外部构造的实例不在其中，按编码就找不到.");
 
     internal static readonly DiagnosticDescriptor MutableValue = Rules.Create(
         "KM0301",
         Rules.DomainCategory,
-        "智能枚举的写法",
-        "智能枚举的取值 {0} 必须是 static readonly 字段");
+        "智能枚举的取值只能由类型自身声明",
+        "智能枚举的取值 {0} 要声明为 static readonly 字段",
+        "框架通过反射收集类型里的静态字段作为全部取值，取值在运行时也不能被替换.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [NotSealed, NonPrivateConstructor, MutableValue];

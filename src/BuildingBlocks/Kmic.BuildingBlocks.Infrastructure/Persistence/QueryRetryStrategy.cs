@@ -17,11 +17,9 @@ internal sealed class QueryRetryStrategy(ExecutionStrategyDependencies dependenc
     /// <summary>
     /// 是否连接池耗尽
     /// </summary>
-    /// <remarks>
-    /// Npgsql 没有专门的异常类型，只能按消息判断。有测试盯着这条消息，升级 Npgsql 后消息变了测试会失败
-    /// </remarks>
     public static bool IsPoolExhausted(Exception? exception)
     {
+        // Npgsql 没有专门的异常类型，只能按消息判断。有测试盯着这条消息，升级 Npgsql 后消息变了测试会失败
         for (var current = exception; current is not null; current = current.InnerException)
         {
             if (current is NpgsqlException && current.Message.StartsWith("The connection pool has been exhausted", StringComparison.Ordinal))

@@ -398,16 +398,16 @@ public sealed class CreateSampleCommandHandler(
     IExecutionContext context,
     INumberGenerator numbers) : ICommandHandler<CreateSampleCommand, CreatedResponse<SampleId>>
 {
-    public async ValueTask<Result<CreatedResponse<SampleId>>> Handle(CreateSampleCommand cmd, CancellationToken ct)
+    public async ValueTask<Result<CreatedResponse<SampleId>>> Handle(CreateSampleCommand command, CancellationToken cancellationToken)
     {
         var access = context.Access!;                                    // [RequirePermission] 保证是用户身份
         if (access.OrgUnitId is not { } orgUnit) return SampleErrors.OwnerHasNoOrgUnit;
 
-        var number = await numbers.NextAsync(SampleNumberRules.Sample, ct: ct);   // 最后一个异步步骤
-        var created = Sample.Create(number, cmd.Title, access.UserId, orgUnit, cmd.DueDate);
+        var number = await numbers.NextAsync(SampleNumberRules.Sample, ct: cancellationToken);   // 最后一个异步步骤
+        var created = Sample.Create(number, command.Title, access.UserId, orgUnit, command.DueDate);
         if (created.IsFailure) return created.Error;
 
-        foreach (var item in cmd.Items)
+        foreach (var item in command.Items)
         {
             var added = created.Value.AddItem(item.Name, item.Quantity);
             if (added.IsFailure) return added.Error;
@@ -422,13 +422,13 @@ public sealed class CreateSampleCommandHandler(
 **修改**（加载 → 资源授权 → 业务方法；05-02 第 2.2 节示例为标准写法）：
 
 ```csharp
-var sample = await repository.GetForUpdateAsync(cmd.SampleId, cmd.ExpectedVersion, ct);   // 第 2、5 层
+var sample = await repository.GetForUpdateAsync(command.SampleId, command.ExpectedVersion, cancellationToken);   // 第 2、5 层
 if (sample.IsFailure) return sample.Error;
 
 var allowed = authorizer.Check(sample.Value, SampleAction.Submit);                       // 第 3 层
 if (allowed.IsFailure) return allowed.Error;
 
-var submitted = sample.Value.Submit(time.GetUtcNow(), cmd.Reason);                      // 第 4 层
+var submitted = sample.Value.Submit(time.GetUtcNow(), command.Reason);                      // 第 4 层
 if (submitted.IsFailure) return submitted.Error;
 ```
 
@@ -452,10 +452,10 @@ public sealed record GetSampleDetailQuery(SampleId SampleId) : IQuery<SampleDeta
 public sealed class GetSampleDetailQueryHandler(ISampleQueryDb db, IAllowedActions<Sample> allowedActions)
     : IQueryHandler<GetSampleDetailQuery, SampleDetailResponse>
 {
-    public async ValueTask<Result<SampleDetailResponse>> Handle(GetSampleDetailQuery q, CancellationToken ct)
+    public async ValueTask<Result<SampleDetailResponse>> Handle(GetSampleDetailQuery query, CancellationToken cancellationToken)
     {
         var sample = await db.Samples.Include(x => x.Items)
-            .FindByIdOrNotFoundAsync(q.SampleId, SampleErrors.NotFound, ct);     // 范围外同样 NotFound（05-05 第 5.10 节）
+            .FindByIdOrNotFoundAsync(query.SampleId, SampleErrors.NotFound, cancellationToken);     // 范围外同样 NotFound（05-05 第 5.10 节）
         if (sample.IsFailure) return sample.Error;
 
         return SampleDetailResponse.From(sample.Value, allowedActions.For(sample.Value));   // 手写映射（03 第 4.8 节）
@@ -474,23 +474,23 @@ public sealed record ListSamplesQuery(
 public sealed class ListSamplesQueryHandler(ISampleQueryDb db, IBusinessCalendar calendar)
     : IQueryHandler<ListSamplesQuery, PagedResult<SampleListItem>>
 {
-    public async ValueTask<Result<PagedResult<SampleListItem>>> Handle(ListSamplesQuery q, CancellationToken ct)
+    public async ValueTask<Result<PagedResult<SampleListItem>>> Handle(ListSamplesQuery query, CancellationToken cancellationToken)
     {
-        var query = db.Samples.AsQueryable();
+        var samples = db.Samples.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(q.Q))
-            query = query.Where(x => KmicFunctions.ContainsText(x.Number, q.Q) ||
-                                     KmicFunctions.ContainsText(x.Title, q.Q));       // 06 第 11.2 节
-        if (q.Status is { Count: > 0 })
-            query = query.Where(x => q.Status.Contains(x.Status.Code));
-        if (q.CreatedFrom is { } from)
-            query = query.Where(x => EF.Property<DateTimeOffset>(x, "CreatedAt") >= calendar.StartOf(from));
-        if (q.CreatedTo is { } to)
-            query = query.Where(x => EF.Property<DateTimeOffset>(x, "CreatedAt") < calendar.StartOf(to.AddDays(1)));   // 半开区间（05-13 第 3.4 节）
+        if (!string.IsNullOrWhiteSpace(query.Q))
+            samples = samples.Where(x => KmicFunctions.ContainsText(x.Number, query.Q) ||
+                                     KmicFunctions.ContainsText(x.Title, query.Q));       // 06 第 11.2 节
+        if (query.Status is { Count: > 0 })
+            samples = samples.Where(x => query.Status.Contains(x.Status.Code));
+        if (query.CreatedFrom is { } from)
+            samples = samples.Where(x => EF.Property<DateTimeOffset>(x, "CreatedAt") >= calendar.StartOf(from));
+        if (query.CreatedTo is { } to)
+            samples = samples.Where(x => EF.Property<DateTimeOffset>(x, "CreatedAt") < calendar.StartOf(to.AddDays(1)));   // 半开区间（05-13 第 3.4 节）
 
-        return await query
+        return await samples
             .Select(x => new SampleListItem(x.Id, x.Number, x.Title, x.Status.Code, EF.Property<DateTimeOffset>(x, "CreatedAt")))
-            .ToPagedAsync(q.Page, q.PageSize, q.Sort, SampleSort.Map, ct);
+            .ToPagedAsync(query.Page, query.PageSize, query.Sort, SampleSort.Map, cancellationToken);
     }
 }
 ```
@@ -849,3 +849,4 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 | 2026-11-06 | 第 4.3、4.4 节示例中的命令、查询处理器改为 `public sealed` | 原型 #1 D1 |
 | 2026-11-06 | 第 6.1、6.2 节：新建模块用 `scripts/new-module.cs`；初始迁移由脚本调用 EF 工具生成（D3 中“模板生成初始迁移”相应修订）；模板生成能力的待确认关闭 | 原型 #11 D1～D3 |
 | 2026-11-10 | 文档整合：以上补充说明并入正文，决定不变 | R01 L2（S0-08） |
+| 2026-11-11 | 示例中处理器的参数名改为 `command` / `query` / `cancellationToken`：Mediator 接口规定了参数名，写成 `cmd`、`q`、`ct` 会触发 CA1725 编译不过（决定不变，06 第 4.2 节已补充这条例外） | 注释与风格复查 |

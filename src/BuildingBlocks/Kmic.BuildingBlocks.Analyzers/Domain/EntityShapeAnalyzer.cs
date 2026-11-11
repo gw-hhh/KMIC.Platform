@@ -14,20 +14,23 @@ public sealed class EntityShapeAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor NonPrivateConstructor = Rules.Create(
         "KM0103",
         Rules.DomainCategory,
-        "实体不得有非私有构造函数",
-        "实体 {0} 的构造函数必须是 private（抽象基类可以是 protected），创建一律经工厂方法");
+        "实体的构造函数必须私有",
+        "实体 {0} 的构造函数要改为 private（抽象基类可以是 protected），通过工厂方法创建",
+        "实体只能通过工厂方法创建，创建时的校验才不会被绕过.");
 
     internal static readonly DiagnosticDescriptor WritableProperty = Rules.Create(
         "KM0104",
         Rules.DomainCategory,
         "实体属性对外只读",
-        "实体属性 {0} 只能有 private set，不得有非私有 setter 或 init");
+        "实体属性 {0} 只能有 private set，去掉非私有的 setter 或 init",
+        "实体的状态只能通过它的业务方法修改.");
 
     internal static readonly DiagnosticDescriptor MutableCollection = Rules.Create(
         "KM0105",
         Rules.DomainCategory,
-        "实体不得公开可变集合",
-        "实体成员 {0} 公开了可变集合，改为 private readonly List<T> 字段 + IReadOnlyList<T> 属性");
+        "实体不能公开可变集合",
+        "实体成员 {0} 公开了可变集合，改为 private readonly List<T> 字段加 IReadOnlyList<T> 属性",
+        "外部拿到可变集合就能直接增删元素，绕过实体的业务方法.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [NonPrivateConstructor, WritableProperty, MutableCollection];

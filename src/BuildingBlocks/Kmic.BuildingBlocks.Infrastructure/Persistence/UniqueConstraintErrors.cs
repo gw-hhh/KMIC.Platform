@@ -9,11 +9,11 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 唯一约束对应的错误
 /// </summary>
 /// <remarks>
-/// 建模时从 MapsToError 收集，异常转换时按 schema 和约束名查找。不放在模型注解里，否则会写进迁移快照。
-/// EF 在进程内缓存模型，收集只发生一次，所以映射也放在进程级
+/// 建模时从 MapsToError 收集，异常转换时按 schema 和约束名查找
 /// </remarks>
 internal static class UniqueConstraintErrors
 {
+    // 不放在模型注解里，否则会写进迁移快照。EF 在进程内缓存模型，收集只发生一次，所以这里也是进程级的
     private static readonly ConcurrentDictionary<(string Schema, string Constraint), Error> _errors = new();
 
     public static Error? Find(string? schema, string? constraint) =>

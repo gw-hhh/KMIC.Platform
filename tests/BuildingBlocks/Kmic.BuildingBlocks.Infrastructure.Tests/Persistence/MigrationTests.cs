@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 迁移：历史表在模块 schema 里，模型没有未生成的迁移，运行账号能读写但不能改表结构
-/// </summary>
 public sealed class MigrationTests(ClassDatabase<ProbeTemplate> database, ProbeTemplate template) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

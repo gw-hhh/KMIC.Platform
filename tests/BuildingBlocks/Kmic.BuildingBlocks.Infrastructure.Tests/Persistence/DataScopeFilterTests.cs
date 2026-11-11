@@ -10,11 +10,8 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 数据权限过滤：同一个查询，不同身份看到不同的数据
-/// </summary>
-/// <remarks>
 /// 每个测试开始时在上海、杭州、广州各建一张单据，所有者分别是销售甲、乙、丙。同一个类的测试共用数据库，断言按标题去重
-/// </remarks>
+/// </summary>
 public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
     : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {

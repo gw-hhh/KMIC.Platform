@@ -10,17 +10,15 @@ namespace Kmic.BuildingBlocks.Analyzers.General;
 /// <summary>
 /// KM9006：不能用 dynamic
 /// </summary>
-/// <remarks>
-/// dynamic 让编译器的类型检查失效，错误要到运行时才暴露
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DynamicAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9006",
         Rules.GeneralCategory,
-        "不得使用 dynamic",
-        "不得使用 dynamic，改用明确的类型或 JsonElement");
+        "不能用 dynamic",
+        "不能用 dynamic，改用明确的类型或 JsonElement",
+        "dynamic 让编译器的类型检查失效，错误要到运行时才暴露.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

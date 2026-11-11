@@ -10,17 +10,15 @@ namespace Kmic.BuildingBlocks.Analyzers.General;
 /// <summary>
 /// KM9004：标识符只能用 ASCII 字符
 /// </summary>
-/// <remarks>
-/// 同一个概念只用一个英文名，代码、测试、术语表保持一致
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AsciiIdentifierAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9004",
         Rules.GeneralCategory,
-        "标识符只能使用 ASCII 字符",
-        "标识符 {0} 含有非 ASCII 字符，改用术语表中的英文名");
+        "标识符只能用 ASCII 字符",
+        "标识符 {0} 含有非 ASCII 字符，改用术语表中的英文名",
+        "同一个概念只用一个英文名，代码、测试、术语表保持一致.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

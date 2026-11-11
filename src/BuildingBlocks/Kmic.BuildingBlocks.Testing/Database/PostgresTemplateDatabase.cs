@@ -25,12 +25,12 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     /// <inheritdoc />
     public async ValueTask InitializeAsync()
     {
-        var cancellationToken = TestContext.Current.CancellationToken;
-        await _container.StartAsync(cancellationToken);
-        await ExecuteAsync($"CREATE DATABASE {TemplateName}", cancellationToken);
+        var ct = TestContext.Current.CancellationToken;
+        await _container.StartAsync(ct);
+        await ExecuteAsync($"CREATE DATABASE {TemplateName}", ct);
 
         // 不用连接池：池里空闲的连接也会让克隆失败
-        await InitializeTemplateAsync(ConnectionString(TemplateName, pooling: false), cancellationToken);
+        await InitializeTemplateAsync(ConnectionString(TemplateName, pooling: false), ct);
     }
 
     /// <inheritdoc />
@@ -43,18 +43,18 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     /// <summary>
     /// 克隆数据库，返回库名
     /// </summary>
-    public async Task<string> CloneAsync(CancellationToken cancellationToken)
+    public async Task<string> CloneAsync(CancellationToken ct)
     {
         var database = $"test_{Guid.CreateVersion7():N}";
-        await ExecuteAsync($"CREATE DATABASE \"{database}\" TEMPLATE {TemplateName}", cancellationToken);
+        await ExecuteAsync($"CREATE DATABASE \"{database}\" TEMPLATE {TemplateName}", ct);
         return database;
     }
 
     /// <summary>
     /// 删除克隆库，有连接时强制断开
     /// </summary>
-    public Task DropAsync(string database, CancellationToken cancellationToken) =>
-        ExecuteAsync($"DROP DATABASE IF EXISTS \"{database}\" WITH (FORCE)", cancellationToken);
+    public Task DropAsync(string database, CancellationToken ct) =>
+        ExecuteAsync($"DROP DATABASE IF EXISTS \"{database}\" WITH (FORCE)", ct);
 
     /// <summary>
     /// 连接串
@@ -68,13 +68,13 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     /// <remarks>
     /// 连接串不用连接池，不要另外建池化的连接
     /// </remarks>
-    protected abstract Task InitializeTemplateAsync(string connectionString, CancellationToken cancellationToken);
+    protected abstract Task InitializeTemplateAsync(string connectionString, CancellationToken ct);
 
-    private async Task ExecuteAsync(string sql, CancellationToken cancellationToken)
+    private async Task ExecuteAsync(string sql, CancellationToken ct)
     {
         await using var connection = new NpgsqlConnection(ConnectionString("postgres", pooling: false));
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(ct);
         await using var command = new NpgsqlCommand(sql, connection);
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await command.ExecuteNonQueryAsync(ct);
     }
 }

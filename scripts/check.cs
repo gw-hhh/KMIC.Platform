@@ -1,10 +1,10 @@
 #:property RestorePackagesWithLockFile=false
 
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
-// 依次执行：编码与换行 → 注释格式 → 设计文档引用 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 密钥扫描 → 拼写；任一步失败即停止并返回非零退出码
+// 依次执行：编码与换行 → 注释格式 → 用词 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 密钥扫描 → 拼写。任一步失败即停止，返回非零退出码
 // 需要 Docker：数据库测试用测试容器，密钥扫描用 Gitleaks 的官方镜像
 // CI 流水线只调用本脚本，本地通过即 CI 通过
-// 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查：Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次；CI 不加
+// 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查。Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次。CI 不加这个参数
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,12 +15,12 @@ var steps = new (string Name, Func<int> Run)[]
 {
     ("编码与换行（UTF-8 无 BOM、LF）", () => CheckEncoding(root, fix)),
     ("注释格式（summary 三行、末尾不加句号）", () => CheckCommentStyle(root)),
-    ("设计文档引用（只能用行末的临时【引用：…】）", () => CheckDesignCitations(root)),
+    ("用词（设计文档编号、不用的说法）", () => CheckWording(root)),
     ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
     ("依赖漏洞（含传递依赖）", () => RunWhenProjectsExist(root, "dotnet", "list Kmic.slnx package --vulnerable --include-transitive")),
-    // 扫描全部提交历史（CI 检出时要取完整历史）；在推送之前发现，密钥就不会离开本机
+    // 扫描全部提交历史，CI 检出时也要取完整历史。推送前就能发现，密钥不会离开本机
     ("密钥扫描（Gitleaks）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
@@ -65,7 +65,7 @@ static int RunWhenProjectsExist(string root, string fileName, string arguments)
 
 static int Run(string root, string fileName, string arguments)
 {
-    // Windows 上 npx 是批处理文件，需经 cmd 启动；不用外壳方式启动，以便输出留在当前控制台
+    // Windows 上 npx 是批处理文件，要经 cmd 启动。不用外壳方式启动，输出才会留在当前控制台
     var startInfo = OperatingSystem.IsWindows() && string.Equals(fileName, "npx", StringComparison.Ordinal)
         ? new ProcessStartInfo("cmd.exe", $"/c npx {arguments}")
         : new ProcessStartInfo(fileName, arguments);
@@ -155,16 +155,14 @@ static string[] ListFiles(string root)
     return files;
 }
 
-// 代码里不写设计文档的节号、决定编号：读代码的人不一定读过文档，文档改版后编号也会失效。
-// 阶段 2 验收前允许 // 注释行末的临时【引用：…】，前面必须写原因；验收删除全部引用后，改为不允许出现
-static int CheckDesignCitations(string root)
+// 设计文档的节号、编号不写进代码：读代码的人不一定读过文档，文档改版后编号也会失效
+static int CheckWording(string root)
 {
     string[] extensions = [".cs", ".ts", ".vue"];
-    var citations = 0;
     var problems = 0;
     foreach (var file in ListFiles(root))
     {
-        // 本脚本中的标记是检查规则本身
+        // 本脚本里的词表和正则就是规则本身，不检查
         if (!extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)
             || string.Equals(file, "scripts/check.cs", StringComparison.Ordinal))
         {
@@ -180,62 +178,31 @@ static int CheckDesignCitations(string root)
         var lines = File.ReadAllLines(path);
         for (var i = 0; i < lines.Length; i++)
         {
-            var marker = lines[i].IndexOf("【引用", StringComparison.Ordinal);
-            if (Kmic.Scripts.Patterns.DesignReference().Match(marker < 0 ? lines[i] : lines[i][..marker]) is { Success: true } reference)
+            if (Kmic.Scripts.Patterns.DesignReference().Match(lines[i]) is { Success: true } reference)
             {
                 Console.WriteLine($"   {file}:{i + 1} 写了设计文档编号“{reference.Value}”，直接说明原因");
                 problems++;
             }
 
-            if (marker < 0)
+            if (lines[i].Contains("【引用", StringComparison.Ordinal))
             {
-                continue;
+                Console.WriteLine($"   {file}:{i + 1} 不再使用临时【引用】，直接说明原因");
+                problems++;
             }
 
-            citations++;
-            if (DescribeCitationProblem(lines[i], marker) is { } problem)
+            if (Kmic.Scripts.Patterns.AvoidedWording().Match(lines[i]) is { Success: true } wording)
             {
-                Console.WriteLine($"   {file}:{i + 1} {problem}");
+                Console.WriteLine($"   {file}:{i + 1} “{wording.Value}”是设计文档里的说法或空话，换成直接的描述");
                 problems++;
             }
         }
     }
 
-    Console.WriteLine($"   临时引用 {citations} 处，问题 {problems} 处");
+    Console.WriteLine($"   问题 {problems} 处");
     return problems == 0 ? 0 : 1;
 }
 
-static string? DescribeCitationProblem(string line, int marker)
-{
-    // 从标记往前找最近的 //；“///” 中最近的一个 // 前面还有一个 /
-    var comment = line.LastIndexOf("//", marker, StringComparison.Ordinal);
-    if (comment < 0)
-    {
-        return "不在 // 注释中";
-    }
-
-    if (comment > 0 && line[comment - 1] == '/')
-    {
-        return "不能写在 /// XML 注释中";
-    }
-
-    if (line[(comment + 2)..marker].Trim().Length == 0)
-    {
-        return "引用前面没有写原因";
-    }
-
-    const string Prefix = "【引用：";
-    var citation = line[marker..].TrimEnd();
-    var closing = citation.IndexOf('】', StringComparison.Ordinal);
-    if (!citation.StartsWith(Prefix, StringComparison.Ordinal) || closing != citation.Length - 1 || closing == Prefix.Length)
-    {
-        return "格式应为行末的【引用：文档与节号】";
-    }
-
-    return null;
-}
-
-// 只检查整行注释：summary 的开始、结束标签各占一行；注释（多行时看最后一行）末尾不加句号
+// 只检查整行注释：summary 的开始、结束标签各占一行，注释末尾不加句号（多行时看最后一行）
 static int CheckCommentStyle(string root)
 {
     var problems = 0;
@@ -298,5 +265,9 @@ namespace Kmic.Scripts
         // 节号（第 5.3 节）、带文档号的决定（05-02 D5）、括号里的文档号（05-03 …）、原型编号、实施任务号
         [GeneratedRegex(@"第 ?\d+(\.\d+)* ?节|\b[FR]?\d{2}(-\d{2})? ?D\d+\b|（[FR]?\d{2}-\d{2}[ ）]|原型 ?#\d+|\bS\d-\d{2}\b|实施待办", RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
         public static partial Regex DesignReference();
+
+        // 只收没有正当用法的说法：设计文档里的说法、自造词、空话。评审发现新的同类说法再加
+        [GeneratedRegex("定稿|挂接|租约|管道第|落地|收口|闭环|赋能|抓手|进行统一处理|高效管理|完整、灵活|完整性与可靠性", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
+        public static partial Regex AvoidedWording();
     }
 }

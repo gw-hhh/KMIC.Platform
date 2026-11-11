@@ -3,9 +3,6 @@ using Verifier = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.Build
 
 namespace Kmic.BuildingBlocks.Analyzers.Tests.Data;
 
-/// <summary>
-/// 只拦截数据库查询里的字符串匹配，内存里的 LINQ 照常可用
-/// </summary>
 public sealed class TextMatchingAnalyzerTests
 {
     private const string Source = """

@@ -13,6 +13,6 @@ public interface IStateHistoryQuery
     /// <summary>
     /// 全部状态流转，按时间排序
     /// </summary>
-    Task<IReadOnlyList<StateHistoryItem>> GetAsync<TAggregate>(Guid aggregateId, CancellationToken cancellationToken)
+    Task<IReadOnlyList<StateHistoryItem>> GetAsync<TAggregate>(Guid aggregateId, CancellationToken ct)
         where TAggregate : IAggregateRoot;
 }

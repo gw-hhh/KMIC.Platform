@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Authorization;
 
-/// <summary>
-/// 资源策略和可用动作用的是同一份策略
-/// </summary>
 public sealed class ResourceAuthorizationTests
 {
     private static readonly Error _notOwner = Error.Forbidden("Thing.NotOwner", "只有负责人可以操作");

@@ -10,17 +10,15 @@ namespace Kmic.BuildingBlocks.Analyzers.General;
 /// <summary>
 /// KM9002：不能用 #pragma warning disable
 /// </summary>
-/// <remarks>
-/// 忘了 restore 会悄悄扩大豁免范围，也不留理由。改用带理由的 [SuppressMessage]
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PragmaWarningAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9002",
         Rules.GeneralCategory,
-        "不得使用 #pragma warning disable",
-        "不得使用 #pragma warning disable，改用带理由的 [SuppressMessage]，作用于最小范围");
+        "不能用 #pragma warning disable",
+        "不能用 #pragma warning disable，改用带理由的 [SuppressMessage]，范围尽量小",
+        "忘了 restore 会悄悄扩大豁免范围，也不留理由.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

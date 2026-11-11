@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 按请求来源选连接池；查询可以重试，但连接池耗尽时不重试；不允许自动预编译
-/// </summary>
 public sealed class DataSourceTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

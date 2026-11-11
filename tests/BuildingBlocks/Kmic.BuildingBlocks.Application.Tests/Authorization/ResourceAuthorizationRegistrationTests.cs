@@ -9,9 +9,6 @@ using static Kmic.BuildingBlocks.Application.Tests.Authorization.ResourceAuthori
 
 namespace Kmic.BuildingBlocks.Application.Tests.Authorization;
 
-/// <summary>
-/// 资源策略与动作目录是模块内部类型，由框架扫描注册
-/// </summary>
 public sealed class ResourceAuthorizationRegistrationTests
 {
     [Fact]

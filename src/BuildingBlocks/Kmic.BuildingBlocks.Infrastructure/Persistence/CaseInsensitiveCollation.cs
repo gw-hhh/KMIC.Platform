@@ -19,7 +19,7 @@ public static class CaseInsensitiveCollation
     /// 创建并核对 public."CaseInsensitive"
     /// </summary>
     /// <param name="connection">迁移账号的连接</param>
-    /// <param name="ct">取消</param>
+    /// <param name="ct">取消令牌</param>
     /// <exception cref="InvalidOperationException">定义不对，或别的 schema 里有同名对象</exception>
     public static async Task EnsureAsync(NpgsqlConnection connection, CancellationToken ct)
     {
@@ -69,7 +69,7 @@ public static class CaseInsensitiveCollation
     /// </summary>
     /// <param name="connection">数据库连接</param>
     /// <param name="context">模块的写入上下文</param>
-    /// <param name="ct">取消</param>
+    /// <param name="ct">取消令牌</param>
     /// <exception cref="InvalidOperationException">有列绑定到了别的排序规则</exception>
     public static async Task VerifyColumnsAsync(NpgsqlConnection connection, DbContext context, CancellationToken ct)
     {

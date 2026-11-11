@@ -12,8 +12,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// KmicFunctions 翻译器
 /// </summary>
 /// <remarks>
-/// 翻译为 ("列" COLLATE "C") ILIKE 模式 ESCAPE '\'。term 始终是参数，转义放在数据库里做。
-/// 显式转成 "C"：不区分大小写的列用的是非确定性排序规则，不支持 ILIKE
+/// 翻译为 ("列" COLLATE "C") ILIKE 模式 ESCAPE '\'
 /// </remarks>
 internal sealed class KmicFunctionsTranslator(NpgsqlSqlExpressionFactory sql) : IMethodCallTranslator
 {
@@ -31,8 +30,11 @@ internal sealed class KmicFunctionsTranslator(NpgsqlSqlExpressionFactory sql) : 
             return null;
         }
 
+        // 显式转成 "C"：不区分大小写的列用的是非确定性排序规则，不支持 ILIKE
         var column = new CollateExpression(arguments[0], "C");
         var term = sql.ApplyTypeMapping(arguments[1], column.TypeMapping);
+
+        // 转义在 SQL 里用 replace 做，term 始终作为参数传入
         var escaped = Replace(Replace(Replace(term, @"\", @"\\"), "%", @"\%"), "_", @"\_");
         var anything = sql.Constant("%", term.TypeMapping);
         var pattern = method == _containsText ? sql.Add(sql.Add(anything, escaped), anything) : sql.Add(escaped, anything);

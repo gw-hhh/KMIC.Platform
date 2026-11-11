@@ -11,42 +11,58 @@ namespace Kmic.BuildingBlocks.Analyzers.Domain;
 /// <summary>
 /// KM0401：状态属性只能由状态机修改
 /// </summary>
-/// <remarks>
-/// 绕过状态机直接赋值，会跳过流转检查，也不会留下业务历史
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
 {
     internal const string DiagnosticId = "KM0401";
 
     private const string Title = "状态属性只能由状态机改写";
-    private const string Category = Rules.DomainCategory;
+    private const string Reason = "绕过状态机直接赋值，会跳过流转检查，也不会留下业务历史.";
     private const string DefineMethodName = "Define";
 
-    internal static readonly DiagnosticDescriptor DirectAssignment = new(
-        DiagnosticId, Title, "状态属性 {0} 只能经状态机的 Start 或 Fire 改写，不能直接赋值", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+    internal static readonly DiagnosticDescriptor DirectAssignment = Rules.Create(
+        DiagnosticId,
+        Rules.DomainCategory,
+        Title,
+        "状态属性 {0} 不能直接赋值，改为经状态机的 Start 或 Fire 改写",
+        Reason);
 
     // 要等整个编译结束才能和 Define 对上，IDE 默认不实时显示，构建时一定会报
-    internal static readonly DiagnosticDescriptor AssignmentOutsideAggregate = new(
+    internal static readonly DiagnosticDescriptor AssignmentOutsideAggregate = Rules.Create(
         DiagnosticId,
+        Rules.DomainCategory,
         Title,
-        "状态属性 {0} 只能经状态机的 Start 或 Fire 改写，不能在其他类型中直接赋值",
-        Category,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: [WellKnownDiagnosticTags.CompilationEnd]);
+        "状态属性 {0} 不能在其他类型里赋值，改为经状态机的 Start 或 Fire 改写",
+        Reason,
+        WellKnownDiagnosticTags.CompilationEnd);
 
-    internal static readonly DiagnosticDescriptor SetterNotPrivate = new(
-        DiagnosticId, Title, "状态属性 {0} 的 setter 必须是 private", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+    internal static readonly DiagnosticDescriptor SetterNotPrivate = Rules.Create(
+        DiagnosticId,
+        Rules.DomainCategory,
+        Title,
+        "状态属性 {0} 的 setter 要改为 private",
+        Reason);
 
-    internal static readonly DiagnosticDescriptor NotAutoProperty = new(
-        DiagnosticId, Title, "状态属性 {0} 必须是自动属性，否则可以绕过属性直接改字段", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+    internal static readonly DiagnosticDescriptor NotAutoProperty = Rules.Create(
+        DiagnosticId,
+        Rules.DomainCategory,
+        Title,
+        "状态属性 {0} 要写成自动属性",
+        "有自己的字段时，类型里的代码可以绕过属性直接改字段，检查就拦不住.");
 
-    internal static readonly DiagnosticDescriptor InvalidGetter = new(
-        DiagnosticId, Title, "Define 的第一个参数必须直接返回聚合的一个属性，如 s => s.Status", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+    internal static readonly DiagnosticDescriptor InvalidGetter = Rules.Create(
+        DiagnosticId,
+        Rules.DomainCategory,
+        Title,
+        "Define 的第一个参数只能直接返回聚合根的一个属性，如 s => s.Status",
+        "分析器按这个参数认出哪个属性是状态，写成别的表达式就认不出来.");
 
-    internal static readonly DiagnosticDescriptor InvalidSetter = new(
-        DiagnosticId, Title, "Define 的第二个参数只能给第一个参数中的属性赋值，如 (s, v) => s.Status = v", Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+    internal static readonly DiagnosticDescriptor InvalidSetter = Rules.Create(
+        DiagnosticId,
+        Rules.DomainCategory,
+        Title,
+        "Define 的第二个参数只能给第一个参数里的属性赋值，如 (s, v) => s.Status = v",
+        "状态机通过这个参数写入状态，在里面改别的属性，就绕过了业务方法.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -171,9 +187,9 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static bool IsAutoProperty(IPropertySymbol property, CancellationToken cancellationToken) =>
+    private static bool IsAutoProperty(IPropertySymbol property, CancellationToken ct) =>
         property.DeclaringSyntaxReferences.All(reference =>
-            reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }
+            reference.GetSyntax(ct) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }
             && accessors.Accessors.All(a => a is { Body: null, ExpressionBody: null }));
 
     // s => s.Status：只接受直接返回参数的某个属性。这个参数是表达式树，lambda 外面还包着一层转换

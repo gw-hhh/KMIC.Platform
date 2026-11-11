@@ -4,9 +4,6 @@ using Verify = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.Buildin
 
 namespace Kmic.BuildingBlocks.Analyzers.Tests.Domain;
 
-/// <summary>
-/// 状态属性赋值规则
-/// </summary>
 public sealed class StateMachineAssignmentAnalyzerTests
 {
     private const string StandardDefine = "(s => s.Status, (s, v) => s.Status = v)";

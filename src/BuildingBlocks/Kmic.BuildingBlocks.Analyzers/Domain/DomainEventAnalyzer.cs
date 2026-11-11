@@ -8,17 +8,15 @@ namespace Kmic.BuildingBlocks.Analyzers.Domain;
 /// <summary>
 /// KM0501：领域事件不能带实体对象
 /// </summary>
-/// <remarks>
-/// 带了实体，事件处理器就能直接改这个实体，绕过它的业务方法
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainEventAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM0501",
         Rules.DomainCategory,
-        "领域事件不得携带实体对象",
-        "领域事件 {0} 的属性 {1} 携带了实体 {2}，改为携带它的 ID");
+        "领域事件不能带实体对象",
+        "领域事件 {0} 的属性 {1} 带了实体 {2}，改为带它的 ID",
+        "事件处理器拿到实体就能直接改它，绕过它的业务方法.");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

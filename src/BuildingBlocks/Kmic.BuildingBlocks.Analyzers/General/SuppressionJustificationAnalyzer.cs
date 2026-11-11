@@ -10,9 +10,6 @@ namespace Kmic.BuildingBlocks.Analyzers.General;
 /// <summary>
 /// KM9001：[SuppressMessage] 必须写明理由
 /// </summary>
-/// <remarks>
-/// 每个豁免都是要评审的决定，写了理由才能被找到和复查
-/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class SuppressionJustificationAnalyzer : DiagnosticAnalyzer
 {
@@ -20,7 +17,8 @@ public sealed class SuppressionJustificationAnalyzer : DiagnosticAnalyzer
         "KM9001",
         Rules.GeneralCategory,
         "豁免必须写明理由",
-        "[{0}] 必须用 Justification 写明豁免的理由");
+        "[{0}] 要用 Justification 写明豁免的理由",
+        "每个豁免都是要评审的决定，写了理由才能被找到和复查.");
 
     private static readonly ImmutableHashSet<string> _suppressionAttributes = ImmutableHashSet.Create(
         StringComparer.Ordinal,

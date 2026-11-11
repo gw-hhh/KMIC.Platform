@@ -7,11 +7,8 @@ using Shouldly;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 排序规则不只要创建，已有的定义、同名对象、列的实际绑定都要核对
-/// </summary>
-/// <remarks>
 /// 每个测试改坏一处，各用一个新克隆的库
-/// </remarks>
+/// </summary>
 public sealed class CaseInsensitiveCollationTests(ProbeTemplate template)
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

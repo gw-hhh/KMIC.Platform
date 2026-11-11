@@ -5,9 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Kmic.BuildingBlocks.Analyzers.Tests.Generators;
 
-/// <summary>
-/// 只收集实体和值对象里有注释的公开属性
-/// </summary>
 public sealed class EntityCommentGeneratorTests
 {
     private const string Source = """

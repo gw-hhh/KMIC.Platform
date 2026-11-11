@@ -5,9 +5,6 @@ using Vogen;
 
 namespace Kmic.BuildingBlocks.Domain.Tests.Identifiers;
 
-/// <summary>
-/// 强类型 ID 的 Vogen 配置
-/// </summary>
 public sealed class StronglyTypedIdTests
 {
     [Fact]
