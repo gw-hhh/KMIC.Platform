@@ -7,6 +7,7 @@ using Kmic.BuildingBlocks.Application.Dictionaries;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
+using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.Settings;
@@ -39,7 +40,15 @@ public static class ApplicationServiceCollectionExtensions
         var permissions = PermissionCatalog.FromAssemblies(applicationAssemblies);
         var settings = SystemSettingCatalog.FromAssemblies(applicationAssemblies);
         var resourceActions = services.AddResourceAuthorization(applicationAssemblies.Distinct().SelectMany(a => a.GetTypes()));
-        permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences]);
+        var jobs = BackgroundJobCatalog.FromAssemblies(applicationAssemblies);
+        permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences, .. jobs.PermissionReferences]);
+
+        services.AddSingleton(jobs);
+        foreach (var job in jobs.All)
+        {
+            services.AddScoped(job.HandlerInterface, job.HandlerType);
+        }
+
 
         services.AddSingleton(permissions);
         services.AddSingleton(settings);
@@ -92,6 +101,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IDataScope, DataScope>();
         services.AddScoped<RequestMetadata>();
         services.TryAddSingleton(IntegrationMessageCatalog.Empty);
+        services.TryAddSingleton(BackgroundJobCatalog.Empty);
         services.AddScoped<IntegrationEventPublisher>();
         services.AddScoped<IIntegrationEventPublisher>(sp => sp.GetRequiredService<IntegrationEventPublisher>());
         services.TryAddSingleton(sp => SubscriptionCatalog.Build(

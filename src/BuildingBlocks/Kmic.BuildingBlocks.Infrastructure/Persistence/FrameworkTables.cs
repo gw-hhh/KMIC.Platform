@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,6 +19,8 @@ internal static class FrameworkTables
 
     public const string Inbox = nameof(InboxMessage);
 
+    public const string Jobs = "BackgroundJob";
+
     // 只索引还没完成的消息：接收方删除对象前只关心这些
     private const string UnfinishedWithSubjects = """
         "SubjectIds" IS NOT NULL AND "Status" IN (0, 1, 3)
@@ -29,6 +32,10 @@ internal static class FrameworkTables
 
     private const string OrderedUnfinished = """
         "Status" IN (0, 1, 3) AND "OrderingKey" IS NOT NULL
+        """;
+
+    private const string Unfinished = """
+        "Status" IN (0, 1, 4)
         """;
 
     public static void Apply(ModelBuilder modelBuilder)
@@ -68,6 +75,21 @@ internal static class FrameworkTables
             message.HasIndex(m => m.NextAttemptAt).HasFilter(Claimable);
             message.HasIndex(m => new { m.Subscription, m.OrderingKey, m.Seq }).HasFilter(OrderedUnfinished);
             message.HasIndex(m => m.SubjectIds).HasMethod("gin").HasFilter(UnfinishedWithSubjects);
+        });
+
+        modelBuilder.Entity<BackgroundJobRecord>(job =>
+        {
+            job.ToTable(Jobs, t => t.HasComment("后台作业"));
+            job.Property(j => j.Id).ValueGeneratedNever();
+            job.Property(j => j.JobType).HasMaxLength(200);
+            job.Property(j => j.Args).HasColumnType(ColumnTypes.Json);
+            job.Property(j => j.Checkpoint).HasColumnType(ColumnTypes.Json);
+            job.Property(j => j.ResultSummary).HasColumnType(ColumnTypes.Json);
+            job.Property(j => j.ProgressMessage).HasMaxLength(500);
+            job.Property(j => j.ErrorCode).HasMaxLength(200);
+            job.Property(j => j.ErrorMessage).HasMaxLength(2000);
+            job.HasIndex(j => j.LeaseUntil).HasFilter(Unfinished);
+            job.HasIndex(j => new { j.SubmittedBy, j.SubmittedAt }).IsDescending(false, true);
         });
     }
 

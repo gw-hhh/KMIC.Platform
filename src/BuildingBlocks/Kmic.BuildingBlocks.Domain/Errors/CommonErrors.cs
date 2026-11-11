@@ -92,6 +92,12 @@ public static class CommonErrors
         Error.Unavailable("Common.NotReadyYet", "依赖的数据还没准备好，稍后自动重试");
 
     /// <summary>
+    /// 同一种后台任务同时进行的太多
+    /// </summary>
+    public static readonly Error TooManyJobs =
+        Error.Conflict("Common.TooManyJobs", "同时进行的任务太多，请等前面的完成后再提交");
+
+    /// <summary>
     /// 数据库空间不足
     /// </summary>
     public static readonly Error MessagingSuspended =

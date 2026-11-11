@@ -39,8 +39,10 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
     {
         ArgumentNullException.ThrowIfNull(next);
 
-        var context = services.GetRequiredService<ModuleWriteContexts>().Get(catalog.Get(typeof(TMessage)).Module);
+        var module = catalog.Get(typeof(TMessage)).Module;
+        var context = services.GetRequiredService<ModuleWriteContexts>().Get(module);
         var transaction = services.GetRequiredService<CommandTransaction>();
+        transaction.Module = module;
         await using var dbTransaction = await context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
         try

@@ -15,6 +15,11 @@ internal sealed class CommandTransaction : IAfterCommit
     private readonly List<Func<ModuleDbContext, object?, CancellationToken, Task<Error?>>> _beforeCommit = [];
     private readonly List<Func<CancellationToken, ValueTask>> _afterCommit = [];
 
+    /// <summary>
+    /// 当前命令所在的模块，只有这个模块的写入上下文会被保存
+    /// </summary>
+    public string? Module { get; set; }
+
     public void Enqueue(Func<CancellationToken, ValueTask> action)
     {
         ArgumentNullException.ThrowIfNull(action);

@@ -76,7 +76,7 @@ internal sealed class MessagingListener(
                 using var connection = new NpgsqlConnection(ConnectionString());
                 connection.Open();
                 connection.Notification += (_, e) => signals.Wake(e.Channel, e.Payload);
-                using (var listen = new NpgsqlCommand($"LISTEN {MessagingChannels.Outbox}; LISTEN {MessagingChannels.Inbox};", connection))
+                using (var listen = new NpgsqlCommand($"LISTEN {MessagingChannels.Outbox}; LISTEN {MessagingChannels.Inbox}; LISTEN {MessagingChannels.Jobs};", connection))
                 {
                     listen.ExecuteNonQuery();
                 }

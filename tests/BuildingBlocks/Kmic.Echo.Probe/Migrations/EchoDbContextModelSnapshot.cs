@@ -23,6 +23,103 @@ namespace Kmic.Echo.Probe.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Jobs.BackgroundJobRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActualUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Args")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("CancelRequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CancelRequestedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Checkpoint")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("ErrorCode")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("JobType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid?>("LeaseToken")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("LeaseUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("ProgressDone")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ProgressMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long?>("ProgressTotal")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("ResultFileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResultSummary")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("SubmittedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SubmittedRoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaseUntil")
+                        .HasFilter("\"Status\" IN (0, 1, 4)");
+
+                    b.HasIndex("SubmittedBy", "SubmittedAt")
+                        .IsDescending(false, true);
+
+                    b.ToTable("BackgroundJob", "Echo", t =>
+                        {
+                            t.HasComment("后台作业");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Messaging.InboxMessage", b =>
                 {
                     b.Property<Guid>("Id")

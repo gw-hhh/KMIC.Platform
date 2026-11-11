@@ -1,7 +1,9 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.ReadModels;
+using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +42,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<CurrentInboxMessage>();
         services.TryAddSingleton<InboxProcessor>();
         services.TryAddScoped(typeof(IReadModelWriter<>), typeof(ReadModelWriter<>));
+        services.TryAddScoped<IBackgroundJobs, BackgroundJobs>();
         services.AddOptions<MessagingOptions>();
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
         services.TryAddScoped<DomainEventDispatcher>();
