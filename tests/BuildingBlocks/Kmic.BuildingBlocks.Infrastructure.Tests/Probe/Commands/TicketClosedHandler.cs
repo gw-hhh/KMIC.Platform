@@ -4,12 +4,12 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 
 /// <summary>
-/// 单据关闭时加一行备注
+/// 单据关闭时加一行备注，并发布一条集成事件
 /// </summary>
 /// <remarks>
 /// 和命令在同一个事务里执行，测试可以让它失败，验证整个命令回滚
 /// </remarks>
-internal sealed class TicketClosedHandler(TicketRepository tickets, ProbeHooks hooks) : IDomainEventHandler<TicketClosed>
+internal sealed class TicketClosedHandler(TicketRepository tickets, IIntegrationEventPublisher publisher, ProbeHooks hooks) : IDomainEventHandler<TicketClosed>
 {
     public async ValueTask<Result> HandleAsync(TicketClosed domainEvent, CancellationToken ct)
     {
@@ -20,6 +20,7 @@ internal sealed class TicketClosedHandler(TicketRepository tickets, ProbeHooks h
 
         var loaded = await tickets.GetForUpdateAsync(domainEvent.Id, null, ct);
         loaded.Value.AddLine("已关闭");
+        publisher.Add(new TicketClosedNotice(domainEvent.Id.Value));
         return Result.Success();
     }
 }

@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -32,6 +33,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<ModuleDbContextServices>();
         services.TryAddScoped<ModuleWriteContexts>();
         services.TryAddScoped<CommandTransaction>();
+        services.TryAddScoped<OutboxWriter>();
+        services.AddOptions<MessagingOptions>();
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
         services.TryAddScoped<DomainEventDispatcher>();
         services.TryAddScoped<QueryVisibilityGuard>();

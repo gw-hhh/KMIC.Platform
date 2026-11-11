@@ -13,9 +13,11 @@ public sealed class MigrationTests(ClassDatabase<ProbeTemplate> database, ProbeT
     [Fact]
     public async Task History_InModuleSchema()
     {
+        await using var harness = new ProbeHarness(database.ConnectionString);
+        await using var work = harness.BeginAsSystem();
         await using var command = database.DataSource.CreateCommand("""SELECT count(*) FROM "Probe"."__EFMigrationsHistory" """);
 
-        ((long)(await command.ExecuteScalarAsync(Ct))!).ShouldBe(1);
+        ((long)(await command.ExecuteScalarAsync(Ct))!).ShouldBe(work.Db.Database.GetMigrations().Count());
     }
 
     [Fact]

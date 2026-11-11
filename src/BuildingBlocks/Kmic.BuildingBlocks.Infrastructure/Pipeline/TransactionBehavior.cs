@@ -7,6 +7,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 using Kmic.BuildingBlocks.Domain.Events;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +49,10 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         }
         catch
         {
-            // 出异常时同样丢弃本次的修改和登记的动作，事务由 await using 回滚
+            // 出异常时同样丢弃本次的修改、登记的动作和没写出去的消息，事务由 await using 回滚
             context.ChangeTracker.Clear();
             transaction.Discard();
+            services.GetRequiredService<OutboxWriter>().Discard();
             throw;
         }
     }
@@ -77,6 +79,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         using (context.Services.SaveGate.Open())
         {
             await context.SaveChangesAsync(ct);
+            await services.GetRequiredService<OutboxWriter>().WriteAsync(context, catalog.Get(typeof(TMessage)).Module, ct);
         }
 
         response = WithSavedVersion(context, response);
@@ -137,12 +140,13 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         throw new InvalidOperationException($"领域事件分发超过 {MaxDispatchRounds} 轮仍有新事件，事件处理器可能在互相触发。");
     }
 
-    private static async Task RollBackAsync(ModuleDbContext context, CommandTransaction transaction)
+    private async Task RollBackAsync(ModuleDbContext context, CommandTransaction transaction)
     {
         // 清空变更跟踪，免得同一作用域里残留的修改被后面的操作误保存
         await context.Database.RollbackTransactionAsync(CancellationToken.None);
         context.ChangeTracker.Clear();
         transaction.Discard();
+        services.GetRequiredService<OutboxWriter>().Discard();
     }
 
     private static async Task CommitAsync(IDbContextTransaction dbTransaction)

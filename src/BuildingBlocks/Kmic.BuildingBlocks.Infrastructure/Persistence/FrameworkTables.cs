@@ -1,4 +1,6 @@
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
@@ -12,7 +14,25 @@ internal static class FrameworkTables
 {
     public const string Idempotency = nameof(IdempotencyRecord);
 
-    public static void Apply(ModelBuilder modelBuilder) =>
+    public const string Outbox = nameof(OutboxMessage);
+
+    public const string Inbox = nameof(InboxMessage);
+
+    // 只索引还没完成的消息：接收方删除对象前只关心这些
+    private const string UnfinishedWithSubjects = """
+        "SubjectIds" IS NOT NULL AND "Status" IN (0, 1, 3)
+        """;
+
+    private const string Claimable = """
+        "Status" IN (0, 1)
+        """;
+
+    private const string OrderedUnfinished = """
+        "Status" IN (0, 1, 3) AND "OrderingKey" IS NOT NULL
+        """;
+
+    public static void Apply(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<IdempotencyRecord>(record =>
         {
             record.ToTable(Idempotency, t => t.HasComment("幂等记录"));
@@ -24,4 +44,42 @@ internal static class FrameworkTables
             record.HasIndex(r => new { r.UserId, r.RoleId, r.Operation, r.Key }).IsUnique();
             record.HasIndex(r => r.ExpiresAt);
         });
+
+        modelBuilder.Entity<OutboxMessage>(message =>
+        {
+            message.ToTable(Outbox, t => t.HasComment("待投递的集成消息"));
+            message.Property(m => m.Id).ValueGeneratedNever();
+            message.Property(m => m.Seq).UseIdentityAlwaysColumn();
+            MapCommonColumns(message);
+            message.HasIndex(m => m.NextAttemptAt).HasFilter(Claimable);
+            message.HasIndex(m => new { m.Status, m.OccurredAt });
+            message.HasIndex(m => m.SubjectIds).HasMethod("gin").HasFilter(UnfinishedWithSubjects);
+        });
+
+        modelBuilder.Entity<InboxMessage>(message =>
+        {
+            message.ToTable(Inbox, t => t.HasComment("待处理的集成消息，每个订阅一行"));
+            message.Property(m => m.Id).ValueGeneratedNever();
+            message.Property(m => m.Subscription).HasMaxLength(200);
+            message.Property(m => m.SourceModule).HasMaxLength(100);
+            message.Property(m => m.ReceivedAt).HasDefaultValueSql("clock_timestamp()");
+            MapCommonColumns(message);
+            message.HasIndex(m => new { m.MessageId, m.Subscription }).IsUnique();
+            message.HasIndex(m => m.NextAttemptAt).HasFilter(Claimable);
+            message.HasIndex(m => new { m.Subscription, m.OrderingKey, m.Seq }).HasFilter(OrderedUnfinished);
+            message.HasIndex(m => m.SubjectIds).HasMethod("gin").HasFilter(UnfinishedWithSubjects);
+        });
+    }
+
+    // 两张表共有的列。时间默认取数据库时钟，各实例的时钟有偏差也不影响
+    private static void MapCommonColumns<T>(EntityTypeBuilder<T> message)
+        where T : class
+    {
+        message.Property<string>(nameof(OutboxMessage.MessageType)).HasMaxLength(200);
+        message.Property<string>(nameof(OutboxMessage.Payload)).HasColumnType(ColumnTypes.Json);
+        message.Property<string>(nameof(OutboxMessage.Headers)).HasColumnType(ColumnTypes.Json);
+        message.Property<string?>(nameof(OutboxMessage.OrderingKey)).HasMaxLength(100);
+        message.Property<string?>(nameof(OutboxMessage.LastError)).HasMaxLength(4000);
+        message.Property<DateTimeOffset>(nameof(OutboxMessage.NextAttemptAt)).HasDefaultValueSql("clock_timestamp()");
+    }
 }

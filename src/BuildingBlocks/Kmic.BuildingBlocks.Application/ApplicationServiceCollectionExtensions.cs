@@ -4,7 +4,9 @@ using FluentValidation;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Dictionaries;
+using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.Settings;
@@ -45,6 +47,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton(DictionaryTypeCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(PreferenceCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(NumberRuleCatalog.FromAssemblies(applicationAssemblies));
+        services.AddSingleton(IntegrationMessageCatalog.FromAssemblies(applicationAssemblies));
         return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 
@@ -67,6 +70,9 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IContractQuerySender, ContractQuerySender>();
         services.AddScoped<IDataScope, DataScope>();
         services.AddScoped<RequestMetadata>();
+        services.TryAddSingleton(IntegrationMessageCatalog.Empty);
+        services.AddScoped<IntegrationEventPublisher>();
+        services.AddScoped<IIntegrationEventPublisher>(sp => sp.GetRequiredService<IntegrationEventPublisher>());
 
         ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.GetCultureInfo("zh-CN");
         foreach (var assembly in validatorAssemblies)

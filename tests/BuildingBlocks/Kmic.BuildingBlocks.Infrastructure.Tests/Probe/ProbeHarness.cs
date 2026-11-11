@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
@@ -20,7 +21,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
 {
     private readonly ServiceProvider _services;
 
-    public ProbeHarness(string connectionString, Action<DatabaseOptions>? configure = null)
+    public ProbeHarness(string connectionString, Action<DatabaseOptions>? configure = null, Action<MessagingOptions>? messaging = null)
     {
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(Time);
@@ -33,6 +34,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
             configure?.Invoke(o);
         });
         services.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();
+        services.Configure<MessagingOptions>(o => messaging?.Invoke(o));
         services.AddScoped<TicketRepository>();
         services.AddScoped<IDomainEventHandler<TicketClosed>, TicketClosedHandler>();
         services.AddSingleton(Hooks);
