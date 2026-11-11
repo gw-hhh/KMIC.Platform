@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
+using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
@@ -53,6 +54,7 @@ public static class BackgroundProcessingServiceCollectionExtensions
         }
 
         services.AddKmicStartupTasks();
+        services.AddKmicSecurityEvents();
         services.AddKmicScheduler();
         if (roles.HasFlag(HostRoles.Worker))
         {

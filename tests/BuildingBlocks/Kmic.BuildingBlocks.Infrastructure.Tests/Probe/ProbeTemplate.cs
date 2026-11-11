@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
+using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.Echo.Probe;
 using Npgsql;
@@ -22,6 +23,14 @@ public sealed class ProbeTemplate : PostgresTemplateDatabase
 
     // 每次启动容器时随机生成，不写进代码
     public string RuntimePassword { get; } = Guid.CreateVersion7().ToString("N");
+
+    // 安全事件表属于 Identity 模块，框架测试里没有这个模块，建 schema 并像模块初始迁移那样授权给运行账号
+    private static string IdentitySchemaSql =>
+        $"""
+        CREATE SCHEMA "Identity";
+        GRANT USAGE ON SCHEMA "Identity" TO {MigrationBuilderExtensions.RuntimeRole};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA "Identity" GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {MigrationBuilderExtensions.RuntimeRole};
+        """;
 
     /// <summary>
     /// 运行账号的连接串
@@ -51,7 +60,7 @@ public sealed class ProbeTemplate : PostgresTemplateDatabase
         {
             await connection.OpenAsync(ct);
             await using var routes = connection.CreateCommand();
-            routes.CommandText = """CREATE SCHEMA "Operations";""" + MessageRouteTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql();
+            routes.CommandText = """CREATE SCHEMA "Operations";""" + MessageRouteTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql() + IdentitySchemaSql + SecurityEventTable.CreateSql;
             await routes.ExecuteNonQueryAsync(ct);
         }
     }

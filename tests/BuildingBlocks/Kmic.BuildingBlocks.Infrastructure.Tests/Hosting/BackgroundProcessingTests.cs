@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
+using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -34,6 +35,7 @@ public sealed class BackgroundProcessingTests
 
         var hosted = HostedServices(services);
         hosted.ShouldContain(typeof(StartupTaskRunner));
+        hosted.ShouldContain(typeof(SecurityEventFlusher));
         hosted.ShouldNotContain(typeof(MessagingWorker));
         hosted.ShouldNotContain(typeof(JobWorker));
         hosted.ShouldNotContain(typeof(SchedulerService));
@@ -48,6 +50,7 @@ public sealed class BackgroundProcessingTests
 
         // 宿主按注册顺序启动，启动任务必须排在后台循环前面
         hosted[0].ShouldBe(typeof(StartupTaskRunner));
+        hosted.ShouldContain(typeof(SecurityEventFlusher));
         hosted.ShouldContain(typeof(MessagingListenerService));
         hosted.ShouldContain(typeof(MessagingWorker));
         hosted.ShouldContain(typeof(JobWorker));
