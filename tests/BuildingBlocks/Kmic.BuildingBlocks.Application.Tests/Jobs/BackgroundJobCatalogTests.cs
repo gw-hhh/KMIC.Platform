@@ -23,6 +23,16 @@ public sealed class BackgroundJobCatalogTests
     }
 
     [Fact]
+    public void FromAssemblies_AlwaysIncludesFrameworkRebuildJob()
+    {
+        var job = BackgroundJobCatalog.FromAssemblies([]).Describe(typeof(ReadModelRebuildJob));
+
+        job.Name.ShouldBe("BuildingBlocks.RebuildReadModel");
+        job.Attribute.SystemOnly.ShouldBeTrue();
+        job.HandlerType.ShouldBeNull();
+    }
+
+    [Fact]
     public void Build_WrongDeclarations_ListsEveryProblem()
     {
         var thrown = Should.Throw<DeclarationException>(() => BackgroundJobCatalog.Build(

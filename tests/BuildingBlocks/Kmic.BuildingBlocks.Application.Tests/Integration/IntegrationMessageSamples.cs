@@ -1,4 +1,6 @@
+using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Contracts.Messaging;
+using Kmic.BuildingBlocks.Contracts.References;
 using Kmic.BuildingBlocks.Contracts.Snapshots;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Integration;
@@ -37,4 +39,23 @@ internal static class IntegrationMessageSamples
     public sealed record AttachLike(Guid Owner, IReadOnlyList<Guid> FileIds);
 
     public interface IThingSnapshotSource : ISnapshotSource<ThingChanged>;
+
+    public interface IOtherSnapshotSource : ISnapshotSource<ThingChangedV2>;
+
+    public sealed record ThingRow(Guid Id) : IReadModel
+    {
+        public long SourceVersion { get; init; }
+
+        public ReferenceStatus Status { get; init; }
+
+        public bool IsTerminal { get; init; }
+
+        public ReadModelTerminalReason? TerminalReason { get; init; }
+
+        public DateTimeOffset? TerminalAt { get; init; }
+
+        public Guid? RebuildRunId { get; init; }
+
+        public DateTimeOffset SyncedAt { get; init; }
+    }
 }

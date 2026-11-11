@@ -47,11 +47,10 @@ public static class ApplicationServiceCollectionExtensions
         permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences, .. jobs.PermissionReferences]);
 
         services.AddSingleton(jobs);
-        foreach (var job in jobs.All)
+        foreach (var job in jobs.All.Where(j => j.HandlerType is not null))
         {
-            services.AddScoped(job.HandlerInterface, job.HandlerType);
+            services.AddScoped(job.HandlerInterface, job.HandlerType!);
         }
-
 
         services.AddSingleton(permissions);
         services.AddSingleton(settings);

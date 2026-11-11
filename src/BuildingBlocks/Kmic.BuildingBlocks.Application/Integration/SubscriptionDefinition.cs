@@ -11,7 +11,7 @@ namespace Kmic.BuildingBlocks.Application.Integration;
 /// <param name="CommandType">消息转成的命令</param>
 /// <param name="Map">把消息转成命令</param>
 /// <param name="IsOrdered">是否按顺序键依次处理</param>
-/// <param name="RebuildSource">重建读模型时拉取快照的接口，没有时为空</param>
+/// <param name="Rebuild">重建读模型的方式，没有时为空</param>
 internal sealed record SubscriptionDefinition(
     string Name,
     string Module,
@@ -19,4 +19,4 @@ internal sealed record SubscriptionDefinition(
     Type CommandType,
     Func<object, MessageEnvelope, ICommand> Map,
     bool IsOrdered,
-    Type? RebuildSource);
+    IReadModelRebuild? Rebuild);

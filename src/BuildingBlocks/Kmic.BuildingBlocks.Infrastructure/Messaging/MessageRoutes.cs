@@ -16,7 +16,7 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
         [.. catalog.All
             .GroupBy(s => (MessageType: s.Message.Name, Subscription: s.Name))
             .Select(g => new RouteDeclaration(
-                new MessageRoute(g.Key.MessageType, g.Key.Subscription, g.First().Module), g.Any(s => s.RebuildSource is not null)))];
+                new MessageRoute(g.Key.MessageType, g.Key.Subscription, g.First().Module), g.Any(s => s.Rebuild is not null)))];
 
     public static IReadOnlyList<RouteRetirement> Retirements(SubscriptionCatalog catalog) =>
         [.. catalog.Retired.Select(r => new RouteRetirement(r.Name, r.Reason))];
@@ -102,6 +102,29 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
         }
 
         return routes;
+    }
+
+    /// <summary>
+    /// 在给定的订阅里，还没完成初始化的
+    /// </summary>
+    public async Task<IReadOnlyList<string>> ListNeedingInitializationAsync(IReadOnlyCollection<string> subscriptions, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(subscriptions);
+
+        await using var command = dataSource.CreateCommand(
+            $"""
+            SELECT DISTINCT "Subscription" FROM {MessageRouteTable.Name}
+            WHERE "NeedsInitialization" AND "Status" IN ({MessageRouteTable.Active}, {MessageRouteTable.Retiring}) AND "Subscription" = ANY(@subscriptions)
+            """);
+        command.Parameters.AddWithValue("subscriptions", subscriptions.ToArray());
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        var pending = new List<string>();
+        while (await reader.ReadAsync(ct))
+        {
+            pending.Add(reader.GetString(0));
+        }
+
+        return pending;
     }
 
     private static async Task RefuseFinalizedAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, IReadOnlyList<RouteDeclaration> declared, CancellationToken ct)

@@ -318,6 +318,81 @@ namespace Kmic.Echo.Probe.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Messaging.ReadModelRebuildRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("MissingCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ReadModel")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<long>("ScannedCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("clock_timestamp()");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Subscription")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Subscription")
+                        .IsUnique()
+                        .HasFilter("\"Status\" IN (0, 1)");
+
+                    b.ToTable("ReadModelRebuildRun", "Echo", t =>
+                        {
+                            t.HasComment("读模型的重建轮次");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Numbering.NumberCounterRecord", b =>
+                {
+                    b.Property<string>("Rule")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PeriodKey")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<string>("PartitionKey")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<long>("LastValue")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Rule", "PeriodKey", "PartitionKey");
+
+                    b.ToTable("NumberCounter", "Echo", t =>
+                        {
+                            t.HasComment("业务编号的计数");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.BuildingBlocks.Infrastructure.Persistence.IdempotencyRecord", b =>
                 {
                     b.Property<Guid>("Id")

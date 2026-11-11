@@ -7,4 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <param name="Outbox">Outbox 表</param>
 /// <param name="Inbox">Inbox 表</param>
 /// <param name="Jobs">后台作业表</param>
-internal sealed record FrameworkTableNames(string Idempotency, string Outbox, string Inbox, string Jobs);
+/// <param name="RebuildRuns">读模型重建轮次表</param>
+/// <param name="NumberCounters">业务编号计数表</param>
+internal sealed record FrameworkTableNames(string Idempotency, string Outbox, string Inbox, string Jobs, string RebuildRuns, string NumberCounters);

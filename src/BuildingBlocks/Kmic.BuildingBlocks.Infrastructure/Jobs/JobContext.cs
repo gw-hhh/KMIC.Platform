@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Execution;
@@ -7,6 +8,7 @@ using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
@@ -79,6 +81,46 @@ internal sealed class JobContext(
         {
             return Settle(await scope.ServiceProvider.GetRequiredService<ISender>().SendAsync(command, stop.Token), json);
         }
+    }
+
+    /// <summary>
+    /// 框架自己的作业写一页：不经过命令管道，写入和检查点在同一个事务里提交
+    /// </summary>
+    /// <remarks>
+    /// 结果和 SendBatchAsync 一样处理：被接管或提交结果未知时本地停下，由领取流程收尾
+    /// </remarks>
+    /// <param name="write">在这一页的事务里执行的写入，参数是这一页的作用域</param>
+    /// <param name="checkpoint">这一页写完后的检查点</param>
+    /// <param name="done">这一页写完后累计完成的数量</param>
+    public async ValueTask<Result> WritePageAsync(Func<IServiceProvider, CancellationToken, Task> write, object checkpoint, long done)
+    {
+        ArgumentNullException.ThrowIfNull(write);
+        ArgumentNullException.ThrowIfNull(checkpoint);
+
+        var json = JsonSerializer.Serialize(checkpoint, checkpoint.GetType(), KmicJsonOptions.Stored);
+        await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, user, access);
+        var db = scope.ServiceProvider.GetRequiredService<ModuleWriteContexts>().Get(module);
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, stop.Token);
+        try
+        {
+            await write(scope.ServiceProvider, stop.Token);
+            if (!await store.SaveCheckpointAsync(db, module, job.Id, token, json, done, stop.Token))
+            {
+                LoseOwnership();
+                return CommonErrors.RequestInProgress;
+            }
+
+            await CommandCommit.CommitAsync(transaction);
+        }
+        catch (CommitOutcomeUnknownException)
+        {
+            OutcomeUnknown = true;
+            await stop.CancelAsync();
+            return CommonErrors.ResultUnknown;
+        }
+
+        _checkpoint = json;
+        return Result.Success();
     }
 
     public void Cancel(JobCancellationReason reason)

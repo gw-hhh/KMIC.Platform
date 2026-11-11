@@ -1,5 +1,4 @@
 using System.Data;
-using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.UseCases;
@@ -11,7 +10,6 @@ using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -91,7 +89,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             return TResponse.Fail(hookFailure);
         }
 
-        await CommitAsync(context.Database.CurrentTransaction ?? throw new InvalidOperationException("事务在提交前已结束，处理器不能自己提交或回滚。"));
+        await CommandCommit.CommitAsync(context.Database.CurrentTransaction ?? throw new InvalidOperationException("事务在提交前已结束，处理器不能自己提交或回滚。"));
         await RunAfterCommitAsync(transaction.TakeAfterCommit());
         return response;
     }
@@ -149,18 +147,6 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         context.ChangeTracker.Clear();
         transaction.Discard();
         services.GetRequiredService<OutboxWriter>().Discard();
-    }
-
-    private static async Task CommitAsync(IDbContextTransaction dbTransaction)
-    {
-        try
-        {
-            await dbTransaction.CommitAsync(CancellationToken.None);
-        }
-        catch (Exception exception) when (exception is DbException or InvalidOperationException or IOException)
-        {
-            throw new CommitOutcomeUnknownException("提交没有得到确认，结果未知。", exception);
-        }
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "提交后的动作失败了也没关系，只记警告，不能影响已提交的结果")]

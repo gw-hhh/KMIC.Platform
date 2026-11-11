@@ -85,4 +85,9 @@ public sealed class MessagingOptions
     /// 停机时等待进行中的处理完成的时长，超时就取消
     /// </summary>
     public TimeSpan ShutdownGrace { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// 读模型重建
+    /// </summary>
+    public RebuildOptions Rebuild { get; } = new();
 }

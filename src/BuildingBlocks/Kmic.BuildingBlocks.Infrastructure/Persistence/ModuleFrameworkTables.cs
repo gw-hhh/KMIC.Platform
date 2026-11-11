@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
+using Kmic.BuildingBlocks.Infrastructure.Numbering;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -38,7 +39,8 @@ internal sealed class ModuleFrameworkTables(IEnumerable<ModuleWriteContext> regi
                 var model = ((ModuleDbContext)scope.ServiceProvider.GetRequiredService(r.ContextType)).Model;
                 return new FrameworkTableNames(
                     TableOf(model, typeof(IdempotencyRecord)),
-                    TableOf(model, typeof(OutboxMessage)), TableOf(model, typeof(InboxMessage)), TableOf(model, typeof(BackgroundJobRecord)));
+                    TableOf(model, typeof(OutboxMessage)), TableOf(model, typeof(InboxMessage)), TableOf(model, typeof(BackgroundJobRecord)),
+                    TableOf(model, typeof(ReadModelRebuildRun)), TableOf(model, typeof(NumberCounterRecord)));
             },
             StringComparer.Ordinal);
     }

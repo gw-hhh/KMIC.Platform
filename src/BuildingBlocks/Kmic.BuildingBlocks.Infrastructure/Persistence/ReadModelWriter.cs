@@ -1,9 +1,10 @@
-using System.Data.Common;
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
@@ -14,13 +15,9 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 三种写入都是一条 INSERT … ON CONFLICT DO UPDATE … WHERE NOT "IsTerminal"：并发时后到的事务等先到的提交，
 /// 再按最新的行重新判断，所以迟到的旧快照不会把终态改回来。表名、列名和值的转换都取自 EF 模型
 /// </remarks>
-internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadModelWriter<T>
+internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadModelWriter<T>, IReadModelMaintenance<T>
     where T : class, IReadModel
 {
-    // 这几列由写入器自己维护，不取行上的值
-    private static readonly string[] _managed =
-        [nameof(IReadModel.IsTerminal), nameof(IReadModel.TerminalReason), nameof(IReadModel.TerminalAt), nameof(IReadModel.RebuildRunId), nameof(IReadModel.SyncedAt)];
-
     public async Task<bool> UpsertAsync(T row, CancellationToken ct)
     {
         var (context, statement) = Prepare(row);
@@ -75,79 +72,86 @@ internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadMo
         }
     }
 
-    private static async Task<bool> ExecuteAsync(ModuleDbContext context, Statement statement, string sql, CancellationToken ct) =>
+    public async Task<long> CountAsync(CancellationToken ct)
+    {
+        var (context, statement) = Prepare();
+        await using (statement)
+        {
+            var sql = $"""
+                SELECT count(*) AS "Value" FROM {statement.Table}
+                """;
+            return await context.Database.SqlQueryRaw<long>(sql).SingleAsync(ct);
+        }
+    }
+
+    public async Task<IReadOnlyList<ReadModelCandidate>> ListCandidatesAsync(Guid runId, Guid? after, int size, CancellationToken ct)
+    {
+        var (context, statement) = Prepare();
+        await using (statement)
+        {
+            var run = statement.Column(nameof(IReadModel.RebuildRunId));
+            var runValue = statement.Parameter(nameof(IReadModel.RebuildRunId), runId);
+            var afterValue = statement.Parameter(nameof(IReadModel.Id), after);
+            var sql = $"""
+                SELECT {statement.Id} AS "Id", {statement.Version} AS "SourceVersion" FROM {statement.Table}
+                WHERE NOT {statement.Terminal} AND ({run} IS NULL OR {run} <> {runValue}) AND ({afterValue} IS NULL OR {statement.Id} > {afterValue})
+                ORDER BY {statement.Id}
+                LIMIT {size}
+                """;
+            return await context.Database.SqlQueryRaw<ReadModelCandidate>(sql, [.. statement.Parameters]).ToListAsync(ct);
+        }
+    }
+
+    public async Task<int> MarkMissingAsync(IReadOnlyCollection<ReadModelCandidate> rows, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+
+        var (context, statement) = Prepare();
+        await using (statement)
+        {
+            var reason = statement.Column(nameof(IReadModel.TerminalReason));
+            var at = statement.Column(nameof(IReadModel.TerminalAt));
+            var confirmed = statement.Parameter(nameof(IReadModel.TerminalReason), ReadModelTerminalReason.ConfirmedMissing);
+
+            // 版本也要对得上：选为候选之后被实时事件更新过的行不动
+            var sql = $"""
+                UPDATE {statement.Table} AS r
+                SET {statement.Terminal} = true, {reason} = {confirmed}, {at} = clock_timestamp(), {statement.Synced} = clock_timestamp()
+                FROM unnest(@ids, @versions) AS m("Id", "SourceVersion")
+                WHERE r.{statement.Id} = m."Id" AND r.{statement.Version} = m."SourceVersion" AND NOT r.{statement.Terminal}
+                """;
+            object[] parameters =
+            [
+                .. statement.Parameters,
+                new NpgsqlParameter("ids", NpgsqlDbType.Array | NpgsqlDbType.Uuid) { Value = rows.Select(r => r.Id).ToArray() },
+                new NpgsqlParameter("versions", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = rows.Select(r => r.SourceVersion).ToArray() },
+            ];
+            return await context.Database.ExecuteSqlRawAsync(sql, parameters, ct);
+        }
+    }
+
+    private static async Task<bool> ExecuteAsync(ModuleDbContext context, ReadModelStatement statement, string sql, CancellationToken ct) =>
         await context.Database.ExecuteSqlRawAsync(sql, statement.Parameters, ct) == 1;
 
-    private (ModuleDbContext Context, Statement Statement) Prepare(T row)
+    private (ModuleDbContext Context, ReadModelStatement Statement) Prepare(T row)
     {
         ArgumentNullException.ThrowIfNull(row);
 
+        var (context, entity) = Entity();
+        return (context, new ReadModelStatement(entity, context.Database.GetDbConnection().CreateCommand(), row));
+    }
+
+    private (ModuleDbContext Context, ReadModelStatement Statement) Prepare()
+    {
+        var (context, entity) = Entity();
+        return (context, new ReadModelStatement(entity, context.Database.GetDbConnection().CreateCommand()));
+    }
+
+    private (ModuleDbContext Context, IEntityType Entity) Entity()
+    {
         var context = contexts.Get(ModuleNames.Of(typeof(T)));
         var entity = context.Model.FindEntityType(typeof(T))
             ?? throw new InvalidOperationException($"{typeof(T).Name} 没有映射到 {context.Module} 模块的上下文里。");
-        return (context, new Statement(entity, context.Database.GetDbConnection().CreateCommand(), row));
-    }
-
-    /// <summary>
-    /// 一条写入语句的列和参数
-    /// </summary>
-    private sealed class Statement : IAsyncDisposable
-    {
-        private readonly IEntityType _entity;
-        private readonly StoreObjectIdentifier _table;
-
-        // 只用来按 EF 的类型映射创建参数，不执行
-        private readonly DbCommand _factory;
-        private readonly List<DbParameter> _parameters = [];
-
-        public Statement(IEntityType entity, DbCommand factory, T row)
-        {
-            _entity = entity;
-            _factory = factory;
-            _table = StoreObjectIdentifier.Table(entity.GetTableName() ?? entity.ClrType.Name, entity.GetSchema());
-
-            var data = entity.GetProperties().Where(p => !_managed.Contains(p.Name, StringComparer.Ordinal)).ToList();
-            Columns = string.Join(", ", data.Select(ColumnOf));
-            Values = string.Join(", ", data.Select(p => Parameter(p, p.PropertyInfo?.GetValue(row))));
-            Updatable = [.. data.Where(p => !string.Equals(p.Name, nameof(IReadModel.Id), StringComparison.Ordinal)).Select(ColumnOf)];
-        }
-
-        public string Table => $"\"{_entity.GetSchema()}\".\"{_entity.GetTableName()}\"";
-
-        public string Columns { get; }
-
-        public string Values { get; }
-
-        public IReadOnlyList<string> Updatable { get; }
-
-        public string Overwrite => string.Join(", ", Updatable.Select(c => $"{c} = EXCLUDED.{c}"));
-
-        public string Id => Column(nameof(IReadModel.Id));
-
-        public string Version => Column(nameof(IReadModel.SourceVersion));
-
-        public string Terminal => Column(nameof(IReadModel.IsTerminal));
-
-        public string Synced => Column(nameof(IReadModel.SyncedAt));
-
-        public IReadOnlyList<DbParameter> Parameters => _parameters;
-
-        public string Column(string property) => ColumnOf(Property(property));
-
-        public string Parameter(string property, object? value) => Parameter(Property(property), value);
-
-        public ValueTask DisposeAsync() => _factory.DisposeAsync();
-
-        private IProperty Property(string name) =>
-            _entity.FindProperty(name) ?? throw new InvalidOperationException($"{_entity.ClrType.Name} 没有映射 {name}。");
-
-        private string ColumnOf(IProperty property) => $"\"{property.GetColumnName(_table)}\"";
-
-        private string Parameter(IProperty property, object? value)
-        {
-            var name = $"p{_parameters.Count}";
-            _parameters.Add(property.GetRelationalTypeMapping().CreateParameter(_factory, name, value, property.IsNullable));
-            return "@" + name;
-        }
+        return (context, entity);
     }
 }

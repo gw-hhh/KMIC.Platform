@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,7 @@ public static class MessagingServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         AddListener(services);
+        services.TryAddScoped<IJobHandler<ReadModelRebuildJob>, ReadModelRebuildHandler>();
         services.AddHostedService<JobWorker>();
         return services;
     }

@@ -37,7 +37,7 @@ public sealed class BackgroundJobCatalog
     public static BackgroundJobCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
-        return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()));
+        return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()).Append(typeof(ReadModelRebuildJob)));
     }
 
     internal static BackgroundJobCatalog Build(IEnumerable<Type> types)
@@ -93,6 +93,12 @@ public sealed class BackgroundJobCatalog
         if ((attribute.Permission.Length > 0) == attribute.SystemOnly)
         {
             problems.Add($"作业 {name} 要么写 Permission（用户提交），要么写 SystemOnly = true（只能系统提交），只能选一个。");
+        }
+
+        // 框架自己的作业，处理器在基础设施层，由那边注册
+        if (type.Assembly == typeof(BackgroundJobCatalog).Assembly)
+        {
+            return new BackgroundJobType(name, attribute.Version, type, module, null, attribute);
         }
 
         if (handlers.Count != 1)

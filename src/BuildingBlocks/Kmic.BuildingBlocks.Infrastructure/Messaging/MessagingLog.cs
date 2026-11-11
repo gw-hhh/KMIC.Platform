@@ -30,4 +30,13 @@ internal static partial class MessagingLog
 
     [LoggerMessage(EventId = 2108, Level = LogLevel.Warning, Message = "Database unavailable for messaging loop, retrying in {DelaySeconds} s")]
     public static partial void LoopDatabaseUnavailable(ILogger logger, Exception exception, double delaySeconds);
+
+    [LoggerMessage(EventId = 2109, Level = LogLevel.Warning, Message = "Rebuild of {Subscription} found {Count} terminal rows that the source still returns, leaving them unchanged")]
+    public static partial void RebuildTerminalRowsReturned(ILogger logger, string subscription, int count);
+
+    [LoggerMessage(EventId = 2110, Level = LogLevel.Warning, Message = "Rebuild of {Subscription} paused: at least {Missing} rows are missing at the source, over the limit of {Limit}")]
+    public static partial void RebuildPaused(ILogger logger, string subscription, long missing, long limit);
+
+    [LoggerMessage(EventId = 2111, Level = LogLevel.Information, Message = "Rebuild of {Subscription} finished: {Scanned} rows scanned, {Marked} marked as gone")]
+    public static partial void RebuildFinished(ILogger logger, string subscription, long scanned, long marked);
 }

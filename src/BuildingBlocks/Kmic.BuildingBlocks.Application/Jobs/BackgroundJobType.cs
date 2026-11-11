@@ -7,9 +7,9 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// <param name="Version">参数版本</param>
 /// <param name="ClrType">参数类型</param>
 /// <param name="Module">所属模块</param>
-/// <param name="HandlerType">处理器类型</param>
+/// <param name="HandlerType">处理器类型，框架自己的作业为空</param>
 /// <param name="Attribute">声明</param>
-internal sealed record BackgroundJobType(string Name, int Version, Type ClrType, string Module, Type HandlerType, BackgroundJobAttribute Attribute)
+internal sealed record BackgroundJobType(string Name, int Version, Type ClrType, string Module, Type? HandlerType, BackgroundJobAttribute Attribute)
 {
     /// <summary>
     /// 处理器接口，如 IJobHandler&lt;ImportSamples&gt;

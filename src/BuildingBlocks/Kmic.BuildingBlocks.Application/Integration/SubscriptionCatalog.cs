@@ -77,12 +77,12 @@ public sealed class SubscriptionCatalog
             problems.Add($"订阅 {name} 订阅了本模块自己发布的 {message.Name}，模块内部要用领域事件。");
         }
 
-        if (declared.Options.RebuildSource is { } source && !SubscriptionOptions.IsSnapshotSource(source))
+        if (declared.Options.Rebuild is { } rebuild && !string.Equals(ModuleNames.Of(rebuild.ReadModel), module, StringComparison.Ordinal))
         {
-            problems.Add($"订阅 {name} 的重建来源 {source.Name} 要是继承 ISnapshotSource<T> 的接口。");
+            problems.Add($"订阅 {name} 重建的读模型 {rebuild.ReadModel.Name} 要在 {module} 模块里。");
         }
 
-        return new SubscriptionDefinition(name, module, message, declared.CommandType, declared.Map, declared.Options.IsOrdered, declared.Options.RebuildSource);
+        return new SubscriptionDefinition(name, module, message, declared.CommandType, declared.Map, declared.Options.IsOrdered, declared.Options.Rebuild);
     }
 
     // 同一个订阅可以分别处理同一种消息的几个版本，但不能混订不同的消息
@@ -97,6 +97,13 @@ public sealed class SubscriptionCatalog
             else if (group.GroupBy(s => s.Message.Version).Any(v => v.Count() > 1))
             {
                 problems.Add($"订阅“{group.Key}”对同一个消息版本声明了两次。");
+            }
+
+            // 重建按订阅名排队，几个消息版本都写了重建的话，读模型和来源要是同一个
+            var rebuilds = group.Select(s => s.Rebuild).OfType<IReadModelRebuild>().ToList();
+            if (rebuilds.Select(r => (r.ReadModel, r.Source)).Distinct().Count() > 1)
+            {
+                problems.Add($"订阅“{group.Key}”的几个消息版本声明了不同的重建方式，要写成同一个读模型和同一个来源。");
             }
         }
     }

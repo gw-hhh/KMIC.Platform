@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Contracts.Snapshots;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
@@ -12,10 +13,7 @@ public sealed class SubscriptionOptions
     /// </summary>
     public bool IsOrdered { get; private set; }
 
-    /// <summary>
-    /// 重建读模型时拉取快照的接口
-    /// </summary>
-    public Type? RebuildSource { get; private set; }
+    internal IReadModelRebuild? Rebuild { get; private set; }
 
     /// <summary>
     /// 同一个顺序键的消息按发布顺序处理
@@ -30,17 +28,21 @@ public sealed class SubscriptionOptions
     }
 
     /// <summary>
-    /// 订阅第一次登记或运维要求时，从这个接口拉取全部快照重建读模型
+    /// 订阅第一次登记或运维要求时，从源模块拉取全部快照重建读模型
     /// </summary>
-    public SubscriptionOptions RebuildWith<TSource>()
-        where TSource : class
+    /// <remarks>
+    /// 映射要和这个订阅的同步命令用同一份，免得实时同步和重建写出不一样的行
+    /// </remarks>
+    /// <typeparam name="TSource">源模块提供的快照来源接口</typeparam>
+    /// <typeparam name="TSnapshot">快照类型</typeparam>
+    /// <typeparam name="TRow">本模块的读模型</typeparam>
+    /// <param name="toRow">把快照转成读模型的一行</param>
+    public SubscriptionOptions RebuildWith<TSource, TSnapshot, TRow>(Func<SnapshotItem<TSnapshot>, TRow> toRow)
+        where TSource : class, ISnapshotSource<TSnapshot>
+        where TRow : class, IReadModel
     {
-        RebuildSource = typeof(TSource);
+        ArgumentNullException.ThrowIfNull(toRow);
+        Rebuild = new ReadModelRebuild<TSource, TSnapshot, TRow>(toRow);
         return this;
     }
-
-    internal static bool IsSnapshotSource(Type type) =>
-        type.IsInterface && (IsSnapshotSourceType(type) || type.GetInterfaces().Any(IsSnapshotSourceType));
-
-    private static bool IsSnapshotSourceType(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISnapshotSource<>);
 }

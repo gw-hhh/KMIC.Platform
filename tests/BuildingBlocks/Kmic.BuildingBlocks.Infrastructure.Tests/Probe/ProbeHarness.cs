@@ -4,6 +4,7 @@ using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
+using Kmic.BuildingBlocks.Contracts.References;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
@@ -37,18 +38,15 @@ internal sealed class ProbeHarness : IAsyncDisposable
         string connectionString,
         Action<DatabaseOptions>? configure = null,
         Action<MessagingOptions>? messaging = null,
-        Action<IServiceCollection>? services = null)
+        Action<IServiceCollection>? services = null,
+        bool withRebuild = false)
     {
         var collection = new ServiceCollection();
         collection.AddSingleton<TimeProvider>(Time);
         collection.AddSingleton<ISecurityEventWriter>(SecurityEvents);
         collection.AddKmicApplication([typeof(ProbeScopes).Assembly, typeof(EchoHooks).Assembly]);
 
-        // Echo 有序处理 Probe 发布的单据快照
-        collection.AddKmicSubscriptions("Echo", m => m.Subscribe<TicketChanged, MirrorTicketCommand>(
-            MirrorSubscription,
-            (e, envelope) => new MirrorTicketCommand(e.Ticket.Id, e.Ticket.Title, envelope.SourceVersion ?? 0),
-            o => o.Ordered()));
+        AddEchoSubscription(collection, withRebuild);
         collection.AddSingleton(Echo);
         collection.AddKmicScheduling("BuildingBlocks", s => s.Schedule(
             DailyStamp, "0 0 7 * * ?", run => new StampTicketsCommand(run.ScheduledFireTime), o => o.DisplayName("每日盖章")));
@@ -99,6 +97,11 @@ internal sealed class ProbeHarness : IAsyncDisposable
     public EchoHooks Echo { get; } = new();
 
     /// <summary>
+    /// Echo 重建读模型时拉取快照的来源，数据由测试摆放
+    /// </summary>
+    public FakeTicketSource TicketSource { get; } = new();
+
+    /// <summary>
     /// 作业执行时按它重新加载提交人的身份
     /// </summary>
     public TestAccessContextLoader Access { get; } = new();
@@ -144,4 +147,27 @@ internal sealed class ProbeHarness : IAsyncDisposable
     }
 
     public ValueTask DisposeAsync() => _services.DisposeAsync();
+
+    // Echo 有序处理 Probe 发布的单据快照，可重建时还声明怎样从来源重建读模型
+    private void AddEchoSubscription(ServiceCollection collection, bool withRebuild)
+    {
+        collection.AddKmicSubscriptions("Echo", m => m.Subscribe<TicketChanged, MirrorTicketCommand>(
+            MirrorSubscription,
+            (e, envelope) => new MirrorTicketCommand(e.Ticket.Id, e.Ticket.Title, envelope.SourceVersion ?? 0),
+            o =>
+            {
+                o.Ordered();
+                if (withRebuild)
+                {
+                    o.RebuildWith<ITicketSnapshotSource, TicketSnapshot, TicketSummary>(item => new TicketSummary
+                    {
+                        Id = item.Snapshot.Id,
+                        SourceVersion = item.SourceVersion,
+                        Status = ReferenceStatus.Active,
+                        Title = item.Snapshot.Title,
+                    });
+                }
+            }));
+        collection.AddSingleton<ITicketSnapshotSource>(TicketSource);
+    }
 }

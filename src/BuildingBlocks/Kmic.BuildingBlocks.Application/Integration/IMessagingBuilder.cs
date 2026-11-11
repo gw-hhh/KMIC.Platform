@@ -16,7 +16,7 @@ public interface IMessagingBuilder
     /// </remarks>
     /// <param name="name">订阅名，以本模块名开头，如 Quotation.SyncCustomerSummary</param>
     /// <param name="map">把消息转成命令</param>
-    /// <param name="configure">有序处理、重建方式</param>
+    /// <param name="configure">有序处理、读模型的重建方式</param>
     void Subscribe<TMessage, TCommand>(string name, Func<TMessage, MessageEnvelope, TCommand> map, Action<SubscriptionOptions>? configure = null)
         where TMessage : class, IIntegrationMessage
         where TCommand : ICommand;

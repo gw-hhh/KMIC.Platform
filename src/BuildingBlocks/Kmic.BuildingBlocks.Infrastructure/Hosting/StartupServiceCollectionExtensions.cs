@@ -24,6 +24,7 @@ public static class StartupServiceCollectionExtensions
         services.TryAddSingleton<StartupState>();
         services.AddHostedService<StartupTaskRunner>();
         services.AddScoped<IStartupTask, RegisterMessageRoutesTask>();
+        services.AddScoped<IStartupTask, QueueReadModelRebuildsTask>();
         return services;
     }
 }

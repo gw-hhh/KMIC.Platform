@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
+using Kmic.BuildingBlocks.Infrastructure.Numbering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,6 +22,10 @@ internal static class FrameworkTables
 
     public const string Jobs = "BackgroundJob";
 
+    public const string RebuildRuns = nameof(ReadModelRebuildRun);
+
+    public const string NumberCounters = "NumberCounter";
+
     // 只索引还没完成的消息：接收方删除对象前只关心这些
     private const string UnfinishedWithSubjects = """
         "SubjectIds" IS NOT NULL AND "Status" IN (0, 1, 3)
@@ -41,6 +46,11 @@ internal static class FrameworkTables
 
     private const string Finished = """
         "ExpiresAt" IS NOT NULL
+        """;
+
+    // 同一个订阅同时只能有一轮没结束的重建
+    private const string ActiveRun = """
+        "Status" IN (0, 1)
         """;
 
     private const string Unfinished = """
@@ -88,6 +98,27 @@ internal static class FrameworkTables
         });
 
         modelBuilder.Entity<BackgroundJobRecord>(MapJobs);
+        modelBuilder.Entity<NumberCounterRecord>(MapNumberCounters);
+        modelBuilder.Entity<ReadModelRebuildRun>(MapRebuildRuns);
+    }
+
+    private static void MapNumberCounters(EntityTypeBuilder<NumberCounterRecord> counter)
+    {
+        counter.ToTable(NumberCounters, t => t.HasComment("业务编号的计数"));
+        counter.HasKey(c => new { c.Rule, c.PeriodKey, c.PartitionKey });
+        counter.Property(c => c.Rule).HasMaxLength(100);
+        counter.Property(c => c.PeriodKey).HasMaxLength(8);
+        counter.Property(c => c.PartitionKey).HasMaxLength(10);
+    }
+
+    private static void MapRebuildRuns(EntityTypeBuilder<ReadModelRebuildRun> run)
+    {
+        run.ToTable(RebuildRuns, t => t.HasComment("读模型的重建轮次"));
+        run.Property(r => r.Id).ValueGeneratedNever();
+        run.Property(r => r.Subscription).HasMaxLength(200);
+        run.Property(r => r.ReadModel).HasMaxLength(200);
+        run.Property(r => r.StartedAt).HasDefaultValueSql("clock_timestamp()");
+        run.HasIndex(r => r.Subscription).IsUnique().HasFilter(ActiveRun);
     }
 
     private static void MapJobs(EntityTypeBuilder<BackgroundJobRecord> job)
