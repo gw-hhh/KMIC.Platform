@@ -29,6 +29,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
         services.AddKmicPersistence(o =>
         {
             o.ConnectionString = connectionString;
+            o.CheckQueryVisibility = true;
             configure?.Invoke(o);
         });
         services.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();

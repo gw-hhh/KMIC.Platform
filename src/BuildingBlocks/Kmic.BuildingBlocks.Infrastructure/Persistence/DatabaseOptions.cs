@@ -20,6 +20,11 @@ public sealed class DatabaseOptions
     public string ConnectionString { get; set; } = "";
 
     /// <summary>
+    /// 是否检查“命令修改后再查询本模块”：开发与测试环境打开，生产环境关闭（每次查询多一次变更检测）
+    /// </summary>
+    public bool CheckQueryVisibility { get; set; }
+
+    /// <summary>
     /// HTTP 请求使用的连接池，默认合计 50
     /// </summary>
     public DatabasePoolOptions Api { get; set; } = new() { TxMaxPoolSize = 30, ReadMaxPoolSize = 20 };

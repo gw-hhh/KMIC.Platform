@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
@@ -33,6 +34,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<CommandTransaction>();
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
         services.TryAddScoped<DomainEventDispatcher>();
+        services.TryAddScoped<QueryVisibilityGuard>();
         return services;
     }
 
@@ -57,9 +59,15 @@ public static class PersistenceServiceCollectionExtensions
         services.AddDbContext<TContext>((provider, options) =>
             AddFrameworkExtensions(options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider)))));
         services.AddDbContext<TQueryContext>((provider, options) =>
+        {
             AddFrameworkExtensions(options.UseNpgsql(
                 provider.GetRequiredService<DataSources>().Reads(EntryOrigin(provider)),
-                npgsql => npgsql.ExecutionStrategy(dependencies => new QueryRetryStrategy(dependencies)))));
+                npgsql => npgsql.ExecutionStrategy(dependencies => new QueryRetryStrategy(dependencies))));
+            if (provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.CheckQueryVisibility)
+            {
+                options.AddInterceptors(provider.GetRequiredService<QueryVisibilityGuard>());
+            }
+        });
         services.AddScoped<TQueryDb>(provider => provider.GetRequiredService<TQueryContext>());
         services.AddSingleton(new ModuleWriteContext(ModuleNames.Of(typeof(TContext)), typeof(TContext)));
         return services;
