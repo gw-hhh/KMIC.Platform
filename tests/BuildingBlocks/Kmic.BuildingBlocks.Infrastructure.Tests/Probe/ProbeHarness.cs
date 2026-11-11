@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
+using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
@@ -11,6 +12,7 @@ using Kmic.BuildingBlocks.Testing.Identity;
 using Kmic.BuildingBlocks.Testing.Security;
 using Kmic.Echo.Probe;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
@@ -24,36 +26,42 @@ internal sealed class ProbeHarness : IAsyncDisposable
 
     private readonly ServiceProvider _services;
 
-    public ProbeHarness(string connectionString, Action<DatabaseOptions>? configure = null, Action<MessagingOptions>? messaging = null)
+    public ProbeHarness(
+        string connectionString,
+        Action<DatabaseOptions>? configure = null,
+        Action<MessagingOptions>? messaging = null,
+        Action<IServiceCollection>? services = null)
     {
-        var services = new ServiceCollection();
-        services.AddSingleton<TimeProvider>(Time);
-        services.AddSingleton<ISecurityEventWriter>(SecurityEvents);
-        services.AddKmicApplication([typeof(ProbeScopes).Assembly, typeof(EchoHooks).Assembly]);
+        var collection = new ServiceCollection();
+        collection.AddSingleton<TimeProvider>(Time);
+        collection.AddSingleton<ISecurityEventWriter>(SecurityEvents);
+        collection.AddKmicApplication([typeof(ProbeScopes).Assembly, typeof(EchoHooks).Assembly]);
 
         // Echo 有序处理 Probe 发布的单据快照
-        services.AddKmicSubscriptions("Echo", m => m.Subscribe<TicketChanged, MirrorTicketCommand>(
+        collection.AddKmicSubscriptions("Echo", m => m.Subscribe<TicketChanged, MirrorTicketCommand>(
             MirrorSubscription,
             (e, envelope) => new MirrorTicketCommand(e.Ticket.Id, e.Ticket.Title, envelope.SourceVersion ?? 0),
             o => o.Ordered()));
-        services.AddSingleton(Echo);
-        services.AddKmicMessagingWorker();
-        services.AddKmicPersistence(o =>
+        collection.AddSingleton(Echo);
+        collection.AddKmicStartupTasks();
+        collection.AddKmicMessagingWorker();
+        services?.Invoke(collection);
+        collection.AddKmicPersistence(o =>
         {
             o.ConnectionString = connectionString;
             o.CheckQueryVisibility = true;
             configure?.Invoke(o);
         });
-        services.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();
-        services.AddModuleDbContexts<EchoDbContext, EchoQueryDbContext, IEchoQueryDb>();
-        services.Configure<MessagingOptions>(o => messaging?.Invoke(o));
-        services.AddScoped<TicketRepository>();
-        services.AddScoped<IDomainEventHandler<TicketClosed>, TicketClosedHandler>();
-        services.AddSingleton(Hooks);
-        services.AddLogging();
+        collection.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();
+        collection.AddModuleDbContexts<EchoDbContext, EchoQueryDbContext, IEchoQueryDb>();
+        collection.Configure<MessagingOptions>(o => messaging?.Invoke(o));
+        collection.AddScoped<TicketRepository>();
+        collection.AddScoped<IDomainEventHandler<TicketClosed>, TicketClosedHandler>();
+        collection.AddSingleton(Hooks);
+        collection.AddLogging();
 
         // 选项必须是编译期常量，源码生成器要读取。数组顺序就是执行顺序
-        services.AddMediator(options =>
+        collection.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
             options.GenerateTypesAsInternal = true;
@@ -67,7 +75,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
                 typeof(TransactionBehavior<,>),
             ];
         });
-        _services = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
+        _services = collection.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
     }
 
     public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 11, 10, 2, 0, 0, TimeSpan.Zero));
@@ -97,6 +105,25 @@ internal sealed class ProbeHarness : IAsyncDisposable
         work.Db.Add(ticket);
         await work.SaveAsync();
         return ticket;
+    }
+
+    /// <summary>
+    /// 像宿主一样按注册顺序启动后台服务：先执行启动任务，再开始后台循环
+    /// </summary>
+    public async Task StartHostedServicesAsync(CancellationToken ct)
+    {
+        foreach (var service in _services.GetServices<IHostedService>())
+        {
+            await service.StartAsync(ct);
+        }
+    }
+
+    public async Task StopHostedServicesAsync(CancellationToken ct)
+    {
+        foreach (var service in _services.GetServices<IHostedService>().Reverse())
+        {
+            await service.StopAsync(ct);
+        }
     }
 
     public ValueTask DisposeAsync() => _services.DisposeAsync();

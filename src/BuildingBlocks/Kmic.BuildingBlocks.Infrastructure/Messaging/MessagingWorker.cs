@@ -1,8 +1,6 @@
 using System.Data.Common;
-using System.Reflection;
-using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
-using Kmic.BuildingBlocks.Infrastructure.Persistence;
+using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,7 +20,7 @@ internal sealed class MessagingWorker(
     InboxProcessor processor,
     ModuleMessageTables tables,
     SubscriptionCatalog subscriptions,
-    DataSources dataSources,
+    StartupState startup,
     TimeProvider time,
     IOptions<MessagingOptions> options,
     ILogger<MessagingWorker> logger) : BackgroundService
@@ -31,9 +29,8 @@ internal sealed class MessagingWorker(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // 路由要先登记再投递，这样新订阅从第一条消息起就收得到。启动任务就绪后挪过去
-        await new MessageRoutes(dataSources.Transactions(CallOrigin.Startup)).RegisterAsync(
-            MessageRoutes.Declared(subscriptions), MessageRoutes.Retirements(subscriptions), Build, stoppingToken);
+        // 订阅路由登记等启动任务完成后才开始投递
+        await startup.WaitAsync(stoppingToken);
 
         // 停机时先不再领取；进行中的处理给一段时间做完，超时才取消，事务回滚后由别的实例接管
         using var processing = new CancellationTokenSource();
@@ -62,9 +59,6 @@ internal sealed class MessagingWorker(
             listener.Stop();
         }
     }
-
-    private static string Build =>
-        Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
 
     private async Task RunAsync(Func<CancellationToken, Task<int>> batch, AsyncSignal signal, CancellationToken stopping, CancellationToken processing)
     {
