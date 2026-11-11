@@ -6,6 +6,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 using Kmic.BuildingBlocks.Domain.Events;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Mediator;
@@ -53,6 +54,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             context.ChangeTracker.Clear();
             transaction.Discard();
             services.GetRequiredService<OutboxWriter>().Discard();
+            services.GetRequiredService<AuditRecorder>().Discard();
             throw;
         }
     }
@@ -74,6 +76,12 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         {
             await RollBackAsync(context, transaction);
             return response;
+        }
+
+        if (catalog.Get(typeof(TMessage)) is { Audited: true } audited)
+        {
+            // 变更要在保存之前采集，保存之后跟踪器里就没有原值了
+            services.GetRequiredService<AuditRecorder>().Publish(context, audited);
         }
 
         using (context.Services.SaveGate.Open())
@@ -147,6 +155,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         context.ChangeTracker.Clear();
         transaction.Discard();
         services.GetRequiredService<OutboxWriter>().Discard();
+        services.GetRequiredService<AuditRecorder>().Discard();
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "提交后的动作失败了也没关系，只记警告，不能影响已提交的结果")]

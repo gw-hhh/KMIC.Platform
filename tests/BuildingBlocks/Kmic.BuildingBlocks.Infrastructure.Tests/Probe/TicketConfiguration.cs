@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,7 +12,8 @@ internal sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.ToTable(t => t.HasComment("测试单据；Probe 模块；一行代表一张单据；可软删除"));
         builder.Property(t => t.Number).HasMaxLength(20).IsCaseInsensitive();
         builder.HasIndex(t => t.Number).IsUnique().MapsToError(TicketErrors.NumberDuplicated);
-        builder.Property(t => t.ContactEmail).HasMaxLength(256);
+        builder.Property(t => t.ContactEmail).HasMaxLength(256).AuditMasked(AuditMask.Email);
+        builder.Property(t => t.AccessTokenHash).HasMaxLength(100).AuditHidden();
         builder.ComplexProperty(t => t.Budget, budget =>
         {
             budget.Property(m => m.Amount).HasPrecision(Precisions.Amount);

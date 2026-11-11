@@ -516,6 +516,12 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                         .HasColumnType("uuid")
                         .HasComment("ID");
 
+                    b.Property<string>("AccessTokenHash")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasComment("访问令牌的哈希")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
@@ -529,7 +535,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                     b.Property<string>("ContactEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasComment("联系邮箱");
+                        .HasComment("联系邮箱")
+                        .HasAnnotation("Kmic:AuditMode", "Masked:Email");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")

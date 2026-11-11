@@ -59,6 +59,11 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     public string? Note { get; private set; }
 
     /// <summary>
+    /// 访问令牌的哈希
+    /// </summary>
+    public string? AccessTokenHash { get; private set; }
+
+    /// <summary>
     /// 状态
     /// </summary>
     public TicketStatus Status { get; private set; } = TicketStatus.Open;
@@ -106,6 +111,8 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     }
 
     public void Escalate() => Priority = TicketPriority.Urgent;
+
+    public void RotateToken(string hash) => AccessTokenHash = hash;
 
     public void ContactAt(EmailAddress email) => ContactEmail = email;
 

@@ -80,7 +80,7 @@ internal static class SaveRules
         return roots;
     }
 
-    private static EntityEntry RootOf(DbContext context, EntityEntry entry)
+    public static EntityEntry RootOf(DbContext context, EntityEntry entry)
     {
         var current = entry;
         while (current.Entity is not IAggregateRoot)

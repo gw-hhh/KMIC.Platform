@@ -25,6 +25,7 @@ public sealed class ModelValidationTests
             p => p.ShouldContain(m => m.StartsWith("Gadget.Ratio：不能用 float 或 double", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget.MadeAt：不能用 DateTime", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget.Name：字符串没有设置最大长度", StringComparison.Ordinal)),
+            p => p.ShouldContain(m => m.StartsWith("Gadget.PasswordHash：名字里有 Password、Token、Secret 或 Hash", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：表名 Gadgets 必须与实体类名 Gadget 相同", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：有所属人或所属组织，要调用 HasDataScope 或 HasNoDataScope", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：唯一索引（Name）没有指定 MapsToError", StringComparison.Ordinal)),

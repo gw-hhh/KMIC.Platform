@@ -26,6 +26,8 @@ internal sealed class Gadget : AggregateRoot<TicketId>, IHasOwner
 
     public string Name { get; private set; } = "";
 
+    public string PasswordHash { get; private set; } = "";
+
     public Widget? Widget { get; private set; }
 
     public IReadOnlyList<GadgetPart> Parts => _parts;

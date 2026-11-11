@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Domain.Entities;
+using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -14,6 +15,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// </remarks>
 internal static class ModelValidator
 {
+    private static readonly string[] _secretWords = ["Password", "Token", "Secret", "Hash"];
+
     public static void Validate(IReadOnlyModel model, string module, DataScopeObjectCatalog scopeObjects)
     {
         var problems = new List<string>();
@@ -50,6 +53,7 @@ internal static class ModelValidator
         if (EntityKinds.IsBusinessEntity(entityType.ClrType))
         {
             ValidateComments(entityType, name, problems);
+            ValidateAuditMarks(entityType, name, problems);
             foreach (var index in entityType.GetDeclaredIndexes().Where(i => i.IsUnique && i.FindAnnotation(ModelAnnotations.UniqueError) is null))
             {
                 problems.Add($"{name}：唯一索引（{string.Join(", ", index.Properties.Select(p => p.Name))}）没有指定 MapsToError。");
@@ -102,6 +106,19 @@ internal static class ModelValidator
         }
     }
 
+
+    // 名字里有这些词的字段多半是密钥类数据，审计记录里不能出现它们的值，要明确标出来
+    private static void ValidateAuditMarks(IReadOnlyEntityType entityType, string name, List<string> problems)
+    {
+        foreach (var (path, property, _) in AllProperties(entityType, name, inJson: false))
+        {
+            if (_secretWords.Any(w => property.Name.Contains(w, StringComparison.Ordinal))
+                && AuditAnnotations.ModeOf(property) is not (AuditAnnotations.Hidden or AuditAnnotations.Excluded))
+            {
+                problems.Add($"{path}：名字里有 Password、Token、Secret 或 Hash，要用 AuditHidden() 标出来，审计记录里不能出现它的值。");
+            }
+        }
+    }
     private static void ValidateProperty(string location, IReadOnlyProperty property, bool inJson, List<string> problems)
     {
         // 按存储类型判断：单值值对象存的是它包装的原始值
