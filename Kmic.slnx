@@ -15,5 +15,6 @@
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Domain.Tests/Kmic.BuildingBlocks.Domain.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Kmic.BuildingBlocks.Infrastructure.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Testing.Tests/Kmic.BuildingBlocks.Testing.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Kmic.Echo.Probe/Kmic.Echo.Probe.csproj" />
   </Folder>
 </Solution>

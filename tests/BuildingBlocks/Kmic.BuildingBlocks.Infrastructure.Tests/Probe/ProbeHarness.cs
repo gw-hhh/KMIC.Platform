@@ -9,13 +9,14 @@ using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 using Kmic.BuildingBlocks.Testing.Identity;
 using Kmic.BuildingBlocks.Testing.Security;
+using Kmic.Echo.Probe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 按真实宿主的方式注册 Probe 模块，每个工作单元一个依赖注入作用域
+/// 按真实宿主的方式注册 Probe、Echo 两个模块，每个工作单元一个依赖注入作用域
 /// </summary>
 internal sealed class ProbeHarness : IAsyncDisposable
 {
@@ -34,6 +35,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
             configure?.Invoke(o);
         });
         services.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();
+        services.AddModuleDbContexts<EchoDbContext, EchoQueryDbContext, IEchoQueryDb>();
         services.Configure<MessagingOptions>(o => messaging?.Invoke(o));
         services.AddScoped<TicketRepository>();
         services.AddScoped<IDomainEventHandler<TicketClosed>, TicketClosedHandler>();

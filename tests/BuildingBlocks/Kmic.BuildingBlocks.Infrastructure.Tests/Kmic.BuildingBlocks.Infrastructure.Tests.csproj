@@ -19,5 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
+    <ProjectReference Include="../Kmic.Echo.Probe/Kmic.Echo.Probe.csproj" />
   </ItemGroup>
 </Project>

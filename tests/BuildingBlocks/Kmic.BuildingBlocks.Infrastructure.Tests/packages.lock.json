@@ -561,6 +561,12 @@
           "xunit.v3.extensibility.core": "[4.0.2, )"
         }
       },
+      "kmic.echo.probe": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )"
+        }
+      },
       "FluentValidation": {
         "type": "CentralTransitive",
         "requested": "[12.2.0, )",

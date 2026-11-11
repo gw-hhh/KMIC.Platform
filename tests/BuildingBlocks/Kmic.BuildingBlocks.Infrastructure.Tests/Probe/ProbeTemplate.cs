@@ -1,12 +1,13 @@
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Testing.Database;
+using Kmic.Echo.Probe;
 using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 /// <summary>
-/// 本测试项目的模板库：和生产一样通过迁移建立结构，另建一个运行账号供权限测试用
+/// 本测试项目的模板库：Probe、Echo 两个模块和生产一样通过迁移建立结构，另建一个运行账号供权限测试用
 /// </summary>
 public sealed class ProbeTemplate : PostgresTemplateDatabase
 {
@@ -42,6 +43,7 @@ public sealed class ProbeTemplate : PostgresTemplateDatabase
 
         await ModuleMigrator.PrepareDatabaseAsync(connectionString, ct);
         await ModuleMigrator.MigrateAsync<ProbeDbContext>(connectionString, ct);
+        await ModuleMigrator.MigrateAsync<EchoDbContext>(connectionString, ct);
 
         // 路由表属于 Operations 模块，框架测试里没有这个模块，直接建表
         await using (var connection = new NpgsqlConnection(connectionString))

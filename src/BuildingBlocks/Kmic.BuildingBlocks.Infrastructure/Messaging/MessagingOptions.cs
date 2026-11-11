@@ -19,4 +19,39 @@ public sealed class MessagingOptions
     /// 一个事务写入 Outbox 的上限（字节）
     /// </summary>
     public int MaxOutboxBytesPerTransaction { get; set; } = 1024 * 1024;
+
+    /// <summary>
+    /// 投递时每次领取的条数
+    /// </summary>
+    public int OutboxBatchSize { get; set; } = 100;
+
+    /// <summary>
+    /// 投递时领取后的占用时长
+    /// </summary>
+    public TimeSpan OutboxLease { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// 第一次重试前的等待时长
+    /// </summary>
+    public TimeSpan RetryBaseDelay { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// 每次重试等待时长的倍数
+    /// </summary>
+    public double RetryFactor { get; set; } = 2;
+
+    /// <summary>
+    /// 重试等待时长的上限
+    /// </summary>
+    public TimeSpan RetryMaxDelay { get; set; } = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// 最多尝试次数，用完进入死信
+    /// </summary>
+    public int MaxAttempts { get; set; } = 10;
+
+    /// <summary>
+    /// 等待时长的随机浮动比例
+    /// </summary>
+    public double RetryJitter { get; set; } = 0.2;
 }

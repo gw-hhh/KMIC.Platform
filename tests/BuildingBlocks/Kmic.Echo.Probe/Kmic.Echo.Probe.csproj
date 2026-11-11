@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    框架测试用的第二个模块（模块名按程序集名推出为 Echo），用来测试跨模块的投递与处理。
+    只给 Kmic.BuildingBlocks.Infrastructure.Tests 引用
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Infrastructure.Tests" />
+  </ItemGroup>
+</Project>
