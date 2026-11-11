@@ -122,6 +122,12 @@ public static class CommonErrors
         Error.Conflict("Common.JobTimedOut", "任务运行时间太长被停止，请缩小范围后重新提交；已经完成的部分会保留");
 
     /// <summary>
+    /// 导出的行数超过上限
+    /// </summary>
+    public static readonly Error ExportTooLarge =
+        Error.Conflict("Common.ExportTooLarge", "要导出的数据太多，请缩小筛选范围后重新导出");
+
+    /// <summary>
     /// 数据库空间不足
     /// </summary>
     public static readonly Error MessagingSuspended =

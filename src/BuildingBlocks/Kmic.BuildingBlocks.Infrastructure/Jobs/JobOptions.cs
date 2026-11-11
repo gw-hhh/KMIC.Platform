@@ -41,6 +41,11 @@ public sealed class JobOptions
     public TimeSpan ResultRetention { get; set; } = TimeSpan.FromDays(7);
 
     /// <summary>
+    /// 导出的行数上限，超过时作业失败，提示缩小筛选范围
+    /// </summary>
+    public int ExportMaxRows { get; set; } = 100_000;
+
+    /// <summary>
     /// 进度写入的最短间隔
     /// </summary>
     public TimeSpan ProgressInterval { get; set; } = TimeSpan.FromSeconds(1);

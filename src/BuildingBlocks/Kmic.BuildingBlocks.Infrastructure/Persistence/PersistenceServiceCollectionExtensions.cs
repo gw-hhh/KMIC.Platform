@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Exports;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
@@ -82,11 +83,12 @@ public static class PersistenceServiceCollectionExtensions
             }
         });
         services.AddScoped<TQueryDb>(provider => provider.GetRequiredService<TQueryContext>());
+        services.AddScoped<IExportReader<TQueryDb>, ExportReader<TQueryDb, TQueryContext>>();
         services.AddSingleton(new ModuleWriteContext(ModuleNames.Of(typeof(TContext)), typeof(TContext)));
         return services;
     }
 
-    private static void AddFrameworkExtensions(DbContextOptionsBuilder options) =>
+    internal static void AddFrameworkExtensions(DbContextOptionsBuilder options) =>
         ((IDbContextOptionsBuilderInfrastructure)options).AddOrUpdateExtension(new KmicFunctionsExtension());
 
     private static CallOrigin EntryOrigin(IServiceProvider provider) => provider.GetRequiredService<ExecutionScope>().EntryOrigin;

@@ -43,6 +43,11 @@ internal sealed class ProbeHooks
     public ConcurrentQueue<DateTimeOffset> ScheduledFires { get; } = new();
 
     /// <summary>
+    /// 导出作业写出的单据标题
+    /// </summary>
+    public ConcurrentQueue<string> Exported { get; } = new();
+
+    /// <summary>
     /// 定时任务命令给这张单据加一行
     /// </summary>
     public TicketId? StampTicket { get; set; }
