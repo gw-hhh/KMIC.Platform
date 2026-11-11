@@ -18,6 +18,8 @@ public sealed class IntegrationMessageCatalogTests
         first.Module.ShouldBe("BuildingBlocks");
         catalog.Find("BuildingBlocks.ThingChanged", 2).ShouldNotBeNull().ClrType.ShouldBe(typeof(ThingChangedV2));
         catalog.Find("BuildingBlocks.ThingChanged", 3).ShouldBeNull();
+        catalog.Describe(typeof(ThingChangedV2)).OrderingKeyOf(new ThingChangedV2(Guid.Empty, "甲")).ShouldBe("甲");
+        first.OrderingKeyOf(new ThingChanged(Guid.Empty)).ShouldBeNull();
     }
 
     [Fact]
@@ -32,7 +34,8 @@ public sealed class IntegrationMessageCatalogTests
         thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.ZeroVersion", StringComparison.Ordinal) && p.Contains("版本号", StringComparison.Ordinal));
         thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.ArchiveThing", StringComparison.Ordinal) && p.Contains("平台模块", StringComparison.Ordinal));
         thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.EventWithSubjects", StringComparison.Ordinal) && p.Contains("[MessageSubjects]", StringComparison.Ordinal));
-        thrown.Problems.Count.ShouldBe(6);
+        thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.ArchiveThing", StringComparison.Ordinal) && p.Contains("[OrderingKey]", StringComparison.Ordinal));
+        thrown.Problems.Count.ShouldBe(7);
     }
 
     [Fact]

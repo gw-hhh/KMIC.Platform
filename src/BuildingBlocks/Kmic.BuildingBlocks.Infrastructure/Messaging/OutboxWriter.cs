@@ -62,7 +62,7 @@ internal sealed class OutboxWriter(
                 Headers = headers,
                 SourceId = sourceId,
                 SourceVersion = sourceId is { } id ? VersionOf(versions, message.Type, id) : null,
-                OrderingKey = sourceId?.ToString(),
+                OrderingKey = message.Type.OrderingKeyOf(message.Message) ?? sourceId?.ToString(),
                 SubjectIds = message.Type.SubjectIdsOf(message.Message)?.ToArray(),
                 OccurredAt = now,
                 Status = MessageStatus.Pending,

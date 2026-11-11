@@ -87,6 +87,7 @@ public sealed class OutboxWriteTests(ClassDatabase<ProbeTemplate> database) : IC
         var row = notices.Where(n => Read<TicketClosedNotice>(n).TicketId == ticket.Id.Value).ShouldHaveSingleItem();
         row.SourceId.ShouldBeNull();
         row.SourceVersion.ShouldBeNull();
+        row.OrderingKey.ShouldBe(ticket.Id.Value.ToString());
     }
 
     [Fact]

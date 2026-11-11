@@ -100,7 +100,8 @@ public sealed class IntegrationMessageCatalog
             problems.Add($"{name} 是请求型消息，只能定义在平台模块（{string.Join("、", PlatformModules.Names)}）里，业务模块之间用事件。");
         }
 
-        return new IntegrationMessageType(name, attribute.Version, isRequest, type, module, ReadSubjects(type, name, isRequest, problems));
+        return new IntegrationMessageType(
+            name, attribute.Version, isRequest, type, module, ReadSubjects(type, name, isRequest, problems), ReadOrderingKey(type, name, isRequest, problems));
     }
 
     private static PropertyInfo? ReadSubjects(Type type, string name, bool isRequest, List<string> problems)
@@ -120,6 +121,29 @@ public sealed class IntegrationMessageCatalog
         if (property is null || (property.PropertyType != typeof(Guid) && !property.PropertyType.IsAssignableTo(typeof(IEnumerable<Guid>))))
         {
             problems.Add($"{name} 的 [MessageSubjects] 指向的属性 {subjects.PropertyName} 不存在，或者不是 Guid / Guid 的集合。");
+            return null;
+        }
+
+        return property;
+    }
+
+    private static PropertyInfo? ReadOrderingKey(Type type, string name, bool isRequest, List<string> problems)
+    {
+        if (type.GetCustomAttribute<OrderingKeyAttribute>() is not { } orderingKey)
+        {
+            return null;
+        }
+
+        if (isRequest)
+        {
+            problems.Add($"{name} 是请求型消息，不能标 [OrderingKey]，只有事件可以。");
+            return null;
+        }
+
+        var property = type.GetProperty(orderingKey.PropertyName);
+        if (property is null || (property.PropertyType != typeof(Guid) && property.PropertyType != typeof(string)))
+        {
+            problems.Add($"{name} 的 [OrderingKey] 指向的属性 {orderingKey.PropertyName} 不存在，或者不是 Guid / string。");
             return null;
         }
 

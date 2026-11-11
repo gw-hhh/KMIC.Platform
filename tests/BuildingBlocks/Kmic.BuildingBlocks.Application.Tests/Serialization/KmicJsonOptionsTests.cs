@@ -39,6 +39,16 @@ public sealed class KmicJsonOptionsTests
     }
 
     [Fact]
+    public void Serialize_ChineseAsIs_HtmlCharactersEscaped()
+    {
+        var paint = new Paint("墙漆<b>", Shade.Red, PaintFinish.Matte, DateTimeOffset.UnixEpoch, 1);
+
+        var json = JsonSerializer.Serialize(paint, KmicJsonOptions.Default);
+
+        json.ShouldStartWith("""{"name":"墙漆\u003Cb\u003E",""");
+    }
+
+    [Fact]
     public void Deserialize_OffsetTime_ConvertedToUtc()
     {
         var paint = JsonSerializer.Deserialize<Paint>(Valid, KmicJsonOptions.Default);

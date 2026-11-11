@@ -1,5 +1,7 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
 
 namespace Kmic.BuildingBlocks.Application.Serialization;
 
@@ -12,6 +14,9 @@ namespace Kmic.BuildingBlocks.Application.Serialization;
 public static class KmicJsonOptions
 {
     private const int MaxDepth = 32;
+
+    // 中文原样输出，HTML 敏感字符仍然转义。共用一个实例，Configure 写进去的和 Create 的才是同一个
+    private static readonly JavaScriptEncoder _encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
 
     /// <summary>
     /// 只读的共用实例
@@ -71,6 +76,7 @@ public static class KmicJsonOptions
         options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
         options.MaxDepth = MaxDepth;
+        options.Encoder = _encoder;
 
         // 普通枚举写成员名，不接受数字
         options.Converters.Add(new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: false));

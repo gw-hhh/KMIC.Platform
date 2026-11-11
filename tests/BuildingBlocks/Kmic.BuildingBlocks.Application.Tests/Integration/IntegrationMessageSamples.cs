@@ -11,6 +11,7 @@ internal static class IntegrationMessageSamples
     public sealed record ThingChanged(Guid Id) : IIntegrationEvent;
 
     [IntegrationMessage("BuildingBlocks.ThingChanged", Version = 2)]
+    [OrderingKey(nameof(Name))]
     public sealed record ThingChangedV2(Guid Id, string Name) : IIntegrationEvent;
 
     public sealed record Unnamed(Guid Id) : IIntegrationEvent;
@@ -25,6 +26,7 @@ internal static class IntegrationMessageSamples
     public sealed record ZeroVersion(Guid Id) : IIntegrationEvent;
 
     [IntegrationMessage("BuildingBlocks.ArchiveThing")]
+    [OrderingKey(nameof(Id))]
     public sealed record ArchiveThing(Guid Id) : IIntegrationRequest;
 
     [IntegrationMessage("BuildingBlocks.EventWithSubjects")]

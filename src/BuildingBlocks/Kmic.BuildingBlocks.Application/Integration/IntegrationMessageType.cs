@@ -11,7 +11,15 @@ namespace Kmic.BuildingBlocks.Application.Integration;
 /// <param name="ClrType">消息类型</param>
 /// <param name="Module">定义它的模块</param>
 /// <param name="Subjects">存涉及对象 ID 的属性，没有标 [MessageSubjects] 时为空</param>
-internal sealed record IntegrationMessageType(string Name, int Version, bool IsRequest, Type ClrType, string Module, PropertyInfo? Subjects)
+/// <param name="OrderingKey">作为顺序键的属性，没有标 [OrderingKey] 时为空</param>
+internal sealed record IntegrationMessageType(
+    string Name,
+    int Version,
+    bool IsRequest,
+    Type ClrType,
+    string Module,
+    PropertyInfo? Subjects,
+    PropertyInfo? OrderingKey = null)
 {
     /// <summary>
     /// 消息涉及的对象 ID
@@ -24,4 +32,9 @@ internal sealed record IntegrationMessageType(string Name, int Version, bool IsR
             IEnumerable<Guid> ids => [.. ids],
             _ => throw new InvalidOperationException($"{ClrType.Name}.{Subjects.Name} 不是 Guid 或 Guid 的集合。"),
         };
+
+    /// <summary>
+    /// 消息声明的顺序键
+    /// </summary>
+    public string? OrderingKeyOf(object message) => OrderingKey?.GetValue(message)?.ToString();
 }
