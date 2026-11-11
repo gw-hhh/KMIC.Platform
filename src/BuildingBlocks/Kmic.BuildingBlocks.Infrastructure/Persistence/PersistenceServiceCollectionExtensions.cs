@@ -1,4 +1,7 @@
+using Kmic.BuildingBlocks.Application;
+using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,9 +25,14 @@ public static class PersistenceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configure);
 
         services.Configure(configure);
+        services.AddOptions<IdempotencyOptions>();
         services.TryAddSingleton<DataSources>();
         services.TryAddScoped<SaveChangesGate>();
         services.TryAddScoped<ModuleDbContextServices>();
+        services.TryAddScoped<ModuleWriteContexts>();
+        services.TryAddScoped<CommandTransaction>();
+        services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
+        services.TryAddScoped<DomainEventDispatcher>();
         return services;
     }
 
@@ -53,6 +61,7 @@ public static class PersistenceServiceCollectionExtensions
                 provider.GetRequiredService<DataSources>().Reads(EntryOrigin(provider)),
                 npgsql => npgsql.ExecutionStrategy(dependencies => new QueryRetryStrategy(dependencies)))));
         services.AddScoped<TQueryDb>(provider => provider.GetRequiredService<TQueryContext>());
+        services.AddSingleton(new ModuleWriteContext(ModuleNames.Of(typeof(TContext)), typeof(TContext)));
         return services;
     }
 

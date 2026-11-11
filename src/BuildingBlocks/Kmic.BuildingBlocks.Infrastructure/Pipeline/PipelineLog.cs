@@ -1,0 +1,18 @@
+using Microsoft.Extensions.Logging;
+
+namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
+
+/// <summary>
+/// Infrastructure 中管道行为的日志方法
+/// </summary>
+internal static partial class PipelineLog
+{
+    [LoggerMessage(EventId = 2001, Level = LogLevel.Warning, Message = "After-commit action of {MessageName} failed")]
+    public static partial void AfterCommitActionFailed(ILogger logger, Exception exception, string messageName);
+
+    [LoggerMessage(EventId = 2002, Level = LogLevel.Warning, Message = "Unique constraint {Schema}.{Constraint} violated by {MessageName} has no mapped error; declare MapsToError")]
+    public static partial void UnmappedUniqueViolation(ILogger logger, string? schema, string? constraint, string messageName);
+
+    [LoggerMessage(EventId = 2003, Level = LogLevel.Warning, Message = "Commit outcome of {MessageName} is unknown")]
+    public static partial void CommitOutcomeUnknown(ILogger logger, Exception exception, string messageName);
+}

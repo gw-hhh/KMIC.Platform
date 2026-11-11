@@ -3,6 +3,9 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <!-- 与宿主相同：组装应用的项目引用源码生成器，管道顺序与宿主一致 -->
+    <PackageReference Include="Mediator.SourceGenerator" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

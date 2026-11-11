@@ -1,7 +1,11 @@
 using Kmic.BuildingBlocks.Application;
+using Kmic.BuildingBlocks.Application.Behaviors;
+using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
+using Kmic.BuildingBlocks.Infrastructure.Pipeline;
+using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 using Kmic.BuildingBlocks.Testing.Identity;
 using Kmic.BuildingBlocks.Testing.Security;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,12 +33,33 @@ internal sealed class ProbeHarness : IAsyncDisposable
         });
         services.AddModuleDbContexts<ProbeDbContext, ProbeQueryDbContext, IProbeQueryDb>();
         services.AddScoped<TicketRepository>();
-        _services = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        services.AddScoped<IDomainEventHandler<TicketClosed>, TicketClosedHandler>();
+        services.AddSingleton(Hooks);
+        services.AddLogging();
+
+        // 选项必须是编译期常量，由源码生成器读取；数组顺序即执行顺序（05-02 第 4.1 节）
+        services.AddMediator(options =>
+        {
+            options.ServiceLifetime = ServiceLifetime.Scoped;
+            options.GenerateTypesAsInternal = true;
+            options.PipelineBehaviors =
+            [
+                typeof(LoggingBehavior<,>),
+                typeof(ExceptionTranslationBehavior<,>),
+                typeof(ValidationBehavior<,>),
+                typeof(AuthorizationBehavior<,>),
+                typeof(IdempotencyBehavior<,>),
+                typeof(TransactionBehavior<,>),
+            ];
+        });
+        _services = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
     }
 
     public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 11, 10, 2, 0, 0, TimeSpan.Zero));
 
     public RecordingSecurityEventWriter SecurityEvents { get; } = new();
+
+    public ProbeHooks Hooks { get; } = new();
 
     /// <summary>
     /// 宿主的服务，测试中直接取框架内部服务（如数据源）时用

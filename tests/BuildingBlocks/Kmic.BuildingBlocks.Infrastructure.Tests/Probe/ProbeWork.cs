@@ -1,3 +1,5 @@
+using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +15,10 @@ internal sealed class ProbeWork(AsyncServiceScope scope) : IAsyncDisposable
     public IProbeQueryDb Query => scope.ServiceProvider.GetRequiredService<IProbeQueryDb>();
 
     public TicketRepository Tickets => scope.ServiceProvider.GetRequiredService<TicketRepository>();
+
+    public ISender Sender => scope.ServiceProvider.GetRequiredService<ISender>();
+
+    public RequestMetadata Request => scope.ServiceProvider.GetRequiredService<RequestMetadata>();
 
     public async Task SaveAsync()
     {

@@ -12,7 +12,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 模块 DbContext 基类：写入上下文直接继承，查询上下文继承 ModuleQueryDbContext；两者共用同一套模型
 /// </summary>
 /// <remarks>
-/// 模型的构建顺序固定：默认 schema → 模块的实体配置 → 框架约定（审计、软删除、并发版本、值对象列名、CHECK）→ 数据范围过滤器 → 定稿时模型校验。
+/// 模型的构建顺序固定：默认 schema → 模块的实体配置 → 模块内框架表 → 框架约定（审计、软删除、并发版本、值对象列名、CHECK）→ 数据范围过滤器 → 定稿时模型校验。
 /// 保存只能由事务行为发起，并依次执行软删除、审计字段、聚合版本三步
 /// </remarks>
 public abstract class ModuleDbContext : DbContext
@@ -93,6 +93,7 @@ public abstract class ModuleDbContext : DbContext
 
         modelBuilder.HasDefaultSchema(Module);
         ConfigureModel(modelBuilder);
+        FrameworkTables.Apply(modelBuilder);
         ModelConventions.Apply(modelBuilder);
         DataScopeFilters.Apply(modelBuilder, this);
     }

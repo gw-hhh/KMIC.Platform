@@ -112,7 +112,7 @@ internal static class ModelValidator
 
         if (type == typeof(string)
             && property.GetMaxLength() is null
-            && !string.Equals(property.GetColumnType(), ColumnTypes.UnboundedText, StringComparison.Ordinal))
+            && property.GetColumnType() is not (ColumnTypes.UnboundedText or ColumnTypes.Json))
         {
             problems.Add($"{location}：字符串必须声明最大长度（HasMaxLength），长文本显式写 IsUnboundedText()。");
         }

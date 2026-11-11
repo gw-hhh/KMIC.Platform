@@ -57,7 +57,11 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
 
     public void Annotate(string note) => Note = note;
 
-    public void Close() => Status = TicketStatus.Closed;
+    public void Close()
+    {
+        Status = TicketStatus.Closed;
+        Raise(new TicketClosed(Id));
+    }
 
     public void Escalate() => Priority = TicketPriority.Urgent;
 
