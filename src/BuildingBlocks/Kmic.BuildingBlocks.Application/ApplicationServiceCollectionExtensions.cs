@@ -63,6 +63,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<ICommandSender>(sp => sp.GetRequiredService<ISender>());
         services.AddScoped<IQuerySender>(sp => sp.GetRequiredService<ISender>());
         services.AddScoped<IContractQuerySender, ContractQuerySender>();
+        services.AddScoped<IDataScope, DataScope>();
 
         ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.GetCultureInfo("zh-CN");
         foreach (var assembly in validatorAssemblies)

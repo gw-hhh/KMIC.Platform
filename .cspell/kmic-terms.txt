@@ -10,6 +10,7 @@ gitea
 Kmic
 Mediator
 Meziantou
+Navigations
 netstandard
 nologo
 Npgsql

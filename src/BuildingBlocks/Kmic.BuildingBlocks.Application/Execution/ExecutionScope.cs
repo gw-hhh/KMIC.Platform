@@ -17,10 +17,13 @@ public sealed class ExecutionScope : IExecutionContext
     private CallOrigin? _origin;
 
     /// <inheritdoc />
-    public CallOrigin Origin =>
-        _moduleCallDepth.Value > 0
-            ? CallOrigin.ModuleCall
-            : _origin ?? throw new InvalidOperationException("执行上下文尚未初始化，入口应先调用 ExecutionScope.Initialize。");
+    public CallOrigin Origin => _moduleCallDepth.Value > 0 ? CallOrigin.ModuleCall : EntryOrigin;
+
+    /// <summary>
+    /// 入口设置的来源；Contracts 调用期间 Origin 是 ModuleCall，这里仍是入口的来源，框架据此选择数据源
+    /// </summary>
+    public CallOrigin EntryOrigin =>
+        _origin ?? throw new InvalidOperationException("执行上下文尚未初始化，入口应先调用 ExecutionScope.Initialize。");
 
     /// <inheritdoc />
     public ICurrentUser User { get; private set; } = CurrentUser.Anonymous;

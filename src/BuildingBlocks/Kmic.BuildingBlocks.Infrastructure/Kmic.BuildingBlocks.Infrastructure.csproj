@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 基础设施（05-03 等标为 BuildingBlocks.Infrastructure 的部分）：EF Core + Npgsql 的数据访问约定与保存规则 -->
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.BuildingBlocks.Application/Kmic.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Infrastructure.Tests" />
+  </ItemGroup>
+</Project>
