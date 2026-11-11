@@ -15,9 +15,9 @@ public sealed class DomainThrowAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM0102",
         Rules.DomainCategory,
-        "领域层只能抛表示程序缺陷的异常",
+        "领域层不能抛业务异常",
         "领域层不能抛 {0}，业务失败改为返回 Result",
-        "能抛的只有两类程序缺陷：调用方用错（ArgumentException 及其子类、InvalidOperationException）和不变量被破坏（DomainInvariantException）.");
+        "业务上的失败（如状态不对、余额不足）要返回 Result。只有代码写错时才抛异常：参数传错用 ArgumentException，调用时机不对用 InvalidOperationException，数据出现了不该有的状态用 DomainInvariantException。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

@@ -47,7 +47,7 @@ static string FindRepositoryRoot()
         directory = directory.Parent;
     }
 
-    return directory?.FullName ?? throw new InvalidOperationException("Kmic.slnx not found; run from inside the repository.");
+    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录里运行。");
 }
 
 // 空解决方案（阶段 0）没有项目时跳过 .NET 步骤
@@ -71,7 +71,7 @@ static int Run(string root, string fileName, string arguments)
         : new ProcessStartInfo(fileName, arguments);
     startInfo.WorkingDirectory = root;
     startInfo.UseShellExecute = false;
-    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Cannot start {fileName}.");
+    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"无法启动 {fileName}。");
     process.WaitForExit();
     return process.ExitCode;
 }
@@ -149,7 +149,7 @@ static string[] ListFiles(string root)
         RedirectStandardOutput = true,
         StandardOutputEncoding = Encoding.UTF8,
     };
-    using var git = Process.Start(startInfo) ?? throw new InvalidOperationException("Cannot start git.");
+    using var git = Process.Start(startInfo) ?? throw new InvalidOperationException("无法启动 git。");
     var files = git.StandardOutput.ReadToEnd().Split('\0', StringSplitOptions.RemoveEmptyEntries);
     git.WaitForExit();
     return files;

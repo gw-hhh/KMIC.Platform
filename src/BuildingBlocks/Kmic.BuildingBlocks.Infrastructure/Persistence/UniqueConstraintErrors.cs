@@ -13,7 +13,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// </remarks>
 internal static class UniqueConstraintErrors
 {
-    // 不放在模型注解里，否则会写进迁移快照。EF 在进程内缓存模型，收集只发生一次，所以这里也是进程级的
+    // 不放在模型注解里，否则会写进迁移快照。EF 在进程里只建一次模型，收集也只有一次，所以存在静态字段里
     private static readonly ConcurrentDictionary<(string Schema, string Constraint), Error> _errors = new();
 
     public static Error? Find(string? schema, string? constraint) =>

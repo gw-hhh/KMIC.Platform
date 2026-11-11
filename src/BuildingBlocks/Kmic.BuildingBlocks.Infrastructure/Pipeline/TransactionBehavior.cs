@@ -24,7 +24,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// </remarks>
 public sealed class TransactionBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
-    // 从容器取框架服务：宿主引用行为类型，行为只能是 public，构造函数里放不了 internal 的服务
+    // 从容器取框架服务：宿主要直接引用行为类型，所以行为只能是 public，构造函数里就放不了 internal 的服务
     IServiceProvider services,
     ILogger<TransactionBehavior<TMessage, TResponse>> logger) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IBaseCommand

@@ -18,7 +18,7 @@ public sealed class AsciiIdentifierAnalyzer : DiagnosticAnalyzer
         Rules.GeneralCategory,
         "标识符只能用 ASCII 字符",
         "标识符 {0} 含有非 ASCII 字符，改用术语表中的英文名",
-        "同一个概念只用一个英文名，代码、测试、术语表保持一致.");
+        "同一个概念只用一个英文名，代码、测试、术语表保持一致。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

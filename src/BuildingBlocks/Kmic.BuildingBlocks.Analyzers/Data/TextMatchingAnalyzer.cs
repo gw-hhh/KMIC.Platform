@@ -18,7 +18,7 @@ public sealed class TextMatchingAnalyzer : DiagnosticAnalyzer
         Rules.DataCategory,
         "查询里不能用字符串方法匹配文本",
         "查询里不能用 string.{0} 匹配文本，模糊匹配改用 KmicFunctions.ContainsText 或 StartsWithText，忽略大小写的等值比较把列声明为 IsCaseInsensitive()",
-        "这些写法要么用不上索引，要么在不区分大小写的列上直接报错。只检查会翻译成 SQL 的查询，内存里的 LINQ 不受影响.");
+        "这些写法要么用不上索引，要么在不区分大小写的列上直接报错。只检查会翻译成 SQL 的查询，内存里的 LINQ 不受影响。");
 
     private static readonly ImmutableHashSet<string> _methods = ImmutableHashSet.Create(
         StringComparer.Ordinal,

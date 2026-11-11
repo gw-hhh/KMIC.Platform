@@ -17,35 +17,35 @@ public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
         Rules.DomainCategory,
         "值对象必须是 sealed record，不用位置参数",
         "值对象 {0} 要改为 sealed record class，不用位置参数写法",
-        "位置参数会生成公开的构造函数和 init 属性，类型外就能绕过工厂方法创建，或用 with 修改.");
+        "位置参数会生成公开的构造函数和 init 属性，类型外就能绕过工厂方法创建，或用 with 修改。");
 
     internal static readonly DiagnosticDescriptor NonPrivateConstructor = Rules.Create(
         "KM0202",
         Rules.DomainCategory,
         "值对象的构造函数必须私有",
         "值对象 {0} 的构造函数要改为 private，通过返回 Result 的工厂方法创建",
-        "值对象只能通过工厂方法创建，校验才不会被绕过.");
+        "值对象只能通过工厂方法创建，校验才不会被绕过。");
 
     internal static readonly DiagnosticDescriptor PropertyAccessor = Rules.Create(
         "KM0203",
         Rules.DomainCategory,
         "值对象属性必须是 { get; private init; }",
         "值对象属性 {0} 要写成 {{ get; private init; }}",
-        "只有 getter 的属性 EF 不会映射，漏了也不报错。private init 还能挡住类型外的 with 表达式.");
+        "只有 getter 的属性 EF 不会映射，漏了也不报错。private init 还能挡住类型外的 with 表达式。");
 
     internal static readonly DiagnosticDescriptor MissingFactory = Rules.Create(
         "KM0204",
         Rules.DomainCategory,
         "值对象必须有返回 Result 的工厂方法",
         "值对象 {0} 至少要有一个返回 Result<{0}> 的静态工厂方法",
-        "构造函数是私有的，只能通过工厂方法创建，校验失败时返回错误而不是抛异常.");
+        "构造函数是私有的，只能通过工厂方法创建，校验失败时返回错误而不是抛异常。");
 
     internal static readonly DiagnosticDescriptor CollectionProperty = Rules.Create(
         "KM0205",
         Rules.DomainCategory,
         "值对象的集合属性必须只读，并自己实现相等比较",
         "值对象属性 {0} 是集合，类型要改为 IReadOnlyList<T>，值对象要自己实现 Equals",
-        "record 默认按引用比较集合，两个内容相同的值对象会被判为不相等.");
+        "record 默认按引用比较集合，两个内容相同的值对象会被判为不相等。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =

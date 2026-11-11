@@ -18,7 +18,7 @@ public sealed class PrimaryConstructorParameterAnalyzer : DiagnosticAnalyzer
         Rules.GeneralCategory,
         "主构造函数参数不能重新赋值",
         "主构造函数参数 {0} 不能重新赋值，需要变化的值另建字段或局部变量",
-        "主构造函数参数在整个类型里都能用，被改过之后，读代码的人没法确定它在某处的值.");
+        "主构造函数参数在整个类型里都能用，被改过之后，读代码的人没法确定它在某处的值。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

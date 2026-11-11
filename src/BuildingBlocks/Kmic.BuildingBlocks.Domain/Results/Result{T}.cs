@@ -10,6 +10,7 @@ public sealed class Result<T> : Result, IResultFactory<Result<T>>
     private Result(T value)
         : base(null) => _value = value;
 
+    // 失败时读不到 _value：Value 会先抛异常
     private Result(Error error)
         : base(error) => _value = default!;
 

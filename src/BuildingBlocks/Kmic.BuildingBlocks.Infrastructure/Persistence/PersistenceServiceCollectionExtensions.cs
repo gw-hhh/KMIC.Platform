@@ -52,7 +52,7 @@ public static class PersistenceServiceCollectionExtensions
             throw new InvalidOperationException($"{typeof(TContext).Name} 是查询上下文，写入上下文要直接继承 ModuleDbContext。");
         }
 
-        // 不用 DbContext 池：过滤器读的当前用户和数据权限是作用域内的状态，池里的实例没重置干净就会越权。
+        // 不用 DbContext 池：过滤器要读当前用户和他的数据权限，池里的实例没重置干净，就会拿上一个请求的权限去查。
         // 第一次用到上下文时，按入口的来源选连接池
         services.AddDbContext<TContext>((provider, options) =>
             AddFrameworkExtensions(options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider)))));

@@ -18,7 +18,7 @@ public sealed class DynamicAnalyzer : DiagnosticAnalyzer
         Rules.GeneralCategory,
         "不能用 dynamic",
         "不能用 dynamic，改用明确的类型或 JsonElement",
-        "dynamic 让编译器的类型检查失效，错误要到运行时才暴露.");
+        "用了 dynamic，编译器就不检查类型，写错了要到运行时才发现。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

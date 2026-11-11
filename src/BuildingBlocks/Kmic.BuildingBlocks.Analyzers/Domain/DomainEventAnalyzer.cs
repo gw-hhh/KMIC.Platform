@@ -16,7 +16,7 @@ public sealed class DomainEventAnalyzer : DiagnosticAnalyzer
         Rules.DomainCategory,
         "领域事件不能带实体对象",
         "领域事件 {0} 的属性 {1} 带了实体 {2}，改为带它的 ID",
-        "事件处理器拿到实体就能直接改它，绕过它的业务方法.");
+        "事件处理器拿到实体就能直接改它，绕过它的业务方法。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

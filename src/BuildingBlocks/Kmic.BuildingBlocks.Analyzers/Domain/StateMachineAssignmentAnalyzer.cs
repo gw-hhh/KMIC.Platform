@@ -17,14 +17,14 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     internal const string DiagnosticId = "KM0401";
 
     private const string Title = "状态属性只能由状态机改写";
-    private const string Reason = "绕过状态机直接赋值，会跳过流转检查，也不会留下业务历史.";
+    private const string Reason = "直接赋值会跳过状态机对状态变化的检查，也不会记下这次变化。";
     private const string DefineMethodName = "Define";
 
     internal static readonly DiagnosticDescriptor DirectAssignment = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "状态属性 {0} 不能直接赋值，改为经状态机的 Start 或 Fire 改写",
+        "状态属性 {0} 不能直接赋值，改为调用状态机的 Start 或 Fire",
         Reason);
 
     // 要等整个编译结束才能和 Define 对上，IDE 默认不实时显示，构建时一定会报
@@ -32,7 +32,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "状态属性 {0} 不能在其他类型里赋值，改为经状态机的 Start 或 Fire 改写",
+        "状态属性 {0} 不能在其他类型里赋值，改为调用状态机的 Start 或 Fire",
         Reason,
         WellKnownDiagnosticTags.CompilationEnd);
 
@@ -48,21 +48,21 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         Rules.DomainCategory,
         Title,
         "状态属性 {0} 要写成自动属性",
-        "有自己的字段时，类型里的代码可以绕过属性直接改字段，检查就拦不住.");
+        "有自己的字段时，类型里的代码可以绕过属性直接改字段，检查就拦不住。");
 
     internal static readonly DiagnosticDescriptor InvalidGetter = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
         "Define 的第一个参数只能直接返回聚合根的一个属性，如 s => s.Status",
-        "分析器按这个参数认出哪个属性是状态，写成别的表达式就认不出来.");
+        "分析器按这个参数认出哪个属性是状态，写成别的表达式就认不出来。");
 
     internal static readonly DiagnosticDescriptor InvalidSetter = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
         "Define 的第二个参数只能给第一个参数里的属性赋值，如 (s, v) => s.Status = v",
-        "状态机通过这个参数写入状态，在里面改别的属性，就绕过了业务方法.");
+        "状态机通过这个参数写入状态，在里面改别的属性，就绕过了业务方法。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =

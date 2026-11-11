@@ -18,7 +18,7 @@ public sealed class SuppressionJustificationAnalyzer : DiagnosticAnalyzer
         Rules.GeneralCategory,
         "豁免必须写明理由",
         "[{0}] 要用 Justification 写明豁免的理由",
-        "每个豁免都是要评审的决定，写了理由才能被找到和复查.");
+        "写了理由，评审和以后复查时才知道当初为什么豁免。");
 
     private static readonly ImmutableHashSet<string> _suppressionAttributes = ImmutableHashSet.Create(
         StringComparer.Ordinal,

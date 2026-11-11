@@ -18,7 +18,7 @@ public sealed class PragmaWarningAnalyzer : DiagnosticAnalyzer
         Rules.GeneralCategory,
         "不能用 #pragma warning disable",
         "不能用 #pragma warning disable，改用带理由的 [SuppressMessage]，范围尽量小",
-        "忘了 restore 会悄悄扩大豁免范围，也不留理由.");
+        "忘了 restore 会悄悄扩大豁免范围，也不留理由。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];

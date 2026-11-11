@@ -18,7 +18,7 @@ public sealed class NestedConditionalAnalyzer : DiagnosticAnalyzer
         Rules.GeneralCategory,
         "不能嵌套三元运算",
         "三元运算不能嵌套，多个条件用 switch 表达式，涉及顺序或副作用时用 if / else",
-        "嵌套的三元运算要逐层拆开才看得懂，加了括号也一样.");
+        "嵌套的三元运算要逐层拆开才看得懂，加了括号也一样。");
 
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
