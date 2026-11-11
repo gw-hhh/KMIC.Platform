@@ -9,6 +9,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwner, IHasOrgUnit
 {
     private readonly List<TicketLine> _lines = [];
+    private readonly List<Watcher> _watchers = [];
 
     private Ticket(TicketId id, string number, string title, UserId ownerId, OrgUnitId orgUnitId)
         : base(id)
@@ -33,6 +34,16 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
 
     public string? Note { get; private set; }
 
+    public TicketStatus Status { get; private set; } = TicketStatus.Open;
+
+    public TicketPriority Priority { get; private set; }
+
+    public EmailAddress? ContactEmail { get; private set; }
+
+    public Money? Budget { get; private set; }
+
+    public IReadOnlyList<Watcher> Watchers => _watchers;
+
     public IReadOnlyList<TicketLine> Lines => _lines;
 
     public static Ticket Create(string number, UserId ownerId, OrgUnitId orgUnitId, string title = "测试单据") =>
@@ -43,6 +54,16 @@ internal sealed class Ticket : AggregateRoot<TicketId>, ISoftDeletable, IHasOwne
     public void SetDue(DateTimeOffset dueAt) => DueAt = dueAt;
 
     public void Annotate(string note) => Note = note;
+
+    public void Close() => Status = TicketStatus.Closed;
+
+    public void Escalate() => Priority = TicketPriority.Urgent;
+
+    public void ContactAt(EmailAddress email) => ContactEmail = email;
+
+    public void Plan(Money budget) => Budget = budget;
+
+    public void Watch(Watcher watcher) => _watchers.Add(watcher);
 
     public TicketLine AddLine(string text)
     {

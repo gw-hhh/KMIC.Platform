@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 在模块配置之后统一加上的框架约定：审计列、软删除、并发版本、关系的删除规则
+/// 在模块配置之后统一加上的框架约定：审计列、软删除、并发版本、关系的删除规则、值对象列名、编码列的 CHECK 约束
 /// </summary>
 internal static class ModelConventions
 {
@@ -47,8 +47,57 @@ internal static class ModelConventions
             {
                 ApplyDeleteRule(foreignKey);
             }
+
+            foreach (var complexProperty in entityType.GetDeclaredComplexProperties())
+            {
+                NameValueObjectColumns(complexProperty, complexProperty.Name);
+            }
+
+            AddCodeChecks(entityType);
         }
     }
+
+    // 值对象的列名是“属性名 + 成员名”，不带下划线，如 BudgetAmount；存为 jsonb 的值对象不是列
+    private static void NameValueObjectColumns(IMutableComplexProperty complexProperty, string prefix)
+    {
+        if (complexProperty.IsCollection || complexProperty.ComplexType.IsMappedToJson())
+        {
+            return;
+        }
+
+        foreach (var property in complexProperty.ComplexType.GetDeclaredProperties())
+        {
+            property.SetColumnName(prefix + property.Name);
+        }
+
+        foreach (var nested in complexProperty.ComplexType.GetDeclaredComplexProperties())
+        {
+            NameValueObjectColumns(nested, prefix + nested.Name);
+        }
+    }
+
+    // 智能枚举与普通枚举的列只能存已定义的编码；新增取值时迁移中会出现约束变更
+    private static void AddCodeChecks(IMutableEntityType entityType)
+    {
+        var table = entityType.GetTableName();
+        foreach (var property in ColumnProperties(entityType))
+        {
+            var type = Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType;
+            if (!type.IsEnum && !ValueTypeConventions.IsEnumeration(type))
+            {
+                continue;
+            }
+
+            var column = property.GetColumnName();
+            var codes = string.Join(", ", ValueTypeConventions.CodesOf(type).Select(code => $"'{code.Replace("'", "''", StringComparison.Ordinal)}'"));
+            entityType.AddCheckConstraint($"CK_{table}_{column}", $"\"{column}\" IN ({codes})");
+        }
+    }
+
+    private static IEnumerable<IMutableProperty> ColumnProperties(IMutableTypeBase type) =>
+        type.GetDeclaredProperties().Concat(type.GetDeclaredComplexProperties()
+            .Where(c => !c.IsCollection && !c.ComplexType.IsMappedToJson())
+            .SelectMany(c => ColumnProperties(c.ComplexType)));
 
     // 父实体 → 子实体：外键必填并级联删除，从集合中移除的子实体随保存删除，而不是留下外键为空的行；
     // 聚合之间只存 ID：外键 Restrict，仍被引用的聚合不能物理删除

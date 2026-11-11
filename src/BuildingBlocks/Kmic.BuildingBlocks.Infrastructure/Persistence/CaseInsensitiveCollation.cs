@@ -1,0 +1,117 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Npgsql;
+
+namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
+
+/// <summary>
+/// 不区分大小写的排序规则 public."CaseInsensitive"：迁移程序在执行模块迁移之前创建并核对定义，迁移之后核对各列的绑定
+/// </summary>
+/// <remarks>
+/// 列在建表时按当时的 search_path 解析不带 schema 的排序规则名并绑定到具体对象（Npgsql 的 UseCollation 不支持带 schema 的名称）。
+/// 只靠 IF NOT EXISTS 会沿用一个已存在、但区分大小写的同名对象，唯一约束的行为就与设计不同，所以要核对，而不只是创建
+/// </remarks>
+public static class CaseInsensitiveCollation
+{
+    private const string Locale = "und-u-ks-level2";
+
+    /// <summary>
+    /// 创建（已存在则跳过）并核对定义；public 以外出现同名排序规则同样失败
+    /// </summary>
+    /// <param name="connection">迁移账号的连接</param>
+    /// <param name="ct">取消</param>
+    /// <exception cref="InvalidOperationException">定义不符或有同名对象</exception>
+    public static async Task EnsureAsync(NpgsqlConnection connection, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        await using (var create = connection.CreateCommand())
+        {
+            create.CommandText = $"""
+                CREATE COLLATION IF NOT EXISTS public."{Collations.CaseInsensitive}" (provider = icu, locale = '{Locale}', deterministic = false)
+                """;
+            await create.ExecuteNonQueryAsync(ct);
+        }
+
+        await using var check = connection.CreateCommand();
+        check.CommandText = """
+            SELECT n.nspname, c.collprovider::text, c.colllocale, c.collisdeterministic
+            FROM pg_collation c JOIN pg_namespace n ON n.oid = c.collnamespace
+            WHERE c.collname = $1
+            """;
+        check.Parameters.Add(new NpgsqlParameter { Value = Collations.CaseInsensitive });
+
+        var problems = new List<string>();
+        await using var reader = await check.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            var schema = reader.GetString(0);
+            if (!string.Equals(schema, "public", StringComparison.Ordinal))
+            {
+                problems.Add($"schema {schema} 中有同名排序规则 \"{Collations.CaseInsensitive}\"，建表时可能被解析到它，删除后重试。");
+            }
+            else if (!string.Equals(reader.GetString(1), "i", StringComparison.Ordinal)
+                || !string.Equals(await reader.IsDBNullAsync(2, ct) ? null : reader.GetString(2), Locale, StringComparison.Ordinal)
+                || reader.GetBoolean(3))
+            {
+                problems.Add($"public.\"{Collations.CaseInsensitive}\" 已存在但定义不符，应为 provider = icu、locale = '{Locale}'、deterministic = false。");
+            }
+        }
+
+        if (problems.Count > 0)
+        {
+            throw new InvalidOperationException("不区分大小写的排序规则有误：" + string.Join(" ", problems));
+        }
+    }
+
+    /// <summary>
+    /// 核对模型中声明为不区分大小写的列，实际绑定的都是 public."CaseInsensitive"
+    /// </summary>
+    /// <param name="connection">数据库连接</param>
+    /// <param name="context">模块的写入上下文；排序规则只在设计时模型中，从它取</param>
+    /// <param name="ct">取消</param>
+    /// <exception cref="InvalidOperationException">有列绑定到其他排序规则</exception>
+    public static async Task VerifyColumnsAsync(NpgsqlConnection connection, DbContext context, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+        ArgumentNullException.ThrowIfNull(context);
+
+        var problems = new List<string>();
+        foreach (var (schema, table, column) in CaseInsensitiveColumns(context.GetService<IDesignTimeModel>().Model))
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT cn.nspname || '.' || c.collname
+                FROM pg_attribute a
+                JOIN pg_class t ON t.oid = a.attrelid
+                JOIN pg_namespace tn ON tn.oid = t.relnamespace
+                LEFT JOIN pg_collation c ON c.oid = a.attcollation
+                LEFT JOIN pg_namespace cn ON cn.oid = c.collnamespace
+                WHERE tn.nspname = $1 AND t.relname = $2 AND a.attname = $3
+                """;
+            command.Parameters.Add(new NpgsqlParameter { Value = schema });
+            command.Parameters.Add(new NpgsqlParameter { Value = table });
+            command.Parameters.Add(new NpgsqlParameter { Value = column });
+
+            var bound = await command.ExecuteScalarAsync(ct) as string;
+            if (!string.Equals(bound, $"public.{Collations.CaseInsensitive}", StringComparison.Ordinal))
+            {
+                problems.Add($"\"{schema}\".\"{table}\".\"{column}\" 绑定的是 {bound ?? "（无）"}。");
+            }
+        }
+
+        if (problems.Count > 0)
+        {
+            throw new InvalidOperationException($"不区分大小写的列没有绑定到 public.\"{Collations.CaseInsensitive}\"：" + string.Join(" ", problems));
+        }
+    }
+
+    private static IEnumerable<(string Schema, string Table, string Column)> CaseInsensitiveColumns(IModel model) =>
+        from entityType in model.GetEntityTypes()
+        let table = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table)
+        where table is not null
+        from property in entityType.GetFlattenedProperties()
+        where string.Equals(property.GetCollation(), Collations.CaseInsensitive, StringComparison.Ordinal)
+        select (table.Value.Schema ?? "public", table.Value.Name, property.GetColumnName(table.Value)!);
+}

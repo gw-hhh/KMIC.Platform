@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模型校验：构建模型时执行，任何一条不满足都拒绝启动，并列出全部问题
+/// 模型校验：模型定稿时执行，任何一条不满足都拒绝启动，并列出全部问题
 /// </summary>
 /// <remarks>
 /// 架构测试构建每个模块的模型，执行的是同一套校验
@@ -42,9 +42,17 @@ internal static class ModelValidator
             problems.Add($"{name}：表名 {entityType.GetTableName()} 必须与实体类名 {entityType.ClrType.Name} 相同。");
         }
 
-        foreach (var property in AllProperties(entityType))
+        foreach (var (path, property, inJson) in AllProperties(entityType, name, inJson: false))
         {
-            ValidateProperty(name, property, problems);
+            ValidateProperty(path, property, inJson, problems);
+        }
+
+        if (EntityKinds.IsBusinessEntity(entityType.ClrType))
+        {
+            foreach (var index in entityType.GetDeclaredIndexes().Where(i => i.IsUnique && i.FindAnnotation(ModelAnnotations.UniqueError) is null))
+            {
+                problems.Add($"{name}：唯一索引（{string.Join(", ", index.Properties.Select(p => p.Name))}）要用 MapsToError 声明冲突时返回的模块错误。");
+            }
         }
 
         foreach (var navigation in entityType.GetDeclaredNavigations())
@@ -76,15 +84,11 @@ internal static class ModelValidator
         }
     }
 
-    private static void ValidateProperty(string entity, IReadOnlyProperty property, List<string> problems)
+    private static void ValidateProperty(string location, IReadOnlyProperty property, bool inJson, List<string> problems)
     {
-        var location = $"{entity}.{property.Name}";
-        var type = Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType;
-        if (type == typeof(decimal) && property.GetPrecision() is null)
-        {
-            problems.Add($"{location}：decimal 必须声明精度，用 HasPrecision。");
-        }
-
+        // 按存储类型判断：单值值对象存的是它包装的原始值
+        var stored = property.GetValueConverter()?.ProviderClrType ?? property.ClrType;
+        var type = Nullable.GetUnderlyingType(stored) ?? stored;
         if (type == typeof(float) || type == typeof(double))
         {
             problems.Add($"{location}：不能用 float / double 存数据，金额、数量等用 decimal 并声明精度。");
@@ -93,6 +97,17 @@ internal static class ModelValidator
         if (type == typeof(DateTime))
         {
             problems.Add($"{location}：不能用 DateTime，时刻用 DateTimeOffset，日期用 DateOnly，时间用 TimeOnly。");
+        }
+
+        // jsonb 中的成员没有列类型，长度与精度由值对象的工厂方法保证
+        if (inJson)
+        {
+            return;
+        }
+
+        if (type == typeof(decimal) && property.GetPrecision() is null)
+        {
+            problems.Add($"{location}：decimal 必须声明精度，用 HasPrecision。");
         }
 
         if (type == typeof(string)
@@ -141,7 +156,9 @@ internal static class ModelValidator
         }
     }
 
-    // 复杂类型（值对象）的成员同样要满足规则
-    private static IEnumerable<IReadOnlyProperty> AllProperties(IReadOnlyTypeBase type) =>
-        type.GetDeclaredProperties().Concat(type.GetDeclaredComplexProperties().SelectMany(c => AllProperties(c.ComplexType)));
+    // 值对象（复杂类型）的成员同样要满足规则，位置写成“实体.属性.成员”
+    private static IEnumerable<(string Path, IReadOnlyProperty Property, bool InJson)> AllProperties(IReadOnlyTypeBase type, string path, bool inJson) =>
+        type.GetDeclaredProperties().Select(p => ($"{path}.{p.Name}", p, inJson))
+            .Concat(type.GetDeclaredComplexProperties().SelectMany(c =>
+                AllProperties(c.ComplexType, $"{path}.{c.Name}", inJson || c.ComplexType.IsMappedToJson())));
 }

@@ -24,8 +24,7 @@ internal static class DataScopeFilters
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes().ToList())
         {
-            entityType.RemoveAnnotation(ModelAnnotations.NoDataScope);
-            if (entityType.RemoveAnnotation(ModelAnnotations.DataScope)?.Value is string scopeObject)
+            if (entityType.FindAnnotation(ModelAnnotations.DataScope)?.Value is string scopeObject)
             {
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(QueryFilters.DataScope, Build(entityType.ClrType, scopeObject, context));
             }

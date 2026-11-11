@@ -1,3 +1,4 @@
+using System.Reflection;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Domain.Events;
 using Kmic.BuildingBlocks.Domain.StateMachines;
@@ -11,7 +12,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 模块 DbContext 基类：写入上下文直接继承，查询上下文继承 ModuleQueryDbContext；两者共用同一套模型
 /// </summary>
 /// <remarks>
-/// 模型的构建顺序固定：默认 schema → 模块的实体配置 → 框架约定（审计、软删除、并发版本）→ 模型校验 → 数据范围过滤器。
+/// 模型的构建顺序固定：默认 schema → 模块的实体配置 → 框架约定（审计、软删除、并发版本、值对象列名、CHECK）→ 数据范围过滤器 → 定稿时模型校验。
 /// 保存只能由事务行为发起，并依次执行软删除、审计字段、聚合版本三步
 /// </remarks>
 public abstract class ModuleDbContext : DbContext
@@ -37,6 +38,15 @@ public abstract class ModuleDbContext : DbContext
 
     // 数据范围过滤器经这两个成员读取当前请求的范围
     internal bool DataScopeUnrestricted => _services.DataScope.Unrestricted;
+
+    /// <summary>
+    /// 从中查找智能枚举与单值值对象的程序集：上下文所在程序集及其引用的 Kmic.* 程序集（模块的 Domain 在其中）
+    /// </summary>
+    protected virtual IEnumerable<Assembly> ModelAssemblies =>
+        GetType().Assembly.GetReferencedAssemblies()
+            .Where(name => name.Name?.StartsWith("Kmic.", StringComparison.Ordinal) == true)
+            .Select(Assembly.Load)
+            .Prepend(GetType().Assembly);
 
     /// <summary>
     /// 只支持异步保存
@@ -70,6 +80,8 @@ public abstract class ModuleDbContext : DbContext
         configurationBuilder.IgnoreAny<IDomainEvent>();
         configurationBuilder.IgnoreAny<StateTransition>();
         configurationBuilder.RegisterAllInFrameworkIdConverters();
+        ValueTypeConventions.Register(configurationBuilder, ModelAssemblies);
+        configurationBuilder.Conventions.Add(_ => new ModelValidationConvention(Module, _services.ScopeObjects));
         ConfigureModuleConventions(configurationBuilder);
     }
 
@@ -81,7 +93,6 @@ public abstract class ModuleDbContext : DbContext
         modelBuilder.HasDefaultSchema(Module);
         ConfigureModel(modelBuilder);
         ModelConventions.Apply(modelBuilder);
-        ModelValidator.Validate(modelBuilder.Model, Module, _services.ScopeObjects);
         DataScopeFilters.Apply(modelBuilder, this);
     }
 

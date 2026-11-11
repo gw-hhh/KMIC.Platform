@@ -2,11 +2,24 @@
 # 修改须框架负责人审核。一行一个词，按字母顺序。
 Antdv
 Aspire
+attcollation
+attisdropped
+attname
+attnum
+attrelid
+atttypid
+atttypmod
 buildtransitive
+collisdeterministic
+colllocale
+collname
+collnamespace
+collprovider
 contentfiles
 datname
 Fluid
 gitea
+ILIKE
 Kmic
 Mediator
 Meziantou
@@ -14,9 +27,12 @@ Navigations
 netstandard
 nologo
 Npgsql
+nspname
 Pinia
 Quartz
 quotepath
+relname
+relnamespace
 Scalar
 Serilog
 Shouldly

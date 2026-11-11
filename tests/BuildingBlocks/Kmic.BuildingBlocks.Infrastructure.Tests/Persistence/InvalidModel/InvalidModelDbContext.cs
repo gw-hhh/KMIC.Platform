@@ -18,6 +18,7 @@ internal sealed class InvalidModelDbContext(DbContextOptions<InvalidModelDbConte
         {
             b.ToTable("Gadgets");
             b.HasMany(g => g.Parts).WithOne(p => p.Gadget);
+            b.HasIndex(g => g.Name).IsUnique();
         });
         modelBuilder.Entity<Widget>(b =>
         {

@@ -29,6 +29,7 @@ public sealed class ModelValidationTests
             p => p.ShouldContain(m => m.StartsWith("Gadget.Name：字符串必须声明最大长度", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：表名 Gadgets 必须与实体类名 Gadget 相同", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：有所属人或所属组织，必须声明 HasDataScope", StringComparison.Ordinal)),
+            p => p.ShouldContain(m => m.StartsWith("Gadget：唯一索引（Name）要用 MapsToError 声明", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget.Widget：聚合之间只存 ID", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("GadgetPart.Gadget：导航只能从父实体指向子实体", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("GadgetPart：只有聚合根能实现 ISoftDeletable", StringComparison.Ordinal)),
@@ -39,11 +40,20 @@ public sealed class ModelValidationTests
     }
 
     [Fact]
-    public void IsUnboundedText_OnNonStringProperty_Throws()
+    public void StringOnlyMappings_OnNonStringProperty_Throw()
     {
         var builder = new ModelBuilder().Entity<Ticket>();
 
         Should.Throw<InvalidOperationException>(() => builder.Property(t => t.Amount).IsUnboundedText());
+        Should.Throw<InvalidOperationException>(() => builder.Property(t => t.Amount).IsCaseInsensitive());
+    }
+
+    [Fact]
+    public void MapsToError_OnNonUniqueIndex_Throws()
+    {
+        var builder = new ModelBuilder().Entity<Ticket>();
+
+        Should.Throw<InvalidOperationException>(() => builder.HasIndex(t => t.Title).MapsToError(TicketErrors.NumberDuplicated));
     }
 
     private static ModuleDbContextServices Services()
