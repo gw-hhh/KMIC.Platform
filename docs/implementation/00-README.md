@@ -72,7 +72,7 @@
 | T-16 | 首期上线前置条件逐项满足（11 项） | 阶段 5 | 用户 + 运维 + 开发 | 08 第 5 节（本文只做提醒，清单以 08 为准） |
 | T-25 | CI 里加 oasdiff 步骤：以主分支上的 `artifacts/openapi/openapi.v1.json`（check 产物）为基线对比当前分支，破坏性变更阻断合并（除非随 API 版本升级） | T-01（CI 迁到 Gitea） | 开发 | 05-06 第 7 节 |
 | T-26 | 弄清 `Kmic.AppHost` 在开发机上启动即崩溃（0xC0000005）的原因并验证编排：PostgreSQL 容器起来、迁移程序跑完、应用在其后启动、仪表盘能看到日志追踪指标 | 下次在能正常运行 Aspire 的环境（或升级 Aspire / .NET 补丁后） | 开发 | S2-14 |
-| T-18 | 在 Linux 上完整运行一次 `scripts/check.cs`：GitHub 仓库的 Actions 页面手动运行 CI 工作流；修正只在 Linux 上出现的问题 | 阶段 2 验收前 | 开发 | S0 问题 7 补充（CI 暂时搁置） |
+| T-18 | 在 Linux 上完整运行一次 `scripts/check.cs`：GitHub 仓库的 Actions 页面手动运行 CI 工作流；修正只在 Linux 上出现的问题 | 阶段 2 验收前 | 开发 | S0 问题 7 补充（CI 暂时搁置）；2026-11-12 已在本机 Linux 容器里做了近似验证（见 S2 清单退出标准 5），Actions 上的手动运行作为最终确认 |
 
 ## 4. 已完成的待办
 
