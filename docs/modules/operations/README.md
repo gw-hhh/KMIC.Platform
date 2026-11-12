@@ -1,5 +1,6 @@
 # Operations 模块设计
 
+- 实现：审计汇总与查询已实现并通过端到端测试（2026-11-13）；定时任务管理、后台作业汇总、消息管理、前端错误接收、审计导出未做（需要 13.1 里的框架服务）。实现时的差异已就地订正，汇总见第 13 节末。
 - 状态：**已确认**（2026-11-12）。起草当天，用户授权“遇到需要选择的地方，默认采用最推荐的方案”，D-O1～D-O3 与小项均按建议决定；第 12 节的待确认事项（保留期、量级、前端错误限额）依赖合规或试运行数据，不阻塞编码。开工前先补框架的公开服务（第 13.1 节）。
 - 模块名 / schema / 编号：`Operations` / `"Operations"` / 11（平台模块，登记见 `docs/modules/README.md`）；`[LoggerMessage]` 的 `EventId` 使用 11000～11999
 - 项目：`Kmic.Operations.Domain`、`Application`、`Infrastructure`、`Presentation`、`Contracts`
@@ -378,7 +379,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 | `IAbandonPolicy<TRequest>` | 接收方为请求型消息注册的放弃前检查 | 05-07 第 9.1 节；Files 的 `AttachFiles` 是第一个使用者 |
 | 路由与重建的管理服务 | 终结、重新激活、手动触发与收尾确认、放弃（D-O2） | 05-07 第 6.3、8 节；现有 `MessageRoutes`、`RebuildRunStore` 是内部类型 |
 | `MessagingInstance` 心跳写入与建表语句 | 实例定期登记构建号与订阅清单 | 05-07 第 6.3 节 |
-| 游标分页 | 审计列表使用 | 第 10 节 |
+| 游标分页 | 审计列表使用 | 第 10 节；已实现（2026-11-13） |
 
 这些都是“框架基础设施写入 / 读取 Operations 表与各模块框架表”的例外（05-08 第 5.4 节、05-07 第 9.1 节已确认），不新增决定。
 
@@ -393,6 +394,17 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 | 05-12 第 6.1 节 | D-O1 选 A 时，`/health/dependencies` 的“或要求权限点 `Operations.Health.View`”一句改为只保留内网访问 | D-O1 |
 | `docs/implementation/S2-框架骨架.md` | 游标分页（S2-12 余项）标为随 Operations 实现；第 13.1 节的公开服务列为阶段 3 的开工项 | 本文 10、13.1 |
 | `docs/glossary.md`、`docs/modules/README.md` | 登记第 2 节术语与模块状态 | 本文 |
+
+---
+
+### 实现时的其他差异（2026-11-13）
+
+- 聚合与表都叫 `AuditLog`（设计写的聚合名 `AuditEntry`）：模型规则要求业务实体的表名等于类名，而框架的清理命令（`purge --table audit-log`）认的表就是 `"Operations"."AuditLog"`。强类型 ID 因此叫 `AuditLogId`。
+- 写入时间用审计的创建时间列（`CreatedAt`），不另设 `ReceivedAt`；`Targets`、`Changes`、`Details` 存 `jsonb`，领域里是 JSON 文本；`ClientIp` 是 `inet`。
+- 按操作对象筛选用 JSON 包含运算（`@>`）并走 GIN 索引。JSON 函数是 Npgsql 专有的，Application 不引用驱动，所以放在查询入口 `IOperationsQueryDb.WithTarget` 里，由 Infrastructure 实现。
+- 订阅 `Operations.RecordAudit` 把 `Framework.AuditRecorded` 转成 `RecordAuditCommand`，按审计 ID 幂等（先查再写，重复投递只写一次）。**消息从产生端的发件箱经路由到这里的收件箱的整条链路没有端到端测试**：API 测试宿主只跑 Api 角色，不跑投递与收件箱处理；已测的是命令本身（幂等、落库）和订阅声明被宿主接受。整条链路等定时任务、消息管理一起做时补一个跑 Worker 角色的测试。
+- `GET audit`、`GET audit/{id}` 已实现；`Operations.Audit.View` 是目前唯一的权限点，其余随用例加入。列表缺少 `from`/`to` 时由请求绑定直接返回 400（不带逐字段错误），超过 93 天或结束早于开始是逐字段错误。
+- Operations 的初始迁移已建消息路由表、定时任务设置与执行记录表、Quartz 表（框架提供建表语句，`MessageRouteTable`、`SchedulingTables` 改为公开）；测试用的 `FrameworkSchema` 增加 `operationsHasMigrations`，API 测试不再代建。`MessagingInstance` 心跳表仍未做。
 
 ---
 

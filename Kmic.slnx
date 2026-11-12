@@ -28,6 +28,13 @@
   <Folder Name="/src/Modules/Notifications/">
     <Project Path="src/Modules/Notifications/Kmic.Notifications.Contracts/Kmic.Notifications.Contracts.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Operations/">
+    <Project Path="src/Modules/Operations/Kmic.Operations.Application/Kmic.Operations.Application.csproj" />
+    <Project Path="src/Modules/Operations/Kmic.Operations.Contracts/Kmic.Operations.Contracts.csproj" />
+    <Project Path="src/Modules/Operations/Kmic.Operations.Domain/Kmic.Operations.Domain.csproj" />
+    <Project Path="src/Modules/Operations/Kmic.Operations.Infrastructure/Kmic.Operations.Infrastructure.csproj" />
+    <Project Path="src/Modules/Operations/Kmic.Operations.Presentation/Kmic.Operations.Presentation.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Sample/">
     <Project Path="src/Modules/Sample/Kmic.Sample.Application/Kmic.Sample.Application.csproj" />
     <Project Path="src/Modules/Sample/Kmic.Sample.Contracts/Kmic.Sample.Contracts.csproj" />
@@ -55,6 +62,9 @@
   </Folder>
   <Folder Name="/tests/Modules/Notifications/">
     <Project Path="tests/Modules/Notifications/Kmic.Notifications.Contracts.Tests/Kmic.Notifications.Contracts.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/Operations/">
+    <Project Path="tests/Modules/Operations/Kmic.Operations.Domain.Tests/Kmic.Operations.Domain.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/Sample/">
     <Project Path="tests/Modules/Sample/Kmic.Sample.Domain.Tests/Kmic.Sample.Domain.Tests.csproj" />

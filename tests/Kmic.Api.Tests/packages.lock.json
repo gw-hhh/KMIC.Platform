@@ -543,6 +543,8 @@
           "Kmic.Configuration.Presentation": "[1.0.0, )",
           "Kmic.Identity.Infrastructure": "[1.0.0, )",
           "Kmic.Identity.Presentation": "[1.0.0, )",
+          "Kmic.Operations.Infrastructure": "[1.0.0, )",
+          "Kmic.Operations.Presentation": "[1.0.0, )",
           "Kmic.Sample.Infrastructure": "[1.0.0, )",
           "Kmic.Sample.Presentation": "[1.0.0, )",
           "Kmic.ServiceDefaults": "[1.0.0, )",
@@ -691,6 +693,43 @@
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.operations.application": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Identity.Contracts": "[1.0.0, )",
+          "Kmic.Operations.Contracts": "[1.0.0, )",
+          "Kmic.Operations.Domain": "[1.0.0, )"
+        }
+      },
+      "kmic.operations.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.operations.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.operations.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Operations.Application": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.operations.presentation": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Presentation": "[1.0.0, )",
+          "Kmic.Operations.Application": "[1.0.0, )"
         }
       },
       "kmic.sample.application": {

@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// <remarks>
 /// 表都属于 Operations 模块，由它的迁移建立；调度器、同步和执行记录直接读写
 /// </remarks>
-internal static class SchedulingTables
+public static class SchedulingTables
 {
     /// <summary>
     /// Quartz 表名的前缀，带 schema
@@ -15,14 +15,23 @@ internal static class SchedulingTables
         "Operations".qrtz_
         """;
 
+    /// <summary>
+    /// 定时任务设置表（管理员的开关与 Cron 覆盖），带 schema
+    /// </summary>
     public const string Settings = """
         "Operations"."ScheduledJobSetting"
         """;
 
+    /// <summary>
+    /// 定时任务执行记录表，带 schema
+    /// </summary>
     public const string Runs = """
         "Operations"."ScheduledJobRun"
         """;
 
+    /// <summary>
+    /// 设置表与执行记录表的建表语句：Operations 模块的迁移执行，框架测试直接执行
+    /// </summary>
     public const string CreateSql = """
         CREATE TABLE "Operations"."ScheduledJobSetting" (
             "JobName" varchar(200) NOT NULL,

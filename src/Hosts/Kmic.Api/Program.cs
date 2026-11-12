@@ -6,6 +6,8 @@ using Kmic.Configuration.Infrastructure;
 using Kmic.Configuration.Presentation;
 using Kmic.Identity.Infrastructure;
 using Kmic.Identity.Presentation;
+using Kmic.Operations.Infrastructure;
+using Kmic.Operations.Presentation;
 using Kmic.Sample.Infrastructure;
 using Kmic.Sample.Presentation;
 using Kmic.ServiceDefaults;
@@ -18,6 +20,7 @@ builder.AddKmicServiceDefaults();
 
 // 模块在这里显式注册，Sample 是参考模块，只在开发与测试环境运行
 builder.AddKmicHost(host => host
+    .AddModule<OperationsModule, OperationsEndpoints>()
     .AddModule<ConfigurationModule, ConfigurationEndpoints>()
     .AddModule<IdentityModule, IdentityEndpoints>()
     .AddModule<SampleModule, SampleEndpoints>(onlyIn: KmicEnvironments.NonProduction));
