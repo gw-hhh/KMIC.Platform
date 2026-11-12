@@ -16,6 +16,8 @@ if (args.Length != 2 || !int.TryParse(args[1], CultureInfo.InvariantCulture, out
     return 2;
 }
 
+const string MigrationRunner = "Kmic.MigrationRunner";
+
 var module = args[0];
 var root = FindRepositoryRoot();
 var problems = Validate(root, module, number);
@@ -110,8 +112,6 @@ static int Template(string root, string module)
     var install = Run(root, "dotnet", "new install templates/kmic-module --force");
     return install != 0 ? install : Run(root, "dotnet", $"new kmic-module -n {module} -o . --force");
 }
-
-const string MigrationRunner = "Kmic.MigrationRunner";
 
 static string[] ProjectsOf(string module) =>
 [
