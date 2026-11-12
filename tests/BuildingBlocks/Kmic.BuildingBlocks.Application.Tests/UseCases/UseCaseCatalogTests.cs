@@ -22,6 +22,8 @@ public sealed class UseCaseCatalogTests
 
         var changePassword = catalog.Get(typeof(ChangePasswordCommand));
         changePassword.AllowWhenPasswordChangeRequired.ShouldBeTrue();
+        changePassword.AllowWhenImpersonationReadOnly.ShouldBeTrue();
+        submit.AllowWhenImpersonationReadOnly.ShouldBeFalse();
         changePassword.Audited.ShouldBe(false);
 
         var lookup = catalog.Get(typeof(LookupThingQuery));
@@ -35,6 +37,8 @@ public sealed class UseCaseCatalogTests
     [InlineData(typeof(CatalogSamples.TwoDeclarationsQuery), "现在有 2 个")]
     [InlineData(typeof(CatalogSamples.SystemOnlyWithAllowSystemCommand), "[AllowSystem] 只能")]
     [InlineData(typeof(CatalogSamples.PasswordExemptWithPermissionCommand), "[AllowWhenPasswordChangeRequired] 只能")]
+    [InlineData(typeof(CatalogSamples.ImpersonationExemptWithPermissionCommand), "[AllowWhenImpersonationReadOnly] 只能")]
+    [InlineData(typeof(CatalogSamples.ImpersonationExemptQuery), "[AllowWhenImpersonationReadOnly] 只能")]
     [InlineData(typeof(CatalogSamples.ContractCommand), "[ContractQuery] 只能用于查询")]
     [InlineData(typeof(CatalogSamples.UnauditedCommand), "[Audited]、[NotAudited] 之一")]
     [InlineData(typeof(CatalogSamples.IdempotentNotAuditedCommand), "必须 [Audited]")]

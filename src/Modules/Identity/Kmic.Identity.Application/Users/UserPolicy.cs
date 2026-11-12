@@ -21,6 +21,15 @@ public sealed class UserPolicy : IResourcePolicy<UserTarget, UserAdminAction>
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(action);
 
+        // 模拟身份比别的动作限制更严：自己、系统账号、受保护角色的持有人一律不能模拟，操作者自己持有受保护角色也不例外。
+        // 不然两个管理员互相模拟，就绕开了对管理员凭据的保护
+        if (action == UserAdminAction.Impersonate || action == UserAdminAction.ImpersonateWrite)
+        {
+            return resource.User.Kind == UserKind.System || resource.User.Id == access.UserId || resource.HoldsProtectedRole
+                ? PolicyDecision.Deny(DenialReason.ResourceDenied, IdentityErrors.ImpersonationDenied)
+                : PolicyDecision.Allow;
+        }
+
         if (resource.User.Kind == UserKind.System)
         {
             return PolicyDecision.Deny(DenialReason.ResourceDenied, IdentityErrors.SystemUserImmutable);

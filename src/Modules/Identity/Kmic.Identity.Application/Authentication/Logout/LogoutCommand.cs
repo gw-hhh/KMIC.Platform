@@ -11,6 +11,7 @@ namespace Kmic.Identity.Application.Authentication.Logout;
 /// </remarks>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
+[AllowWhenImpersonationReadOnly]
 [NotAudited("结果记入安全事件")]
 [NotIdempotent("退出天然幂等：会话已经作废时再次退出不改变任何东西")]
 public sealed record LogoutCommand : ICommand;

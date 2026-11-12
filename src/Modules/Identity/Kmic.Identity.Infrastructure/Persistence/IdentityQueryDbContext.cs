@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application;
+using Kmic.Identity.Application.SecurityEvents;
 using Kmic.Identity.Contracts;
 using Kmic.Identity.Domain.Organization;
 using Kmic.Identity.Domain.Roles;
@@ -29,6 +30,14 @@ internal sealed class IdentityQueryDbContext(DbContextOptions<IdentityQueryDbCon
 
     /// <inheritdoc />
     public IQueryable<Session> Sessions => Set<Session>();
+
+    /// <inheritdoc />
+    public IQueryable<SecurityEventRow> SecurityEvents => Database.SqlQuery<SecurityEventRow>(
+        $"""
+        SELECT "Id", "OccurredAt", "Type", "Severity", "Reason", "UserId", "ActualUserId", "RoleId", "SessionId", "AttemptedAccount",
+               host("ClientIp") AS "ClientIp", "ResourceType", "ResourceId", "Details"::text AS "Details", "TraceId"
+        FROM "Identity"."SecurityEvent"
+        """);
 
     /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>

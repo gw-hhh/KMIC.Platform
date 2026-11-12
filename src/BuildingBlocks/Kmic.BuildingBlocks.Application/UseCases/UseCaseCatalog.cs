@@ -116,6 +116,7 @@ public sealed class UseCaseCatalog
             Permission = access.Permission,
             AllowSystem = access.AllowSystem,
             AllowWhenPasswordChangeRequired = access.AllowWhenPasswordChangeRequired,
+            AllowWhenImpersonationReadOnly = access.AllowWhenImpersonationReadOnly,
             ContractAccess = access.ContractAccess,
             Idempotent = audit.Idempotent,
             Audited = kind == MessageKind.Command ? audit.Audited is not null : null,
@@ -163,7 +164,7 @@ public sealed class UseCaseCatalog
                 && (definition == typeof(Mediator.ICommandHandler<,>) || definition == typeof(Mediator.IQueryHandler<,>)))
             .Select(i => i.GetGenericArguments()[0]);
 
-    // 授权声明必须有且只有一种，AllowSystem、AllowWhenPasswordChangeRequired 只能和特定声明一起用
+    // 授权声明必须有且只有一种，AllowSystem、AllowWhenPasswordChangeRequired、AllowWhenImpersonationReadOnly 只能和特定声明一起用
     private static AccessDeclaration ReadAccess(Type type, string name, MessageKind kind, List<string> problems)
     {
         var permission = type.GetCustomAttribute<RequirePermissionAttribute>();
@@ -188,6 +189,7 @@ public sealed class UseCaseCatalog
         var requirement = declared.Length == 1 ? declared[0] : AccessRequirement.Permission;
         var allowSystem = Has<AllowSystemAttribute>(type);
         var allowWhenPasswordChangeRequired = Has<AllowWhenPasswordChangeRequiredAttribute>(type);
+        var allowWhenImpersonationReadOnly = Has<AllowWhenImpersonationReadOnlyAttribute>(type);
         if (allowSystem && requirement is not (AccessRequirement.Permission or AccessRequirement.Authenticated))
         {
             problems.Add($"{name}：[AllowSystem] 只能与 [RequirePermission] 或 [AllowAuthenticated] 叠加。");
@@ -196,6 +198,11 @@ public sealed class UseCaseCatalog
         if (allowWhenPasswordChangeRequired && requirement != AccessRequirement.Authenticated)
         {
             problems.Add($"{name}：[AllowWhenPasswordChangeRequired] 只能与 [AllowAuthenticated] 叠加。");
+        }
+
+        if (allowWhenImpersonationReadOnly && (requirement != AccessRequirement.Authenticated || kind != MessageKind.Command))
+        {
+            problems.Add($"{name}：[AllowWhenImpersonationReadOnly] 只能用于带 [AllowAuthenticated] 的命令。");
         }
 
         if (permission is not null && string.IsNullOrWhiteSpace(permission.Permission))
@@ -213,7 +220,7 @@ public sealed class UseCaseCatalog
             ReferenceResultRule.Check(type, name, contractQuery, problems);
         }
 
-        return new AccessDeclaration(requirement, permission?.Permission, allowSystem, allowWhenPasswordChangeRequired, contractQuery?.Access);
+        return new AccessDeclaration(requirement, permission?.Permission, allowSystem, allowWhenPasswordChangeRequired, allowWhenImpersonationReadOnly, contractQuery?.Access);
     }
 
     // 幂等和审计只能用于命令，读取审计只能用于查询，每个命令都要声明是否审计
@@ -280,6 +287,7 @@ public sealed class UseCaseCatalog
         string? Permission,
         bool AllowSystem,
         bool AllowWhenPasswordChangeRequired,
+        bool AllowWhenImpersonationReadOnly,
         ContractAccess? ContractAccess);
 
     private sealed record AuditDeclaration(bool Idempotent, AuditedAttribute? Audited, bool AuditedRead);

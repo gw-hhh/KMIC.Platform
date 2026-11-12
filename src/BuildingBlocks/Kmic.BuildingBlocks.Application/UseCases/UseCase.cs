@@ -44,6 +44,11 @@ public sealed record UseCase
     public bool AllowWhenPasswordChangeRequired { get; init; }
 
     /// <summary>
+    /// 只读的模拟会话里是否仍可执行
+    /// </summary>
+    public bool AllowWhenImpersonationReadOnly { get; init; }
+
+    /// <summary>
     /// Contracts 查询的授权方式
     /// </summary>
     public ContractAccess? ContractAccess { get; init; }

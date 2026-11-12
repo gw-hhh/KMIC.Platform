@@ -61,6 +61,22 @@ internal sealed class LoginThrottleStore(IIndependentDatabase database, LoginThr
             },
             ct);
 
+    public async Task<int> PurgeAsync(DateTimeOffset lastFailedBefore, DateTimeOffset now, CancellationToken ct) =>
+        await database.InTransactionAsync(
+            async (connection, transaction, token) =>
+            {
+                await using var delete = Command(connection, transaction, """
+                    DELETE FROM "Identity"."LoginThrottle"
+                    WHERE "LastFailedAt" < @before
+                      AND ("LockedUntil" IS NULL OR "LockedUntil" < @now)
+                      AND ("NextAllowedAt" IS NULL OR "NextAllowedAt" < @now)
+                    """);
+                delete.Parameters.Add(new NpgsqlParameter("before", lastFailedBefore));
+                delete.Parameters.Add(new NpgsqlParameter("now", now));
+                return await delete.ExecuteNonQueryAsync(token);
+            },
+            ct);
+
     private static async Task<LoginThrottleState?> ReadAsync(DbConnection connection, DbTransaction transaction, string loginNameHash, bool forUpdate, CancellationToken ct)
     {
         await using var command = Command(connection, transaction, forUpdate ? Select + " FOR UPDATE" : Select);

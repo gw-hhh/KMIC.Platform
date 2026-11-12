@@ -50,4 +50,10 @@ public sealed class SessionLifetimeOptions
     /// </summary>
     [TimeSpanRange("00:05:00", "04:00:00")]
     public TimeSpan ImpersonationLifetime { get; init; } = TimeSpan.FromHours(1);
+
+    /// <summary>
+    /// 已经结束的会话在表里保留多久：超过绝对上限、或作废之后过了这么久，定时清理才删除
+    /// </summary>
+    [TimeSpanRange("1.00:00:00", "365.00:00:00")]
+    public TimeSpan EndedRetention { get; init; } = TimeSpan.FromDays(30);
 }

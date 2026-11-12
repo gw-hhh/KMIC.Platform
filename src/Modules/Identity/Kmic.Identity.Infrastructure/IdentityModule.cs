@@ -1,11 +1,14 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application;
 using Kmic.Identity.Application.Authentication;
 using Kmic.Identity.Application.Authorization;
+using Kmic.Identity.Application.ContractQueries;
+using Kmic.Identity.Application.Maintenance;
 using Kmic.Identity.Contracts;
 using Kmic.Identity.Domain.Organization;
 using Kmic.Identity.Domain.Roles;
@@ -45,6 +48,12 @@ public sealed class IdentityModule : IModule
         services.AddScoped<IOrgTreeRepository, OrgTreeRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
 
+        // Contracts 的实现：薄适配器，经 IContractQuerySender 调用本模块的契约查询
+        services.AddScoped<IUserReferences, UserReferences>();
+        services.AddScoped<IRoleReferences, RoleReferences>();
+        services.AddScoped<IOrgUnitReferences, OrgUnitReferences>();
+        services.AddScoped<IUserContacts, UserContacts>();
+
         // 单例：后台作业的执行器是单例，每次加载自己开一个作用域；请求里同样如此
         services.AddSingleton<IAccessContextLoader, AccessContextLoader>();
 
@@ -59,5 +68,14 @@ public sealed class IdentityModule : IModule
         services.AddSingleton<LoginThrottlePolicy>();
         services.AddSingleton<PasswordPolicy>();
         services.AddSingleton<TemporaryPasswordGenerator>();
+    }
+
+    /// <inheritdoc />
+    public void ConfigureScheduling(ISchedulingBuilder scheduling)
+    {
+        ArgumentNullException.ThrowIfNull(scheduling);
+
+        scheduling.Schedule("Identity.PurgeSessions", "0 30 3 * * ?", run => new PurgeSessionsCommand(run.ScheduledFireTime), o => o.DisplayName("清理已结束的会话"));
+        scheduling.Schedule("Identity.PurgeLoginThrottle", "0 0 4 * * ?", run => new PurgeLoginThrottleCommand(run.ScheduledFireTime), o => o.DisplayName("清理登录失败计数"));
     }
 }

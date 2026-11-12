@@ -42,6 +42,16 @@ public sealed class UserAdminAction : Enumeration<UserAdminAction>
     /// </summary>
     public static readonly UserAdminAction ForceLogout = new("ForceLogout", "强制下线");
 
+    /// <summary>
+    /// 以只读方式模拟他的身份
+    /// </summary>
+    public static readonly UserAdminAction Impersonate = new("Impersonate", "模拟身份");
+
+    /// <summary>
+    /// 以可以修改数据的方式模拟他的身份：需要另外的权限点，开始模拟时按它决定会话是否可写
+    /// </summary>
+    public static readonly UserAdminAction ImpersonateWrite = new("ImpersonateWrite", "模拟身份并允许修改数据");
+
     private UserAdminAction(string code, string name)
         : base(code, name)
     {

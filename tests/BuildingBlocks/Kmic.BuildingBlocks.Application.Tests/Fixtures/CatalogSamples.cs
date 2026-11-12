@@ -28,6 +28,15 @@ public static class CatalogSamples
     [NotAudited("测试")]
     public sealed record PasswordExemptWithPermissionCommand : ICommand;
 
+    [RequirePermission("Test.Thing.Edit")]
+    [AllowWhenImpersonationReadOnly]
+    [NotAudited("测试")]
+    public sealed record ImpersonationExemptWithPermissionCommand : ICommand;
+
+    [AllowAuthenticated]
+    [AllowWhenImpersonationReadOnly]
+    public sealed record ImpersonationExemptQuery : IQuery<int>;
+
     [ContractQuery(ContractAccess.Reference)]
     [NotAudited("测试")]
     public sealed record ContractCommand : ICommand;
@@ -71,6 +80,16 @@ public static class CatalogSamples
     public sealed class PasswordExemptWithPermissionCommandHandler : ICommandHandler<PasswordExemptWithPermissionCommand>
     {
         public ValueTask<Result> Handle(PasswordExemptWithPermissionCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    public sealed class ImpersonationExemptWithPermissionCommandHandler : ICommandHandler<ImpersonationExemptWithPermissionCommand>
+    {
+        public ValueTask<Result> Handle(ImpersonationExemptWithPermissionCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    public sealed class ImpersonationExemptQueryHandler : IQueryHandler<ImpersonationExemptQuery, int>
+    {
+        public ValueTask<Result<int>> Handle(ImpersonationExemptQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<int>>(0);
     }
 
     public sealed class ContractCommandHandler : ICommandHandler<ContractCommand>

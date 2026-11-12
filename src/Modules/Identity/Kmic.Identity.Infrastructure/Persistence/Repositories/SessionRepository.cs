@@ -36,4 +36,9 @@ internal sealed class SessionRepository(IdentityDbContext context)
             .AsSplitQuery()
             .Where(s => s.Status == SessionStatus.Active && (s.UserId == userId || s.ImpersonatorUserId == userId))
             .ToListAsync(ct);
+
+    public async Task<int> PurgeEndedAsync(DateTimeOffset before, CancellationToken ct) =>
+        await Context.Set<Session>()
+            .Where(s => s.AbsoluteExpiresAt < before || (s.Status == SessionStatus.Revoked && s.RevokedAt < before))
+            .ExecuteDeleteAsync(ct);
 }

@@ -70,7 +70,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
             return CommonErrors.PasswordChangeRequired;
         }
 
-        if (useCase.Kind == MessageKind.Command && access.ImpersonatorUserId is not null && !access.ImpersonationAllowsWrite)
+        if (useCase.Kind == MessageKind.Command && access.ImpersonatorUserId is not null && !access.ImpersonationAllowsWrite && !useCase.AllowWhenImpersonationReadOnly)
         {
             return Deny(useCase, CommonErrors.ImpersonationReadOnly, "ImpersonationReadOnly");
         }

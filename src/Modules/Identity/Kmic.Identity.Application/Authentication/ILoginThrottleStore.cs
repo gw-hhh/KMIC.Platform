@@ -23,4 +23,9 @@ public interface ILoginThrottleStore
     /// 清零：登录成功、管理员解锁或用短信重置密码之后
     /// </summary>
     Task ClearAsync(string loginNameHash, CancellationToken ct);
+
+    /// <summary>
+    /// 删除不再有意义的行：最近一次失败早于 <paramref name="lastFailedBefore" />，而且当前没有处在等待或锁定中，返回删除的行数
+    /// </summary>
+    Task<int> PurgeAsync(DateTimeOffset lastFailedBefore, DateTimeOffset now, CancellationToken ct);
 }

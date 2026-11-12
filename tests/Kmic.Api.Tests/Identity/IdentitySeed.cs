@@ -40,17 +40,17 @@ internal sealed class IdentitySeed(string connectionString)
         return id;
     }
 
-    public async Task<Guid> UserAsync(string account, string? password, string displayName = "测试用户", string? mobile = null, bool active = true, bool mustChange = false)
+    public async Task<Guid> UserAsync(string account, string? password, string displayName = "测试用户", string? mobile = null, bool active = true, bool mustChange = false, string? employeeNo = null, string? email = null)
     {
         var id = Guid.CreateVersion7();
         await using var data = NpgsqlDataSource.Create(connectionString);
         await ExecuteAsync(
             data,
             """
-            INSERT INTO "Identity"."User" ("Id", "Account", "DisplayName", "Mobile", "Kind", "Status", "PasswordHash", "PasswordChangeRequired", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
-            VALUES (@id, @account, @name, @mobile, 'Normal', @status, @hash, @must, now(), @system, 0)
+            INSERT INTO "Identity"."User" ("Id", "Account", "DisplayName", "Mobile", "EmployeeNo", "Email", "Kind", "Status", "PasswordHash", "PasswordChangeRequired", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
+            VALUES (@id, @account, @name, @mobile, @employee, @email, 'Normal', @status, @hash, @must, now(), @system, 0)
             """,
-            ("id", id), ("account", account), ("name", displayName), ("mobile", (object?)mobile ?? DBNull.Value), ("status", active ? "Active" : "Disabled"),
+            ("id", id), ("account", account), ("name", displayName), ("mobile", (object?)mobile ?? DBNull.Value), ("employee", (object?)employeeNo ?? DBNull.Value), ("email", (object?)email ?? DBNull.Value), ("status", active ? "Active" : "Disabled"),
             ("hash", password is null ? DBNull.Value : _hasher.HashPassword(new object(), password)), ("must", mustChange), ("system", _system));
         return id;
     }

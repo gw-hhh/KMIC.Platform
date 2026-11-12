@@ -22,6 +22,8 @@ public sealed class UserActions : ResourceActionCatalog<UserTarget, UserAdminAct
         builder.Action(UserAdminAction.ResetPassword, IdentityPermissions.UserResetPassword);
         builder.Action(UserAdminAction.Unlock, IdentityPermissions.UserUnlock);
         builder.Action(UserAdminAction.ForceLogout, IdentityPermissions.UserForceLogout);
+        builder.Action(UserAdminAction.Impersonate, IdentityPermissions.UserImpersonate, state: IsActive);
+        builder.Action(UserAdminAction.ImpersonateWrite, IdentityPermissions.UserImpersonateWrite, state: IsActive);
     }
 
     private static Result IsActive(UserTarget target) => target.User.Status == UserStatus.Active ? Result.Success() : IdentityErrors.InvalidState;

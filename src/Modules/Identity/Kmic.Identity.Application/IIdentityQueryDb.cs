@@ -1,3 +1,4 @@
+using Kmic.Identity.Application.SecurityEvents;
 using Kmic.Identity.Domain.Organization;
 using Kmic.Identity.Domain.Roles;
 using Kmic.Identity.Domain.Sessions;
@@ -33,4 +34,9 @@ public interface IIdentityQueryDb
     /// 会话，含刷新令牌
     /// </summary>
     IQueryable<Session> Sessions { get; }
+
+    /// <summary>
+    /// 安全事件：表由框架的写入器写，这里只读，用原生 SQL 映射到只读的行类型
+    /// </summary>
+    IQueryable<SecurityEventRow> SecurityEvents { get; }
 }

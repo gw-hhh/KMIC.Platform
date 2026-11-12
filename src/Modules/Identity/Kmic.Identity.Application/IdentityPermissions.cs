@@ -65,4 +65,22 @@ public static class IdentityPermissions
     /// </summary>
     [Permission("授予与收回角色", Sensitive = true)]
     public const string UserGrant = "Identity.User.Grant";
+
+    /// <summary>
+    /// 模拟身份（只读）
+    /// </summary>
+    [Permission("模拟身份", Sensitive = true)]
+    public const string UserImpersonate = "Identity.User.Impersonate";
+
+    /// <summary>
+    /// 模拟身份时允许修改数据
+    /// </summary>
+    [Permission("模拟身份时允许写入", Sensitive = true)]
+    public const string UserImpersonateWrite = "Identity.User.ImpersonateWrite";
+
+    /// <summary>
+    /// 查看安全事件
+    /// </summary>
+    [Permission("查看安全事件", Sensitive = true)]
+    public const string SecurityEventView = "Identity.SecurityEvent.View";
 }

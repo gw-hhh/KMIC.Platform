@@ -11,6 +11,8 @@ public sealed class UserPolicyTests
 {
     private static readonly UserAdminAction[] _credentialActions = [UserAdminAction.ResetPassword, UserAdminAction.ChangeCredentials, UserAdminAction.ForceLogout];
 
+    private static readonly UserAdminAction[] _impersonation = [UserAdminAction.Impersonate, UserAdminAction.ImpersonateWrite];
+
     private readonly UserPolicy _policy = new();
 
     private static User Target() => User.Create("13800138000", "张三", null, null, null, null).Value;
@@ -24,7 +26,7 @@ public sealed class UserPolicyTests
     {
         var target = new UserTarget(Target(), OperatorIsProtected: false, HoldsProtectedRole: false, IsLastProtectedHolder: false);
 
-        foreach (var action in UserAdminAction.All)
+        foreach (var action in UserAdminAction.All.Except(_impersonation))
         {
             Evaluate(Operator(), target, action).Allowed.ShouldBeTrue(action.Code);
         }
@@ -48,7 +50,7 @@ public sealed class UserPolicyTests
     {
         var target = new UserTarget(Target(), OperatorIsProtected: false, HoldsProtectedRole: true, IsLastProtectedHolder: false);
 
-        foreach (var action in UserAdminAction.All)
+        foreach (var action in UserAdminAction.All.Except(_impersonation))
         {
             var decision = Evaluate(Operator(), target, action);
             if (_credentialActions.Contains(action))
@@ -68,7 +70,7 @@ public sealed class UserPolicyTests
     {
         var target = new UserTarget(Target(), OperatorIsProtected: true, HoldsProtectedRole: true, IsLastProtectedHolder: false);
 
-        foreach (var action in UserAdminAction.All)
+        foreach (var action in UserAdminAction.All.Except(_impersonation))
         {
             Evaluate(Operator(), target, action).Allowed.ShouldBeTrue(action.Code);
         }
@@ -82,5 +84,21 @@ public sealed class UserPolicyTests
         Evaluate(Operator(), target, UserAdminAction.Disable).Error.ShouldBe(IdentityErrors.LastProtectedHolder);
         Evaluate(Operator(), target, UserAdminAction.Edit).Allowed.ShouldBeTrue();
         Evaluate(Operator(), target, UserAdminAction.ResetPassword).Allowed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Impersonating_IsRefusedForYourselfAndProtectedHolders_EvenByAProtectedOperator()
+    {
+        var user = Target();
+        var self = Operator() with { UserId = user.Id };
+        var ordinary = new UserTarget(user, OperatorIsProtected: false, HoldsProtectedRole: false, IsLastProtectedHolder: false);
+        var protectedHolder = new UserTarget(Target(), OperatorIsProtected: true, HoldsProtectedRole: true, IsLastProtectedHolder: false);
+
+        foreach (var action in _impersonation)
+        {
+            Evaluate(Operator(), ordinary, action).Allowed.ShouldBeTrue(action.Code);
+            Evaluate(self, ordinary, action).Error.ShouldBe(IdentityErrors.ImpersonationDenied);
+            Evaluate(Operator(), protectedHolder, action).Error.ShouldBe(IdentityErrors.ImpersonationDenied);
+        }
     }
 }

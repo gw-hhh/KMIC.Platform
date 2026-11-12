@@ -84,6 +84,15 @@ public sealed class PipelineTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ReadOnlyImpersonation_StillAllowsCommandsThatDeclareTheExemption()
+    {
+        var access = TestAccess.WithPermissions() with { ImpersonatorUserId = UserId.New(), ImpersonationAllowsWrite = false };
+
+        (await SendAsync(access, new ChangePasswordCommand())).IsSuccess.ShouldBeTrue();
+        _host.SecurityEvents.Events.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task SystemIdentity_SystemOnlyPasses_UndeclaredUseCaseThrows()
     {
         await using var scope = _host.Scope(CallOrigin.ScheduledJob, CurrentUser.System());

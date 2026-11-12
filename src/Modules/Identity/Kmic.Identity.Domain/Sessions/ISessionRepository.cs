@@ -20,4 +20,12 @@ public interface ISessionRepository : IRepository<Session, SessionId>
     /// 某个用户仍然有效的全部会话，含他作为实际操作人发起的模拟会话
     /// </summary>
     Task<IReadOnlyList<Session>> ListActiveInvolvingAsync(UserId userId, CancellationToken ct);
+
+    /// <summary>
+    /// 删除已经结束的会话（连同它的刷新令牌）：超过绝对上限，或作废的时间早于 <paramref name="before" />，返回删除的会话数
+    /// </summary>
+    /// <remarks>
+    /// 定时清理用。会话表只保留“最近发生了什么”，更久远的登录记录在安全事件里
+    /// </remarks>
+    Task<int> PurgeEndedAsync(DateTimeOffset before, CancellationToken ct);
 }
