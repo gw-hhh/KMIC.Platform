@@ -6,12 +6,18 @@ namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 /// <remarks>
 /// 表属于 Identity 模块，由它的迁移执行这里的建表语句；框架的写入器直接插入。只追加：运行账号改不了、删不了
 /// </remarks>
-internal static class SecurityEventTable
+public static class SecurityEventTable
 {
+    /// <summary>
+    /// 带 schema 的表名
+    /// </summary>
     public const string Name = """
         "Identity"."SecurityEvent"
         """;
 
+    /// <summary>
+    /// 建表语句，含索引、表注释，并收回运行账号的修改与删除权限
+    /// </summary>
     public const string CreateSql = """
         CREATE TABLE "Identity"."SecurityEvent" (
             "Id" uuid NOT NULL,

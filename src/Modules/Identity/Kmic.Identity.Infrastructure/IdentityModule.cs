@@ -1,0 +1,46 @@
+using System.Reflection;
+using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
+using Kmic.Identity.Application;
+using Kmic.Identity.Contracts;
+using Kmic.Identity.Domain.Organization;
+using Kmic.Identity.Domain.Roles;
+using Kmic.Identity.Domain.Sessions;
+using Kmic.Identity.Domain.Users;
+using Kmic.Identity.Infrastructure.Access;
+using Kmic.Identity.Infrastructure.Persistence;
+using Kmic.Identity.Infrastructure.Persistence.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Kmic.Identity.Infrastructure;
+
+/// <summary>
+/// Identity 模块的服务端注册类
+/// </summary>
+/// <remarks>
+/// 处理器、校验器、EF 配置自动发现；这里只写自动发现做不到的注册
+/// </remarks>
+public sealed class IdentityModule : IModule
+{
+    /// <inheritdoc />
+    public string Name => IdentityModuleInfo.Name;
+
+    /// <inheritdoc />
+    public Assembly ApplicationAssembly => typeof(IIdentityQueryDb).Assembly;
+
+    /// <inheritdoc />
+    public void AddServices(IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddModuleDbContexts<IdentityDbContext, IdentityQueryDbContext, IIdentityQueryDb>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IOrgTreeRepository, OrgTreeRepository>();
+        services.AddScoped<ISessionRepository, SessionRepository>();
+
+        // 单例：后台作业的执行器是单例，每次加载自己开一个作用域；请求里同样如此
+        services.AddSingleton<IAccessContextLoader, AccessContextLoader>();
+    }
+}

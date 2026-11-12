@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Testing.Database;
+using Kmic.Identity.Infrastructure;
 using Kmic.Sample.Infrastructure;
 using Npgsql;
 
@@ -40,8 +41,9 @@ public sealed class ApiTemplate : PostgresTemplateDatabase
         }
 
         // 框架表要在模块迁移之前就有授权设置；每个模块的 AddServices 登记了它的 DbContext，迁移不用认识具体类型
-        await FrameworkSchema.CreateAsync(connectionString, ct);
+        await FrameworkSchema.CreateAsync(connectionString, ct, identityHasMigrations: true);
         var modules = new ServiceCollection();
+        new IdentityModule().AddServices(modules);
         new SampleModule().AddServices(modules);
         await using var provider = modules.BuildServiceProvider();
         await ModuleMigrator.MigrateAllAsync(provider, connectionString, ct);

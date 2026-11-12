@@ -61,6 +61,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<IAuditContext>(provider => provider.GetRequiredService<AuditRecorder>());
         services.AddOptions<AuditOptions>();
         services.TryAddSingleton<JobExecutor>();
+        services.TryAddSingleton<IQueryScopeFactory, QueryScopeFactory>();
         services.AddOptions<JobOptions>();
         services.AddOptions<MessagingOptions>();
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());

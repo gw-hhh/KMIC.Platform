@@ -72,9 +72,9 @@ public sealed class Role : AggregateRoot<RoleId>
     public int SortOrder { get; private set; }
 
     /// <summary>
-    /// 全权限角色最近一次同步的权限点目录哈希；目录变化时同步任务更新它，让授权版本跟着递增
+    /// 全权限角色最近一次同步的权限点目录指纹；目录变化时同步任务更新它，让授权版本跟着递增
     /// </summary>
-    public string? CatalogHash { get; private set; }
+    public string? CatalogFingerprint { get; private set; }
 
     /// <summary>
     /// 拥有的权限点
@@ -227,7 +227,7 @@ public sealed class Role : AggregateRoot<RoleId>
 
         if (GrantsAllPermissions)
         {
-            CatalogHash = catalogHash;
+            CatalogFingerprint = catalogHash;
         }
     }
 

@@ -2,6 +2,8 @@ using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Presentation.OpenApi;
+using Kmic.Identity.Infrastructure;
+using Kmic.Identity.Presentation;
 using Kmic.Sample.Infrastructure;
 using Kmic.Sample.Presentation;
 using Kmic.ServiceDefaults;
@@ -14,6 +16,7 @@ builder.AddKmicServiceDefaults();
 
 // 模块在这里显式注册，Sample 是参考模块，只在开发与测试环境运行
 builder.AddKmicHost(host => host
+    .AddModule<IdentityModule, IdentityEndpoints>()
     .AddModule<SampleModule, SampleEndpoints>(onlyIn: KmicEnvironments.NonProduction));
 
 // 选项必须是编译期常量，源码生成器要读取。数组顺序就是管道里的执行顺序

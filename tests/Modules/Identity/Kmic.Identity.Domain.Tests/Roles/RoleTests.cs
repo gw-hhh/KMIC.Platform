@@ -112,7 +112,7 @@ public sealed class RoleTests
         admin.SyncCatalog("hash-1");
         seller.SyncCatalog("hash-1");
 
-        admin.CatalogHash.ShouldBe("hash-1");
-        seller.CatalogHash.ShouldBeNull();
+        admin.CatalogFingerprint.ShouldBe("hash-1");
+        seller.CatalogFingerprint.ShouldBeNull();
     }
 }

@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Testing.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Kmic.Api.Tests;
 
@@ -36,6 +37,7 @@ public sealed class ApiFactory(string connectionString, TokenFactory tokens) : W
         builder.ConfigureTestServices(services =>
         {
             services.AddSingleton<TestAccessContextLoader>();
+            services.RemoveAll<IAccessContextLoader>();
             services.AddSingleton<IAccessContextLoader>(sp => sp.GetRequiredService<TestAccessContextLoader>());
         });
     }
