@@ -65,6 +65,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton(PreferenceCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(NumberRuleCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(IntegrationMessageCatalog.FromAssemblies(applicationAssemblies));
+        services.AddOptions<CursorOptions>();
+        services.AddSingleton<ICursorProtector, HmacCursorProtector>();
         return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 

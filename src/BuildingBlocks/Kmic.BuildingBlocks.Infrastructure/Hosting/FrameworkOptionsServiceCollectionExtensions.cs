@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Application.Behaviors;
+using Kmic.BuildingBlocks.Application.Querying;
 using Kmic.BuildingBlocks.Application.Time;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Caching;
@@ -9,6 +10,7 @@ using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
@@ -39,6 +41,14 @@ public static class FrameworkOptionsServiceCollectionExtensions
         services.AddOptions<PurgeOptions>().BindConfiguration(PurgeOptions.Section);
         services.AddOptions<SecurityEventOptions>().BindConfiguration(SecurityEventOptions.Section);
         services.AddOptions<DatabaseDiagnosticsOptions>().BindConfiguration(DatabaseDiagnosticsOptions.Section);
+
+        // 多个实例的游标签名密钥必须一致，所以生产环境一定要配置；开发和测试可以不配，每个进程随机一个
+        services.AddOptions<CursorOptions>()
+            .BindConfiguration(CursorOptions.Section)
+            .Validate<IHostEnvironment>(
+                (options, environment) => !environment.IsProduction() || !string.IsNullOrWhiteSpace(options.SigningKey),
+                "生产环境必须配置 Kmic:Paging:SigningKey（游标签名密钥，Base64，至少 32 字节），多个实例用同一个值")
+            .ValidateOnStart();
         return services;
     }
 }

@@ -14,6 +14,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 internal static class ProjectionOrdering
 {
     private static readonly MethodInfo _select = Queryable("Select", lambdaParameters: 1);
+    private static readonly MethodInfo _where = Queryable(nameof(System.Linq.Queryable.Where), lambdaParameters: 1);
     private static readonly MethodInfo _orderBy = Queryable(nameof(System.Linq.Queryable.OrderBy));
     private static readonly MethodInfo _orderByDescending = Queryable(nameof(System.Linq.Queryable.OrderByDescending));
     private static readonly MethodInfo _thenBy = Queryable(nameof(System.Linq.Queryable.ThenBy));
@@ -30,6 +31,21 @@ internal static class ProjectionOrdering
         }
 
         return query.Provider.CreateQuery<T>(OrderExpression(query.Expression, typeof(T), keys.Select(k => (k.Selector, k.Descending))));
+    }
+
+    /// <summary>
+    /// 筛选条件同样按列表项成员写，同样换回投影里的表达式，先筛选再投影
+    /// </summary>
+    public static IQueryable<T> Where<T>(IQueryable<T> query, Expression<Func<T, bool>> predicate)
+    {
+        if (query.Expression is MethodCallExpression { Method: { IsGenericMethod: true } method, Arguments: [var source, UnaryExpression { Operand: LambdaExpression { Parameters.Count: 1 } projection } quoted] }
+            && method.GetGenericMethodDefinition() == _select)
+        {
+            var filtered = Expression.Call(_where.MakeGenericMethod(projection.Parameters[0].Type), source, Expression.Quote(Rebase(predicate, projection)));
+            return query.Provider.CreateQuery<T>(Expression.Call(method, filtered, quoted));
+        }
+
+        return query.Where(predicate);
     }
 
     private static Expression OrderExpression(Expression source, Type itemType, IEnumerable<(LambdaExpression Selector, bool Descending)> keys)

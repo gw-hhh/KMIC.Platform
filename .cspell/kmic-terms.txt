@@ -64,3 +64,4 @@ dedup
 relock
 zhang
 bootstrapper
+HMACSHA
