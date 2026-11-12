@@ -70,7 +70,7 @@ public sealed class LoginThrottlePolicyTests
     }
 
     [Fact]
-    public void FailuresBetweenLocks_KeepTheLastWaitTier_AndEveryFifthRelocksWithDoubleTheTime()
+    public void FailuresBetweenLocks_KeepTheLastWaitTier_AndEveryFifthLocksAgainWithDoubleTheTime()
     {
         var state = FailTimes(11, _t0, out _);
         state.LockedUntil.ShouldBeNull();

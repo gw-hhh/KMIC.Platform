@@ -54,7 +54,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
             || time.GetUtcNow() >= expires
             || sessionUser != user.Value
             || currentRole != role.Value
-            || !IsLoginable(state))
+            || !CanLogIn(state))
         {
             return AccessLoadResult.SessionInvalid();
         }
@@ -66,7 +66,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
     private async Task<IAccessContext?> LoadJobAsync(IdentityQueryDbContext db, UserId user, RoleId role, CancellationToken ct)
     {
         var state = await ReadUserStateAsync(db, user, role, ct);
-        if (state is null || !IsLoginable(state))
+        if (state is null || !CanLogIn(state))
         {
             return null;
         }
@@ -75,7 +75,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         return context.RoleAvailable ? context.Access : null;
     }
 
-    private static bool IsLoginable(AccessStateRow state) =>
+    private static bool CanLogIn(AccessStateRow state) =>
         string.Equals(state.UserStatus, UserStatus.Active.Code, StringComparison.Ordinal)
         && string.Equals(state.UserKind, UserKind.Normal.Code, StringComparison.Ordinal);
 
