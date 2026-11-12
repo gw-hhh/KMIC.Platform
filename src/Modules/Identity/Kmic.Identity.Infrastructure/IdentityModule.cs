@@ -1,12 +1,14 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Scheduling;
+using Kmic.BuildingBlocks.Application.Startup;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application;
 using Kmic.Identity.Application.Authentication;
 using Kmic.Identity.Application.Authorization;
+using Kmic.Identity.Application.Catalog;
 using Kmic.Identity.Application.ContractQueries;
 using Kmic.Identity.Application.Maintenance;
 using Kmic.Identity.Contracts;
@@ -44,6 +46,8 @@ public sealed class IdentityModule : IModule
 
         services.AddModuleDbContexts<IdentityDbContext, IdentityQueryDbContext, IIdentityQueryDb>();
         services.AddScoped<IIdentityCommandReads, IdentityCommandReads>();
+        services.AddScoped<IPermissionCatalogStore, PermissionCatalogStore>();
+        services.AddScoped<IStartupTask, SyncPermissionCatalogTask>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IOrgTreeRepository, OrgTreeRepository>();
@@ -66,6 +70,7 @@ public sealed class IdentityModule : IModule
         services.AddKmicOptions<PasswordOptions>(PasswordOptions.Section);
         services.AddKmicOptions<SessionLifetimeOptions>(SessionLifetimeOptions.Section);
         services.AddKmicOptions<TrustedOriginsOptions>(TrustedOriginsOptions.Section);
+        services.AddKmicOptions<CatalogOptions>(CatalogOptions.Section);
         services.AddSingleton<LoginThrottlePolicy>();
         services.AddSingleton<PasswordPolicy>();
         services.AddSingleton<TemporaryPasswordGenerator>();
@@ -77,6 +82,7 @@ public sealed class IdentityModule : IModule
         ArgumentNullException.ThrowIfNull(scheduling);
 
         scheduling.Schedule("Identity.PurgeSessions", "0 30 3 * * ?", run => new PurgeSessionsCommand(run.ScheduledFireTime), o => o.DisplayName("清理已结束的会话"));
+        scheduling.Schedule("Identity.PurgeRetiredPermissions", "0 0 5 ? * SUN", run => new PurgeRetiredPermissionsCommand(run.ScheduledFireTime), o => o.DisplayName("清理退役的权限点"));
         scheduling.Schedule("Identity.PurgeLoginThrottle", "0 0 4 * * ?", run => new PurgeLoginThrottleCommand(run.ScheduledFireTime), o => o.DisplayName("清理登录失败计数"));
     }
 }

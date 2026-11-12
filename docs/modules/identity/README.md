@@ -156,7 +156,7 @@ erDiagram
 | `Session` + `RefreshToken` | 会话与令牌链 | 聚合 |
 | `VerificationCode` | 短信验证码 | 聚合（生命周期短） |
 | `LoginThrottle` | 登录失败计数 | 模块内框架表，原子 SQL 更新，不走聚合 |
-| `Permission`、`DataScopeObject`、`CatalogState` | 权限点与范围对象目录（05-05 第 3.2、5.1 节） | 模块内框架表，只由同步任务写 |
+| `Permission`、`DataScopeObject`、`CatalogState` | 权限点与范围对象目录（05-05 第 3.2、5.1 节） | 模块内框架表，只由同步任务写。实现时的差异：①`Permission.Status` 拆成 `IsRetired` 加 `RetiredAt`；②角色上配置的权限点存**编码**（`RolePermissionEntry.PermissionCode`），不是 `Permission.Id`，所以没有外键：改名时同步任务原地改 `Permission.Code`，同时把角色条目里的旧编码换成新编码（角色版本递增），效果与“按 ID 引用、改名不影响角色”相同；③没有 `PermissionId` 强类型 ID |
 | `SecurityEvent` | 05-09 第 6.3 节 | 框架建表语句 + 只追加；写入器是框架 |
 
 强类型 ID：`UserId`、`RoleId`、`SessionId`、`OrgUnitId` 属框架（05-02 第 7.1 节，横切所有模块）；`PermissionId`、`GrantId`、`RefreshTokenId`、`VerificationCodeId` 在本模块 Domain。
@@ -302,9 +302,9 @@ stateDiagram-v2
 
 | 用例 | 声明 | 说明 |
 |---|---|---|
-| `SyncPermissionCatalogCommand` | `[SystemOnly]`，启动任务 | 05-05 第 3.2 节 |
+| `SyncPermissionCatalogCommand` | `[SystemOnly]`，启动任务 | 05-05 第 3.2 节；目录哈希没变就跳过；有变化时按 `RenamedFrom` 改名、新增与更新、代码里没有的标为退役（重新出现时恢复）、全权限角色同步指纹（授权版本递增）、写安全事件 `PermissionCatalogSynced`；多实例由事务级咨询锁串行化 |
 | `PurgeSessionsCommand` | `[SystemOnly]`，每日 03:30 | 删除过期或作废 30 天以上的会话与令牌（05-08 第 5.7 节） |
-| `PurgeRetiredPermissionsCommand` | `[SystemOnly]`，每周 | 删除退役 180 天以上的权限点（05-05 D2） |
+| `PurgeRetiredPermissionsCommand` | `[SystemOnly]`，每周日 05:00 | 删除退役 180 天以上的权限点与范围对象，同时去掉角色上对它们的配置；保留期配置 `Identity:Catalog:RetiredRetention`（05-05 D2） |
 | `PurgeLoginThrottleCommand` | `[SystemOnly]`，每日 | 删除 24 小时没有新失败的行（05-04 D4） |
 | `PurgeVerificationCodesCommand` | `[SystemOnly]`，每日 | 删除过期超过 1 天的验证码 |
 

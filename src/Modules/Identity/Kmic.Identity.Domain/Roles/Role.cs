@@ -179,6 +179,52 @@ public sealed class Role : AggregateRoot<RoleId>
     }
 
     /// <summary>
+    /// 权限点改名之后，把角色上的旧编码换成新编码；新编码已经有了就只去掉旧的。返回有没有改动
+    /// </summary>
+    public bool RenamePermissions(IReadOnlyDictionary<string, string> renames)
+    {
+        ArgumentNullException.ThrowIfNull(renames);
+
+        var changed = false;
+        foreach (var entry in _permissions.Where(p => renames.ContainsKey(p.PermissionCode)).ToList())
+        {
+            var newCode = renames[entry.PermissionCode];
+            if (_permissions.Exists(p => string.Equals(p.PermissionCode, newCode, StringComparison.Ordinal)))
+            {
+                _permissions.Remove(entry);
+            }
+            else
+            {
+                entry.Rename(newCode);
+            }
+
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    /// <summary>
+    /// 去掉这些权限点：它们退役很久了，角色上不再保留对它们的配置。返回有没有改动
+    /// </summary>
+    public bool RemovePermissions(IReadOnlyCollection<string> codes)
+    {
+        ArgumentNullException.ThrowIfNull(codes);
+
+        return _permissions.RemoveAll(p => codes.Contains(p.PermissionCode, StringComparer.Ordinal)) > 0;
+    }
+
+    /// <summary>
+    /// 去掉对这些范围对象单独设置的等级：范围对象退役很久了。返回有没有改动
+    /// </summary>
+    public bool RemoveDataScopeOverrides(IReadOnlyCollection<string> scopeObjects)
+    {
+        ArgumentNullException.ThrowIfNull(scopeObjects);
+
+        return _dataScopes.RemoveAll(s => scopeObjects.Contains(s.ScopeObject, StringComparer.Ordinal)) > 0;
+    }
+
+    /// <summary>
     /// 整体替换数据范围：默认等级和各范围对象的覆盖
     /// </summary>
     public Result SetDataScopes(RoleScopeLevel defaultLevel, IReadOnlyDictionary<string, RoleScopeLevel> overrides)

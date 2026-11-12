@@ -16,4 +16,6 @@ public sealed class RolePermissionEntry : Entity<RolePermissionEntryId>
     public string PermissionCode { get; private set; }
 
     internal static RolePermissionEntry Create(string permissionCode) => new(RolePermissionEntryId.New(), permissionCode);
+
+    internal void Rename(string permissionCode) => PermissionCode = permissionCode;
 }

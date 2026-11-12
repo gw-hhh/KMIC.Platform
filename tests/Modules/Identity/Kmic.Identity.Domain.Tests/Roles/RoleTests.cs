@@ -50,6 +50,50 @@ public sealed class RoleTests
     }
 
     [Fact]
+    public void RenamePermissions_ChangesTheCodeInPlace_AndDropsTheOldRowWhenTheNewCodeIsAlreadyThere()
+    {
+        var role = Seller();
+        role.SetPermissions(["Sample.Specimen.Finish", "Sample.Specimen.View", "Sample.Report.Look", "Sample.Report.View"]).ShouldBeSuccess();
+        var movedId = role.Permissions.Single(p => string.Equals(p.PermissionCode, "Sample.Specimen.Finish", StringComparison.Ordinal)).Id;
+        var renames = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["Sample.Specimen.Finish"] = "Sample.Specimen.Close",
+            ["Sample.Report.Look"] = "Sample.Report.View",
+        };
+
+        var changed = role.RenamePermissions(renames);
+
+        changed.ShouldBeTrue();
+        role.Permissions.Select(p => p.PermissionCode).ShouldBe(["Sample.Specimen.Close", "Sample.Specimen.View", "Sample.Report.View"], ignoreOrder: true);
+        role.Permissions.Single(p => string.Equals(p.PermissionCode, "Sample.Specimen.Close", StringComparison.Ordinal)).Id.ShouldBe(movedId);
+        role.RenamePermissions(renames).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void RemovePermissions_DropsOnlyTheGivenCodes()
+    {
+        var role = Seller();
+        role.SetPermissions(["Sample.Specimen.View", "Sample.Specimen.Create"]).ShouldBeSuccess();
+
+        role.RemovePermissions(["Sample.Specimen.Create", "Sample.Nothing.Here"]).ShouldBeTrue();
+        role.RemovePermissions(["Sample.Specimen.Create"]).ShouldBeFalse();
+
+        role.Permissions.Select(p => p.PermissionCode).ShouldBe(["Sample.Specimen.View"]);
+    }
+
+    [Fact]
+    public void RemoveDataScopeOverrides_DropsOnlyTheGivenScopeObjects()
+    {
+        var role = Seller();
+        role.SetDataScopes(RoleScopeLevel.Self, new Dictionary<string, RoleScopeLevel>(StringComparer.Ordinal) { ["Sample.Specimen"] = RoleScopeLevel.All, ["Sales.Quote"] = RoleScopeLevel.OrgUnit }).ShouldBeSuccess();
+
+        role.RemoveDataScopeOverrides(["Sales.Quote"]).ShouldBeTrue();
+        role.RemoveDataScopeOverrides(["Sales.Quote"]).ShouldBeFalse();
+
+        role.DataScopes.Select(s => s.ScopeObject).ShouldBe(["Sample.Specimen"]);
+    }
+
+    [Fact]
     public void SetDataScopes_ReplacesDefaultAndOverrides()
     {
         var role = Seller();

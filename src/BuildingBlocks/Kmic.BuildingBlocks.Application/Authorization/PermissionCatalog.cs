@@ -48,6 +48,24 @@ public sealed partial class PermissionCatalog
             problems.Add($"权限点 {duplicated.Key} 重复声明。");
         }
 
+        var codes = permissions.Select(p => p.Code).ToHashSet(StringComparer.Ordinal);
+        foreach (var renamed in permissions.Where(p => p.RenamedFrom is not null))
+        {
+            if (!CodePattern().IsMatch(renamed.RenamedFrom!))
+            {
+                problems.Add($"权限点 {renamed.Code} 的 RenamedFrom {renamed.RenamedFrom} 不符合“模块.资源.动作”格式。");
+            }
+            else if (codes.Contains(renamed.RenamedFrom!))
+            {
+                problems.Add($"权限点 {renamed.Code} 的 RenamedFrom {renamed.RenamedFrom} 是现在还在用的权限点。");
+            }
+        }
+
+        foreach (var duplicated in permissions.Where(p => p.RenamedFrom is not null).GroupBy(p => p.RenamedFrom, StringComparer.Ordinal).Where(g => g.Count() > 1))
+        {
+            problems.Add($"RenamedFrom {duplicated.Key} 被多个权限点使用。");
+        }
+
         foreach (var duplicated in permissions.GroupBy(p => (p.Module, p.Group, p.DisplayName)).Where(g => g.Count() > 1))
         {
             problems.Add($"分组“{duplicated.Key.Group}”中显示名“{duplicated.Key.DisplayName}”重复。");
@@ -147,7 +165,7 @@ public sealed partial class PermissionCatalog
                 continue;
             }
 
-            yield return new PermissionDefinition(code, group.Module, group.DisplayName, attribute.DisplayName, attribute.Sensitive);
+            yield return new PermissionDefinition(code, group.Module, group.DisplayName, attribute.DisplayName, attribute.Sensitive, attribute.RenamedFrom);
         }
     }
 

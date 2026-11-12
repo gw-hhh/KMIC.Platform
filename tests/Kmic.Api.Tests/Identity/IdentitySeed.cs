@@ -110,6 +110,26 @@ internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
         return (long)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken) ?? 0L);
     }
 
+    /// <summary>
+    /// 执行一条任意 SQL（造数据或改数据）
+    /// </summary>
+    public async Task SqlAsync(string sql, params (string Name, object Value)[] parameters) => await ExecuteAsync(_data, sql, parameters);
+
+    /// <summary>
+    /// 读一个值
+    /// </summary>
+    public async Task<T?> ScalarAsync<T>(string sql, params (string Name, object Value)[] parameters)
+    {
+        await using var command = _data.CreateCommand(sql);
+        foreach (var (name, value) in parameters)
+        {
+            command.Parameters.AddWithValue(name, value);
+        }
+
+        var result = await command.ExecuteScalarAsync(TestContext.Current.CancellationToken);
+        return result is null or DBNull ? default : (T)result;
+    }
+
     private static async Task ExecuteAsync(NpgsqlDataSource data, string sql, params (string Name, object Value)[] parameters)
     {
         await using var command = data.CreateCommand(sql);

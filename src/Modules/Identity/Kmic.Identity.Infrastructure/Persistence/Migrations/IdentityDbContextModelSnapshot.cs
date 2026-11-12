@@ -1133,6 +1133,65 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Kmic.Identity.Infrastructure.Persistence.Records.CatalogStateRow", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("SyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("CatalogState", "Identity", t =>
+                        {
+                            t.HasComment("目录同步状态；Identity 模块；上次同步的目录哈希与时间，哈希没变就跳过同步");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Identity.Infrastructure.Persistence.Records.DataScopeObjectRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsRetired")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("RetiredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("DataScopeObject", "Identity", t =>
+                        {
+                            t.HasComment("数据范围对象目录；Identity 模块；代码里声明的范围对象同步到这里，处理方式与权限点目录相同");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.Identity.Infrastructure.Persistence.Records.LoginThrottleRow", b =>
                 {
                     b.Property<string>("LoginNameHash")
@@ -1159,6 +1218,51 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.ToTable("LoginThrottle", "Identity", t =>
                         {
                             t.HasComment("登录失败计数；Identity 模块；一行代表一个登录名（哈希）的失败状态；24 小时没有新失败由每日清理任务删除");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Identity.Infrastructure.Persistence.Records.PermissionRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsRetired")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSensitive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("RetiredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Permission", "Identity", t =>
+                        {
+                            t.HasComment("权限点目录；Identity 模块；代码里声明的权限点同步到这里，代码里删除的标为退役，退役超过保留期由每周清理任务删除");
                         });
                 });
 

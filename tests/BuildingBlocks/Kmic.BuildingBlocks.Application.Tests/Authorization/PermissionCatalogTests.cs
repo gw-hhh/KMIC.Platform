@@ -66,6 +66,47 @@ public sealed class PermissionCatalogTests
         public const string Purge = "Thing.Thing.Purge";
     }
 
+    [Fact]
+    public void Build_RenamedFrom_IsReadIntoTheDefinition()
+    {
+        var catalog = PermissionCatalog.Build([typeof(RenamedPermissions)]);
+
+        catalog.All.Single().RenamedFrom.ShouldBe("Thing.Thing.Look");
+    }
+
+    [Fact]
+    public void Build_RenamedFromProblems_AreAllReported()
+    {
+        var thrown = Should.Throw<DeclarationException>(() => PermissionCatalog.Build([typeof(GoodPermissions), typeof(BadRenamePermissions)]));
+
+        thrown.Problems.ShouldContain(p => p.Contains("Thing.Rename.Wrong", StringComparison.Ordinal) && p.Contains("格式", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains("Thing.Rename.Taken", StringComparison.Ordinal) && p.Contains("还在用", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains("Thing.Thing.Gone", StringComparison.Ordinal) && p.Contains("多个", StringComparison.Ordinal));
+    }
+
+    [PermissionGroup("Thing", "改名的")]
+    public static class RenamedPermissions
+    {
+        [Permission("查看东西", RenamedFrom = "Thing.Thing.Look")]
+        public const string View = "Thing.Thing.View";
+    }
+
+    [PermissionGroup("Thing", "改名的错误示例")]
+    public static class BadRenamePermissions
+    {
+        [Permission("格式不对的旧编码", RenamedFrom = "not a code")]
+        public const string Wrong = "Thing.Rename.Wrong";
+
+        [Permission("旧编码还在用", RenamedFrom = GoodPermissions.View)]
+        public const string Taken = "Thing.Rename.Taken";
+
+        [Permission("第一个用同一个旧编码", RenamedFrom = "Thing.Thing.Gone")]
+        public const string First = "Thing.Rename.First";
+
+        [Permission("第二个用同一个旧编码", RenamedFrom = "Thing.Thing.Gone")]
+        public const string Second = "Thing.Rename.Second";
+    }
+
     [PermissionGroup("Thing", "东西（错误示例）")]
     public static class BadPermissions
     {

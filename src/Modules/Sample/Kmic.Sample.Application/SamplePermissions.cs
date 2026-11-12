@@ -29,7 +29,7 @@ public static class SamplePermissions
     /// <summary>
     /// 关闭
     /// </summary>
-    [Permission("关闭示例标本")]
+    [Permission("关闭示例标本", RenamedFrom = "Sample.Specimen.Finish")]
     public const string Close = "Sample.Specimen.Close";
 
     /// <summary>

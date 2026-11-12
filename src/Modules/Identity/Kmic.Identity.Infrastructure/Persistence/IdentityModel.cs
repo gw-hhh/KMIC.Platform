@@ -21,5 +21,8 @@ internal static class IdentityModel
             .ApplyConfiguration(new SessionConfiguration())
             .ApplyConfiguration(new RefreshTokenConfiguration())
             .ApplyConfiguration(new LoginThrottleRowConfiguration())
-            .ApplyConfiguration(new VerificationCodeRowConfiguration());
+            .ApplyConfiguration(new VerificationCodeRowConfiguration())
+            .ApplyConfiguration(new PermissionRowConfiguration())
+            .ApplyConfiguration(new DataScopeObjectRowConfiguration())
+            .ApplyConfiguration(new CatalogStateRowConfiguration());
 }
