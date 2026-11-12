@@ -19,5 +19,7 @@
     <InternalsVisibleTo Include="Kmic.BuildingBlocks.Infrastructure.Tests" />
     <!-- 测试工具要直接驱动投递和处理 -->
     <InternalsVisibleTo Include="Kmic.BuildingBlocks.Testing" />
+    <!-- 就绪检查要读启动任务是否完成 -->
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Hosting" />
   </ItemGroup>
 </Project>

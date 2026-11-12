@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    宿主的组装：模块注册（AddModule）、按角色装配框架服务、请求管道的顺序、健康检查。
+    引用 Infrastructure 与 Presentation，所以不属于任何一层；只有宿主项目（Kmic.Api）和它的测试引用它
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../Kmic.BuildingBlocks.Presentation/Kmic.BuildingBlocks.Presentation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.AspNetCore.Routing" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.BuildingBlocks.Hosting.Tests" />
+  </ItemGroup>
+</Project>

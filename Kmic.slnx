@@ -6,6 +6,7 @@
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Contracts/Kmic.BuildingBlocks.Contracts.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Hosting/Kmic.BuildingBlocks.Hosting.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Presentation/Kmic.BuildingBlocks.Presentation.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
   </Folder>
@@ -15,6 +16,7 @@
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Application.Tests/Kmic.BuildingBlocks.Application.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Domain.Tests/Kmic.BuildingBlocks.Domain.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Kmic.BuildingBlocks.Infrastructure.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Hosting.Tests/Kmic.BuildingBlocks.Hosting.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Presentation.Tests/Kmic.BuildingBlocks.Presentation.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Testing.Tests/Kmic.BuildingBlocks.Testing.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.Echo.Probe/Kmic.Echo.Probe.csproj" />
