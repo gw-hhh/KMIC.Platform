@@ -1,7 +1,10 @@
+using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.UseCases;
+using Kmic.BuildingBlocks.Presentation.Authentication;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
+using Kmic.BuildingBlocks.Testing.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +31,11 @@ internal sealed class ApiHost : IAsyncDisposable
     public SenderScript Script { get; }
 
     /// <summary>
+    /// 令牌验证模式下登记身份用的加载器
+    /// </summary>
+    public TestAccessContextLoader Loader => App.Services.GetRequiredService<TestAccessContextLoader>();
+
+    /// <summary>
     /// 已登录的客户端
     /// </summary>
     public HttpClient Client { get; private set; } = null!;
@@ -40,7 +48,7 @@ internal sealed class ApiHost : IAsyncDisposable
     /// <summary>
     /// 建好但不启动：校验失败的测试要看启动时抛什么
     /// </summary>
-    public static ApiHost Create(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null)
+    public static ApiHost Create(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null, bool jwt = false)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = environment, ContentRootPath = AppContext.BaseDirectory });
         builder.WebHost.UseTestServer();
@@ -48,8 +56,21 @@ internal sealed class ApiHost : IAsyncDisposable
         builder.Configuration.AddInMemoryCollection(configuration ?? new Dictionary<string, string?>(StringComparer.Ordinal));
 
         var script = new SenderScript();
-        builder.Services.AddAuthentication(TestAuthHandler.SchemeName).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
-        builder.Services.AddAuthorization();
+        if (jwt)
+        {
+            // 真正的令牌验证与访问上下文加载；身份由测试登记在 TestAccessContextLoader 里
+            builder.Services.AddKmicAuthentication();
+            builder.Services.AddScoped<ExecutionScope>();
+            builder.Services.AddScoped<IExecutionContext>(sp => sp.GetRequiredService<ExecutionScope>());
+            builder.Services.AddSingleton<TestAccessContextLoader>();
+            builder.Services.AddSingleton<IAccessContextLoader>(sp => sp.GetRequiredService<TestAccessContextLoader>());
+        }
+        else
+        {
+            builder.Services.AddAuthentication(TestAuthHandler.SchemeName).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+            builder.Services.AddAuthorization();
+        }
+
         builder.Services.AddKmicPresentation();
         builder.Services.AddSingleton(UseCaseCatalog.Build(messages ?? Messages.All));
         builder.Services.AddScoped<RequestMetadata>();
@@ -72,6 +93,11 @@ internal sealed class ApiHost : IAsyncDisposable
         app.UseKmicErrorHandling();
         app.UseRouting();
         app.UseAuthentication();
+        if (jwt)
+        {
+            app.UseKmicAccessContext();
+        }
+
         app.UseKmicLimits();
         app.UseAuthorization();
         beforeEndpoints?.Invoke(app);
@@ -79,9 +105,9 @@ internal sealed class ApiHost : IAsyncDisposable
         return new ApiHost(app, script);
     }
 
-    public static async Task<ApiHost> StartAsync(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null)
+    public static async Task<ApiHost> StartAsync(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null, bool jwt = false)
     {
-        var host = Create(modules, messages, environment, services, beforeEndpoints, skipValidation, configuration);
+        var host = Create(modules, messages, environment, services, beforeEndpoints, skipValidation, configuration, jwt);
         await host.StartAsync();
         return host;
     }

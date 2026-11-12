@@ -17,6 +17,14 @@ public static class FrameworkProblems
     public static readonly FrameworkProblem Unauthenticated = new("Common.Unauthenticated", StatusCodes.Status401Unauthorized, "请先登录");
 
     /// <summary>
+    /// 用户的当前角色已被收回或停用，只有 me 和 switch-role 可用
+    /// </summary>
+    /// <remarks>
+    /// 错误码属于 Identity，由框架的访问上下文中间件返回，Identity 模块不要再声明同一个错误码
+    /// </remarks>
+    public static readonly FrameworkProblem CurrentRoleUnavailable = new("Identity.CurrentRoleUnavailable", StatusCodes.Status403Forbidden, "当前角色已不可用，请重新选择角色");
+
+    /// <summary>
     /// 请求体无法解析、类型不符、有未知字段，或路由参数格式错误
     /// </summary>
     public static readonly FrameworkProblem MalformedRequest = new("Common.MalformedRequest", StatusCodes.Status400BadRequest, "请求的格式不正确");
@@ -90,7 +98,7 @@ public static class FrameworkProblems
     /// 全部框架层错误，给错误码目录导出用
     /// </summary>
     public static IReadOnlyCollection<FrameworkProblem> All { get; } =
-        [Unauthenticated, MalformedRequest, PayloadTooLarge, UnsupportedMediaType, TooManyRequests, TooBusy, InternalError, RequestTimeout, RouteNotFound, MethodNotAllowed, _other];
+        [Unauthenticated, CurrentRoleUnavailable, MalformedRequest, PayloadTooLarge, UnsupportedMediaType, TooManyRequests, TooBusy, InternalError, RequestTimeout, RouteNotFound, MethodNotAllowed, _other];
 
     /// <summary>
     /// 状态码对应的错误：中间件只设置了状态码、没有写内容时使用

@@ -134,7 +134,7 @@ public sealed class ErrorHandlingTests : IAsyncLifetime
         var codes = FrameworkProblems.All.Select(p => p.Code).ToList();
 
         codes.Distinct(StringComparer.Ordinal).Count().ShouldBe(codes.Count);
-        codes.ShouldAllBe(code => code.StartsWith("Common.", StringComparison.Ordinal));
+        codes.ShouldAllBe(code => code.Split('.').Length == 2 && code.Split('.').All(part => part.Length > 0 && char.IsUpper(part[0])));
     }
 
     [Fact]

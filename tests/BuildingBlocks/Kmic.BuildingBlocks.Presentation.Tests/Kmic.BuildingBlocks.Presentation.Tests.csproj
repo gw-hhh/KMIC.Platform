@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Presentation/Kmic.BuildingBlocks.Presentation.csproj" />
+    <ProjectReference Include="../../../src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Microsoft.AspNetCore.Builder" />

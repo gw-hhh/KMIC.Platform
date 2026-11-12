@@ -126,6 +126,20 @@ public sealed record TestIdentity : IAccessContext
     /// </summary>
     public TestIdentity MustChangePassword() => this with { PasswordChangeRequired = true };
 
+    /// <summary>
+    /// 没有角色权限的版本：当前角色被收回后，用户自己的上下文
+    /// </summary>
+    public TestIdentity WithoutRolePrivileges() =>
+        this with
+        {
+            Permissions = new HashSet<string>(StringComparer.Ordinal),
+            DataScopeGrant = new DataScopeGrant(
+                ScopeLevel.Self,
+                new Dictionary<string, ScopeLevel>(StringComparer.Ordinal),
+                [],
+                new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal)),
+        };
+
     /// <inheritdoc />
     public override string ToString() => DisplayName;
 }
