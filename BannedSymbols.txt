@@ -1,6 +1,6 @@
 # 禁用 API：全部项目（06 第 15.2 节）。每行“符号的文档注释 ID;替代做法”。修改须框架负责人审核。
-# 只针对模块或某一层的禁用项（IConfiguration、IMemoryCache、DbContext 写入 API、端点中的 Results.Problem 等）
-# 在阶段 2 建立对应项目时另建分层清单加入；每一条都要有分析器测试证明它确实生效（06 第 16 节）。
+# 只针对业务模块的禁用项（IConfiguration、IMemoryCache、Task.Run、服务定位、手写 SQL 的 Raw 形式、Results.Problem 等）在 BannedSymbols.Modules.txt；
+# 每一条都要能解析成唯一的符号，由架构测试 BannedSymbolsTests 逐条核对（06 第 16 节）。
 
 # 时间：使用 TimeProvider（ADR-0011、05-13）
 P:System.DateTime.Now;使用 TimeProvider（ADR-0011、05-13）

@@ -6,10 +6,12 @@ using Kmic.BuildingBlocks.Domain.Events;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Repositories;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Infrastructure.Files;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Hosting;
 
 namespace Kmic.ArchitectureTests.Violations;
@@ -121,4 +123,20 @@ internal static class BadSamples
 
     // 命令里出现了领域实体
     internal sealed record LeakyCommand(FakeAggregate Aggregate) : ICommand;
+
+    // 不是 Files 模块的类型使用了文件存储
+    internal sealed class FileTouchingService(IFileStorage storage)
+    {
+        public IFileStorage Storage { get; } = storage;
+    }
+
+    // 命令一侧的类型读缓存
+    internal sealed class CachingService(HybridCache cache)
+    {
+        public HybridCache Cache { get; } = cache;
+    }
+
+    // 匿名用例出现在 Identity 之外
+    [Kmic.BuildingBlocks.Application.UseCases.AllowAnonymous]
+    internal sealed record OpenDoorCommand : ICommand;
 }

@@ -1,0 +1,55 @@
+# 禁用 API：业务模块的 src 项目追加（06 第 15.2 节）。BuildingBlocks 与宿主不受限，那里正是这些能力的出处。
+# 每行“符号的文档注释 ID;替代做法”。方法必须逐个重载写全：不带参数列表的方法 ID 不会生效。
+# 每个符号都要能解析成唯一的符号（架构测试 BannedSymbolsTests 检查），写错一个字符，规则就悄悄失效。修改须框架负责人审核
+# 配置：用 IOptions<T>（05-10）
+T:Microsoft.Extensions.Configuration.IConfiguration;注入 IOptions<T> 读取配置（05-10）
+T:Microsoft.Extensions.Configuration.IConfigurationRoot;注入 IOptions<T> 读取配置（05-10）
+# 缓存：用 HybridCache（05-10）
+T:Microsoft.Extensions.Caching.Memory.IMemoryCache;使用 HybridCache（05-10）
+T:Microsoft.Extensions.Caching.Distributed.IDistributedCache;使用 HybridCache（05-10）
+# 线程：需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run(System.Action);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run(System.Action,System.Threading.CancellationToken);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run``1(System.Func{``0});需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run``1(System.Func{``0},System.Threading.CancellationToken);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run(System.Func{System.Threading.Tasks.Task});需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run(System.Func{System.Threading.Tasks.Task},System.Threading.CancellationToken);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run``1(System.Func{System.Threading.Tasks.Task{``0}});需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Tasks.Task.Run``1(System.Func{System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Thread.#ctor(System.Threading.ThreadStart);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Thread.#ctor(System.Threading.ThreadStart,System.Int32);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Thread.#ctor(System.Threading.ParameterizedThreadStart);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.Thread.#ctor(System.Threading.ParameterizedThreadStart,System.Int32);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.ThreadPool.QueueUserWorkItem(System.Threading.WaitCallback);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.ThreadPool.QueueUserWorkItem(System.Threading.WaitCallback,System.Object);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.ThreadPool.QueueUserWorkItem``1(System.Action{``0},``0,System.Boolean);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.ThreadPool.UnsafeQueueUserWorkItem``1(System.Action{``0},``0,System.Boolean);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.ThreadPool.UnsafeQueueUserWorkItem(System.Threading.WaitCallback,System.Object);需要后台执行时用后台作业（06 第 7 节）
+M:System.Threading.ThreadPool.UnsafeQueueUserWorkItem(System.Threading.IThreadPoolWorkItem,System.Boolean);需要后台执行时用后台作业（06 第 7 节）
+# 服务定位：用构造函数注入（06 第 8 节）
+M:System.IServiceProvider.GetService(System.Type);使用构造函数注入（06 第 8 节）
+M:Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService``1(System.IServiceProvider);使用构造函数注入（06 第 8 节）
+M:Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(System.IServiceProvider,System.Type);使用构造函数注入（06 第 8 节）
+M:Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService``1(System.IServiceProvider);使用构造函数注入（06 第 8 节）
+M:Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetServices``1(System.IServiceProvider);使用构造函数注入（06 第 8 节）
+M:Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetServices(System.IServiceProvider,System.Type);使用构造函数注入（06 第 8 节）
+# 数据范围过滤器：用 WithoutDataScope 并标注 [BypassesDataScope]（05-03、05-05）
+M:Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.IgnoreQueryFilters``1(System.Linq.IQueryable{``0});使用 WithoutDataScope 并标注 [BypassesDataScope]（05-03、05-05）
+M:Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.IgnoreQueryFilters``1(System.Linq.IQueryable{``0},System.Collections.Generic.IReadOnlyCollection{System.String});使用 WithoutDataScope 并标注 [BypassesDataScope]（05-03、05-05）
+# 手写 SQL：只用插值形式，参数化由 EF 完成（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalQueryableExtensions.FromSqlRaw``1(Microsoft.EntityFrameworkCore.DbSet{``0},System.String,System.Object[]);使用插值形式 FromSql（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.SqlQueryRaw``1(Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade,System.String,System.Object[]);使用插值形式 SqlQuery（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRaw(Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade,System.String,System.Object[]);使用插值形式 ExecuteSql（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRaw(Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade,System.String,System.Collections.Generic.IEnumerable{System.Object});使用插值形式 ExecuteSql（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade,System.String,System.Threading.CancellationToken);使用插值形式 ExecuteSql（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade,System.String,System.Object[]);使用插值形式 ExecuteSql（06 第 11.1 节）
+M:Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade,System.String,System.Collections.Generic.IEnumerable{System.Object},System.Threading.CancellationToken);使用插值形式 ExecuteSql（06 第 11.1 节）
+# 端点：返回 Result，由框架转成 HTTP 响应（05-06）
+M:Microsoft.AspNetCore.Http.Results.Problem(System.String,System.String,System.Nullable{System.Int32},System.String,System.String,System.Collections.Generic.IDictionary{System.String,System.Object});返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.Results.Problem(System.String,System.String,System.Nullable{System.Int32},System.String,System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}});返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.Results.Problem(Microsoft.AspNetCore.Mvc.ProblemDetails);返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.Results.StatusCode(System.Int32);返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.TypedResults.Problem(System.String,System.String,System.Nullable{System.Int32},System.String,System.String,System.Collections.Generic.IDictionary{System.String,System.Object});返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.TypedResults.Problem(System.String,System.String,System.Nullable{System.Int32},System.String,System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}});返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.TypedResults.Problem(Microsoft.AspNetCore.Mvc.ProblemDetails);返回 Result，由框架转换（05-06）
+M:Microsoft.AspNetCore.Http.TypedResults.StatusCode(System.Int32);返回 Result，由框架转换（05-06）

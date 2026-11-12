@@ -59,6 +59,15 @@ public sealed class HygieneRuleTests
         InjectionRules.Endpoints(Types(Layer.Presentation)).ShouldBeEmpty();
 
     [Fact]
+    public void OnlyIdentityDeclaresAnonymousUseCases() => CapabilityRules.AnonymousAccess(ProductAssemblies.All).ShouldBeEmpty();
+
+    [Fact]
+    public void OnlyFilesAndTheFrameworkUseFileStorage() => CapabilityRules.FileStorage(ProductAssemblies.All).ShouldBeEmpty();
+
+    [Fact]
+    public void CacheIsOnlyUsedInInfrastructureAndQueryHandlers() => CapabilityRules.Cache(ProductAssemblies.All).ShouldBeEmpty();
+
+    [Fact]
     public void MessagesAndResponses_HoldNoDomainTypes()
     {
         foreach (var module in ProductAssemblies.ModuleNames)
@@ -126,5 +135,28 @@ public sealed class HygieneRuleTests
         var problems = MessageContentRules.NoDomainTypes(_bad, typeof(BadSamples).Assembly);
 
         problems.ShouldContain(p => p.Contains("LeakyCommand", StringComparison.Ordinal) && p.Contains("FakeAggregate", StringComparison.Ordinal));
+    }
+
+    // 样例类型都在测试程序集里，把它当作“某个业务模块的程序集”来检查
+    private static ProductAssembly[] BadModule => [new(typeof(BadSamples).Assembly, "Orders", Layer.Application)];
+
+    [Fact]
+    public void Violation_AnonymousUseCaseOutsideIdentity_IsReported() =>
+        CapabilityRules.AnonymousAccess(BadModule).ShouldContain(p => p.Contains("OpenDoorCommand", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_FileStorageOutsideFiles_IsReported() =>
+        CapabilityRules.FileStorage(BadModule).ShouldContain(p => p.Contains("FileTouchingService", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_CacheOutsideInfrastructureAndQueryHandlers_IsReported() =>
+        CapabilityRules.Cache(BadModule).ShouldContain(p => p.Contains("CachingService", StringComparison.Ordinal));
+
+    [Fact]
+    public void Exemption_IdentityMayDeclareAnonymousUseCases_FilesMayUseFileStorage()
+    {
+        CapabilityRules.AnonymousAccess([new(typeof(BadSamples).Assembly, "Identity", Layer.Application)]).ShouldBeEmpty();
+        CapabilityRules.FileStorage([new(typeof(BadSamples).Assembly, "Files", Layer.Infrastructure)]).ShouldBeEmpty();
+        CapabilityRules.Cache([new(typeof(BadSamples).Assembly, "Orders", Layer.Infrastructure)]).ShouldBeEmpty();
     }
 }

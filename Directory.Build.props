@@ -62,5 +62,7 @@
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.Tests.txt" Condition="'$(KmicIsTestProject)' == 'true'" />
+    <!-- 业务模块的 src 项目：再加模块清单；路径分隔符在 Windows 与 Linux 上不同，先统一 -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.Modules.txt" Condition="$(_KmicRelativeDirectory.Replace('\', '/').StartsWith('src/Modules/'))" />
   </ItemGroup>
 </Project>
