@@ -103,7 +103,7 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         var fired = _machine.Fire(this, SpecimenAction.Submit, reason);
         if (fired.IsSuccess)
         {
-            Raise(new SpecimenSubmitted(Id));
+            Raise(new SpecimenSubmitted(Id, Number));
         }
 
         return fired;

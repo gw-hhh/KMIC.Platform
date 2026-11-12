@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Kmic.BuildingBlocks.Testing.Database;
+using Kmic.BuildingBlocks.Testing.Waiting;
+using Npgsql;
 using Shouldly;
 
 namespace Kmic.Api.Tests.Sample;
@@ -130,6 +133,23 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
     }
 
     [Fact]
+    public async Task Submit_PublishesTheIntegrationEventWithTheBusinessData()
+    {
+        using var alice = ClientFor(Alice);
+        var (id, version) = await CreateAsync(alice, "事件测试");
+        var number = (await JsonAsync(await alice.GetAsync($"{Root}/{id}", Ct))).GetProperty("number").GetString();
+
+        (await alice.PostAsJsonAsync($"{Root}/{id}/submit", new { expectedVersion = version }, Ct)).EnsureSuccessStatusCode();
+
+        // 事件和提交在同一个事务里写进本模块的 Outbox，不需要等投递
+        var payloads = await OutboxPayloadsAsync("Sample.SpecimenSubmitted", Ct);
+        var payload = payloads.Where(p => p.Contains(id.ToString(), StringComparison.OrdinalIgnoreCase)).ShouldHaveSingleItem();
+        using var message = JsonDocument.Parse(payload);
+        message.RootElement.GetProperty("specimenId").GetGuid().ShouldBe(id);
+        message.RootElement.GetProperty("number").GetString().ShouldBe(number);
+    }
+
+    [Fact]
     public async Task Submit_WithAStaleVersion_Returns409WithTheCurrentVersion()
     {
         using var alice = ClientFor(Alice);
@@ -169,6 +189,21 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         detail.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         (await JsonAsync(detail)).GetProperty("code").GetString().ShouldBe("Sample.NotFound");
+    }
+
+    [Fact]
+    public async Task DataOutsideTheScope_IsRecordedAsASecurityEvent()
+    {
+        using var alice = ClientFor(Alice);
+        using var carol = ClientFor(Carol);
+        var (id, _) = await CreateAsync(alice, "越权记录");
+
+        (await carol.GetAsync($"{Root}/{id}", Ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        // 安全事件由后台循环批量写库，不在请求线程里，所以要等
+        var recorded = await Eventually.UntilAsync(
+            ct => CountOutOfScopeEventsAsync(id, ct), count => count > 0, "范围外访问的安全事件写入数据库", ct: Ct);
+        recorded.ShouldBe(1);
     }
 
     [Fact]
@@ -265,5 +300,33 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         }
 
         return await client.SendAsync(request, Ct);
+    }
+
+    private async Task<long> CountOutOfScopeEventsAsync(Guid resourceId, CancellationToken ct)
+    {
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync(ct);
+        await using var command = new NpgsqlCommand(
+            """SELECT count(*) FROM "Identity"."SecurityEvent" WHERE "Type" = 'AuthorizationDenied' AND "Reason" = 'OutOfDataScope' AND "ResourceId" = @id""",
+            connection);
+        command.Parameters.AddWithValue("id", resourceId);
+        return (long)(await command.ExecuteScalarAsync(ct))!;
+    }
+
+    // 同一个类的测试共用一个库，库里有别的测试提交的标本，所以取同类型的全部载荷，由调用方挑自己的
+    private async Task<List<string>> OutboxPayloadsAsync(string messageType, CancellationToken ct)
+    {
+        await using var connection = new NpgsqlConnection(ConnectionString);
+        await connection.OpenAsync(ct);
+        await using var command = new NpgsqlCommand("""SELECT "Payload" FROM "Sample"."OutboxMessage" WHERE "MessageType" = @type""", connection);
+        command.Parameters.AddWithValue("type", messageType);
+        var payloads = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            payloads.Add(reader.GetString(0));
+        }
+
+        return payloads;
     }
 }

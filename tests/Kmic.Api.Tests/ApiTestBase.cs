@@ -37,9 +37,14 @@ public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTempla
 
     protected ApiFactory Factory { get; private set; } = null!;
 
+    /// <summary>
+    /// 宿主用的运行账号连接串，测试直接查库时也用它
+    /// </summary>
+    protected string ConnectionString => template.RuntimeConnectionString(database.Name);
+
     public ValueTask InitializeAsync()
     {
-        Factory = new ApiFactory(template.RuntimeConnectionString(database.Name), _tokens);
+        Factory = new ApiFactory(ConnectionString, _tokens);
         foreach (var identity in new[] { Alice, Bob, Carol })
         {
             Factory.Loader.Register(identity);

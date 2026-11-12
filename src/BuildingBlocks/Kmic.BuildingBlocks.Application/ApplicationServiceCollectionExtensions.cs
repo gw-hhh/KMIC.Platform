@@ -12,6 +12,7 @@ using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.Observability;
+using Kmic.BuildingBlocks.Application.Querying;
 using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Application.Time;
@@ -44,7 +45,9 @@ public static class ApplicationServiceCollectionExtensions
         var useCases = UseCaseCatalog.FromAssemblies(applicationAssemblies);
         var permissions = PermissionCatalog.FromAssemblies(applicationAssemblies);
         var settings = SystemSettingCatalog.FromAssemblies(applicationAssemblies);
-        var resourceActions = services.AddResourceAuthorization(applicationAssemblies.Distinct().SelectMany(a => a.GetTypes()));
+        var types = applicationAssemblies.Distinct().SelectMany(a => a.GetTypes()).ToList();
+        var resourceActions = services.AddResourceAuthorization(types);
+        services.AddDomainEventHandlers(types);
         var jobs = BackgroundJobCatalog.FromAssemblies(applicationAssemblies);
         permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences, .. jobs.PermissionReferences]);
 
@@ -127,6 +130,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IQuerySender>(sp => sp.GetRequiredService<ISender>());
         services.AddScoped<IContractQuerySender, ContractQuerySender>();
         services.AddScoped<IDataScope, DataScope>();
+        services.AddScoped<IEntityFinder, EntityFinder>();
         services.AddScoped<RequestMetadata>();
         services.AddOptions<BusinessTimeOptions>();
         services.TryAddSingleton<IBusinessCalendar>(sp => new BusinessCalendar(

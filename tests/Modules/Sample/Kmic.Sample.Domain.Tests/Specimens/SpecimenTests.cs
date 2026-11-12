@@ -53,7 +53,7 @@ public sealed class SpecimenTests
         specimen.Submit("提交测试").ShouldBeSuccess();
 
         specimen.Status.ShouldBe(SpecimenStatus.Submitted);
-        specimen.DomainEvents.ShouldHaveSingleItem().ShouldBe(new SpecimenSubmitted(specimen.Id));
+        specimen.DomainEvents.ShouldHaveSingleItem().ShouldBe(new SpecimenSubmitted(specimen.Id, specimen.Number));
         specimen.StateTransitions.Count.ShouldBe(2);
     }
 

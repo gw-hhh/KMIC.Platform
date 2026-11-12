@@ -178,15 +178,14 @@ builder.AddKmicHost()
 ```text
 src/Modules/Sample/
 ├─ Kmic.Sample.Domain/
-│  ├─ AssemblyInfo.cs                 Vogen 默认配置（模板生成，05-01 第 4.1 节）
-│  ├─ Samples/                        一个聚合一个文件夹
-│  │  ├─ Sample.cs                    聚合根（含状态机声明）
-│  │  ├─ SampleItem.cs                子实体
-│  │  ├─ SampleId.cs  SampleItemId.cs
-│  │  ├─ SampleStatus.cs  SampleAction.cs
-│  │  ├─ Events/SampleSubmitted.cs …  领域事件
-│  │  └─ ISampleRepository.cs
-│  ├─ Shared/                         多个聚合共用的值对象、领域服务、计算策略
+│  ├─ Specimens/                      一个聚合一个文件夹
+│  │  ├─ Specimen.cs                  聚合根（含状态机声明）
+│  │  ├─ SpecimenItem.cs              子实体
+│  │  ├─ SpecimenId.cs  SpecimenItemId.cs
+│  │  ├─ SpecimenStatus.cs  SpecimenAction.cs
+│  │  ├─ Events/SpecimenSubmitted.cs  领域事件
+│  │  └─ ISpecimenRepository.cs
+│  ├─ Shared/                         多个聚合共用的值对象、领域服务、计算策略（按需）
 │  └─ Errors/SampleErrors.cs          错误目录：唯一的文件夹，按聚合分文件（05-01 第 2.4 节）
 │
 ├─ Kmic.Sample.Application/
@@ -194,59 +193,61 @@ src/Modules/Sample/
 │  ├─ SamplePermissions.cs            权限点（05-05 第 3 节）
 │  ├─ SampleScopes.cs                 范围对象（05-05 第 5.1 节）
 │  ├─ SampleNumberRules.cs            编号规则（按需，05-13）
-│  ├─ Samples/                        按聚合分组
-│  │  ├─ SamplePolicy.cs              资源策略
-│  │  ├─ SampleActions.cs             资源动作目录
+│  ├─ Specimens/                      按聚合分组
+│  │  ├─ SpecimenPolicy.cs            资源策略
+│  │  ├─ SpecimenActions.cs           资源动作目录
 │  │  ├─ Create/                      一个用例一个文件夹
-│  │  │  ├─ CreateSampleCommand.cs
-│  │  │  ├─ CreateSampleCommandValidator.cs
-│  │  │  └─ CreateSampleCommandHandler.cs
-│  │  ├─ Submit/ …
+│  │  │  ├─ CreateSpecimenCommand.cs
+│  │  │  ├─ CreateSpecimenItemInput.cs
+│  │  │  ├─ CreateSpecimenCommandValidator.cs
+│  │  │  └─ CreateSpecimenCommandHandler.cs
+│  │  ├─ Submit/  Close/  Delete/ …
 │  │  ├─ GetDetail/
-│  │  │  ├─ GetSampleDetailQuery.cs
-│  │  │  ├─ SampleDetailResponse.cs
-│  │  │  └─ GetSampleDetailQueryHandler.cs
+│  │  │  ├─ GetSpecimenDetailQuery.cs
+│  │  │  ├─ SpecimenDetailResponse.cs
+│  │  │  └─ GetSpecimenDetailQueryHandler.cs
 │  │  ├─ List/
-│  │  │  ├─ ListSamplesQuery.cs  SampleListItem.cs  SampleSort.cs
-│  │  │  └─ ListSamplesQueryHandler.cs
-│  │  ├─ CloseExpired/ …              定时任务的命令也是用例
+│  │  │  ├─ ListSpecimensQuery.cs  SpecimenListItem.cs  SpecimenSort.cs
+│  │  │  └─ ListSpecimensQueryHandler.cs
 │  │  ├─ EventHandlers/               领域事件处理器
 │  │  └─ Shared/                      本聚合多个用例共用的 DTO
-│  └─ Contracts/                      本模块 Contracts 接口的实现（薄适配器，05-07 D2）
+│  ├─ (CloseExpired/ …)               定时任务的命令也是用例（按需）
+│  └─ (Contracts/)                    本模块 Contracts 接口的实现（薄适配器，按需，05-07 D2）
 │
 ├─ Kmic.Sample.Infrastructure/
 │  ├─ SampleModule.cs
-│  ├─ Persistence/
-│  │  ├─ SampleDbContext.cs  SampleQueryDbContext.cs
-│  │  ├─ Configurations/SampleConfiguration.cs …
-│  │  ├─ Repositories/SampleRepository.cs
-│  │  └─ Migrations/
-│  ├─ Clients/                        外部系统的类型化客户端（按需）
-│  └─ Options/SampleImportOptions.cs
+│  └─ Persistence/
+│     ├─ SampleDbContext.cs  SampleQueryDbContext.cs  SampleDbContextFactory.cs  SampleIdConverters.cs
+│     ├─ Configurations/SpecimenConfiguration.cs …
+│     ├─ Repositories/SpecimenRepository.cs
+│     └─ Migrations/
+│     （外部系统的类型化客户端 Clients/、部署配置 Options/，按需）
 │
 ├─ Kmic.Sample.Presentation/
 │  ├─ SampleEndpoints.cs
-│  └─ Samples/                        按资源分组，一个端点一个文件（请求模型 + 端点，05-06）
-│     ├─ CreateSample.cs  SubmitSample.cs  GetSample.cs  ListSamples.cs
+│  └─ Specimens/                      按资源分组，一个端点一个文件，请求模型各自一个文件（05-06）
+│     ├─ CreateSpecimenEndpoint.cs  CreateSpecimenRequest.cs  CreateSpecimenItemRequest.cs
+│     └─ GetSpecimenEndpoint.cs  ListSpecimensEndpoint.cs  ListSpecimensRequest.cs …
 │
 └─ Kmic.Sample.Contracts/
    ├─ SampleModuleInfo.cs
-   ├─ ISampleReferences.cs …          对外查询接口（按需）
-   ├─ Events/                         集成事件（按需）
-   └─ Snapshots/                      快照 DTO（按需）
+   ├─ Events/SpecimenSubmitted.cs     集成事件（按需）
+   └─ （ISampleReferences.cs 对外查询接口、Snapshots/ 快照 DTO，按需）
 
 tests/Modules/Sample/
-├─ Kmic.Sample.Domain.Tests/        Samples/SampleTests.cs、Builders/SampleBuilder.cs
-└─ Kmic.Sample.IntegrationTests/    按用例：Samples/SubmitSampleCommandTests.cs …
-tests/Kmic.Api.Tests/Sample/        端点与授权矩阵（ADR-0021：API 测试集中在一个项目，按模块分目录）
+└─ Kmic.Sample.Domain.Tests/          Specimens/SpecimenTests.cs
+tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个项目（ADR-0021），按模块分目录：
+   ├─ Sample/                         端点与授权（SpecimenApiTests）、授权矩阵、动作一致性；处理器的集成测试同在这里
+   ├─ Contracts/Snapshots/            每个集成消息一份 JSON Schema 快照
+   └─ ModuleConformanceTests.cs       对宿主里的每个模块：启动、模型与最新迁移一致
 ```
 
 | 规则 | 说明 |
 |---|---|
-| 命名空间 = 目录 | `Kmic.Sample.Application.Samples.Submit`（06 第 3.2 节） |
+| 命名空间 = 目录 | `Kmic.Sample.Application.Specimens.Submit`（06 第 3.2 节） |
 | 订阅、定时任务的命令 | 也是用例，放在**所修改对象**的用例文件夹中；注册（订阅名、Cron）集中在 `SampleModule` |
 | 跨聚合的用例 | 放在“主要修改对象”的聚合文件夹中；一个命令仍然只修改一个聚合（ADR-0003） |
-| 共用 DTO | 同一聚合内共用放 `Samples/Shared/`；不跨聚合共用响应 DTO（各自演进） |
+| 共用 DTO | 同一聚合内共用放 `Specimens/Shared/`；不跨聚合共用响应 DTO（各自演进） |
 | 不允许的目录 | `Helpers/`、`Utils/`、`Common/`、`Services/` 这类按“技术杂项”命名的目录（评审）；确有共用逻辑时，按它在领域中的含义命名 |
 
 ### 3.2 D2 一个用例的文件粒度
@@ -258,10 +259,7 @@ tests/Kmic.Api.Tests/Sample/        端点与授权矩阵（ADR-0021：API 测�
 | **A 一个类型一个文件，一个用例一个文件夹** | 如 3.1：`Submit/` 下三个文件 | 与 06 的通用规则一致，没有例外；文件名即类型名，按名称跳转、搜索、评审差异都最直接；05-02 第 2.2 节已按此写 | 小用例也是三四个文件 |
 | B 一个用例一个文件 | `SubmitSample.cs` 中放命令、校验器、处理器、响应 | 一个用例一屏看完（“垂直切片”常见写法） | 文件名与类型名不一致；用例变大后文件很长，又回到“大文件”；与 06 规则冲突需要开例外 |
 
-- **决定（已确认，2026-11-04）**：A。例外只有两种，都是“只服务于一个类型的附属类型”：
-  - Presentation 中请求模型与端点同一文件（05-06 已定）；
-  - 只被一个命令 / 查询使用的内嵌 DTO（如 4.3 的 `CreateSampleItem`）与该消息同一文件。被第二个消息使用时即移到 `Shared/`。
-  - 06 第 3.2 节“一个文件一个顶层类型”的例外由本条给出，KM 规则不检查这一项，由评审把关。
+- **决定（已确认，2026-11-04）**：A。原定有两种例外：Presentation 中请求模型与端点同一文件；只被一个命令 / 查询使用的内嵌 DTO 与该消息同一文件。**实现时没有采用这两种例外**（见修订记录 2026-11-12）：文件名与类型名一致由 MA0048 检查，是错误级，例外要逐处豁免；改为一个类型一个文件，请求模型、内嵌 DTO 各自一个文件，放在同一文件夹里，被第二个消息使用时移到 `Shared/`。
 - **理由**：用例文件夹已经把相关文件放在一起，B 的“看得全”优势很小；A 让每个类型都有固定、可预测的位置。
 - **取舍**：文件数量多一些，模块模板与 IDE 模板负责生成。
 
@@ -269,319 +267,130 @@ tests/Kmic.Api.Tests/Sample/        端点与授权矩阵（ADR-0021：API 测�
 
 ## 4. 标准写法
 
-各小节只给写法和要点，规则的来源写在小节标题后。
+各小节列出标准写法在参考模块 `Sample` 里对应的真实文件，以及这些写法的要点。`Sample` 随解决方案编译、测试，框架改动破坏了写法会立刻暴露（D3），所以这里不再抄代码；规则的来源写在小节标题后。
+
+- 路径省略 `src/Modules/Sample/`，各项目目录名为 `Kmic.Sample.Domain` 这样的形式。
+- `Sample` 的聚合叫 `Specimen`（标本），原因见本文修订记录；下文的“聚合”“聚合根”泛指它。
 
 ### 4.1 聚合（05-01）
 
-```csharp
-// Kmic.Sample.Domain/Samples/Sample.cs
-public sealed class Sample : AggregateRoot<SampleId>, IHasOwner, IHasOrgUnit, ISoftDeletable
-{
-    private static readonly StateMachine<Sample, SampleStatus, SampleAction> _machine = /* 05-01 第 7.2 节 */;
-
-    private readonly List<SampleItem> _items = [];
-
-    public string Number { get; private set; } = null!;
-    public string Title { get; private set; } = null!;
-    public SampleStatus Status { get; private set; } = null!;
-    public UserId OwnerId { get; private set; }            // 所属人：创建人（示例中的业务含义，写在注释里，05-05 第 5.1 节）
-    public OrgUnitId OrgUnitId { get; private set; }       // 所属组织：创建时创建人的组织
-    public DateOnly? DueDate { get; private set; }
-    public IReadOnlyList<SampleItem> Items => _items;
-
-    private Sample() { }                                   // EF
-    private Sample(SampleId id) : base(id) { }
-
-    public static Result<Sample> Create(string number, string title, UserId owner, OrgUnitId orgUnit, DateOnly? dueDate)
-    {
-        if (string.IsNullOrWhiteSpace(title)) return SampleErrors.TitleRequired;
-
-        var sample = new Sample(SampleId.New())
-        {
-            Number = number, Title = title.Trim(), OwnerId = owner, OrgUnitId = orgUnit, DueDate = dueDate,
-        };
-        _machine.Start(sample, reason: null);
-        sample.Raise(new SampleCreated(sample.Id));
-        return sample;
-    }
-
-    public Result Submit(DateTimeOffset now, string? reason)
-    {
-        var fired = _machine.Fire(this, SampleAction.Submit, reason);
-        if (fired.IsFailure) return fired;
-
-        Raise(new SampleSubmitted(Id, now));
-        return Result.Success();
-    }
-}
-```
+| 构件 | 文件 |
+|---|---|
+| 聚合根（状态机声明、工厂方法、业务方法、`Raise`） | `Kmic.Sample.Domain/Specimens/Specimen.cs` |
+| 子实体与它的 ID | `SpecimenItem.cs`、`SpecimenItemId.cs` |
+| 强类型 ID | `SpecimenId.cs` |
+| 状态与动作（智能枚举） | `SpecimenStatus.cs`、`SpecimenAction.cs` |
+| 领域事件 | `Events/SpecimenSubmitted.cs` |
+| 仓储接口 | `ISpecimenRepository.cs` |
+| 错误目录 | `Kmic.Sample.Domain/Errors/SampleErrors.cs` |
+| 领域测试 | `tests/Modules/Sample/Kmic.Sample.Domain.Tests/Specimens/SpecimenTests.cs` |
 
 | 要点 | 出处 |
 |---|---|
 | 工厂方法创建，构造函数私有；属性 `private set`；集合只读公开 | 05-01 第 3.2 节，KM0103～KM0105 |
-| 不取时间、不取当前用户：`now`、操作人、业务日期都由处理器传入 | 05-01 第 9 节，05-13 D3 |
+| 不取时间、不取当前用户：操作人、业务日期由处理器传入 | 05-01 第 9 节，05-13 D3 |
 | 状态只经状态机改；需要通知时显式 `Raise` | 05-01 第 7、8 节 |
 | 跨模块引用用 `XxxRef` 强类型 ID，不持有其他聚合 | 05-01 第 3.3 节 |
 | 业务失败返回错误目录中的 `Error` | 05-01 第 2 节 |
 
 ### 4.2 持久化（05-03、05-05 第 5.4 节）
 
-```csharp
-// Kmic.Sample.Infrastructure/Persistence/Configurations/SampleConfiguration.cs
-internal sealed class SampleConfiguration : IEntityTypeConfiguration<Sample>
-{
-    public void Configure(EntityTypeBuilder<Sample> b)
-    {
-        b.ToTable(t => t.HasComment("示例单据；Sample 模块；一行代表一张示例单据；编号全局唯一；草稿可删除，提交后只能作废"));
-        b.Property(x => x.Number).HasMaxLength(32).IsCaseInsensitive()
-         .HasComment("单据编号；创建时分配，全局唯一且不可修改；示例：SP-202611-0001");
-        b.HasIndex(x => x.Number).IsUnique().MapsToError(SampleErrors.NumberDuplicated);
-        b.Property(x => x.Title).HasMaxLength(200).HasComment("标题；保存前去除首尾空格");
-        b.HasMany(x => x.Items).WithOne().HasForeignKey("SampleId");
-        b.Navigation(x => x.Items).HasField("_items");
-
-        b.HasDataScope(SampleScopes.Sample);
-    }
-}
-
-// Kmic.Sample.Infrastructure/Persistence/Repositories/SampleRepository.cs
-internal sealed class SampleRepository(SampleDbContext db)
-    : EfRepository<SampleDbContext, Sample, SampleId>(db), ISampleRepository
-{
-    protected override IQueryable<Sample> Aggregate(IQueryable<Sample> set) => set.Include(x => x.Items);
-}
-
-// Kmic.Sample.Application/ISampleQueryDb.cs
-public interface ISampleQueryDb
-{
-    IQueryable<Sample> Samples { get; }                // 只暴露聚合根（子实体不得单独暴露，05-05 第 5.4 节）
-}
-```
+| 构件 | 文件 |
+|---|---|
+| 实体配置（字符串长度、不区分大小写、唯一约束映射错误码、数据范围） | `Kmic.Sample.Infrastructure/Persistence/Configurations/SpecimenConfiguration.cs`、`SpecimenItemConfiguration.cs` |
+| 仓储（只写 `Aggregate` 里要带出的子实体） | `Persistence/Repositories/SpecimenRepository.cs` |
+| 写入、查询两个上下文与设计时工厂、ID 转换器 | `Persistence/SampleDbContext.cs`、`SampleQueryDbContext.cs`、`SampleDbContextFactory.cs`、`SampleIdConverters.cs` |
+| 查询接口（只暴露聚合根） | `Kmic.Sample.Application/ISampleQueryDb.cs` |
+| 模块注册（`AddModuleDbContexts`、仓储） | `Kmic.Sample.Infrastructure/SampleModule.cs` |
+| 迁移 | `Persistence/Migrations/` |
 
 | 要点 | 出处 |
 |---|---|
 | 两个 DbContext：写入（跟踪）与查询（不跟踪），由 `AddModuleDbContexts` 注册 | 05-03 第 2 节 |
 | 审计字段、软删除、版本、schema、强类型 ID、枚举 CHECK 由约定处理，配置中不写 | 05-03 第 3～6 节 |
 | 字符串列声明长度；`decimal` 声明精度；需要时声明不区分大小写 | 05-03 第 3.5～3.7 节 |
-| 唯一约束映射错误码 | 05-03 第 7.3 节 |
+| 唯一约束映射错误码，缺失时启动失败 | 05-03 第 7.3 节 |
 | 数据范围在配置中声明 | 05-05 第 5.4 节 |
 | 敏感字段在配置中标注数据分类 | 05-09 第 3.3 节、05-12 D2 |
-| 表、列、人工索引写中文数据库注释（`HasComment`），缺失时启动失败 | 05-03 第 3.9 节（R01 M1） |
+| 表、列、人工索引写中文数据库注释：表在配置里写 `HasComment`，列取实体属性的 XML 注释，缺失时启动失败 | 05-03 第 3.9 节（R01 M1） |
 | 迁移：`dotnet ef migrations add <名称> -p Kmic.Sample.Infrastructure -c SampleDbContext`；初始迁移由新建模块的脚本生成（第 6.1 节），含 `InitializeModuleSchema` | 05-03 第 9 节 |
+| 模型改了就要生成迁移：`Kmic.Api.Tests` 的 `ModuleConformanceTests` 对宿主里的每个模块检查模型与最新迁移一致 | 05-03 第 9 节 |
 
 ### 4.3 命令（05-02）
 
-**创建**（取号放在最后，05-13 D1）：
+| 用例 | 文件夹（`Kmic.Sample.Application/Specimens/`） | 演示什么 |
+|---|---|---|
+| 创建 | `Create/`：命令、校验器、处理器、`CreateSpecimenItemInput` | `[Idempotent]`、`[Audited]`；输入形状校验；用当前用户填负责人和所属组织；取号放在最后一个异步步骤 |
+| 提交 | `Submit/`：命令、处理器 | 修改类命令：`ExpectedVersion`；加载 → 资源授权 → 业务方法 |
+| 关闭 | `Close/` | 同上，另一个动作 |
+| 删除 | `Delete/` | 软删除；只有草稿可以删 |
 
-```csharp
-// Create/CreateSampleCommand.cs
-[RequirePermission(SamplePermissions.Create), Idempotent, Audited]
-public sealed record CreateSampleCommand(string Title, DateOnly? DueDate, IReadOnlyList<CreateSampleItem> Items)
-    : ICommand<CreatedResponse<SampleId>>;
-
-public sealed record CreateSampleItem(string Name, decimal Quantity);    // 只服务于本命令的内嵌 DTO，同文件（D2）
-
-// Create/CreateSampleCommandValidator.cs
-internal sealed class CreateSampleCommandValidator : AbstractValidator<CreateSampleCommand>
-{
-    public CreateSampleCommandValidator()
-    {
-        RuleFor(x => x.Title).NotEmpty().MaximumLength(200);
-        RuleFor(x => x.Items).NotEmpty();
-        RuleForEach(x => x.Items).ChildRules(i => i.RuleFor(x => x.Quantity).GreaterThan(0));
-    }
-}
-
-// Create/CreateSampleCommandHandler.cs
-public sealed class CreateSampleCommandHandler(
-    ISampleRepository repository,
-    IExecutionContext context,
-    INumberGenerator numbers) : ICommandHandler<CreateSampleCommand, CreatedResponse<SampleId>>
-{
-    public async ValueTask<Result<CreatedResponse<SampleId>>> Handle(CreateSampleCommand command, CancellationToken cancellationToken)
-    {
-        var access = context.Access!;                                    // [RequirePermission] 保证是用户身份
-        if (access.OrgUnitId is not { } orgUnit) return SampleErrors.OwnerHasNoOrgUnit;
-
-        var number = await numbers.NextAsync(SampleNumberRules.Sample, ct: cancellationToken);   // 最后一个异步步骤
-        var created = Sample.Create(number, command.Title, access.UserId, orgUnit, command.DueDate);
-        if (created.IsFailure) return created.Error;
-
-        foreach (var item in command.Items)
-        {
-            var added = created.Value.AddItem(item.Name, item.Quantity);
-            if (added.IsFailure) return added.Error;
-        }
-
-        repository.Add(created.Value);
-        return new CreatedResponse<SampleId>(created.Value.Id);          // 版本由框架回填（05-02 第 6.4 节）
-    }
-}
-```
-
-**修改**（加载 → 资源授权 → 业务方法；05-02 第 2.2 节示例为标准写法）：
-
-```csharp
-var sample = await repository.GetForUpdateAsync(command.SampleId, command.ExpectedVersion, cancellationToken);   // 第 2、5 层
-if (sample.IsFailure) return sample.Error;
-
-var allowed = authorizer.Check(sample.Value, SampleAction.Submit);                       // 第 3 层
-if (allowed.IsFailure) return allowed.Error;
-
-var submitted = sample.Value.Submit(time.GetUtcNow(), command.Reason);                      // 第 4 层
-if (submitted.IsFailure) return submitted.Error;
-```
+修改类命令的处理顺序固定：`GetForUpdateAsync`（第 2 层数据范围、第 5 层并发版本）→ `IResourceAuthorizer.Check`（第 3 层资源策略）→ 聚合的业务方法（第 4 层状态）。授权检查和状态变化是两步，不能写成同时求值。
 
 | 要点 | 出处 |
 |---|---|
 | 每个命令：授权声明五选一、`[Audited]` / `[NotAudited]` 二选一；创建、提交、审批类 `[Idempotent]` | 05-02 第 3 节 |
 | 修改类命令带 `ExpectedVersion` | 05-06 D6、05-03 第 6 节 |
 | 处理器只编排：不 `SaveChanges`、不开事务、不写 Outbox；一个命令只改一个聚合 | 05-02 第 2.2、6 节 |
+| 处理器是 `public sealed`（Mediator 生成的代码要引用它），参数名沿用 `command` / `cancellationToken` | 05-02 第 2.2 节、06 第 4.2 节 |
 | 一个命令只取一次当前时间 | 05-13 第 3.1 节 |
-| 校验器只查形状，不注入数据访问 | 05-02 第 4.4 节 |
+| 校验器是 `internal sealed`，只查形状，不注入数据访问 | 05-02 第 4.4 节 |
+| 只服务于一个命令的内嵌 DTO 也单独一个文件（`CreateSpecimenItemInput.cs`），不与命令同文件 | 本文 D2 修订 |
 | 用户传入的其他模块 ID 用 `CallerScoped` 查询校验 | 05-07 第 4 节 |
 
 ### 4.4 查询（05-03 D1、05-06 第 6 节、05-05 第 7 节）
 
-**详情**（含 `allowedActions`）：
-
-```csharp
-[RequirePermission(SamplePermissions.View)]
-public sealed record GetSampleDetailQuery(SampleId SampleId) : IQuery<SampleDetailResponse>;
-
-public sealed class GetSampleDetailQueryHandler(ISampleQueryDb db, IAllowedActions<Sample> allowedActions)
-    : IQueryHandler<GetSampleDetailQuery, SampleDetailResponse>
-{
-    public async ValueTask<Result<SampleDetailResponse>> Handle(GetSampleDetailQuery query, CancellationToken cancellationToken)
-    {
-        var sample = await db.Samples.Include(x => x.Items)
-            .FindByIdOrNotFoundAsync(query.SampleId, SampleErrors.NotFound, cancellationToken);     // 范围外同样 NotFound（05-05 第 5.10 节）
-        if (sample.IsFailure) return sample.Error;
-
-        return SampleDetailResponse.From(sample.Value, allowedActions.For(sample.Value));   // 手写映射（03 第 4.8 节）
-    }
-}
-```
-
-**列表**（投影 + 筛选 + 排序 + 分页）：
-
-```csharp
-[RequirePermission(SamplePermissions.View)]
-public sealed record ListSamplesQuery(
-    string? Q, IReadOnlyList<string>? Status, DateOnly? CreatedFrom, DateOnly? CreatedTo,
-    int Page = 1, int PageSize = 20, string? Sort = null) : IQuery<PagedResult<SampleListItem>>;
-
-public sealed class ListSamplesQueryHandler(ISampleQueryDb db, IBusinessCalendar calendar)
-    : IQueryHandler<ListSamplesQuery, PagedResult<SampleListItem>>
-{
-    public async ValueTask<Result<PagedResult<SampleListItem>>> Handle(ListSamplesQuery query, CancellationToken cancellationToken)
-    {
-        var samples = db.Samples.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(query.Q))
-            samples = samples.Where(x => KmicFunctions.ContainsText(x.Number, query.Q) ||
-                                     KmicFunctions.ContainsText(x.Title, query.Q));       // 06 第 11.2 节
-        if (query.Status is { Count: > 0 })
-            samples = samples.Where(x => query.Status.Contains(x.Status.Code));
-        if (query.CreatedFrom is { } from)
-            samples = samples.Where(x => EF.Property<DateTimeOffset>(x, "CreatedAt") >= calendar.StartOf(from));
-        if (query.CreatedTo is { } to)
-            samples = samples.Where(x => EF.Property<DateTimeOffset>(x, "CreatedAt") < calendar.StartOf(to.AddDays(1)));   // 半开区间（05-13 第 3.4 节）
-
-        return await samples
-            .Select(x => new SampleListItem(x.Id, x.Number, x.Title, x.Status.Code, EF.Property<DateTimeOffset>(x, "CreatedAt")))
-            .ToPagedAsync(query.Page, query.PageSize, query.Sort, SampleSort.Map, cancellationToken);
-    }
-}
-```
+| 用例 | 文件夹（`Kmic.Sample.Application/Specimens/`） | 演示什么 |
+|---|---|---|
+| 详情 | `GetDetail/`：查询、响应、处理器 | 经 `IEntityFinder` 取单个对象：范围外与不存在同样返回 `NotFound`，范围外另记安全事件；响应带 `allowedActions` |
+| 列表 | `List/`：查询、列表项、`SpecimenSort`、处理器 | 投影到 DTO；筛选（关键字、状态）；排序白名单；分页 |
+| 共用 DTO | `Shared/SpecimenItemResponse.cs` | 同一聚合内共用放 `Shared/` |
 
 | 要点 | 出处 |
 |---|---|
 | 从 `ISampleQueryDb` 出发（已带数据范围与软删除过滤器）；列表、详情、导出、下拉共用同一个起点 | 05-05 第 5.4 节 |
 | 列表投影到 DTO，不加载聚合；详情需要 `allowedActions` 时才加载聚合 | 05-05 D10 |
-| 筛选模型的字段名与查询参数一致；日期筛选参数为 `DateOnly` | 05-06 第 6.4 节、05-13 第 3.4 节 |
+| 筛选模型的字段名与查询参数一致；日期筛选参数为 `DateOnly`，用 `IBusinessCalendar` 换算成半开区间（`Sample` 的列表没有日期筛选，规则见出处） | 05-06 第 6.4 节、05-13 第 3.4 节 |
+| 文本模糊匹配用 `KmicFunctions.ContainsText` | 06 第 11.2 节 |
 | 引用其他模块的显示名：先收集本页 ID，再一次 `ResolveAsync` | 05-07 第 4 节 |
 | 导出复用同一个查询的筛选与排序 | 05-08 第 6.8 节 |
 | 数据量可能很大的列表声明上限计数（`CountMode.Capped`），响应带 `totalCountExact` | 05-06 第 6.1 节（R01 M4） |
-
-> `ListSamplesQuery` 的参数形态、`PagedResult<T>`、`FindByIdOrNotFoundAsync` 的签名以 05-06 第 6 节与框架实现为准；此处只示意调用顺序。
-
-> 可见性：第 4.3、4.4 节示例中的命令、查询处理器是 `public sealed`，原因与守护方式见 05-02 第 2.2 节；校验器、端点、EF 配置等为 `internal sealed`。
+| 查询处理器同样是 `public sealed` | 05-02 第 2.2 节 |
 
 ### 4.5 授权声明（05-05）
 
-```csharp
-// SamplePermissions.cs
-[PermissionGroup("Sample", "示例")]
-public static class SamplePermissions
-{
-    [Permission("查看示例")] public const string View   = "Sample.Sample.View";
-    [Permission("新建示例")] public const string Create = "Sample.Sample.Create";
-    [Permission("提交示例")] public const string Submit = "Sample.Sample.Submit";
-}
+| 构件 | 文件 |
+|---|---|
+| 权限点（`模块.资源.动作`，敏感点标 `Sensitive`） | `Kmic.Sample.Application/SamplePermissions.cs` |
+| 范围对象 | `SampleScopes.cs` |
+| 资源策略（纯函数；只实现一个 `IResourcePolicy<,>`） | `Specimens/SpecimenPolicy.cs` |
+| 资源动作目录（权限点与命令的 `[RequirePermission]` 同源；状态检查取自聚合的 `CanFire`） | `Specimens/SpecimenActions.cs` |
 
-// SampleScopes.cs
-[DataScopeObjectGroup("Sample")]
-public static class SampleScopes
-{
-    [DataScopeObject("示例单据")] public const string Sample = "Sample.Sample";
-}
-
-// Samples/SamplePolicy.cs —— 纯函数；无特殊规则的动作显式 Allow
-internal sealed class SamplePolicy : IResourcePolicy<Sample, SampleAction>
-{
-    public PolicyDecision Evaluate(IAccessContext access, Sample s, SampleAction action) => action switch
-    {
-        _ when action == SampleAction.Submit
-            => s.OwnerId == access.UserId
-                ? PolicyDecision.Allow
-                : PolicyDecision.Deny(DenialReason.ResourceDenied, SampleErrors.NotOwner),
-        _ => PolicyDecision.Allow,
-    };
-}
-
-// Samples/SampleActions.cs —— 动作目录：权限点与命令的 [RequirePermission] 同源
-internal sealed class SampleActions : ResourceActionCatalog<Sample, SampleAction>
-{
-    protected override void Define(IResourceActionBuilder<Sample, SampleAction> a) =>
-        a.Action(SampleAction.Submit, SamplePermissions.Submit, state: StateMachine(SampleAction.Submit));
-}
-```
+动作目录里的每个动作都要有对应的命令。`Kmic.Api.Tests/Sample/SpecimenAllowedActionsTests.cs` 对每个状态、每种身份验证“`allowedActions` 包含某动作 ⇔ 执行对应命令不会被拒绝”；`SpecimenAuthorizationMatrixTests.cs` 验证范围等级 × 数据归属 × 出口的授权矩阵。
 
 ### 4.6 端点（05-06）
 
-```csharp
-// Kmic.Sample.Presentation/Samples/SubmitSample.cs
-public sealed record SubmitSampleRequest(long ExpectedVersion, string? Reason);
-
-internal sealed class SubmitSampleEndpoint : IEndpoint
-{
-    public void Map(IEndpointRouteBuilder group) =>
-        group.MapPost("/samples/{id}/submit", HandleAsync)
-             .Sends<SubmitSampleCommand>()
-             .WithSummary("提交示例");
-
-    private static async Task<IResult> HandleAsync(
-        SampleId id, SubmitSampleRequest request, ICommandSender sender, CancellationToken ct)
-    {
-        var result = await sender.SendAsync(new SubmitSampleCommand(id, request.ExpectedVersion, request.Reason), ct);
-        return result.ToOk();
-    }
-}
-```
+| 构件 | 文件（`Kmic.Sample.Presentation/`） |
+|---|---|
+| 模块端点注册类 | `SampleEndpoints.cs` |
+| 创建、详情、列表、提交、关闭、删除 | `Specimens/CreateSpecimenEndpoint.cs`、`GetSpecimenEndpoint.cs`、`ListSpecimensEndpoint.cs`、`SubmitSpecimenEndpoint.cs`、`CloseSpecimenEndpoint.cs`、`DeleteSpecimenEndpoint.cs` |
+| 请求模型 | `CreateSpecimenRequest.cs`、`SubmitSpecimenRequest.cs` 等，一个类型一个文件 |
 
 | 动作 | 方法与路径（模块前缀由 `SampleEndpoints` 加上：`/api/v1/sample`） | 结果转换 |
 |---|---|---|
-| 新建 | `POST /samples` | `ToCreated(id => $"/api/v1/sample/samples/{id}")` |
-| 详情 | `GET /samples/{id}` | `ToOk()` |
-| 列表 | `GET /samples`（查询参数 `[AsParameters]`） | `ToOk()` |
-| 修改 | `PUT /samples/{id}` | `ToOk()`（返回新版本） |
-| 动作 | `POST /samples/{id}/submit` | `ToOk()` |
-| 删除 | `DELETE /samples/{id}?expectedVersion=…` | `ToNoContent()` |
-| 后台作业 | `POST /samples/imports` | `ToAccepted(…)` |
+| 新建 | `POST /specimens` | `ToCreated(id => …)` |
+| 详情 | `GET /specimens/{id}` | `ToOk()` |
+| 列表 | `GET /specimens`（查询参数 `[AsParameters]`） | `ToOk()` |
+| 修改 | `PUT /specimens/{id}` | `ToOk()`（返回新版本） |
+| 动作 | `POST /specimens/{id}/submit` | `ToOk()` |
+| 删除 | `DELETE /specimens/{id}`，版本号在请求体 `expectedVersion` | `ToNoContent()` |
+| 后台作业 | `POST /specimens/imports` | `ToAccepted(…)` |
 
+- 并发版本在请求体里，不用 `If-Match`，也不放在查询参数里（05-06 D6）。
+- 路径参数的说明写在处理方法的参数上：`[Description("标本 ID")] SpecimenId id`；缺少时文档完整性检查失败。
 - 统计、大范围查询等重型端点声明并发策略：`.RequireConcurrency(ConcurrencyPolicies.Heavy, ConcurrencyPolicies.HeavyPerUser)`（05-06 第 8.3 节，R01 M5）。
 - 端点的 `.WithSummary(...)`、请求模型与响应 DTO 的 XML 注释就是前端看到的接口文档，缺少时 CI 失败（05-06 第 7.1 节，R01 M2）。
+- 端点是 `internal sealed`。
 
 ### 4.7 跨模块（按需，05-07）
 
@@ -594,19 +403,17 @@ internal sealed class SubmitSampleEndpoint : IEndpoint
 | 收到其他模块的事件后做事 | 本模块定义 `[SystemOnly]` 命令；在 `ConfigureMessaging` 中 `Subscribe<事件, 命令>("Sample.Xxx", 映射)` | 05-07 第 7.2 节 |
 | 请平台模块做事（发通知、登记文件引用） | `publisher.Send(new SendNotification(...))` | 05-07 D6、05-11 |
 
-```csharp
-// Samples/EventHandlers/PublishSampleApproved.cs —— 领域事件 → 集成事件
-internal sealed class PublishSampleApproved(IIntegrationEventPublisher publisher)
-    : IDomainEventHandler<SampleApproved>
-{
-    public ValueTask<Result> HandleAsync(SampleApproved e, CancellationToken ct)
-    {
-        publisher.Add(new Contracts.Events.SampleApproved(e.SampleId.Value, e.Number, e.ApprovedAt));
-        return ValueTask.FromResult(Result.Success());
-    }
-}
-```
+`Sample` 演示“通知其他模块发生了什么”这一种，其余几种框架测试里的 Probe、Echo 两个模块有完整用法（`tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Probe`、`tests/BuildingBlocks/Kmic.Echo.Probe`）：
 
+| 构件 | 文件 |
+|---|---|
+| 集成事件（载荷只用 `Guid` 与基础类型） | `Kmic.Sample.Contracts/Events/SpecimenSubmitted.cs` |
+| 领域事件 → 集成事件的处理器 | `Kmic.Sample.Application/Specimens/EventHandlers/PublishSpecimenSubmitted.cs` |
+| 提交后事件随业务数据写进 Outbox 的测试 | `tests/Kmic.Api.Tests/Sample/SpecimenApiTests.cs` 的 `Submit_PublishesTheIntegrationEventWithTheBusinessData` |
+| 契约快照 | `tests/Kmic.Api.Tests/Contracts/Snapshots/Sample.SpecimenSubmitted.v1.json`，由 `MessageContractTests` 对宿主里的全部模块检查 |
+
+- 领域事件处理器不用在模块注册类里登记：`AddKmicApplication` 扫描各模块的 Application 程序集，实现了 `IDomainEventHandler<T>` 的类自动注册，可以是 `internal`。
+- 集成事件的契约改动要过快照检查（05-07 第 5.5 节）：兼容的改动（新增可空字段）更新快照；破坏性的改动新建 `Version = 2` 的消息类。更新快照的方法：设环境变量 `KMIC_UPDATE_SNAPSHOTS=1` 重跑 `MessageContractTests`。
 - 领域事件与集成事件同名、以命名空间区分（05-07 第 3.3 节）；集成事件的载荷只用 `Guid` 与基础类型（Contracts 不含强类型 ID）。
 - 需要加载本模块其他数据时，领域事件处理器可以注入本模块仓储（05-02 第 6.2 节）。
 
@@ -715,68 +522,32 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 
 ## 7. 测试写法
 
-测试规则见 06 第 12 节，这里给出模块中三类测试的标准形态。
+测试规则见 06 第 12 节，这里给出模块里各类测试的标准形态和 `Sample` 中对应的真实文件。
 
 ### 7.1 领域测试
 
-```csharp
-// tests/Modules/Sample/Kmic.Sample.Domain.Tests/Samples/SampleTests.cs
-public sealed class SampleTests
-{
-    private static readonly DateTimeOffset _now = new(2026, 11, 4, 2, 0, 0, TimeSpan.Zero);
+不依赖任何基础设施，直接构造聚合、调用业务方法、断言结果与领域事件：`tests/Modules/Sample/Kmic.Sample.Domain.Tests/Specimens/SpecimenTests.cs`。每个模块一个领域测试项目，由新建模块的脚本生成。
 
-    [Fact]
-    public void Submit_WhenDraftWithItems_ChangesStatusAndRaisesSubmitted()
-    {
-        var sample = SampleBuilder.Draft().WithItems(1).Build();
+### 7.2 处理器的集成测试（处理器 + 真实数据库）
 
-        var result = sample.Submit(_now, reason: null);
+`tests/Kmic.Api.Tests/Sample/SpecimenCommandTests.cs`：以某个身份建立执行作用域，消息走完整管道（校验、授权、幂等、事务、审计）落到真实 PostgreSQL，断言 `Result` 与错误码，不经过 HTTP。
 
-        result.ShouldBeSuccess();
-        sample.Status.ShouldBe(SampleStatus.Submitted);
-        sample.DomainEvents.ShouldContain(e => e is SampleSubmitted);
-    }
+- 身份用 `TestIdentity`（`Kmic.BuildingBlocks.Testing`），在 `ApiTestBase` 里登记到测试用的访问上下文加载器；`IExecutionScopeFactory.CreateScope(identity)` 建立作用域，`ICommandSender` / `IQuerySender` 发送消息；带 `[Idempotent]` 的命令先设置 `RequestMetadata.IdempotencyKey`。
+- 每个测试类一个克隆库（06 D8），同一个类里的测试共用一个库，所以断言不要依赖“库里只有我的数据”：用唯一的标题或编号挑出自己的数据。
+- 与 API 测试放在同一个项目：处理器测试和端点测试都需要完整的宿主与迁移过的数据库，集中在 `Kmic.Api.Tests` 里按模块分目录（ADR-0021），不再为每个模块另建集成测试项目。
 
-    [Fact]
-    public void Submit_WhenNoItems_FailsWithNoItems()
-    {
-        var sample = SampleBuilder.Draft().Build();
+### 7.3 每个模块都要满足的测试
 
-        sample.Submit(_now, reason: null).ShouldBeFailure(SampleErrors.NoItems);
-    }
-}
-```
+原设计是由模板为每个模块生成六类测试。实现时改为：能对宿主里全部模块通用的，写成遍历式测试，新增模块自动覆盖；必须按模块写的，在 `Sample` 里给出样板，新模块照写。
 
-### 7.2 集成测试（处理器 + 真实数据库）
-
-```csharp
-// tests/Modules/Sample/Kmic.Sample.IntegrationTests/Samples/SubmitSampleCommandTests.cs
-public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBase(host)   // 每个测试类一个克隆库（06 D8）
-{
-    [Fact]
-    public async Task Submit_WithStaleVersion_ReturnsVersionConflict()
-    {
-        var owner = TestIdentity.User("owner").WithRole(r => r.Permissions(SamplePermissions.Submit));
-        var sample = await Seed(SampleBuilder.Draft().WithItems(1).OwnedBy(owner));
-
-        await using var scope = App.As(owner);
-        var result = await scope.SendAsync(new SubmitSampleCommand(sample.Id, ExpectedVersion: sample.Version - 1, Reason: null));
-
-        result.ShouldBeFailure(CommonErrors.VersionConflict);
-    }
-}
-```
-
-### 7.3 模板为每个模块生成的测试
-
-| 测试 | 内容 | 出处 |
-|---|---|---|
-| 启动 | 模块注册、用例目录、权限点目录、EF 模型校验全部通过 | 05-02、05-05、05-03 |
-| 唯一约束映射 | 模块的每个唯一索引都登记了错误码 | 05-02 第 4.3 节 |
-| `allowedActions` 一致性 | 动作目录中每个动作 ⇔ 对应命令不因第 1、3、4 层被拒 | 05-05 第 7.1 节 |
-| 授权矩阵 | 每个范围对象：范围等级 × 数据归属 × 出口（列表 / 详情 / 导出 / 下拉 / 统计） | 05-05 第 12.2 节 |
-| 消息契约快照 | 本模块 Contracts 中每个消息的 JSON Schema | 05-07 第 5.5 节 |
-| 迁移 | 模型与最新迁移一致（无未生成的变更） | 05-03 第 9 节 |
+| 测试 | 内容 | 怎么实现 | 出处 |
+|---|---|---|---|
+| 启动 | 模块注册、用例目录、权限点目录、EF 模型校验全部通过 | 宿主启动时检查，`ModuleConformanceTests.Host_StartsWithEveryRegisteredModule` 启动宿主并检查就绪 | 05-02、05-05、05-03 |
+| 唯一约束映射 | 模块的每个唯一索引都登记了错误码 | EF 模型定稿时的校验，缺失即启动失败，不需要另写测试 | 05-02 第 4.3 节 |
+| `allowedActions` 一致性 | 动作目录中每个动作 ⇔ 对应命令不因第 1、3、4 层被拒 | 每个资源一份，样板：`Sample/SpecimenAllowedActionsTests.cs`。动作目录里的每个动作都要有对应的命令；身份要覆盖“负责人、非负责人、没有权限的人、负责人但缺其中一个动作的权限” | 05-05 第 7.1 节 |
+| 授权矩阵 | 每个范围对象：范围等级 × 数据归属 × 出口 | 每个范围对象一份，样板：`Sample/SpecimenAuthorizationMatrixTests.cs`（四个等级 × 四种归属 × 列表与详情）。模块有导出、下拉、统计出口时加进同一张矩阵；身份状态（角色切换、用户禁用、角色收回）由框架测试覆盖 | 05-05 第 12.2 节 |
+| 消息契约快照 | 每个集成消息的 JSON Schema | 全部模块通用：`Contracts/MessageContractTests` 从宿主出发找到各模块的 Contracts 程序集，每个消息一个文件放在 `Contracts/Snapshots/`；兼容变化更新快照，破坏性变化失败（`MessageContractSnapshots`） | 05-07 第 5.5 节 |
+| 迁移 | 模型与最新迁移一致（无未生成的变更） | 全部模块通用：`ModuleConformanceTests.EveryModuleModel_MatchesItsLatestMigration` | 05-03 第 9 节 |
 
 ---
 
@@ -813,7 +584,7 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 | 模块编号与 `EventId` 分段 | 06 D6 |
 | 参考模块 `Sample`、`dotnet new kmic-module` 模板 | 08 实施计划（框架阶段的交付物） |
 | 模块登记表 `docs/modules/README.md`、模块设计文档模板 | 各业务模块设计 |
-| 测试基座 `TestIdentity`、`ModuleTestBase`、`SampleBuilder` 写法 | `Kmic.BuildingBlocks.Testing`（06 D8、05-05 第 12 节） |
+| 测试基座 `TestIdentity` / `TestOrgTree`、`TestAccessContextLoader`、契约快照 `MessageContractSnapshots` | `Kmic.BuildingBlocks.Testing`（06 D8、05-05 第 12 节、05-07 第 5.5 节） |
 
 本文编写过程中顺带修正了 05 系列示例中的不一致（不改变任何决定）：
 
@@ -830,12 +601,8 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 | 编号 | 事项 | 决定（均已确认，2026-11-04） |
 |---|---|---|
 | D1 | 模块注册类放在哪里 | 两个注册类：Infrastructure 的 `IModule` + Presentation 的 `ModuleEndpoints`，宿主 `AddModule<TModule, TEndpoints>()` 配对 |
-| D2 | 一个用例的文件粒度 | 一个类型一个文件、一个用例一个文件夹；例外只有“请求模型 + 端点”和“只服务于一个消息的内嵌 DTO” |
+| D2 | 一个用例的文件粒度 | 一个类型一个文件、一个用例一个文件夹；原定的两种“同文件”例外实现时没有采用，请求模型和内嵌 DTO 同样单独一个文件 |
 | D3 | 模块模板与参考模块 | 空骨架模板（经 `scripts/new-module.cs` 调用，初始迁移由脚本生成）+ 仓库中常驻、随 CI 编译测试、生产不注册的参考模块 `Sample` |
-
-| 待确认 | 处理方式 |
-|---|---|
-| 第 4 节示例中框架 API 的确切签名（`FindByIdOrNotFoundAsync`、`ToPagedAsync`、`AddModuleDbContexts`、`EfRepository.Aggregate`） | 实现框架时确定；参考模块落地后本文改为引用真实文件（D3） |
 
 ---
 
@@ -852,3 +619,4 @@ public sealed class SubmitSampleCommandTests(ModuleTestHost host) : ModuleTestBa
 | 2026-11-11 | 示例中处理器的参数名改为 `command` / `query` / `cancellationToken`：Mediator 接口规定了参数名，写成 `cmd`、`q`、`ct` 会触发 CA1725 编译不过（决定不变，06 第 4.2 节已补充这条例外） | 注释与风格复查 |
 | 2026-11-12 | 第 2.3 节实现时补全（决定不变）：`IModule` 在 `Kmic.BuildingBlocks.Infrastructure.Modules`，`DeclareDependencies`、`ConfigureMessaging`、`ConfigureScheduling` 是默认实现的接口成员；宿主组装放在新项目 `Kmic.BuildingBlocks.Hosting`（引用 Infrastructure 与 Presentation，不属于任何一层，只有宿主和宿主测试引用它）。注册写法改为 `builder.AddKmicHost(host => host.AddModule<IdentityModule, IdentityEndpoints>().AddModule<SampleModule, SampleEndpoints>(onlyIn: KmicEnvironments.NonProduction))`——原写作 `builder.AddKmicHost().AddModule<…>()` 的链式调用，但框架服务（用例目录、权限点目录等）要拿到全部模块的程序集才能一次构建，链式写法没有收尾的时机，所以改成一个回调里登记完。`onlyIn: NonProduction` 的模块在生产环境不注册（原“生产环境启动校验发现 Sample 被注册即拒绝启动”：同一个 Program 在各环境运行，注册了就拒绝等于生产无法启动，所以改为跳过；漏写 `onlyIn` 而在生产环境注册 `Sample` 时才拒绝启动）。启动校验一次报全：配对、重复、Application 与 Presentation 程序集名、`Kmic:Roles`、依赖、配置里关闭的模块被依赖、数据库连接串、Api 角色必须有 `IAccessContextLoader`。`Modules:{模块}:Enabled = false` 时该模块不注册，被依赖则拒绝启动 | S2-14 实现 |
 | 2026-11-12 | 参考模块 Sample 实现时补全（决定不变）：①聚合名不能和模块名相同——命名空间 `Kmic.Sample` 会遮住同名的类型 `Sample`，模块里其他命名空间的代码无法用 using 引用它，所以参考模块的聚合叫 `Specimen`（标本）；业务模块的聚合名与模块名相同时同样会遇到，划分模块时避开（第 6.3 节检查表）。②路径参数的说明写在处理方法的参数上：`[Description("标本 ID")] SpecimenId id`（.NET 10 读取它；处理方法上的 XML 注释 `param` 读不到），文档完整性检查要求每个参数有说明。③初始迁移用宿主 `Kmic.Api` 做 `--startup-project`（类库不能做启动项目，宿主引用了 EF 设计时工具）：`dotnet ef migrations add InitializeModuleSchema --project src/Modules/<模块>/Kmic.<模块>.Infrastructure --startup-project src/Hosts/Kmic.Api --context <模块>DbContext --output-dir Persistence/Migrations`，生成后在 `Up` 开头补 `migrationBuilder.InitializeModuleSchema("<模块>");` 与它的 using（模块的 schema 授权给运行账号），新建模块的脚本（S2-16）自动完成。④迁移程序与测试模板库不认识每个模块的 DbContext 类型：`ModuleMigrator.MigrateAllAsync` 按模块注册服务时登记的 `ModuleWriteContext` 逐个迁移；Operations、Identity 两个模块建好之前，测试用 `FrameworkSchema.CreateAsync` 建它们的框架表并授权。⑤`AddMediator` 在宿主里调用，管道行为的顺序与 05-02 第 4.1 节一致 | S2-17 实现 |
+| 2026-11-12 | 第 4 节、第 7 节改为引用 Sample 中的真实文件（退出标准 4），不再抄代码；第 3.1 节目录树改为 Sample 的实际结构（决定不变）。对照真实实现发现并更正的差异：①D2 原定的两种“同文件”例外没有采用——文件名与类型名一致由 MA0048 检查，是错误级，例外要逐处豁免；请求模型与端点、内嵌 DTO 与命令各自单独一个文件（D2 选 A 不变，例外取消，规则更严）。②删除端点的并发版本在请求体 `expectedVersion`，不在查询参数里（与 05-06 D6 一致，原表写错）。③查询侧取单个对象的写法由示例中的 `FindByIdOrNotFoundAsync` 扩展方法改为注入 `IEntityFinder`（`Kmic.BuildingBlocks.Application.Querying`）：扩展方法拿不到安全事件服务和当前用户，范围外访问要记安全事件（05-05 第 5.10 节）需要这两样；找不到时补查是否被数据范围挡住，正常路径没有额外开销。④领域事件处理器由 `AddKmicApplication` 按程序集扫描自动注册，可以是 `internal`，不必在模块注册类里逐个登记。⑤第 7 节：处理器的集成测试与 API 测试同在 `Kmic.Api.Tests`、按模块分目录，不另建 `Kmic.<模块>.IntegrationTests` 项目（两者都需要完整宿主与迁移过的库，另建项目要重复一套宿主组装；ADR-0021 已定 API 测试集中在一个项目）；原定“模板为每个模块生成六类测试”改为：模型与迁移一致、契约快照、启动、唯一约束映射对宿主里全部模块遍历检查，授权矩阵与 `allowedActions` 一致性按资源写、Sample 给样板。⑥Sample 新增 `Close` 命令与端点（动作目录里有这个动作，一致性测试需要对应的命令）、`Sample.SpecimenSubmitted` 集成事件（演示领域事件 → 集成事件，并给契约快照一个真实对象）。第 4 节示例中框架 API 的确切签名的“待确认”关闭 | S2-18 |

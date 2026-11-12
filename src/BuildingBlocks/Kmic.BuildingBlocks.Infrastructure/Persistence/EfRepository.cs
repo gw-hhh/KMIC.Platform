@@ -144,13 +144,7 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
             ct);
     }
 
-    // ID 放在闭包对象上，EF 会把它当参数，不同 ID 共用同一份编译结果
-    private static Expression<Func<TAggregate, bool>> HasId(TId id)
-    {
-        var aggregate = Expression.Parameter(typeof(TAggregate), "a");
-        var value = Expression.Property(Expression.Constant(new IdHolder(id)), nameof(IdHolder.Value));
-        return Expression.Lambda<Func<TAggregate, bool>>(Expression.Equal(Expression.Property(aggregate, nameof(Entity<>.Id)), value), aggregate);
-    }
+    private static Expression<Func<TAggregate, bool>> HasId(TId id) => EntityPredicates.HasId<TAggregate, TId>(id);
 
     private static Result<TAggregate> CheckVersion(TAggregate aggregate, long? expectedVersion) =>
         expectedVersion is { } expected && expected != aggregate.ConcurrencyVersion
@@ -193,6 +187,4 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
             throw new InvalidOperationException($"{operation} 必须在事务里调用。");
         }
     }
-
-    private sealed record IdHolder(TId Value);
 }

@@ -1,0 +1,176 @@
+{
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "auditId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurredAt": true,
+    "module": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string"
+    },
+    "actorUserId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "actualUserId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "roleId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "sessionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "onBehalfOfUserId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "clientIp": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "traceId": {
+      "type": "string"
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId"
+        ]
+      }
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "entity": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "enum": [
+              "Added",
+              "Modified",
+              "Deleted",
+              "SoftDeleted",
+              "Restored"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "old": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "new": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "masked": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "field",
+                "old",
+                "new",
+                "masked"
+              ]
+            }
+          }
+        },
+        "required": [
+          "entity",
+          "entityId",
+          "kind",
+          "fields"
+        ]
+      }
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "required": [
+    "auditId",
+    "occurredAt",
+    "module",
+    "action",
+    "origin",
+    "traceId",
+    "targets",
+    "changes",
+    "details"
+  ]
+}

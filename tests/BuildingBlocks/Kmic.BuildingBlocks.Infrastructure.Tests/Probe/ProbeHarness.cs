@@ -1,7 +1,6 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Behaviors;
-using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Contracts.References;
@@ -70,7 +69,6 @@ internal sealed class ProbeHarness : IAsyncDisposable
         collection.AddModuleDbContexts<EchoDbContext, EchoQueryDbContext, IEchoQueryDb>();
         collection.Configure<MessagingOptions>(o => messaging?.Invoke(o));
         collection.AddScoped<TicketRepository>();
-        collection.AddScoped<IDomainEventHandler<TicketClosed>, TicketClosedHandler>();
         collection.AddSingleton(Hooks);
         collection.AddLogging();
 

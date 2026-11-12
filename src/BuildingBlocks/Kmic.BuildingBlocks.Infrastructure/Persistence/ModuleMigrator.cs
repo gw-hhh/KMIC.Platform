@@ -83,6 +83,39 @@ public static class ModuleMigrator
         return pending;
     }
 
+    /// <summary>
+    /// 列出实体模型和最新迁移不一致的模块，即改了模型却没有生成迁移
+    /// </summary>
+    /// <remarks>
+    /// 只比较代码里的模型和迁移的模型快照，不查数据库，连接串只是为了构建上下文
+    /// </remarks>
+    /// <param name="services">已经由各模块的 AddServices 注册过的服务容器</param>
+    /// <param name="connectionString">连接串</param>
+    /// <returns>有差异的模块名，按名称排序</returns>
+    public static IReadOnlyList<string> ModulesWithPendingModelChanges(IServiceProvider services, string connectionString)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        var changed = new List<string>();
+        foreach (var registration in services.GetServices<ModuleWriteContext>().OrderBy(r => r.Module, StringComparer.Ordinal))
+        {
+            var check = typeof(ModuleMigrator).GetMethod(nameof(HasPendingModelChangesOf), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.MakeGenericMethod(registration.ContextType);
+            if ((bool)check.Invoke(null, [connectionString])!)
+            {
+                changed.Add(registration.Module);
+            }
+        }
+
+        return changed;
+    }
+
+    private static bool HasPendingModelChangesOf<TContext>(string connectionString)
+        where TContext : ModuleDbContext
+    {
+        using var context = StandaloneContexts.Create<TContext>(connectionString);
+        return context.Database.HasPendingModelChanges();
+    }
+
     private static async Task<IReadOnlyList<string>> PendingOfAsync<TContext>(string connectionString, CancellationToken ct)
         where TContext : ModuleDbContext
     {

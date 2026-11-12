@@ -1,0 +1,19 @@
+{
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "specimenId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "number": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "specimenId",
+    "number"
+  ]
+}
