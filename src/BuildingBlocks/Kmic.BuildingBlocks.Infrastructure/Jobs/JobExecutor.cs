@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Observability;
@@ -104,6 +106,10 @@ internal sealed class JobExecutor(
         string module, ClaimedJob job, Guid token, BackgroundJobType type, object args, (ICurrentUser User, IAccessContext? Access) identity, CancellationToken shutdown)
     {
         var started = TimeProvider.System.GetTimestamp();
+
+        // 每次执行一个根 span，不挂在领取它的循环下面；每一批在它下面是一个子 span
+        using var activity = KmicActivities.Messaging.StartActivity(
+            $"job {type.Name}", ActivityKind.Internal, default(ActivityContext), [new("kmic.job.id", job.Id.ToString()), new("kmic.module", module)]);
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(shutdown);
         var context = new JobContext(store, scopes, Options, module, job, token, identity.User, identity.Access, stop);
         var (result, failure) = await InvokeAsync(module, job, token, type, args, identity, context, stop);

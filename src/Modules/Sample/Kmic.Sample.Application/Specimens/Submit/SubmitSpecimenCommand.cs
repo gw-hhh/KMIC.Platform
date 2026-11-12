@@ -11,4 +11,5 @@ namespace Kmic.Sample.Application.Specimens.Submit;
 /// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
 [RequirePermission(SamplePermissions.Submit)]
 [Audited]
+[Idempotent]
 public sealed record SubmitSpecimenCommand(SpecimenId Id, long ExpectedVersion) : ICommand<VersionedResponse<SpecimenId>>;

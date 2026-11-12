@@ -98,4 +98,14 @@ public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTempla
         var created = await JsonAsync(response);
         return (created.GetProperty("id").GetGuid(), created.GetProperty("version").GetInt64());
     }
+
+    /// <summary>
+    /// 以 POST 调用一个带 [Idempotent] 的动作接口，每次换一个新的幂等键
+    /// </summary>
+    protected static async Task<HttpResponseMessage> PostActionAsync(HttpClient client, string url, object body)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body) };
+        request.Headers.Add("Idempotency-Key", Guid.CreateVersion7().ToString());
+        return await client.SendAsync(request, Ct);
+    }
 }

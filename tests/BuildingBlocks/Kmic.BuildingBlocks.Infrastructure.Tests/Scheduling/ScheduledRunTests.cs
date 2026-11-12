@@ -1,4 +1,7 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using Kmic.BuildingBlocks.Application;
+using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
@@ -44,6 +47,32 @@ public sealed class ScheduledRunTests(ClassDatabase<ProbeTemplate> database) : I
         run.Note.ShouldBe("已盖章");
         run.Finished.ShouldBeTrue();
         (await LinesAsync(ticket)).ShouldBe(["定时 23:00"]);
+    }
+
+    [Fact]
+    public async Task Fire_StartsARootSpan_AndTheRunRecordHoldsItsTraceId()
+    {
+        var started = new ConcurrentQueue<Activity>();
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = static source => string.Equals(source.Name, KmicActivities.MessagingName, StringComparison.Ordinal),
+            Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = started.Enqueue,
+        };
+        ActivitySource.AddActivityListener(listener);
+        var ticket = await _harness.AddAsync(_user, Ticket.Create(TicketNumbers.Next(), _user.UserId, _org["总部"]));
+        _harness.Hooks.StampTicket = ticket.Id;
+
+        (await _harness.Services.FireAsync(ProbeHarness.DailyStamp, _sevenAm, Ct)).ShouldBeSuccess();
+
+        // 监听器是进程范围的，别的测试类也会触发同名的任务，所以按执行记录里的追踪 ID 找这一次
+        await using var command = database.DataSource.CreateCommand(
+            $"""SELECT "TraceId" FROM {SchedulingTables.Runs} WHERE "JobName" = @job ORDER BY "Id" DESC LIMIT 1""");
+        command.Parameters.AddWithValue("job", ProbeHarness.DailyStamp);
+        var traceId = (string)(await command.ExecuteScalarAsync(Ct))!;
+        var span = started.Single(a => string.Equals(a.TraceId.ToString(), traceId, StringComparison.Ordinal) && a.ParentId is null);
+        span.OperationName.ShouldBe($"scheduled {ProbeHarness.DailyStamp}");
+        started.ShouldContain(a => a.ParentSpanId == span.SpanId, "命令的 span 在这次执行之下");
     }
 
     [Fact]

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
@@ -78,7 +77,7 @@ public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> datab
 
     private static async Task<long> AdvanceAsync(HttpClient client, Guid id, string path, long version)
     {
-        var response = await client.PostAsJsonAsync($"{Root}/{id}/{path}", new { expectedVersion = version }, Ct);
+        var response = await PostActionAsync(client, $"{Root}/{id}/{path}", new { expectedVersion = version });
         response.EnsureSuccessStatusCode();
         return (await JsonAsync(response)).GetProperty("version").GetInt64();
     }
@@ -107,7 +106,7 @@ public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> datab
         var detail = await JsonAsync(await client.GetAsync($"{Root}/{id}", Ct));
         var allowed = detail.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()).Contains(code, StringComparer.Ordinal);
 
-        var response = await client.PostAsJsonAsync($"{Root}/{id}/{path}", new { expectedVersion = version }, Ct);
+        var response = await PostActionAsync(client, $"{Root}/{id}/{path}", new { expectedVersion = version });
 
         (response.StatusCode == HttpStatusCode.OK).ShouldBe(allowed, context);
         if (!allowed)

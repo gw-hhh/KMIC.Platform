@@ -46,7 +46,6 @@ public sealed class SpecimenCommandTests(ClassDatabase<ApiTemplate> database, Ap
 
         await using (var scope = As(withoutUnit))
         {
-            scope.Requests.IdempotencyKey = Guid.CreateVersion7().ToString();
             var failed = await scope.Commands.SendAsync(new CreateSpecimenCommand("没有组织", _oneItem), Ct);
             failed.ShouldBeFailure(SampleErrors.NoOrgUnit);
         }
@@ -105,12 +104,17 @@ public sealed class SpecimenCommandTests(ClassDatabase<ApiTemplate> database, Ap
 
     private static long Sequence(string number) => long.Parse(number[^4..], System.Globalization.CultureInfo.InvariantCulture);
 
-    private HandlerScope As(TestIdentity identity) => new(Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(identity));
+    // 每个作用域带一个新的幂等键：带 [Idempotent] 的命令要求有键，没有这个属性的命令不看它
+    private HandlerScope As(TestIdentity identity)
+    {
+        var scope = new HandlerScope(Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(identity));
+        scope.Requests.IdempotencyKey = Guid.CreateVersion7().ToString();
+        return scope;
+    }
 
     private async Task<Created> CreateAsync(TestIdentity owner)
     {
         await using var scope = As(owner);
-        scope.Requests.IdempotencyKey = Guid.CreateVersion7().ToString();
         var created = (await scope.Commands.SendAsync(new CreateSpecimenCommand("集成测试", _oneItem), Ct)).ShouldBeSuccess();
         var number = (await scope.Queries.SendAsync(new Kmic.Sample.Application.Specimens.GetDetail.GetSpecimenDetailQuery(created.Id), Ct)).ShouldBeSuccess().Number;
         return new Created(created.Id, created.ConcurrencyVersion, number);

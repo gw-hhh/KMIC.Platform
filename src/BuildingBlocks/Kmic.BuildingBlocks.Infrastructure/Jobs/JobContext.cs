@@ -1,6 +1,8 @@
 using System.Data;
+using System.Diagnostics;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
@@ -66,6 +68,7 @@ internal sealed class JobContext(
     public async ValueTask<Result<TResponse>> SendBatchAsync<TResponse>(ICommand<TResponse> command, object checkpoint, long done)
     {
         ArgumentNullException.ThrowIfNull(command);
+        using var span = StartBatchSpan(done);
         var (scope, json) = Prepare(checkpoint, done);
         await using (scope)
         {
@@ -76,6 +79,7 @@ internal sealed class JobContext(
     public async ValueTask<Result> SendBatchAsync(ICommand command, object checkpoint, long done)
     {
         ArgumentNullException.ThrowIfNull(command);
+        using var span = StartBatchSpan(done);
         var (scope, json) = Prepare(checkpoint, done);
         await using (scope)
         {
@@ -97,6 +101,7 @@ internal sealed class JobContext(
         ArgumentNullException.ThrowIfNull(write);
         ArgumentNullException.ThrowIfNull(checkpoint);
 
+        using var span = StartBatchSpan(done);
         var json = JsonSerializer.Serialize(checkpoint, checkpoint.GetType(), KmicJsonOptions.Stored);
         await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, user, access);
         var db = scope.ServiceProvider.GetRequiredService<ModuleWriteContexts>().Get(module);
@@ -134,6 +139,9 @@ internal sealed class JobContext(
         TakenOver = true;
         stop.Cancel();
     }
+
+    // 每一批一个子 span，挂在这次执行的根 span 下面
+    private static Activity? StartBatchSpan(long done) => KmicActivities.Messaging.StartActivity("job batch")?.SetTag("kmic.job.done", done);
 
     private (AsyncServiceScope Scope, string Checkpoint) Prepare(object checkpoint, long done)
     {

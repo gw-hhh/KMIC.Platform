@@ -1,6 +1,15 @@
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
+using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Application.Authorization;
+using Kmic.BuildingBlocks.Application.Events;
+using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Querying;
+using Kmic.BuildingBlocks.Application.ReadModels;
+using Kmic.BuildingBlocks.Application.Settings;
+using Kmic.BuildingBlocks.Application.UseCases;
+using Kmic.BuildingBlocks.Contracts.References;
 using Kmic.BuildingBlocks.Domain.Entities;
 using Kmic.BuildingBlocks.Domain.Events;
 using Kmic.BuildingBlocks.Domain.Identifiers;
@@ -12,6 +21,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Kmic.ArchitectureTests.Violations;
@@ -139,4 +149,188 @@ internal static class BadSamples
     // 匿名用例出现在 Identity 之外
     [Kmic.BuildingBlocks.Application.UseCases.AllowAnonymous]
     internal sealed record OpenDoorCommand : ICommand;
+
+    // 命令响应：带嵌套对象（业务内容应当经查询获取）
+    internal sealed record BadReceiptCommand(string Name) : ICommand<BadReceipt>;
+
+    internal sealed record BadReceipt(Guid Id, ThingDetail Detail);
+
+    internal sealed record ThingDetail(string Name, decimal Amount);
+
+    // 命令响应：集合的元素不是收据
+    internal sealed record BadReceiptItemsCommand(string Name) : ICommand<BadReceiptItems>;
+
+    internal sealed record BadReceiptItems(IReadOnlyList<ThingDetail> Items);
+
+    // 合格的收据：标识、版本号、逐条收据
+    internal sealed record GoodReceiptCommand(string Name) : ICommand<GoodReceipt>;
+
+    internal sealed record GoodReceipt(Guid Id, long Version, IReadOnlyList<GoodReceiptLine> Lines);
+
+    internal sealed record GoodReceiptLine(Guid Id, string Code, bool Succeeded);
+
+    // 系统专用命令不受收据规则限制
+    [SystemOnly]
+    internal sealed record SystemOutcomeCommand(string Name) : ICommand<BadReceipt>;
+
+    // 引用了另一个命令处理器
+    internal sealed class HandlerUser(ChainingHandler other)
+    {
+        public ChainingHandler Other => other;
+    }
+
+    // 领域事件处理器注入了别的模块的服务
+    internal interface IOtherModuleThing;
+
+    internal sealed class BadEventHandler(IOtherModuleThing other) : IDomainEventHandler<ThingHappened>
+    {
+        public IOtherModuleThing Other => other;
+
+        public ValueTask<Result> HandleAsync(ThingHappened domainEvent, CancellationToken ct) => ValueTask.FromResult(Result.Success());
+    }
+
+    // 服务注册写在了模块注册类之外
+    internal static class RogueRegistration
+    {
+        public static IServiceCollection AddThing(IServiceCollection services) => services;
+    }
+    // 状态机声明有误：类型初始化时抛异常
+    internal sealed class BrokenAggregate : AggregateRoot<FakeAggregateId>
+    {
+        public static readonly int Broken = Fail();
+
+        public BrokenAggregate()
+            : base(default)
+        {
+        }
+
+        private static int Fail() => throw new InvalidOperationException("状态机没有初始状态");
+    }
+
+    // 命令处理器注入了查询入口
+    internal interface IThingQueryDb;
+
+    public sealed class QueryingHandler(IThingQueryDb db) : ICommandHandler<SubmitThing>
+    {
+        public IThingQueryDb Db => db;
+
+        public ValueTask<Result> Handle(SubmitThing command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    // 作业处理器注入了 DbContext
+    internal sealed record ThingJob : IBackgroundJob;
+
+    internal sealed class DatabaseJobHandler(FakeDb db) : IJobHandler<ThingJob>
+    {
+        public FakeDb Db => db;
+
+        public Task<Result<JobOutcome>> ExecuteAsync(ThingJob job, IJobContext context, CancellationToken ct) => throw new NotSupportedException();
+    }
+
+    // 资源策略依赖了用户偏好
+    internal sealed class PreferenceAwarePolicy(IPreferences preferences) : IResourcePolicy<FakeAggregate, string>
+    {
+        public IPreferences Preferences => preferences;
+
+        public PolicyDecision Evaluate(IAccessContext access, FakeAggregate resource, string action) => PolicyDecision.Allow;
+    }
+
+    // 敏感权限点没有标 Sensitive：物理删除
+    [PermissionGroup("Bad", "示例")]
+    internal static class BadPermissions
+    {
+        [Permission("物理删除")]
+        public const string Purge = "Bad.Thing.Purge";
+
+        [Permission("查看")]
+        public const string View = "Bad.Thing.View";
+
+        [Permission("导出全部", Sensitive = true)]
+        public const string ExportAll = "Bad.Thing.ExportAll";
+    }
+
+    // 读模型同时是聚合根，可以被仓储和 SaveChanges 写入
+    internal sealed class BadReadModel : AggregateRoot<FakeAggregateId>, IReadModel
+    {
+        public BadReadModel()
+            : base(default)
+        {
+        }
+
+        Guid IReadModel.Id => Id.Value;
+
+        public long SourceVersion => 0;
+
+        public ReferenceStatus Status => default;
+
+        public bool IsTerminal => false;
+
+        public ReadModelTerminalReason? TerminalReason => null;
+
+        public DateTimeOffset? TerminalAt => null;
+
+        public Guid? RebuildRunId => null;
+
+        public DateTimeOffset SyncedAt => default;
+    }
+
+    // 创建类命令既没有 [Idempotent] 也没有 [NotIdempotent]
+    internal sealed record CreateThingCommand(string Name) : ICommand;
+
+    // 豁免要写明原因
+    [NotIdempotent("天然幂等")]
+    internal sealed record SubmitThingAgainCommand(string Name) : ICommand;
+
+    // 校验器注入了 Contracts 里的类型
+    internal interface IThingReferences;
+
+    public sealed class ReferencingValidator(IThingReferences references) : AbstractValidator<FakeMessage>
+    {
+        public IThingReferences References => references;
+    }
+
+    // 绕过数据范围：处理器没有标 [BypassesDataScope]，调用藏在 async 方法的状态机里
+    internal sealed record CountAllQuery(IQueryable<FakeAggregate> Source) : IQuery<int>;
+
+    public sealed class UnmarkedBypassHandler : IQueryHandler<CountAllQuery, int>
+    {
+        public async ValueTask<Result<int>> Handle(CountAllQuery query, CancellationToken cancellationToken)
+        {
+            await Task.Yield();
+            return query.Source.WithoutDataScope().Count();
+        }
+    }
+
+    // 标了 [BypassesDataScope] 并写明原因：合格
+    [BypassesDataScope("编号要在全部数据中判断是否重复")]
+    public sealed class MarkedBypassHandler : IQueryHandler<CountAllQuery, int>
+    {
+        public ValueTask<Result<int>> Handle(CountAllQuery query, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<Result<int>>(query.Source.WithoutDataScope().Count());
+    }
+
+    // 不是处理器的类型调用了 WithoutDataScope
+    internal sealed class ScopeHelper
+    {
+        public static int CountAll(IQueryable<FakeAggregate> source) => source.WithoutDataScope().Count();
+    }
+
+    // 缓存值：可变的类和不可变的记录
+    internal sealed class MutableValue
+    {
+        public string Name { get; set; } = "";
+
+        public List<string> Tags { get; } = [];
+    }
+
+    internal sealed record FrozenValue(string Name, IReadOnlyList<string> Tags);
+
+    internal sealed class CachingQueries(HybridCache cache)
+    {
+        public ValueTask<MutableValue> MutableAsync(CancellationToken ct) =>
+            cache.GetOrCreateAsync("Bad:mutable", _ => ValueTask.FromResult(new MutableValue()), cancellationToken: ct);
+
+        public ValueTask<FrozenValue> FrozenAsync(CancellationToken ct) =>
+            cache.GetOrCreateAsync("Bad:frozen", _ => ValueTask.FromResult(new FrozenValue("a", [])), cancellationToken: ct);
+    }
 }

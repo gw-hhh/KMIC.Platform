@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Observability;
@@ -30,6 +31,9 @@ internal sealed class ScheduledCommandRunner(
         string name, ScheduledRun run, DateTimeOffset actualFireTime, UserId? triggeredBy, string instance, CancellationToken ct)
     {
         var started = TimeProvider.System.GetTimestamp();
+
+        // 每次执行一个根 span（调度器自己有追踪时挂在它下面），先于执行记录开始，记录里的追踪 ID 才是这个 span 的
+        using var activity = KmicActivities.Messaging.StartActivity($"scheduled {name}", ActivityKind.Internal);
         var id = await runs.StartAsync(name, run, actualFireTime, triggeredBy, instance, Activity.Current?.TraceId.ToString(), ct);
         try
         {

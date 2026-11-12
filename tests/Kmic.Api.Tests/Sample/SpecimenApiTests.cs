@@ -122,7 +122,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         using var alice = ClientFor(Alice);
         var (id, version) = await CreateAsync(alice, "提交测试");
 
-        var submitted = await alice.PostAsJsonAsync($"{Root}/{id}/submit", new { expectedVersion = version }, Ct);
+        var submitted = await PostActionAsync(alice, $"{Root}/{id}/submit", new { expectedVersion = version });
 
         submitted.StatusCode.ShouldBe(HttpStatusCode.OK);
         var newVersion = (await JsonAsync(submitted)).GetProperty("version").GetInt64();
@@ -139,7 +139,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         var (id, version) = await CreateAsync(alice, "事件测试");
         var number = (await JsonAsync(await alice.GetAsync($"{Root}/{id}", Ct))).GetProperty("number").GetString();
 
-        (await alice.PostAsJsonAsync($"{Root}/{id}/submit", new { expectedVersion = version }, Ct)).EnsureSuccessStatusCode();
+        (await PostActionAsync(alice, $"{Root}/{id}/submit", new { expectedVersion = version })).EnsureSuccessStatusCode();
 
         // 事件和提交在同一个事务里写进本模块的 Outbox，不需要等投递
         var payloads = await OutboxPayloadsAsync("Sample.SpecimenSubmitted", Ct);
@@ -154,9 +154,9 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
     {
         using var alice = ClientFor(Alice);
         var (id, version) = await CreateAsync(alice, "冲突测试");
-        (await alice.PostAsJsonAsync($"{Root}/{id}/submit", new { expectedVersion = version }, Ct)).EnsureSuccessStatusCode();
+        (await PostActionAsync(alice, $"{Root}/{id}/submit", new { expectedVersion = version })).EnsureSuccessStatusCode();
 
-        var stale = await alice.PostAsJsonAsync($"{Root}/{id}/submit", new { expectedVersion = version }, Ct);
+        var stale = await PostActionAsync(alice, $"{Root}/{id}/submit", new { expectedVersion = version });
 
         stale.StatusCode.ShouldBe(HttpStatusCode.Conflict);
         var body = await JsonAsync(stale);
@@ -172,7 +172,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         var (id, version) = await CreateAsync(alice, "负责人测试");
 
         // 乙的数据范围是全部，看得到，也有提交权限，但不是负责人
-        var response = await bob.PostAsJsonAsync($"{Root}/{id}/submit", new { expectedVersion = version }, Ct);
+        var response = await PostActionAsync(bob, $"{Root}/{id}/submit", new { expectedVersion = version });
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         (await JsonAsync(response)).GetProperty("code").GetString().ShouldBe("Sample.NotOwner");
@@ -245,7 +245,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         using var alice = ClientFor(Alice);
         var (draft, draftVersion) = await CreateAsync(alice, "删除测试");
         var (submitted, submittedVersion) = await CreateAsync(alice, "已提交不能删");
-        (await alice.PostAsJsonAsync($"{Root}/{submitted}/submit", new { expectedVersion = submittedVersion }, Ct)).EnsureSuccessStatusCode();
+        (await PostActionAsync(alice, $"{Root}/{submitted}/submit", new { expectedVersion = submittedVersion })).EnsureSuccessStatusCode();
         var newVersion = (await JsonAsync(await alice.GetAsync($"{Root}/{submitted}", Ct))).GetProperty("version").GetInt64();
 
         var deleted = await DeleteAsync(alice, draft, draftVersion);

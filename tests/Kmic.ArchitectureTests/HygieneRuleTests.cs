@@ -55,6 +55,18 @@ public sealed class HygieneRuleTests
         InjectionRules.Validators(Types(Layer.Application)).ShouldBeEmpty();
 
     [Fact]
+    public void CommandHandlers_DoNotInjectQueryContexts() =>
+        InjectionRules.CommandHandlersAndQueryContexts(Types(Layer.Application)).ShouldBeEmpty();
+
+    [Fact]
+    public void JobHandlers_DoNotInjectDataAccess() =>
+        InjectionRules.JobHandlers(Types(Layer.Application)).ShouldBeEmpty();
+
+    [Fact]
+    public void AuthorizationCode_DoesNotDependOnPreferences() =>
+        InjectionRules.AuthorizationCode(ProductAssemblies.All.SelectMany(a => a.Assembly.GetTypes())).ShouldBeEmpty();
+
+    [Fact]
     public void Endpoints_OnlyUseTheSenders() =>
         InjectionRules.Endpoints(Types(Layer.Presentation)).ShouldBeEmpty();
 
@@ -119,6 +131,18 @@ public sealed class HygieneRuleTests
     [Fact]
     public void Violation_CommandHandlerInjectingASender_IsReported() =>
         InjectionRules.CommandHandlers(_bad).ShouldContain(p => p.Contains("ChainingHandler", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_CommandHandlerInjectingAQueryContext_IsReported() =>
+        InjectionRules.CommandHandlersAndQueryContexts(_bad).ShouldContain(p => p.Contains("QueryingHandler", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_JobHandlerInjectingADbContext_IsReported() =>
+        InjectionRules.JobHandlers(_bad).ShouldContain(p => p.Contains("DatabaseJobHandler", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_PolicyDependingOnPreferences_IsReported() =>
+        InjectionRules.AuthorizationCode(_bad).ShouldContain(p => p.Contains("PreferenceAwarePolicy", StringComparison.Ordinal));
 
     [Fact]
     public void Violation_ValidatorInjectingADbContext_IsReported() =>

@@ -321,7 +321,7 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 | 用例 | 文件夹（`Kmic.Sample.Application/Specimens/`） | 演示什么 |
 |---|---|---|
 | 创建 | `Create/`：命令、校验器、处理器、`CreateSpecimenItemInput` | `[Idempotent]`、`[Audited]`；输入形状校验；用当前用户填负责人和所属组织；取号放在最后一个异步步骤 |
-| 提交 | `Submit/`：命令、处理器 | 修改类命令：`ExpectedVersion`；加载 → 资源授权 → 业务方法 |
+| 提交 | `Submit/`：命令、处理器 | 修改类命令：`ExpectedVersion`；`[Idempotent]`（提交类命令要幂等，超时重试得到原来的结果而不是版本冲突）；加载 → 资源授权 → 业务方法 |
 | 关闭 | `Close/` | 同上，另一个动作 |
 | 删除 | `Delete/` | 软删除；只有草稿可以删 |
 

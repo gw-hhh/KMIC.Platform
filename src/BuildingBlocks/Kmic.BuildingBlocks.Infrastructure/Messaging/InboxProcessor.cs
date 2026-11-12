@@ -1,6 +1,8 @@
 using System.Data.Common;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Messaging;
@@ -146,6 +148,7 @@ internal sealed class InboxProcessor(
             message.SourceId, message.SourceVersion, headers.Purged, headers.InitiatorUserId);
         var initiator = headers.InitiatorUserId is { } id ? UserId.From(id) : (UserId?)null;
 
+        using var activity = StartActivity(message, headers);
         await using var scope = scopes.CreateScope(CallOrigin.Inbox, CurrentUser.System(initiator));
         var current = scope.ServiceProvider.GetRequiredService<CurrentInboxMessage>();
         current.MessageId = message.MessageId;
@@ -182,6 +185,18 @@ internal sealed class InboxProcessor(
 
         // 暂时不满足的会自己好起来，按退避重试；其余业务失败重试也没用，直接进死信等人看
         return await RecordFailureAsync(module, message, token, $"{result.Error.Code}：{result.Error.Message}", dead: !IsRetryable(result.Error), null, ct);
+    }
+
+    // 处理消息不是原请求的一部分：开新的追踪，链接回发布它的请求，两边都能顺着链接找到对方
+    private static Activity? StartActivity(ClaimedInboxMessage message, MessageHeaders headers)
+    {
+        IEnumerable<ActivityLink> links = ActivityContext.TryParse(headers.TraceParent, headers.TraceState, out var origin) ? [new ActivityLink(origin)] : [];
+        return KmicActivities.Messaging.StartActivity(
+            $"inbox {message.Subscription}",
+            ActivityKind.Consumer,
+            default(ActivityContext),
+            [new("kmic.message.type", message.MessageType), new("kmic.message.id", message.MessageId.ToString()), new("kmic.subscription", message.Subscription)],
+            links);
     }
 
     private static bool IsRetryable(Error error) =>

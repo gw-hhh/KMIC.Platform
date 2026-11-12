@@ -1,4 +1,7 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json;
+using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Contracts.Auditing;
 using Kmic.BuildingBlocks.Domain.Errors;
@@ -54,6 +57,27 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.ExpiresAt.ShouldNotBeNull();
         job.Attempts.ShouldBe(1);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批", "第 2 批", "第 3 批"]);
+    }
+
+    [Fact]
+    public async Task Run_OneRootSpanPerExecutionAndOneChildSpanPerBatch()
+    {
+        var started = new ConcurrentQueue<Activity>();
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = static source => string.Equals(source.Name, KmicActivities.MessagingName, StringComparison.Ordinal),
+            Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = started.Enqueue,
+        };
+        ActivitySource.AddActivityListener(listener);
+        var (_, jobId) = await SubmitAsync(batches: 3);
+
+        await _harness.Services.RunJobsAsync(Ct);
+
+        // 监听器是进程范围的，别的测试的作业也会进来，按作业 ID 挑出这一个
+        var root = started.Single(a => a.OperationName.StartsWith("job ", StringComparison.Ordinal) && string.Equals(a.GetTagItem("kmic.job.id") as string, jobId.ToString(), StringComparison.Ordinal));
+        root.ParentId.ShouldBeNull("每次执行是一个根 span，不挂在领取它的循环下面");
+        started.Count(a => string.Equals(a.OperationName, "job batch", StringComparison.Ordinal) && a.ParentSpanId == root.SpanId).ShouldBe(3);
     }
 
     [Fact]
