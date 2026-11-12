@@ -9,7 +9,7 @@
 | 模块 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 | 状态 |
 |---|---|---|---|---|---|---|---|
 | Identity | `Identity` | 10 | 平台 | — | @gw-hhh | [identity/README.md](identity/README.md) | 设计待审（2026-11-12 起草，待决 D-A～D-G）；评审通过前不编码 |
-| Operations | `Operations` | 11 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/operations/` | 未开始 |
+| Operations | `Operations` | 11 | 平台 | Identity | @gw-hhh | [operations/README.md](operations/README.md) | 设计待审（2026-11-12 起草，待决 D-O1～D-O3）；评审通过前不编码 |
 | Configuration | `Configuration` | 12 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/configuration/` | 未开始 |
 | Files | `Files` | 13 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/files/` | 未开始 |
 | Notifications | `Notifications` | 14 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/notifications/` | 未开始 |
