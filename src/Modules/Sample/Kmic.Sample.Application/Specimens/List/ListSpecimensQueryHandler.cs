@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Querying;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.Sample.Domain.Specimens;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Application.Specimens.List;
@@ -21,9 +22,16 @@ public sealed class ListSpecimensQueryHandler(ISampleQueryDb db) : IQueryHandler
             specimens = specimens.Where(s => KmicFunctions.ContainsText(s.Number, query.Q) || KmicFunctions.ContainsText(s.Title, query.Q));
         }
 
-        if (query.Status is { Count: > 0 })
+        var statuses = EnumerationFilter.Parse<SpecimenStatus>(query.Status, "status");
+        if (statuses.IsFailure)
         {
-            specimens = specimens.Where(s => query.Status.Contains(s.Status.Code));
+            return statuses.Error;
+        }
+
+        var wanted = statuses.Value;
+        if (wanted.Count > 0)
+        {
+            specimens = specimens.Where(s => wanted.Contains(s.Status));
         }
 
         return await specimens

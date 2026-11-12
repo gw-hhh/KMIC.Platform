@@ -36,7 +36,7 @@ public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, Ap
         paths.GetProperty("/api/v1/sample/specimens").GetProperty("get").GetProperty("x-sortable-fields").EnumerateArray().Select(f => f.GetString()).ShouldBe(["number", "title", "createdAt"]);
         paths.GetProperty("/api/v1/sample/specimens/{id}/submit").GetProperty("post").GetProperty("x-permission").GetString().ShouldBe("Sample.Specimen.Submit");
         document.RootElement.GetProperty("x-kmic-permissions").EnumerateArray().Select(p => p.GetProperty("code").GetString())
-            .ShouldBe(["Sample.Specimen.Close", "Sample.Specimen.Create", "Sample.Specimen.Delete", "Sample.Specimen.Submit", "Sample.Specimen.View"]);
+            .ShouldBe(["Identity.Role.Manage", "Identity.Role.View", "Sample.Specimen.Close", "Sample.Specimen.Create", "Sample.Specimen.Delete", "Sample.Specimen.Submit", "Sample.Specimen.View"]);
         document.RootElement.GetProperty("x-kmic-enums").GetProperty("SpecimenStatus").GetArrayLength().ShouldBe(3);
     }
 

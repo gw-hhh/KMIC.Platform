@@ -229,6 +229,24 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
     }
 
     [Fact]
+    public async Task List_FiltersByStatusCode_AndRejectsAnUnknownOne()
+    {
+        using var alice = ClientFor(Alice);
+        var (draft, _) = await CreateAsync(alice, "筛选-草稿");
+        var (submitted, version) = await CreateAsync(alice, "筛选-已提交");
+        (await PostActionAsync(alice, $"{Root}/{submitted}/submit", new { expectedVersion = version })).EnsureSuccessStatusCode();
+
+        var onlySubmitted = await JsonAsync(await alice.GetAsync($"{Root}?q=筛选-&status=Submitted", Ct));
+        var both = await JsonAsync(await alice.GetAsync($"{Root}?q=筛选-&status=Submitted&status=Draft", Ct));
+        var unknown = await alice.GetAsync($"{Root}?status=Archived", Ct);
+
+        onlySubmitted.GetProperty("items").EnumerateArray().Select(i => i.GetProperty("id").GetGuid()).ShouldBe([submitted]);
+        both.GetProperty("items").EnumerateArray().Select(i => i.GetProperty("id").GetGuid()).Order().ShouldBe(new[] { draft, submitted }.Order());
+        unknown.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await JsonAsync(unknown)).GetProperty("errors")[0].GetProperty("path").GetString().ShouldBe("status");
+    }
+
+    [Fact]
     public async Task List_WithAnUnknownSortField_Returns400()
     {
         using var alice = ClientFor(Alice);

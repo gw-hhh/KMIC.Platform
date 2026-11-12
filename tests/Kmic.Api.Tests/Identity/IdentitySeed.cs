@@ -15,7 +15,7 @@ internal sealed class IdentitySeed(string connectionString)
 
     private readonly PasswordHasher<object> _hasher = new();
 
-    public async Task<Guid> RoleAsync(string name, IReadOnlyCollection<string> permissions, string scope = "All", int sortOrder = 10, bool active = true)
+    public async Task<Guid> RoleAsync(string name, IReadOnlyCollection<string> permissions, string scope = "All", int sortOrder = 10, bool active = true, bool isProtected = false, bool builtIn = false)
     {
         var id = Guid.CreateVersion7();
         await using var data = NpgsqlDataSource.Create(connectionString);
@@ -23,9 +23,9 @@ internal sealed class IdentitySeed(string connectionString)
             data,
             """
             INSERT INTO "Identity"."Role" ("Id", "Name", "Status", "IsProtected", "GrantsAllPermissions", "DefaultScopeLevel", "SortOrder", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
-            VALUES (@id, @name, @status, false, false, @scope, @sort, now(), @system, 0)
+            VALUES (@id, @name, @status, @protected, @builtin, @scope, @sort, now(), @system, 0)
             """,
-            ("id", id), ("name", name), ("status", active ? "Active" : "Disabled"), ("scope", scope), ("sort", sortOrder), ("system", _system));
+            ("id", id), ("name", name), ("status", active ? "Active" : "Disabled"), ("scope", scope), ("sort", sortOrder), ("protected", isProtected), ("builtin", builtIn), ("system", _system));
         foreach (var permission in permissions)
         {
             await ExecuteAsync(

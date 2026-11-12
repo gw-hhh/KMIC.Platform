@@ -5,6 +5,8 @@ using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application;
 using Kmic.Identity.Application.Authentication;
+using Kmic.Identity.Application.Authorization;
+using Kmic.Identity.Infrastructure.Authorization;
 using Kmic.Identity.Infrastructure.Authentication;
 using Kmic.Identity.Contracts;
 using Kmic.Identity.Domain.Organization;
@@ -49,6 +51,7 @@ public sealed class IdentityModule : IModule
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<IWeakPasswordList, EmbeddedWeakPasswordList>();
         services.AddScoped<ILoginThrottleStore, LoginThrottleStore>();
+        services.AddScoped<IOperatorRecheck, OperatorRecheck>();
         services.AddKmicOptions<LoginThrottleOptions>(LoginThrottleOptions.Section);
         services.AddKmicOptions<PasswordOptions>(PasswordOptions.Section);
         services.AddKmicOptions<SessionLifetimeOptions>(SessionLifetimeOptions.Section);
