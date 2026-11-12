@@ -94,8 +94,8 @@
 
   <!-- 本地开发编排（Aspire.AppHost.Sdk 的版本在 global.json 中固定） -->
   <ItemGroup>
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.4" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.6.4" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.5" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.6.5" />
   </ItemGroup>
 
   <!-- 测试 -->

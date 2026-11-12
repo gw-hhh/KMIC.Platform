@@ -22,7 +22,10 @@
     <Project Path="src/Hosts/Kmic.Api/Kmic.Api.csproj" />
     <Project Path="src/Hosts/Kmic.MigrationRunner/Kmic.MigrationRunner.csproj" />
     <Project Path="src/Hosts/Kmic.Operator/Kmic.Operator.csproj" />
-    <Project Path="src/Hosts/Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/Aspire/">
+    <Project Path="src/Aspire/Kmic.AppHost/Kmic.AppHost.csproj" />
+    <Project Path="src/Aspire/Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/Modules/Sample/">

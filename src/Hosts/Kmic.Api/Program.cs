@@ -2,9 +2,9 @@ using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Presentation.OpenApi;
-using Kmic.ServiceDefaults;
 using Kmic.Sample.Infrastructure;
 using Kmic.Sample.Presentation;
+using Kmic.ServiceDefaults;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

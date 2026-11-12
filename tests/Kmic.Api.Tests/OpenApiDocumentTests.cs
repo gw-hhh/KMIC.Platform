@@ -48,4 +48,30 @@ public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, Ap
 
         (await client.GetAsync("/openapi/v1.json", Ct)).IsSuccessStatusCode.ShouldBeTrue();
     }
+
+    // 前端生成类型、破坏性变更检查（oasdiff）都读这个文件。文档由真实宿主生成：构建时生成的工具会启动整个宿主，
+    // 启动任务要连数据库，所以改由这里导出
+    [Fact]
+    public async Task Document_IsExportedToTheArtifactsFolder()
+    {
+        using var client = ClientFor();
+
+        var json = await client.GetStringAsync("/openapi/v1.json", Ct);
+
+        var output = Path.Combine(RepositoryRoot(), "artifacts", "openapi", "openapi.v1.json");
+        Directory.CreateDirectory(Path.GetDirectoryName(output)!);
+        await File.WriteAllTextAsync(output, json, Ct);
+        new FileInfo(output).Length.ShouldBeGreaterThan(0);
+    }
+
+    private static string RepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Kmic.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx。");
+    }
 }

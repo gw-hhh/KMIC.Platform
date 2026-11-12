@@ -57,3 +57,5 @@ appsettings
 apikey
 connectionstring
 secretquery
+oasdiff
+ASPNETCORE

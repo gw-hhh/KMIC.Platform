@@ -17,7 +17,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../src/Hosts/Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
+    <ProjectReference Include="../../src/Aspire/Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
     <ProjectReference Include="../../src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
   </ItemGroup>
 </Project>

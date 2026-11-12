@@ -42,3 +42,6 @@ appsettings.*.local.json
 
 # AI 助手的本机设置
 .claude/settings.local.json
+
+# 测试导出的 OpenAPI 文档等构建产物
+artifacts/

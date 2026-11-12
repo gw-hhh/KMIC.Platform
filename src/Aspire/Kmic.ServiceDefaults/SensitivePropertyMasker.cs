@@ -43,32 +43,32 @@ internal sealed class SensitivePropertyMasker : ILogEventEnricher
         switch (value)
         {
             case StructureValue structure:
-            {
-                var properties = structure.Properties
-                    .Select(p => IsSensitive(p.Name) ? new LogEventProperty(p.Name, new ScalarValue(Mask)) : new LogEventProperty(p.Name, Visit(p.Value)))
-                    .ToList();
-                return properties.Zip(structure.Properties).All(pair => ReferenceEquals(pair.First.Value, pair.Second.Value))
-                    ? value
-                    : new StructureValue(properties, structure.TypeTag);
-            }
+                {
+                    var properties = structure.Properties
+                        .Select(p => IsSensitive(p.Name) ? new LogEventProperty(p.Name, new ScalarValue(Mask)) : new LogEventProperty(p.Name, Visit(p.Value)))
+                        .ToList();
+                    return properties.Zip(structure.Properties).All(pair => ReferenceEquals(pair.First.Value, pair.Second.Value))
+                        ? value
+                        : new StructureValue(properties, structure.TypeTag);
+                }
 
             case DictionaryValue dictionary:
-            {
-                var elements = dictionary.Elements
-                    .Select(e => KeyValuePair.Create(e.Key, e.Key.Value is string key && IsSensitive(key) ? new ScalarValue(Mask) : Visit(e.Value)))
-                    .ToList();
-                return elements.Zip(dictionary.Elements).All(pair => ReferenceEquals(pair.First.Value, pair.Second.Value))
-                    ? value
-                    : new DictionaryValue(elements);
-            }
+                {
+                    var elements = dictionary.Elements
+                        .Select(e => KeyValuePair.Create(e.Key, e.Key.Value is string key && IsSensitive(key) ? new ScalarValue(Mask) : Visit(e.Value)))
+                        .ToList();
+                    return elements.Zip(dictionary.Elements).All(pair => ReferenceEquals(pair.First.Value, pair.Second.Value))
+                        ? value
+                        : new DictionaryValue(elements);
+                }
 
             case SequenceValue sequence:
-            {
-                var elements = sequence.Elements.Select(Visit).ToList();
-                return elements.Zip(sequence.Elements).All(pair => ReferenceEquals(pair.First, pair.Second))
-                    ? value
-                    : new SequenceValue(elements);
-            }
+                {
+                    var elements = sequence.Elements.Select(Visit).ToList();
+                    return elements.Zip(sequence.Elements).All(pair => ReferenceEquals(pair.First, pair.Second))
+                        ? value
+                        : new SequenceValue(elements);
+                }
 
             default:
                 return value;

@@ -1,0 +1,21 @@
+<Project Sdk="Aspire.AppHost.Sdk">
+  <!--
+    本地开发编排：PostgreSQL 容器、迁移程序、应用，仪表盘里看日志、追踪、指标。
+    只给开发机用，生产不部署 Aspire；Domain、Application 不引用 Aspire（05-12 第 7 节）
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <!-- 我们用 dotnet run 启动，不用 Aspire CLI 的打包与部署功能，不需要 CLI 压缩包 -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Hosts/Kmic.Api/Kmic.Api.csproj" />
+    <ProjectReference Include="../../Hosts/Kmic.MigrationRunner/Kmic.MigrationRunner.csproj" />
+    <!-- Directory.Build.props 给所有 src 项目加了自定义分析器，它不是可执行项目，不能当作 Aspire 资源 -->
+    <ProjectReference Update="../../BuildingBlocks/Kmic.BuildingBlocks.Analyzers/Kmic.BuildingBlocks.Analyzers.csproj" IsAspireProjectResource="false" />
+  </ItemGroup>
+</Project>
