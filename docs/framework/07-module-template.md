@@ -212,7 +212,7 @@ src/Modules/Sample/
 │  │  ├─ EventHandlers/               领域事件处理器
 │  │  └─ Shared/                      本聚合多个用例共用的 DTO
 │  ├─ (CloseExpired/ …)               定时任务的命令也是用例（按需）
-│  └─ (Contracts/)                    本模块 Contracts 接口的实现（薄适配器，按需，05-07 D2）
+│  └─ (ContractQueries/)             本模块 Contracts 接口的实现与对外查询（薄适配器、带 [ContractQuery] 的查询和处理器，按需，05-07 D2）
 │
 ├─ Kmic.Sample.Infrastructure/
 │  ├─ SampleModule.cs
@@ -396,14 +396,14 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 
 | 需要 | 写法 | 出处 |
 |---|---|---|
-| 让其他模块查本模块数据 | Contracts 中定义 `ISampleReferences` / `ISampleXxxQueries`；Application 的 `Contracts/` 文件夹中写薄适配器，发送带 `[ContractQuery(...)]` 的查询；在 `AddServices` 中注册 | 05-07 第 4.1 节 |
+| 让其他模块查本模块数据 | Contracts 中定义 `ISampleReferences` / `ISampleXxxQueries`；Application 的 `ContractQueries/` 文件夹中写薄适配器（`public sealed`，`AddServices` 在 Infrastructure 里要能看到它），发送带 `[ContractQuery(...)]` 的查询；在 `AddServices` 中注册 | 05-07 第 4.1 节 |
 | 查其他模块数据 | 在 `DeclareDependencies` 中 `d.DependsOn(CustomerModuleInfo.Name)`；处理器注入对方的 Contracts 接口 | 05-07 第 4.1 节 |
 | 通知其他模块“发生了什么” | Contracts 中定义 `[IntegrationMessage("Sample.SampleApproved")]` 事件；在**领域事件处理器**或命令处理器中 `publisher.Add(...)` | 05-07 第 5 节 |
 | 被其他模块引用、需要同步副本 | 发布 `SampleChanged` 快照事件，实现 `ISampleSnapshotSource` | 05-07 第 5.2、8.3 节 |
 | 收到其他模块的事件后做事 | 本模块定义 `[SystemOnly]` 命令；在 `ConfigureMessaging` 中 `Subscribe<事件, 命令>("Sample.Xxx", 映射)` | 05-07 第 7.2 节 |
 | 请平台模块做事（发通知、登记文件引用） | `publisher.Send(new SendNotification(...))` | 05-07 D6、05-11 |
 
-`Sample` 演示“通知其他模块发生了什么”这一种，其余几种框架测试里的 Probe、Echo 两个模块有完整用法（`tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Probe`、`tests/BuildingBlocks/Kmic.Echo.Probe`）：
+`Sample` 演示“通知其他模块发生了什么”和“让其他模块批量解析本模块的引用”两种，其余几种框架测试里的 Probe、Echo 两个模块有完整用法（`tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Probe`、`tests/BuildingBlocks/Kmic.Echo.Probe`）：
 
 | 构件 | 文件 |
 |---|---|
@@ -411,6 +411,10 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 | 领域事件 → 集成事件的处理器 | `Kmic.Sample.Application/Specimens/EventHandlers/PublishSpecimenSubmitted.cs` |
 | 提交后事件随业务数据写进 Outbox 的测试 | `tests/Kmic.Api.Tests/Sample/SpecimenApiTests.cs` 的 `Submit_PublishesTheIntegrationEventWithTheBusinessData` |
 | 契约快照 | `tests/Kmic.Api.Tests/Contracts/Snapshots/Sample.SpecimenSubmitted.v1.json`，由 `MessageContractTests` 对宿主里的全部模块检查 |
+| 引用解析接口（批量、不存在的 ID 不出现在结果里） | `Kmic.Sample.Contracts/ISpecimenReferences.cs` |
+| 对外查询（`Reference`，不受调用方权限与数据范围限制）及其处理器、校验器 | `Kmic.Sample.Application/ContractQueries/GetSpecimenReferencesQuery.cs`、`…QueryHandler.cs`、`…QueryValidator.cs` |
+| 适配器（自动分批、失败时抛异常）及其注册 | `Kmic.Sample.Application/ContractQueries/SpecimenReferences.cs`、`Kmic.Sample.Infrastructure/SampleModule.cs` |
+| 引用解析的测试（范围外与无权限的调用方、已删除、已关闭、重复与超过一批的 ID、超上限） | `tests/Kmic.Api.Tests/Sample/SpecimenReferencesTests.cs` |
 
 - 领域事件处理器不用在模块注册类里登记：`AddKmicApplication` 扫描各模块的 Application 程序集，实现了 `IDomainEventHandler<T>` 的类自动注册，可以是 `internal`。
 - 集成事件的契约改动要过快照检查（05-07 第 5.5 节）：兼容的改动（新增可空字段）更新快照；破坏性的改动新建 `Version = 2` 的消息类。更新快照的方法：设环境变量 `KMIC_UPDATE_SNAPSHOTS=1` 重跑 `MessageContractTests`。
@@ -620,3 +624,4 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 | 2026-11-12 | 第 2.3 节实现时补全（决定不变）：`IModule` 在 `Kmic.BuildingBlocks.Infrastructure.Modules`，`DeclareDependencies`、`ConfigureMessaging`、`ConfigureScheduling` 是默认实现的接口成员；宿主组装放在新项目 `Kmic.BuildingBlocks.Hosting`（引用 Infrastructure 与 Presentation，不属于任何一层，只有宿主和宿主测试引用它）。注册写法改为 `builder.AddKmicHost(host => host.AddModule<IdentityModule, IdentityEndpoints>().AddModule<SampleModule, SampleEndpoints>(onlyIn: KmicEnvironments.NonProduction))`——原写作 `builder.AddKmicHost().AddModule<…>()` 的链式调用，但框架服务（用例目录、权限点目录等）要拿到全部模块的程序集才能一次构建，链式写法没有收尾的时机，所以改成一个回调里登记完。`onlyIn: NonProduction` 的模块在生产环境不注册（原“生产环境启动校验发现 Sample 被注册即拒绝启动”：同一个 Program 在各环境运行，注册了就拒绝等于生产无法启动，所以改为跳过；漏写 `onlyIn` 而在生产环境注册 `Sample` 时才拒绝启动）。启动校验一次报全：配对、重复、Application 与 Presentation 程序集名、`Kmic:Roles`、依赖、配置里关闭的模块被依赖、数据库连接串、Api 角色必须有 `IAccessContextLoader`。`Modules:{模块}:Enabled = false` 时该模块不注册，被依赖则拒绝启动 | S2-14 实现 |
 | 2026-11-12 | 参考模块 Sample 实现时补全（决定不变）：①聚合名不能和模块名相同——命名空间 `Kmic.Sample` 会遮住同名的类型 `Sample`，模块里其他命名空间的代码无法用 using 引用它，所以参考模块的聚合叫 `Specimen`（标本）；业务模块的聚合名与模块名相同时同样会遇到，划分模块时避开（第 6.3 节检查表）。②路径参数的说明写在处理方法的参数上：`[Description("标本 ID")] SpecimenId id`（.NET 10 读取它；处理方法上的 XML 注释 `param` 读不到），文档完整性检查要求每个参数有说明。③初始迁移用宿主 `Kmic.Api` 做 `--startup-project`（类库不能做启动项目，宿主引用了 EF 设计时工具）：`dotnet ef migrations add InitializeModuleSchema --project src/Modules/<模块>/Kmic.<模块>.Infrastructure --startup-project src/Hosts/Kmic.Api --context <模块>DbContext --output-dir Persistence/Migrations`，生成后在 `Up` 开头补 `migrationBuilder.InitializeModuleSchema("<模块>");` 与它的 using（模块的 schema 授权给运行账号），新建模块的脚本（S2-16）自动完成。④迁移程序与测试模板库不认识每个模块的 DbContext 类型：`ModuleMigrator.MigrateAllAsync` 按模块注册服务时登记的 `ModuleWriteContext` 逐个迁移；Operations、Identity 两个模块建好之前，测试用 `FrameworkSchema.CreateAsync` 建它们的框架表并授权。⑤`AddMediator` 在宿主里调用，管道行为的顺序与 05-02 第 4.1 节一致 | S2-17 实现 |
 | 2026-11-12 | 第 4 节、第 7 节改为引用 Sample 中的真实文件（退出标准 4），不再抄代码；第 3.1 节目录树改为 Sample 的实际结构（决定不变）。对照真实实现发现并更正的差异：①D2 原定的两种“同文件”例外没有采用——文件名与类型名一致由 MA0048 检查，是错误级，例外要逐处豁免；请求模型与端点、内嵌 DTO 与命令各自单独一个文件（D2 选 A 不变，例外取消，规则更严）。②删除端点的并发版本在请求体 `expectedVersion`，不在查询参数里（与 05-06 D6 一致，原表写错）。③查询侧取单个对象的写法由示例中的 `FindByIdOrNotFoundAsync` 扩展方法改为注入 `IEntityFinder`（`Kmic.BuildingBlocks.Application.Querying`）：扩展方法拿不到安全事件服务和当前用户，范围外访问要记安全事件（05-05 第 5.10 节）需要这两样；找不到时补查是否被数据范围挡住，正常路径没有额外开销。④领域事件处理器由 `AddKmicApplication` 按程序集扫描自动注册，可以是 `internal`，不必在模块注册类里逐个登记。⑤第 7 节：处理器的集成测试与 API 测试同在 `Kmic.Api.Tests`、按模块分目录，不另建 `Kmic.<模块>.IntegrationTests` 项目（两者都需要完整宿主与迁移过的库，另建项目要重复一套宿主组装；ADR-0021 已定 API 测试集中在一个项目）；原定“模板为每个模块生成六类测试”改为：模型与迁移一致、契约快照、启动、唯一约束映射对宿主里全部模块遍历检查，授权矩阵与 `allowedActions` 一致性按资源写、Sample 给样板。⑥Sample 新增 `Close` 命令与端点（动作目录里有这个动作，一致性测试需要对应的命令）、`Sample.SpecimenSubmitted` 集成事件（演示领域事件 → 集成事件，并给契约快照一个真实对象）。第 4 节示例中框架 API 的确切签名的“待确认”关闭 | S2-18 |
+| 2026-11-12 | 第 3.1、4 节：Contracts 接口的实现放在 Application 的 `ContractQueries/` 文件夹，不叫 `Contracts/`（决定不变，只改文件夹名）：命名空间 `Kmic.<模块>.Application.Contracts` 会遮住 `Kmic.<模块>.Contracts`，模块里 `Contracts.Events.…` 这类相对写法就编译不过（Sample 实测）；适配器要 `public sealed`，因为 `AddServices` 在 Infrastructure，看不到 Application 的 internal 类型（`InternalsVisibleTo` 只给本模块的测试）。Sample 增加 `ISpecimenReferences` 的完整示例，第 4 节表格对应补行 | S2-18 FR-MSG-01 |

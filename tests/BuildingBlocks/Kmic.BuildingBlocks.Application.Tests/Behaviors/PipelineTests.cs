@@ -113,7 +113,7 @@ public sealed class PipelineTests : IAsyncLifetime
         var viaContract = await provider.GetRequiredService<IContractQuerySender>().SendAsync(new LookupThingQuery(), CancellationToken.None);
 
         direct.Error.ShouldBeSameAs(CommonErrors.MissingPermission);
-        viaContract.Value.ShouldBe("引用");
+        viaContract.Value.DisplayName.ShouldBe("引用");
         _host.Probe.Calls.ShouldBe([(nameof(LookupThingQueryHandler), CallOrigin.ModuleCall)]);
         provider.GetRequiredService<IExecutionContext>().Origin.ShouldBe(CallOrigin.Http);
     }

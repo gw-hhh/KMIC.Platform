@@ -53,7 +53,7 @@ internal static class Messages
     [NotAudited("框架测试")]
     internal sealed record SystemCommand : ICommand;
 
-    [ContractQuery(ContractAccess.Reference)]
+    [ContractQuery(ContractAccess.CallerScoped)]
     internal sealed record ContractThingQuery(ThingId Id) : IQuery<ThingDto>;
 
     [AllowAnonymous]

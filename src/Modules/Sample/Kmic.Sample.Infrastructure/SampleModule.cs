@@ -2,6 +2,7 @@ using System.Reflection;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Sample.Application;
+using Kmic.Sample.Application.ContractQueries;
 using Kmic.Sample.Contracts;
 using Kmic.Sample.Domain.Specimens;
 using Kmic.Sample.Infrastructure.Persistence;
@@ -31,5 +32,6 @@ public sealed class SampleModule : IModule
 
         services.AddModuleDbContexts<SampleDbContext, SampleQueryDbContext, ISampleQueryDb>();
         services.AddScoped<ISpecimenRepository, SpecimenRepository>();
+        services.AddScoped<ISpecimenReferences, SpecimenReferences>();
     }
 }

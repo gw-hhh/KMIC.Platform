@@ -95,4 +95,28 @@ public sealed class UseCaseCatalogTests
         thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.NoDeclarationCommand), StringComparison.Ordinal));
         thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.NotAHandler), StringComparison.Ordinal));
     }
+
+    [Theory]
+    [InlineData(typeof(LookupThingQuery))]
+    [InlineData(typeof(CatalogSamples.ReferenceOfDictionaryQuery))]
+    [InlineData(typeof(CatalogSamples.ReferenceOfArrayQuery))]
+    [InlineData(typeof(CatalogSamples.ReferenceOfListQuery))]
+    [InlineData(typeof(CatalogSamples.ReferenceExemptQuery))]
+    [InlineData(typeof(CatalogSamples.CallerScopedStringQuery))]
+    public void Build_ReferenceQueryWithAllowedResult_Accepted(Type query) =>
+        Should.NotThrow(() => UseCaseCatalog.Build([query]));
+
+    [Theory]
+    [InlineData(typeof(CatalogSamples.ReferenceOfStringQuery), "只能是 ReferenceInfo 或它的集合、字典，现在是 String")]
+    [InlineData(typeof(CatalogSamples.ReferenceOfNamesQuery), "现在是 IReadOnlyDictionary`2")]
+    [InlineData(typeof(CatalogSamples.ReferenceOfWrongKeyQuery), "现在是 IReadOnlyDictionary`2")]
+    [InlineData(typeof(CatalogSamples.ReferenceUselessExemptionQuery), "不需要 ResultExemption")]
+    [InlineData(typeof(CatalogSamples.ReferenceBlankExemptionQuery), "ResultExemption 必须写明原因")]
+    [InlineData(typeof(CatalogSamples.CallerScopedExemptionQuery), "ResultExemption 只能用在")]
+    public void Build_ReferenceQueryWithWrongResult_RefusesWithReason(Type query, string reason)
+    {
+        var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.Build([query]));
+
+        thrown.Problems.ShouldContain(p => p.Contains(reason, StringComparison.Ordinal) && p.Contains(query.Name, StringComparison.Ordinal));
+    }
 }

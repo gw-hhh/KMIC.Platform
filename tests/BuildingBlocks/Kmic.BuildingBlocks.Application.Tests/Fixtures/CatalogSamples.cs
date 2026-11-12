@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.UseCases;
+using Kmic.BuildingBlocks.Contracts.References;
 using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
@@ -102,5 +103,93 @@ public static class CatalogSamples
     public sealed class BlankBypassReasonQueryHandler : IQueryHandler<BlankBypassReasonQuery, bool>
     {
         public ValueTask<Result<bool>> Handle(BlankBypassReasonQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<bool>>(false);
+    }
+
+    [ContractQuery(ContractAccess.Reference)]
+    public sealed record ReferenceOfDictionaryQuery : IQuery<IReadOnlyDictionary<Guid, ReferenceInfo>>;
+
+    [ContractQuery(ContractAccess.Reference)]
+    public sealed record ReferenceOfArrayQuery : IQuery<ReferenceInfo[]>;
+
+    [ContractQuery(ContractAccess.Reference)]
+    public sealed record ReferenceOfListQuery : IQuery<IReadOnlyList<ReferenceInfo>>;
+
+    [ContractQuery(ContractAccess.Reference, ResultExemption = "候选人员：调用方需要看到范围外的人，只返回编号和姓名")]
+    public sealed record ReferenceExemptQuery : IQuery<string>;
+
+    [ContractQuery(ContractAccess.CallerScoped)]
+    public sealed record CallerScopedStringQuery : IQuery<string>;
+
+    [ContractQuery(ContractAccess.Reference)]
+    public sealed record ReferenceOfStringQuery : IQuery<string>;
+
+    [ContractQuery(ContractAccess.Reference)]
+    public sealed record ReferenceOfNamesQuery : IQuery<IReadOnlyDictionary<Guid, string>>;
+
+    [ContractQuery(ContractAccess.Reference)]
+    public sealed record ReferenceOfWrongKeyQuery : IQuery<IReadOnlyDictionary<ReferenceInfo, string>>;
+
+    [ContractQuery(ContractAccess.Reference, ResultExemption = "多余的例外")]
+    public sealed record ReferenceUselessExemptionQuery : IQuery<ReferenceInfo>;
+
+    [ContractQuery(ContractAccess.Reference, ResultExemption = " ")]
+    public sealed record ReferenceBlankExemptionQuery : IQuery<string>;
+
+    [ContractQuery(ContractAccess.CallerScoped, ResultExemption = "不是引用解析")]
+    public sealed record CallerScopedExemptionQuery : IQuery<string>;
+
+    public sealed class ReferenceOfDictionaryQueryHandler : IQueryHandler<ReferenceOfDictionaryQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
+    {
+        public ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(ReferenceOfDictionaryQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceOfArrayQueryHandler : IQueryHandler<ReferenceOfArrayQuery, ReferenceInfo[]>
+    {
+        public ValueTask<Result<ReferenceInfo[]>> Handle(ReferenceOfArrayQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceOfListQueryHandler : IQueryHandler<ReferenceOfListQuery, IReadOnlyList<ReferenceInfo>>
+    {
+        public ValueTask<Result<IReadOnlyList<ReferenceInfo>>> Handle(ReferenceOfListQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceExemptQueryHandler : IQueryHandler<ReferenceExemptQuery, string>
+    {
+        public ValueTask<Result<string>> Handle(ReferenceExemptQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class CallerScopedStringQueryHandler : IQueryHandler<CallerScopedStringQuery, string>
+    {
+        public ValueTask<Result<string>> Handle(CallerScopedStringQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceOfStringQueryHandler : IQueryHandler<ReferenceOfStringQuery, string>
+    {
+        public ValueTask<Result<string>> Handle(ReferenceOfStringQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceOfNamesQueryHandler : IQueryHandler<ReferenceOfNamesQuery, IReadOnlyDictionary<Guid, string>>
+    {
+        public ValueTask<Result<IReadOnlyDictionary<Guid, string>>> Handle(ReferenceOfNamesQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceOfWrongKeyQueryHandler : IQueryHandler<ReferenceOfWrongKeyQuery, IReadOnlyDictionary<ReferenceInfo, string>>
+    {
+        public ValueTask<Result<IReadOnlyDictionary<ReferenceInfo, string>>> Handle(ReferenceOfWrongKeyQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceUselessExemptionQueryHandler : IQueryHandler<ReferenceUselessExemptionQuery, ReferenceInfo>
+    {
+        public ValueTask<Result<ReferenceInfo>> Handle(ReferenceUselessExemptionQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class ReferenceBlankExemptionQueryHandler : IQueryHandler<ReferenceBlankExemptionQuery, string>
+    {
+        public ValueTask<Result<string>> Handle(ReferenceBlankExemptionQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    public sealed class CallerScopedExemptionQueryHandler : IQueryHandler<CallerScopedExemptionQuery, string>
+    {
+        public ValueTask<Result<string>> Handle(CallerScopedExemptionQuery query, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

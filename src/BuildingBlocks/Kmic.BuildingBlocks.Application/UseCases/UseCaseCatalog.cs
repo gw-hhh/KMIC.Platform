@@ -208,6 +208,11 @@ public sealed class UseCaseCatalog
             problems.Add($"{name}：[ContractQuery] 只能用于查询。");
         }
 
+        if (contractQuery is not null && kind == MessageKind.Query)
+        {
+            ReferenceResultRule.Check(type, name, contractQuery, problems);
+        }
+
         return new AccessDeclaration(requirement, permission?.Permission, allowSystem, allowWhenPasswordChangeRequired, contractQuery?.Access);
     }
 
