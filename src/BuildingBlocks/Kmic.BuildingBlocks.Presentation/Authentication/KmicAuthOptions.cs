@@ -25,6 +25,12 @@ public sealed class KmicAuthOptions
     public string Audience { get; init; } = "";
 
     /// <summary>
+    /// 访问令牌的有效期
+    /// </summary>
+    [Range(typeof(TimeSpan), "00:01:00", "01:00:00")]
+    public TimeSpan AccessTokenLifetime { get; init; } = TimeSpan.FromMinutes(15);
+
+    /// <summary>
     /// 允许的时钟偏差
     /// </summary>
     [Range(typeof(TimeSpan), "00:00:00", "00:05:00")]

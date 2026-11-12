@@ -39,6 +39,7 @@
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/Modules/Identity/">
+    <Project Path="tests/Modules/Identity/Kmic.Identity.Application.Tests/Kmic.Identity.Application.Tests.csproj" />
     <Project Path="tests/Modules/Identity/Kmic.Identity.Domain.Tests/Kmic.Identity.Domain.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/Notifications/">

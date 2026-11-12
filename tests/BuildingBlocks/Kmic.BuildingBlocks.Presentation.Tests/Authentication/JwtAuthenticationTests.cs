@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Presentation.Tests.Cases;
 using Kmic.BuildingBlocks.Presentation.Tests.Support;
 using Kmic.BuildingBlocks.Testing.Identity;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Shouldly;
 
@@ -135,6 +137,31 @@ public sealed class JwtAuthenticationTests : IAsyncLifetime
         var response = await GetAsync(Protected, _tokens.Create(_alice, "2026-11", issuer, audience));
 
         await response.ShouldBeProblemAsync(401, "Common.Unauthenticated");
+    }
+
+    [Fact]
+    public async Task TokenFromTheFrameworkIssuer_IsAcceptedByTheValidator_AndCarriesTheDocumentedClaims()
+    {
+        var issuer = _api.App.Services.GetRequiredService<IAccessTokenIssuer>();
+        var now = TimeProvider.System.GetUtcNow();
+
+        var token = issuer.Issue(_alice.UserId, _alice.SessionId, _alice.RoleId, "web", now);
+
+        token.ExpiresAt.ShouldBe(now.AddMinutes(15));
+        var parsed = new JsonWebToken(token.Value);
+        parsed.Kid.ShouldBe("2026-11");
+        parsed.Alg.ShouldBe(SecurityAlgorithms.RsaSha256);
+        parsed.GetClaim("sub").Value.ShouldBe(_alice.UserId.Value.ToString());
+        parsed.GetClaim("sid").Value.ShouldBe(_alice.SessionId.Value.ToString());
+        parsed.GetClaim("rid").Value.ShouldBe(_alice.RoleId.Value.ToString());
+        parsed.GetClaim("cty").Value.ShouldBe("web");
+        parsed.GetClaim("jti").Value.ShouldNotBeNullOrWhiteSpace();
+        parsed.Issuer.ShouldBe(TokenFactory.Issuer);
+        parsed.Audiences.ShouldHaveSingleItem().ShouldBe(TokenFactory.Audience);
+
+        var response = await GetAsync(Protected, token.Value);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]

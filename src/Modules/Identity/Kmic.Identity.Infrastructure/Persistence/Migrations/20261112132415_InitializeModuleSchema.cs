@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 using Microsoft.EntityFrameworkCore.Migrations;

@@ -707,13 +707,50 @@
           "xunit.v3.extensibility.core": "[4.0.2, )"
         }
       },
+      "kmic.identity.application": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Identity.Contracts": "[1.0.0, )",
+          "Kmic.Identity.Domain": "[1.0.0, )",
+          "Kmic.Notifications.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.identity.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.identity.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.identity.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Identity.Application": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
       "kmic.migrationrunner": {
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Identity.Infrastructure": "[1.0.0, )",
           "Kmic.Sample.Infrastructure": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.14, )",
           "System.CommandLine": "[2.0.15, )"
+        }
+      },
+      "kmic.notifications.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
         }
       },
       "kmic.operator": {

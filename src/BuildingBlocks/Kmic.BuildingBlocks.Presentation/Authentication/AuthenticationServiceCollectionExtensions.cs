@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.Access;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
@@ -25,6 +26,7 @@ public static class AuthenticationServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
         services.AddSingleton<SigningKeyStore>();
+        services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
 
         // 密钥有问题时在启动阶段就失败，而不是第一个请求才发现
         services.AddTransient<IStartupFilter, SigningKeyValidationFilter>();
