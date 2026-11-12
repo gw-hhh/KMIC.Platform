@@ -11,6 +11,9 @@
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Kmic.Notifications.Contracts/Kmic.Notifications.Contracts.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Sample/">
     <Project Path="src/Modules/Sample/Kmic.Sample.Application/Kmic.Sample.Application.csproj" />
     <Project Path="src/Modules/Sample/Kmic.Sample.Contracts/Kmic.Sample.Contracts.csproj" />
@@ -28,6 +31,9 @@
     <Project Path="src/Aspire/Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/tests/Modules/Notifications/">
+    <Project Path="tests/Modules/Notifications/Kmic.Notifications.Contracts.Tests/Kmic.Notifications.Contracts.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/Sample/">
     <Project Path="tests/Modules/Sample/Kmic.Sample.Domain.Tests/Kmic.Sample.Domain.Tests.csproj" />
   </Folder>

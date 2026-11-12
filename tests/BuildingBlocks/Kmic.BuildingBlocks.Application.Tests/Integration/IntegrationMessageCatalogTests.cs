@@ -39,6 +39,37 @@ public sealed class IntegrationMessageCatalogTests
     }
 
     [Fact]
+    public void Build_WrongSecretDeclarations_ListsEveryProblem()
+    {
+        var thrown = Should.Throw<DeclarationException>(() => IntegrationMessageCatalog.Build(
+            [typeof(SecretEvent), typeof(SecretWithoutLifetime), typeof(SecretTooLong), typeof(LifetimeWithoutSecret)]));
+
+        thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.SecretEvent", StringComparison.Ordinal) && p.Contains("CarriesSecret", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.SecretWithoutLifetime", StringComparison.Ordinal) && p.Contains("SecretLifetimeSeconds", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.SecretTooLong", StringComparison.Ordinal) && p.Contains("600", StringComparison.Ordinal));
+        thrown.Problems.ShouldContain(p => p.Contains("BuildingBlocks.LifetimeWithoutSecret", StringComparison.Ordinal) && p.Contains("没有声明 CarriesSecret", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Build_ValidSecretDeclaration_OnlyComplainsAboutModule()
+    {
+        // 测试程序集不属于任何平台模块，所以请求型消息总会因为模块被拒；这里只确认含密声明本身没有被挑出毛病
+        var thrown = Should.Throw<DeclarationException>(() => IntegrationMessageCatalog.Build([typeof(SendCodeLike)]));
+
+        thrown.Problems.ShouldNotContain(p => p.Contains("CarriesSecret", StringComparison.Ordinal) || p.Contains("SecretLifetimeSeconds", StringComparison.Ordinal));
+        thrown.Problems.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public void CarriesSecret_FollowsLifetime()
+    {
+        var plain = new IntegrationMessageType("Files.AttachLike", 1, IsRequest: true, typeof(AttachLike), "Files", null);
+
+        plain.CarriesSecret.ShouldBeFalse();
+        (plain with { SecretLifetimeSeconds = 300 }).CarriesSecret.ShouldBeTrue();
+    }
+
+    [Fact]
     public void Describe_NotDeclared_Throws() =>
         Should.Throw<InvalidOperationException>(() => IntegrationMessageCatalog.Empty.Describe(typeof(ThingChanged)));
 

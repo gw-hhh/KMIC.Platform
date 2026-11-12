@@ -305,8 +305,9 @@ stateDiagram-v2
 
 | 接口 / 类型 | 声明 | 用途 |
 |---|---|---|
-| 请求型消息 `SendNotification`、`Recipient`、`NotificationPriority`、`RecipientRole` | 请求型（05-07 D6），声明 `CarriesSecret`（含密消息类型，05-07 第 5.3 节例外）；`SubjectIds` 为空 | 业务模块与 Identity 发送通知；发送方用 `SendNotification.For(模型, 收件人, 去重键)` 构造，`Model` 由框架序列化，保证与模板声明一致 |
-| `[NotificationTemplate]`、`ISmsTemplateModel`、`INotificationModel` | 在 `BuildingBlocks.Application`（框架，**待补**，见 11.1） | 声明模板 |
+| 请求型消息 `SendNotification`、`Recipient`、`NotificationPriority`、`RecipientRole` | 请求型（05-07 D6）；没有 `SubjectIds` | 业务模块与 Identity 发送通知；发送方用 `SendNotification.For(模型, 收件人, 去重键)` 构造，`Model` 是 `JsonElement`，由 `NotificationModelJson` 序列化，保证与模板声明一致 |
+| 请求型消息 `SendSecretNotification` | 请求型，`CarriesSecret = true`、`SecretLifetimeSeconds = 300`（05-07 第 5.3 节例外） | 含密模板（验证码）专用：和 `SendNotification` 字段相近但没有附件与优先级；含密模板只能用它，普通模板只能用 `SendNotification`，Notifications 处理时两边互查，不符的进死信 |
+| `[NotificationTemplate]`、`INotificationModel<TSelf>`、`ISmsTemplateModel`、`NotificationChannels`、`NotificationModelJson` | 在 `BuildingBlocks.Contracts`（`Kmic.BuildingBlocks.Contracts.Notifications`，已实现）：Notifications.Contracts 只能引用这个框架项目，而 `For` 要读模板声明 | 声明模板；发送方与 Notifications 用同一份 JSON 选项（属性名保持原样、不认识的属性是错误） |
 
 没有对外的查询接口：业务模块不读取通知的状态。
 
@@ -349,7 +350,7 @@ stateDiagram-v2
 | `Notifications:MaxAttachmentMb` | 20 |
 | `Notifications:Template:RenderTimeoutMs` / `MaxOutputKb` | 1000 / 1024 |
 | `Notifications:Retention:DeliveryDays` / `SiteMessageReadDays` / `SiteMessageUnreadDays` / `CapturedDays` | 180 / 90 / 365 / 30（`待确认`，与审计保留期一起定） |
-| `Notifications:SecretBody:ValiditySeconds` | 含密模板的投递，超过此时间仍未发送的不再发送（默认 600，不超过验证码有效期） |
+| 含密消息的有效期 | 不另设配置：用消息类型上声明的 `SecretLifetimeSeconds`（`SendSecretNotification` 为 300 秒，不超过 600）；投递超过这个时间仍未发送的不再发送 |
 
 ### 8.2 短信渠道与模板参数
 
@@ -429,9 +430,9 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 | 事项 | 说明 | 出处 |
 |---|---|---|
 | `LeasedQueueWorker` 模板 | 同 Files 设计 11.1，只做一次 | 05-08 第 4.1 节 |
-| `[NotificationTemplate]` 与目录 | 键以模块名开头；渠道标志枚举；`SenderProfile`；`CarriesSecret`；模型的 `Example`、`DefaultSubject`、`DefaultBody` 静态成员（静态抽象接口 `INotificationModel` 保证，写法同 `ISystemSetting<T>`）；启动校验：模板键唯一、默认内容能用示例数据渲染、短信模板有 `ISmsTemplateModel` | 05-11 第 7.4 节 |
-| `SendNotification` 的契约 | `IIntegrationRequest` 已有；`SendNotification.For(模型, 收件人, 去重键)` 与 `CarriesSecret` 声明 | 05-11 第 7.2 节、05-07 第 5.3 节 |
-| 含密消息类型 | `[IntegrationMessage(CarriesSecret = true)]`：契约快照、日志不输出载荷、启动校验要求声明有效期 | Identity 设计 D-F |
+| `[NotificationTemplate]` 与目录 | **声明类型已实现**（`BuildingBlocks.Contracts.Notifications`）；**目录与启动校验待补**：`NotificationTemplateCatalog` 从各模块 Application 程序集读取，校验模板键以模块名开头且唯一、默认内容能用示例数据渲染、短信渠道的模型实现 `ISmsTemplateModel`、含密模板不带附件 | 05-11 第 7.4 节 |
+| `SendNotification` 的契约 | **已实现**（`Kmic.Notifications.Contracts`，含 `For`） | 05-11 第 7.2 节 |
+| 含密消息类型 | **已实现**：`[IntegrationMessage(CarriesSecret = true, SecretLifetimeSeconds = …)]`，目录校验只有请求型可声明、有效期 1～600 秒；契约快照照常；日志不输出载荷的约束由各处写日志的代码遵守（Operations 的死信查看同样不显示含密消息的载荷） | Identity 设计 D-F |
 | 渲染原型 | Fluid 的访问限制、限时与输出上限，在开工时做一个小验证并记录 | 05-11 待确认 |
 | 阿里云短信 SDK | 版本与许可在 `docs/implementation/S0-04-版本与许可.md` 核对后锁定；开通与费用见实施待办 T-08 | 05-11 第 8.3 节 |
 
@@ -484,7 +485,7 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 | 站内消息保留：已读 90 天、未读 365 天 | 是，配置项，`待确认` |
 | 投递与通知记录保留 180 天 | 是，配置项，`待确认`（与审计保留期一起定） |
 | 捕获内容保留 30 天 | 是，配置项 |
-| 含密模板：投递成功后立即清空正文；超过 10 分钟仍未发送的不再发送 | 是（Identity 设计 D-F） |
+| 含密模板：投递成功后立即清空正文；超过消息声明的有效期（300 秒）仍未发送的不再发送 | 是（Identity 设计 D-F） |
 | 失败的投递可人工重试一次到多次，放弃要写原因 | 是 |
 | 邮件附件总量上限 20 MB | 是（05-11 已定） |
 | 管理页的发送记录不显示正文，进入详情才显示并写读审计 | 是 |

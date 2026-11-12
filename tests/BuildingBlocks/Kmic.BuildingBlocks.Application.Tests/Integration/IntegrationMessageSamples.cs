@@ -36,6 +36,21 @@ internal static class IntegrationMessageSamples
     [MessageSubjects(nameof(Ids))]
     public sealed record EventWithSubjects(IReadOnlyList<Guid> Ids) : IIntegrationEvent;
 
+    [IntegrationMessage("Identity.SendCode", CarriesSecret = true, SecretLifetimeSeconds = 300)]
+    public sealed record SendCodeLike(Guid UserId, string Code) : IIntegrationRequest;
+
+    [IntegrationMessage("BuildingBlocks.SecretEvent", CarriesSecret = true, SecretLifetimeSeconds = 300)]
+    public sealed record SecretEvent(Guid Id) : IIntegrationEvent;
+
+    [IntegrationMessage("BuildingBlocks.SecretWithoutLifetime", CarriesSecret = true)]
+    public sealed record SecretWithoutLifetime(Guid Id) : IIntegrationRequest;
+
+    [IntegrationMessage("BuildingBlocks.SecretTooLong", CarriesSecret = true, SecretLifetimeSeconds = 601)]
+    public sealed record SecretTooLong(Guid Id) : IIntegrationRequest;
+
+    [IntegrationMessage("BuildingBlocks.LifetimeWithoutSecret", SecretLifetimeSeconds = 60)]
+    public sealed record LifetimeWithoutSecret(Guid Id) : IIntegrationRequest;
+
     public sealed record AttachLike(Guid Owner, IReadOnlyList<Guid> FileIds);
 
     public interface IThingSnapshotSource : ISnapshotSource<ThingChanged>;

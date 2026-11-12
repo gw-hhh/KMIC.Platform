@@ -12,6 +12,7 @@ namespace Kmic.BuildingBlocks.Application.Integration;
 /// <param name="Module">定义它的模块</param>
 /// <param name="Subjects">存涉及对象 ID 的属性，没有标 [MessageSubjects] 时为空</param>
 /// <param name="OrderingKey">作为顺序键的属性，没有标 [OrderingKey] 时为空</param>
+/// <param name="SecretLifetimeSeconds">含密消息里凭据的有效期；不含密为空</param>
 internal sealed record IntegrationMessageType(
     string Name,
     int Version,
@@ -19,8 +20,14 @@ internal sealed record IntegrationMessageType(
     Type ClrType,
     string Module,
     PropertyInfo? Subjects,
-    PropertyInfo? OrderingKey = null)
+    PropertyInfo? OrderingKey = null,
+    int? SecretLifetimeSeconds = null)
 {
+    /// <summary>
+    /// 载荷里带有一次性短时凭据，日志与管理视图不能输出载荷
+    /// </summary>
+    public bool CarriesSecret => SecretLifetimeSeconds is not null;
+
     /// <summary>
     /// 消息涉及的对象 ID
     /// </summary>

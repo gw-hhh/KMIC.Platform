@@ -105,7 +105,41 @@ public sealed class IntegrationMessageCatalog
         }
 
         return new IntegrationMessageType(
-            name, attribute.Version, isRequest, type, module, ReadSubjects(type, name, isRequest, problems), ReadOrderingKey(type, name, isRequest, problems));
+            name,
+            attribute.Version,
+            isRequest,
+            type,
+            module,
+            ReadSubjects(type, name, isRequest, problems),
+            ReadOrderingKey(type, name, isRequest, problems),
+            ReadSecretLifetime(attribute, name, isRequest, problems));
+    }
+
+    private static int? ReadSecretLifetime(IntegrationMessageAttribute attribute, string name, bool isRequest, List<string> problems)
+    {
+        if (!attribute.CarriesSecret)
+        {
+            if (attribute.SecretLifetimeSeconds != 0)
+            {
+                problems.Add($"{name} 写了凭据有效期，但没有声明 CarriesSecret。");
+            }
+
+            return null;
+        }
+
+        if (!isRequest)
+        {
+            problems.Add($"{name} 是事件，不能声明 CarriesSecret，只有请求型消息可以。");
+            return null;
+        }
+
+        if (attribute.SecretLifetimeSeconds is < 1 or > IntegrationMessageAttribute.MaxSecretLifetimeSeconds)
+        {
+            problems.Add($"{name} 声明了 CarriesSecret，凭据有效期 SecretLifetimeSeconds 要写在 1 到 {IntegrationMessageAttribute.MaxSecretLifetimeSeconds} 秒之间。");
+            return null;
+        }
+
+        return attribute.SecretLifetimeSeconds;
     }
 
     private static PropertyInfo? ReadSubjects(Type type, string name, bool isRequest, List<string> problems)
