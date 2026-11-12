@@ -35,6 +35,11 @@ internal static class FrameworkTables
         "Status" IN (0, 1)
         """;
 
+    // 还没处理完的和死信：积压统计按订阅分组，只看这些行
+    private const string Outstanding = """
+        "Status" IN (0, 1, 3)
+        """;
+
     private const string OrderedUnfinished = """
         "Status" IN (0, 1, 3) AND "OrderingKey" IS NOT NULL
         """;
@@ -94,6 +99,7 @@ internal static class FrameworkTables
             message.HasIndex(m => m.NextAttemptAt).HasFilter(Claimable);
             message.HasIndex(m => new { m.Subscription, m.OrderingKey, m.Seq }).HasFilter(OrderedUnfinished);
             message.HasIndex(m => m.ReceivedAt).HasFilter(Done);
+            message.HasIndex(m => m.Subscription).HasFilter(Outstanding);
             message.HasIndex(m => m.SubjectIds).HasMethod("gin").HasFilter(UnfinishedWithSubjects);
         });
 

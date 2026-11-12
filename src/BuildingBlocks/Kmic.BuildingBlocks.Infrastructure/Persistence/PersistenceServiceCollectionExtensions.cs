@@ -11,6 +11,7 @@ using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Numbering;
+using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -41,6 +42,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<SaveChangesGate>();
         services.TryAddScoped<ModuleDbContextServices>();
         services.AddKmicCache();
+        services.AddKmicSlowQueryLog();
         services.TryAddScoped<ModuleWriteContexts>();
         services.TryAddScoped<CommandTransaction>();
         services.TryAddScoped<OutboxWriter>();
@@ -84,10 +86,13 @@ public static class PersistenceServiceCollectionExtensions
         // 不用 DbContext 池：过滤器要读当前用户和他的数据权限，池里的实例没重置干净，就会拿上一个请求的权限去查。
         // 第一次用到上下文时，按入口的来源选连接池
         services.AddDbContext<TContext>((provider, options) =>
-            AddFrameworkExtensions(options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider)))));
+            AddFrameworkExtensions(
+                provider, options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider)))));
         services.AddDbContext<TQueryContext>((provider, options) =>
         {
-            AddFrameworkExtensions(options.UseNpgsql(
+            AddFrameworkExtensions(
+                provider,
+                options.UseNpgsql(
                 provider.GetRequiredService<DataSources>().Reads(EntryOrigin(provider)),
                 npgsql => npgsql.ExecutionStrategy(dependencies => new QueryRetryStrategy(dependencies))));
             if (provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.CheckQueryVisibility)
@@ -101,8 +106,11 @@ public static class PersistenceServiceCollectionExtensions
         return services;
     }
 
-    internal static void AddFrameworkExtensions(DbContextOptionsBuilder options) =>
+    internal static void AddFrameworkExtensions(IServiceProvider provider, DbContextOptionsBuilder options)
+    {
         ((IDbContextOptionsBuilderInfrastructure)options).AddOrUpdateExtension(new KmicFunctionsExtension());
+        options.AddInterceptors(provider.GetRequiredService<SlowQueryInterceptor>());
+    }
 
     private static CallOrigin EntryOrigin(IServiceProvider provider) => provider.GetRequiredService<ExecutionScope>().EntryOrigin;
 }

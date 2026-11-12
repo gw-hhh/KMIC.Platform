@@ -63,6 +63,7 @@ public static class KmicHostExtensions
             services.AddKmicScheduling(module.Name, module.ConfigureScheduling);
         }
 
+        services.AddKmicFrameworkOptions();
         services.AddKmicBackgroundProcessing(roles);
         if (roles.HasFlag(HostRoles.Api))
         {
@@ -77,8 +78,7 @@ public static class KmicHostExtensions
             services.AddTransient<IStartupFilter, AccessContextLoaderFilter>();
         }
 
-        services.AddSingleton<ReadinessHealthCheck>();
-        services.AddHealthChecks().AddCheck<ReadinessHealthCheck>("ready", tags: [ReadyTag]);
+        AddHealthChecks(services, roles);
         return builder;
     }
 
@@ -113,6 +113,22 @@ public static class KmicHostExtensions
         // 存活只看进程能不能响应；就绪见 ReadinessHealthCheck。都匿名、只返回 Healthy / Unhealthy
         app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
         app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = registration => registration.Tags.Contains(ReadyTag) });
+        DependencyEndpoint.Map(app);
         return app;
+    }
+
+    // 就绪只放“没有它整个服务就无法工作”的条件；依赖检查列出全部依赖，模块要加自己的依赖就用 DependencyHealth.Tag 登记
+    private static void AddHealthChecks(IServiceCollection services, HostRoles roles)
+    {
+        services.AddSingleton<DatabaseProbe>();
+        var checks = services.AddHealthChecks()
+            .AddCheck<ReadinessHealthCheck>("ready", tags: [ReadyTag])
+            .AddCheck<DatabaseDependencyCheck>("database", tags: [DependencyHealth.Tag], timeout: DatabaseProbe.Timeout)
+            .AddCheck<ListenerDependencyCheck>("message-listener", tags: [DependencyHealth.Tag], timeout: DatabaseProbe.Timeout)
+            .AddCheck<FileStorageDependencyCheck>("file-storage", tags: [DependencyHealth.Tag], timeout: DatabaseProbe.Timeout);
+        if (roles.HasFlag(HostRoles.Worker))
+        {
+            checks.AddCheck<SchedulerDependencyCheck>("scheduler", tags: [DependencyHealth.Tag], timeout: DatabaseProbe.Timeout);
+        }
     }
 }

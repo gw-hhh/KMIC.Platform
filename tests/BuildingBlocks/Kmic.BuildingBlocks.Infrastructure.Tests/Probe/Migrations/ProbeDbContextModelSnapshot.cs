@@ -219,6 +219,9 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SubjectIds"), "gin");
 
+                    b.HasIndex("Subscription")
+                        .HasFilter("\"Status\" IN (0, 1, 3)");
+
                     b.HasIndex("MessageId", "Subscription")
                         .IsUnique();
 
@@ -536,7 +539,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
                         .HasComment("联系邮箱")
-                        .HasAnnotation("Kmic:AuditMode", "Masked:Email");
+                        .HasAnnotation("Kmic:AuditMode", "Masked:Personal");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")

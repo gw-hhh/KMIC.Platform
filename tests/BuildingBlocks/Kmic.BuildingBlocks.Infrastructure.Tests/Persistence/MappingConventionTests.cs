@@ -106,6 +106,21 @@ public sealed class MappingConventionTests(ClassDatabase<ProbeTemplate> database
         UniqueConstraintErrors.Find(postgres.SchemaName, postgres.ConstraintName).ShouldBeSameAs(TicketErrors.NumberDuplicated);
     }
 
+    [Fact]
+    public async Task UniqueViolation_ExceptionTextCarriesNoRowData()
+    {
+        var number = $"secret-{TicketNumbers.Next()}";
+        await _harness.AddAsync(_alice, Ticket.Create(number, _alice.UserId, _org["总部"]));
+
+        var error = await Should.ThrowAsync<DbUpdateException>(() =>
+            _harness.AddAsync(_alice, Ticket.Create(number, _alice.UserId, _org["总部"])));
+
+        // 记日志时写进去的就是异常的完整文本；Npgsql 默认把错误详情替换成一句说明，里面不会有重复的那个值
+        var postgres = error.InnerException.ShouldBeOfType<PostgresException>();
+        postgres.Detail.ShouldNotBeNull().ShouldNotContain(number);
+        error.ToString().ShouldNotContain(number);
+    }
+
     public ValueTask DisposeAsync() => _harness.DisposeAsync();
 
     private static Ticket NewTicket() => Ticket.Create(TicketNumbers.Next(), _alice.UserId, _org["总部"]);

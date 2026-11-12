@@ -33,6 +33,9 @@ public sealed class FrameworkMetrics
     private readonly Counter<long> _rebuildPaused;
     private readonly Counter<long> _terminalConflicts;
     private readonly Counter<long> _readAuditFailures;
+    private readonly Counter<long> _slowQueries;
+    private readonly Meter _meter;
+    private Func<BacklogSnapshot?>? _backlog;
 
     /// <summary>
     /// 创建全部指标
@@ -41,7 +44,7 @@ public sealed class FrameworkMetrics
     {
         ArgumentNullException.ThrowIfNull(factory);
 
-        var meter = factory.Create(MeterName);
+        var meter = _meter = factory.Create(MeterName);
         _requests = meter.CreateCounter<long>("kmic.mediator.requests", "{request}", "命令和查询的执行次数");
         _requestDuration = meter.CreateHistogram<double>("kmic.mediator.request.duration", "s", "命令和查询的执行时长");
         _authzDenied = meter.CreateCounter<long>("kmic.authz.denied", "{denial}", "授权拒绝的次数");
@@ -58,6 +61,7 @@ public sealed class FrameworkMetrics
         _rebuildPaused = meter.CreateCounter<long>("kmic.readmodel.rebuild_paused", "{run}", "因为找不到的行太多而暂停的重建轮次");
         _terminalConflicts = meter.CreateCounter<long>("kmic.readmodel.terminal_conflicts", "{row}", "已是终态、源端却还返回存在的行数");
         _readAuditFailures = meter.CreateCounter<long>("kmic.audit.read_write_failures", "{failure}", "读审计写不进去的次数");
+        _slowQueries = meter.CreateCounter<long>("kmic.db.slow_queries", "{query}", "超过慢查询阈值的 SQL 次数");
     }
 
     /// <summary>
@@ -146,4 +150,58 @@ public sealed class FrameworkMetrics
     /// 读审计没有写进去
     /// </summary>
     public void ReadAuditFailed() => _readAuditFailures.Add(1);
+
+    /// <summary>
+    /// 一条 SQL 超过了慢查询阈值，module 是发起查询的数据库上下文所在的模块
+    /// </summary>
+    public void SlowQuery(string module) => _slowQueries.Add(1, new TagList { { "module", module } });
+
+    /// <summary>
+    /// 登记积压量表的数据来源，只能登记一次
+    /// </summary>
+    /// <remarks>
+    /// 量表的回调在指标读取线程上执行，不能查库，所以由后台采样器把结果放在内存里，这里只读。
+    /// 返回 null 表示还没有可信的数据（刚启动，或采样连续失败后数据已经过期），这时不输出任何数值，
+    /// 比输出过期的数字更不容易误导告警
+    /// </remarks>
+    /// <param name="read">取最新一次采样</param>
+    public void ObserveBacklog(Func<BacklogSnapshot?> read)
+    {
+        ArgumentNullException.ThrowIfNull(read);
+        if (Interlocked.CompareExchange(ref _backlog, read, null) is not null)
+        {
+            throw new InvalidOperationException("积压量表已经登记过了。");
+        }
+
+        Gauge("kmic.outbox.pending", "{message}", "待投递的消息条数", s => s.Outbox.Select(o => Measure(o.Pending, ("module", o.Module))));
+        Gauge("kmic.outbox.oldest_age", "s", "最老的待投递消息产生至今的时间", s => s.Outbox.Select(o => Measure(o.OldestAge.TotalSeconds, ("module", o.Module))));
+        Gauge("kmic.inbox.pending", "{message}", "待处理的消息条数，不含待终结订阅", s => Active(s).Select(i => Measure(i.Pending, Subscription(i))));
+        Gauge("kmic.inbox.oldest_age", "s", "最老的待处理消息收到至今的时间，不含待终结订阅", s => Active(s).Select(i => Measure(i.OldestAge.TotalSeconds, Subscription(i))));
+        Gauge("kmic.inbox.dead", "{message}", "死信条数", s => s.Inbox.Select(i => Measure(i.Dead, Subscription(i))));
+        Gauge("kmic.inbox.blocked_keys", "{key}", "有序订阅里被死信挡住的顺序键个数", s => s.Inbox.Select(i => Measure(i.BlockedKeys, Subscription(i))));
+        Gauge("kmic.inbox.retiring_pending", "{message}", "待终结订阅的积压", s => s.Inbox.Where(i => i.Retiring).Select(i => Measure(i.Pending, Subscription(i))));
+        Gauge("kmic.background_job.queued", "{job}", "排队中的后台作业数", s => s.Jobs.Select(j => Measure(j.Queued, ("module", j.Module), ("type", j.Type))));
+        Gauge("kmic.background_job.oldest_queued", "s", "最老的排队作业已等待的时间", s => s.Jobs.Select(j => Measure(j.OldestQueued.TotalSeconds, ("module", j.Module), ("type", j.Type))));
+        Gauge("kmic.scheduled_job.last_success_age", "s", "定时任务距上次成功的时间", s => s.ScheduledJobs.Select(t => Measure(t.LastSuccessAge.TotalSeconds, ("task", t.Task))));
+    }
+
+    private static IEnumerable<InboxBacklog> Active(BacklogSnapshot snapshot) => snapshot.Inbox.Where(i => !i.Retiring);
+
+    private static (string Key, string Value)[] Subscription(InboxBacklog inbox) => [("module", inbox.Module), ("subscription", inbox.Subscription)];
+
+    private static Measurement<T> Measure<T>(T value, params (string Key, string Value)[] tags)
+        where T : struct
+    {
+        var list = new TagList();
+        foreach (var (key, tagValue) in tags)
+        {
+            list.Add(key, tagValue);
+        }
+
+        return new Measurement<T>(value, list);
+    }
+
+    private void Gauge<T>(string name, string unit, string description, Func<BacklogSnapshot, IEnumerable<Measurement<T>>> select)
+        where T : struct =>
+        _meter.CreateObservableGauge(name, () => _backlog?.Invoke() is { } snapshot ? select(snapshot).ToList() : [], unit, description);
 }

@@ -33,6 +33,11 @@ internal sealed class MessagingListener(
 
     public bool IsRunning => _thread?.IsAlive == true;
 
+    /// <summary>
+    /// 监听连接现在是否连着。断开后到重连成功之间为 false
+    /// </summary>
+    public bool IsConnected => Volatile.Read(ref _connection) is not null;
+
     public void Start()
     {
         if (_thread is not null)

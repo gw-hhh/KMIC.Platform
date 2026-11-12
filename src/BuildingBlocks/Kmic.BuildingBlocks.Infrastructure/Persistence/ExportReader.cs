@@ -31,7 +31,7 @@ internal sealed class ExportReader<TQueryDb, TQueryContext>(
         }
 
         var builder = new DbContextOptionsBuilder<TQueryContext>();
-        PersistenceServiceCollectionExtensions.AddFrameworkExtensions(builder.UseNpgsql(dataSources.Stream));
+        PersistenceServiceCollectionExtensions.AddFrameworkExtensions(services, builder.UseNpgsql(dataSources.Stream));
         await using var context = ActivatorUtilities.CreateInstance<TQueryContext>(services, builder.Options);
 
         // 多取一行，读到它就说明超了上限

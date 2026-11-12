@@ -39,6 +39,16 @@ public sealed class MetricRecorder : IDisposable
     public IReadOnlyCollection<RecordedMeasurement> All => _measurements;
 
     /// <summary>
+    /// 读取一遍所有量表（ObservableGauge 这类只在被读取时才产生数值），结果加入记录
+    /// </summary>
+    public void Collect() => _listener.RecordObservableInstruments();
+
+    /// <summary>
+    /// 清空已有的记录，从头观察下一段操作
+    /// </summary>
+    public void Clear() => _measurements.Clear();
+
+    /// <summary>
     /// 某个指标的记录
     /// </summary>
     public IReadOnlyList<RecordedMeasurement> Of(string instrument) =>

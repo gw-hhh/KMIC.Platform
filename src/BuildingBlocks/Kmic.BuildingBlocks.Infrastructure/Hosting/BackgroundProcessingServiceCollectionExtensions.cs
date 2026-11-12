@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
+using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
@@ -55,6 +56,7 @@ public static class BackgroundProcessingServiceCollectionExtensions
 
         services.AddKmicStartupTasks();
         services.AddKmicSecurityEvents();
+        services.AddKmicBacklogSampling();
         services.AddKmicScheduler();
         if (roles.HasFlag(HostRoles.Worker))
         {

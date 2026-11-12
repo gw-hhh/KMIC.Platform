@@ -6,6 +6,11 @@ namespace Kmic.BuildingBlocks.Application.Behaviors;
 public sealed class PipelineOptions
 {
     /// <summary>
+    /// 配置节名称
+    /// </summary>
+    public const string Section = "Kmic:Pipeline";
+
+    /// <summary>
     /// 慢请求阈值
     /// </summary>
     public TimeSpan SlowMessageThreshold { get; set; } = TimeSpan.FromSeconds(1);

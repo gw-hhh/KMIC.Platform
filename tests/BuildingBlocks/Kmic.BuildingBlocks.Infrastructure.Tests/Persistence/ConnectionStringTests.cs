@@ -30,6 +30,20 @@ public sealed class ConnectionStringTests
     [InlineData("  ")]
     public void Empty_ReturnedAsIs(string value) => KmicConnectionString.Normalize(value).ShouldBe(value);
 
+    [Theory]
+    [InlineData("Host=db;Include Error Detail=true")]
+    [InlineData("Host=db;IncludeErrorDetail=True;Username=u")]
+    public void IncludeErrorDetail_Refused(string value) =>
+        Should.Throw<InvalidOperationException>(() => KmicConnectionString.Normalize(value)).Message.ShouldContain("Include Error Detail");
+
+    [Fact]
+    public void IncludeErrorDetailOff_Accepted() =>
+        new NpgsqlConnectionStringBuilder(KmicConnectionString.Normalize("Host=db;Include Error Detail=false")).IncludeErrorDetail.ShouldBeFalse();
+
+    [Fact]
+    public void Options_RefuseTheSettingWhenBound() =>
+        Should.Throw<InvalidOperationException>(() => new DatabaseOptions { ConnectionString = "Host=db;Include Error Detail=true" });
+
     [Fact]
     public void Options_NormalizeWhateverIsBound()
     {

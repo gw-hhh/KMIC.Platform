@@ -14,6 +14,7 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
     <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
   </ItemGroup>
   <ItemGroup>

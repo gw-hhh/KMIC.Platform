@@ -218,6 +218,9 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SubjectIds"), "gin");
 
+                    b.HasIndex("Subscription")
+                        .HasFilter("\"Status\" IN (0, 1, 3)");
+
                     b.HasIndex("MessageId", "Subscription")
                         .IsUnique();
 
