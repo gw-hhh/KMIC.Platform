@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KMIC",
+  "classifications": ["KMIC", "Module"],
+  "identity": "Kmic.Templates.Module",
+  "name": "KMIC 业务模块",
+  "shortName": "kmic-module",
+  "sourceName": "Customer",
+  "preferNameDirectory": false,
+  "tags": { "language": "C#", "type": "project" }
+}

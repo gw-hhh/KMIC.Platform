@@ -52,3 +52,4 @@ qrtz
 AWSSDK
 presign
 readmodel
+slnf
