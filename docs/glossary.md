@@ -45,6 +45,43 @@
 | 业务时区 | `BusinessTimeZone` | 框架 | 业务日期、显示时间所用的时区 | 05-13 |
 | 审计日志 | `AuditLog` | Operations | 谁在何时做了什么的记录 | 05-09 |
 | 业务历史 | `BusinessHistory` | 框架 | 单据状态流转的记录 | 05-09 |
+| 用户 | `User` | Identity | 能登录系统的人或系统账号 | Identity 设计 2 |
+| 账号 | `Account` | Identity | 登录名，唯一，不区分大小写；迁移用户沿用旧系统的手机号 | Identity 设计 2 |
+| 授予 | `UserRoleGrant` | Identity | 用户拥有某个角色，可带锚点 | Identity 设计 2 |
+| 锚点 | `GrantAnchor` | Identity | 授予上指定的组织单元，作为“本组织及下级”的计算起点 | 05-05 D5 |
+| 受保护角色 | `ProtectedRole`（`Role.IsProtected`） | Identity | 只能由受保护角色的持有人管理的角色，如系统管理员 | 05-05 D11 |
+| 权限点目录 | `PermissionCatalog` | Identity | 代码中声明、启动时同步到数据库的权限点集合 | 05-05 第 3.2 节 |
+| 刷新令牌 | `RefreshToken` | Identity | 换取新访问令牌的不透明令牌，只存哈希 | 05-04 |
+| 验证码 | `VerificationCode` | Identity | 短信验证码，只存哈希，一次性、次数有限 | 05-04 第 7.3 节 |
+| 登录限制 | `LoginThrottle` | Identity | 按登录名累计的失败次数与等待、锁定状态；不是用户状态 | 05-04 D4 |
+| 安全事件 | `SecurityEvent` | Identity | 登录、授权拒绝、授权配置变更等记录，独立通道写入 | 05-09 第 6 节 |
+| 模拟会话 | `ImpersonationSession` | Identity | 管理员以他人身份查看系统的会话 | 05-04 第 9 节 |
+| 系统账号 | `SystemUser` | Identity | 代表“系统”的固定账号，不可登录 | 05-03 第 4 节 |
+| 审计记录 | `AuditEntry` | Operations | `AuditLog` 表中的一行：一次命令执行的汇总 | Operations 设计 2 |
+| 定时任务覆盖值 | `JobOverride` | Operations | 对代码里默认开关与 Cron 的修改，只存被改过的项 | Operations 设计 2 |
+| 订阅路由 | `MessageRoute` | Operations | 消息类型到订阅的登记，决定投递到哪些 Inbox | 05-07 第 6.3 节 |
+| 终结 / 重新激活 | `Finalize` / `Reactivate` | Operations | 订阅路由的运维操作 | 05-07 第 6.3 节 |
+| 补投 | `Redeliver` | Operations | 按消息类型与序号区间向指定订阅重新投递 | 05-07 第 9 节 |
+| 死信 | `DeadLetter` | 框架 | 重试用尽或不可重试的消息 | 05-07 |
+| 字典类型 | `DictionaryType` | Configuration | 一类候选值，由代码声明；类型是聚合根，字典项是子实体 | Configuration 设计 2 |
+| 层级字典 | `IsHierarchical` | Configuration | 字典项可以有父项的字典类型 | Configuration 设计 3.2 |
+| 设置值 / 设置变更 | `SystemSettingValue` / `SystemSettingChange` | Configuration | 被修改过的设置值（没有行表示用代码默认值）/ 一次修改的新旧值与原因，只追加 | Configuration 设计 3.3 |
+| 偏好层 / 偏好族 | `PreferenceLayer` / `PreferenceFamily` | Configuration | `System` / `Role` / `UserRole` 三层；键带后缀的偏好集合（`Ui.Shell`、`Ui.Table.*`） | 05-10 第 7 节 |
+| 文件 | `StoredFile` | Files | 一个已上传或生成的文件的元数据，内容在对象存储 | Files 设计 2 |
+| 引用 | `FileReference` | Files | 文件被某个业务对象关联的登记，只由 `AttachFiles` / `DetachFiles` 维护 | 05-11 第 3.3 节 |
+| 临时文件 | `Available`（未关联） | Files | 已上传、尚未被业务关联的文件，到期成为清理候选 | 05-11 第 4.2 节 |
+| 生成文件 | `GeneratedFile` | Files | 作业或系统生成的文件（导出结果、PDF），不经上传 | 05-11 第 4.4 节 |
+| 文件描述 | `FileDescriptor` | Files | 文件的元数据（不含内容），业务下载查询据它组装 | 05-11 第 5.1 节 |
+| 存储问题 | `StorageIssue` | Files | 对账发现的“库中有记录、存储中没有对象”，等待还原 | Files 设计 3.3 |
+| 彻底删除 | `Purge`（`Purged`） | Files | 误传敏感文件时应用层删除对象、元数据标为已删除；历史版本由运维另行清除 | 05-11 第 6 节 |
+| 通知 / 投递 | `Notification` / `Delivery` | Notifications | 一次发送请求的记录 / 通知在一个渠道上给一个收件人的一次发送 | Notifications 设计 2 |
+| 渠道 | `Channel` | Notifications | `Email` / `Sms` / `InApp` | 05-11 第 8 节 |
+| 通知模板 / 模板版本 | `NotificationTemplate` / `TemplateVersion` | Notifications | 代码声明的一种通知 / 管理员发布的修改后内容，只增不改 | 05-11 第 7.4 节 |
+| 含密模板 | `CarriesSecret` | Notifications | 内容含一次性短时凭据（验证码）的模板，投递后清空正文 | Identity 设计 D-F |
+| 发件账号 | `SenderProfile` | Notifications | 部署配置里的一组 SMTP 账号，模板按场景选择 | 05-11 第 7.4 节 |
+| 去重键 | `DedupKey` | Notifications | 业务给出的“同一件事只通知一次”的键 | 05-11 第 7.2 节 |
+| 站内消息 | `SiteMessage` | Notifications | 只有收件人本人可见的系统内消息，带已读状态 | 05-11 第 8.3 节 |
+| 捕获消息 | `CapturedMessage` | Notifications | 非生产环境本应发出的内容，供测试人员查看 | 05-11 第 8.4 节 |
 | 页面实例 | `PageInstance` | 前端框架 | 一个标签对应的页面及其未保存、保存中、结果未知等状态 | F03 第 6 节 |
 | 工作区 | `Workspace` | 前端框架 | 标签的唯一可写来源 | F03 第 5.2 节 |
 | 业务表格 | `KTable` | 前端框架 | 基于 VXE Table 的列表表格 | F07 |

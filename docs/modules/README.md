@@ -8,11 +8,11 @@
 
 | 模块 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 | 状态 |
 |---|---|---|---|---|---|---|---|
-| Identity | `Identity` | 10 | 平台 | — | @gw-hhh | [identity/README.md](identity/README.md) | 设计待审（2026-11-12 起草，待决 D-A～D-G）；评审通过前不编码 |
-| Operations | `Operations` | 11 | 平台 | Identity | @gw-hhh | [operations/README.md](operations/README.md) | 设计待审（2026-11-12 起草，待决 D-O1～D-O3）；评审通过前不编码 |
-| Configuration | `Configuration` | 12 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/configuration/` | 未开始 |
-| Files | `Files` | 13 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/files/` | 未开始 |
-| Notifications | `Notifications` | 14 | 平台 | 阶段 3 设计时确定 | @gw-hhh | `modules/notifications/` | 未开始 |
+| Identity | `Identity` | 10 | 平台 | — | @gw-hhh | [identity/README.md](identity/README.md) | 设计已确认（2026-11-12，D-A～D-G 按建议；业务数据类待确认项见设计 12.3）；未开始实现 |
+| Operations | `Operations` | 11 | 平台 | Identity | @gw-hhh | [operations/README.md](operations/README.md) | 设计已确认（2026-11-12，D-O1～D-O3 按建议）；未开始实现，开工前先补框架公开服务（设计第 13.1 节） |
+| Configuration | `Configuration` | 12 | 平台 | Identity | @gw-hhh | [configuration/README.md](configuration/README.md) | 设计已确认（2026-11-12，D-C1～D-C3 按建议）；未开始实现 |
+| Files | `Files` | 13 | 平台 | Identity | @gw-hhh | [files/README.md](files/README.md) | 设计已确认（2026-11-12，D-F1～D-F4 按建议）；未开始实现，开工前先补框架的上传与关联构件（设计 11.1） |
+| Notifications | `Notifications` | 14 | 平台 | Identity、Files | @gw-hhh | [notifications/README.md](notifications/README.md) | 设计已确认（2026-11-12，D-N1～D-N3 按建议）；未开始实现，开工前先补框架的租约队列与模板声明（设计 11.1） |
 | Sample | `Sample` | 99 | 参考（07 D3） | Identity | @gw-hhh | 07 业务模块标准写法 | 未开始 |
 
 平台模块的编号按 08 阶段 3 的实施顺序分配（2026-11-05，S0-07）。业务模块的划分与试点模块的选定见 08 并行线 B 与 D4。
