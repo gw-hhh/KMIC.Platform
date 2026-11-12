@@ -115,7 +115,7 @@ internal static class ModelValidator
             if (_secretWords.Any(w => property.Name.Contains(w, StringComparison.Ordinal))
                 && AuditAnnotations.ModeOf(property) is not (AuditAnnotations.Hidden or AuditAnnotations.Excluded))
             {
-                problems.Add($"{path}：名字里有 Password、Token、Secret 或 Hash，要用 AuditHidden() 标出来，审计记录里不能出现它的值。");
+                problems.Add($"{path}：名字里有 Password、Token、Secret 或 Hash，要用 Classified(KmicData.Secret)（或 AuditHidden()）标出来，审计记录和日志里不能出现它的值。");
             }
         }
     }

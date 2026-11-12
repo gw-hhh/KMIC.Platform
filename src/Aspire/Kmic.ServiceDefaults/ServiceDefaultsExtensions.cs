@@ -49,6 +49,7 @@ public static class ServiceDefaultsExtensions
             builder.Configuration["Kmic:Roles"] ?? "",
             Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown");
 
+        builder.Services.AddKmicRedaction();
         builder.Services.AddOptions<ObservabilityOptions>().Bind(builder.Configuration.GetSection(ObservabilityOptions.Section));
         ConfigureLogging(builder, identity);
         ConfigureTelemetry(builder, identity);
@@ -112,6 +113,7 @@ public static class ServiceDefaultsExtensions
                     .Enrich.WithProperty("Instance", identity.Instance)
                     .Enrich.WithProperty("Roles", identity.Roles)
                     .Enrich.WithProperty("Version", identity.Version)
+                    .Destructure.With<ClassifiedDestructuringPolicy>()
                     .Enrich.With<SensitivePropertyMasker>();
 
                 if (development)

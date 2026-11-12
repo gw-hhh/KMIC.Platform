@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Auditing;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Serialization;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
@@ -44,27 +45,17 @@ internal static class AuditValues
     }
 
     /// <summary>
-    /// 按遮盖方式处理：保留头尾，中间换成星号，太短的整个遮住
+    /// 按遮盖方式处理，规则与日志共用 <see cref="PartialMask" />
     /// </summary>
     public static string Mask(string value, AuditMask mask)
     {
         ArgumentNullException.ThrowIfNull(value);
         return mask switch
         {
-            AuditMask.Email => MaskEmail(value),
-            AuditMask.Phone or AuditMask.IdNumber => MaskMiddle(value, keepHead: 3, keepTail: 4),
+            AuditMask.Email => PartialMask.Email(value),
+            AuditMask.Phone or AuditMask.IdNumber => PartialMask.Middle(value),
+            AuditMask.Personal => PartialMask.Of(value),
             _ => throw new ArgumentOutOfRangeException(nameof(mask), mask, "没有这种遮盖方式。"),
         };
-    }
-
-    private static string MaskMiddle(string value, int keepHead, int keepTail) =>
-        value.Length <= keepHead + keepTail
-            ? new string('*', value.Length)
-            : value[..keepHead] + new string('*', value.Length - keepHead - keepTail) + value[^keepTail..];
-
-    private static string MaskEmail(string value)
-    {
-        var at = value.IndexOf('@', StringComparison.Ordinal);
-        return at <= 0 ? new string('*', value.Length) : value[0] + "***" + value[at..];
     }
 }

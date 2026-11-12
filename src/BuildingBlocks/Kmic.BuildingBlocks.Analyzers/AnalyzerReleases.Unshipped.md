@@ -26,3 +26,4 @@ KM9004 | Kmic.General | Error | AsciiIdentifierAnalyzer
 KM9005 | Kmic.General | Error | PrimaryConstructorParameterAnalyzer
 KM9006 | Kmic.General | Error | DynamicAnalyzer
 KM9007 | Kmic.General | Error | NestedConditionalAnalyzer
+KM9008 | Kmic.General | Error | LogTemplateAnalyzer

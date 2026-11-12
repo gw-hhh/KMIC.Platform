@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Compliance.Classification;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
@@ -64,5 +65,26 @@ public static class AuditPropertyBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         return builder.HasAnnotation(AuditAnnotations.Name, AuditAnnotations.Excluded);
+    }
+
+    /// <summary>
+    /// 声明字段的数据分类，审计记录和日志按同一套规则处理
+    /// </summary>
+    /// <remarks>
+    /// Secret 在审计里只记“已修改”，Personal 部分遮盖，Internal 完整记录。等价于对应的 AuditHidden、AuditMasked
+    /// </remarks>
+    public static PropertyBuilder<TProperty> Classified<TProperty>(this PropertyBuilder<TProperty> builder, DataClassification classification)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        return AuditAnnotations.For(classification) is { } mode ? builder.HasAnnotation(AuditAnnotations.Name, mode) : builder;
+    }
+
+    /// <summary>
+    /// 声明值对象成员的数据分类，审计记录和日志按同一套规则处理
+    /// </summary>
+    public static ComplexTypePropertyBuilder<TProperty> Classified<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder, DataClassification classification)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        return AuditAnnotations.For(classification) is { } mode ? builder.HasAnnotation(AuditAnnotations.Name, mode) : builder;
     }
 }

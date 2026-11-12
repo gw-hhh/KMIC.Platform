@@ -11,6 +11,8 @@ public sealed class AuditValuesTests
     [InlineData(AuditMask.Phone, "13812341234", "138****1234")]
     [InlineData(AuditMask.IdNumber, "110101199001011234", "110***********1234")]
     [InlineData(AuditMask.Email, "zhang@example.com", "z***@example.com")]
+    [InlineData(AuditMask.Personal, "13812341234", "138****1234")]
+    [InlineData(AuditMask.Personal, "zhang@example.com", "z***@example.com")]
     [InlineData(AuditMask.Phone, "12345", "*****")]
     [InlineData(AuditMask.Email, "no-at-sign", "**********")]
     public void Mask_KeepsHeadAndTailOnly(AuditMask mask, string value, string expected) =>

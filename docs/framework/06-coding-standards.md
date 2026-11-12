@@ -776,6 +776,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | KM9005 | 主构造函数参数不得被重新赋值 | 全部 | 本文 D5 |
 | KM9006 | 不得使用 `dynamic` | 全部 | 本文 5.2 |
 | KM9007 | 手写代码禁止嵌套三元运算（加括号也不行） | 全部（生成代码除外） | 本文附录 A.7（R01 M3） |
+| KM9008 | `[LoggerMessage]` 的模板里不得出现 `{@对象}`，整个对象不能写进日志 | 全部（生成代码除外） | 05-12 第 2.3 节、ADR-0016 |
 
 ### 15.2 禁用 API（BannedApiAnalyzers）
 
@@ -1200,3 +1201,4 @@ var dueAt = useBusinessCalendar
 | 常量、静态只读字段都用 PascalCase | 常量 PascalCase；私有静态只读字段与其他私有字段一样用 `_camelCase` | 第 4.2 节 |
 | 2026-11-12 | 第 15.2 节分层禁用清单落地（决定不变）：根目录 `BannedSymbols.Modules.txt` 只对 `src/Modules/**` 的项目生效（`Directory.Build.props` 按路径接入），覆盖 `IConfiguration`、`IMemoryCache`、`IDistributedCache`、`Task.Run`、`new Thread`、`ThreadPool`、服务定位（`GetService`、`GetRequiredService`、`GetServices`）、`IgnoreQueryFilters`、`FromSqlRaw` / `SqlQueryRaw` / `ExecuteSqlRaw`、`Results` 与 `TypedResults` 的 `Problem` / `StatusCode`；BuildingBlocks 与宿主不受限。实测发现：**方法的禁用 ID 必须逐个重载写全，不带参数列表的写法（如 `M:System.Threading.Tasks.Task.Run`）不会生效，也不报错**。因此架构测试 `BannedSymbolsTests` 逐条核对每个清单：每个符号必须解析成唯一的符号，清单必须接入构建；并在真实项目里用故意违规的代码确认过 `Task.Run`、`GetService` 会报 RS0030。Application 中的 DbContext 写入 API 不需要单独禁用：Application 不引用 EF（架构测试守护）。端点里不得出现 `Results.Problem` 的限制对模块的全部项目生效，BuildingBlocks 的 Presentation 里用到的不受限 | S2-15 / S2-18 |
 | 2026-11-12 | 第 15.4 节架构测试补全（决定不变）：对照规则总表逐条核对，结果见 `docs/implementation/S2-18-规则核对.md`。新增：命令响应是收据、处理器不被引用（只检查成员签名）、领域事件处理器只依赖本模块、校验器不注入 Contracts、命令处理器不注入查询上下文、作业处理器不注入数据访问、授权代码不依赖偏好、`IServiceCollection` 只在 `IModule`、聚合类型初始化（状态机可构建）、敏感权限点按命名标记、读模型不是聚合根、创建 / 提交 / 审批 / 支付类命令声明幂等、`WithoutDataScope` 只在标了 `[BypassesDataScope]` 的处理器里、缓存值不可变；后两条读方法体里的调用（`Support/IlCalls`，含 async 状态机与 lambda 的嵌套类型）。没有机器检查的：共享内核不含业务概念、领域事件过去时（评审）；手写 SQL 查询范围对象的提示（等第一个手写 SQL）；Identity 授权管理命令的基类（阶段 3）；缓存键的模块名取值只能评审，键的形态由 `CacheKey.Of` 保证。规则暴露了一处实现与 05-02 的不一致：Sample 的提交命令没有 `[Idempotent]`，已补 | S2-18 |
+| 2026-11-12 | 第 15.1 节新增 KM9008：`[LoggerMessage]` 的模板里出现 `{@对象}` 即编译失败（05-12 第 2.3 节落实 ADR-0016 的“禁止整对象输出”，实现见 05-12 修订记录）；自定义分析器共 22 个编号 | S2-18 |

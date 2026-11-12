@@ -19,4 +19,9 @@ public enum AuditMask
     /// 证件号，保留前 3 位和后 4 位
     /// </summary>
     IdNumber,
+
+    /// <summary>
+    /// 按内容判断：含 @ 的当邮箱，其余保留前 3 位和后 4 位；数据分类为 Personal 时用它
+    /// </summary>
+    Personal,
 }

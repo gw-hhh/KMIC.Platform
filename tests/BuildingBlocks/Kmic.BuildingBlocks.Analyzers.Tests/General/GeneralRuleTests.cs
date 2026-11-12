@@ -3,6 +3,7 @@ using Ascii = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.Building
 using Conditional = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.NestedConditionalAnalyzer>;
 using Dynamic = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.DynamicAnalyzer>;
 using Justification = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.SuppressionJustificationAnalyzer>;
+using LogTemplate = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.LogTemplateAnalyzer>;
 using Marker = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.TrackedMarkerAnalyzer>;
 using Pragma = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.PragmaWarningAnalyzer>;
 using PrimaryParameter = Kmic.BuildingBlocks.Analyzers.Tests.AnalyzerVerifier<Kmic.BuildingBlocks.Analyzers.General.PrimaryConstructorParameterAnalyzer>;
@@ -169,5 +170,40 @@ public sealed class GeneralRuleTests
             """;
 
         await Conditional.VerifyAsync(Source, Project, Conditional.Diagnostic(NestedConditionalAnalyzer.Rule, 0));
+    }
+
+    [Fact]
+    public async Task LogTemplate_Destructuring_Reports_PlainPlaceholdersAllowed()
+    {
+        const string Source = """
+            using System;
+
+            namespace Microsoft.Extensions.Logging
+            {
+                public enum LogLevel { Information }
+
+                [AttributeUsage(AttributeTargets.Method)]
+                public sealed class LoggerMessageAttribute : Attribute
+                {
+                    public LoggerMessageAttribute(int eventId, LogLevel level, string message) { }
+
+                    public string? Message { get; set; }
+                }
+            }
+
+            public static class SampleLog
+            {
+                [Microsoft.Extensions.Logging.LoggerMessage(1, Microsoft.Extensions.Logging.LogLevel.Information, "提交 {Number} 金额 {Amount}")]
+                public static void Plain() { }
+
+                [Microsoft.Extensions.Logging.LoggerMessage(2, Microsoft.Extensions.Logging.LogLevel.Information, {|#0:"客户 {@Customer}"|})]
+                public static void Destructured() { }
+
+                [Microsoft.Extensions.Logging.LoggerMessage(3, Microsoft.Extensions.Logging.LogLevel.Information, "客户 {Customer}", Message = {|#1:"客户 {@Customer} 已更新"|})]
+                public static void NamedMessage() { }
+            }
+            """;
+
+        await LogTemplate.VerifyAsync(Source, Project, LogTemplate.Diagnostic(LogTemplateAnalyzer.Rule, 0, "{@Customer}"), LogTemplate.Diagnostic(LogTemplateAnalyzer.Rule, 1, "{@Customer}"));
     }
 }
