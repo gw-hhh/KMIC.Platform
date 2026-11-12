@@ -53,4 +53,16 @@ public static class IdentityPermissions
     /// </summary>
     [Permission("强制下线", Sensitive = true)]
     public const string UserForceLogout = "Identity.User.ForceLogout";
+
+    /// <summary>
+    /// 维护组织树与用户归属
+    /// </summary>
+    [Permission("管理组织", Sensitive = true)]
+    public const string OrgUnitManage = "Identity.OrgUnit.Manage";
+
+    /// <summary>
+    /// 授予、收回用户的角色与锚点
+    /// </summary>
+    [Permission("授予与收回角色", Sensitive = true)]
+    public const string UserGrant = "Identity.User.Grant";
 }

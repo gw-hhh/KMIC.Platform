@@ -283,7 +283,7 @@ stateDiagram-v2
 | `CreateRoleCommand` / `UpdateRoleCommand` | `Identity.Role.Manage` | 名称、说明、排序、默认范围等级 |
 | `SetRolePermissionsCommand` / `SetRoleDataScopesCommand` | `Identity.Role.Manage`（敏感） | 整体替换；受保护角色受 D11 约束 |
 | `DisableRoleCommand` / `EnableRoleCommand` | `Identity.Role.Manage` | 系统管理员角色不能停用 |
-| `CreateOrgUnitCommand`、`RenameOrgUnitCommand`、`MoveOrgUnitCommand`、`ReorderOrgUnitsCommand`、`DisableOrgUnitCommand`、`EnableOrgUnitCommand` | `Identity.OrgUnit.Manage` | 规则与错误码见 05-05 第 4.4 节 |
+| `CreateOrgUnitCommand`、`UpdateOrgUnitCommand`（名称与编码一起改）、`MoveOrgUnitCommand`、`ReorderOrgUnitsCommand`、`DisableOrgUnitCommand`、`EnableOrgUnitCommand` | `Identity.OrgUnit.Manage` | 规则与错误码见 05-05 第 4.4 节 |
 | `StartImpersonationCommand` | `Identity.User.Impersonate`（敏感） | 05-04 第 9 节；原因必填；不能模拟自己、不能模拟受保护角色的持有人 |
 | `EndImpersonationCommand` | `[AllowAuthenticated]` | 只在模拟会话中有效 |
 
@@ -387,7 +387,7 @@ stateDiagram-v2
 
 ### 5.3 资源策略与动作目录
 
-两类资源：`User`（动作：`Edit`、`ChangeCredentials`、`Disable`、`Enable`、`ResetPassword`、`Unlock`、`ForceLogout`、`Impersonate`、`Grant`；`ChangeCredentials` 是改账号、手机号，D-D 的凭据规则落在它上面，`UpdateUserProfileCommand` 只在账号或手机号真的变了时才检查它，界面据此把这两个输入框置灰）与 `Role`（`Edit`、`SetPermissions`、`SetDataScopes`、`Disable`、`Enable`）。策略是纯函数，规则：
+两类资源：`User`（动作：`Edit`、`ChangeCredentials`、`Disable`、`Enable`、`ResetPassword`、`Unlock`、`ForceLogout`、`Impersonate`；角色授予是单独的一类资源 `Grant`，动作 `Grant`、`Revoke`、`SetAnchors`，策略 `GrantPolicy`，目标是“用户 + 角色”，因为规则要看被授予的角色是否受保护；`ChangeCredentials` 是改账号、手机号，D-D 的凭据规则落在它上面，`UpdateUserProfileCommand` 只在账号或手机号真的变了时才检查它，界面据此把这两个输入框置灰）与 `Role`（`Edit`、`SetPermissions`、`SetDataScopes`、`Disable`、`Enable`）。策略是纯函数，规则：
 
 | 规则 | 拒绝原因 |
 |---|---|

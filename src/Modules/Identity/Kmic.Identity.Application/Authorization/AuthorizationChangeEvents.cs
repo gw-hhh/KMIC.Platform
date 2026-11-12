@@ -22,8 +22,9 @@ internal static class AuthorizationChangeEvents
     /// <param name="resourceType">被改的资源类型</param>
     /// <param name="id">资源 ID</param>
     /// <param name="change">改了什么</param>
+    /// <param name="details">补充说明，如授予的是哪个角色</param>
     /// <typeparam name="TId">资源 ID 类型</typeparam>
-    public static Result<VersionedResponse<TId>> Complete<TId>(ISecurityEventWriter writer, Result done, string resourceType, TId id, string change)
+    public static Result<VersionedResponse<TId>> Complete<TId>(ISecurityEventWriter writer, Result done, string resourceType, TId id, string change, IReadOnlyDictionary<string, string>? details = null)
         where TId : struct, IStronglyTypedId
     {
         if (done.IsFailure)
@@ -31,7 +32,7 @@ internal static class AuthorizationChangeEvents
             return done.Error;
         }
 
-        Write(writer, resourceType, id.Value, change);
+        Write(writer, resourceType, id.Value, change, details);
         return new VersionedResponse<TId>(id);
     }
 
@@ -42,7 +43,8 @@ internal static class AuthorizationChangeEvents
     /// <param name="resourceType">被改的资源类型，如 Role、User、OrgUnit</param>
     /// <param name="resourceId">资源 ID</param>
     /// <param name="change">改了什么，如 PermissionsSet</param>
-    public static void Write(ISecurityEventWriter writer, string resourceType, Guid resourceId, string change)
+    /// <param name="details">补充说明，如授予的是哪个角色</param>
+    public static void Write(ISecurityEventWriter writer, string resourceType, Guid resourceId, string change, IReadOnlyDictionary<string, string>? details = null)
     {
         ArgumentNullException.ThrowIfNull(writer);
 
@@ -50,6 +52,7 @@ internal static class AuthorizationChangeEvents
         {
             ResourceType = resourceType,
             ResourceId = resourceId,
+            Details = details,
         });
     }
 }

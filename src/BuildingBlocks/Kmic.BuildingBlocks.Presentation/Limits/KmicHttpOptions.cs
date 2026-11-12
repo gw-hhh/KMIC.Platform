@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Kmic.BuildingBlocks.Application.Time;
 
 namespace Kmic.BuildingBlocks.Presentation.Limits;
 
@@ -18,7 +19,7 @@ public sealed class KmicHttpOptions
     /// <summary>
     /// 请求超时，超过的操作应该做成后台作业
     /// </summary>
-    [Range(typeof(TimeSpan), "00:00:01", "01:00:00")]
+    [TimeSpanRange("00:00:01", "01:00:00")]
     public TimeSpan RequestTimeout { get; init; } = TimeSpan.FromSeconds(30);
 
     /// <summary>

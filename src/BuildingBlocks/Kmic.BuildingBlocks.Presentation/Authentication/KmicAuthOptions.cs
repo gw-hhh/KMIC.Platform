@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Kmic.BuildingBlocks.Application.Time;
 
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
@@ -27,13 +28,13 @@ public sealed class KmicAuthOptions
     /// <summary>
     /// 访问令牌的有效期
     /// </summary>
-    [Range(typeof(TimeSpan), "00:01:00", "01:00:00")]
+    [TimeSpanRange("00:01:00", "01:00:00")]
     public TimeSpan AccessTokenLifetime { get; init; } = TimeSpan.FromMinutes(15);
 
     /// <summary>
     /// 允许的时钟偏差
     /// </summary>
-    [Range(typeof(TimeSpan), "00:00:00", "00:05:00")]
+    [TimeSpanRange("00:00:00", "00:05:00")]
     public TimeSpan ClockSkew { get; init; } = TimeSpan.FromSeconds(30);
 
     /// <summary>

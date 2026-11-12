@@ -67,6 +67,28 @@ internal sealed class IdentitySeed(string connectionString)
             ("id", Guid.CreateVersion7()), ("role", roleId), ("user", userId), ("system", _system));
     }
 
+    /// <summary>
+    /// 建好组织树和根单元（已经有就不动），返回根单元的 ID
+    /// </summary>
+    public async Task<Guid> OrgTreeAsync(string rootName = "总部")
+    {
+        await using var data = NpgsqlDataSource.Create(connectionString);
+        await ExecuteAsync(
+            data,
+            """
+            WITH tree AS (
+                INSERT INTO "Identity"."OrgTree" ("Id", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
+                VALUES ('00000000-0000-0000-0000-000000000003', now(), @system, 0)
+                ON CONFLICT DO NOTHING
+                RETURNING "Id")
+            INSERT INTO "Identity"."OrgUnit" ("Id", "ParentId", "Name", "Code", "Status", "SortOrder", "CreatedAt", "CreatedBy", "TreeId")
+            SELECT @unit, NULL, @name, NULL, 'Active', 1000, now(), @system, "Id" FROM tree
+            """,
+            ("unit", Guid.CreateVersion7()), ("name", rootName), ("system", _system));
+        await using var command = data.CreateCommand("""SELECT "Id" FROM "Identity"."OrgUnit" WHERE "ParentId" IS NULL""");
+        return (Guid)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
+    }
+
     public async Task SetRoleStatusAsync(Guid roleId, bool active)
     {
         await using var data = NpgsqlDataSource.Create(connectionString);
