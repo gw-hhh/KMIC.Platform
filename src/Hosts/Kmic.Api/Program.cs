@@ -2,11 +2,15 @@ using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Presentation.OpenApi;
+using Kmic.ServiceDefaults;
 using Kmic.Sample.Infrastructure;
 using Kmic.Sample.Presentation;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 日志、追踪、指标的默认配置，要在模块注册之前
+builder.AddKmicServiceDefaults();
 
 // 模块在这里显式注册，Sample 是参考模块，只在开发与测试环境运行
 builder.AddKmicHost(host => host
@@ -33,6 +37,8 @@ builder.Services.AddMediator(options =>
 builder.Services.AddOpenApi("v1", options => options.AddKmicConventions());
 
 var app = builder.Build();
+// 请求摘要日志在最前面，错误处理之前，500 也能记到
+app.UseKmicRequestLogging();
 app.UseKmicHost();
 
 // 接口文档与界面只在开发和测试环境开放

@@ -30,6 +30,7 @@ public sealed class LoggingBehavior<TMessage, TResponse>(
         ArgumentNullException.ThrowIfNull(next);
 
         var useCase = catalog.Get(typeof(TMessage));
+        using var logScope = logger.BeginScope(LogProperties(useCase));
         using var activity = KmicActivities.Messaging.StartActivity(useCase.Name);
         activity?.SetTag("kmic.message.kind", useCase.Kind == MessageKind.Command ? "command" : "query");
         activity?.SetTag("kmic.origin", context.Origin.ToString());
@@ -57,5 +58,22 @@ public sealed class LoggingBehavior<TMessage, TResponse>(
                 LoggingBehaviorLog.MessageHandled(logger, useCase.Name, outcome, elapsed.TotalMilliseconds, user.UserId?.Value, user.RoleId?.Value);
             }
         }
+    }
+
+    // 处理这条消息期间的所有日志都带这些字段（Serilog 把日志作用域里的键值当作属性输出），业务代码不用自己传。
+    // 只放 ID 和有限取值，不放姓名等个人信息
+    private Dictionary<string, object?> LogProperties(UseCase useCase)
+    {
+        var user = context.User;
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["Origin"] = context.Origin.ToString(),
+            ["UserId"] = user.UserId?.Value,
+            ["RoleId"] = user.RoleId?.Value,
+            ["ActualUserId"] = user.ActualUserId?.Value,
+            ["IsSystem"] = user.IsSystem,
+            ["Module"] = useCase.Module,
+            ["Message"] = useCase.Name,
+        };
     }
 }

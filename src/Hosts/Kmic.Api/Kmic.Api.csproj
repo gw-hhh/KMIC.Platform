@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../BuildingBlocks/Kmic.BuildingBlocks.Hosting/Kmic.BuildingBlocks.Hosting.csproj" />
+    <ProjectReference Include="../Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
     <ProjectReference Include="../../Modules/Sample/Kmic.Sample.Infrastructure/Kmic.Sample.Infrastructure.csproj" />
     <ProjectReference Include="../../Modules/Sample/Kmic.Sample.Presentation/Kmic.Sample.Presentation.csproj" />
   </ItemGroup>

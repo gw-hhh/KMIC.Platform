@@ -141,6 +141,34 @@ public sealed class PipelineTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Logging_ScopeCarriesOriginUserModuleAndMessage_ForEveryLogInsideTheHandler()
+    {
+        var access = TestAccess.WithPermissions(SubmitThingCommand.Permission);
+
+        (await SendAsync(access, _validSubmit)).IsSuccess.ShouldBeTrue();
+
+        var handled = _host.Logs.GetSnapshot().Single(r => r.Id.Id == 1001 && r.Message.Contains("SubmitThingCommand", StringComparison.Ordinal));
+        var properties = handled.Scopes.OfType<IReadOnlyDictionary<string, object?>>().Single();
+        properties["Origin"].ShouldBe("Http");
+        properties["Module"].ShouldBe("BuildingBlocks");
+        properties["Message"].ShouldBe("BuildingBlocks.SubmitThingCommand");
+        properties["UserId"].ShouldBe(access.UserId.Value);
+        properties["IsSystem"].ShouldBe(false);
+    }
+
+    [Fact]
+    public async Task Logging_SystemIdentity_IsMarkedAndHasNoUserId()
+    {
+        await using var scope = _host.Scope(CallOrigin.ScheduledJob, CurrentUser.System());
+        (await scope.ServiceProvider.GetRequiredService<ISender>().SendAsync(new SyncThingCommand(), CancellationToken.None)).IsSuccess.ShouldBeTrue();
+
+        var properties = _host.Logs.GetSnapshot().Last(r => r.Id.Id == 1001).Scopes.OfType<IReadOnlyDictionary<string, object?>>().Single();
+        properties["Origin"].ShouldBe("ScheduledJob");
+        properties["IsSystem"].ShouldBe(true);
+        properties["UserId"].ShouldBeNull();
+    }
+
+    [Fact]
     public async Task ExecutionScope_InitializeTwice_Throws()
     {
         await using var scope = _host.UserScope(TestAccess.WithPermissions());

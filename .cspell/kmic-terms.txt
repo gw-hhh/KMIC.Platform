@@ -54,3 +54,6 @@ presign
 readmodel
 slnf
 appsettings
+apikey
+connectionstring
+secretquery
