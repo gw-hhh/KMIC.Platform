@@ -414,7 +414,7 @@ graph TD
 | 11 | 分析器与 CI 工具：Meziantou.Analyzer、oasdiff；镜像扫描工具 Grype + Syft（ADR-0032）；CI 供应链加固规则 | 已确认 | 4.10 |
 | 12 | Quartz.NET 锁定 3.x 还是 4.x：3.x 仍在维护、资料多；4.x 为官方当前版本。采用 4.x 稳定版（已锁定 4.7.2，S0-04）；PG 集群模式在阶段 2 实现时验证 | 已确认 | 第 7 节 |
 | 13 | 标为“中”和“未核实”的条目：Mediator MIT、openapi-fetch MIT、oasdiff Apache-2.0、Quartz.NET Apache-2.0、Meziantou.Analyzer MIT、Fluid 2.x 维护活跃（2.41.1） | 已核实（S0-04） | 第 7 节 |
-| 14 | .NET 10 chiseled-extra 镜像包含时区数据与 ICU，实施时实测 | 待确认 | 第 7 节 |
+| 14 | .NET 10 chiseled-extra 镜像包含时区数据与 ICU，实施时实测 | 已确认（2026-11-12，实测，见实施待办 T-14） | 第 7 节 |
 | 15 | S3 校验和配置在目标生产存储（OSS）上验证 | 待确认（原型 #14） | 4.9 |
 
 ---
@@ -428,3 +428,4 @@ graph TD
 | 2026-11-05 | 版本锁定与许可复核：第 8 节第 12、13 项关闭；第 4.9 节 AWSSDK.S3 为 v4 | S0-04 |
 | 2026-11-10 | 文档整合：以上补充说明并入正文，决定不变 | R01 L2（S0-08） |
 | 2026-11-10 | 第 4.2、6、7 节：更正 Vogen 的引用方式——ID 写了 `Validate`，运行时需要 `Vogen.SharedTypes`，不能排除运行时程序集；选型不变 | 阶段 2 S2-01 实测 |
+| 2026-11-12 | 第 8 节第 14 项实测完成：chiseled-extra 含时区数据与 ICU，普通 chiseled 不含（见实施待办 T-14）；第 7 节该条的“中 / 待实测”风险关闭 | S2-18 |

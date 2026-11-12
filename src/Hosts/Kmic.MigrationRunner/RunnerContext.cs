@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -23,7 +24,7 @@ internal sealed class RunnerContext(IConfiguration configuration, IReadOnlyList<
 
     public string ConnectionString() =>
         configuration[RunnerApp.ConnectionStringKey] is { Length: > 0 } connection
-            ? connection
+            ? KmicConnectionString.Normalize(connection)
             : throw new InvalidOperationException($"没有配置迁移账号的连接串 {RunnerApp.ConnectionStringKey}。");
 
     // 模块的服务注册类只登记自己的数据库上下文，迁移只需要这些登记

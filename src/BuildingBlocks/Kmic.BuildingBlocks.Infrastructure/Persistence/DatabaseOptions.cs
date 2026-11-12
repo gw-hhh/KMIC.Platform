@@ -17,7 +17,11 @@ public sealed class DatabaseOptions
     /// <summary>
     /// 运行账号的连接串
     /// </summary>
-    public string ConnectionString { get; set; } = "";
+    public string ConnectionString
+    {
+        get;
+        set => field = KmicConnectionString.Normalize(value);
+    } = "";
 
     /// <summary>
     /// 迁移账号的连接串，只用于开发环境的自动迁移
@@ -25,7 +29,11 @@ public sealed class DatabaseOptions
     /// <remarks>
     /// 不配置时用运行账号的连接串（本机开发库的账号通常什么权限都有）。生产环境的迁移由 Kmic.MigrationRunner 执行，应用里不配置迁移账号
     /// </remarks>
-    public string MigrationConnectionString { get; set; } = "";
+    public string MigrationConnectionString
+    {
+        get;
+        set => field = KmicConnectionString.Normalize(value);
+    } = "";
 
     /// <summary>
     /// 启动时是否自动执行迁移

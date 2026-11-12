@@ -1,0 +1,14 @@
+# 构建上下文只要源码：产物、历史、文档、测试都不进镜像构建
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+.idea/
+node_modules/
+TestResults/
+artifacts/
+docs/
+spikes/
+tests/
+*.md
