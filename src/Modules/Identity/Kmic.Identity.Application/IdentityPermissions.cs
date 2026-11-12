@@ -23,4 +23,34 @@ public static class IdentityPermissions
     /// </summary>
     [Permission("管理角色", Sensitive = true)]
     public const string RoleManage = "Identity.Role.Manage";
+
+    /// <summary>
+    /// 查看用户、会话
+    /// </summary>
+    [Permission("查看用户")]
+    public const string UserView = "Identity.User.View";
+
+    /// <summary>
+    /// 新建、修改资料、禁用、启用用户
+    /// </summary>
+    [Permission("管理用户")]
+    public const string UserManage = "Identity.User.Manage";
+
+    /// <summary>
+    /// 管理员重置用户密码
+    /// </summary>
+    [Permission("重置用户密码", Sensitive = true)]
+    public const string UserResetPassword = "Identity.User.ResetPassword";
+
+    /// <summary>
+    /// 解锁被登录限制的账号
+    /// </summary>
+    [Permission("解锁登录", Sensitive = true)]
+    public const string UserUnlock = "Identity.User.Unlock";
+
+    /// <summary>
+    /// 强制用户下线
+    /// </summary>
+    [Permission("强制下线", Sensitive = true)]
+    public const string UserForceLogout = "Identity.User.ForceLogout";
 }

@@ -2,8 +2,8 @@ using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.Identity.Application.Authorization;
 using Kmic.Identity.Domain.Roles;
-using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Roles;
 
@@ -31,13 +31,7 @@ internal static class RoleAdminLoading
             return loaded.Error;
         }
 
-        var allowed = authorizer.Check(new RoleTarget(loaded.Value, await OperatorIsProtectedAsync(db, access, ct)), action);
+        var allowed = authorizer.Check(new RoleTarget(loaded.Value, await OperatorFacts.IsProtectedAsync(db, access, ct)), action);
         return allowed.IsFailure ? allowed.Error : loaded.Value;
     }
-
-    /// <summary>
-    /// 操作者当前的角色是不是受保护角色
-    /// </summary>
-    public static async Task<bool> OperatorIsProtectedAsync(IIdentityQueryDb db, IAccessContext access, CancellationToken ct) =>
-        await db.Roles.Where(r => r.Id == access.RoleId).Select(r => r.IsProtected).SingleOrDefaultAsync(ct);
 }

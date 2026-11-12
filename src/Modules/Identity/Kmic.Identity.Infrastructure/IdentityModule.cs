@@ -6,14 +6,14 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application;
 using Kmic.Identity.Application.Authentication;
 using Kmic.Identity.Application.Authorization;
-using Kmic.Identity.Infrastructure.Authorization;
-using Kmic.Identity.Infrastructure.Authentication;
 using Kmic.Identity.Contracts;
 using Kmic.Identity.Domain.Organization;
 using Kmic.Identity.Domain.Roles;
 using Kmic.Identity.Domain.Sessions;
 using Kmic.Identity.Domain.Users;
 using Kmic.Identity.Infrastructure.Access;
+using Kmic.Identity.Infrastructure.Authentication;
+using Kmic.Identity.Infrastructure.Authorization;
 using Kmic.Identity.Infrastructure.Persistence;
 using Kmic.Identity.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,5 +58,6 @@ public sealed class IdentityModule : IModule
         services.AddKmicOptions<TrustedOriginsOptions>(TrustedOriginsOptions.Section);
         services.AddSingleton<LoginThrottlePolicy>();
         services.AddSingleton<PasswordPolicy>();
+        services.AddSingleton<TemporaryPasswordGenerator>();
     }
 }

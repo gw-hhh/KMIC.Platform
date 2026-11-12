@@ -1,6 +1,6 @@
+using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
-using System.Buffers.Text;
 
 namespace Kmic.Identity.Application.Authentication;
 

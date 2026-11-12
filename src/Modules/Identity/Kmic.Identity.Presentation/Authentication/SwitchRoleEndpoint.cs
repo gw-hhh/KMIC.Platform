@@ -11,6 +11,7 @@ internal sealed class SwitchRoleEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/auth/switch-role", HandleAsync)
             .Sends<SwitchRoleCommand>()
+            .NoStore()
             .AllowWhenRoleUnavailable()
             .WithSummary("切换当前角色")
             .WithDescription("在同一会话里换成用户拥有的另一个启用的角色，返回带新角色的访问令牌；旧角色的访问令牌随即失效。当前角色被收回或停用后也能用它重新选择角色。");

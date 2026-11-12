@@ -7,7 +7,7 @@ namespace Kmic.Identity.Application.Tests.Authentication;
 
 public sealed class PasswordPolicyTests
 {
-    private readonly PasswordPolicy _policy = new(Options.Create(new PasswordOptions()), new FixedWeakList("qwertyuiop123"));
+    private readonly PasswordPolicy _policy = new(Options.Create(new PasswordOptions()), new FixedWeakList("password123"));
 
     [Fact]
     public void LongEnoughPassphrase_IsAccepted() =>
@@ -27,11 +27,11 @@ public sealed class PasswordPolicyTests
 
     [Fact]
     public void OnTheWeakList_IsRefused_IgnoringCase() =>
-        _policy.Validate("QWERTYUIOP123", "zhang", null).ShouldBeFailure(IdentityErrors.PasswordTooWeak);
+        _policy.Validate("PASSWORD123", "zhang", null).ShouldBeFailure(IdentityErrors.PasswordTooWeak);
 
     [Fact]
     public void SameAsTheAccount_IsRefused() =>
-        _policy.Validate("zhangsan-account", "ZhangSan-Account", null).ShouldBeFailure(IdentityErrors.PasswordTooWeak);
+        _policy.Validate("wang-account", "Wang-Account", null).ShouldBeFailure(IdentityErrors.PasswordTooWeak);
 
     [Theory]
     [InlineData("+8613800138000")]

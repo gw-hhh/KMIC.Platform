@@ -14,6 +14,7 @@ internal sealed class RefreshEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/auth/refresh", HandleAsync)
             .Sends<RefreshTokenCommand>()
+            .NoStore()
             .AllowAnonymous()
             .AddEndpointFilter<CookieEndpointGuard>()
             .WithSummary("刷新令牌")

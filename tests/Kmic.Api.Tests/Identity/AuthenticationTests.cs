@@ -34,6 +34,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         var response = await LoginAsync(client, "app-user");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Headers.CacheControl!.NoStore.ShouldBeTrue();
         var tokens = await JsonAsync(response);
         tokens.GetProperty("token_type").GetString().ShouldBe("Bearer");
         tokens.GetProperty("expires_in").GetInt32().ShouldBeInRange(800, 900);
@@ -64,7 +65,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         (await JsonAsync(response)).TryGetProperty("refresh_token", out var inBody).ShouldBeTrue();
         inBody.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
         var setCookie = response.Headers.GetValues("Set-Cookie").First(v => v.StartsWith("__Host-kmic-rt=", StringComparison.Ordinal));
-        setCookie.ShouldContain("httponly", Case.Insensitive);
+        setCookie.ShouldContain("HttpOnly", Case.Insensitive);
         setCookie.ShouldContain("secure", Case.Insensitive);
         setCookie.ShouldContain("samesite=strict", Case.Insensitive);
     }

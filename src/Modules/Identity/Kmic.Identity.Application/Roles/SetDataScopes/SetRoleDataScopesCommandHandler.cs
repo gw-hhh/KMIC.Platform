@@ -2,6 +2,7 @@ using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Identity.Application.Authorization;
@@ -18,6 +19,7 @@ public sealed class SetRoleDataScopesCommandHandler(
     IIdentityQueryDb db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
     DataScopeObjectCatalog catalog,
+    ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<SetRoleDataScopesCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
@@ -37,6 +39,6 @@ public sealed class SetRoleDataScopesCommandHandler(
         }
 
         var set = loaded.Value.SetDataScopes(command.DefaultLevel, command.Overrides);
-        return set.IsFailure ? set.Error : new VersionedResponse<RoleId>(loaded.Value.Id);
+        return AuthorizationChangeEvents.Complete(securityEvents, set, "Role", loaded.Value.Id, "RoleDataScopesSet");
     }
 }

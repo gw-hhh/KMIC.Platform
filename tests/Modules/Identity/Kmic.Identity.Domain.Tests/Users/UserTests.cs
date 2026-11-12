@@ -173,4 +173,22 @@ public sealed class UserTests
         user.AssignOrgUnit(null).ShouldBeSuccess();
         user.OrgUnitId.ShouldBeNull();
     }
+
+    [Theory]
+    [InlineData("13800138000", "138 0013 8000", false)]
+    [InlineData("13800138000", "+86 13800138000", false)]
+    [InlineData("13800138000", null, true)]
+    [InlineData("13800138000", "13900139000", true)]
+    [InlineData("13800138999", "13800138000", true)]
+    public void WouldChangeCredentials_ComparesTheNormalizedAccountAndMobile(string account, string? mobile, bool expected) =>
+        Newcomer().WouldChangeCredentials(account, mobile).ShouldBe(expected);
+
+    [Fact]
+    public void WouldChangeCredentials_IgnoresInputThatIsInvalidAnyway()
+    {
+        var user = Newcomer();
+
+        user.WouldChangeCredentials(" ", "138 0013 8000").ShouldBeFalse();
+        user.WouldChangeCredentials("13800138000", "123").ShouldBeFalse();
+    }
 }

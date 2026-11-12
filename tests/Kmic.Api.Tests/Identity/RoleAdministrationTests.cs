@@ -1,6 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.Identity.Application;
@@ -13,39 +11,12 @@ namespace Kmic.Api.Tests.Identity;
 /// 角色管理：增改、权限点与数据范围、停用启用，以及受保护角色、内置角色、版本冲突这些规则，端到端
 /// </summary>
 public sealed class RoleAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
-    : IdentityApiTestBase(database, template),
+    : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
 {
-    private const string Password = "correct horse battery";
-
     private static readonly string[] _manageRoles = [IdentityPermissions.RoleView, IdentityPermissions.RoleManage];
 
     private static Dictionary<string, string> Overrides(string scopeObject, string level) => new(StringComparer.Ordinal) { [scopeObject] = level };
-
-    private static string[] ActionsOf(JsonElement detail) =>
-        [.. detail.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()!).Order(StringComparer.Ordinal)];
-
-    private async Task<string> LoginAsOperatorAsync(string account, IReadOnlyCollection<string> permissions, bool isProtected = false)
-    {
-        var role = await Seed.RoleAsync("操作者-" + account, permissions, isProtected: isProtected);
-        var user = await Seed.UserAsync(account, Password);
-        await Seed.GrantAsync(user, role);
-        var login = await PostAsync(NewClient(), "/api/v1/identity/auth/login", new { account, password = Password, clientType = "app" });
-        login.StatusCode.ShouldBe(HttpStatusCode.OK);
-        return (await JsonAsync(login)).GetProperty("access_token").GetString()!;
-    }
-
-    private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, string token, object? body = null)
-    {
-        using var request = new HttpRequestMessage(method, "/api/v1/identity" + url) { Content = body is null ? null : JsonContent.Create(body) };
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        if (method != HttpMethod.Get)
-        {
-            request.Headers.Add("Idempotency-Key", Guid.CreateVersion7().ToString());
-        }
-
-        return await NewClient().SendAsync(request, Ct);
-    }
 
     private async Task<Guid> CreateRoleAsync(string token, string name, string scope = "Self")
     {
@@ -192,6 +163,24 @@ public sealed class RoleAdministrationTests(ClassDatabase<ApiTemplate> database,
         var scope = detail.GetProperty("dataScopes").EnumerateArray().ShouldHaveSingleItem();
         scope.GetProperty("scopeObject").GetString().ShouldBe(SampleScopes.Specimen);
         scope.GetProperty("level").GetString().ShouldBe("OrgUnitAndBelow");
+    }
+
+    [Fact]
+    public async Task ChangesThatAffectAuthorization_WriteASecurityEvent_ButRenamingDoesNot()
+    {
+        var token = await LoginAsOperatorAsync("events-admin", _manageRoles);
+        var id = await CreateRoleAsync(token, "留痕的角色");
+        var version = (await DetailAsync(token, id)).GetProperty("version").GetInt64();
+
+        (await SendAsync(HttpMethod.Put, $"/roles/{id}", token, new { expectedVersion = version, name = "改了名的角色", description = (string?)null, sortOrder = 20 })).StatusCode.ShouldBe(HttpStatusCode.OK);
+        version = (await DetailAsync(token, id)).GetProperty("version").GetInt64();
+        (await SendAsync(HttpMethod.Put, $"/roles/{id}/permissions", token, new { expectedVersion = version, permissions = new[] { SamplePermissions.View } })).StatusCode.ShouldBe(HttpStatusCode.OK);
+        version = (await DetailAsync(token, id)).GetProperty("version").GetInt64();
+        (await SendAsync(HttpMethod.Post, $"/roles/{id}/disable", token, new { expectedVersion = version, reason = (string?)null })).StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        (await WaitForSecurityEventsAsync($"\"Type\" = 'AuthorizationConfigChanged' AND \"Reason\" = 'RolePermissionsSet' AND \"ResourceId\" = '{id}'")).ShouldBe(1);
+        (await WaitForSecurityEventsAsync($"\"Type\" = 'AuthorizationConfigChanged' AND \"Reason\" = 'RoleDisabled' AND \"ResourceId\" = '{id}'")).ShouldBe(1);
+        (await Seed.CountAsync($"""SELECT count(*) FROM "Identity"."SecurityEvent" WHERE "Type" = 'AuthorizationConfigChanged' AND "ResourceId" = '{id}'""")).ShouldBe(2);
     }
 
     [Fact]

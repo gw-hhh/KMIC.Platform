@@ -10,6 +10,7 @@
     "**/packages.lock.json",
     "**/pnpm-lock.yaml",
     "**/Migrations/**",
+    "**/weak-passwords.txt",
     "**/generated/**",
     "**/*.verified.*"
   ],

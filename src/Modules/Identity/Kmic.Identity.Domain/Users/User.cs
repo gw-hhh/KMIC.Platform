@@ -147,6 +147,20 @@ public sealed class User : AggregateRoot<UserId>
     }
 
     /// <summary>
+    /// 这次修改会不会改动登录凭据（账号、手机号）
+    /// </summary>
+    /// <remarks>
+    /// 输入本身不合法时当作没有改动：随后的修改会因为同一个原因失败，不必在这里重复报错
+    /// </remarks>
+    public bool WouldChangeCredentials(string? account, string? mobile)
+    {
+        var newAccount = UserFields.Account(account);
+        var newMobile = UserFields.Mobile(mobile);
+        return (newAccount.IsSuccess && !string.Equals(newAccount.Value, Account, StringComparison.Ordinal))
+            || (newMobile.IsSuccess && !string.Equals(newMobile.Value, Mobile, StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// 设置所属组织；组织是否存在、是否启用由调用方先确认
     /// </summary>
     public Result AssignOrgUnit(OrgUnitId? orgUnitId)

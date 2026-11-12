@@ -2,6 +2,7 @@ using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.Identity.Application.Authorization;
 using Kmic.Identity.Domain.Errors;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,7 +40,7 @@ public sealed class GetRoleQueryHandler(
         }
 
         var role = found.Role;
-        var operatorProtected = await RoleAdminLoading.OperatorIsProtectedAsync(db, access, cancellationToken);
+        var operatorProtected = await OperatorFacts.IsProtectedAsync(db, access, cancellationToken);
         var definitions = permissions.All.ToDictionary(p => p.Code, StringComparer.Ordinal);
         var objects = scopeObjects.All.ToDictionary(o => o.Code, StringComparer.Ordinal);
         return new RoleDetailResponse(

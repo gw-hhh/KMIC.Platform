@@ -12,6 +12,7 @@ internal sealed class LoginEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/auth/login", HandleAsync)
             .Sends<LoginCommand>()
+            .NoStore()
             .AllowAnonymous()
             .WithSummary("账号密码登录")
             .WithDescription("成功返回访问令牌；网页客户端的刷新令牌放在 HttpOnly Cookie 里，不出现在响应体，移动端在响应体里取得。账号不存在、密码错误、账号已禁用返回同样的 401；登录尝试过多返回 429。");

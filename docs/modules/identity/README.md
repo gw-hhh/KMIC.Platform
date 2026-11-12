@@ -268,7 +268,7 @@ stateDiagram-v2
 
 ### 4.2 管理
 
-除最后一行 `EndImpersonationCommand`（自助命令，不在 05-05 第 4.6 节的范围内，`[NotAudited]`、结束时写安全事件 `ImpersonationEnded`）外，以下命令都继承 `AuthorizationAdminCommandHandler`、`[Idempotent]`（创建类必须，其余按 05-05 第 11 节一律加）、`[Audited]`、携带 `ExpectedVersion`；影响授权的另写安全事件 `AuthorizationConfigChanged`。
+`ResetUserPasswordCommand`、`UnlockLoginCommand`、`ForceLogoutCommand` 不带 `ExpectedVersion`：它们不依赖界面上看到的某个状态，版本比较没有意义。除最后一行 `EndImpersonationCommand`（自助命令，不在 05-05 第 4.6 节的范围内，`[NotAudited]`、结束时写安全事件 `ImpersonationEnded`）外，以下命令都继承 `AuthorizationAdminCommandHandler`、`[Idempotent]`（创建类必须，其余按 05-05 第 11 节一律加）、`[Audited]`、携带 `ExpectedVersion`；影响授权的另写安全事件 `AuthorizationConfigChanged`。
 
 | 用例 | 权限点 | 说明与规则 |
 |---|---|---|
@@ -276,7 +276,7 @@ stateDiagram-v2
 | `UpdateUserProfileCommand` | `Identity.User.Manage` | 显示名、英文名、工号、手机号、邮箱、账号。**账号与手机号是登录凭据**，对持有受保护角色的用户改这两项受 D-D 约束 |
 | `AssignUserOrgUnitCommand` | `Identity.OrgUnit.Manage` | 单独成命令，因为它直接改变用户的数据范围（05-05 第 11 节归在组织管理名下）；界面上新建用户的抽屉在操作人同时有两个权限点时顺序调用两个命令 |
 | `DisableUserCommand` / `EnableUserCommand` | `Identity.User.Manage` | 不能禁用自己；不能禁用最后一个启用的受保护角色持有人（I5）；禁用即作废全部会话 |
-| `ResetUserPasswordCommand` | `Identity.User.ResetPassword`（敏感） | 生成一次性临时密码（只在响应中出现一次、不写日志与审计内容），置 `PasswordChangeRequired`，作废该用户全部会话（05-04 第 7.5 节）。临时密码不能经短信发送 |
+| `ResetUserPasswordCommand` | `Identity.User.ResetPassword`（敏感） | 生成一次性临时密码（只在响应中出现一次、不写日志与审计内容），置 `PasswordChangeRequired`，作废该用户全部会话（05-04 第 7.5 节）。临时密码不能经短信发送。**不做幂等**（`[NotIdempotent]`）：幂等记录会把响应存进数据库，临时密码就留在库里；重复提交等于重新生成，之前的临时密码随之失效。响应带 `Cache-Control: no-store` |
 | `UnlockLoginCommand` | `Identity.User.Unlock`（敏感） | 清零 `LoginThrottle`（05-04 D4） |
 | `ForceLogoutCommand` | `Identity.User.ForceLogout`（敏感） | 指定会话或该用户全部会话（含其发起的模拟会话，05-04 第 5.2 节） |
 | `GrantRoleCommand` / `RevokeRoleCommand` / `SetGrantAnchorsCommand` | `Identity.User.Grant`（敏感） | D11：不能改自己的授予（`Identity.CannotChangeOwnGrants`）；受保护角色只有受保护角色的持有人能授予、收回（`Identity.ProtectedRoleChangeDenied`） |
@@ -387,7 +387,7 @@ stateDiagram-v2
 
 ### 5.3 资源策略与动作目录
 
-两类资源：`User`（动作：`Edit`、`Disable`、`Enable`、`ResetPassword`、`Unlock`、`ForceLogout`、`Impersonate`、`Grant`）与 `Role`（`Edit`、`SetPermissions`、`SetDataScopes`、`Disable`、`Enable`）。策略是纯函数，规则：
+两类资源：`User`（动作：`Edit`、`ChangeCredentials`、`Disable`、`Enable`、`ResetPassword`、`Unlock`、`ForceLogout`、`Impersonate`、`Grant`；`ChangeCredentials` 是改账号、手机号，D-D 的凭据规则落在它上面，`UpdateUserProfileCommand` 只在账号或手机号真的变了时才检查它，界面据此把这两个输入框置灰）与 `Role`（`Edit`、`SetPermissions`、`SetDataScopes`、`Disable`、`Enable`）。策略是纯函数，规则：
 
 | 规则 | 拒绝原因 |
 |---|---|

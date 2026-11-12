@@ -2,6 +2,7 @@ using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Identity.Application.Authorization;
@@ -16,6 +17,7 @@ public sealed class DisableRoleCommandHandler(
     IRoleRepository roles,
     IIdentityQueryDb db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
+    ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<DisableRoleCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
@@ -29,6 +31,6 @@ public sealed class DisableRoleCommandHandler(
         }
 
         var done = loaded.Value.Disable(command.Reason);
-        return done.IsFailure ? done.Error : new VersionedResponse<RoleId>(loaded.Value.Id);
+        return AuthorizationChangeEvents.Complete(securityEvents, done, "Role", loaded.Value.Id, "RoleDisabled");
     }
 }
