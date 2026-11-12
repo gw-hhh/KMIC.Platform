@@ -71,6 +71,21 @@ public abstract class ModuleDbContext : DbContext
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
+    /// <summary>
+    /// 在命令管道之外保存，运维程序和初始化命令用
+    /// </summary>
+    /// <remarks>
+    /// 平时只有命令事务能保存，处理器自己调用 SaveChangesAsync 会抛异常。运维程序没有命令管道，用这个打开保存的开关；
+    /// 审计列、版本号照常处理，身份是创建上下文时的系统身份。业务代码不能用
+    /// </remarks>
+    public async Task<int> SaveForToolAsync(CancellationToken ct)
+    {
+        using (Services.SaveGate.Open())
+        {
+            return await SaveChangesAsync(ct);
+        }
+    }
+
     internal EffectiveScope DataScopeFor(string scopeObject) => Services.DataScope.For(scopeObject);
 
     /// <inheritdoc />

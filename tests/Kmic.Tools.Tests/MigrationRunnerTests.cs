@@ -44,10 +44,12 @@ public sealed class MigrationRunnerTests(ToolsTemplate template) : IAsyncLifetim
     [Fact]
     public async Task Production_SkipsTheReferenceModule()
     {
+        // 生产环境只有平台模块：全新的库里 Identity 待迁移，参考模块 Sample 不出现
         var (exitCode, output) = await ToolHarness.RunnerAsync(_database.ConnectionString, production: true, "status");
 
-        exitCode.ShouldBe(0, output);
-        output.ShouldContain("没有未执行的迁移");
+        exitCode.ShouldBe(3, output);
+        output.ShouldContain("Identity/");
+        output.ShouldNotContain("Sample/");
     }
 
     [Fact]

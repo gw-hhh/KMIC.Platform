@@ -55,6 +55,19 @@
         "resolved": "4.0.102.17",
         "contentHash": "GgPhSG8GB0ZkQptRifKaHxEDq7quS4frFW4G9y5fMWv1IwNhWIgLeKeekz6s0+KS9Hpm/niwU60Dwuya9PeeTg=="
       },
+      "Microsoft.AspNetCore.Cryptography.Internal": {
+        "type": "Transitive",
+        "resolved": "10.0.14",
+        "contentHash": "hwsfpgYV5uYh/JLzjS9qdNBWwjL6dRbs4naGku9fJKLwrIJFTtRSincH2P060ZQUKdFFRzG+uT4hinr85sZtlQ=="
+      },
+      "Microsoft.AspNetCore.Cryptography.KeyDerivation": {
+        "type": "Transitive",
+        "resolved": "10.0.14",
+        "contentHash": "cpj0yWhsZ7HrSPl+pRoU3XqgJoyU3s7BoXU01atiELVV3Uw9dA7kR6AWhWQh/KUa/gkjYejf51c9PHrStjzZkQ==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.Internal": "10.0.14"
+        }
+      },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.14",
@@ -471,6 +484,7 @@
         "dependencies": {
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
           "Kmic.Identity.Application": "[1.0.0, )",
+          "Microsoft.Extensions.Identity.Core": "[10.0.14, )",
           "Vogen": "[8.0.7, )"
         }
       },
@@ -637,6 +651,18 @@
           "Microsoft.Extensions.Http.Diagnostics": "10.11.0",
           "Microsoft.Extensions.ObjectPool": "10.0.13",
           "Microsoft.Extensions.Resilience": "10.11.0"
+        }
+      },
+      "Microsoft.Extensions.Identity.Core": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.14, )",
+        "resolved": "10.0.14",
+        "contentHash": "Thdt9CjRPtN4v9chsW2rTAnAfUexDhQS4PcJS2yuriSdTGpBHjxNEdKqVrSmUFvRb0GLO7fZpNgqdcBVsmhAXw==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "10.0.14",
+          "Microsoft.Extensions.Diagnostics": "10.0.14",
+          "Microsoft.Extensions.Logging": "10.0.14",
+          "Microsoft.Extensions.Options": "10.0.14"
         }
       },
       "Microsoft.Extensions.Logging": {
