@@ -14,7 +14,7 @@ namespace Kmic.Identity.Application.Users.ResetPassword;
 /// </summary>
 public sealed class ResetUserPasswordCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     IPasswordService passwords,
     TemporaryPasswordGenerator generator,

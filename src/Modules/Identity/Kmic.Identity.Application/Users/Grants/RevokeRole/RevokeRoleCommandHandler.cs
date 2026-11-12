@@ -15,7 +15,7 @@ namespace Kmic.Identity.Application.Users.Grants.RevokeRole;
 /// </summary>
 public sealed class RevokeRoleCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<GrantTarget, GrantAction> authorizer,
     ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,

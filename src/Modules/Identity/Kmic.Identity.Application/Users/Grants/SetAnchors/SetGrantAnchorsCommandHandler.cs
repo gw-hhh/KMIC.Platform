@@ -15,7 +15,7 @@ namespace Kmic.Identity.Application.Users.Grants.SetAnchors;
 /// </summary>
 public sealed class SetGrantAnchorsCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<GrantTarget, GrantAction> authorizer,
     ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,

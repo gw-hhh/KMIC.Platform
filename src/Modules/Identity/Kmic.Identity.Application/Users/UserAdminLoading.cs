@@ -16,7 +16,7 @@ internal static class UserAdminLoading
     /// </summary>
     public static async Task<Result<User>> LoadForAsync(
         IUserRepository users,
-        IIdentityQueryDb db,
+        IIdentityReads db,
         IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
         UserId id,
         long? expectedVersion,

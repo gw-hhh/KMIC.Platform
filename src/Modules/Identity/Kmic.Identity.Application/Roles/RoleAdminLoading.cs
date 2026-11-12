@@ -17,7 +17,7 @@ internal static class RoleAdminLoading
     /// </summary>
     public static async Task<Result<Role>> LoadForAsync(
         IRoleRepository roles,
-        IIdentityQueryDb db,
+        IIdentityReads db,
         IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
         RoleId id,
         long expectedVersion,

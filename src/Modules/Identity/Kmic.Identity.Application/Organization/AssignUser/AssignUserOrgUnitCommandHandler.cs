@@ -19,7 +19,7 @@ namespace Kmic.Identity.Application.Organization.AssignUser;
 public sealed class AssignUserOrgUnitCommandHandler(
     IUserRepository users,
     IOrgTreeRepository trees,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,

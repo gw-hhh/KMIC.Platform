@@ -38,6 +38,7 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
 
     public async ValueTask DisposeAsync()
     {
+        await Seed.DisposeAsync();
         await Factory.DisposeAsync();
         _tokens.Dispose();
         GC.SuppressFinalize(this);

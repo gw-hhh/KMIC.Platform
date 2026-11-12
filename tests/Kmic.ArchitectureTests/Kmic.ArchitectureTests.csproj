@@ -31,5 +31,15 @@
     <ProjectReference Include="../../src/Modules/Sample/Kmic.Sample.Application/Kmic.Sample.Application.csproj" />
     <ProjectReference Include="../../src/Modules/Sample/Kmic.Sample.Infrastructure/Kmic.Sample.Infrastructure.csproj" />
     <ProjectReference Include="../../src/Modules/Sample/Kmic.Sample.Presentation/Kmic.Sample.Presentation.csproj" />
+    <ProjectReference Include="../../src/Modules/Identity/Kmic.Identity.Domain/Kmic.Identity.Domain.csproj" />
+    <ProjectReference Include="../../src/Modules/Identity/Kmic.Identity.Contracts/Kmic.Identity.Contracts.csproj" />
+    <ProjectReference Include="../../src/Modules/Identity/Kmic.Identity.Application/Kmic.Identity.Application.csproj" />
+    <ProjectReference Include="../../src/Modules/Identity/Kmic.Identity.Infrastructure/Kmic.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/Modules/Identity/Kmic.Identity.Presentation/Kmic.Identity.Presentation.csproj" />
+    <ProjectReference Include="../../src/Modules/Configuration/Kmic.Configuration.Domain/Kmic.Configuration.Domain.csproj" />
+    <ProjectReference Include="../../src/Modules/Configuration/Kmic.Configuration.Contracts/Kmic.Configuration.Contracts.csproj" />
+    <ProjectReference Include="../../src/Modules/Configuration/Kmic.Configuration.Application/Kmic.Configuration.Application.csproj" />
+    <ProjectReference Include="../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Kmic.Configuration.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/Modules/Configuration/Kmic.Configuration.Presentation/Kmic.Configuration.Presentation.csproj" />
   </ItemGroup>
 </Project>

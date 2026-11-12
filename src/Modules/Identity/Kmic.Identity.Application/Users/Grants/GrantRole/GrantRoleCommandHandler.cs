@@ -16,7 +16,7 @@ namespace Kmic.Identity.Application.Users.Grants.GrantRole;
 /// </summary>
 public sealed class GrantRoleCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<GrantTarget, GrantAction> authorizer,
     ISecurityEventWriter securityEvents,
     TimeProvider time,

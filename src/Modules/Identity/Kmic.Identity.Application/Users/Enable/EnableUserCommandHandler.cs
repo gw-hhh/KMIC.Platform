@@ -14,7 +14,7 @@ namespace Kmic.Identity.Application.Users.Enable;
 /// </summary>
 public sealed class EnableUserCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<EnableUserCommand, VersionedResponse<UserId>>(recheck, execution)

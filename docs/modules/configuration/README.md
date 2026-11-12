@@ -1,5 +1,6 @@
 # Configuration 模块设计
 
+- 实现：字典、系统设置、偏好已实现并通过端到端测试（2026-11-13）；功能开关查询（`GetFeaturesQuery`，P2）未做，等第一个有前端开关的功能出现（4.4）。实现时发现的差异已就地订正，汇总见第 13 节末。
 - 状态：**已确认**（2026-11-12）。起草当天，用户授权“遇到需要选择的地方，默认采用最推荐的方案”，第 12 节的决定均按建议确定；第 12.3 节的待确认事项是需要业务方或旧库数据回答的事实，不阻塞编码。
 - 模块名 / schema / 编号：`Configuration` / `"Configuration"` / 12（平台模块，登记见 `docs/modules/README.md`）；`[LoggerMessage]` 的 `EventId` 使用 12000～12999
 - 项目：`Kmic.Configuration.Domain`、`Application`、`Infrastructure`、`Presentation`、`Contracts`（07 第 2 节）
@@ -116,7 +117,6 @@ erDiagram
 | `SystemSettingValue` | 被修改过的设置值 | 聚合（一行一个，主键是设置键） |
 | `SystemSettingChange` | 设置变更历史 | 只追加表，不作为聚合的子实体（量随修改次数增长，只插入） |
 | `PreferenceValue` | 偏好值 | 聚合（一行一个） |
-| `CatalogState` | 字典类型目录的内容哈希（05-05 第 3.2 节同一机制） | 模块内框架表，只由同步任务写 |
 
 强类型：`DictionaryItemId`、`PreferenceValueId` 在本模块 Domain；字典类型用 `DictionaryTypeCode`、设置用 `SettingKey` 这样的值对象包装字符串（Vogen），不暴露裸字符串。
 
@@ -128,7 +128,8 @@ erDiagram
 
 | 字段 | 说明 |
 |---|---|
-| `Code` | `varchar(100)`，主键，如 `Sample.Industry`。以声明它的模块名开头 |
+| `Id` | `uuid`，主键（实现时定：与其他聚合一致用 Guid 主键，编码另设唯一索引） |
+| `Code` | `varchar(100)`，唯一（违反返回 `DictionaryTypeCodeExists`），如 `Sample.Industry`。以声明它的模块名开头 |
 | `DisplayName` | `varchar(100)`，来自代码声明，每次同步更新 |
 | `OwnerModule` | `varchar(50)` |
 | `IsHierarchical` | `boolean`，来自代码声明 |
@@ -141,7 +142,7 @@ erDiagram
 | 字段 | 说明 |
 |---|---|
 | `Id` | `uuid` |
-| `TypeCode` | 外键 |
+| `TypeId` | 外键，指向 `DictionaryType.Id` |
 | `Code` | `varchar(50)`，同类型内唯一（不区分大小写，列声明 `CaseInsensitive`，ADR-0030），**创建后不可修改**；业务数据存的就是它 |
 | `Name` | `varchar(200)`，显示名，可改名 |
 | `ParentCode` | `varchar(50) null`，层级字典的父项编码 |
@@ -167,9 +168,9 @@ stateDiagram-v2
 
 ### 3.3 `SystemSettingValue` 与 `SystemSettingChange`
 
-`"Configuration"."SystemSettingValue"`：`Key`（`varchar(200)`，主键，以模块名开头）、`Value`（`jsonb`）、`ConcurrencyVersion`、审计字段。方法：`Set(json)`。
+`"Configuration"."SystemSettingValue"`：`Id`（`uuid`，主键）、`Key`（`varchar(200)`，唯一，以模块名开头；违反唯一约束按版本冲突处理）、`Value`（`jsonb`）、`ConcurrencyVersion`、审计字段。方法：`Set(json)`。
 
-`"Configuration"."SystemSettingChange"`（只追加，运行账号撤销修改与删除权限，05-09 D7）：`Id`、`Key`、`OldValue jsonb null`、`NewValue jsonb null`（恢复默认时为空）、`Reason varchar(500)`（必填）、`ChangedBy`、`ChangedAt`、`TraceId`；索引 `(Key, ChangedAt DESC)`。
+`"Configuration"."SystemSettingChange"`（只追加，运行账号撤销修改与删除权限，05-09 D7）：`Id`、`Key`、`OldValue jsonb null`、`NewValue jsonb null`（恢复默认时为空）、`Reason varchar(500)`（必填）、`TraceId`；谁改的、什么时候改的就是审计的创建人和创建时间列，不另设 `ChangedBy`、`ChangedAt`；索引 `Key`、`CreatedAt`。它自己是一个聚合根（不是设置值的子实体：恢复默认会删除值行，历史要留下），因此带一列并发版本号，但从不更新。
 
 - 值的校验不在聚合里：校验函数是各模块 Application 里设置类型的静态成员 `Validate`，由命令处理器经**设置目录**取到并执行（聚合只存已校验的 JSON）。
 - 值敏感度：设置里不放密钥（05-10 6.1）；变更历史里的新旧值原样保存，查看变更历史需要 `Configuration.Setting.View`。
@@ -187,7 +188,7 @@ stateDiagram-v2
 
 | 表 | 关键列 | 规则 |
 |---|---|---|
-| `CatalogState` | `Name`、`ContentHash`、`SyncedAt` | 字典类型目录的同步（与 Identity 的权限点同步同一写法）；哈希未变则跳过 |
+| （无） | | 实现时没有建 `CatalogState`：字典类型目录只有几十行，每次启动读一次类型表（不含字典项）逐行比较，没有变化就不写；多个实例同时启动由事务级咨询锁串行化，后到的看到的已经是同步好的结果。内容哈希表是为一千多行的权限点目录设计的，本模块用不上 |
 
 设置与偏好的**定义目录**在启动时由各模块汇总到内存（`SystemSettingCatalog`、`PreferenceCatalog`，已实现于 BuildingBlocks.Application），不进数据库（05-10 6.2）。
 
@@ -209,7 +210,7 @@ stateDiagram-v2
 | `MoveDictionaryItemCommand` | 同上 | 层级字典改父项 |
 | `ReorderDictionaryItemsCommand` | 同上 | 见 3.2 |
 | `DisableDictionaryItemCommand` / `EnableDictionaryItemCommand` | 同上 | 停用的影响（历史数据显示“已禁用”、新数据不可选）在界面提示 |
-| `IDictionaries.GetAsync` / `EnsureSelectableAsync` | Contracts 查询，`Reference` 类 | 05-10 5.3；不检查权限点、不套数据范围；`EnsureSelectable` 失败返回 `Configuration.DictionaryItemNotSelectable`（422） |
+| `IDictionaries.GetAsync` / `IsSelectableAsync` | Contracts 查询，`Reference` 类 | 05-10 5.3；不检查权限点、不套数据范围；`IsSelectableAsync` 只返回能不能选（类型存在、项存在且启用），不返回错误：调用方知道输入框的路径，自己拒绝并带上字段错误比 Configuration 替它拒绝更好用。设计里的 `Configuration.DictionaryItemNotSelectable` 错误码因此取消 |
 
 提交后失效标签 `Configuration:Dictionary:{type}`（`IAfterCommit.InvalidateTags`，05-10 4.2）。
 
@@ -219,7 +220,7 @@ stateDiagram-v2
 |---|---|---|
 | `ListSettingsQuery` | `Configuration.Setting.View` | 设置目录里全部定义，按分组：键、显示名、说明、所属模块、字段清单（名称、类型、显示名、单位）、默认值、当前值、是否被修改、版本、修改所需权限点（用户是否有它也一并返回，页面据此显示编辑按钮）；另列“已不存在”的值行 |
 | `GetSettingQuery` | 同上 | 单项详情 |
-| `SetSettingCommand(key, value, reason, expectedVersion?)` | `Configuration.Setting.View` + 资源策略 `Setting` 的动作 `Edit`（12 节 D-C2） | 值是 JSON 对象，按设置类型反序列化后执行 `Validate`；通不过返回 `Configuration.SettingInvalid`（422，逐字段错误，写入 `errors[]`）；原因必填；同一事务写 `SystemSettingChange`；提交后失效 `Configuration:Settings` |
+| `SetSettingCommand(key, value, reason, expectedVersion?)` | `Configuration.Setting.View` + 资源策略 `Setting` 的动作 `Edit`（12 节 D-C2） | 值是 JSON 对象，按设置类型反序列化后执行 `Validate`；通不过设置自己的校验返回 `Configuration.SettingInvalid`（400，逐字段错误写入 `errors[]`；值读不出来、不是对象、超过大小是同一错误码的 422）；原因必填；同一事务写 `SystemSettingChange`；提交后失效 `Configuration:Settings` |
 | `ResetSettingCommand(key, reason, expectedVersion)` | 同上 | 恢复默认：删除值行并写一条 `NewValue` 为空的变更 |
 | `ListSettingChangesQuery` | `Configuration.Setting.View` | 按键与时间范围；操作人名经 `IUserReferences` |
 | `PurgeObsoleteSettingCommand` | `Configuration.Setting.Manage`（敏感） | 清除代码里已不存在的设置的值行，写变更 |
@@ -230,14 +231,15 @@ stateDiagram-v2
 | 用例 | 授权 | 说明 |
 |---|---|---|
 | `GetMyPreferencesQuery` | `[AllowAuthenticated]` | `GET /api/v1/configuration/preferences/me`：当前用户在当前角色下全部偏好的解析结果（含偏好族已有的键），每项带来源层（默认 / 系统 / 角色 / 本人），前端启动时拉一次 |
-| `SetMyPreferenceCommand(key, value)` | `[AllowAuthenticated]`，`[NotAudited("个人体验配置")]` | 写 `UserRole` 层，只能改自己；键必须在目录里或符合偏好族的键格式；`Layers` 不含 `UserRole` 的偏好拒绝（`Configuration.PreferenceLayerNotAllowed`）；值校验失败 `Configuration.PreferenceInvalid`（422） |
-| `ResetMyPreferenceCommand(key)` | 同上 | 删除当前层那一行；偏好族的重置按键 |
-| `ListPreferenceDefinitionsQuery` | `Configuration.Preference.Manage` | 目录里的偏好、允许的层、系统层与各角色层的现有值 |
-| `SetPreferenceLayerCommand(key, layer, roleId?, value)` | `Configuration.Preference.Manage`，`[Audited]` | 系统层、角色层 |
-| `ResetPreferenceLayerCommand(key, layer, roleId?)` | 同上 | |
+| `SetMyPreferenceCommand(key, value)` | `[AllowAuthenticated]`，`[NotAudited("个人体验配置")]`，`[NotIdempotent("按键覆盖，重复执行结果相同")]`，`PUT preferences/me/{key}`，204 | 写 `UserRole` 层，只能改自己；键必须在目录里或符合偏好族的键格式；`Layers` 不含 `UserRole` 的偏好拒绝（`Configuration.PreferenceLayerNotAllowed`）；值校验失败 `Configuration.PreferenceInvalid`（422） |
+| `ResetMyPreferenceCommand(key)` | 同上，`POST preferences/me/{key}/reset`，204 | 删除当前层那一行，本来没有就什么也不做；偏好族的重置按键 |
+| `ListPreferenceDefinitionsQuery` | `Configuration.Preference.Manage`，`GET preferences` | 目录里的偏好和偏好族里已经有系统层或角色层值的键：允许的层、默认值、系统层与各角色层的现有值和版本、角色名称（`IRoleReferences`） |
+| `SetPreferenceLayerCommand(key, roleId?, value, expectedVersion?)` | `Configuration.Preference.Manage`，`[Audited]`，`[Idempotent]`，`PUT preferences/{key}/layers/system` 与 `…/layers/roles/{roleId}` | 不给角色是系统层，给了是角色层（角色必须存在，否则 `PreferenceRoleNotFound`）；`expectedVersion` 的含义与设置相同：这一层还没有值时不给，已有值而没给或不一致都是版本冲突 |
+| `ResetPreferenceLayerCommand(key, roleId?, expectedVersion)` | 同上，`POST …/layers/system/reset` 与 `…/layers/roles/{roleId}/reset` | 只删这一层；这一层已经没有值是版本冲突 |
 
 - 模拟身份：模拟会话默认只读（05-04 D7），`SetMyPreference` 在只读模拟中被框架拒绝；`GetMyPreferences` 返回被模拟用户的偏好。
 - 缓存：系统层与角色层按标签缓存（`Configuration:Preferences:System`、`…:Role:{roleId}`），用户层不缓存（05-10 7.2）。
+- 值的校验：目录里的偏好按值类型读出后执行它自己的 `Validate`（逐字段错误 400，读不出来 422）；偏好族的值只要求是不超过 `Configuration:Preference:FamilyValueMaxKb` 的 JSON 对象，键不在目录里也不属于任何族是 `PreferenceNotFound`（404）。读取时某一层存着的值已经读不出来（值类型后来改过）就跳到下一层，不报错。
 - 偏好的“重置只删当前层”：删除 `UserRole` 层的行后，值回落到角色层，这是设计内的行为，界面提示“恢复为角色默认”。
 
 ### 4.4 功能开关与系统任务
@@ -306,7 +308,7 @@ stateDiagram-v2
 | 接口 | 声明 | 用途 |
 |---|---|---|
 | `IDictionaries.GetAsync(typeCode)` | `Reference` 类（05-07 D3 的白名单，返回类型不是 `ReferenceInfo`） | 取字典快照（含停用项与状态）；后端导出、通知内容需要名称时使用 |
-| `IDictionaries.EnsureSelectableAsync(typeCode, itemCode)` | 同上 | 命令中校验用户输入的字典编码 |
+| `IDictionaries.IsSelectableAsync(typeCode, itemCode)` | 同上 | 命令中校验用户输入的字典编码：返回 `bool`，编码不区分大小写 |
 
 `ISettings`、`IPreferences` 是 `BuildingBlocks.Application` 里的框架接口，实现由本模块注册，不在 Contracts。
 
@@ -331,7 +333,7 @@ Identity：`IUserReferences`、`IRoleReferences`（变更历史与角色层偏�
 | 构件 | 内容 |
 |---|---|
 | 配置（部署配置，05-10） | `Configuration:Dictionary:MaxItemsPerType`（默认 2000）、`Configuration:Setting:ValueMaxKb`（默认 16）、`Configuration:Preference:FamilyValueMaxKb`（默认 16） |
-| 错误码（`ConfigurationErrors`） | `DictionaryTypeNotFound`（404）、`DictionaryTypeRetired`（422）、`DictionaryItemNotFound`（404）、`DictionaryItemCodeExists`（409）、`DictionaryItemCodeInvalid`（422）、`DictionaryParentInvalid`（422，不存在、不是层级字典、会成环）、`DictionaryItemHasEnabledChildren`（422）、`DictionaryTooManyItems`（422）、`DictionaryItemNotSelectable`（422）、`SettingNotFound`（404）、`SettingInvalid`（422）、`PreferenceNotFound`（404）、`PreferenceLayerNotAllowed`（422）、`PreferenceInvalid`（422） |
+| 错误码（`ConfigurationErrors`） | `DictionaryTypeNotFound`（404）、`DictionaryTypeRetired`（422）、`DictionaryItemNotFound`（404）、`DictionaryItemCodeExists`（409）、`DictionaryItemCodeInvalid`（422）、`DictionaryParentInvalid`（422，不存在、不是层级字典、会成环）、`DictionaryItemHasEnabledChildren`（422）、`DictionaryTooManyItems`（422）、`SettingNotFound`（404）、`SettingInvalid`（400 逐字段错误 / 422 值读不出来）、`PreferenceNotFound`（404）、`PreferenceLayerNotAllowed`（422）、`PreferenceInvalid`（400 逐字段错误 / 422 值读不出来、偏好族的值不是对象或超大小）、`PreferenceRoleNotFound`（404，给角色层指定的角色不存在） |
 | 通知模板 | 无 |
 | 编号、字典、附件 | 无（本模块是字典的提供方） |
 | 缓存键（`ConfigurationCacheKeys`） | `Configuration:Dictionary:{type}`、`Configuration:Settings`、`Configuration:Preferences:System`、`Configuration:Preferences:Role:{roleId}`（05-10 第 3.2 节） |
@@ -481,6 +483,15 @@ ADR-0016 第 3 节写“复杂设置结构与自动生成设置界面，需求�
 | `docs/glossary.md`、`docs/modules/README.md` | 登记第 2 节术语与模块状态 | 本文 |
 
 本文自己发现的差异：05-10 第 1 节对旧 `Base_Dictionary` 的描述（“字典：代码中按名称或 ID 引用”）与旧代码不符，旧表实际是键值配置存储，见本文 1.1；决定不变。
+
+### 实现时的其他差异（2026-11-13）
+
+- 聚合的主键统一用 Guid，编码列另设唯一索引（`DictionaryType.Code`、`SystemSettingValue.Key`）；唯一约束违反都映射为明确的错误码（字典类型编码重复、版本冲突）。
+- `GetDictionariesQuery` 的 ETag 是各类型的编码与版本号拼起来取 SHA-256 的前 16 位（任何一个类型变了整体就变）；框架增加 `ToOkWithETag`（`If-None-Match`、304、`Cache-Control: private, no-cache`）。
+- 设置的值类型成员标 `[SettingField]`（显示名、单位），已在 `BuildingBlocks.Application.Settings` 实现，设置列表据此返回字段清单。
+- 偏好族键格式、系统层/角色层缓存、四层解析都在本模块；框架增加 `PreferenceFamily` / `PreferenceFamilies`（05-10 7.2）。
+- 偏好的各层读取放在 Application 的 `IPreferenceLayers` 接口后面（实现在 Infrastructure，用 HybridCache），读取逻辑与 `IPreferences`、`GetMyPreferencesQuery` 共用。
+- 尚未实现：`GetFeaturesQuery`（4.4，P2）。
 
 ---
 

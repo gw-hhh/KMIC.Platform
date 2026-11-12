@@ -32,6 +32,18 @@ public sealed class OpenApiCompletenessTests
     public void CompleteDocument_HasNoProblems() => Check(Complete).ShouldBeEmpty();
 
     [Fact]
+    public void NullableObjectReference_CanCarryItsDescriptionOnTheReferenceBranch()
+    {
+        var withReference = Complete.Replace(
+            "\"name\": { \"type\": \"string\", \"description\": \"名称\" }",
+            "\"name\": { \"type\": \"string\", \"description\": \"名称\" }, \"owner\": { \"oneOf\": [ { \"type\": \"null\" }, { \"description\": \"负责人\", \"$ref\": \"#/components/schemas/ThingDto\" } ] }",
+            StringComparison.Ordinal);
+
+        Check(withReference).ShouldBeEmpty();
+        Check(withReference.Replace("\"description\": \"负责人\", ", "", StringComparison.Ordinal)).ShouldHaveSingleItem().ShouldBe("架构 ThingDto 的字段 owner 没有说明。");
+    }
+
+    [Fact]
     public void OperationWithoutSummary_IsReported() =>
         Check(Complete.Replace("\"summary\": \"列表\",", "", StringComparison.Ordinal)).ShouldHaveSingleItem().ShouldBe("操作 GET /api/v1/samples/things 没有摘要（summary）。");
 

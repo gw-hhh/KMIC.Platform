@@ -17,7 +17,7 @@ namespace Kmic.Identity.Application.Authentication.SwitchRole;
 public sealed class SwitchRoleCommandHandler(
     IUserRepository users,
     ISessionRepository sessions,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IExecutionContext execution,
     IAccessTokenIssuer tokens,
     ISecurityEventWriter securityEvents,

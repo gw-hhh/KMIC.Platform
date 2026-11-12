@@ -45,7 +45,7 @@ public abstract class IdentityAdminApiTestBase(ClassDatabase<ApiTemplate> databa
     /// </summary>
     protected async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, string token, object? body = null)
     {
-        using var request = new HttpRequestMessage(method, "/api/v1/identity" + url) { Content = body is null ? null : JsonContent.Create(body) };
+        using var request = new HttpRequestMessage(method, url.StartsWith("/api/", StringComparison.Ordinal) ? url : "/api/v1/identity" + url) { Content = body is null ? null : JsonContent.Create(body) };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         if (method != HttpMethod.Get)
         {

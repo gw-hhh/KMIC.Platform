@@ -15,7 +15,7 @@ namespace Kmic.Identity.Application.Roles.Enable;
 /// </summary>
 public sealed class EnableRoleCommandHandler(
     IRoleRepository roles,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
     ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,

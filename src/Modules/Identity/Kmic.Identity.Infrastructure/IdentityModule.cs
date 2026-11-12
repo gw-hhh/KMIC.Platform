@@ -43,6 +43,7 @@ public sealed class IdentityModule : IModule
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddModuleDbContexts<IdentityDbContext, IdentityQueryDbContext, IIdentityQueryDb>();
+        services.AddScoped<IIdentityCommandReads, IdentityCommandReads>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IOrgTreeRepository, OrgTreeRepository>();

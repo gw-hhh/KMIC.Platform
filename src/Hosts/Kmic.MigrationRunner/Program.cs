@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.Configuration.Infrastructure;
 using Kmic.Identity.Infrastructure;
 using Kmic.MigrationRunner;
 using Kmic.Sample.Infrastructure;
@@ -9,6 +10,7 @@ var builder = Host.CreateApplicationBuilder();
 
 // 模块清单和 Kmic.Api 的 Program.cs 保持一致；Sample 是参考模块，生产环境不迁移
 var modules = new ToolModules()
+    .Add<ConfigurationModule>()
     .Add<IdentityModule>()
     .Add<SampleModule>(nonProductionOnly: true);
 

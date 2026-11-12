@@ -17,7 +17,7 @@ internal static class GrantLoading
 {
     public static async Task<Result<GrantContext>> LoadForAsync(
         IUserRepository users,
-        IIdentityQueryDb db,
+        IIdentityReads db,
         IResourceAuthorizer<GrantTarget, GrantAction> authorizer,
         UserId userId,
         long expectedVersion,
@@ -53,7 +53,7 @@ internal static class GrantLoading
     }
 
     // 收回这个角色之后：他自己不再是启用的受保护角色持有人（没有别的受保护角色顶着），而且没有别人
-    private static async Task<bool> RemovesLastHolderAsync(IIdentityQueryDb db, User user, RoleId revoked, CancellationToken ct)
+    private static async Task<bool> RemovesLastHolderAsync(IIdentityReads db, User user, RoleId revoked, CancellationToken ct)
     {
         if (!user.CanLogin)
         {

@@ -11,7 +11,7 @@ namespace Kmic.Identity.Application.Users.Grants;
 /// </summary>
 internal static class OrgAnchors
 {
-    public static async Task<Result> CheckAsync(IIdentityQueryDb db, IReadOnlyList<OrgUnitId> anchors, CancellationToken ct)
+    public static async Task<Result> CheckAsync(IIdentityReads db, IReadOnlyList<OrgUnitId> anchors, CancellationToken ct)
     {
         List<OrgUnitId> distinct = [.. anchors.Distinct()];
         if (distinct.Count == 0)

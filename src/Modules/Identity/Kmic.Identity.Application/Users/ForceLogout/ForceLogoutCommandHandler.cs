@@ -18,7 +18,7 @@ namespace Kmic.Identity.Application.Users.ForceLogout;
 public sealed class ForceLogoutCommandHandler(
     IUserRepository users,
     ISessionRepository sessions,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     ISecurityEventWriter securityEvents,
     TimeProvider time,

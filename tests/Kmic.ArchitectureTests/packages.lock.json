@@ -432,6 +432,86 @@
           "Microsoft.AspNetCore.OpenApi": "[10.0.14, )"
         }
       },
+      "kmic.configuration.application": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Configuration.Contracts": "[1.0.0, )",
+          "Kmic.Configuration.Domain": "[1.0.0, )",
+          "Kmic.Identity.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.configuration.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.configuration.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.configuration.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Configuration.Application": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.configuration.presentation": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Presentation": "[1.0.0, )",
+          "Kmic.Configuration.Application": "[1.0.0, )"
+        }
+      },
+      "kmic.identity.application": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Identity.Contracts": "[1.0.0, )",
+          "Kmic.Identity.Domain": "[1.0.0, )",
+          "Kmic.Notifications.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.identity.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.identity.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.identity.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Identity.Application": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.identity.presentation": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Presentation": "[1.0.0, )",
+          "Kmic.Identity.Application": "[1.0.0, )"
+        }
+      },
+      "kmic.notifications.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
       "kmic.sample.application": {
         "type": "Project",
         "dependencies": {

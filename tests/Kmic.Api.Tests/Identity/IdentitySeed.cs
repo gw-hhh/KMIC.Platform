@@ -9,18 +9,21 @@ namespace Kmic.Api.Tests.Identity;
 /// <remarks>
 /// 密码哈希用和产品代码同一套哈希器（PBKDF2，ASP.NET Core 的 PasswordHasher），所以登录时能被识别
 /// </remarks>
-internal sealed class IdentitySeed(string connectionString)
+internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
 {
     private static readonly Guid _system = new("00000000-0000-0000-0000-000000000001");
 
+    // 一个测试只开一个连接池：每次造数据都新建连接池，连接用完即关，测试多了会把本机的临时端口用光
+    private readonly NpgsqlDataSource _data = NpgsqlDataSource.Create(connectionString);
     private readonly PasswordHasher<object> _hasher = new();
+
+    public async ValueTask DisposeAsync() => await _data.DisposeAsync();
 
     public async Task<Guid> RoleAsync(string name, IReadOnlyCollection<string> permissions, string scope = "All", int sortOrder = 10, bool active = true, bool isProtected = false, bool builtIn = false)
     {
         var id = Guid.CreateVersion7();
-        await using var data = NpgsqlDataSource.Create(connectionString);
         await ExecuteAsync(
-            data,
+            _data,
             """
             INSERT INTO "Identity"."Role" ("Id", "Name", "Status", "IsProtected", "GrantsAllPermissions", "DefaultScopeLevel", "SortOrder", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
             VALUES (@id, @name, @status, @protected, @builtin, @scope, @sort, now(), @system, 0)
@@ -29,7 +32,7 @@ internal sealed class IdentitySeed(string connectionString)
         foreach (var permission in permissions)
         {
             await ExecuteAsync(
-                data,
+                _data,
                 """
                 INSERT INTO "Identity"."RolePermissionEntry" ("Id", "PermissionCode", "RoleId", "CreatedAt", "CreatedBy")
                 VALUES (@id, @code, @role, now(), @system)
@@ -43,9 +46,8 @@ internal sealed class IdentitySeed(string connectionString)
     public async Task<Guid> UserAsync(string account, string? password, string displayName = "测试用户", string? mobile = null, bool active = true, bool mustChange = false, string? employeeNo = null, string? email = null)
     {
         var id = Guid.CreateVersion7();
-        await using var data = NpgsqlDataSource.Create(connectionString);
         await ExecuteAsync(
-            data,
+            _data,
             """
             INSERT INTO "Identity"."User" ("Id", "Account", "DisplayName", "Mobile", "EmployeeNo", "Email", "Kind", "Status", "PasswordHash", "PasswordChangeRequired", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
             VALUES (@id, @account, @name, @mobile, @employee, @email, 'Normal', @status, @hash, @must, now(), @system, 0)
@@ -57,9 +59,8 @@ internal sealed class IdentitySeed(string connectionString)
 
     public async Task GrantAsync(Guid userId, Guid roleId)
     {
-        await using var data = NpgsqlDataSource.Create(connectionString);
         await ExecuteAsync(
-            data,
+            _data,
             """
             INSERT INTO "Identity"."UserRoleGrant" ("Id", "RoleId", "GrantedBy", "GrantedAt", "CreatedAt", "CreatedBy", "UserId")
             VALUES (@id, @role, @system, now(), now(), @system, @user)
@@ -72,9 +73,8 @@ internal sealed class IdentitySeed(string connectionString)
     /// </summary>
     public async Task<Guid> OrgTreeAsync(string rootName = "总部")
     {
-        await using var data = NpgsqlDataSource.Create(connectionString);
         await ExecuteAsync(
-            data,
+            _data,
             """
             WITH tree AS (
                 INSERT INTO "Identity"."OrgTree" ("Id", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
@@ -85,31 +85,28 @@ internal sealed class IdentitySeed(string connectionString)
             SELECT @unit, NULL, @name, NULL, 'Active', 1000, now(), @system, "Id" FROM tree
             """,
             ("unit", Guid.CreateVersion7()), ("name", rootName), ("system", _system));
-        await using var command = data.CreateCommand("""SELECT "Id" FROM "Identity"."OrgUnit" WHERE "ParentId" IS NULL""");
+        await using var command = _data.CreateCommand("""SELECT "Id" FROM "Identity"."OrgUnit" WHERE "ParentId" IS NULL""");
         return (Guid)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
     }
 
     public async Task SetRoleStatusAsync(Guid roleId, bool active)
     {
-        await using var data = NpgsqlDataSource.Create(connectionString);
         await ExecuteAsync(
-            data,
+            _data,
             """UPDATE "Identity"."Role" SET "Status" = @status, "ConcurrencyVersion" = "ConcurrencyVersion" + 1 WHERE "Id" = @id""",
             ("status", active ? "Active" : "Disabled"), ("id", roleId));
     }
 
     public async Task<string?> SessionStatusAsync(Guid sessionId)
     {
-        await using var data = NpgsqlDataSource.Create(connectionString);
-        await using var command = data.CreateCommand("""SELECT "Status" FROM "Identity"."Session" WHERE "Id" = @id""");
+        await using var command = _data.CreateCommand("""SELECT "Status" FROM "Identity"."Session" WHERE "Id" = @id""");
         command.Parameters.AddWithValue("id", sessionId);
         return await command.ExecuteScalarAsync(TestContext.Current.CancellationToken) as string;
     }
 
     public async Task<long> CountAsync(string sql)
     {
-        await using var data = NpgsqlDataSource.Create(connectionString);
-        await using var command = data.CreateCommand(sql);
+        await using var command = _data.CreateCommand(sql);
         return (long)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken) ?? 0L);
     }
 

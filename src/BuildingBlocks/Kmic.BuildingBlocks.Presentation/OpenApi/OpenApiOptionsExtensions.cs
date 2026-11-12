@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Domain.Identifiers;
@@ -44,7 +45,10 @@ public static class OpenApiOptionsExtensions
             return type.Type.Name;
         }
 
-        return typeof(IStronglyTypedId).IsAssignableFrom(Nullable.GetUnderlyingType(type.Type) ?? type.Type)
+        // 强类型 ID 就是 UUID 字符串；JsonElement 是“任意 JSON 值”，没有结构可言：都内联，不生成同名的架构。
+        // 可空的 JsonElement 和不可空的算同一个类型，不然同一个名字会被两个类型占用
+        var underlying = Nullable.GetUnderlyingType(type.Type) ?? type.Type;
+        return typeof(IStronglyTypedId).IsAssignableFrom(underlying) || underlying == typeof(JsonElement)
             ? null
             : OpenApiOptions.CreateDefaultSchemaReferenceId(type);
     }

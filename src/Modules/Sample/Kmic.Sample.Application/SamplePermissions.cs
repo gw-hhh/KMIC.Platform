@@ -37,4 +37,10 @@ public static class SamplePermissions
     /// </summary>
     [Permission("删除示例标本", Sensitive = true)]
     public const string Delete = "Sample.Specimen.Delete";
+
+    /// <summary>
+    /// 修改示例设置
+    /// </summary>
+    [Permission("管理示例设置")]
+    public const string SettingManage = "Sample.Setting.Manage";
 }

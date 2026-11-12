@@ -14,7 +14,7 @@ namespace Kmic.Identity.Application.Roles.Update;
 /// </summary>
 public sealed class UpdateRoleCommandHandler(
     IRoleRepository roles,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<UpdateRoleCommand, VersionedResponse<RoleId>>(recheck, execution)

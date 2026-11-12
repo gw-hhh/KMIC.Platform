@@ -126,7 +126,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
     private async Task<RoleSnapshot> GetRoleSnapshotAsync(IdentityQueryDbContext db, RoleId role, long version, CancellationToken ct)
     {
         var key = IdentityCacheKeys.RoleSnapshot(role, version);
-        var snapshot = await cache.GetOrCreateAsync(key, (db, permissions, role), LoadRoleAsync, _versionedEntry, cancellationToken: ct);
+        var snapshot = await cache.GetOrCreateAsync(key, new RoleSnapshotLoader(db, permissions, role), static (loader, token) => loader.LoadAsync(token), _versionedEntry, cancellationToken: ct);
         if (snapshot.Version != version)
         {
             // 键里的版本比内容旧：不让错位的内容留在缓存里，本次请求用快照自己的版本
@@ -144,7 +144,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         }
 
         var key = IdentityCacheKeys.OrgTree(version);
-        var snapshot = await cache.GetOrCreateAsync(key, db, LoadOrgTreeAsync, _versionedEntry, cancellationToken: ct);
+        var snapshot = await cache.GetOrCreateAsync(key, new OrgTreeLoader(db), static (loader, token) => loader.LoadAsync(token), _versionedEntry, cancellationToken: ct);
         if (snapshot.Version != version)
         {
             await cache.RemoveAsync(key, ct);
@@ -153,33 +153,41 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         return snapshot;
     }
 
-    private static async ValueTask<RoleSnapshot> LoadRoleAsync((IdentityQueryDbContext Db, PermissionCatalog Catalog, RoleId Role) state, CancellationToken ct)
+    // 缓存的加载状态不直接传查询上下文：上下文有公开可写的属性，缓存值与状态的可变性检查按类型逐个看，
+    // 包一层后依赖都是私有的，对外没有可变成员
+    private sealed class RoleSnapshotLoader(IdentityQueryDbContext db, PermissionCatalog catalog, RoleId roleId)
     {
-        var role = await state.Db.Set<Role>()
-            .AsNoTracking()
-            .Include(r => r.Permissions)
-            .Include(r => r.DataScopes)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync(r => r.Id == state.Role, ct)
-            ?? throw new InvalidOperationException($"角色 {state.Role.Value} 不存在，授予指向了一个不存在的角色。");
+        public async ValueTask<RoleSnapshot> LoadAsync(CancellationToken ct)
+        {
+            var role = await db.Set<Role>()
+                .AsNoTracking()
+                .Include(r => r.Permissions)
+                .Include(r => r.DataScopes)
+                .AsSplitQuery()
+                .SingleOrDefaultAsync(r => r.Id == roleId, ct)
+                ?? throw new InvalidOperationException($"角色 {roleId.Value} 不存在，授予指向了一个不存在的角色。");
 
-        // 全权限角色不存权限点行，拥有当前目录里的全部；其余角色只保留目录里还有的，已退役的权限点没有代码会检查它
-        var codes = role.GrantsAllPermissions
-            ? state.Catalog.All.Select(p => p.Code)
-            : role.Permissions.Select(p => p.PermissionCode).Where(state.Catalog.Contains);
-        return new RoleSnapshot(
-            role.ConcurrencyVersion,
-            [.. codes.Distinct(StringComparer.Ordinal)],
-            (int)role.DefaultScopeLevel,
-            role.DataScopes.ToDictionary(s => s.ScopeObject, s => (int)s.Level, StringComparer.Ordinal));
+            // 全权限角色不存权限点行，拥有当前目录里的全部；其余角色只保留目录里还有的，已退役的权限点没有代码会检查它
+            var codes = role.GrantsAllPermissions
+                ? catalog.All.Select(p => p.Code)
+                : role.Permissions.Select(p => p.PermissionCode).Where(catalog.Contains);
+            return new RoleSnapshot(
+                role.ConcurrencyVersion,
+                [.. codes.Distinct(StringComparer.Ordinal)],
+                role.DefaultScopeLevel.ToScopeLevel(),
+                role.DataScopes.ToDictionary(s => s.ScopeObject, s => s.Level.ToScopeLevel(), StringComparer.Ordinal));
+        }
     }
 
-    private static async ValueTask<OrgTreeSnapshot> LoadOrgTreeAsync(IdentityQueryDbContext db, CancellationToken ct)
+    private sealed class OrgTreeLoader(IdentityQueryDbContext db)
     {
-        var tree = await db.Set<Domain.Organization.OrgTree>().AsNoTracking().Include(t => t.Units).AsSplitQuery().SingleOrDefaultAsync(ct);
-        return tree is null
-            ? OrgTreeSnapshot.Empty
-            : new OrgTreeSnapshot(tree.ConcurrencyVersion, [.. tree.Units.Select(u => new OrgNode(u.Id.Value, u.ParentId?.Value))]);
+        public async ValueTask<OrgTreeSnapshot> LoadAsync(CancellationToken ct)
+        {
+            var tree = await db.Set<Domain.Organization.OrgTree>().AsNoTracking().Include(t => t.Units).AsSplitQuery().SingleOrDefaultAsync(ct);
+            return tree is null
+                ? OrgTreeSnapshot.Empty
+                : new OrgTreeSnapshot(tree.ConcurrencyVersion, [.. tree.Units.Select(u => new OrgNode(u.Id.Value, u.ParentId?.Value))]);
+        }
     }
 
     private static async Task<AccessStateRow?> ReadSessionStateAsync(IdentityQueryDbContext db, SessionId session, RoleId role, CancellationToken ct) =>

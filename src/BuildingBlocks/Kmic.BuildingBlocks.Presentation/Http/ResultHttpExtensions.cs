@@ -2,6 +2,7 @@ using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Microsoft.Net.Http.Headers;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
@@ -21,6 +22,37 @@ public static class ResultHttpExtensions
     {
         ArgumentNullException.ThrowIfNull(result);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result);
+    }
+
+    /// <summary>
+    /// 成功返回 200 和值，并带上 ETag；请求的 If-None-Match 与它一致时返回 304、没有响应体
+    /// </summary>
+    /// <remarks>
+    /// 给“变化很少、很多人反复读”的数据用，如字典：前端带着上次的 ETag 再问，没变就不用再传一遍。
+    /// 响应同时带 <c>Cache-Control: private, no-cache</c>：浏览器可以保存，但每次使用前必须带 ETag 向服务器确认
+    /// </remarks>
+    /// <param name="result">查询的结果</param>
+    /// <param name="http">当前请求</param>
+    /// <param name="etagOf">从值算出 ETag 的内容，不用带引号；值不变它就不变</param>
+    public static IResult ToOkWithETag<T>(this Result<T> result, HttpContext http, Func<T, string> etagOf)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(http);
+        ArgumentNullException.ThrowIfNull(etagOf);
+
+        if (result.IsFailure)
+        {
+            return Problem(result);
+        }
+
+        var etag = new EntityTagHeaderValue($"\"{etagOf(result.Value)}\"");
+        var response = http.Response.GetTypedHeaders();
+        response.ETag = etag;
+        response.CacheControl = new CacheControlHeaderValue { Private = true, NoCache = true };
+        var presented = http.Request.GetTypedHeaders().IfNoneMatch;
+        return presented.Any(t => t.Equals(EntityTagHeaderValue.Any) || t.Compare(etag, useStrongComparison: false))
+            ? Results.StatusCode(StatusCodes.Status304NotModified)
+            : TypedResults.Ok(result.Value);
     }
 
     /// <summary>

@@ -13,7 +13,7 @@ namespace Kmic.Identity.Application.Organization.Disable;
 /// <summary>
 /// 处理 <see cref="DisableOrgUnitCommand"/>
 /// </summary>
-public sealed class DisableOrgUnitCommandHandler(IOrgTreeRepository trees, IIdentityQueryDb db, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
+public sealed class DisableOrgUnitCommandHandler(IOrgTreeRepository trees, IIdentityCommandReads db, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<DisableOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
 {
     /// <inheritdoc />

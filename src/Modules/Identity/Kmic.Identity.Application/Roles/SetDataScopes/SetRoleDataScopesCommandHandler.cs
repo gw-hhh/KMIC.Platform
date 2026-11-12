@@ -16,7 +16,7 @@ namespace Kmic.Identity.Application.Roles.SetDataScopes;
 /// </summary>
 public sealed class SetRoleDataScopesCommandHandler(
     IRoleRepository roles,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
     DataScopeObjectCatalog catalog,
     ISecurityEventWriter securityEvents,

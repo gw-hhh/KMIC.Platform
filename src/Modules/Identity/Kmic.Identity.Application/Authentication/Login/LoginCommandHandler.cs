@@ -19,7 +19,7 @@ namespace Kmic.Identity.Application.Authentication.Login;
 /// </remarks>
 public sealed class LoginCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     ISessionRepository sessions,
     IPasswordService passwords,
     ILoginThrottleStore throttles,

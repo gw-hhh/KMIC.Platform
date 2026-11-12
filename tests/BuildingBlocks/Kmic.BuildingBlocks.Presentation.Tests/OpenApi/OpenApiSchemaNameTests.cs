@@ -26,4 +26,19 @@ public sealed class OpenApiSchemaNameTests
         thrown.Message.ShouldContain("First");
         thrown.Message.ShouldContain("Second");
     }
+
+    [Fact]
+    public async Task AnyJsonValue_IsInlined_WhetherOrNotItIsNullable()
+    {
+        await using var api = await ApiHost.StartAsync(
+            [new ListedModule("Samples", AnyJsonEndpoints.All)],
+            services: services => services.AddOpenApi("v1", options => options.AddKmicConventions()));
+        var provider = api.App.Services.GetRequiredKeyedService<IOpenApiDocumentProvider>("v1");
+
+        var document = await provider.GetOpenApiDocumentAsync(TestContext.Current.CancellationToken);
+
+        var schemas = document.Components!.Schemas!;
+        schemas.ContainsKey("SaveValueRequest").ShouldBeTrue();
+        schemas.ContainsKey("JsonElement").ShouldBeFalse();
+    }
 }

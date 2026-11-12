@@ -16,7 +16,7 @@ namespace Kmic.Identity.Application.Roles.SetPermissions;
 /// </summary>
 public sealed class SetRolePermissionsCommandHandler(
     IRoleRepository roles,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
     PermissionCatalog catalog,
     ISecurityEventWriter securityEvents,

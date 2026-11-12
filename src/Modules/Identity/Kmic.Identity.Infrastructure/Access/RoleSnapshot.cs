@@ -16,7 +16,7 @@ namespace Kmic.Identity.Infrastructure.Access;
 /// <param name="DefaultScopeLevel">默认数据范围等级，数值与框架的 ScopeLevel 一致</param>
 /// <param name="ScopeOverrides">按范围对象单独设置的等级，键是范围对象编码</param>
 [ImmutableObject(true)]
-internal sealed record RoleSnapshot(long Version, string[] PermissionCodes, int DefaultScopeLevel, Dictionary<string, int> ScopeOverrides)
+internal sealed record RoleSnapshot(long Version, IReadOnlyList<string> PermissionCodes, int DefaultScopeLevel, IReadOnlyDictionary<string, int> ScopeOverrides)
 {
     private readonly Lazy<FrozenSet<string>> _permissions = new(() => PermissionCodes.ToFrozenSet(StringComparer.Ordinal));
 

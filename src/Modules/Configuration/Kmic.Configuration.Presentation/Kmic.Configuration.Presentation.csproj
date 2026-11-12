@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 接口层：端点和请求模型 -->
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Presentation/Kmic.BuildingBlocks.Presentation.csproj" />
+    <ProjectReference Include="../Kmic.Configuration.Application/Kmic.Configuration.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.AspNetCore.Routing" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+</Project>

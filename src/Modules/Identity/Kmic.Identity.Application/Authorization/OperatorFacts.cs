@@ -11,6 +11,6 @@ internal static class OperatorFacts
     /// <summary>
     /// 操作者当前的角色是不是受保护角色
     /// </summary>
-    public static async Task<bool> IsProtectedAsync(IIdentityQueryDb db, IAccessContext access, CancellationToken ct) =>
+    public static async Task<bool> IsProtectedAsync(IIdentityReads db, IAccessContext access, CancellationToken ct) =>
         await db.Roles.Where(r => r.Id == access.RoleId).Select(r => r.IsProtected).SingleOrDefaultAsync(ct);
 }

@@ -14,7 +14,7 @@ namespace Kmic.Identity.Application.Users.Disable;
 /// </summary>
 public sealed class DisableUserCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<DisableUserCommand, VersionedResponse<UserId>>(recheck, execution)

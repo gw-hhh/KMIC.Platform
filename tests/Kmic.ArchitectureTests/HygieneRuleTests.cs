@@ -84,8 +84,14 @@ public sealed class HygieneRuleTests
     {
         foreach (var module in ProductAssemblies.ModuleNames)
         {
-            var application = ProductAssemblies.Modules.Single(a => string.Equals(a.Module, module, StringComparison.Ordinal) && a.Layer == Layer.Application);
-            var domain = ProductAssemblies.Modules.Single(a => string.Equals(a.Module, module, StringComparison.Ordinal) && a.Layer == Layer.Domain);
+            var application = ProductAssemblies.Modules.SingleOrDefault(a => string.Equals(a.Module, module, StringComparison.Ordinal) && a.Layer == Layer.Application);
+            var domain = ProductAssemblies.Modules.SingleOrDefault(a => string.Equals(a.Module, module, StringComparison.Ordinal) && a.Layer == Layer.Domain);
+
+            // 只有 Contracts 的模块（别的模块先引用了它的契约，实现还没开始）没有消息可检查
+            if (application is null || domain is null)
+            {
+                continue;
+            }
 
             MessageContentRules.NoDomainTypes(application.Assembly.GetTypes(), domain.Assembly).ShouldBeEmpty();
         }

@@ -11,6 +11,13 @@
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Configuration/">
+    <Project Path="src/Modules/Configuration/Kmic.Configuration.Application/Kmic.Configuration.Application.csproj" />
+    <Project Path="src/Modules/Configuration/Kmic.Configuration.Contracts/Kmic.Configuration.Contracts.csproj" />
+    <Project Path="src/Modules/Configuration/Kmic.Configuration.Domain/Kmic.Configuration.Domain.csproj" />
+    <Project Path="src/Modules/Configuration/Kmic.Configuration.Infrastructure/Kmic.Configuration.Infrastructure.csproj" />
+    <Project Path="src/Modules/Configuration/Kmic.Configuration.Presentation/Kmic.Configuration.Presentation.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Kmic.Identity.Application/Kmic.Identity.Application.csproj" />
     <Project Path="src/Modules/Identity/Kmic.Identity.Contracts/Kmic.Identity.Contracts.csproj" />
@@ -38,6 +45,10 @@
     <Project Path="src/Aspire/Kmic.ServiceDefaults/Kmic.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Configuration/">
+    <Project Path="tests/Modules/Configuration/Kmic.Configuration.Domain.Tests/Kmic.Configuration.Domain.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/Identity/">
     <Project Path="tests/Modules/Identity/Kmic.Identity.Application.Tests/Kmic.Identity.Application.Tests.csproj" />
     <Project Path="tests/Modules/Identity/Kmic.Identity.Domain.Tests/Kmic.Identity.Domain.Tests.csproj" />

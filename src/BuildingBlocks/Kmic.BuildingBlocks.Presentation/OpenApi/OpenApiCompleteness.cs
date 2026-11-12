@@ -69,12 +69,17 @@ public static class OpenApiCompleteness
                 continue;
             }
 
-            foreach (var property in properties.EnumerateObject().Where(p => IsBlank(p.Value, "description")))
+            foreach (var property in properties.EnumerateObject().Where(p => !HasDescription(p.Value)))
             {
                 problems.Add($"架构 {schema.Name} 的字段 {property.Name} 没有说明。");
             }
         }
     }
+
+    // 可空的对象引用生成为 oneOf: [null, $ref]，说明跟在 $ref 那一支上，不在字段本身
+    private static bool HasDescription(JsonElement property) =>
+        !IsBlank(property, "description")
+        || (property.TryGetProperty("oneOf", out var branches) && branches.EnumerateArray().Any(b => !IsBlank(b, "description")));
 
     // 智能枚举的每个值都要有显示名，并且和架构里的取值一致
     private static void CheckEnumLabels(JsonElement document, List<string> problems)

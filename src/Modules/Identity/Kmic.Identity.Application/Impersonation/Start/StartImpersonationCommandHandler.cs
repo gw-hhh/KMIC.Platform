@@ -22,7 +22,7 @@ namespace Kmic.Identity.Application.Impersonation.Start;
 public sealed class StartImpersonationCommandHandler(
     IUserRepository users,
     ISessionRepository sessions,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     IAllowedActions<UserTarget> allowedActions,
     IAccessTokenIssuer tokens,

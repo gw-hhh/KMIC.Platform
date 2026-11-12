@@ -16,7 +16,7 @@ namespace Kmic.Identity.Application.Users.UnlockLogin;
 /// </summary>
 public sealed class UnlockLoginCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     ILoginThrottleStore throttle,
     ISecurityEventWriter securityEvents,

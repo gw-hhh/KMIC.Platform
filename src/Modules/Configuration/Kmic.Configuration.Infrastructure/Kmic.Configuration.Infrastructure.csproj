@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 基础设施层：DbContext、仓储、模块注册类、迁移 -->
+  <ItemGroup>
+    <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../Kmic.Configuration.Application/Kmic.Configuration.Application.csproj" />
+  </ItemGroup>
+</Project>

@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Users;
 /// </summary>
 internal static class UserNames
 {
-    public static async Task<IReadOnlyDictionary<OrgUnitId, string>> OrgUnitsAsync(IIdentityQueryDb db, IEnumerable<OrgUnitId> ids, CancellationToken ct)
+    public static async Task<IReadOnlyDictionary<OrgUnitId, string>> OrgUnitsAsync(IIdentityReads db, IEnumerable<OrgUnitId> ids, CancellationToken ct)
     {
         List<OrgUnitId> distinct = [.. ids.Distinct()];
         if (distinct.Count == 0)
@@ -21,7 +21,7 @@ internal static class UserNames
         return rows.ToDictionary(r => r.Id, r => r.Name);
     }
 
-    public static async Task<IReadOnlyDictionary<RoleId, RoleName>> RolesAsync(IIdentityQueryDb db, IEnumerable<RoleId> ids, CancellationToken ct)
+    public static async Task<IReadOnlyDictionary<RoleId, RoleName>> RolesAsync(IIdentityReads db, IEnumerable<RoleId> ids, CancellationToken ct)
     {
         List<RoleId> distinct = [.. ids.Distinct()];
         if (distinct.Count == 0)
@@ -33,7 +33,7 @@ internal static class UserNames
         return rows.ToDictionary(r => r.Id, r => new RoleName(r.Name, r.Status == RoleStatus.Active, r.IsProtected));
     }
 
-    public static async Task<IReadOnlyDictionary<UserId, string>> UsersAsync(IIdentityQueryDb db, IEnumerable<UserId> ids, CancellationToken ct)
+    public static async Task<IReadOnlyDictionary<UserId, string>> UsersAsync(IIdentityReads db, IEnumerable<UserId> ids, CancellationToken ct)
     {
         List<UserId> distinct = [.. ids.Distinct()];
         if (distinct.Count == 0)

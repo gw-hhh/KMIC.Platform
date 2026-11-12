@@ -14,7 +14,7 @@ namespace Kmic.Identity.Application.Users.UpdateProfile;
 /// </summary>
 public sealed class UpdateUserProfileCommandHandler(
     IUserRepository users,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<UserTarget, UserAdminAction> authorizer,
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<UpdateUserProfileCommand, VersionedResponse<UserId>>(recheck, execution)

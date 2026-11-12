@@ -15,7 +15,7 @@ namespace Kmic.Identity.Application.Roles.Disable;
 /// </summary>
 public sealed class DisableRoleCommandHandler(
     IRoleRepository roles,
-    IIdentityQueryDb db,
+    IIdentityCommandReads db,
     IResourceAuthorizer<RoleTarget, RoleAdminAction> authorizer,
     ISecurityEventWriter securityEvents,
     IOperatorRecheck recheck,
