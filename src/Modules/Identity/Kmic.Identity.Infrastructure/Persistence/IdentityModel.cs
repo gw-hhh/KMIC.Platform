@@ -19,5 +19,7 @@ internal static class IdentityModel
             .ApplyConfiguration(new OrgTreeConfiguration())
             .ApplyConfiguration(new OrgUnitConfiguration())
             .ApplyConfiguration(new SessionConfiguration())
-            .ApplyConfiguration(new RefreshTokenConfiguration());
+            .ApplyConfiguration(new RefreshTokenConfiguration())
+            .ApplyConfiguration(new LoginThrottleRowConfiguration())
+            .ApplyConfiguration(new VerificationCodeRowConfiguration());
 }

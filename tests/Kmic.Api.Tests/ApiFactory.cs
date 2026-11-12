@@ -14,7 +14,7 @@ namespace Kmic.Api.Tests;
 /// 角色只有 Api：投递、作业、调度这些后台处理另有测试。Identity 模块还没有，
 /// 身份由测试登记在 <see cref="Loader"/> 里，令牌用测试自己的密钥签发
 /// </remarks>
-public sealed class ApiFactory(string connectionString, TokenFactory tokens) : WebApplicationFactory<Program>
+public sealed class ApiFactory(string connectionString, TokenFactory tokens, bool realIdentity = false, IReadOnlyDictionary<string, string>? extraSettings = null) : WebApplicationFactory<Program>
 {
     /// <summary>
     /// 登记身份用的加载器
@@ -32,6 +32,16 @@ public sealed class ApiFactory(string connectionString, TokenFactory tokens) : W
         foreach (var (key, value) in tokens.Settings())
         {
             builder.UseSetting(key, value);
+        }
+
+        foreach (var (key, value) in extraSettings ?? new Dictionary<string, string>(StringComparer.Ordinal))
+        {
+            builder.UseSetting(key, value);
+        }
+
+        if (realIdentity)
+        {
+            return;
         }
 
         builder.ConfigureTestServices(services =>

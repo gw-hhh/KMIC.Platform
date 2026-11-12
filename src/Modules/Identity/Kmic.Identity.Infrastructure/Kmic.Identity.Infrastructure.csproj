@@ -2,9 +2,13 @@
   <!-- 基础设施层：DbContext、仓储、模块注册类、迁移 -->
   <ItemGroup>
     <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="../Kmic.Identity.Application/Kmic.Identity.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Authentication/weak-passwords.txt" />
   </ItemGroup>
 </Project>

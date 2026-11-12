@@ -217,6 +217,27 @@ public sealed class Session : AggregateRoot<SessionId>
     }
 
     /// <summary>
+    /// 出示的令牌是不是被重用：它是已被换掉的旧令牌，并且已经过了宽限期；是的话作废整个会话
+    /// </summary>
+    /// <remarks>
+    /// 刷新命令发现重用时会失败回滚，作废要靠这个方法在另一个事务里重新核实后完成
+    /// </remarks>
+    /// <returns>确实是重用并且这次作废了会话时为真</returns>
+    public bool RevokeIfReused(string presentedHash, DateTimeOffset now, TimeSpan grace)
+    {
+        ArgumentNullException.ThrowIfNull(presentedHash);
+
+        var presented = _refreshTokens.Find(t => string.Equals(t.TokenHash, presentedHash, StringComparison.Ordinal));
+        if (presented is null || presented.IsCurrent || !IsUsable(now) || now - presented.UsedAt!.Value <= grace)
+        {
+            return false;
+        }
+
+        Revoke(RevokeReason.RefreshTokenReused, now);
+        return true;
+    }
+
+    /// <summary>
     /// 切换当前角色；角色是否可切换由调用方先确认
     /// </summary>
     public void SwitchRole(RoleId roleId) => CurrentRoleId = roleId;

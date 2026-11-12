@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 
@@ -8,6 +9,7 @@ namespace Kmic.Identity.Infrastructure.Access;
 /// </summary>
 /// <param name="Version">组织树的并发版本号</param>
 /// <param name="Nodes">全部单元（含已停用）：ID 与上级 ID，根单元的上级为空</param>
+[ImmutableObject(true)]
 internal sealed record OrgTreeSnapshot(long Version, IReadOnlyList<OrgNode> Nodes) : IOrgHierarchy
 {
     private readonly Lazy<Index> _index = new(() => Index.Build(Nodes));

@@ -199,6 +199,11 @@ public static class IdentityErrors
     public static readonly Error InvalidRefreshToken = Error.Unauthenticated("Identity.InvalidRefreshToken", "登录已失效，请重新登录");
 
     /// <summary>
+    /// 旧的刷新令牌在宽限期之外再次出现：内部使用，对外统一返回 InvalidRefreshToken
+    /// </summary>
+    public static readonly Error RefreshTokenReused = Error.Unauthenticated("Identity.RefreshTokenReused", "登录已失效，请重新登录");
+
+    /// <summary>
     /// 登录尝试过多，要等一段时间
     /// </summary>
     public static readonly Error LoginThrottled = Error.TooManyRequests("Identity.LoginThrottled", "登录尝试过多，请稍后再试或联系管理员解锁", TimeSpan.FromMinutes(1));
@@ -251,5 +256,10 @@ public static class IdentityErrors
     /// <summary>
     /// 应急重置只能对持有受保护角色的账号执行
     /// </summary>
+    /// <summary>
+    /// 携带刷新 Cookie 的请求来源不可信：Origin 不在名单里，或没有带自定义请求头
+    /// </summary>
+    public static readonly Error CsrfRejected = Error.Forbidden("Identity.CsrfRejected", "请求来源不可信");
+
     public static readonly Error NotProtectedHolder = Error.BusinessRule("Identity.NotProtectedHolder", "这个账号不是系统管理员，不能用应急命令重置");
 }

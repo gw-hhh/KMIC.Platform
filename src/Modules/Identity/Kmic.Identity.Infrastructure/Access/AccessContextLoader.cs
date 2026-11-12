@@ -169,9 +169,9 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
             : role.Permissions.Select(p => p.PermissionCode).Where(state.Catalog.Contains);
         return new RoleSnapshot(
             role.ConcurrencyVersion,
-            codes.ToFrozenSet(StringComparer.Ordinal),
+            [.. codes.Distinct(StringComparer.Ordinal)],
             (int)role.DefaultScopeLevel,
-            role.DataScopes.ToFrozenDictionary(s => s.ScopeObject, s => (int)s.Level, StringComparer.Ordinal));
+            role.DataScopes.ToDictionary(s => s.ScopeObject, s => (int)s.Level, StringComparer.Ordinal));
     }
 
     private static async ValueTask<OrgTreeSnapshot> LoadOrgTreeAsync(IdentityQueryDbContext db, CancellationToken ct)

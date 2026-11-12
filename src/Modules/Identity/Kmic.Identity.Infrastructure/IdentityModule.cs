@@ -1,8 +1,11 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application;
+using Kmic.Identity.Application.Authentication;
+using Kmic.Identity.Infrastructure.Authentication;
 using Kmic.Identity.Contracts;
 using Kmic.Identity.Domain.Organization;
 using Kmic.Identity.Domain.Roles;
@@ -42,5 +45,15 @@ public sealed class IdentityModule : IModule
 
         // 单例：后台作业的执行器是单例，每次加载自己开一个作用域；请求里同样如此
         services.AddSingleton<IAccessContextLoader, AccessContextLoader>();
+
+        services.AddSingleton<IPasswordService, PasswordService>();
+        services.AddSingleton<IWeakPasswordList, EmbeddedWeakPasswordList>();
+        services.AddScoped<ILoginThrottleStore, LoginThrottleStore>();
+        services.AddKmicOptions<LoginThrottleOptions>(LoginThrottleOptions.Section);
+        services.AddKmicOptions<PasswordOptions>(PasswordOptions.Section);
+        services.AddKmicOptions<SessionLifetimeOptions>(SessionLifetimeOptions.Section);
+        services.AddKmicOptions<TrustedOriginsOptions>(TrustedOriginsOptions.Section);
+        services.AddSingleton<LoginThrottlePolicy>();
+        services.AddSingleton<PasswordPolicy>();
     }
 }

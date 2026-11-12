@@ -1,4 +1,5 @@
 using Kmic.Identity.Application.Authentication;
+using Microsoft.Extensions.Options;
 using Shouldly;
 
 namespace Kmic.Identity.Application.Tests.Authentication;
@@ -7,7 +8,7 @@ public sealed class LoginThrottlePolicyTests
 {
     private static readonly DateTimeOffset _t0 = new(2026, 11, 12, 9, 0, 0, TimeSpan.Zero);
 
-    private readonly LoginThrottlePolicy _policy = new(new LoginThrottleOptions());
+    private readonly LoginThrottlePolicy _policy = new(Options.Create(new LoginThrottleOptions()));
 
     // 在第 n 次失败时没有等待，等待从上一次失败之后起算：测试里每次失败都发生在等待结束之后
     private LoginThrottleState FailTimes(int times, DateTimeOffset start, out DateTimeOffset now)
@@ -107,7 +108,7 @@ public sealed class LoginThrottlePolicyTests
     [Fact]
     public void CustomOptions_AreHonored()
     {
-        var strict = new LoginThrottlePolicy(new LoginThrottleOptions { FreeFailures = 0, Waits = [TimeSpan.FromSeconds(10)], LockAfterFailures = 3, FirstLock = TimeSpan.FromMinutes(1), RelockEveryFailures = 2, MaxLock = TimeSpan.FromMinutes(3) });
+        var strict = new LoginThrottlePolicy(Options.Create(new LoginThrottleOptions { FreeFailures = 0, Waits = [TimeSpan.FromSeconds(10)], LockAfterFailures = 3, FirstLock = TimeSpan.FromMinutes(1), RelockEveryFailures = 2, MaxLock = TimeSpan.FromMinutes(3) }));
 
         var first = strict.OnFailure(null, _t0);
         var second = strict.OnFailure(first, _t0.AddSeconds(10));
