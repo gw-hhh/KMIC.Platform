@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 应用层：命令、查询、校验器、权限点与资源策略。处理器是 public sealed，宿主里生成的中介者代码要直接引用它们 -->
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Application/Kmic.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="../Kmic.Sample.Domain/Kmic.Sample.Domain.csproj" />
+    <ProjectReference Include="../Kmic.Sample.Contracts/Kmic.Sample.Contracts.csproj" />
+  </ItemGroup>
+</Project>

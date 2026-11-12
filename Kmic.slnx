@@ -10,7 +10,24 @@
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Presentation/Kmic.BuildingBlocks.Presentation.csproj" />
     <Project Path="src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Kmic.BuildingBlocks.Testing.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Sample/">
+    <Project Path="src/Modules/Sample/Kmic.Sample.Application/Kmic.Sample.Application.csproj" />
+    <Project Path="src/Modules/Sample/Kmic.Sample.Contracts/Kmic.Sample.Contracts.csproj" />
+    <Project Path="src/Modules/Sample/Kmic.Sample.Domain/Kmic.Sample.Domain.csproj" />
+    <Project Path="src/Modules/Sample/Kmic.Sample.Infrastructure/Kmic.Sample.Infrastructure.csproj" />
+    <Project Path="src/Modules/Sample/Kmic.Sample.Presentation/Kmic.Sample.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Hosts/">
+    <Project Path="src/Hosts/Kmic.Api/Kmic.Api.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
+  <Folder Name="/tests/Modules/Sample/">
+    <Project Path="tests/Modules/Sample/Kmic.Sample.Domain.Tests/Kmic.Sample.Domain.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Api/">
+    <Project Path="tests/Kmic.Api.Tests/Kmic.Api.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Analyzers.Tests/Kmic.BuildingBlocks.Analyzers.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Application.Tests/Kmic.BuildingBlocks.Application.Tests.csproj" />

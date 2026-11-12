@@ -1,4 +1,6 @@
+using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
@@ -33,5 +35,26 @@ public static class ModuleMigrator
         await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync(ct);
         await CaseInsensitiveCollation.VerifyColumnsAsync(connection, context, ct);
+    }
+
+    /// <summary>
+    /// 执行服务容器里登记的全部模块的迁移，先做数据库级的准备，模块按名称顺序
+    /// </summary>
+    /// <remarks>
+    /// 迁移程序和测试用的模板库不需要认识每个模块的 DbContext 类型：模块注册服务时已经登记了它
+    /// </remarks>
+    /// <param name="services">已经由各模块的 AddServices 注册过的服务容器</param>
+    /// <param name="connectionString">迁移账号的连接串</param>
+    /// <param name="ct">取消令牌</param>
+    public static async Task MigrateAllAsync(IServiceProvider services, string connectionString, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        await PrepareDatabaseAsync(connectionString, ct);
+        foreach (var registration in services.GetServices<ModuleWriteContext>().OrderBy(r => r.Module, StringComparer.Ordinal))
+        {
+            var migrate = typeof(ModuleMigrator).GetMethod(nameof(MigrateAsync))!.MakeGenericMethod(registration.ContextType);
+            await (Task)migrate.Invoke(null, [connectionString, ct])!;
+        }
     }
 }

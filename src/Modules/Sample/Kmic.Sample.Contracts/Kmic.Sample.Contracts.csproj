@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Sample 模块对外的契约：只能引用 BuildingBlocks.Contracts -->
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Contracts/Kmic.BuildingBlocks.Contracts.csproj" />
+  </ItemGroup>
+</Project>
