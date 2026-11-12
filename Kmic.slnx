@@ -25,6 +25,9 @@
   <Folder Name="/tests/Modules/Sample/">
     <Project Path="tests/Modules/Sample/Kmic.Sample.Domain.Tests/Kmic.Sample.Domain.Tests.csproj" />
   </Folder>
+  <Folder Name="/tests/Architecture/">
+    <Project Path="tests/Kmic.ArchitectureTests/Kmic.ArchitectureTests.csproj" />
+  </Folder>
   <Folder Name="/tests/Api/">
     <Project Path="tests/Kmic.Api.Tests/Kmic.Api.Tests.csproj" />
   </Folder>
