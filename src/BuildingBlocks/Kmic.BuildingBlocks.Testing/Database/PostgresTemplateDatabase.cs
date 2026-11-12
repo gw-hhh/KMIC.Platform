@@ -51,6 +51,19 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     }
 
     /// <summary>
+    /// 建一个没有任何结构的空库，返回库名
+    /// </summary>
+    /// <remarks>
+    /// 用来测试迁移本身。角色属于整个实例，空库里同样能用
+    /// </remarks>
+    public async Task<string> CreateEmptyAsync(CancellationToken ct)
+    {
+        var database = $"test_{Guid.CreateVersion7():N}";
+        await ExecuteAsync($"CREATE DATABASE \"{database}\"", ct);
+        return database;
+    }
+
+    /// <summary>
     /// 删除克隆库，有连接时强制断开
     /// </summary>
     public Task DropAsync(string database, CancellationToken ct) =>

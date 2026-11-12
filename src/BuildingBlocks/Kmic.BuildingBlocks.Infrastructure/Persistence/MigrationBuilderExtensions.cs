@@ -19,7 +19,7 @@ public static class MigrationBuilderExtensions
     /// 建立模块 schema 并授权给运行账号
     /// </summary>
     /// <remarks>
-    /// 写在模块初始迁移的最前面。之后建的表运行账号自动可读写，但不能改表结构
+    /// 写在模块初始迁移的最前面。之后建的表运行账号自动可读写，但不能改表结构；迁移历史表只可读
     /// </remarks>
     /// <param name="migrationBuilder">迁移</param>
     /// <param name="schema">模块名</param>
@@ -30,6 +30,8 @@ public static class MigrationBuilderExtensions
 
         migrationBuilder.Sql($"""CREATE SCHEMA IF NOT EXISTS "{schema}";""");
         migrationBuilder.Sql($"""GRANT USAGE ON SCHEMA "{schema}" TO {RuntimeRole};""");
+        // 迁移历史表在执行第一个迁移之前就建好了，默认授权管不到它；启动时的迁移检查用运行账号读它
+        migrationBuilder.Sql($"""GRANT SELECT ON "{schema}"."__EFMigrationsHistory" TO {RuntimeRole};""");
         migrationBuilder.Sql($"""ALTER DEFAULT PRIVILEGES IN SCHEMA "{schema}" GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {RuntimeRole};""");
     }
 }

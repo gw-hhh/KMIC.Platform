@@ -20,6 +20,22 @@ public sealed class DatabaseOptions
     public string ConnectionString { get; set; } = "";
 
     /// <summary>
+    /// 迁移账号的连接串，只用于开发环境的自动迁移
+    /// </summary>
+    /// <remarks>
+    /// 不配置时用运行账号的连接串（本机开发库的账号通常什么权限都有）。生产环境的迁移由 Kmic.MigrationRunner 执行，应用里不配置迁移账号
+    /// </remarks>
+    public string MigrationConnectionString { get; set; } = "";
+
+    /// <summary>
+    /// 启动时是否自动执行迁移
+    /// </summary>
+    /// <remarks>
+    /// 开发环境默认开启，其他环境默认关闭，只检查有没有未执行的迁移
+    /// </remarks>
+    public bool AutoMigrate { get; set; }
+
+    /// <summary>
     /// 是否检查查询漏读未保存的修改
     /// </summary>
     /// <remarks>

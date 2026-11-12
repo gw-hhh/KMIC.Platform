@@ -6,7 +6,7 @@ using Shouldly;
 namespace Kmic.ArchitectureTests;
 
 /// <summary>
-/// 宿主与仓库层面的约定：管道行为的顺序、模块都登记了、只有根目录有 .editorconfig
+/// 宿主与仓库层面的约定：管道行为的顺序、模块都登记了（宿主与迁移程序）、只有根目录有 .editorconfig
 /// </summary>
 public sealed partial class HostRuleTests
 {
@@ -39,6 +39,23 @@ public sealed partial class HostRuleTests
         foreach (var module in modules)
         {
             ProgramText.ShouldContain($"AddModule<{module},", Case.Sensitive, $"{module} 没有在 Kmic.Api 的 Program.cs 里注册。");
+        }
+    }
+
+    [Fact]
+    public void EveryModuleRegistrationClass_IsListedInTheMigrationRunner()
+    {
+        var program = File.ReadAllText(Path.Combine(ProductAssemblies.RepositoryRoot(), "src", "Hosts", "Kmic.MigrationRunner", "Program.cs"));
+        var modules = ProductAssemblies.Of(Layer.Infrastructure)
+            .SelectMany(a => a.Assembly.GetTypes())
+            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IModule).IsAssignableFrom(t))
+            .Select(t => t.Name)
+            .ToList();
+
+        modules.ShouldNotBeEmpty();
+        foreach (var module in modules)
+        {
+            program.ShouldContain($".Add<{module}>(", Case.Sensitive, $"{module} 没有在 Kmic.MigrationRunner 的 Program.cs 里登记。");
         }
     }
 

@@ -53,3 +53,4 @@ AWSSDK
 presign
 readmodel
 slnf
+appsettings

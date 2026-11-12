@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    运维命令：初始化首个管理员、写入运行配置等需要人工或部署流程触发的一次性操作。
+    用单独的运维账号，权限只给命令需要的那部分（ADR-0029）。现在只有骨架，命令随需要它的模块添加
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Kmic.Tools.Tests" />
+  </ItemGroup>
+</Project>

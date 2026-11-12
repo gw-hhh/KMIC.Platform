@@ -57,4 +57,36 @@ public static class ModuleMigrator
             await (Task)migrate.Invoke(null, [connectionString, ct])!;
         }
     }
+
+    /// <summary>
+    /// 列出服务容器里登记的全部模块还没有执行的迁移，按模块名称排序
+    /// </summary>
+    /// <remarks>
+    /// 启动时用运行账号检查：只读迁移历史表，不改库。模块的 schema 还不存在时，它的全部迁移都算未执行
+    /// </remarks>
+    /// <param name="services">已经由各模块的 AddServices 注册过的服务容器</param>
+    /// <param name="connectionString">连接串</param>
+    /// <param name="ct">取消令牌</param>
+    /// <returns>形如 Sample/20261112002136_InitializeModuleSchema 的迁移标识</returns>
+    public static async Task<IReadOnlyList<string>> PendingAsync(IServiceProvider services, string connectionString, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        var pending = new List<string>();
+        foreach (var registration in services.GetServices<ModuleWriteContext>().OrderBy(r => r.Module, StringComparer.Ordinal))
+        {
+            var query = typeof(ModuleMigrator).GetMethod(nameof(PendingOfAsync), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.MakeGenericMethod(registration.ContextType);
+            var names = await (Task<IReadOnlyList<string>>)query.Invoke(null, [connectionString, ct])!;
+            pending.AddRange(names.Select(name => $"{registration.Module}/{name}"));
+        }
+
+        return pending;
+    }
+
+    private static async Task<IReadOnlyList<string>> PendingOfAsync<TContext>(string connectionString, CancellationToken ct)
+        where TContext : ModuleDbContext
+    {
+        await using var context = StandaloneContexts.Create<TContext>(connectionString);
+        return [.. await context.Database.GetPendingMigrationsAsync(ct)];
+    }
 }

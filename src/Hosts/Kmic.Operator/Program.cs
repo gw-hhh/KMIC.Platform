@@ -1,0 +1,10 @@
+using Kmic.Operator;
+
+using var cancellation = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cancellation.Cancel();
+};
+
+return await OperatorApp.RunAsync(args, Console.Out, cancellation.Token);

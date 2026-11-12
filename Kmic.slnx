@@ -20,6 +20,8 @@
   </Folder>
   <Folder Name="/src/Hosts/">
     <Project Path="src/Hosts/Kmic.Api/Kmic.Api.csproj" />
+    <Project Path="src/Hosts/Kmic.MigrationRunner/Kmic.MigrationRunner.csproj" />
+    <Project Path="src/Hosts/Kmic.Operator/Kmic.Operator.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/Modules/Sample/">
@@ -30,6 +32,7 @@
   </Folder>
   <Folder Name="/tests/Api/">
     <Project Path="tests/Kmic.Api.Tests/Kmic.Api.Tests.csproj" />
+    <Project Path="tests/Kmic.Tools.Tests/Kmic.Tools.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Kmic.BuildingBlocks.Analyzers.Tests/Kmic.BuildingBlocks.Analyzers.Tests.csproj" />

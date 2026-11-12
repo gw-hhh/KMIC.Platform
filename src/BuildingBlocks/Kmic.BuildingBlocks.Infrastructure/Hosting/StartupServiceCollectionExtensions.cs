@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application.Startup;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -23,6 +24,7 @@ public static class StartupServiceCollectionExtensions
 
         services.TryAddSingleton<StartupState>();
         services.AddHostedService<StartupTaskRunner>();
+        services.AddScoped<IStartupTask, MigrationCheckTask>();
         services.AddScoped<IStartupTask, RegisterMessageRoutesTask>();
         services.AddScoped<IStartupTask, QueueReadModelRebuildsTask>();
         return services;

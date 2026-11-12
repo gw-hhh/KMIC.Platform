@@ -9,4 +9,10 @@ internal static partial class HostingLog
 {
     [LoggerMessage(EventId = 2201, Level = LogLevel.Information, Message = "Startup task {Name} completed in {ElapsedMs:0} ms")]
     public static partial void StartupTaskCompleted(ILogger logger, string name, double elapsedMs);
+
+    [LoggerMessage(EventId = 2202, Level = LogLevel.Information, Message = "Database migrations applied automatically for {Modules} modules")]
+    public static partial void MigrationsApplied(ILogger logger, int modules);
+
+    [LoggerMessage(EventId = 2203, Level = LogLevel.Information, Message = "Database migrations are up to date for {Modules} modules")]
+    public static partial void MigrationsUpToDate(ILogger logger, int modules);
 }

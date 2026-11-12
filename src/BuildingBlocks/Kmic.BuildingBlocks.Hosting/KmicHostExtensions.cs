@@ -51,7 +51,11 @@ public static class KmicHostExtensions
         services.AddOptions<DatabaseOptions>()
             .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectionString), $"{DatabaseOptions.Section}:ConnectionString 没有配置。")
             .ValidateOnStart();
-        services.AddKmicPersistence(options => builder.Configuration.GetSection(DatabaseOptions.Section).Bind(options));
+        services.AddKmicPersistence(options =>
+        {
+            options.AutoMigrate = builder.Environment.IsDevelopment();
+            builder.Configuration.GetSection(DatabaseOptions.Section).Bind(options);
+        });
         foreach (var module in modules.Select(m => m.Module))
         {
             module.AddServices(services);

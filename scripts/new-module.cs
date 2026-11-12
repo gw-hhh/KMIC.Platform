@@ -2,7 +2,7 @@
 
 // 新建业务模块：dotnet run scripts/new-module.cs -- <模块名> <编号>
 // 先在 docs/modules/README.md 的登记表里登记模块名与编号，再运行本脚本。依次执行：
-// 对照登记表校验 → dotnet new kmic-module → 加入 Kmic.slnx → 宿主与架构测试引用新模块并登记 →
+// 对照登记表校验 → dotnet new kmic-module → 加入 Kmic.slnx → 宿主、迁移程序与架构测试引用新模块并登记 →
 // 编译 → 生成初始迁移（补 InitializeModuleSchema）→ 规整 dotnet 工具写出的换行与 BOM。
 // 之后运行 dotnet run scripts/check.cs -- --fix 做完整检查
 using System.Diagnostics;
@@ -30,7 +30,7 @@ var steps = new (string Name, Func<int> Run)[]
 {
     ("安装并运行模板", () => Template(root, module)),
     ("加入解决方案", () => AddToSolution(root, module)),
-    ("宿主与架构测试引用新模块并登记", () => Register(root, module)),
+    ("宿主、迁移程序与架构测试引用新模块并登记", () => Register(root, module)),
     ("编译", () => Run(root, "dotnet", "build Kmic.slnx --nologo")),
     ("生成初始迁移", () => Migration(root, module)),
     ("规整换行与 BOM", () => Normalize(root, module)),
@@ -111,6 +111,8 @@ static int Template(string root, string module)
     return install != 0 ? install : Run(root, "dotnet", $"new kmic-module -n {module} -o . --force");
 }
 
+const string MigrationRunner = "Kmic.MigrationRunner";
+
 static string[] ProjectsOf(string module) =>
 [
     $"src/Modules/{module}/Kmic.{module}.Contracts/Kmic.{module}.Contracts.csproj",
@@ -147,6 +149,16 @@ static int Register(string root, string module)
     text = text.Replace("using Kmic.BuildingBlocks.Presentation.OpenApi;", $"using Kmic.BuildingBlocks.Presentation.OpenApi;{Environment.NewLine}using Kmic.{module}.Infrastructure;{Environment.NewLine}using Kmic.{module}.Presentation;", StringComparison.Ordinal);
     text = text.Replace("builder.AddKmicHost(host => host", $"builder.AddKmicHost(host => host{Environment.NewLine}    .AddModule<{module}Module, {module}Endpoints>()", StringComparison.Ordinal);
     File.WriteAllText(program, text);
+
+    // 迁移程序也有一份模块清单（运维命令还没有命令，加了模块清单再登记）
+    var directory = Path.Combine(root, "src", "Hosts", MigrationRunner);
+    InsertAfterLast(Path.Combine(directory, $"{MigrationRunner}.csproj"), "<ProjectReference ", $"""<ProjectReference Include="../../Modules/{module}/Kmic.{module}.Infrastructure/Kmic.{module}.Infrastructure.csproj" />""");
+    var toolProgram = Path.Combine(directory, "Program.cs");
+    var toolText = File.ReadAllText(toolProgram);
+    toolText = toolText.Replace("using Microsoft.Extensions.Hosting;", $"using Kmic.{module}.Infrastructure;{Environment.NewLine}using Microsoft.Extensions.Hosting;", StringComparison.Ordinal);
+    toolText = toolText.Replace("var modules = new ToolModules()", $"var modules = new ToolModules(){Environment.NewLine}    .Add<{module}Module>()", StringComparison.Ordinal);
+    File.WriteAllText(toolProgram, toolText);
+
     return Run(root, "dotnet", "restore Kmic.slnx --force-evaluate");
 }
 
@@ -189,6 +201,8 @@ static int Normalize(string root, string module)
             Path.Combine(root, $"{module}.slnf"),
             Path.Combine(root, "src", "Hosts", "Kmic.Api", "Kmic.Api.csproj"),
             Path.Combine(root, "src", "Hosts", "Kmic.Api", "Program.cs"),
+            Path.Combine(root, "src", "Hosts", "Kmic.MigrationRunner", "Kmic.MigrationRunner.csproj"),
+            Path.Combine(root, "src", "Hosts", "Kmic.MigrationRunner", "Program.cs"),
             Path.Combine(root, "tests", "Kmic.ArchitectureTests", "Kmic.ArchitectureTests.csproj"),
         ])
         .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
