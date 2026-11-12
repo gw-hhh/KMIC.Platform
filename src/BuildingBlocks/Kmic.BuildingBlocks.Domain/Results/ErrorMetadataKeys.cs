@@ -14,4 +14,9 @@ public static class ErrorMetadataKeys
     /// 是否可以重试
     /// </summary>
     public const string Retryable = "retryable";
+
+    /// <summary>
+    /// 还要等多少秒才能重试，只用于“请求过于频繁”
+    /// </summary>
+    public const string RetryAfterSeconds = "retryAfterSeconds";
 }

@@ -99,6 +99,8 @@ public sealed class ResultHttpTests : IAsyncLifetime
     [InlineData(ErrorType.Conflict, 409, false)]
     [InlineData(ErrorType.BusinessRule, 422, false)]
     [InlineData(ErrorType.Unavailable, 503, true)]
+    [InlineData(ErrorType.Unauthenticated, 401, false)]
+    [InlineData(ErrorType.TooManyRequests, 429, true)]
     public async Task EveryErrorType_MapsToItsStatusAndRetryable(ErrorType type, int status, bool retryable)
     {
         var error = ErrorOf(type, "Sample.Failed", "出错了");
@@ -115,6 +117,7 @@ public sealed class ResultHttpTests : IAsyncLifetime
     [InlineData(ErrorType.Validation, false)]
     [InlineData(ErrorType.Conflict, false)]
     [InlineData(ErrorType.Unavailable, true)]
+    [InlineData(ErrorType.TooManyRequests, true)]
     public async Task RetryAfter_IsSentOnlyWhenUnavailable(ErrorType type, bool expected)
     {
         _api.Script.On<GetThingQuery, ThingDto>((_, _) => ErrorOf(type, "Sample.Failed", "出错了"));
@@ -122,6 +125,29 @@ public sealed class ResultHttpTests : IAsyncLifetime
         var response = await _api.Client.GetAsync($"/api/v1/samples/things/{ThingId.New().Value}", Ct);
 
         response.Headers.Contains("Retry-After").ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task TooManyRequests_UsesTheDeclaredWaitInBodyAndHeader()
+    {
+        _api.Script.On<GetThingQuery, ThingDto>((_, _) => Error.TooManyRequests("Sample.Throttled", "稍后再试", TimeSpan.FromSeconds(90)));
+
+        var response = await _api.Client.GetAsync($"/api/v1/samples/things/{ThingId.New().Value}", Ct);
+
+        var body = await response.ShouldBeProblemAsync(429, "Sample.Throttled");
+        body.GetProperty("retryAfterSeconds").GetInt32().ShouldBe(90);
+        response.Headers.GetValues("Retry-After").ShouldHaveSingleItem().ShouldBe("90");
+    }
+
+    [Fact]
+    public async Task Unauthenticated_SendsTheBearerChallenge()
+    {
+        _api.Script.On<GetThingQuery, ThingDto>((_, _) => Error.Unauthenticated("Sample.BadCredentials", "账号或密码不对"));
+
+        var response = await _api.Client.GetAsync($"/api/v1/samples/things/{ThingId.New().Value}", Ct);
+
+        await response.ShouldBeProblemAsync(401, "Sample.BadCredentials");
+        response.Headers.WwwAuthenticate.ToString().ShouldBe("Bearer");
     }
 
     [Fact]
@@ -318,6 +344,8 @@ public sealed class ResultHttpTests : IAsyncLifetime
         ErrorType.Conflict => Error.Conflict(code, message),
         ErrorType.BusinessRule => Error.BusinessRule(code, message),
         ErrorType.Unavailable => Error.Unavailable(code, message),
+        ErrorType.Unauthenticated => Error.Unauthenticated(code, message),
+        ErrorType.TooManyRequests => Error.TooManyRequests(code, message, TimeSpan.FromSeconds(30)),
         _ => throw new ArgumentOutOfRangeException(nameof(type)),
     };
 }

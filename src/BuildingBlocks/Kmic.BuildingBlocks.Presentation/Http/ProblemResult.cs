@@ -21,6 +21,16 @@ internal sealed class ProblemResult(Error error) : IResult
         {
             RetryAfter.Set(httpContext.Response);
         }
+        else if (error.Type == ErrorType.TooManyRequests)
+        {
+            RetryAfter.Set(httpContext.Response, KmicProblems.RetryAfterSecondsOf(error) ?? RetryAfter.DefaultSeconds);
+        }
+
+        if (error.Type == ErrorType.Unauthenticated)
+        {
+            // 没有凭据或凭据无效的响应要说明认证方案，Bearer 令牌的客户端据此判断是否去刷新
+            httpContext.Response.Headers.WWWAuthenticate = "Bearer";
+        }
 
         await httpContext.RequestServices.GetRequiredService<IProblemDetailsService>()
             .WriteAsync(new ProblemDetailsContext { HttpContext = httpContext, ProblemDetails = details });

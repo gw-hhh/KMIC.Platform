@@ -93,6 +93,17 @@ public sealed partial record Error
     public static Error Unavailable(string code, string message) => new(code, ErrorType.Unavailable, message, []);
 
     /// <summary>
+    /// 凭据无效或没有登录，只用于认证本身
+    /// </summary>
+    public static Error Unauthenticated(string code, string message) => new(code, ErrorType.Unauthenticated, message, []);
+
+    /// <summary>
+    /// 请求过于频繁，调用方要等待 <paramref name="retryAfter" /> 之后再试
+    /// </summary>
+    public static Error TooManyRequests(string code, string message, TimeSpan retryAfter) =>
+        new Error(code, ErrorType.TooManyRequests, message, []).WithMetadata(ErrorMetadataKeys.RetryAfterSeconds, (int)Math.Ceiling(retryAfter.TotalSeconds));
+
+    /// <summary>
     /// 附上详细说明
     /// </summary>
     public Error WithDetail(string detail)

@@ -34,4 +34,14 @@ public enum ErrorType
     /// 暂时不可用（503）
     /// </summary>
     Unavailable,
+
+    /// <summary>
+    /// 凭据无效或没有登录（401）：只用于认证本身，如密码错误、刷新令牌无效
+    /// </summary>
+    Unauthenticated,
+
+    /// <summary>
+    /// 请求过于频繁，要等一段时间再试（429）
+    /// </summary>
+    TooManyRequests,
 }

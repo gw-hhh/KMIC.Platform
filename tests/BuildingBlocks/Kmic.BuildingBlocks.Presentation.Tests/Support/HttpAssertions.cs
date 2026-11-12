@@ -5,7 +5,7 @@ namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
 
 internal static class HttpAssertions
 {
-    private static readonly string[] _problemMembers = ["type", "title", "status", "detail", "instance", "code", "traceId", "retryable", "errors", "currentVersion"];
+    private static readonly string[] _problemMembers = ["type", "title", "status", "detail", "instance", "code", "traceId", "retryable", "errors", "currentVersion", "retryAfterSeconds"];
 
     public static async Task<JsonElement> JsonAsync(this HttpResponseMessage response)
     {
