@@ -80,3 +80,6 @@ HELO
 RSET
 Sasl
 Unconfigured
+Abandonable
+isready
+rolname

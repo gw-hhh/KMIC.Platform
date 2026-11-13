@@ -45,3 +45,6 @@ appsettings.*.local.json
 
 # 测试导出的 OpenAPI 文档等构建产物
 artifacts/
+
+# 本机运行产生的密码、签名密钥、上传的文件（scripts/dev.cs），不进仓库
+/.local/

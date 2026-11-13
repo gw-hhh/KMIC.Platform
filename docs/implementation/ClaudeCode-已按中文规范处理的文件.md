@@ -94,3 +94,5 @@ src/Modules/Notifications/Kmic.Notifications.Presentation/Captured/ListCapturedE
 src/Modules/Notifications/Kmic.Notifications.Presentation/Captured/GetCapturedEndpoint.cs
 tests/Kmic.Api.Tests/Notifications/DeliveryManagementTests.cs
 tests/Kmic.Api.Tests/Notifications/CapturedMessageTests.cs
+scripts/dev.cs
+docs/implementation/本地运行.md

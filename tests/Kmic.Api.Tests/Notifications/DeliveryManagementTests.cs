@@ -194,25 +194,25 @@ public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database,
         await using var seed = new IdentitySeed(ConnectionString);
         var user = await UserAsync(seed);
         var tag = Guid.CreateVersion7().ToString("N");
-        string[] dedups = [$"purge-sent-old-{tag}", $"purge-failed-open-{tag}", $"purge-failed-abandoned-{tag}", $"purge-sent-recent-{tag}"];
-        foreach (var dedup in dedups)
+        string[] keys = [$"purge-sent-old-{tag}", $"purge-failed-open-{tag}", $"purge-failed-abandoned-{tag}", $"purge-sent-recent-{tag}"];
+        foreach (var dedup in keys)
         {
             await SendSubmittedAsync(dedup, user, "SP-5");
         }
 
         var old = "\"CreatedAt\" = now() - interval '200 days'";
-        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Sent', {old} WHERE "DedupKey" = '{dedups[0]}'""");
-        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Failed', {old} WHERE "DedupKey" = '{dedups[1]}'""");
-        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Failed', "AbandonedAt" = now() - interval '199 days', {old} WHERE "DedupKey" = '{dedups[2]}'""");
-        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Sent' WHERE "DedupKey" = '{dedups[3]}'""");
-        await seed.SqlAsync($"""UPDATE "Notifications"."Notification" SET {old} WHERE "DedupKey" IN ('{dedups[0]}', '{dedups[1]}', '{dedups[2]}')""");
+        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Sent', {old} WHERE "DedupKey" = '{keys[0]}'""");
+        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Failed', {old} WHERE "DedupKey" = '{keys[1]}'""");
+        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Failed', "AbandonedAt" = now() - interval '199 days', {old} WHERE "DedupKey" = '{keys[2]}'""");
+        await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "Status" = 'Sent' WHERE "DedupKey" = '{keys[3]}'""");
+        await seed.SqlAsync($"""UPDATE "Notifications"."Notification" SET {old} WHERE "DedupKey" IN ('{keys[0]}', '{keys[1]}', '{keys[2]}')""");
 
         await RunAsync(new PurgeDeliveriesCommand(TimeProvider.System.GetUtcNow()));
 
         var left = await seed.ScalarAsync<string>($"""SELECT string_agg("DedupKey", ',' ORDER BY "DedupKey") FROM "Notifications"."Delivery" WHERE "DedupKey" LIKE 'purge-%-{tag}'""");
-        left.ShouldBe($"{dedups[1]},{dedups[3]}");
+        left.ShouldBe($"{keys[1]},{keys[3]}");
         var notifications = await seed.ScalarAsync<string>($"""SELECT string_agg("DedupKey", ',' ORDER BY "DedupKey") FROM "Notifications"."Notification" WHERE "DedupKey" LIKE 'purge-%-{tag}'""");
-        notifications.ShouldBe($"{dedups[1]},{dedups[3]}", "发送请求记录在它的投递都删完之后才删");
+        notifications.ShouldBe($"{keys[1]},{keys[3]}", "发送请求记录在它的投递都删完之后才删");
     }
 
     [Fact]

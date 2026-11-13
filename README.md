@@ -5,6 +5,7 @@
 - 当前阶段：阶段 2（框架骨架 + 参考模块）已完成，阶段 3（平台模块）设计中，Identity、Operations 两份设计待评审。阶段与待办见 [`docs/implementation/00-README.md`](docs/implementation/00-README.md)；在另一台机器上继续开发见 [`docs/implementation/换机器继续开发.md`](docs/implementation/换机器继续开发.md)。
 - 本文件夹是独立项目，目前临时放在旧仓库 `kelong.web` 中只为方便读取旧代码，之后单独成为仓库；新系统的所有设计、开发文档和资料都放在这里，且不依赖旧仓库的任何文件。
 - 项目规则与工作约定：[`CLAUDE.md`](CLAUDE.md)。
+- 本机运行：`dotnet run scripts/dev.cs -- up`，说明见 [`docs/implementation/本地运行.md`](docs/implementation/本地运行.md)。
 
 ## 目录
 

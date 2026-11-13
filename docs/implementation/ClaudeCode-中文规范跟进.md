@@ -152,3 +152,8 @@
 | 2026-11-13 21:17 | `docs/framework/00-README.md` | 延后事项表里新增的“短信登录与重置密码…”一行 | 部分 | 其余未检查 |
 | 2026-11-13 21:17 | `docs/modules/identity/README.md` | “实施待办”一段中关于 T-08 的描述 | 部分 | 改为搁置，其余未检查 |
 | 2026-11-13 21:17 | `docs/implementation/换机器继续开发.md` | 第 4 节新增的“Docker 命名约定”一条 | 部分 | 其余未检查 |
+| 2026-11-13 21:59 | `scripts/dev.cs` | 脚本里的全部注释和提示文字 | 整份完成 | 新增，本机一键运行（数据库容器、迁移、首个管理员、签名密钥、启动 Api） |
+| 2026-11-13 21:59 | `docs/implementation/本地运行.md` | 全文 | 整份完成 | 新增 |
+| 2026-11-13 21:59 | `README.md` | 目录前新增的“本机运行”一条 | 部分 | 其余未检查 |
+| 2026-11-13 21:59 | `.gitignore` | 新增的 .local 一行及其注释 | 部分 | 其余未检查 |
+| 2026-11-13 21:59 | `tests/Kmic.Api.Tests/Notifications/DeliveryManagementTests.cs` | 变量 dedups 改名为 keys | 部分 | 只改名字，通过拼写检查；其余按之前的记录 |
