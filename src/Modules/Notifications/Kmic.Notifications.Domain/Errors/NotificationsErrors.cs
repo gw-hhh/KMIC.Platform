@@ -37,6 +37,46 @@ public static class NotificationsErrors
     public static readonly Error TemplateSecretMismatch = Error.BusinessRule("Notifications.TemplateSecretMismatch", "含密模板只能用含密通知发送，普通模板不能用含密通知发送");
 
     /// <summary>
+    /// 模板已经在代码里删除，不能再修改
+    /// </summary>
+    public static readonly Error TemplateRetired = Error.BusinessRule("Notifications.TemplateRetired", "这个模板已经在代码里删除，不能再修改");
+
+    /// <summary>
+    /// 模板没有声明这个渠道
+    /// </summary>
+    public static readonly Error TemplateChannelNotDeclared = Error.BusinessRule("Notifications.TemplateChannelNotDeclared", "这个模板没有这个渠道");
+
+    /// <summary>
+    /// 模板键已经登记过：两个实例同时同步时，后一个撞上唯一索引
+    /// </summary>
+    public static readonly Error TemplateKeyDuplicated = Error.Conflict("Notifications.TemplateKeyDuplicated", "这个模板已经登记过");
+
+    /// <summary>
+    /// 版本号已经被占用：两个人同时发布同一个模板
+    /// </summary>
+    public static readonly Error TemplateVersionDuplicated = Error.Conflict("Notifications.TemplateVersionDuplicated", "这个版本号已经被别人用了，请刷新后重试");
+
+    /// <summary>
+    /// 含密模板的预览只能用示例数据，不能传入真实数据
+    /// </summary>
+    public static readonly Error PreviewModelNotAllowed = Error.BusinessRule("Notifications.PreviewModelNotAllowed", "含密模板的预览只能用示例数据");
+
+    /// <summary>
+    /// 只有失败、而且没有放弃的投递可以重试
+    /// </summary>
+    public static readonly Error DeliveryNotRetryable = Error.BusinessRule("Notifications.DeliveryNotRetryable", "只有失败、而且没有放弃的投递可以重试");
+
+    /// <summary>
+    /// 含密通知已经过了有效期，不能重试
+    /// </summary>
+    public static readonly Error DeliverySecretExpired = Error.BusinessRule("Notifications.DeliverySecretExpired", "含密通知已经过了有效期，不能重试");
+
+    /// <summary>
+    /// 只有失败、而且还没放弃的投递可以放弃
+    /// </summary>
+    public static readonly Error DeliveryNotAbandonable = Error.BusinessRule("Notifications.DeliveryNotAbandonable", "只有失败、而且还没放弃的投递可以放弃");
+
+    /// <summary>
     /// 同一个模板、收件人、去重键、渠道已经有一条投递
     /// </summary>
     public static readonly Error DeliveryDuplicated = Error.Conflict("Notifications.DeliveryDuplicated", "这条通知已经发给过这个收件人");

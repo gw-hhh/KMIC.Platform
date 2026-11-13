@@ -1,12 +1,15 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Scheduling;
+using Kmic.BuildingBlocks.Application.Startup;
 using Kmic.BuildingBlocks.Infrastructure.Background;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Notifications.Application;
+using Kmic.Notifications.Application.Captured.Purge;
 using Kmic.Notifications.Application.Channels;
+using Kmic.Notifications.Application.Deliveries.Purge;
 using Kmic.Notifications.Application.Processing;
 using Kmic.Notifications.Application.Rendering;
 using Kmic.Notifications.Application.SiteMessages.Purge;
@@ -15,11 +18,13 @@ using Kmic.Notifications.Domain.Captured;
 using Kmic.Notifications.Domain.Deliveries;
 using Kmic.Notifications.Domain.Notifications;
 using Kmic.Notifications.Domain.SiteMessages;
+using Kmic.Notifications.Domain.Templates;
 using Kmic.Notifications.Infrastructure.Channels;
 using Kmic.Notifications.Infrastructure.Persistence;
 using Kmic.Notifications.Infrastructure.Persistence.Repositories;
 using Kmic.Notifications.Infrastructure.Rendering;
 using Kmic.Notifications.Infrastructure.Sending;
+using Kmic.Notifications.Infrastructure.Templates;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Notifications.Infrastructure;
@@ -48,6 +53,8 @@ public sealed class NotificationsModule : IModule
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();
         services.AddScoped<ICapturedMessageRepository, CapturedMessageRepository>();
+        services.AddScoped<ITemplateRepository, TemplateRepository>();
+        services.AddScoped<IStartupTask, SyncTemplateCatalogTask>();
         services.AddScoped<NotificationProcessor>();
         services.AddKmicOptions<NotificationsCaptureOptions>(NotificationsCaptureOptions.Section);
         services.AddKmicOptions<NotificationsRetentionOptions>(NotificationsRetentionOptions.Section);
@@ -85,5 +92,8 @@ public sealed class NotificationsModule : IModule
         ArgumentNullException.ThrowIfNull(scheduling);
 
         scheduling.Schedule("Notifications.PurgeSiteMessages", "0 20 3 * * ?", run => new PurgeSiteMessagesCommand(run.ScheduledFireTime), o => o.DisplayName("清理过期的站内消息"));
+        scheduling.Schedule("Notifications.PurgeDeliveries", "0 30 3 * * ?", run => new PurgeDeliveriesCommand(run.ScheduledFireTime), o => o.DisplayName("清理过期的投递记录"));
+        scheduling.Schedule("Notifications.PurgeCaptured", "0 40 3 * * ?", run => new PurgeCapturedCommand(run.ScheduledFireTime), o => o.DisplayName("清理过期的捕获内容"));
+        scheduling.Schedule("Notifications.ClearSecretBodies", "0 10 * * * ?", run => new ClearSecretBodiesCommand(run.ScheduledFireTime), o => o.DisplayName("清空含密通知残留的正文"));
     }
 }

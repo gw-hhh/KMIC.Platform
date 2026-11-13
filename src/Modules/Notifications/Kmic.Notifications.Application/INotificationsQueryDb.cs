@@ -1,4 +1,7 @@
+using Kmic.Notifications.Domain.Captured;
+using Kmic.Notifications.Domain.Deliveries;
 using Kmic.Notifications.Domain.SiteMessages;
+using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application;
 
@@ -15,4 +18,24 @@ public interface INotificationsQueryDb
     /// 站内消息
     /// </summary>
     IQueryable<SiteMessage> SiteMessages { get; }
+
+    /// <summary>
+    /// 通知模板
+    /// </summary>
+    IQueryable<NotificationTemplate> Templates { get; }
+
+    /// <summary>
+    /// 模板的发布版本
+    /// </summary>
+    IQueryable<TemplateVersion> TemplateVersions { get; }
+
+    /// <summary>
+    /// 投递记录；尝试次数、失败原因这些影子列用 EF.Property 读取，列名见 DeliveryColumns
+    /// </summary>
+    IQueryable<Delivery> Deliveries { get; }
+
+    /// <summary>
+    /// 非生产环境捕获的内容
+    /// </summary>
+    IQueryable<CapturedMessage> CapturedMessages { get; }
 }

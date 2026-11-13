@@ -568,4 +568,24 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 
 实现时的小调整（决定不变）：①`Delivery` 增加 `SmsParameters` 列（迁移 `DeliverySmsParameters`），保存短信的模板参数，发送时用它，`Body` 只供查看；②投递配置在设计的并行度和尝试次数之外，增加领取租期和空闲轮询间隔。
 
-未做：模板同步到数据库与版本、阿里云短信网关、模板管理与投递管理用例、清理投递与捕获内容、含密正文的兜底清理、邮件附件和纯文本备选正文。
+2026-11-13 再续：**模板同步、版本与管理**完成。
+
+- 启动任务 `SyncTemplateCatalogCommand`：新声明的登记，声明或默认内容变了的更新，代码里已经删掉的标为退役；退役的模板重新出现就恢复启用。多个实例同时启动时，只有拿到咨询锁的做同步。
+- 发布与恢复：`PublishTemplateCommand`、`RevertTemplateCommand`（`Notifications.Template.Manage`，`[Audited]`、`[Idempotent]`，带期望版本）。发布前用示例数据渲染一遍，语法错误、超时、输出过大返回 422；已退役的模板和模板没有的渠道不能发布。
+- 查询：`ListTemplatesQuery`、`GetTemplateQuery`（各渠道当前内容、代码里的默认内容、变量名、示例数据、版本历史）、`PreviewTemplateQuery`（用示例数据或传入的数据渲染，模板有误时错误放在响应里；含密模板只能用示例数据）。权限点 `Notifications.Template.View`。
+- 处理发送请求时，每个渠道取它当前生效的版本渲染，没有发布过的用代码里的默认内容。`Notification.TemplateVersions` 和 `Delivery.TemplateVersion` 记实际用的版本号，0 表示默认内容。
+- 测试：模板 9 个（同步、发布、恢复、版本冲突、权限、预览、发布后新通知用新内容）。
+
+实现时的小调整（决定不变）：①`NotificationTemplate` 用 Guid 作主键，模板键是唯一索引（强类型 ID 都是 Guid）；②版本号在同一个模板内递增，不分渠道；③不做 `CatalogState`：模板很少，同步时逐个比较声明的哈希就够；④`CodeHash` 是代码里声明的哈希，除默认内容外还包含显示名、渠道、发件账号、含密标记，投递记录里的 `CodeHash` 也用它；⑤渠道在模板表里存成逗号隔开的编码；⑥发布时没有检查“正文里的变量必须在变量结构里”，目前只用示例数据渲染一遍，渲染出错才拒绝。
+
+2026-11-13 再续：**投递管理与清理**完成。
+
+- 查询：`ListDeliveriesQuery`（按收件用户、渠道、状态、模板、创建时间筛选，分页，不含正文）、`GetDeliveryQuery`（含渲染后的主题和正文，含密模板发完后正文为空），权限点 `Notifications.Delivery.View`，都记读审计。
+- 处理：`RetryDeliveryCommand`（失败且没放弃的放回队列，次数清零；含密通知超过有效期的拒绝）、`AbandonDeliveryCommand`（失败的标记为已放弃，原因必填），权限点 `Notifications.Delivery.Manage`，`[Audited]`、`[Idempotent]`。条件和更新在同一条语句里，两个人同时点只有一个生效。
+- 捕获内容：`ListCapturedQuery`、`GetCapturedQuery`，权限点 `Notifications.Captured.View`，记读审计。`Notifications:Capture:Enabled` 关闭（生产环境）时返回 404。
+- 清理任务：`Notifications.PurgeDeliveries`（每天 03:30，按保留期删已发送、已跳过、已捕获和已放弃的投递，再删已经没有投递的发送请求记录；还在等人处理的失败投递不删）、`Notifications.PurgeCaptured`（每天 03:40）、`Notifications.ClearSecretBodies`（每小时，清空含密通知的已完成投递里残留的正文和短信参数；非生产环境的捕获内容不动）。
+- 测试：投递管理 9 个，捕获内容 3 个。
+
+实现时的小调整（决定不变）：①`Delivery` 增加影子列 `AbandonedAt`、`AbandonReason` 作为放弃标记（迁移 `DeliveryManagement`）；②影子列的列名集中在 `DeliveryColumns`，查询用 `EF.Property` 读取；③“捕获内容仅非生产环境可用”按 `Notifications:Capture:Enabled` 判断，不另外判断环境名。
+
+未做：阿里云短信网关（已搁置，需要时再做）、邮件附件和纯文本备选正文、发布时的变量检查。

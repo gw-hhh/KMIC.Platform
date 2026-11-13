@@ -2,8 +2,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // 版本与生产环境的 PostgreSQL 小版本一致；数据放在命名卷里，重启后还在
 var postgres = builder.AddPostgres("postgres")
+    .WithContainerName("kmic-test-postgres-aspire")
     .WithImageTag("18.6")
-    .WithDataVolume("kmic-postgres")
+    .WithDataVolume("kmic-test-postgres-aspire-data")
     .WithInitFiles("init");
 var database = postgres.AddDatabase("kmic");
 

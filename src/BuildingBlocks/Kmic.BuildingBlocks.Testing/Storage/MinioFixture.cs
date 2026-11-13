@@ -26,7 +26,9 @@ public sealed class MinioFixture : IAsyncLifetime
     /// </summary>
     public MinioFixture() =>
         _container = new ContainerBuilder(Environment.GetEnvironmentVariable("KMIC_TEST_MINIO_IMAGE") ?? DefaultImage)
-            .WithPortBinding(9000, assignRandomHostPort: true)
+            .WithName(TestContainerNames.For("minio"))
+            .WithLabel(TestContainerNames.GroupLabel, TestContainerNames.Group)
+            .WithPortBinding(TestPorts.Free(), 9000)
             .WithEnvironment("MINIO_ROOT_USER", AccessKey)
             .WithEnvironment("MINIO_ROOT_PASSWORD", _secretKey)
             .WithCommand("server", "/data")

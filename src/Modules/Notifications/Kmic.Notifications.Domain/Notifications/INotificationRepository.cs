@@ -13,4 +13,12 @@ public interface INotificationRepository : IRepository<Notification, Notificatio
     /// <param name="sourceMessageId">来源消息的 ID</param>
     /// <param name="ct">取消令牌</param>
     Task<bool> ExistsForAsync(Guid sourceMessageId, CancellationToken ct);
+
+    /// <summary>
+    /// 删除超过保留期、而且已经没有投递的发送请求记录
+    /// </summary>
+    /// <param name="createdBefore">创建时间早于它的才删除</param>
+    /// <param name="ct">取消令牌</param>
+    /// <returns>删除的行数</returns>
+    Task<int> PurgeAsync(DateTimeOffset createdBefore, CancellationToken ct);
 }

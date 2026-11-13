@@ -545,6 +545,15 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasComment("ID");
 
+                    b.Property<string>("AbandonReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("放弃处理的原因");
+
+                    b.Property<DateTimeOffset?>("AbandonedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("放弃处理的时间，没有放弃为空");
+
                     b.Property<string>("Address")
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)")
@@ -866,6 +875,189 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         {
                             t.HasComment("站内消息；Notifications 模块；一行是发给某个用户的一条消息，已读是唯一会改的状态；已读和未读超过保留期后由清理任务删除");
                         });
+                });
+
+            modelBuilder.Entity("Kmic.Notifications.Domain.Templates.NotificationTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<string>("ActiveVersions")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasComment("各渠道当前生效的版本号，JSON：渠道编码到版本号；没有的渠道用代码里的默认内容");
+
+                    b.Property<bool>("CarriesSecret")
+                        .HasColumnType("boolean")
+                        .HasComment("内容含一次性短时凭据（如验证码）")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
+                    b.Property<string>("Channels")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("发往的渠道，渠道编码用逗号隔开");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("代码里声明内容的哈希，同步时用来判断有没有变化")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasComment("显示名");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("模板键，以声明它的模块名开头，唯一");
+
+                    b.Property<string>("OwnerModule")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("声明它的模块");
+
+                    b.Property<string>("SenderProfile")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("发件账号名，只对邮件渠道有意义");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("状态");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("NotificationTemplate", "Notifications", t =>
+                        {
+                            t.HasComment("通知模板；Notifications 模块；一行是代码里声明的一种通知，启动时与代码同步；各渠道发布过的内容版本在子表");
+
+                            t.HasCheckConstraint("CK_NotificationTemplate_Status", "\"Status\" IN ('Active', 'Retired')");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Notifications.Domain.Templates.TemplateVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("character varying(20000)")
+                        .HasComment("正文");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("渠道");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<DateTimeOffset>("PublishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("发布时间");
+
+                    b.Property<Guid>("PublishedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("发布人");
+
+                    b.Property<string>("Remark")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("备注");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("主题；站内消息里是标题");
+
+                    b.Property<Guid>("TemplateId")
+                        .HasColumnType("uuid")
+                        .HasComment("所属模板");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasComment("版本号，同一个模板内递增");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TemplateId", "Version")
+                        .IsUnique();
+
+                    b.ToTable("TemplateVersion", "Notifications", t =>
+                        {
+                            t.HasComment("通知模板的发布版本；Notifications 模块；一行是模板在某个渠道发布过的一版内容，只增不改");
+
+                            t.HasCheckConstraint("CK_TemplateVersion_Channel", "\"Channel\" IN ('Email', 'Sms', 'InApp')");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Notifications.Domain.Templates.TemplateVersion", b =>
+                {
+                    b.HasOne("Kmic.Notifications.Domain.Templates.NotificationTemplate", null)
+                        .WithMany("Versions")
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Kmic.Notifications.Domain.Templates.NotificationTemplate", b =>
+                {
+                    b.Navigation("Versions");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,13 +9,15 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Configurations;
 internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
 {
     // 投递队列与结果的列不属于聚合，是只由投递工作器和管理用例用带条件的语句更新的影子属性，列名集中定义
-    public const string Attempts = nameof(Attempts);
-    public const string NextAttemptAt = nameof(NextAttemptAt);
-    public const string LeaseToken = nameof(LeaseToken);
-    public const string LeaseUntil = nameof(LeaseUntil);
-    public const string ProviderMessageId = nameof(ProviderMessageId);
-    public const string LastError = nameof(LastError);
-    public const string SentAt = nameof(SentAt);
+    public const string Attempts = DeliveryColumns.Attempts;
+    public const string NextAttemptAt = DeliveryColumns.NextAttemptAt;
+    public const string LeaseToken = DeliveryColumns.LeaseToken;
+    public const string LeaseUntil = DeliveryColumns.LeaseUntil;
+    public const string ProviderMessageId = DeliveryColumns.ProviderMessageId;
+    public const string LastError = DeliveryColumns.LastError;
+    public const string SentAt = DeliveryColumns.SentAt;
+    public const string AbandonedAt = DeliveryColumns.AbandonedAt;
+    public const string AbandonReason = DeliveryColumns.AbandonReason;
 
     public void Configure(EntityTypeBuilder<Delivery> builder)
     {
@@ -37,6 +39,8 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property<string?>(ProviderMessageId).HasMaxLength(200).HasComment("渠道返回的消息标识");
         builder.Property<string?>(LastError).HasMaxLength(1000).HasComment("最近一次失败的原因");
         builder.Property<DateTimeOffset?>(SentAt).HasComment("发送成功的时间");
+        builder.Property<DateTimeOffset?>(AbandonedAt).HasComment("放弃处理的时间，没有放弃为空");
+        builder.Property<string?>(AbandonReason).HasMaxLength(500).HasComment("放弃处理的原因");
 
         // 同一个模板、收件人、去重键、渠道只有一条投递：重复的请求或重试处理不会重复发送
         builder.HasIndex(d => new { d.TemplateKey, d.RecipientKey, d.DedupKey, d.Channel }).IsUnique().MapsToError(NotificationsErrors.DeliveryDuplicated);

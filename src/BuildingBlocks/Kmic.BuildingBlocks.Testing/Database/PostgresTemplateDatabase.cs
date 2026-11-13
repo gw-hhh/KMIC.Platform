@@ -22,7 +22,12 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
 
     // 测试类并行运行，每个带 Worker 角色的宿主要开前台、后台各两个连接池；默认的 100 个连接会被用光，
     // 表现是个别测试随机报“剩余连接槽位留给超级用户”。测试库的上限放宽，生产的连接预算按运维手册的公式另算
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder(Image).WithCommand("-c", "max_connections=500").Build();
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder(Image)
+        .WithName(TestContainerNames.For("postgres"))
+        .WithLabel(TestContainerNames.GroupLabel, TestContainerNames.Group)
+        .WithPortBinding(TestPorts.Free(), PostgreSqlBuilder.PostgreSqlPort)
+        .WithCommand("-c", "max_connections=500")
+        .Build();
 
     /// <inheritdoc />
     public async ValueTask InitializeAsync()

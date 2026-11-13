@@ -1,7 +1,10 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Notifications.Application;
 using Kmic.Notifications.Contracts;
+using Kmic.Notifications.Domain.Captured;
+using Kmic.Notifications.Domain.Deliveries;
 using Kmic.Notifications.Domain.SiteMessages;
+using Kmic.Notifications.Domain.Templates;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Infrastructure.Persistence;
@@ -17,6 +20,18 @@ internal sealed class NotificationsQueryDbContext(DbContextOptions<Notifications
 
     /// <inheritdoc />
     public IQueryable<SiteMessage> SiteMessages => Set<SiteMessage>();
+
+    /// <inheritdoc />
+    public IQueryable<NotificationTemplate> Templates => Set<NotificationTemplate>();
+
+    /// <inheritdoc />
+    public IQueryable<TemplateVersion> TemplateVersions => Set<TemplateVersion>();
+
+    /// <inheritdoc />
+    public IQueryable<Delivery> Deliveries => Set<Delivery>();
+
+    /// <inheritdoc />
+    public IQueryable<CapturedMessage> CapturedMessages => Set<CapturedMessage>();
 
     /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
