@@ -46,5 +46,10 @@
     <ProjectReference Include="../../src/Modules/Operations/Kmic.Operations.Application/Kmic.Operations.Application.csproj" />
     <ProjectReference Include="../../src/Modules/Operations/Kmic.Operations.Infrastructure/Kmic.Operations.Infrastructure.csproj" />
     <ProjectReference Include="../../src/Modules/Operations/Kmic.Operations.Presentation/Kmic.Operations.Presentation.csproj" />
+    <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Domain/Kmic.Files.Domain.csproj" />
+    <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Contracts/Kmic.Files.Contracts.csproj" />
+    <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Application/Kmic.Files.Application.csproj" />
+    <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Infrastructure/Kmic.Files.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Presentation/Kmic.Files.Presentation.csproj" />
   </ItemGroup>
 </Project>

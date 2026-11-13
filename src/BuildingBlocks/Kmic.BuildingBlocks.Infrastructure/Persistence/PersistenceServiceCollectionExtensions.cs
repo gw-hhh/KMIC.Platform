@@ -5,6 +5,7 @@ using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Exports;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
+using Kmic.BuildingBlocks.Application.Locking;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
@@ -46,6 +47,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddKmicSlowQueryLog();
         services.TryAddScoped<ModuleWriteContexts>();
         services.TryAddScoped<CommandTransaction>();
+        services.TryAddScoped<ITransactionLocks, TransactionLocks>();
         services.TryAddScoped<OutboxWriter>();
         services.TryAddSingleton<ModuleFrameworkTables>();
         services.TryAddSingleton<OutboxDispatcher>();

@@ -1,0 +1,19 @@
+{
+  "solution": {
+    "path": "Kmic.slnx",
+    "projects": [
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Application\\Kmic.BuildingBlocks.Application.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Contracts\\Kmic.BuildingBlocks.Contracts.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Domain\\Kmic.BuildingBlocks.Domain.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Infrastructure\\Kmic.BuildingBlocks.Infrastructure.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Presentation\\Kmic.BuildingBlocks.Presentation.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Testing\\Kmic.BuildingBlocks.Testing.csproj",
+      "src\\Modules\\Files\\Kmic.Files.Application\\Kmic.Files.Application.csproj",
+      "src\\Modules\\Files\\Kmic.Files.Contracts\\Kmic.Files.Contracts.csproj",
+      "src\\Modules\\Files\\Kmic.Files.Domain\\Kmic.Files.Domain.csproj",
+      "src\\Modules\\Files\\Kmic.Files.Infrastructure\\Kmic.Files.Infrastructure.csproj",
+      "src\\Modules\\Files\\Kmic.Files.Presentation\\Kmic.Files.Presentation.csproj",
+      "tests\\Modules\\Files\\Kmic.Files.Domain.Tests\\Kmic.Files.Domain.Tests.csproj"
+    ]
+  }
+}

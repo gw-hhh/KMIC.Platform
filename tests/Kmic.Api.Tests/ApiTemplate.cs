@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.Configuration.Infrastructure;
+using Kmic.Files.Infrastructure;
 using Kmic.Identity.Infrastructure;
 using Kmic.Operations.Infrastructure;
 using Kmic.Sample.Infrastructure;
@@ -45,6 +46,7 @@ public sealed class ApiTemplate : PostgresTemplateDatabase
         // 每个模块的 AddServices 登记了它的 DbContext，迁移不用认识具体类型；Identity 与 Operations 的框架表由它们自己的迁移建
         var modules = new ServiceCollection();
         new ConfigurationModule().AddServices(modules);
+        new FilesModule().AddServices(modules);
         new IdentityModule().AddServices(modules);
         new OperationsModule().AddServices(modules);
         new SampleModule().AddServices(modules);

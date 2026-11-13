@@ -7,6 +7,7 @@ using Kmic.BuildingBlocks.Application.Dictionaries;
 using Kmic.BuildingBlocks.Application.Errors;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Files;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
@@ -49,9 +50,11 @@ public static class ApplicationServiceCollectionExtensions
         var resourceActions = services.AddResourceAuthorization(types);
         services.AddDomainEventHandlers(types);
         var jobs = BackgroundJobCatalog.FromAssemblies(applicationAssemblies);
-        permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences, .. jobs.PermissionReferences]);
+        var uploadProfiles = UploadProfileCatalog.FromAssemblies(applicationAssemblies);
+        permissions.Verify(useCases, [.. resourceActions, .. settings.PermissionReferences, .. jobs.PermissionReferences, .. uploadProfiles.PermissionReferences]);
 
         services.AddSingleton(jobs);
+        services.AddSingleton(uploadProfiles);
         foreach (var job in jobs.All.Where(j => j.HandlerType is not null))
         {
             services.AddScoped(job.HandlerInterface, job.HandlerType!);
@@ -140,6 +143,7 @@ public static class ApplicationServiceCollectionExtensions
             TimeZoneInfo.FindSystemTimeZoneById(sp.GetRequiredService<IOptions<BusinessTimeOptions>>().Value.BusinessTimeZone)));
         services.TryAddSingleton(IntegrationMessageCatalog.Empty);
         services.TryAddSingleton(BackgroundJobCatalog.Empty);
+        services.TryAddSingleton(UploadProfileCatalog.Empty);
         services.AddScoped<IntegrationEventPublisher>();
         services.AddScoped<IIntegrationEventPublisher>(sp => sp.GetRequiredService<IntegrationEventPublisher>());
         services.TryAddSingleton(sp => SubscriptionCatalog.Build(

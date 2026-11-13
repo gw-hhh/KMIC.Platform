@@ -487,6 +487,35 @@
           "Vogen": "[8.0.7, )"
         }
       },
+      "kmic.files.application": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Files.Contracts": "[1.0.0, )",
+          "Kmic.Files.Domain": "[1.0.0, )"
+        }
+      },
+      "kmic.files.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.files.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.files.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Files.Application": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
       "kmic.identity.application": {
         "type": "Project",
         "dependencies": {
