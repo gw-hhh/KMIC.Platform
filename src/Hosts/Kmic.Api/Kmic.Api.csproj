@@ -23,6 +23,8 @@
     <ProjectReference Include="../../Modules/Operations/Kmic.Operations.Presentation/Kmic.Operations.Presentation.csproj" />
     <ProjectReference Include="../../Modules/Files/Kmic.Files.Infrastructure/Kmic.Files.Infrastructure.csproj" />
     <ProjectReference Include="../../Modules/Files/Kmic.Files.Presentation/Kmic.Files.Presentation.csproj" />
+    <ProjectReference Include="../../Modules/Notifications/Kmic.Notifications.Infrastructure/Kmic.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Notifications/Kmic.Notifications.Presentation/Kmic.Notifications.Presentation.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Kmic.Api.Tests" />

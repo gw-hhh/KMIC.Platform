@@ -17,6 +17,7 @@
     <ProjectReference Include="../../Modules/Configuration/Kmic.Configuration.Infrastructure/Kmic.Configuration.Infrastructure.csproj" />
     <ProjectReference Include="../../Modules/Operations/Kmic.Operations.Infrastructure/Kmic.Operations.Infrastructure.csproj" />
     <ProjectReference Include="../../Modules/Files/Kmic.Files.Infrastructure/Kmic.Files.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Notifications/Kmic.Notifications.Infrastructure/Kmic.Notifications.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Kmic.Tools.Tests" />

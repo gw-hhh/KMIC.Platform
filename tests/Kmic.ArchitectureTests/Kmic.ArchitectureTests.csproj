@@ -51,5 +51,10 @@
     <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Application/Kmic.Files.Application.csproj" />
     <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Infrastructure/Kmic.Files.Infrastructure.csproj" />
     <ProjectReference Include="../../src/Modules/Files/Kmic.Files.Presentation/Kmic.Files.Presentation.csproj" />
+    <ProjectReference Include="../../src/Modules/Notifications/Kmic.Notifications.Domain/Kmic.Notifications.Domain.csproj" />
+    <ProjectReference Include="../../src/Modules/Notifications/Kmic.Notifications.Contracts/Kmic.Notifications.Contracts.csproj" />
+    <ProjectReference Include="../../src/Modules/Notifications/Kmic.Notifications.Application/Kmic.Notifications.Application.csproj" />
+    <ProjectReference Include="../../src/Modules/Notifications/Kmic.Notifications.Infrastructure/Kmic.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/Modules/Notifications/Kmic.Notifications.Presentation/Kmic.Notifications.Presentation.csproj" />
   </ItemGroup>
 </Project>

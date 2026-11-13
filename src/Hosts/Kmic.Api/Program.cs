@@ -8,6 +8,8 @@ using Kmic.Files.Infrastructure;
 using Kmic.Files.Presentation;
 using Kmic.Identity.Infrastructure;
 using Kmic.Identity.Presentation;
+using Kmic.Notifications.Infrastructure;
+using Kmic.Notifications.Presentation;
 using Kmic.Operations.Infrastructure;
 using Kmic.Operations.Presentation;
 using Kmic.Sample.Infrastructure;
@@ -22,6 +24,7 @@ builder.AddKmicServiceDefaults();
 
 // 模块在这里显式注册，Sample 是参考模块，只在开发与测试环境运行
 builder.AddKmicHost(host => host
+    .AddModule<NotificationsModule, NotificationsEndpoints>()
     .AddModule<FilesModule, FilesEndpoints>()
     .AddModule<OperationsModule, OperationsEndpoints>()
     .AddModule<ConfigurationModule, ConfigurationEndpoints>()

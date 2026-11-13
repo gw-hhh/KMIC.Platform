@@ -1,0 +1,19 @@
+{
+  "solution": {
+    "path": "Kmic.slnx",
+    "projects": [
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Application\\Kmic.BuildingBlocks.Application.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Contracts\\Kmic.BuildingBlocks.Contracts.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Domain\\Kmic.BuildingBlocks.Domain.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Infrastructure\\Kmic.BuildingBlocks.Infrastructure.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Presentation\\Kmic.BuildingBlocks.Presentation.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Testing\\Kmic.BuildingBlocks.Testing.csproj",
+      "src\\Modules\\Notifications\\Kmic.Notifications.Application\\Kmic.Notifications.Application.csproj",
+      "src\\Modules\\Notifications\\Kmic.Notifications.Contracts\\Kmic.Notifications.Contracts.csproj",
+      "src\\Modules\\Notifications\\Kmic.Notifications.Domain\\Kmic.Notifications.Domain.csproj",
+      "src\\Modules\\Notifications\\Kmic.Notifications.Infrastructure\\Kmic.Notifications.Infrastructure.csproj",
+      "src\\Modules\\Notifications\\Kmic.Notifications.Presentation\\Kmic.Notifications.Presentation.csproj",
+      "tests\\Modules\\Notifications\\Kmic.Notifications.Domain.Tests\\Kmic.Notifications.Domain.Tests.csproj"
+    ]
+  }
+}

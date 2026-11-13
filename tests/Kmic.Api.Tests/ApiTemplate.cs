@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.Configuration.Infrastructure;
 using Kmic.Files.Infrastructure;
 using Kmic.Identity.Infrastructure;
+using Kmic.Notifications.Infrastructure;
 using Kmic.Operations.Infrastructure;
 using Kmic.Sample.Infrastructure;
 using Npgsql;
@@ -48,6 +49,7 @@ public sealed class ApiTemplate : PostgresTemplateDatabase
         new ConfigurationModule().AddServices(modules);
         new FilesModule().AddServices(modules);
         new IdentityModule().AddServices(modules);
+        new NotificationsModule().AddServices(modules);
         new OperationsModule().AddServices(modules);
         new SampleModule().AddServices(modules);
         await using var provider = modules.BuildServiceProvider();

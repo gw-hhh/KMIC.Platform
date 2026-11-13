@@ -817,16 +817,40 @@
           "Kmic.Configuration.Infrastructure": "[1.0.0, )",
           "Kmic.Files.Infrastructure": "[1.0.0, )",
           "Kmic.Identity.Infrastructure": "[1.0.0, )",
+          "Kmic.Notifications.Infrastructure": "[1.0.0, )",
           "Kmic.Operations.Infrastructure": "[1.0.0, )",
           "Kmic.Sample.Infrastructure": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.14, )",
           "System.CommandLine": "[2.0.15, )"
         }
       },
+      "kmic.notifications.application": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Notifications.Contracts": "[1.0.0, )",
+          "Kmic.Notifications.Domain": "[1.0.0, )"
+        }
+      },
       "kmic.notifications.contracts": {
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
+      "kmic.notifications.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Domain": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
+        }
+      },
+      "kmic.notifications.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Notifications.Application": "[1.0.0, )",
+          "Vogen": "[8.0.7, )"
         }
       },
       "kmic.operations.application": {

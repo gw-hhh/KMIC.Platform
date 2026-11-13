@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 领域层：只能引用 BuildingBlocks.Domain。强类型 ID 由 Vogen 生成 -->
+  <ItemGroup>
+    <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Domain/Kmic.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+</Project>

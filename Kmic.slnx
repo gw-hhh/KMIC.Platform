@@ -33,7 +33,11 @@
     <Project Path="src/Modules/Identity/Kmic.Identity.Presentation/Kmic.Identity.Presentation.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Kmic.Notifications.Application/Kmic.Notifications.Application.csproj" />
     <Project Path="src/Modules/Notifications/Kmic.Notifications.Contracts/Kmic.Notifications.Contracts.csproj" />
+    <Project Path="src/Modules/Notifications/Kmic.Notifications.Domain/Kmic.Notifications.Domain.csproj" />
+    <Project Path="src/Modules/Notifications/Kmic.Notifications.Infrastructure/Kmic.Notifications.Infrastructure.csproj" />
+    <Project Path="src/Modules/Notifications/Kmic.Notifications.Presentation/Kmic.Notifications.Presentation.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Operations/">
     <Project Path="src/Modules/Operations/Kmic.Operations.Application/Kmic.Operations.Application.csproj" />
@@ -72,6 +76,7 @@
   </Folder>
   <Folder Name="/tests/Modules/Notifications/">
     <Project Path="tests/Modules/Notifications/Kmic.Notifications.Contracts.Tests/Kmic.Notifications.Contracts.Tests.csproj" />
+    <Project Path="tests/Modules/Notifications/Kmic.Notifications.Domain.Tests/Kmic.Notifications.Domain.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/Operations/">
     <Project Path="tests/Modules/Operations/Kmic.Operations.Domain.Tests/Kmic.Operations.Domain.Tests.csproj" />

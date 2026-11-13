@@ -3,6 +3,7 @@ using Kmic.Configuration.Infrastructure;
 using Kmic.Files.Infrastructure;
 using Kmic.Identity.Infrastructure;
 using Kmic.MigrationRunner;
+using Kmic.Notifications.Infrastructure;
 using Kmic.Operations.Infrastructure;
 using Kmic.Sample.Infrastructure;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,7 @@ var builder = Host.CreateApplicationBuilder();
 
 // 模块清单和 Kmic.Api 的 Program.cs 保持一致；Sample 是参考模块，生产环境不迁移
 var modules = new ToolModules()
+    .Add<NotificationsModule>()
     .Add<FilesModule>()
     .Add<OperationsModule>()
     .Add<ConfigurationModule>()
