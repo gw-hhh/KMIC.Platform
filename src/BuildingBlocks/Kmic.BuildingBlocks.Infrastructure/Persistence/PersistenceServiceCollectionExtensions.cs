@@ -3,6 +3,7 @@ using Kmic.BuildingBlocks.Application.Auditing;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Exports;
+using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.ReadModels;
@@ -55,6 +56,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<IBackgroundJobs, BackgroundJobs>();
         services.TryAddSingleton<JobStore>();
         services.TryAddSingleton<IModuleJobStores, ModuleJobStores>();
+        services.TryAddSingleton<IModuleMessageStores, ModuleMessageStores>();
+        services.TryAddSingleton<IAbandonGuard, AbandonGuard>();
         services.TryAddSingleton<RebuildRunStore>();
         services.TryAddScoped<INumberGenerator, NumberGenerator>();
         services.TryAddScoped<AuditRecorder>();

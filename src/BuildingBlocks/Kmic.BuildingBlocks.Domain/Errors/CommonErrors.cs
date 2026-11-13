@@ -140,6 +140,18 @@ public static class CommonErrors
         Error.Validation("Common.PageOutOfRange", "要查看的页超出了范围，请缩小筛选条件，或者改用导出");
 
     /// <summary>
+    /// 消息类型当前版本不认识，没法确认能不能放弃
+    /// </summary>
+    public static readonly Error MessageUnknown =
+        Error.BusinessRule("Common.MessageUnknown", "这条消息的类型当前版本不认识，不能确认能不能放弃");
+
+    /// <summary>
+    /// 消息载荷读不出来，没法确认能不能放弃
+    /// </summary>
+    public static readonly Error MessagePayloadUnreadable =
+        Error.BusinessRule("Common.MessagePayloadUnreadable", "这条消息的载荷读不出来，不能确认能不能放弃");
+
+    /// <summary>
     /// 带字段错误的校验失败
     /// </summary>
     public static Error ValidationFailedWith(IReadOnlyList<FieldError> fieldErrors) =>

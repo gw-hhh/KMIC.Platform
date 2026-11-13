@@ -156,6 +156,22 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
         }
     }
 
+    [Fact]
+    public async Task StoppingTheSchedulerServiceTwice_IsHarmless()
+    {
+        await using var worker = new ProbeHarness(database.ConnectionString, services: s =>
+        {
+            s.AddSingleton(TimeProvider.System);
+            s.AddKmicSchedulerWorker();
+        });
+        await worker.StartHostedServicesAsync(Ct);
+
+        await worker.StopHostedServicesAsync(CancellationToken.None);
+
+        // 第二次停机时调度器已经关了：不应该再去取它
+        await Should.NotThrowAsync(async () => await worker.StopHostedServicesAsync(CancellationToken.None));
+    }
+
     public ValueTask DisposeAsync() => _harness.DisposeAsync();
 
     private async Task<long> RunningCountAsync(CancellationToken ct)

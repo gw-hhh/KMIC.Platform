@@ -47,6 +47,11 @@ public static class OperationsErrors
     public static readonly Error BackgroundJobFinished = Error.Conflict("Operations.BackgroundJobFinished", "这个作业已经结束，不能取消");
 
     /// <summary>
+    /// 这条消息不存在，或者不是死信：模块、箱、行 ID 对不上
+    /// </summary>
+    public static readonly Error MessageNotFound = Error.NotFound("Operations.MessageNotFound", "没有这条死信");
+
+    /// <summary>
     /// 前端错误上报太频繁，要等一段时间；前端收到后丢弃这批，不重试
     /// </summary>
     /// <param name="retryAfter">多久以后可以再报</param>

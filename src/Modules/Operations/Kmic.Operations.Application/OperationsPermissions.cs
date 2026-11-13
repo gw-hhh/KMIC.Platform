@@ -29,4 +29,16 @@ public static class OperationsPermissions
     /// </summary>
     [Permission("管理定时任务与后台作业")]
     public const string JobsManage = "Operations.Jobs.Manage";
+
+    /// <summary>
+    /// 查看消息积压、死信、被挡住的顺序键；查看死信载荷还会留下读取审计
+    /// </summary>
+    [Permission("查看消息")]
+    public const string MessagesView = "Operations.Messages.View";
+
+    /// <summary>
+    /// 重试、放弃死信：放弃意味着消息永远不会被处理，所以是敏感权限点，用到它的命令都记审计
+    /// </summary>
+    [Permission("管理消息", Sensitive = true)]
+    public const string MessagesManage = "Operations.Messages.Manage";
 }
