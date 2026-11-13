@@ -4,11 +4,13 @@ using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Notifications.Application;
+using Kmic.Notifications.Application.Rendering;
 using Kmic.Notifications.Application.SiteMessages.Purge;
 using Kmic.Notifications.Contracts;
 using Kmic.Notifications.Domain.SiteMessages;
 using Kmic.Notifications.Infrastructure.Persistence;
 using Kmic.Notifications.Infrastructure.Persistence.Repositories;
+using Kmic.Notifications.Infrastructure.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Notifications.Infrastructure;
@@ -35,6 +37,8 @@ public sealed class NotificationsModule : IModule
         services.AddModuleDbContexts<NotificationsDbContext, NotificationsQueryDbContext, INotificationsQueryDb>();
         services.AddScoped<ISiteMessageRepository, SiteMessageRepository>();
         services.AddKmicOptions<NotificationsRetentionOptions>(NotificationsRetentionOptions.Section);
+        services.AddKmicOptions<NotificationsRenderOptions>(NotificationsRenderOptions.Section);
+        services.AddSingleton<ITemplateRenderer, FluidTemplateRenderer>();
     }
 
     /// <inheritdoc />

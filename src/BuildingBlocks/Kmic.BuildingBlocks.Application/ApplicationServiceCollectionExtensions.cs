@@ -11,6 +11,7 @@ using Kmic.BuildingBlocks.Application.Files;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Notifications;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Querying;
@@ -68,6 +69,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton(PreferenceCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(NumberRuleCatalog.FromAssemblies(applicationAssemblies));
         services.AddSingleton(IntegrationMessageCatalog.FromAssemblies(applicationAssemblies));
+        services.AddSingleton(NotificationTemplateCatalog.FromAssemblies(applicationAssemblies));
         services.AddOptions<CursorOptions>();
         services.AddSingleton<ICursorProtector, HmacCursorProtector>();
         return services.AddKmicApplication(useCases, applicationAssemblies);

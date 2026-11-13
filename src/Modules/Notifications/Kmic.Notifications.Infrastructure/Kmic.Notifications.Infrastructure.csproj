@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- 基础设施层：DbContext、仓储、模块注册类、迁移 -->
   <ItemGroup>
+    <PackageReference Include="Fluid.Core" />
     <PackageReference Include="Vogen" PrivateAssets="analyzers;build;buildtransitive;contentfiles" />
   </ItemGroup>
   <ItemGroup>

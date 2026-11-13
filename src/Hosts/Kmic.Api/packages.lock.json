@@ -255,6 +255,11 @@
           "OpenTelemetry.Api": "1.20.1"
         }
       },
+      "Parlot": {
+        "type": "Transitive",
+        "resolved": "1.5.9",
+        "contentHash": "Vro4ZKVZLBoPdCftyMUlzhlRpegI3N6TlT0zpyn79a42mH214VDqzkAdV70vu578W6NKS84hBA9H6j81cz0dLg=="
+      },
       "Polly.Core": {
         "type": "Transitive",
         "resolved": "8.4.2",
@@ -400,6 +405,11 @@
           "Microsoft.IdentityModel.JsonWebTokens": "8.19.2",
           "Microsoft.IdentityModel.Tokens": "8.19.2"
         }
+      },
+      "TimeZoneConverter": {
+        "type": "Transitive",
+        "resolved": "7.2.0",
+        "contentHash": "4Poqu79dTmacVETqUJ53g3x4U21V/cmWPSlehdsVE4Q00akavvlRq+SRjcg/CmfO9ibOCjRl6TeUV7hkC5RC4w=="
       },
       "kmic.buildingblocks.application": {
         "type": "Project",
@@ -587,6 +597,7 @@
       "kmic.notifications.infrastructure": {
         "type": "Project",
         "dependencies": {
+          "Fluid.Core": "[2.41.1, )",
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
           "Kmic.Notifications.Application": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
@@ -708,6 +719,16 @@
         "contentHash": "QpKXgiO9E6wXCh19X2Musn8MZM0xt7KQt/QrD6GDBn3MCUfy8a+rkhCzrYJNCfoxTsTRQ7bpKP8T3geTnJNNeQ==",
         "dependencies": {
           "FluentValidation": "12.2.0"
+        }
+      },
+      "Fluid.Core": {
+        "type": "CentralTransitive",
+        "requested": "[2.41.1, )",
+        "resolved": "2.41.1",
+        "contentHash": "T6ksxt3TxOod/6yJ7G1QMy3udIRlgpY4mxa0Y2yzx3p7JWaOezPrleyOGkUIB1WtzMz7glcl3JFdXGt1zG6MYw==",
+        "dependencies": {
+          "Parlot": "1.5.9",
+          "TimeZoneConverter": "7.2.0"
         }
       },
       "Mediator.Abstractions": {
