@@ -8,6 +8,7 @@ using Kmic.Operations.Application;
 using Kmic.Operations.Application.Audit.Record;
 using Kmic.Operations.Contracts;
 using Kmic.Operations.Domain.Audit;
+using Kmic.Operations.Domain.Jobs;
 using Kmic.Operations.Infrastructure.Persistence;
 using Kmic.Operations.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,7 @@ public sealed class OperationsModule : IModule
 
         services.AddModuleDbContexts<OperationsDbContext, OperationsQueryDbContext, IOperationsQueryDb>();
         services.AddScoped<IAuditRepository, AuditRepository>();
+        services.AddScoped<IScheduledJobSettingRepository, ScheduledJobSettingRepository>();
     }
 
     /// <inheritdoc />

@@ -373,7 +373,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 
 | 服务 | 作用 | 出处 |
 |---|---|---|
-| `IScheduledJobControl` | 列出调度库里的任务与下次触发时间、同步覆盖值到触发器、立即触发一次 | 05-08 第 5.3、7.1 节；现有 `ScheduleSynchronizer`、`SyncSchedulesTask` 是内部类型 |
+| `IScheduledJobControl` | 列出调度库里的任务与下次触发时间、同步覆盖值到触发器、立即触发一次（已实现，2026-11-13；另有 `Preview`，见 05-08 修订记录） | 05-08 第 5.3、7.1 节；现有 `ScheduleSynchronizer`、`SyncSchedulesTask` 是内部类型 |
 | `IModuleMessageStore` | 每个模块一个，读写本模块的 Outbox / Inbox：积压汇总、死信、重试、放弃、补投 | 05-07 第 9.1 节 |
 | `IModuleJobStore` | 每个模块一个，汇总与取消本模块的作业 | 05-08 D6 |
 | `IAbandonPolicy<TRequest>` | 接收方为请求型消息注册的放弃前检查 | 05-07 第 9.1 节；Files 的 `AttachFiles` 是第一个使用者 |
@@ -402,9 +402,21 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 - 聚合与表都叫 `AuditLog`（设计写的聚合名 `AuditEntry`）：模型规则要求业务实体的表名等于类名，而框架的清理命令（`purge --table audit-log`）认的表就是 `"Operations"."AuditLog"`。强类型 ID 因此叫 `AuditLogId`。
 - 写入时间用审计的创建时间列（`CreatedAt`），不另设 `ReceivedAt`；`Targets`、`Changes`、`Details` 存 `jsonb`，领域里是 JSON 文本；`ClientIp` 是 `inet`。
 - 按操作对象筛选用 JSON 包含运算（`@>`）并走 GIN 索引。JSON 函数是 Npgsql 专有的，Application 不引用驱动，所以放在查询入口 `IOperationsQueryDb.WithTarget` 里，由 Infrastructure 实现。
-- 订阅 `Operations.RecordAudit` 把 `Framework.AuditRecorded` 转成 `RecordAuditCommand`，按审计 ID 幂等（先查再写，重复投递只写一次）。**消息从产生端的发件箱经路由到这里的收件箱的整条链路没有端到端测试**：API 测试宿主只跑 Api 角色，不跑投递与收件箱处理；已测的是命令本身（幂等、落库）和订阅声明被宿主接受。整条链路等定时任务、消息管理一起做时补一个跑 Worker 角色的测试。
+- 订阅 `Operations.RecordAudit` 把 `Framework.AuditRecorded` 转成 `RecordAuditCommand`，按审计 ID 幂等（先查再写，重复投递只写一次）。消息从产生端的发件箱经路由到这里的收件箱的整条链路，由跑 Api 加 Worker 两个角色的宿主测试（`WorkerRoleTests`，2026-11-13）走通：一个带审计的命令执行后，审计行出现在审计表里，列表接口能查到。
 - `GET audit`、`GET audit/{id}` 已实现；`Operations.Audit.View` 是目前唯一的权限点，其余随用例加入。列表缺少 `from`/`to` 时由请求绑定直接返回 400（不带逐字段错误），超过 93 天或结束早于开始是逐字段错误。
 - Operations 的初始迁移已建消息路由表、定时任务设置与执行记录表、Quartz 表（框架提供建表语句，`MessageRouteTable`、`SchedulingTables` 改为公开）；测试用的 `FrameworkSchema` 增加 `operationsHasMigrations`，API 测试不再代建。`MessagingInstance` 心跳表仍未做。
+
+### 实现时的其他差异：定时任务（2026-11-13）
+
+- 设置聚合叫 `ScheduledJobSetting`（设计写的 `JobOverride`）：模型规则要求实体类名等于表名，而这张表框架已经按这个名字建好并读取。表在初始迁移里由框架的建表语句建成（任务名做主键），新增迁移 `ScheduledJobSettingAggregate` 把它改成聚合的形状：`Id` 做主键、任务名唯一、补上创建与并发版本列；框架读它时只用任务名、开关、Cron 三列，不受影响。
+- 保存覆盖用整体替换：给空的项恢复成跟着默认值（`PUT …/override`）；“恢复默认”是单独的命令，设置行保留、两项清空。已经从代码里删除的任务只在列表里标为“已删除”，不能再改（没有触发器可同步）。
+- 版本号规则与系统设置一致：从来没改过的任务没有设置行，调用方不带版本；已经有行（含恢复默认后留着的）就要带列表里的 `overrideVersion`，否则 409。
+- 保存后的同步放在提交之后执行，失败只记警告、不影响保存；列表每项带 `inSync`（调度器里的状态与按设置应有的状态是否一致），改了设置却没同步上时界面能看出来。
+- Cron 的最短间隔用预览出的相邻触发时间判断（秒位只有一个取值才不会一分钟内触发多次，头几次触发里就能看出来）；预览、保存都走同一条规则，错误都是 `Operations.CronInvalid` 加 `cron` 字段错误。
+- 立即执行：任务正在任何实例上运行时返回 409 `Operations.JobAlreadyRunning`（查 Quartz 集群共享的“正在触发”表，不看本实例）；触发写进调度库，由运行着调度器的实例执行，执行记录里触发方式是手动、触发人是操作人（模拟登录时是真正动手的人）。触发不在命令的事务里：事务之后才失败时任务已经交给调度器，任务本来就要求可以重复执行，这一点接受。
+- 执行记录用原生 SQL 映射到只读行类型（表由框架的调度器写），状态与触发方式在查询里换成编码文字，响应里是智能枚举 `JobRunStatus`、`JobRunTrigger`；翻页用游标（开始时间加 ID，行 ID 是 Guid 的重载）。
+- 动作目录 `ScheduledJobActions`：`Edit`、`RestoreDefault`（有覆盖才有）、`RunNow`，都要 `Operations.Jobs.Manage`；资源策略是一条全部允许的空策略（动作目录要求每类资源有一个策略，权限点就是授权的全部）。
+- 权限点 `Operations.Jobs.View`、`Operations.Jobs.Manage` 随用例加入（非敏感，沿用 05-08 第 7.1 节）。
 
 ---
 

@@ -10,6 +10,11 @@ internal sealed class ScheduledTasks
 {
     private const string FrameworkPrefix = "Framework.";
 
+    /// <summary>
+    /// 框架任务归属的“模块”名
+    /// </summary>
+    public const string FrameworkModule = "Framework";
+
     private readonly ScheduledJobCatalog _catalog;
     private readonly FrozenDictionary<string, IFrameworkTask> _framework;
 
@@ -29,8 +34,8 @@ internal sealed class ScheduledTasks
         _framework = tasks.ToFrozenDictionary(t => t.Name, StringComparer.Ordinal);
         All =
         [
-            .. catalog.All.Select(j => new ScheduleEntry(j.Name, j.Cron, j.Misfire, j.DisplayName)),
-            .. tasks.Select(t => new ScheduleEntry(t.Name, t.Cron, Misfire.FireOnceNow, t.DisplayName)),
+            .. catalog.All.Select(j => new ScheduleEntry(j.Name, j.Module, j.Cron, j.Misfire, j.DisplayName)),
+            .. tasks.Select(t => new ScheduleEntry(t.Name, FrameworkModule, t.Cron, Misfire.FireOnceNow, t.DisplayName)),
         ];
     }
 

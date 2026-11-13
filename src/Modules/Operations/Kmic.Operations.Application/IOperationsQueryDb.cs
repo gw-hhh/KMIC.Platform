@@ -1,4 +1,6 @@
+using Kmic.Operations.Application.ScheduledJobs;
 using Kmic.Operations.Domain.Audit;
+using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application;
 
@@ -15,6 +17,21 @@ public interface IOperationsQueryDb
     /// 审计记录
     /// </summary>
     IQueryable<AuditLog> AuditLogs { get; }
+
+    /// <summary>
+    /// 运维改过的定时任务开关与执行时间
+    /// </summary>
+    IQueryable<ScheduledJobSetting> ScheduledJobSettings { get; }
+
+    /// <summary>
+    /// 定时任务的全部执行记录
+    /// </summary>
+    IQueryable<ScheduledJobRunRow> ScheduledJobRuns { get; }
+
+    /// <summary>
+    /// 每个定时任务最近一次的执行记录
+    /// </summary>
+    IQueryable<ScheduledJobRunRow> LatestScheduledJobRuns { get; }
 
     /// <summary>
     /// 只留下操作对象里包含给定内容的审计记录

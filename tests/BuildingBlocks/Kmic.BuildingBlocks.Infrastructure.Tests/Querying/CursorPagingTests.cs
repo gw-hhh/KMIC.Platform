@@ -63,6 +63,32 @@ public sealed class CursorPagingTests(ClassDatabase<ProbeTemplate> database) : I
         seen.Select(r => r.Id.Value).ShouldBe(descending ? seen.Select(r => r.Id.Value).OrderByDescending(i => i) : seen.Select(r => r.Id.Value).Order());
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ARowFromRawSql_WithAGuidId_PagesTheSameWay(bool descending)
+    {
+        // 原生 SQL 映射的只读行没有强类型 ID，用 Guid 的重载
+        var seen = new List<RawRow>();
+        string? after = null;
+        do
+        {
+            await using var work = _harness.BeginAsSystem();
+            var rows = work.Db.Database.SqlQuery<RawRow>(
+                $"""
+                SELECT "Id", "Title", "CreatedAt" FROM "Probe"."Ticket"
+                """).Where(r => r.Title.StartsWith(_prefix));
+            var page = (await rows.ToCursorPageAsync(new CursorRequest(after, 6), _protector, r => r.CreatedAt, r => r.Id, descending, Ct)).ShouldBeSuccess();
+            seen.AddRange(page.Items);
+            after = page.NextCursor;
+        }
+        while (after is not null);
+
+        seen.Count.ShouldBe(Count);
+        seen.Select(r => r.Id).Distinct().Count().ShouldBe(Count);
+        seen.ShouldBe(descending ? seen.OrderByDescending(r => r.CreatedAt) : seen.OrderBy(r => r.CreatedAt));
+    }
+
     private async Task<List<Row>> WalkAsync(int limit, bool descending, bool tied)
     {
         var seen = new List<Row>();
@@ -144,4 +170,13 @@ public sealed class CursorPagingTests(ClassDatabase<ProbeTemplate> database) : I
     }
 
     internal sealed record Row(TicketId Id, string Title, DateTimeOffset CreatedAt, int TitleLength);
+
+    internal sealed record RawRow
+    {
+        public Guid Id { get; init; }
+
+        public string Title { get; init; } = string.Empty;
+
+        public DateTimeOffset CreatedAt { get; init; }
+    }
 }

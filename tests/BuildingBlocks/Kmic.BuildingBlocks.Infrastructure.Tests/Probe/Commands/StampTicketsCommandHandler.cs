@@ -10,6 +10,7 @@ internal sealed class StampTicketsCommandHandler(TicketRepository tickets, Probe
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(StampTicketsCommand command, CancellationToken cancellationToken)
     {
         hooks.ScheduledFires.Enqueue(command.ScheduledFireTime);
+        await hooks.BeforeReturnAsync(cancellationToken);
         if (hooks.StampTicket is { } id)
         {
             var loaded = await tickets.GetForUpdateAsync(id, null, cancellationToken);

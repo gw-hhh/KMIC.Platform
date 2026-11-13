@@ -14,7 +14,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// <remarks>
 /// 每个游标列表固定一种排序，不接受调用方指定。排序键支持时间（DateTimeOffset、DateTime）与整数（int、long），
 /// 排序键相同时按 ID 排，所以结果稳定。游标无效或被改过、数量超出范围返回校验错误。
-/// 列表项的 ID 用强类型 ID（Vogen 生成的，带 From(Guid) 与 CompareTo）
+/// 列表项的 ID 用强类型 ID（Vogen 生成的，带 From(Guid) 与 CompareTo）；原生 SQL 映射的只读行没有强类型 ID，直接用 Guid
 /// </remarks>
 public static class CursorQueryableExtensions
 {
@@ -42,6 +42,29 @@ public static class CursorQueryableExtensions
         where TKey : struct, IComparable<TKey>, IFormattable
         where TId : struct, IStronglyTypedId, IComparable<TId> =>
         ToCursorPageCoreAsync(source, request, protector, key, id, descending, StronglyTypedIds<TId>.FromGuid, value => value.Value, ct);
+
+    /// <summary>
+    /// 取一页，行的 ID 是 Guid：给原生 SQL 映射的只读行类型用，它们不走强类型 ID 的值转换
+    /// </summary>
+    /// <param name="source">查询，已经带了业务筛选</param>
+    /// <param name="request">请求参数</param>
+    /// <param name="protector">游标编码</param>
+    /// <param name="key">排序键</param>
+    /// <param name="id">行的 ID，用来在排序键相同时定先后</param>
+    /// <param name="descending">是否倒序</param>
+    /// <param name="ct">取消令牌</param>
+    /// <typeparam name="T">列表项</typeparam>
+    /// <typeparam name="TKey">排序键类型</typeparam>
+    public static Task<Result<CursorPage<T>>> ToCursorPageAsync<T, TKey>(
+        this IQueryable<T> source,
+        CursorRequest request,
+        ICursorProtector protector,
+        Expression<Func<T, TKey>> key,
+        Expression<Func<T, Guid>> id,
+        bool descending,
+        CancellationToken ct)
+        where TKey : struct, IComparable<TKey>, IFormattable =>
+        ToCursorPageCoreAsync(source, request, protector, key, id, descending, value => value, value => value, ct);
 
     private static async Task<Result<CursorPage<T>>> ToCursorPageCoreAsync<T, TKey, TId>(
         IQueryable<T> source,

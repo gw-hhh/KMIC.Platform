@@ -40,6 +40,7 @@ public static class SchedulingServiceCollectionExtensions
         services.TryAddSingleton<ScheduledJobSettings>();
         services.TryAddSingleton<ScheduledCommandRunner>();
         services.TryAddSingleton<ScheduleSynchronizer>();
+        services.TryAddSingleton<IScheduledJobControl, ScheduledJobControl>();
         services.AddTransient<CommandJob>();
         services.AddScoped<IStartupTask, SyncSchedulesTask>();
         // 调度器用容器里的 TimeProvider。不在这里指定：Quartz 会把它注册成全容器的时钟，盖掉宿主的

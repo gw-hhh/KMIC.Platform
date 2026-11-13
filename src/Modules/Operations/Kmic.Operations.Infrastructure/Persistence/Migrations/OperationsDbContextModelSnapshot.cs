@@ -577,6 +577,61 @@ namespace Kmic.Operations.Infrastructure.Persistence.Migrations
 
                     b.HasAnnotation("Kmic:AppendOnly", true);
                 });
+
+            modelBuilder.Entity("Kmic.Operations.Domain.Jobs.ScheduledJobSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<string>("Cron")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasComment("执行时间的 Cron 表达式；空表示跟着代码里的默认值");
+
+                    b.Property<bool?>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasComment("是否启用；空表示跟着代码里的默认值（启用）");
+
+                    b.Property<string>("JobName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("任务的稳定名称，如 Identity.PurgeSessions");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("JobName")
+                        .IsUnique();
+
+                    b.ToTable("ScheduledJobSetting", "Operations", t =>
+                        {
+                            t.HasComment("定时任务的覆盖值；Operations 模块；运维改过的开关与执行时间，只存改过的项，没改的项按代码里的默认值；框架同步触发器时读这张表");
+                        });
+                });
 #pragma warning restore 612, 618
         }
     }
