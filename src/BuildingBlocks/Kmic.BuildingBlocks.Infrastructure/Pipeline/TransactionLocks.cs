@@ -51,6 +51,30 @@ internal sealed class TransactionLocks(IExecutionContext execution, CommandTrans
         return Result.Success();
     }
 
+    public async Task<IReadOnlySet<Guid>> TryAcquireExclusiveAsync(string scope, IReadOnlyCollection<Guid> ids, CancellationToken ct)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
+        ArgumentNullException.ThrowIfNull(ids);
+        if (!execution.InCommand || transaction.Module is not { } module)
+        {
+            throw new InvalidOperationException("事务级咨询锁只能在命令里取：它要随命令的事务释放。");
+        }
+
+        var database = contexts.Get(module).Database;
+        var acquired = new HashSet<Guid>();
+        foreach (var id in ids.Distinct().OrderBy(i => LockKeys.Of(scope, i)))
+        {
+            var key = LockKeys.Of(scope, id);
+            var taken = (await database.SqlQuery<bool>($"SELECT pg_try_advisory_xact_lock({key}) AS \"Value\"").ToListAsync(ct)).Single();
+            if (taken)
+            {
+                acquired.Add(id);
+            }
+        }
+
+        return acquired;
+    }
+
     // 55P03：lock_not_available，等锁超过了 lock_timeout
     private static bool IsLockTimeout(Exception exception) =>
         exception is PostgresException { SqlState: "55P03" } || exception.InnerException is PostgresException { SqlState: "55P03" };

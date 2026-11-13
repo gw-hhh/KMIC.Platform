@@ -45,6 +45,17 @@ public interface IModule
     }
 
     /// <summary>
+    /// 注册只在 Worker 角色上运行的后台组件，如领取队列的循环
+    /// </summary>
+    /// <remarks>
+    /// 宿主在本实例带 Worker 角色时才调用；只跑 Api 的实例不会有这些循环
+    /// </remarks>
+    /// <param name="services">服务集合</param>
+    void AddWorkerServices(IServiceCollection services)
+    {
+    }
+
+    /// <summary>
     /// 声明定时任务
     /// </summary>
     void ConfigureScheduling(ISchedulingBuilder scheduling)

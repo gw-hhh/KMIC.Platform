@@ -126,6 +126,14 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public string? HistoryPurgeNote { get; private set; }
 
     /// <summary>
+    /// 对象在存储里被删除的时间：只有彻底删除的文件需要，空表示对象还在、等删除工作器处理
+    /// </summary>
+    /// <remarks>
+    /// 只由删除工作器在删除对象之后更新，不经聚合方法；到期清理的文件整行删除，没有这个值
+    /// </remarks>
+    public DateTimeOffset? ObjectDeletedAt { get; private set; }
+
+    /// <summary>
     /// 引用它的业务对象
     /// </summary>
     public IReadOnlyList<FileReference> References => _references;

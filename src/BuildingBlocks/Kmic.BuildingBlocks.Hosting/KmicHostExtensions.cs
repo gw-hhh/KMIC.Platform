@@ -59,6 +59,11 @@ public static class KmicHostExtensions
         foreach (var module in modules.Select(m => m.Module))
         {
             module.AddServices(services);
+            if (roles.HasFlag(HostRoles.Worker))
+            {
+                module.AddWorkerServices(services);
+            }
+
             services.AddKmicSubscriptions(module.Name, module.ConfigureMessaging);
             services.AddKmicScheduling(module.Name, module.ConfigureScheduling);
         }

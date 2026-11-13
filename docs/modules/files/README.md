@@ -483,6 +483,11 @@ Identity：`IUserReferences`（上传者显示名）。
 | 读取内容 | 端点直接用 `IFileStorage` | 框架的 `IFileContentReader`（Application），Files 模块用存储实现它 | 框架 Presentation 不能引用 Infrastructure；窄接口只读、只认存储键 |
 | 返回 `FileDownload` 的查询 | 必须 `[AuditedRead]` | 启动校验已实现；模块之间的契约查询（`[ContractQuery]`）除外 | 契约查询只是给业务的下载查询取信息，审计记在业务的下载查询上 |
 | `IFileAttachments` 的位置 | 框架 | `Kmic.Files.Contracts`，实现在 Files.Application | 框架不能引用模块的 Contracts，它要发 `AttachFiles` |
+| 删除工作器 | 模块里的 `LeasedQueueWorker` 子类 | 模块实现框架的 `ILeasedWork<DeletionItem>`，循环由框架运行，在 `IModule.AddWorkerServices` 里登记 | 架构规则不许模块实现后台组件；循环的细节（槽位、退避、停机）本来也不该每个模块写一遍 |
+| 彻底删除后的对象 | “对象立即由删除工作器删除”，没有说怎样标记待删 | `StoredFile.ObjectDeletedAt`：空表示对象还在，删除队列领取“删除中”和“已彻底删除且 `ObjectDeletedAt` 为空”的行；删完记下时间，行保留 | 不另建队列表，也不用状态表示“对象已删”；管理员能看到对象删除的时间 |
+| 彻底删除与关联的互斥 | 没写 | `PurgeFile` 也取排他锁并探查未完成的关联请求，取不到或有请求在路上返回暂时冲突（503，可重试） | 否则关联请求会落在已彻底删除的文件上，变成不可放弃的死信 |
+| 文件详情里的状态历史 | 详情含状态历史 | 暂时没有：框架的 `IStateHistoryQuery` 只有接口、没有实现，等有实现再加 | 不在模块里重复写一份读历史表的 SQL |
+| 清理候选的读取 | “决定删不删的是锁 + 探查 + 状态条件” | 候选只取 ID；取锁、探查之后才加载聚合，核对状态与到期时间，再用状态机改状态，状态历史照常写入 | 不用批量 SQL 改状态，状态历史才完整；一次最多一批（`Files:PurgeBatchSize`，默认 1000），一个事务持有的锁有限 |
 
 ## 14. 决策汇总
 
@@ -501,5 +506,7 @@ Identity：`IUserReferences`（上传者显示名）。
 
 2026-11-13 完成：`StoredFile` / `FileReference` 聚合与状态机（含状态历史）、迁移、上传三步（端点、`StartUpload`、`CompleteUpload`、`RejectUpload`）、三个请求型消息的订阅与处理、`IFileAttachments`（互斥协议）、`IFileAttachability`、`IFileDownloads`、`FileResults.Stream`；`Sample` 接入附件作为业务模块的标准写法（上传档案、添加、移除、下载）。端到端测试用真实宿主（Api + Worker 角色）和本地存储：上传的成功与各种拒绝、关联与解除关联被 Worker 处理、下载的头与 Range、权限与数据范围、被彻底删除与对象丢失。
 
-未做（按设计 4.3、4.5、7 节）：管理查询与命令（列表、详情、彻底删除、登记历史版本清除、存储问题、重试删除）、三个定时任务（清理到期文件、重置停滞的上传、对账）、删除工作器（`LeasedQueueWorker`）、`StorageIssue`、`IGeneratedFiles` 与 `RegisterGeneratedFile` 的发送端、`IFileContents`、直接 `Send(AttachFiles)` 的分析器、预签名下载与 S3 的范围读取（已登记延后事项）。
+同日完成：管理查询与命令（列表、详情、彻底删除、登记历史版本清除、重试删除）、定时任务 `Files.PurgeExpired`（每小时 15 分）与 `Files.ResetStaleUploads`（每小时 45 分）、删除队列；权限点 `Files.File.View`、`Files.File.Manage`、`Files.File.Purge`。
+
+未做（按设计 4.3、4.5、7 节）：对账任务 `Files.ReconcileStorage` 与 `StorageIssue`（待还原清单、标记已解决）、`IGeneratedFiles` 与 `RegisterGeneratedFile` 的发送端、`IFileContents`、文件详情里的状态历史、直接 `Send(AttachFiles)` 的分析器、预签名下载与 S3 的范围读取（已登记延后事项）。
 

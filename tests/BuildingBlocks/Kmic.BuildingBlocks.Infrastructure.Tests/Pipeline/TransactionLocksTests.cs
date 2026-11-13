@@ -140,6 +140,44 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
     }
 
     [Fact]
+    public async Task TryAcquireExclusive_SkipsWhatABusinessCommandHoldsShared_AndTakesTheRest()
+    {
+        var busy = Guid.CreateVersion7();
+        var idle = Guid.CreateVersion7();
+        await using var business = await database.DataSource.OpenConnectionAsync(Ct);
+        await using var businessTransaction = await business.BeginTransactionAsync(Ct);
+        await using (var share = new NpgsqlCommand("SELECT pg_advisory_xact_lock_shared(@key)", business, businessTransaction))
+        {
+            share.Parameters.AddWithValue("key", LockKeys.Of("Things", busy));
+            await share.ExecuteNonQueryAsync(Ct);
+        }
+
+        var (reached, release) = HoldCommandsAfterTheyLock();
+        await using var work = _harness.Begin(_user);
+        var cleanup = work.Sender.SendAsync(new TryLockThingsCommand([busy, idle, idle]), Ct).AsTask();
+        await reached.WaitAsync(TimeSpan.FromSeconds(30), Ct);
+
+        var idleWhileHeld = await ExclusiveTryLockSucceedsAsync(idle);
+        release.SetResult();
+        var taken = (await cleanup).ShouldBeSuccess();
+        var idleAfterCommit = await ExclusiveTryLockSucceedsAsync(idle);
+        await businessTransaction.RollbackAsync(Ct);
+
+        taken.Ids.ShouldBe([idle], "业务命令持有共享锁的那个这次跳过，没人持有的取到，重复的 ID 只锁一次");
+        idleWhileHeld.ShouldBeFalse("取到的排他锁在清理的事务里一直持有");
+        idleAfterCommit.ShouldBeTrue("清理的事务提交之后锁释放");
+    }
+
+    [Fact]
+    public async Task TryAcquireExclusive_OutsideACommand_Refuses()
+    {
+        await using var scope = _harness.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+
+        await Should.ThrowAsync<InvalidOperationException>(async () =>
+            await scope.ServiceProvider.GetRequiredService<ITransactionLocks>().TryAcquireExclusiveAsync("Things", [Guid.CreateVersion7()], Ct));
+    }
+
+    [Fact]
     public async Task OutsideACommand_ItRefuses()
     {
         await using var scope = _harness.BeginAsSystem();

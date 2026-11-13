@@ -575,6 +575,10 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasComment("删除队列下次可以领取的时间");
 
+                    b.Property<DateTimeOffset?>("ObjectDeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("对象在存储里被删除的时间：只有彻底删除的文件需要，空表示对象还在、等删除工作器处理");
+
                     b.Property<string>("ObjectVersionId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")

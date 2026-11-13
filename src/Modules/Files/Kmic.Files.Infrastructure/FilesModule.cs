@@ -1,15 +1,19 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Files;
 using Kmic.BuildingBlocks.Application.Integration;
+using Kmic.BuildingBlocks.Application.Scheduling;
+using Kmic.BuildingBlocks.Infrastructure.Background;
 using Kmic.BuildingBlocks.Infrastructure.Files;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Files.Application;
 using Kmic.Files.Application.Attachments;
+using Kmic.Files.Application.Cleanup;
 using Kmic.Files.Application.ContractQueries;
 using Kmic.Files.Contracts;
 using Kmic.Files.Domain.Files;
+using Kmic.Files.Infrastructure.Deletion;
 using Kmic.Files.Infrastructure.Persistence;
 using Kmic.Files.Infrastructure.Persistence.Repositories;
 using Kmic.Files.Infrastructure.Storage;
@@ -50,6 +54,15 @@ public sealed class FilesModule : IModule
     }
 
     /// <inheritdoc />
+    public void AddWorkerServices(IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddKmicOptions<FilesDeletionOptions>(FilesDeletionOptions.Section);
+        services.AddKmicLeasedWork<StoredFileDeletionWork, DeletionItem>();
+    }
+
+    /// <inheritdoc />
     public void ConfigureMessaging(IMessagingBuilder messaging)
     {
         ArgumentNullException.ThrowIfNull(messaging);
@@ -58,5 +71,14 @@ public sealed class FilesModule : IModule
         messaging.Subscribe<AttachFiles, AttachFilesCommand>("Files.Attach", (message, _) => new AttachFilesCommand(message));
         messaging.Subscribe<DetachFiles, DetachFilesCommand>("Files.Detach", (message, _) => new DetachFilesCommand(message));
         messaging.Subscribe<RegisterGeneratedFile, RegisterGeneratedFileCommand>("Files.RegisterGenerated", (message, _) => new RegisterGeneratedFileCommand(message));
+    }
+
+    /// <inheritdoc />
+    public void ConfigureScheduling(ISchedulingBuilder scheduling)
+    {
+        ArgumentNullException.ThrowIfNull(scheduling);
+
+        scheduling.Schedule("Files.PurgeExpired", "0 15 * * * ?", run => new PurgeExpiredFilesCommand(run.ScheduledFireTime), o => o.DisplayName("清理到期的文件"));
+        scheduling.Schedule("Files.ResetStaleUploads", "0 45 * * * ?", run => new ResetStaleUploadsCommand(run.ScheduledFireTime), o => o.DisplayName("重置上传中断的文件"));
     }
 }

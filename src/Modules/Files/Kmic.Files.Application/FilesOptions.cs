@@ -43,6 +43,18 @@ public sealed class FilesOptions
     public int AttachLockTimeoutSeconds { get; init; } = 5;
 
     /// <summary>
+    /// 每次清理最多处理多少个到期的文件，剩下的下一轮再处理：限制单个事务持有的锁数量
+    /// </summary>
+    [Range(1, 5000)]
+    public int PurgeBatchSize { get; init; } = 1000;
+
+    /// <summary>
+    /// 上传开始之后超过多少分钟还没有结果，就当作中断
+    /// </summary>
+    [Range(5, 24 * 60)]
+    public int StaleUploadMinutes { get; init; } = 60;
+
+    /// <summary>
     /// 临时文件保留多久
     /// </summary>
     public TimeSpan TempExpiry => TimeSpan.FromHours(TempExpiryHours);
@@ -56,4 +68,9 @@ public sealed class FilesOptions
     /// 被拒绝的文件保留多久
     /// </summary>
     public TimeSpan RejectedRetention => TimeSpan.FromDays(RejectedRetentionDays);
+
+    /// <summary>
+    /// 上传多久没有结果算中断
+    /// </summary>
+    public TimeSpan StaleUpload => TimeSpan.FromMinutes(StaleUploadMinutes);
 }
