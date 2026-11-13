@@ -527,6 +527,15 @@
         "resolved": "5.0.0",
         "contentHash": "dDoKi0PnDz31yAyETfRntsLArTlVAVzUzCIvvEDsDsucrl33Dl8pIJG06ePTJTI3tGpeyHS9Cq7Foc/s4EeKcg=="
       },
+      "MimeKit": {
+        "type": "Transitive",
+        "resolved": "4.18.2",
+        "contentHash": "aYnwCCq+ZgQIsnHSJd3TMeGqf/Rz/9jYEItXpOoG3E2REOCZtLishwBSDFl2wQ/W2SB5wBsvE38DgHZ0IEyz4Q==",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.7.0",
+          "System.Security.Cryptography.Pkcs": "10.0.13"
+        }
+      },
       "Parlot": {
         "type": "Transitive",
         "resolved": "1.5.9",
@@ -862,6 +871,7 @@
           "Fluid.Core": "[2.41.1, )",
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
           "Kmic.Notifications.Application": "[1.0.0, )",
+          "MailKit": "[4.18.2, )",
           "Vogen": "[8.0.7, )"
         }
       },
@@ -969,6 +979,15 @@
           "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0",
           "Parlot": "1.5.9",
           "TimeZoneConverter": "7.2.0"
+        }
+      },
+      "MailKit": {
+        "type": "CentralTransitive",
+        "requested": "[4.18.2, )",
+        "resolved": "4.18.2",
+        "contentHash": "ofqddpSbdrD00NqTD0ZyVfKvrl/ZZ70VFFEQ+DuR8r8CdbY3U02/sdb0CSQBNUqJifsXfVHIwRe1ToR2MvJJkw==",
+        "dependencies": {
+          "MimeKit": "4.18.2"
         }
       },
       "Mediator.Abstractions": {
@@ -1210,6 +1229,12 @@
         "requested": "[2.0.15, )",
         "resolved": "2.0.15",
         "contentHash": "zsnY7Ex2dPmbS/Nrg5RUKJFCEMbHeP9TdzmTJrsNh59mgr8ulba1SHmE1SVgmVqivvr79kV1GAlInC44F4ggEg=="
+      },
+      "System.Security.Cryptography.Pkcs": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.14, )",
+        "resolved": "10.0.14",
+        "contentHash": "Wz+IgL2xpg8KJ4i2VWj6uz1PmZNu4Q0Ljlwd73P9Vze5NcOBtctLii3itV0PB2MpOqwqDEGfB6RCdv94A4E5yQ=="
       },
       "Testcontainers.PostgreSql": {
         "type": "CentralTransitive",

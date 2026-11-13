@@ -15,7 +15,11 @@ namespace Kmic.Api.Tests;
 /// 组织：总部下有华东、华南。甲在华东，有 Sample 的全部权限，数据范围只看自己；
 /// 乙同在华东，有提交和查看权限，数据范围是全部；丙在华南，有查看和创建权限，范围只看自己
 /// </remarks>
-public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTemplate template, IReadOnlyDictionary<string, string>? extraSettings = null) : IAsyncLifetime
+public abstract class ApiTestBase(
+    ClassDatabase<ApiTemplate> database,
+    ApiTemplate template,
+    IReadOnlyDictionary<string, string>? extraSettings = null,
+    Action<IServiceCollection>? configureServices = null) : IAsyncLifetime
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部", hq => hq.Unit("华东").Unit("华南")));
 
@@ -44,7 +48,7 @@ public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTempla
 
     public ValueTask InitializeAsync()
     {
-        Factory = new ApiFactory(ConnectionString, _tokens, extraSettings: extraSettings);
+        Factory = new ApiFactory(ConnectionString, _tokens, extraSettings: extraSettings, configureServices: configureServices);
         foreach (var identity in new[] { Alice, Bob, Carol })
         {
             Factory.Loader.Register(identity);

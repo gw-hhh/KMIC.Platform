@@ -25,6 +25,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         DeliveryRole role,
         string subject,
         string? body,
+        string? smsParameters,
         string templateKey,
         string dedupKey,
         int templateVersion,
@@ -43,6 +44,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         Role = role;
         Subject = subject;
         Body = body;
+        SmsParameters = smsParameters;
         TemplateKey = templateKey;
         DedupKey = dedupKey;
         TemplateVersion = templateVersion;
@@ -98,6 +100,11 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
     public string? Body { get; private set; }
 
     /// <summary>
+    /// 短信模板的参数，JSON；只有短信有。短信服务只收模板编码和参数，实际发送用它，含密模板投递完成后清空
+    /// </summary>
+    public string? SmsParameters { get; private set; }
+
+    /// <summary>
     /// 模板键
     /// </summary>
     public string TemplateKey { get; private set; }
@@ -145,12 +152,13 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         DeliveryRole role,
         string subject,
         string body,
+        string? smsParameters,
         string templateKey,
         string dedupKey,
         int templateVersion,
         string codeHash,
         DeliveryPriority priority) =>
-        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Pending, null);
+        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Pending, null);
 
     /// <summary>
     /// 创建一条已跳过的投递：没有地址或用户已禁用，留一条记录说明为什么没有发
@@ -168,7 +176,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         string codeHash,
         DeliveryPriority priority,
         DeliverySkipReason reason) =>
-        Create(notificationId, channel, recipientUserId, recipientKey, string.Empty, null, role, subject, null, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Skipped, reason);
+        Create(notificationId, channel, recipientUserId, recipientKey, string.Empty, null, role, subject, null, null, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Skipped, reason);
 
     /// <summary>
     /// 创建一条已捕获的投递：非生产环境不真的发送
@@ -183,12 +191,13 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         DeliveryRole role,
         string subject,
         string body,
+        string? smsParameters,
         string templateKey,
         string dedupKey,
         int templateVersion,
         string codeHash,
         DeliveryPriority priority) =>
-        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Captured, null);
+        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Captured, null);
 
     private static Delivery Create(
         NotificationId notificationId,
@@ -200,6 +209,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         DeliveryRole role,
         string subject,
         string? body,
+        string? smsParameters,
         string templateKey,
         string dedupKey,
         int templateVersion,
@@ -215,6 +225,6 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         ArgumentNullException.ThrowIfNull(priority);
 
         return new Delivery(
-            DeliveryId.New(), notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, templateKey, dedupKey, templateVersion, codeHash, priority, status, skipReason);
+            DeliveryId.New(), notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, templateKey, dedupKey, templateVersion, codeHash, priority, status, skipReason);
     }
 }

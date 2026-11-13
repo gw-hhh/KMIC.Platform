@@ -655,6 +655,11 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(64)")
                         .HasComment("被跳过的原因，只有已跳过的才有");
 
+                    b.Property<string>("SmsParameters")
+                        .HasColumnType("jsonb")
+                        .HasComment("短信模板的参数，JSON；只有短信有。短信服务只收模板编码和参数，实际发送用它，含密模板投递完成后清空")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -692,6 +697,8 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                     b.HasIndex("NotificationId");
 
                     b.HasIndex("RecipientUserId");
+
+                    b.HasIndex("Status", "Priority");
 
                     b.HasIndex("TemplateKey", "RecipientKey", "DedupKey", "Channel")
                         .IsUnique();

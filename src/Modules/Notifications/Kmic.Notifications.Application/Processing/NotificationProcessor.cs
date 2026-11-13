@@ -180,16 +180,21 @@ public sealed class NotificationProcessor(
         var body = channel == DeliveryChannel.Email ? context.Content.HtmlBody : context.Content.TextBody;
         var masked = channel == DeliveryChannel.Email ? AddressMasking.Email(address) : AddressMasking.Phone(address);
         var direct = userId is null ? address : null;
+        var parameters = channel == DeliveryChannel.Sms ? SmsParametersOf(context.Model) : null;
         if (capture.Value.Enabled)
         {
-            var captureDelivery = Delivery.Capture(context.NotificationId, channel, userId, key, masked, direct, role, context.Content.Subject, body, definition.Key, context.DedupKey, 0, context.Content.CodeHash, context.Priority);
+            var captureDelivery = Delivery.Capture(context.NotificationId, channel, userId, key, masked, direct, role, context.Content.Subject, body, parameters, definition.Key, context.DedupKey, 0, context.Content.CodeHash, context.Priority);
             deliveries.Add(captureDelivery);
             captured.Add(CapturedMessage.Create(captureDelivery.Id, channel, address, role, context.Content.Subject, body, context.Now));
             return;
         }
 
-        deliveries.Add(Delivery.Queue(context.NotificationId, channel, userId, key, masked, direct, role, context.Content.Subject, body, definition.Key, context.DedupKey, 0, context.Content.CodeHash, context.Priority));
+        deliveries.Add(Delivery.Queue(context.NotificationId, channel, userId, key, masked, direct, role, context.Content.Subject, body, parameters, definition.Key, context.DedupKey, 0, context.Content.CodeHash, context.Priority));
     }
+
+    // 短信只能发已审核的模板编码加参数：参数随投递保存，发送时用
+    private static string? SmsParametersOf(object model) =>
+        model is ISmsTemplateModel sms ? JsonSerializer.Serialize(sms.ToSmsParameters()) : null;
 
     // 收件人在这个渠道的地址：用户向联系方式查，直接给的用其中的邮箱或手机号；没有地址或用户不可用时给出跳过的原因
     private static (UserId? UserId, string Key, string? Address, DeliverySkipReason? Skip) Resolve(Recipient recipient, DeliveryChannel channel, FanOut context)

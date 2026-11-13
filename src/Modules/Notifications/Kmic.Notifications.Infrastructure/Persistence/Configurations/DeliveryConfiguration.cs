@@ -25,6 +25,7 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(d => d.Address).HasMaxLength(320);
         builder.Property(d => d.Subject).HasMaxLength(500);
         builder.Property(d => d.Body).IsUnboundedText().AuditHidden();
+        builder.Property(d => d.SmsParameters).HasColumnType("jsonb").AuditHidden();
         builder.Property(d => d.TemplateKey).HasMaxLength(200);
         builder.Property(d => d.DedupKey).HasMaxLength(300);
         builder.Property(d => d.CodeHash).HasMaxLength(64).AuditHidden();
@@ -40,6 +41,7 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         // 同一个模板、收件人、去重键、渠道只有一条投递：重复的请求或重试处理不会重复发送
         builder.HasIndex(d => new { d.TemplateKey, d.RecipientKey, d.DedupKey, d.Channel }).IsUnique().MapsToError(NotificationsErrors.DeliveryDuplicated);
         builder.HasIndex(d => d.RecipientUserId);
+        builder.HasIndex(d => new { d.Status, d.Priority });
         builder.HasIndex(d => d.NotificationId);
         builder.HasNoDataScope("投递记录按权限点管理，不按组织范围；收件人的联系方式已脱敏");
     }
