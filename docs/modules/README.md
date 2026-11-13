@@ -12,7 +12,7 @@
 | Operations | `Operations` | 11 | 平台 | Identity | @gw-hhh | [operations/README.md](operations/README.md) | 设计已确认（2026-11-12，D-O1～D-O3 按建议）；已实现审计汇总与查询、定时任务管理、后台作业汇总、前端错误接收、消息积压与死信管理（2026-11-13），其余用例（路由与实例、补投、订阅终结、重建收尾）开工前先补框架公开服务（设计第 13.1 节） |
 | Configuration | `Configuration` | 12 | 平台 | Identity | @gw-hhh | [configuration/README.md](configuration/README.md) | 设计已确认（2026-11-12，D-C1～D-C3 按建议）；已实现字典、系统设置、偏好（2026-11-13），功能开关查询未做 |
 | Files | `Files` | 13 | 平台 | Identity | @gw-hhh | [files/README.md](files/README.md) | 设计已确认（2026-11-12，D-F1～D-F4 按建议）；已实现上传、关联与解除关联（互斥协议）、下载信息查询，`Sample` 已接入附件；管理、清理与对账、删除工作器未做（设计 15 节） |
-| Notifications | `Notifications` | 14 | 平台 | Identity、Files | @gw-hhh | [notifications/README.md](notifications/README.md) | 设计已确认（2026-11-12，D-N1～D-N3 按建议）；已建模块，实现了站内消息（本人的列表、未读数、已读、全部已读、过期清理）；模板、发送请求处理、投递、捕获、管理未做（设计 15 节） |
+| Notifications | `Notifications` | 14 | 平台 | Identity、Files | @gw-hhh | [notifications/README.md](notifications/README.md) | 设计已确认（2026-11-12，D-N1～D-N3 按建议）；已建模块，实现了站内消息（本人访问）、模板声明目录与渲染、发送请求的处理（投递、站内消息、跳过、去重、非生产捕获）；投递工作器与邮件、短信渠道、模板版本与管理、投递管理未做（设计 15 节） |
 | Sample | `Sample` | 99 | 参考（07 D3） | Identity、Files | @gw-hhh | 07 业务模块标准写法 | 未开始 |
 
 平台模块的编号按 08 阶段 3 的实施顺序分配（2026-11-05，S0-07）。业务模块的划分与试点模块的选定见 08 并行线 B 与 D4。

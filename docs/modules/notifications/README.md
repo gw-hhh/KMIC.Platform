@@ -553,4 +553,8 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 
 同日完成：框架的模板声明目录 `NotificationTemplateCatalog`（启动时核对：键以模块名开头且唯一、至少一个渠道、含密模板不发邮件、发短信的模型要实现 `ISmsTemplateModel`）、渲染器（8.3 的验证结论已写入）。
 
-未做：模板同步到数据库、发送请求的处理、`Notification` 与 `Delivery`、投递工作器与邮件、短信渠道、捕获、模板管理与投递管理用例、清理投递与捕获内容、含密正文清理。
+2026-11-13 续：**发送请求的处理**完成。`Notification`、`Delivery`、`CapturedMessage` 三个聚合与迁移 `DeliveryTables`；订阅 `Notifications.Process`（`SendNotification`）与 `Notifications.ProcessSecret`（`SendSecretNotification`），处理命令以系统身份在 Worker 上执行；`NotificationProcessor`：按模板键查目录、含密与否核对、同一条来源消息只处理一次、数据模型反序列化、渲染一次（主题和短信、站内消息用纯文本，邮件正文用 HTML 转义）、向 Identity 的 `IUserContacts` 一次取全部用户的联系方式、每个收件人每个渠道生成投递（待发送、已跳过、已捕获）或站内消息，同一个模板、收件人、去重键、渠道已有投递的跳过，已禁用与不存在的用户只留一条“已跳过”的记录。Sample 接入通知：三个示例模板（邮件与站内消息、短信、含密短信），标本提交后通知负责人（和提交同一个事务写发送请求），端到端测试走通发件箱、路由、收件箱。
+
+实现时的小调整（决定不变）：①`Delivery` 增加 `DedupKey` 列，设计里的唯一约束 `(TemplateKey, RecipientKey, DedupKey, Channel)` 需要它；②`CapturedMessage` 用 `Address` 加 `Role` 代替设计里的 `From`、`To`、`Cc`、`Bcc` 四列：一条投递只有一个收件人，角色已经说明它是哪一类，发件账号要等邮件渠道实现再记；③非生产捕获由配置 `Notifications:Capture:Enabled` 决定，默认开启，生产环境要明确配置成 false，这样开发、测试环境不会误发给真实的人；④`AttachmentFileIds` 等有 `IFileContents` 时再加；⑤`Delivery` 的哈希和正文标了 `AuditHidden`；⑥模型里叫 `Link` 的字符串属性是站内消息的跳转链接，不是站内地址就不带链接，不让一个链接挡住整条通知；类别取声明模板的模块名。
+
+未做：模板同步到数据库与版本、投递工作器与邮件渠道（MailKit）、短信渠道（阿里云）、模板管理与投递管理用例、清理投递与捕获内容、含密正文清理、邮件附件。

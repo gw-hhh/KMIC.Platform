@@ -5,5 +5,6 @@
     <ProjectReference Include="../Kmic.Sample.Domain/Kmic.Sample.Domain.csproj" />
     <ProjectReference Include="../Kmic.Sample.Contracts/Kmic.Sample.Contracts.csproj" />
     <ProjectReference Include="../../Files/Kmic.Files.Contracts/Kmic.Files.Contracts.csproj" />
+    <ProjectReference Include="../../Notifications/Kmic.Notifications.Contracts/Kmic.Notifications.Contracts.csproj" />
   </ItemGroup>
 </Project>

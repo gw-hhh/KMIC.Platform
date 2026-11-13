@@ -743,6 +743,7 @@
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Identity.Contracts": "[1.0.0, )",
           "Kmic.Notifications.Contracts": "[1.0.0, )",
           "Kmic.Notifications.Domain": "[1.0.0, )"
         }
@@ -818,6 +819,7 @@
         "dependencies": {
           "Kmic.BuildingBlocks.Application": "[1.0.0, )",
           "Kmic.Files.Contracts": "[1.0.0, )",
+          "Kmic.Notifications.Contracts": "[1.0.0, )",
           "Kmic.Sample.Contracts": "[1.0.0, )",
           "Kmic.Sample.Domain": "[1.0.0, )"
         }

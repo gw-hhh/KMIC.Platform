@@ -457,6 +457,332 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Kmic.Notifications.Domain.Captured.CapturedMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasComment("本该发往的完整地址");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasComment("正文");
+
+                    b.Property<DateTimeOffset>("CapturedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("捕获的时间");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("渠道");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<Guid>("DeliveryId")
+                        .HasColumnType("uuid")
+                        .HasComment("对应的投递");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("邮件里的角色");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("主题");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CapturedAt");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("DeliveryId");
+
+                    b.ToTable("CapturedMessage", "Notifications", t =>
+                        {
+                            t.HasComment("非生产环境捕获的邮件与短信；Notifications 模块；本该发出去的内容留在这里供查看，只在非生产环境有数据，超过保留期由清理任务删除");
+
+                            t.HasCheckConstraint("CK_CapturedMessage_Channel", "\"Channel\" IN ('Email', 'Sms')");
+
+                            t.HasCheckConstraint("CK_CapturedMessage_Role", "\"Role\" IN ('To', 'Cc', 'Bcc')");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Notifications.Domain.Deliveries.Delivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasComment("直接给的地址；收件人是用户时为空，发送时再向 Identity 取最新的联系方式");
+
+                    b.Property<string>("AddressMasked")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("脱敏后的地址，管理页和日志里只显示它");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasComment("已经尝试发送几次");
+
+                    b.Property<string>("Body")
+                        .HasColumnType("text")
+                        .HasComment("渲染好的正文；含密模板投递完成后清空")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("渠道");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("渲染时代码里默认内容的哈希，事后能知道发出的是哪一版默认内容")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<string>("DedupKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasComment("业务给的去重键：同一个模板、收件人、去重键、渠道只有一条投递");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasComment("最近一次失败的原因");
+
+                    b.Property<Guid?>("LeaseToken")
+                        .HasColumnType("uuid")
+                        .HasComment("投递工作器的领取令牌")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
+                    b.Property<DateTimeOffset?>("LeaseUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("领取的到期时间");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("下次可以领取的时间");
+
+                    b.Property<Guid>("NotificationId")
+                        .HasColumnType("uuid")
+                        .HasComment("产生它的发送请求");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("优先级");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("渠道返回的消息标识");
+
+                    b.Property<string>("RecipientKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasComment("去重用的收件人键：用户是 u:用户 ID，直接给的地址是 a:地址小写的 SHA-256");
+
+                    b.Property<Guid?>("RecipientUserId")
+                        .HasColumnType("uuid")
+                        .HasComment("收件人，系统里的用户；直接给了地址的收件人为空");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("邮件里的角色");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("发送成功的时间");
+
+                    b.Property<string>("SkipReason")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("被跳过的原因，只有已跳过的才有");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("状态");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("渲染好的主题");
+
+                    b.Property<string>("TemplateKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("模板键");
+
+                    b.Property<int>("TemplateVersion")
+                        .HasColumnType("integer")
+                        .HasComment("实际用的模板版本号，0 表示代码里的默认内容");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("NotificationId");
+
+                    b.HasIndex("RecipientUserId");
+
+                    b.HasIndex("TemplateKey", "RecipientKey", "DedupKey", "Channel")
+                        .IsUnique();
+
+                    b.ToTable("Delivery", "Notifications", t =>
+                        {
+                            t.HasComment("通知的投递；Notifications 模块；一行是把一条通知用一个渠道发给一个收件人，渲染好的内容随行保存；状态靠带条件的语句更新，不经聚合");
+
+                            t.HasCheckConstraint("CK_Delivery_Channel", "\"Channel\" IN ('Email', 'Sms')");
+
+                            t.HasCheckConstraint("CK_Delivery_Priority", "\"Priority\" IN ('Normal', 'High')");
+
+                            t.HasCheckConstraint("CK_Delivery_Role", "\"Role\" IN ('To', 'Cc', 'Bcc')");
+
+                            t.HasCheckConstraint("CK_Delivery_SkipReason", "\"SkipReason\" IN ('NoAddress', 'UserDisabled', 'UnknownUser')");
+
+                            t.HasCheckConstraint("CK_Delivery_Status", "\"Status\" IN ('Pending', 'Sending', 'Sent', 'Failed', 'Skipped', 'Captured')");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Notifications.Domain.Notifications.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<string>("DedupKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasComment("业务给的去重键");
+
+                    b.Property<Guid?>("InitiatorUserId")
+                        .HasColumnType("uuid")
+                        .HasComment("发起这件事的用户，系统发起的为空");
+
+                    b.Property<Guid>("SourceMessageId")
+                        .HasColumnType("uuid")
+                        .HasComment("来源消息的 ID，唯一");
+
+                    b.Property<string>("SourceModule")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("发出请求的模块");
+
+                    b.Property<string>("TemplateKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("模板键");
+
+                    b.Property<string>("TemplateVersions")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasComment("本次各渠道实际用的版本号，JSON：渠道编码到版本号，0 表示代码里的默认内容");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("SourceMessageId")
+                        .IsUnique();
+
+                    b.ToTable("Notification", "Notifications", t =>
+                        {
+                            t.HasComment("通知发送请求的记录；Notifications 模块；一行是一次发送请求，处理时插入，之后不再修改；来源消息 ID 唯一，保证同一条消息只处理一次");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.Notifications.Domain.SiteMessages.SiteMessage", b =>
                 {
                     b.Property<Guid>("Id")

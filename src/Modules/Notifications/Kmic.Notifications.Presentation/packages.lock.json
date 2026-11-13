@@ -184,10 +184,17 @@
           "Microsoft.AspNetCore.OpenApi": "[10.0.14, )"
         }
       },
+      "kmic.identity.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
       "kmic.notifications.application": {
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Identity.Contracts": "[1.0.0, )",
           "Kmic.Notifications.Contracts": "[1.0.0, )",
           "Kmic.Notifications.Domain": "[1.0.0, )"
         }

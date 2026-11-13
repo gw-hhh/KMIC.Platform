@@ -11,5 +11,8 @@ internal static class NotificationsModel
     public static void Configure(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new SiteMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+        modelBuilder.ApplyConfiguration(new DeliveryConfiguration());
+        modelBuilder.ApplyConfiguration(new CapturedMessageConfiguration());
     }
 }

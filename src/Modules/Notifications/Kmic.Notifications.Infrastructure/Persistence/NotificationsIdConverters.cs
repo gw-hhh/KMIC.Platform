@@ -1,3 +1,5 @@
+using Kmic.Notifications.Domain.Captured;
+using Kmic.Notifications.Domain.Deliveries;
 using Kmic.Notifications.Domain.Notifications;
 using Kmic.Notifications.Domain.SiteMessages;
 using Vogen;
@@ -9,4 +11,6 @@ namespace Kmic.Notifications.Infrastructure.Persistence;
 /// </summary>
 [EfCoreConverter<SiteMessageId>]
 [EfCoreConverter<NotificationId>]
+[EfCoreConverter<DeliveryId>]
+[EfCoreConverter<CapturedMessageId>]
 internal sealed partial class NotificationsIdConverters;

@@ -123,6 +123,12 @@
           "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
         }
       },
+      "kmic.notifications.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
       "kmic.sample.contracts": {
         "type": "Project",
         "dependencies": {

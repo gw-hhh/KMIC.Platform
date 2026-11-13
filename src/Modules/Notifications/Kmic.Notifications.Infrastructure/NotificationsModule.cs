@@ -1,12 +1,17 @@
 using System.Reflection;
+using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Notifications.Application;
+using Kmic.Notifications.Application.Processing;
 using Kmic.Notifications.Application.Rendering;
 using Kmic.Notifications.Application.SiteMessages.Purge;
 using Kmic.Notifications.Contracts;
+using Kmic.Notifications.Domain.Captured;
+using Kmic.Notifications.Domain.Deliveries;
+using Kmic.Notifications.Domain.Notifications;
 using Kmic.Notifications.Domain.SiteMessages;
 using Kmic.Notifications.Infrastructure.Persistence;
 using Kmic.Notifications.Infrastructure.Persistence.Repositories;
@@ -36,9 +41,26 @@ public sealed class NotificationsModule : IModule
 
         services.AddModuleDbContexts<NotificationsDbContext, NotificationsQueryDbContext, INotificationsQueryDb>();
         services.AddScoped<ISiteMessageRepository, SiteMessageRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+        services.AddScoped<ICapturedMessageRepository, CapturedMessageRepository>();
+        services.AddScoped<NotificationProcessor>();
+        services.AddKmicOptions<NotificationsCaptureOptions>(NotificationsCaptureOptions.Section);
         services.AddKmicOptions<NotificationsRetentionOptions>(NotificationsRetentionOptions.Section);
         services.AddKmicOptions<NotificationsRenderOptions>(NotificationsRenderOptions.Section);
         services.AddSingleton<ITemplateRenderer, FluidTemplateRenderer>();
+    }
+
+    /// <inheritdoc />
+    public void ConfigureMessaging(IMessagingBuilder messaging)
+    {
+        ArgumentNullException.ThrowIfNull(messaging);
+
+        // 订阅名存进收件箱，发布后不能改
+        messaging.Subscribe<SendNotification, ProcessSendNotificationCommand>(
+            "Notifications.Process", (message, envelope) => new ProcessSendNotificationCommand(message, envelope.MessageId, envelope.SourceModule, envelope.InitiatorUserId));
+        messaging.Subscribe<SendSecretNotification, ProcessSendSecretNotificationCommand>(
+            "Notifications.ProcessSecret", (message, envelope) => new ProcessSendSecretNotificationCommand(message, envelope.MessageId, envelope.SourceModule, envelope.InitiatorUserId));
     }
 
     /// <inheritdoc />

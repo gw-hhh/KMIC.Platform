@@ -43,18 +43,18 @@ internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
         return id;
     }
 
-    public async Task<Guid> UserAsync(string account, string? password, string displayName = "测试用户", string? mobile = null, bool active = true, bool mustChange = false, string? employeeNo = null, string? email = null)
+    public async Task<Guid> UserAsync(string account, string? password, string displayName = "测试用户", string? mobile = null, bool active = true, bool mustChange = false, string? employeeNo = null, string? email = null, Guid? id = null)
     {
-        var id = Guid.CreateVersion7();
+        id ??= Guid.CreateVersion7();
         await ExecuteAsync(
             _data,
             """
             INSERT INTO "Identity"."User" ("Id", "Account", "DisplayName", "Mobile", "EmployeeNo", "Email", "Kind", "Status", "PasswordHash", "PasswordChangeRequired", "CreatedAt", "CreatedBy", "ConcurrencyVersion")
             VALUES (@id, @account, @name, @mobile, @employee, @email, 'Normal', @status, @hash, @must, now(), @system, 0)
             """,
-            ("id", id), ("account", account), ("name", displayName), ("mobile", (object?)mobile ?? DBNull.Value), ("employee", (object?)employeeNo ?? DBNull.Value), ("email", (object?)email ?? DBNull.Value), ("status", active ? "Active" : "Disabled"),
+            ("id", id.Value), ("account", account), ("name", displayName), ("mobile", (object?)mobile ?? DBNull.Value), ("employee", (object?)employeeNo ?? DBNull.Value), ("email", (object?)email ?? DBNull.Value), ("status", active ? "Active" : "Disabled"),
             ("hash", password is null ? DBNull.Value : _hasher.HashPassword(new object(), password)), ("must", mustChange), ("system", _system));
-        return id;
+        return id.Value;
     }
 
     public async Task GrantAsync(Guid userId, Guid roleId)

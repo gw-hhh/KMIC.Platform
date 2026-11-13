@@ -4,5 +4,6 @@
     <ProjectReference Include="../../../BuildingBlocks/Kmic.BuildingBlocks.Application/Kmic.BuildingBlocks.Application.csproj" />
     <ProjectReference Include="../Kmic.Notifications.Domain/Kmic.Notifications.Domain.csproj" />
     <ProjectReference Include="../Kmic.Notifications.Contracts/Kmic.Notifications.Contracts.csproj" />
+    <ProjectReference Include="../../Identity/Kmic.Identity.Contracts/Kmic.Identity.Contracts.csproj" />
   </ItemGroup>
 </Project>
