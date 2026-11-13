@@ -54,6 +54,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped(typeof(IReadModelMaintenance<>), typeof(ReadModelWriter<>));
         services.TryAddScoped<IBackgroundJobs, BackgroundJobs>();
         services.TryAddSingleton<JobStore>();
+        services.TryAddSingleton<IModuleJobStores, ModuleJobStores>();
         services.TryAddSingleton<RebuildRunStore>();
         services.TryAddScoped<INumberGenerator, NumberGenerator>();
         services.TryAddScoped<AuditRecorder>();

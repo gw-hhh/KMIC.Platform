@@ -35,4 +35,21 @@ public static class OperationsErrors
     /// </summary>
     public static Error CronInvalidWith(string path, string message) =>
         Error.Validation(CronInvalid.Code, CronInvalid.Message, [new FieldError(path, "Cron", message)]);
+
+    /// <summary>
+    /// 后台作业不存在：模块名或作业 ID 不对
+    /// </summary>
+    public static readonly Error BackgroundJobNotFound = Error.NotFound("Operations.BackgroundJobNotFound", "后台作业不存在");
+
+    /// <summary>
+    /// 作业已经结束，不能再取消
+    /// </summary>
+    public static readonly Error BackgroundJobFinished = Error.Conflict("Operations.BackgroundJobFinished", "这个作业已经结束，不能取消");
+
+    /// <summary>
+    /// 前端错误上报太频繁，要等一段时间；前端收到后丢弃这批，不重试
+    /// </summary>
+    /// <param name="retryAfter">多久以后可以再报</param>
+    public static Error ClientErrorsThrottled(TimeSpan retryAfter) =>
+        Error.TooManyRequests("Operations.ClientErrorsThrottled", "错误上报太频繁，请稍后再试", retryAfter);
 }

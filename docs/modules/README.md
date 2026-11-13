@@ -9,7 +9,7 @@
 | 模块 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 | 状态 |
 |---|---|---|---|---|---|---|---|
 | Identity | `Identity` | 10 | 平台 | — | @gw-hhh | [identity/README.md](identity/README.md) | 设计已确认（2026-11-12，D-A～D-G 按建议；业务数据类待确认项见设计 12.3）；未开始实现 |
-| Operations | `Operations` | 11 | 平台 | Identity | @gw-hhh | [operations/README.md](operations/README.md) | 设计已确认（2026-11-12，D-O1～D-O3 按建议）；已实现审计汇总与查询、定时任务管理（2026-11-13），其余用例（后台作业、消息管理）开工前先补框架公开服务（设计第 13.1 节） |
+| Operations | `Operations` | 11 | 平台 | Identity | @gw-hhh | [operations/README.md](operations/README.md) | 设计已确认（2026-11-12，D-O1～D-O3 按建议）；已实现审计汇总与查询、定时任务管理、后台作业汇总、前端错误接收（2026-11-13），其余用例（消息管理）开工前先补框架公开服务（设计第 13.1 节） |
 | Configuration | `Configuration` | 12 | 平台 | Identity | @gw-hhh | [configuration/README.md](configuration/README.md) | 设计已确认（2026-11-12，D-C1～D-C3 按建议）；已实现字典、系统设置、偏好（2026-11-13），功能开关查询未做 |
 | Files | `Files` | 13 | 平台 | Identity | @gw-hhh | [files/README.md](files/README.md) | 设计已确认（2026-11-12，D-F1～D-F4 按建议）；未开始实现，开工前先补框架的上传与关联构件（设计 11.1） |
 | Notifications | `Notifications` | 14 | 平台 | Identity、Files | @gw-hhh | [notifications/README.md](notifications/README.md) | 设计已确认（2026-11-12，D-N1～D-N3 按建议）；未开始实现，开工前先补框架的租约队列与模板声明（设计 11.1） |

@@ -1,14 +1,17 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Contracts.Auditing;
+using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Contracts;
 using Kmic.Operations.Application;
 using Kmic.Operations.Application.Audit.Record;
+using Kmic.Operations.Application.ClientErrors;
 using Kmic.Operations.Contracts;
 using Kmic.Operations.Domain.Audit;
 using Kmic.Operations.Domain.Jobs;
+using Kmic.Operations.Infrastructure.ClientErrors;
 using Kmic.Operations.Infrastructure.Persistence;
 using Kmic.Operations.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +40,9 @@ public sealed class OperationsModule : IModule
         services.AddModuleDbContexts<OperationsDbContext, OperationsQueryDbContext, IOperationsQueryDb>();
         services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IScheduledJobSettingRepository, ScheduledJobSettingRepository>();
+        services.AddKmicOptions<ClientErrorOptions>(ClientErrorOptions.Section);
+        services.AddSingleton<IClientErrorLimiter, ClientErrorLimiter>();
+        services.AddSingleton<IClientErrorLog, ClientErrorLog>();
     }
 
     /// <inheritdoc />
