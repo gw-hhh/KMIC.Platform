@@ -60,7 +60,7 @@ public sealed class FileUploadProcessorTests : IDisposable
         file.Size.ShouldBe(size);
         file.Sha256.ShouldBe(Convert.ToHexStringLower(SHA256.HashData(content)));
         file.Type.Code.ShouldBe(FileType.Pdf);
-        file.Stored.Key.ShouldBe("env/2026/11/abc");
+        file.Key.ShouldBe("env/2026/11/abc");
         await using var stored = await _storage.OpenReadAsync("env/2026/11/abc", Ct);
         using var copy = new MemoryStream();
         await stored.CopyToAsync(copy, Ct);

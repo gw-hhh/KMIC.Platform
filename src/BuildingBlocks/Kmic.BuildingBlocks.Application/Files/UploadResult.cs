@@ -1,4 +1,4 @@
-namespace Kmic.BuildingBlocks.Infrastructure.Files;
+namespace Kmic.BuildingBlocks.Application.Files;
 
 /// <summary>
 /// 上传处理的结果：成功时带着写入的文件，失败时只有原因

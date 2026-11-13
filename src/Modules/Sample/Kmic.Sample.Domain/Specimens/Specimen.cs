@@ -25,6 +25,7 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
             .Build();
 
     private readonly List<SpecimenItem> _items = [];
+    private readonly List<SpecimenAttachment> _attachments = [];
 
     private Specimen(SpecimenId id, string number, string title, UserId ownerId, OrgUnitId orgUnitId)
         : base(id)
@@ -66,6 +67,11 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     public IReadOnlyList<SpecimenItem> Items => _items;
 
     /// <summary>
+    /// 附件
+    /// </summary>
+    public IReadOnlyList<SpecimenAttachment> Attachments => _attachments;
+
+    /// <summary>
     /// 创建草稿，状态的起点同时写入业务历史
     /// </summary>
     public static Specimen Create(string number, string title, UserId ownerId, OrgUnitId orgUnitId, string? reason = null)
@@ -88,6 +94,58 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         var item = SpecimenItem.Create(name, quantity);
         _items.Add(item);
         return item;
+    }
+
+    /// <summary>
+    /// 能不能增删附件：关闭之后不能
+    /// </summary>
+    public Result CanEditAttachments() => Status == SpecimenStatus.Closed ? SampleErrors.InvalidState : Result.Success();
+
+    /// <summary>
+    /// 添加附件；同一个文件不能添加两次
+    /// </summary>
+    /// <param name="fileId">文件，已经由 IFileAttachments 取锁、检查、发出关联请求</param>
+    /// <param name="fileName">关联时的文件名快照</param>
+    /// <param name="size">关联时的字节数快照</param>
+    /// <param name="fileType">关联时的文件类型编码快照</param>
+    public Result<SpecimenAttachment> AddAttachment(StoredFileId fileId, string fileName, long size, string fileType)
+    {
+        var editable = CanEditAttachments();
+        if (editable.IsFailure)
+        {
+            return editable.Error;
+        }
+
+        if (_attachments.Exists(a => a.FileId == fileId))
+        {
+            return SampleErrors.AttachmentExists;
+        }
+
+        var attachment = SpecimenAttachment.Create(fileId, fileName, size, fileType);
+        _attachments.Add(attachment);
+        return attachment;
+    }
+
+    /// <summary>
+    /// 移除附件，返回被移除的那个，调用方据此解除文件的关联
+    /// </summary>
+    /// <param name="attachmentId">附件</param>
+    public Result<SpecimenAttachment> RemoveAttachment(SpecimenAttachmentId attachmentId)
+    {
+        var editable = CanEditAttachments();
+        if (editable.IsFailure)
+        {
+            return editable.Error;
+        }
+
+        var attachment = _attachments.Find(a => a.Id == attachmentId);
+        if (attachment is null)
+        {
+            return SampleErrors.AttachmentNotFound;
+        }
+
+        _attachments.Remove(attachment);
+        return attachment;
     }
 
     /// <summary>

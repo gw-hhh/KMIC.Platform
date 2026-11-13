@@ -44,4 +44,19 @@ public enum ErrorType
     /// 请求过于频繁，要等一段时间再试（429）
     /// </summary>
     TooManyRequests,
+
+    /// <summary>
+    /// 内容太大（413）：上传的文件超过了上限
+    /// </summary>
+    PayloadTooLarge,
+
+    /// <summary>
+    /// 不支持的内容类型（415）：上传的文件类型不被允许
+    /// </summary>
+    UnsupportedMediaType,
+
+    /// <summary>
+    /// 已经不存在，也不会再回来（410）：比如被彻底删除的文件
+    /// </summary>
+    Gone,
 }

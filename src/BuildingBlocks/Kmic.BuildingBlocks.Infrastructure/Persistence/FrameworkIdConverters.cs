@@ -8,4 +8,5 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 [EfCoreConverter<RoleId>]
 [EfCoreConverter<SessionId>]
 [EfCoreConverter<OrgUnitId>]
+[EfCoreConverter<StoredFileId>]
 internal sealed partial class FrameworkIdConverters;

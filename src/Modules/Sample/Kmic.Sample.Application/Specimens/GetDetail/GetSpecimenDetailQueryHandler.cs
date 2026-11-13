@@ -21,7 +21,7 @@ public sealed class GetSpecimenDetailQueryHandler(ISampleQueryDb db, IEntityFind
         ArgumentNullException.ThrowIfNull(query);
 
         // 查询入口已经带了数据范围过滤：范围外的数据和不存在一样，返回 NotFound，同时记一条安全事件
-        var found = await finder.FindByIdOrNotFoundAsync(db.Specimens.Include(s => s.Items), query.Id, SampleErrors.NotFound, cancellationToken);
+        var found = await finder.FindByIdOrNotFoundAsync(db.Specimens.Include(s => s.Items).Include(s => s.Attachments), query.Id, SampleErrors.NotFound, cancellationToken);
         if (found.IsFailure)
         {
             return found.Error;
@@ -35,6 +35,7 @@ public sealed class GetSpecimenDetailQueryHandler(ISampleQueryDb db, IEntityFind
             specimen.Title,
             specimen.Status,
             [.. specimen.Items.Select(i => new SpecimenItemResponse(i.Name, i.Quantity))],
+            [.. specimen.Attachments.Select(a => new SpecimenAttachmentResponse(a.Id.Value, a.FileName, a.Size, a.FileType))],
             allowedActions.For(specimen));
     }
 }

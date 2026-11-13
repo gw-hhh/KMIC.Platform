@@ -15,7 +15,7 @@ namespace Kmic.Api.Tests;
 /// 组织：总部下有华东、华南。甲在华东，有 Sample 的全部权限，数据范围只看自己；
 /// 乙同在华东，有提交和查看权限，数据范围是全部；丙在华南，有查看和创建权限，范围只看自己
 /// </remarks>
-public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTemplate template) : IAsyncLifetime
+public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTemplate template, IReadOnlyDictionary<string, string>? extraSettings = null) : IAsyncLifetime
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部", hq => hq.Unit("华东").Unit("华南")));
 
@@ -24,7 +24,7 @@ public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTempla
     protected static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     protected TestIdentity Alice { get; } = TestIdentity.User("甲").InTree(_org).InOrgUnit(_org["华东"]).WithRole(r => r
-        .Permissions(SamplePermissions.View, SamplePermissions.Create, SamplePermissions.Submit, SamplePermissions.Close, SamplePermissions.Delete)
+        .Permissions(SamplePermissions.View, SamplePermissions.Create, SamplePermissions.Edit, SamplePermissions.Submit, SamplePermissions.Close, SamplePermissions.Delete)
         .Scope(ScopeLevel.Self));
 
     protected TestIdentity Bob { get; } = TestIdentity.User("乙").InTree(_org).InOrgUnit(_org["华东"]).WithRole(r => r
@@ -44,7 +44,7 @@ public abstract class ApiTestBase(ClassDatabase<ApiTemplate> database, ApiTempla
 
     public ValueTask InitializeAsync()
     {
-        Factory = new ApiFactory(ConnectionString, _tokens);
+        Factory = new ApiFactory(ConnectionString, _tokens, extraSettings: extraSettings);
         foreach (var identity in new[] { Alice, Bob, Carol })
         {
             Factory.Loader.Register(identity);

@@ -14,8 +14,9 @@ internal sealed class FilesDbContext(DbContextOptions<FilesDbContext> options, M
     public override string Module => FilesModuleInfo.Name;
 
     /// <inheritdoc />
-    protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        // 有强类型 ID 之后，在 FilesIdConverters 上标 [EfCoreConverter<XxxId>]，并在这里调用 RegisterAllInFilesIdConverters
-    }
+    protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
+        configurationBuilder.RegisterAllInFilesIdConverters();
+
+    /// <inheritdoc />
+    protected override void ConfigureModel(ModelBuilder modelBuilder) => FilesModel.Configure(modelBuilder);
 }

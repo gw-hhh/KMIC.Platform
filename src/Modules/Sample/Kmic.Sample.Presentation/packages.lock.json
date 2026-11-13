@@ -184,10 +184,17 @@
           "Microsoft.AspNetCore.OpenApi": "[10.0.14, )"
         }
       },
+      "kmic.files.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
       "kmic.sample.application": {
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Application": "[1.0.0, )",
+          "Kmic.Files.Contracts": "[1.0.0, )",
           "Kmic.Sample.Contracts": "[1.0.0, )",
           "Kmic.Sample.Domain": "[1.0.0, )"
         }

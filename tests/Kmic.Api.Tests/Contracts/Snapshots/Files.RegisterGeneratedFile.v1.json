@@ -1,0 +1,60 @@
+{
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "fileId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "storageKey": {
+      "type": "string"
+    },
+    "objectVersionId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "originalName": {
+      "type": "string"
+    },
+    "fileType": {
+      "type": "string"
+    },
+    "contentType": {
+      "type": "string"
+    },
+    "size": {
+      "type": "integer"
+    },
+    "sha256": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "requestedBy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "expiresAt": true
+  },
+  "required": [
+    "fileId",
+    "storageKey",
+    "objectVersionId",
+    "originalName",
+    "fileType",
+    "contentType",
+    "size",
+    "sha256",
+    "source",
+    "requestedBy",
+    "expiresAt"
+  ]
+}

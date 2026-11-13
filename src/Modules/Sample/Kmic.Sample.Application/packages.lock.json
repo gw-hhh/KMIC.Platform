@@ -117,6 +117,12 @@
           "Vogen": "[8.0.7, )"
         }
       },
+      "kmic.files.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Kmic.BuildingBlocks.Contracts": "[1.0.0, )"
+        }
+      },
       "kmic.sample.contracts": {
         "type": "Project",
         "dependencies": {

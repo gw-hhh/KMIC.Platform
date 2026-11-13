@@ -38,7 +38,7 @@ public sealed class DependencyHealthTests(ClassDatabase<ApiTemplate> database, A
         entries.Keys.ShouldBe(["database", "file-storage", "message-listener"], ignoreOrder: true);
         entries["database"].GetProperty("status").GetString().ShouldBe("Healthy");
         entries["message-listener"].GetProperty("description").GetString().ShouldBe("监听连接正常");
-        entries["file-storage"].GetProperty("description").GetString().ShouldBe("没有启用文件存储");
+        entries["file-storage"].GetProperty("description").GetString().ShouldBe("可以访问", "Files 模块登记了文件存储，测试里是本地目录");
         report.GetProperty("totalDurationMs").GetDouble().ShouldBeGreaterThan(0);
     }
 

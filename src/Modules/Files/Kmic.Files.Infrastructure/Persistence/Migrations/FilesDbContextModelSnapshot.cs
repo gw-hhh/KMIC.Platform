@@ -456,6 +456,294 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
                             t.HasComment("幂等记录");
                         });
                 });
+
+            modelBuilder.Entity("Kmic.Files.Domain.Files.FileReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<DateTimeOffset>("AttachedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("关联的时间");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasComment("业务对象的 ID");
+
+                    b.Property<string>("OwnerModule")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("引用它的业务模块");
+
+                    b.Property<string>("OwnerType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasComment("业务对象的类型，如 Specimen");
+
+                    b.Property<Guid>("StoredFileId")
+                        .HasColumnType("uuid")
+                        .HasComment("StoredFile ID");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerModule", "OwnerType", "OwnerId");
+
+                    b.HasIndex("StoredFileId", "OwnerModule", "OwnerType", "OwnerId")
+                        .IsUnique();
+
+                    b.ToTable("FileReference", "Files", t =>
+                        {
+                            t.HasComment("文件的引用登记；Files 模块；业务对象对文件的引用，只由关联与解除关联的请求消息维护，用来判断文件的生命周期");
+                        });
+                });
+
+            modelBuilder.Entity("Kmic.Files.Domain.Files.StoredFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("识别出的内容类型，不信任客户端声明的值");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<int>("DeleteAttempts")
+                        .HasColumnType("integer")
+                        .HasComment("删除队列已经试了几次");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("成为清理候选的时间：临时、已解除关联、被拒绝的文件才有，已关联的文件为空");
+
+                    b.Property<string>("FileType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("识别出的文件类型编码；写入完成之前没有");
+
+                    b.Property<string>("HistoryPurgeNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("彻底删除历史版本的执行记录，如工单号");
+
+                    b.Property<DateTimeOffset?>("HistoryPurgedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("运维彻底删除历史版本之后登记的时间；为空表示历史版本可能仍在");
+
+                    b.Property<Guid?>("LeaseToken")
+                        .HasColumnType("uuid")
+                        .HasComment("删除队列的领取令牌")
+                        .HasAnnotation("Kmic:AuditMode", "Hidden");
+
+                    b.Property<DateTimeOffset?>("LeaseUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("删除队列的领取到期时间");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("删除队列下次可以领取的时间");
+
+                    b.Property<string>("ObjectVersionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("存储里对象的版本 ID：开启版本控制的桶才有，恢复与对账用");
+
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("显示用的文件名：去掉路径与控制字符，只作显示");
+
+                    b.Property<string>("Profile")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("上传档案名；生成的文件是 Generated:来源");
+
+                    b.Property<string>("PurgeReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("彻底删除的原因");
+
+                    b.Property<DateTimeOffset?>("PurgedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("彻底删除的时间");
+
+                    b.Property<Guid?>("PurgedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("彻底删除的人");
+
+                    b.Property<string>("RejectReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("被拒绝的原因：类型不符、超过大小、扫描没通过、写入失败");
+
+                    b.Property<string>("Sha256")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("内容的 SHA-256，小写十六进制");
+
+                    b.Property<long?>("Size")
+                        .HasColumnType("bigint")
+                        .HasComment("实际字节数；写入完成之前没有");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("状态");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasComment("对象在存储里的键，由文件 ID 生成，与文件名无关");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("上传开始的时间");
+
+                    b.Property<Guid?>("UploadedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("上传的人；系统生成的文件没有");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Profile");
+
+                    b.HasIndex("Status", "ExpiresAt");
+
+                    b.HasIndex("UploadedBy", "UploadedAt");
+
+                    b.ToTable("StoredFile", "Files", t =>
+                        {
+                            t.HasComment("文件元数据；Files 模块；一行一个文件，内容在对象存储里；状态是删除队列：删除中的行由删除工作器领取，先删对象再删行");
+
+                            t.HasCheckConstraint("CK_StoredFile_Status", "\"Status\" IN ('Uploading', 'Scanning', 'Available', 'Attached', 'Detached', 'Rejected', 'Deleting', 'Purged')");
+                        });
+                });
+
+            modelBuilder.Entity("StoredFileStateHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActionCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActualUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AggregateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FromCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("OnBehalfOfUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int?>("Revision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StateName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ToCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TraceId")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AggregateId", "OccurredAt");
+
+                    b.ToTable("StoredFileStateHistory", "Files", t =>
+                        {
+                            t.HasComment("StoredFile 的状态流转记录，只追加");
+                        });
+
+                    b.HasAnnotation("Kmic:AppendOnly", true);
+                });
+
+            modelBuilder.Entity("Kmic.Files.Domain.Files.FileReference", b =>
+                {
+                    b.HasOne("Kmic.Files.Domain.Files.StoredFile", null)
+                        .WithMany("References")
+                        .HasForeignKey("StoredFileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Kmic.Files.Domain.Files.StoredFile", b =>
+                {
+                    b.Navigation("References");
+                });
 #pragma warning restore 612, 618
         }
     }

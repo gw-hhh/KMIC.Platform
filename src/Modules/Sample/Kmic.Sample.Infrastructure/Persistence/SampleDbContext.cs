@@ -1,6 +1,5 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Sample.Contracts;
-using Kmic.Sample.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Infrastructure.Persistence;
@@ -19,6 +18,5 @@ internal sealed class SampleDbContext(DbContextOptions<SampleDbContext> options,
         configurationBuilder.RegisterAllInSampleIdConverters();
 
     /// <inheritdoc />
-    protected override void ConfigureModel(ModelBuilder modelBuilder) =>
-        modelBuilder.ApplyConfiguration(new SpecimenConfiguration()).ApplyConfiguration(new SpecimenItemConfiguration());
+    protected override void ConfigureModel(ModelBuilder modelBuilder) => SampleModel.Configure(modelBuilder);
 }

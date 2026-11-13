@@ -1,4 +1,4 @@
-namespace Kmic.BuildingBlocks.Infrastructure.Files;
+namespace Kmic.BuildingBlocks.Application.Files;
 
 /// <summary>
 /// 一次上传处理的结果

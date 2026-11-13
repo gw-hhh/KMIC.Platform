@@ -16,6 +16,7 @@ internal sealed class SpecimenConfiguration : IEntityTypeConfiguration<Specimen>
         builder.HasIndex(s => s.Number).IsUnique().MapsToError(SampleErrors.NumberDuplicated);
         builder.Property(s => s.Title).HasMaxLength(100);
         builder.HasMany(s => s.Items).WithOne().HasForeignKey("SpecimenId");
+        builder.HasMany(s => s.Attachments).WithOne().HasForeignKey("SpecimenId");
         builder.HasDataScope(SampleScopes.Specimen);
     }
 }

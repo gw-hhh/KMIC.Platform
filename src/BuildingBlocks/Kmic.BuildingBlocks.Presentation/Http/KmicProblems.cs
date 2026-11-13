@@ -47,6 +47,9 @@ internal static class KmicProblems
         ErrorType.Unavailable => StatusCodes.Status503ServiceUnavailable,
         ErrorType.Unauthenticated => StatusCodes.Status401Unauthorized,
         ErrorType.TooManyRequests => StatusCodes.Status429TooManyRequests,
+        ErrorType.PayloadTooLarge => StatusCodes.Status413PayloadTooLarge,
+        ErrorType.UnsupportedMediaType => StatusCodes.Status415UnsupportedMediaType,
+        ErrorType.Gone => StatusCodes.Status410Gone,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "没有为这种错误类型定义状态码。"),
     };
 

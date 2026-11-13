@@ -21,6 +21,12 @@ public static class SamplePermissions
     public const string Create = "Sample.Specimen.Create";
 
     /// <summary>
+    /// 编辑，目前是增删附件
+    /// </summary>
+    [Permission("编辑示例标本")]
+    public const string Edit = "Sample.Specimen.Edit";
+
+    /// <summary>
     /// 提交
     /// </summary>
     [Permission("提交示例标本")]

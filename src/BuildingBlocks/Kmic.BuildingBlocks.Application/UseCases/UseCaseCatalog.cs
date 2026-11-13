@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Contracts.Files;
 
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
@@ -239,6 +240,12 @@ public sealed class UseCaseCatalog
                 problems.Add($"{name}：[Idempotent]、[NotIdempotent]、[Audited]、[NotAudited] 只能用于命令。");
             }
 
+            // 模块之间的契约查询只是给业务的下载查询取下载信息，审计记在业务的下载查询上
+            if (!auditedRead && !Has<ContractQueryAttribute>(type) && ReturnsFileDownload(type))
+            {
+                problems.Add($"{name}：返回 FileDownload 的查询必须 [AuditedRead]，每次下载都要留审计记录。");
+            }
+
             return new AuditDeclaration(false, null, auditedRead);
         }
 
@@ -276,6 +283,9 @@ public sealed class UseCaseCatalog
 
         return audit.AuditedRead ? $"{module}.{TrimSuffix(type.Name, "Query")}" : null;
     }
+    private static bool ReturnsFileDownload(Type queryType) =>
+        queryType.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQuery<>) && i.GetGenericArguments()[0] == typeof(FileDownload));
+
     private static string TrimSuffix(string name, string suffix) =>
         name.EndsWith(suffix, StringComparison.Ordinal) ? name[..^suffix.Length] : name;
 

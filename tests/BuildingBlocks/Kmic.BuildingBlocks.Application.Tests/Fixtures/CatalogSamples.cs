@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application.Authorization;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.UseCases;
+using Kmic.BuildingBlocks.Contracts.Files;
 using Kmic.BuildingBlocks.Contracts.References;
 using Kmic.BuildingBlocks.Domain.Results;
 
@@ -11,6 +12,8 @@ namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 /// </summary>
 public static class CatalogSamples
 {
+    private static readonly Error _notFound = Error.NotFound("Test.NotFound", "测试");
+
     [NotAudited("测试")]
     public sealed record NoDeclarationCommand : ICommand;
 
@@ -52,6 +55,16 @@ public static class CatalogSamples
     [AllowAuthenticated]
     [Idempotent]
     public sealed record IdempotentQuery : IQuery<int>;
+
+    [AllowAuthenticated]
+    public sealed record UnauditedDownloadQuery : IQuery<FileDownload>;
+
+    [AllowAuthenticated]
+    [AuditedRead]
+    public sealed record AuditedDownloadQuery : IQuery<FileDownload>;
+
+    [ContractQuery(ContractAccess.Reference, ResultExemption = "测试：模块之间取下载信息")]
+    public sealed record ContractDownloadQuery : IQuery<FileDownload>;
 
     [RequirePermission("Test.Thing.View")]
     public sealed record CheckNumberQuery : IQuery<bool>;
@@ -110,6 +123,21 @@ public static class CatalogSamples
     public sealed class IdempotentQueryHandler : IQueryHandler<IdempotentQuery, int>
     {
         public ValueTask<Result<int>> Handle(IdempotentQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<int>>(0);
+    }
+
+    public sealed class UnauditedDownloadQueryHandler : IQueryHandler<UnauditedDownloadQuery, FileDownload>
+    {
+        public ValueTask<Result<FileDownload>> Handle(UnauditedDownloadQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<FileDownload>>(_notFound);
+    }
+
+    public sealed class AuditedDownloadQueryHandler : IQueryHandler<AuditedDownloadQuery, FileDownload>
+    {
+        public ValueTask<Result<FileDownload>> Handle(AuditedDownloadQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<FileDownload>>(_notFound);
+    }
+
+    public sealed class ContractDownloadQueryHandler : IQueryHandler<ContractDownloadQuery, FileDownload>
+    {
+        public ValueTask<Result<FileDownload>> Handle(ContractDownloadQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<FileDownload>>(_notFound);
     }
 
     [BypassesDataScope("编号唯一性要在全部数据中判断")]

@@ -104,6 +104,21 @@ public sealed partial record Error
         new Error(code, ErrorType.TooManyRequests, message, []).WithMetadata(ErrorMetadataKeys.RetryAfterSeconds, (int)Math.Ceiling(retryAfter.TotalSeconds));
 
     /// <summary>
+    /// 内容太大，超过了允许的上限
+    /// </summary>
+    public static Error PayloadTooLarge(string code, string message) => new(code, ErrorType.PayloadTooLarge, message, []);
+
+    /// <summary>
+    /// 内容类型不被支持
+    /// </summary>
+    public static Error UnsupportedMediaType(string code, string message) => new(code, ErrorType.UnsupportedMediaType, message, []);
+
+    /// <summary>
+    /// 已经不存在，也不会再回来
+    /// </summary>
+    public static Error Gone(string code, string message) => new(code, ErrorType.Gone, message, []);
+
+    /// <summary>
     /// 附上详细说明
     /// </summary>
     public Error WithDetail(string detail)

@@ -43,12 +43,21 @@ public sealed class UseCaseCatalogTests
     [InlineData(typeof(CatalogSamples.UnauditedCommand), "[Audited]、[NotAudited] 之一")]
     [InlineData(typeof(CatalogSamples.IdempotentNotAuditedCommand), "必须 [Audited]")]
     [InlineData(typeof(CatalogSamples.IdempotentQuery), "只能用于命令")]
+    [InlineData(typeof(CatalogSamples.UnauditedDownloadQuery), "返回 FileDownload 的查询必须 [AuditedRead]")]
     public void Build_WrongDeclaration_RefusesWithReason(Type messageType, string reason)
     {
         var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.Build([messageType]));
 
         thrown.Problems.ShouldContain(p => p.Contains(reason, StringComparison.Ordinal) && p.Contains(messageType.Name, StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void Build_AuditedFileDownloadQuery_IsAccepted() =>
+        UseCaseCatalog.Build([typeof(CatalogSamples.AuditedDownloadQuery)]).Get(typeof(CatalogSamples.AuditedDownloadQuery)).AuditedRead.ShouldBeTrue();
+
+    [Fact]
+    public void Build_ContractQueryThatReturnsAFileDownload_NeedsNoReadAudit_BecauseTheBusinessDownloadQueryIsTheAuditedOne() =>
+        Should.NotThrow(() => UseCaseCatalog.Build([typeof(CatalogSamples.ContractDownloadQuery)]));
 
     [Fact]
     public void Build_SeveralProblems_ReportsAllAtOnce()

@@ -8,4 +8,5 @@ namespace Kmic.Sample.Infrastructure.Persistence;
 /// </summary>
 [EfCoreConverter<SpecimenId>]
 [EfCoreConverter<SpecimenItemId>]
+[EfCoreConverter<SpecimenAttachmentId>]
 internal sealed partial class SampleIdConverters;

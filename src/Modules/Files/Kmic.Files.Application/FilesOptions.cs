@@ -1,0 +1,59 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Kmic.Files.Application;
+
+/// <summary>
+/// Files 模块的部署配置
+/// </summary>
+public sealed class FilesOptions
+{
+    /// <summary>
+    /// 配置节
+    /// </summary>
+    public const string Section = "Files";
+
+    /// <summary>
+    /// 上传完成后没有被关联的临时文件保留多少小时，过了成为清理候选
+    /// </summary>
+    [Range(1, 24 * 14)]
+    public int TempExpiryHours { get; init; } = 24;
+
+    /// <summary>
+    /// 解除关联后的文件保留多少天：期内可以重新关联，期满清理
+    /// </summary>
+    [Range(0, 3650)]
+    public int DetachedRetentionDays { get; init; } = 30;
+
+    /// <summary>
+    /// 被拒绝的文件保留多少天就清理
+    /// </summary>
+    [Range(0, 365)]
+    public int RejectedRetentionDays { get; init; } = 1;
+
+    /// <summary>
+    /// 一次关联最多多少个文件：限制单个事务持有的锁数量
+    /// </summary>
+    [Range(1, 500)]
+    public int MaxFilesPerCommand { get; init; } = 50;
+
+    /// <summary>
+    /// 关联时取共享锁最多等几秒
+    /// </summary>
+    [Range(1, 60)]
+    public int AttachLockTimeoutSeconds { get; init; } = 5;
+
+    /// <summary>
+    /// 临时文件保留多久
+    /// </summary>
+    public TimeSpan TempExpiry => TimeSpan.FromHours(TempExpiryHours);
+
+    /// <summary>
+    /// 解除关联后保留多久
+    /// </summary>
+    public TimeSpan DetachedRetention => TimeSpan.FromDays(DetachedRetentionDays);
+
+    /// <summary>
+    /// 被拒绝的文件保留多久
+    /// </summary>
+    public TimeSpan RejectedRetention => TimeSpan.FromDays(RejectedRetentionDays);
+}

@@ -541,6 +541,63 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Kmic.Sample.Domain.Specimens.SpecimenAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uuid")
+                        .HasComment("文件，Files 模块里的 ID");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("关联时的文件名快照");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasComment("关联时的文件类型编码快照");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint")
+                        .HasComment("关联时的字节数快照");
+
+                    b.Property<Guid>("SpecimenId")
+                        .HasColumnType("uuid")
+                        .HasComment("Specimen ID");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpecimenId", "FileId")
+                        .IsUnique();
+
+                    b.ToTable("SpecimenAttachment", "Sample", t =>
+                        {
+                            t.HasComment("示例标本的附件；Sample 模块；一行代表一个附件，保存文件 ID 和关联时的快照，随标本一起保存");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.Sample.Domain.Specimens.SpecimenItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -653,6 +710,15 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
                     b.HasAnnotation("Kmic:AppendOnly", true);
                 });
 
+            modelBuilder.Entity("Kmic.Sample.Domain.Specimens.SpecimenAttachment", b =>
+                {
+                    b.HasOne("Kmic.Sample.Domain.Specimens.Specimen", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("SpecimenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Kmic.Sample.Domain.Specimens.SpecimenItem", b =>
                 {
                     b.HasOne("Kmic.Sample.Domain.Specimens.Specimen", null)
@@ -664,6 +730,8 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Kmic.Sample.Domain.Specimens.Specimen", b =>
                 {
+                    b.Navigation("Attachments");
+
                     b.Navigation("Items");
                 });
 #pragma warning restore 612, 618

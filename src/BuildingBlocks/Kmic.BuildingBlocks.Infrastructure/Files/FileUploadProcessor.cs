@@ -10,7 +10,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Files;
 /// 类型不符、空文件在写入之前就拒绝，存储里不留对象；读流时发现超过上限，中断写入，存储自己清理写了一半的内容
 /// （本地存储删临时文件，S3 中止分段上传）。其他异常（客户端断开、超时、取消）照常向上抛，由调用方把这次上传登记为被拒绝
 /// </remarks>
-public sealed class FileUploadProcessor(IFileStorage storage)
+public sealed class FileUploadProcessor(IFileStorage storage) : IFileUploadProcessor
 {
     /// <summary>
     /// 处理上传的文件流
@@ -50,7 +50,7 @@ public sealed class FileUploadProcessor(IFileStorage storage)
             return UploadResult.Refused(UploadOutcome.TooLarge);
         }
 
-        return new UploadResult(UploadOutcome.Stored, new StoredFileInfo(stored, source.BytesRead, source.FinishHash(), type));
+        return new UploadResult(UploadOutcome.Stored, new StoredFileInfo(stored.Key, stored.VersionId, source.BytesRead, source.FinishHash(), type));
     }
 
     private static async Task<byte[]> ReadHeaderAsync(Stream content, CancellationToken ct)

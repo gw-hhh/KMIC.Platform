@@ -33,6 +33,16 @@ public static class SampleErrors
     public static readonly Error NumberDuplicated = Error.Conflict("Sample.NumberDuplicated", "示例标本的编号已存在");
 
     /// <summary>
+    /// 附件不存在
+    /// </summary>
+    public static readonly Error AttachmentNotFound = Error.NotFound("Sample.AttachmentNotFound", "附件不存在");
+
+    /// <summary>
+    /// 同一个文件已经是这个标本的附件
+    /// </summary>
+    public static readonly Error AttachmentExists = Error.Conflict("Sample.AttachmentExists", "这个文件已经是这个标本的附件");
+
+    /// <summary>
     /// 用户没有所属组织，无法确定数据归属
     /// </summary>
     public static readonly Error NoOrgUnit = Error.BusinessRule("Sample.NoOrgUnit", "当前用户没有所属组织，不能创建示例标本");

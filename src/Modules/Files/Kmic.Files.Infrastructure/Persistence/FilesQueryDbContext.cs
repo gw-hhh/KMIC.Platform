@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Files.Application;
 using Kmic.Files.Contracts;
+using Kmic.Files.Domain.Files;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Infrastructure.Persistence;
@@ -15,8 +16,12 @@ internal sealed class FilesQueryDbContext(DbContextOptions<FilesQueryDbContext> 
     public override string Module => FilesModuleInfo.Name;
 
     /// <inheritdoc />
-    protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        // 与 FilesDbContext 一致
-    }
+    public IQueryable<StoredFile> Files => Set<StoredFile>();
+
+    /// <inheritdoc />
+    protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
+        configurationBuilder.RegisterAllInFilesIdConverters();
+
+    /// <inheritdoc />
+    protected override void ConfigureModel(ModelBuilder modelBuilder) => FilesModel.Configure(modelBuilder);
 }

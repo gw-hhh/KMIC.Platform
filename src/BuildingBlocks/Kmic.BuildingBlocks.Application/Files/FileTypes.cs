@@ -59,6 +59,12 @@ public static class FileTypes
     public static FileTypeDefinition? Find(string code) => _byCode.GetValueOrDefault(code);
 
     /// <summary>
+    /// 这种类型能不能在浏览器里直接打开：只有 PDF 和图片，其余一律作为附件下载
+    /// </summary>
+    /// <param name="code">编码，见 <see cref="FileType" /></param>
+    public static bool OpensInBrowser(string code) => code is FileType.Pdf or FileType.Jpeg or FileType.Png or FileType.Gif or FileType.Webp;
+
+    /// <summary>
     /// 扩展名对应的类型，不认识时返回空
     /// </summary>
     /// <param name="fileName">文件名，只看最后一个扩展名，不分大小写</param>

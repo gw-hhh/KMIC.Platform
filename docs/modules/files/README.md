@@ -158,7 +158,7 @@ stateDiagram-v2
 | `FoundAt`、`Status`（`Open` / `Resolved`）、`ResolvedAt`、`ResolvedBy`、`ResolutionNote` | |
 | `ConcurrencyVersion` | |
 
-- 由对账任务创建（同一文件已有 `Open` 的问题时不重复创建）；运维按 09 第 11.2 节还原后在页面上标为已解决。文件在还原之前保持原状态，下载会因对象不存在而失败，业务端点返回 409 `Files.NotReady`（`retryable = false`，错误信息写“文件正在恢复”），避免误导为权限问题。
+- 由对账任务创建（同一文件已有 `Open` 的问题时不重复创建）；运维按 09 第 11.2 节还原后在页面上标为已解决。文件在还原之前保持原状态，下载会因对象不存在而失败，下载响应返回 409 `Common.FileContentMissing`（不可重试，错误信息写“文件正在恢复”），避免误导为权限问题。错误码由框架的下载响应给出，所以不用 `Files.NotReady`（框架不能引用 Files 的错误目录）。
 
 ### 3.4 模块内的其他表
 
@@ -208,7 +208,7 @@ stateDiagram-v2
 
 ### 4.4 供业务模块使用的查询（Contracts，第 6 节）
 
-`IFileDescriptors.GetAsync(fileId)` 返回 `FileDescriptor`（文件元数据与存储键）；状态必须为 `Attached` 才可组装下载（05-11 5.1）。`IFileAttachability.CheckAsync(fileIds, uploaderId)` 供 `IFileAttachments` 在互斥协议的第 2 步调用。`IFileContents.OpenReadAsync(fileId)` 供 Notifications 投递时读取附件（`SystemOnly`）。
+`IFileDownloads.GetAsync(fileId)` 返回 `Result<FileDownload>`（元数据与存储键，`FileDownload` 在框架 Contracts）；状态判断集中在这里：只有 `Attached` 的文件可以下载，`Purged` 返回 410 `Files.Purged`，还没登记完（`Uploading`、`Scanning`、`Available`）返回可重试的 409 `Files.NotReady`，其余（已解除关联、被拒绝、清理中）按 404 `Files.NotFound`（05-11 5.1）。`IFileAttachability.CheckAsync(fileIds, uploaderId)` 供 `IFileAttachments` 在互斥协议的第 2 步调用。`IFileContents.OpenReadAsync(fileId)` 供 Notifications 投递时读取附件（`SystemOnly`）。
 
 ### 4.5 系统任务
 
@@ -275,7 +275,7 @@ stateDiagram-v2
 
 | 接口 | 声明 | 用途 |
 |---|---|---|
-| `IFileDescriptors.GetAsync(fileId)` | `Reference` 类白名单例外（05-11 5.1：返回 `FileDescriptor`，只含元数据） | 业务下载查询取文件描述；**调用方必须先完成业务对象的授权**，由代码评审与模板写法保证 |
+| `IFileDownloads.GetAsync(fileId)` | `Reference` 类白名单例外（05-11 5.1：返回 `FileDownload`，含存储键，不含内容） | 业务下载查询取下载信息；**调用方必须先完成业务对象的授权**，由代码评审与模板写法保证；文件状态由它判断，业务不重复 |
 | `IFileAttachability.CheckAsync(fileIds, uploaderId)` | `SystemOnly` | `IFileAttachments` 在互斥协议的第 2 步使用：读主实例的新快照检查可关联性，不经缓存 |
 | `IFileContents.OpenReadAsync(fileId)` | `SystemOnly` | Notifications 投递邮件时读取附件内容；返回流，调用方负责释放 |
 | 请求型消息 `AttachFiles`、`DetachFiles`、`RegisterGeneratedFile` | 请求型（05-07 D6），声明 `SubjectIds`（文件 ID） | 由框架的 `IFileAttachments`、`IGeneratedFiles` 发送，业务模块不直接 `Send`（分析器拦截） |
@@ -307,7 +307,7 @@ Identity：`IUserReferences`（上传者显示名）。
 | 构件 | 内容 |
 |---|---|
 | 配置（部署配置，05-10、05-11 第 10 节） | `Files:Storage:Provider` / `LocalRoot` / `S3:*`；`Files:TempExpiryHours`（24）、`DetachedRetentionDays`（30）、`RejectedRetentionDays`（1）；`Files:UploadTimeoutMinutes`（10）、`MaxConcurrentUploadsPerUser`（3）；`Files:PresignThresholdMb`（100）、`PresignValidMinutes`（5）；`Files:MaxFilesPerCommand`（50）、`AttachLockTimeoutSeconds`（5）、`PurgeBatchSize`（1000）；`Files:Deletion:Parallelism`（4）、`MaxAttempts`（8） |
-| 错误码（`FilesErrors`） | `TooLarge`（413）、`TypeNotAllowed`（415）、`ProfileNotFound`（400）、`NotFound`（404）、`NotReady`（409，`retryable`，登记前下载与还原中）、`Purged`（410）、`TooManyFiles`（400）、`NotAttachable`（422，文件不是本人上传、已过期被清理、已被拒绝）、`AlreadyPurged`（幂等成功，不返回错误） |
+| 错误码（`FilesErrors`） | `TooLarge`（413）、`TypeNotAllowed`（415）、`ProfileNotFound`（400）、`NotFound`（404）、`NotReady`（409，`retryable`，登记前下载）；下载时对象在存储里读不到是框架的 `Common.FileContentMissing`（409，还原中）、`Purged`（410）、`TooManyFiles`（400）、`NotAttachable`（422，文件不是本人上传、已过期被清理、已被拒绝）、`AlreadyPurged`（幂等成功，不返回错误） |
 | 通知模板、字典、编号 | 无 |
 | 上传档案目录 | 框架的 `UploadProfileCatalog`（`[UploadProfile]` 在各业务模块声明）；本模块不声明档案（没有自己的附件） |
 
@@ -474,6 +474,16 @@ Identity：`IUserReferences`（上传者显示名）。
 
 ---
 
+## 13.1 实现中的调整（2026-11-13，决定不变）
+
+| 项 | 设计原文 | 实现 | 理由 |
+|---|---|---|---|
+| 下载信息的取法 | `IFileDescriptors.GetAsync` 返回 `FileDescriptor`，业务自己判断状态 | `IFileDownloads.GetAsync` 返回 `Result<FileDownload>`，状态判断在 Files 里 | 每个业务模块都要重复同一段状态判断和对应的错误码，写漏一处就是“已删除的文件还能下载”或错误码不一致；`FileDownload` 放在框架 Contracts，Files.Contracts 才能引用它 |
+| 对象读不到 | 409 `Files.NotReady`，`retryable = false` | 409 `Common.FileContentMissing` | 下载响应在框架里，不能引用 Files 的错误目录；与“登记前下载”的 `Files.NotReady`（可重试）本来也是两回事 |
+| 读取内容 | 端点直接用 `IFileStorage` | 框架的 `IFileContentReader`（Application），Files 模块用存储实现它 | 框架 Presentation 不能引用 Infrastructure；窄接口只读、只认存储键 |
+| 返回 `FileDownload` 的查询 | 必须 `[AuditedRead]` | 启动校验已实现；模块之间的契约查询（`[ContractQuery]`）除外 | 契约查询只是给业务的下载查询取信息，审计记在业务的下载查询上 |
+| `IFileAttachments` 的位置 | 框架 | `Kmic.Files.Contracts`，实现在 Files.Application | 框架不能引用模块的 Contracts，它要发 `AttachFiles` |
+
 ## 14. 决策汇总
 
 | 编号 | 事项 | 决定（已确认，2026-11-12） |
@@ -486,3 +496,10 @@ Identity：`IUserReferences`（上传者显示名）。
 | 待确认 | 处理方式 |
 |---|---|
 | 12.3 全部 | 业务方回答、旧库统计或阶段 5 |
+
+## 15. 实现进度
+
+2026-11-13 完成：`StoredFile` / `FileReference` 聚合与状态机（含状态历史）、迁移、上传三步（端点、`StartUpload`、`CompleteUpload`、`RejectUpload`）、三个请求型消息的订阅与处理、`IFileAttachments`（互斥协议）、`IFileAttachability`、`IFileDownloads`、`FileResults.Stream`；`Sample` 接入附件作为业务模块的标准写法（上传档案、添加、移除、下载）。端到端测试用真实宿主（Api + Worker 角色）和本地存储：上传的成功与各种拒绝、关联与解除关联被 Worker 处理、下载的头与 Range、权限与数据范围、被彻底删除与对象丢失。
+
+未做（按设计 4.3、4.5、7 节）：管理查询与命令（列表、详情、彻底删除、登记历史版本清除、存储问题、重试删除）、三个定时任务（清理到期文件、重置停滞的上传、对账）、删除工作器（`LeasedQueueWorker`）、`StorageIssue`、`IGeneratedFiles` 与 `RegisterGeneratedFile` 的发送端、`IFileContents`、直接 `Send(AttachFiles)` 的分析器、预签名下载与 S3 的范围读取（已登记延后事项）。
+

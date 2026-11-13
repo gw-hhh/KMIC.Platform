@@ -11,6 +11,6 @@ internal sealed class SpecimenRepository(SampleDbContext context)
 {
     protected override Error NotFound => SampleErrors.NotFound;
 
-    // 聚合的明细总是一起加载
-    protected override IQueryable<Specimen> Aggregate(IQueryable<Specimen> set) => set.Include(s => s.Items);
+    // 聚合的明细和附件总是一起加载
+    protected override IQueryable<Specimen> Aggregate(IQueryable<Specimen> set) => set.Include(s => s.Items).Include(s => s.Attachments);
 }

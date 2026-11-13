@@ -12,6 +12,7 @@ namespace Kmic.Sample.Application.Specimens.GetDetail;
 /// <param name="Title">标题</param>
 /// <param name="Status">状态</param>
 /// <param name="Items">明细</param>
+/// <param name="Attachments">附件</param>
 /// <param name="AllowedActions">当前用户现在可以执行的动作，如 Submit、Close</param>
 public sealed record SpecimenDetailResponse(
     SpecimenId Id,
@@ -20,4 +21,5 @@ public sealed record SpecimenDetailResponse(
     string Title,
     SpecimenStatus Status,
     IReadOnlyList<SpecimenItemResponse> Items,
+    IReadOnlyList<SpecimenAttachmentResponse> Attachments,
     IReadOnlyList<string> AllowedActions);

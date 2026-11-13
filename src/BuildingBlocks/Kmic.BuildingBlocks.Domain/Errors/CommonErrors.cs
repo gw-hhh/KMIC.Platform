@@ -152,6 +152,12 @@ public static class CommonErrors
         Error.BusinessRule("Common.MessagePayloadUnreadable", "这条消息的载荷读不出来，不能确认能不能放弃");
 
     /// <summary>
+    /// 文件的内容在存储里读不到：对象被删除标记覆盖或丢失，等运维还原
+    /// </summary>
+    public static readonly Error FileContentMissing =
+        Error.Conflict("Common.FileContentMissing", "文件正在恢复，暂时读取不到，请稍后再试");
+
+    /// <summary>
     /// 带字段错误的校验失败
     /// </summary>
     public static Error ValidationFailedWith(IReadOnlyList<FieldError> fieldErrors) =>

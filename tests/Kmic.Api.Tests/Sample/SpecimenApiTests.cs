@@ -113,7 +113,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         body.GetProperty("status").GetString().ShouldBe("Draft");
         body.GetProperty("number").GetString().ShouldStartWith("SP-");
         body.GetProperty("items").GetArrayLength().ShouldBe(1);
-        body.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()).ShouldBe(["Submit"]);
+        body.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()).ShouldBe(["Edit", "Submit"]);
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         newVersion.ShouldBeGreaterThan(version);
         var detail = await JsonAsync(await alice.GetAsync($"{Root}/{id}", Ct));
         detail.GetProperty("status").GetString().ShouldBe("Submitted");
-        detail.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()).ShouldBe(["Close"]);
+        detail.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()).ShouldBe(["Edit", "Close"]);
     }
 
     [Fact]
