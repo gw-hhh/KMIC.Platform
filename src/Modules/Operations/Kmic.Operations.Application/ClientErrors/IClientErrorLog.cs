@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Operations.Application.ClientErrors;
 
 /// <summary>
-/// 前端错误的日志出口：日志分类 Kmic.ClientErrors，Warning 级结构化日志
+/// 将前端错误写入 Kmic.ClientErrors 分类的 Warning 级结构化日志
 /// </summary>
 public interface IClientErrorLog
 {

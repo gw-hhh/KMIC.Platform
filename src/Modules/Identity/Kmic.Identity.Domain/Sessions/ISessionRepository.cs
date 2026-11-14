@@ -9,23 +9,20 @@ namespace Kmic.Identity.Domain.Sessions;
 public interface ISessionRepository : IRepository<Session, SessionId>
 {
     /// <summary>
-    /// 按刷新令牌的哈希找到会话并锁住这一行，刷新时用：两个并发刷新请求被串行化，第二个落入宽限期判断
+    /// 按刷新令牌哈希查找并锁定会话
     /// </summary>
     /// <remarks>
-    /// 只在事务里调用。找不到返回空
+    /// 须在事务中调用，锁持有至事务结束；取得会话锁后再读取令牌状态，避免并发刷新读到旧状态。找不到时返回 null
     /// </remarks>
     Task<Session?> FindByRefreshTokenForUpdateAsync(string tokenHash, CancellationToken ct);
 
     /// <summary>
-    /// 某个用户仍然有效的全部会话，含他作为实际操作人发起的模拟会话
+    /// 查询状态为有效的用户会话，包括该用户发起的模拟会话；不检查绝对到期时间
     /// </summary>
     Task<IReadOnlyList<Session>> ListActiveInvolvingAsync(UserId userId, CancellationToken ct);
 
     /// <summary>
-    /// 删除已经结束的会话（连同它的刷新令牌）：超过绝对上限，或作废的时间早于 <paramref name="before" />，返回删除的会话数
+    /// 删除绝对到期时间或作废时间早于 <paramref name="before" /> 的会话及其刷新令牌，返回删除的会话数
     /// </summary>
-    /// <remarks>
-    /// 定时清理用。会话表只保留“最近发生了什么”，更久远的登录记录在安全事件里
-    /// </remarks>
     Task<int> PurgeEndedAsync(DateTimeOffset before, CancellationToken ct);
 }

@@ -7,7 +7,7 @@ using Kmic.Configuration.Contracts;
 namespace Kmic.Configuration.Application.Dictionaries.Get;
 
 /// <summary>
-/// 处理 <see cref="GetDictionariesQuery"/>
+/// 批量读取字典并生成 ETag
 /// </summary>
 public sealed class GetDictionariesQueryHandler(IDictionarySnapshots snapshots) : IQueryHandler<GetDictionariesQuery, DictionariesResponse>
 {
@@ -28,7 +28,7 @@ public sealed class GetDictionariesQueryHandler(IDictionarySnapshots snapshots) 
         return new DictionariesResponse(found, ETagOf(found));
     }
 
-    // 各类型的编码与版本号拼起来取哈希：任何一个类型变了，整体的 ETag 就变
+    // ETag 包含各类型的编码和版本号，任一类型更新后都会变化
     private static string ETagOf(IReadOnlyList<DictionarySnapshot> snapshots)
     {
         var text = string.Join(';', snapshots.Select(s => $"{s.TypeCode}={s.Version}"));

@@ -10,7 +10,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Enable;
 
 /// <summary>
-/// 处理 <see cref="EnableUserCommand"/>
+/// 启用用户
 /// </summary>
 public sealed class EnableUserCommandHandler(
     IUserRepository users,

@@ -12,7 +12,7 @@ internal sealed class RenameDictionaryItemEndpoint : IEndpoint
         group.MapPut("/dictionary-types/{typeCode}/items/{code}", HandleAsync)
             .Sends<RenameDictionaryItemCommand>()
             .WithSummary("修改字典项的显示名")
-            .WithDescription("只改显示名，编码不能改：业务数据里存的是编码。");
+            .WithDescription("仅修改显示名。业务数据通过编码引用字典项，因此编码不可修改。");
 
     private static async Task<IResult> HandleAsync([Description("字典类型编码")] string typeCode, [Description("字典项编码")] string code, RenameDictionaryItemRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new RenameDictionaryItemCommand(typeCode, request.ExpectedVersion, code, request.Name), ct)).ToOk();

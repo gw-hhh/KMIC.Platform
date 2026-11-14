@@ -14,7 +14,7 @@ internal sealed class SwitchRoleEndpoint : IEndpoint
             .NoStore()
             .AllowWhenRoleUnavailable()
             .WithSummary("切换当前角色")
-            .WithDescription("在同一会话里换成用户拥有的另一个启用的角色，返回带新角色的访问令牌；旧角色的访问令牌随即失效。当前角色被收回或停用后也能用它重新选择角色。");
+            .WithDescription("切换到用户已获授且启用的角色，返回新访问令牌。令牌角色与会话当前角色不一致时，请求会被拒绝。当前角色被收回或停用后仍可重新选择；模拟会话不能切换角色。");
 
     private static async Task<IResult> HandleAsync(SwitchRoleRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SwitchRoleCommand(request.RoleId), ct)).ToOk();

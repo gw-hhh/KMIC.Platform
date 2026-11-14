@@ -10,7 +10,7 @@ using Kmic.Operations.Domain.Audit;
 namespace Kmic.Operations.Application.Audit.List;
 
 /// <summary>
-/// 处理 <see cref="ListAuditQuery"/>
+/// 查询审计记录列表
 /// </summary>
 public sealed class ListAuditQueryHandler(IOperationsQueryDb db, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListAuditQuery, CursorPage<AuditListItem>>

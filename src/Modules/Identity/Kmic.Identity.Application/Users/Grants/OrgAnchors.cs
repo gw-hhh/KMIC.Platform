@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Users.Grants;
 
 /// <summary>
-/// 授予上的锚点检查：每个锚点都必须是存在的、启用的组织单元
+/// 校验角色授予的组织锚点，所有单元必须存在且已启用
 /// </summary>
 internal static class OrgAnchors
 {

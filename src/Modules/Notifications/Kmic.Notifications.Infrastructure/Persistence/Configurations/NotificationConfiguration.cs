@@ -16,7 +16,7 @@ internal sealed class NotificationConfiguration : IEntityTypeConfiguration<Notif
         builder.Property(n => n.DedupKey).HasMaxLength(300);
         builder.Property(n => n.SourceModule).HasMaxLength(50);
 
-        // 同一条来源消息被重复投递时，这里挡住第二次；处理器先查过，撞上唯一索引只可能是两个实例同时处理，重试即可
+        // 来源消息 ID 唯一，防止并发处理重复生成通知
         builder.HasIndex(n => n.SourceMessageId).IsUnique().MapsToError(NotificationsErrors.DeliveryDuplicated);
         builder.HasNoDataScope("通知记录按权限点管理，不按组织范围");
     }

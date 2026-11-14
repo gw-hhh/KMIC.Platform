@@ -9,56 +9,48 @@ namespace Kmic.Files.Domain.Files;
 public interface IStoredFileRepository : IRepository<StoredFile, StoredFileId>
 {
     /// <summary>
-    /// 这个 ID 的文件是不是已经登记了
+    /// 指定文件 ID 是否已登记
     /// </summary>
-    /// <param name="id">文件 ID</param>
-    /// <param name="ct">取消令牌</param>
     Task<bool> ExistsAsync(StoredFileId id, CancellationToken ct);
 
     /// <summary>
-    /// 这些 ID 里，哪些已经登记为文件
+    /// 查询指定 ID 中已登记的文件 ID
     /// </summary>
-    /// <param name="ids">要查的文件 ID</param>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlySet<StoredFileId>> FindExistingAsync(IReadOnlyCollection<StoredFileId> ids, CancellationToken ct);
 
     /// <summary>
-    /// 按 ID 顺序分页取出应该有对象的文件：可用、已关联、已解除关联，上传得不晚于 <paramref name="uploadedBefore" />
+    /// 分页查询应有存储对象的文件
     /// </summary>
     /// <remarks>
-    /// 对账用。不加载聚合，只返回存储位置
+    /// 仅查询可用、已关联或已解除关联的文件，UploadedAt 不晚于 <paramref name="uploadedBefore" />。
+    /// 按 ID 升序，<paramref name="after" /> 为上一页最后一个文件 ID，首页为空。只返回 ID 和存储位置，不加载聚合
     /// </remarks>
-    /// <param name="after">上一页最后一个文件，从头开始时为空</param>
-    /// <param name="uploadedBefore">上传开始的时间不晚于它</param>
-    /// <param name="limit">最多几个</param>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlyList<StoredObjectRef>> FindExpectedObjectsAsync(StoredFileId? after, DateTimeOffset uploadedBefore, int limit, CancellationToken ct);
 
     /// <summary>
-    /// 找出到期的文件：处于某个状态、到期时间不晚于现在，最早到期的在前
+    /// 查询指定状态下已到期的文件 ID
     /// </summary>
     /// <remarks>
-    /// 只返回 ID，不加载聚合：清理要先取锁、探查消息，之后才读文件，不能用这里读到的旧状态
+    /// 到期时间不晚于 <paramref name="now" />，按到期时间升序。
+    /// 只返回 ID，避免清理前读入旧状态；清理可用或已解除关联的文件时，须先取锁并探查关联消息，再重读文件
     /// </remarks>
-    /// <param name="status">要找的状态：临时的 Available、已解除关联的 Detached、被拒绝的 Rejected</param>
-    /// <param name="now">现在</param>
-    /// <param name="limit">最多几个</param>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlyList<StoredFileId>> FindExpiredAsync(StoredFileStatus status, DateTimeOffset now, int limit, CancellationToken ct);
 
     /// <summary>
-    /// 找出上传中断的文件：一直处于“上传中”，开始得不晚于 <paramref name="startedBefore" />
+    /// 查询超时未完成的上传
     /// </summary>
-    /// <param name="startedBefore">上传开始的时间不晚于它</param>
-    /// <param name="limit">最多几个</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 状态仍为上传中，上传开始时间不晚于 <paramref name="startedBefore" />，按开始时间升序
+    /// </remarks>
     Task<IReadOnlyList<StoredFileId>> FindStaleUploadsAsync(DateTimeOffset startedBefore, int limit, CancellationToken ct);
 
     /// <summary>
-    /// 把一个删除失败太多次的文件放回删除队列：清零重试次数和退避，让删除工作器重新领取
+    /// 重置文件删除重试
     /// </summary>
-    /// <param name="id">文件 ID</param>
-    /// <param name="ct">取消令牌</param>
-    /// <returns>这个文件现在在删除队列里（删除中，或已彻底删除而对象还没删）并且被重置了，否则 false</returns>
+    /// <remarks>
+    /// 清零尝试次数，清除退避时间和领取信息，使文件可重新领取。
+    /// 仅适用于删除中，或已彻底删除且尚未登记对象删除完成的文件
+    /// </remarks>
+    /// <returns>成功重置返回 true；记录不存在或状态不符合时返回 false</returns>
     Task<bool> ResetDeletionAsync(StoredFileId id, CancellationToken ct);
 }

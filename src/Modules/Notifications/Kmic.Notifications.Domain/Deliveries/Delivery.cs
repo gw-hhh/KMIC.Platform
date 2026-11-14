@@ -8,9 +8,8 @@ namespace Kmic.Notifications.Domain.Deliveries;
 /// 一次投递：把一条通知用某个渠道发给一个收件人
 /// </summary>
 /// <remarks>
-/// 渲染好的内容随这一行保存，发出去的就是这个内容，重试期间模板被修改也不影响。这一行只在处理发送请求时创建；
-/// 之后的状态变化（领取、发送成功、失败退避、人工重试）由投递工作器和管理用例用带条件的单条语句更新，不经聚合，
-/// 所以领取用的列和结果列不在聚合的方法里
+/// 渲染结果随投递保存，重试不受模板修改影响。
+/// 后续领取、发送结果、失败退避和人工重试由工作器或管理用例按条件更新，不经聚合方法
 /// </remarks>
 public sealed class Delivery : AggregateRoot<DeliveryId>
 {
@@ -97,12 +96,12 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
     public string Subject { get; private set; }
 
     /// <summary>
-    /// 渲染好的正文；含密模板投递完成后清空
+    /// 渲染后的正文
     /// </summary>
     public string? Body { get; private set; }
 
     /// <summary>
-    /// 短信模板的参数，JSON；只有短信有。短信服务只收模板编码和参数，实际发送用它，含密模板投递完成后清空
+    /// 短信模板参数（JSON）
     /// </summary>
     public string? SmsParameters { get; private set; }
 
@@ -127,7 +126,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
     public int TemplateVersion { get; private set; }
 
     /// <summary>
-    /// 渲染时代码里默认内容的哈希，事后能知道发出的是哪一版默认内容
+    /// 模板声明及默认内容的哈希
     /// </summary>
     public string CodeHash { get; private set; }
 
@@ -169,7 +168,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, attachmentFileIds, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Pending, null);
 
     /// <summary>
-    /// 创建一条已跳过的投递：没有地址或用户已禁用，留一条记录说明为什么没有发
+    /// 记录已跳过的投递及原因，如用户不存在、已禁用或缺少地址
     /// </summary>
     public static Delivery Skip(
         NotificationId notificationId,
@@ -187,7 +186,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         Create(notificationId, channel, recipientUserId, recipientKey, string.Empty, null, role, subject, null, null, null, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Skipped, reason);
 
     /// <summary>
-    /// 创建一条已捕获的投递：非生产环境不真的发送
+    /// 创建已捕获的投递记录；捕获模式下保存内容，不实际发送
     /// </summary>
     public static Delivery Capture(
         NotificationId notificationId,

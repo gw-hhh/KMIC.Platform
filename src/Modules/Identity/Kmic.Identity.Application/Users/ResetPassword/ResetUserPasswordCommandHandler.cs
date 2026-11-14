@@ -10,7 +10,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.ResetPassword;
 
 /// <summary>
-/// 处理 <see cref="ResetUserPasswordCommand"/>
+/// 为用户生成临时密码
 /// </summary>
 public sealed class ResetUserPasswordCommandHandler(
     IUserRepository users,

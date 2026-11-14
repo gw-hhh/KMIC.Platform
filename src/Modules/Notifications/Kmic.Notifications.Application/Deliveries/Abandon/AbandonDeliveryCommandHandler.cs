@@ -6,7 +6,7 @@ using Kmic.Notifications.Domain.Errors;
 namespace Kmic.Notifications.Application.Deliveries.Abandon;
 
 /// <summary>
-/// 处理 <see cref="AbandonDeliveryCommand"/>
+/// 放弃失败的投递
 /// </summary>
 public sealed class AbandonDeliveryCommandHandler(IDeliveryRepository deliveries, TimeProvider time) : ICommandHandler<AbandonDeliveryCommand>
 {

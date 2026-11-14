@@ -18,7 +18,7 @@ internal sealed class RefreshEndpoint : IEndpoint
             .AllowAnonymous()
             .AddEndpointFilter<CookieEndpointGuard>()
             .WithSummary("刷新令牌")
-            .WithDescription("网页客户端从 HttpOnly Cookie 取刷新令牌（要求可信 Origin 与 X-Requested-With: kmic），移动端在请求体里给出 refreshToken。每次刷新换一个新的刷新令牌；旧令牌宽限期之外再次出现，整个会话作废并返回 401。");
+            .WithDescription("网页客户端通过 HttpOnly Cookie 提交刷新令牌，须携带可信 Origin 和 X-Requested-With: kmic；移动端通过请求体中的 refreshToken 提交。刷新成功后更换刷新令牌；检测到宽限期外的旧令牌重用时，作废会话并返回 401。");
 
     private static async Task<IResult> HandleAsync(
         RefreshRequest? request,
@@ -38,7 +38,7 @@ internal sealed class RefreshEndpoint : IEndpoint
         var result = await sender.SendAsync(new RefreshTokenCommand(presented, http.Connection.RemoteIpAddress?.ToString()), ct);
         if (result.IsFailure && string.Equals(result.Error.Code, IdentityErrors.RefreshTokenReused.Code, StringComparison.Ordinal))
         {
-            // 重用：刷新命令已经回滚，另发命令在独立事务里作废会话；对外和其他刷新失败一样，Cookie 一并清掉
+            // 独立提交会话作废操作并清除 Cookie，对外统一返回刷新失败
             await sender.SendAsync(new RevokeReusedSessionCommand(presented), ct);
             RefreshCookie.Clear(http.Response);
             return Result.Failure(IdentityErrors.InvalidRefreshToken).ToNoContent();

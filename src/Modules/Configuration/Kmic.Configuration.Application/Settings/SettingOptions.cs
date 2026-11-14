@@ -13,7 +13,7 @@ public sealed class SettingOptions
     public const string Section = "Configuration:Setting";
 
     /// <summary>
-    /// 一个设置的值序列化后最大多少 KB：所有被修改过的值放在一个缓存项里，一起读
+    /// 单个设置值序列化后的大小上限（KB）；所有已保存的设置值整体缓存
     /// </summary>
     [Range(1, 256)]
     public int ValueMaxKb { get; init; } = 16;

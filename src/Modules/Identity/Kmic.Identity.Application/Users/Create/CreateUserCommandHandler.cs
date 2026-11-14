@@ -9,7 +9,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Create;
 
 /// <summary>
-/// 处理 <see cref="CreateUserCommand"/>
+/// 创建用户
 /// </summary>
 public sealed class CreateUserCommandHandler(IUserRepository users, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<CreateUserCommand, CreatedResponse<UserId>>(recheck, execution)

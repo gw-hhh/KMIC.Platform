@@ -1,7 +1,7 @@
 namespace Kmic.Operations.Application.ScheduledJobs.Preview;
 
 /// <summary>
-/// 一个 Cron 表达式接下来的触发时间
+/// Cron 触发时间预览
 /// </summary>
-/// <param name="NextFireTimes">接下来 5 次触发的时刻，按时间顺序</param>
+/// <param name="NextFireTimes">后续触发时间，最多 5 次，按时间升序</param>
 public sealed record CronPreviewResponse(IReadOnlyList<DateTimeOffset> NextFireTimes);

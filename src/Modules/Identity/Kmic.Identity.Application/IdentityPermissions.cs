@@ -67,7 +67,7 @@ public static class IdentityPermissions
     public const string UserGrant = "Identity.User.Grant";
 
     /// <summary>
-    /// 模拟身份（只读）
+    /// 开始模拟身份，默认只读
     /// </summary>
     [Permission("模拟身份", Sensitive = true)]
     public const string UserImpersonate = "Identity.User.Impersonate";

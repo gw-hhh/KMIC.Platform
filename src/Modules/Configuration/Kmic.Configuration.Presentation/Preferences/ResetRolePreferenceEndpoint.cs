@@ -12,8 +12,8 @@ internal sealed class ResetRolePreferenceEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/preferences/{key}/layers/roles/{roleId}/reset", HandleAsync)
             .Sends<ResetPreferenceLayerCommand>()
-            .WithSummary("删除偏好在一个角色上的值")
-            .WithDescription("只删这个角色这一层，系统层的值或默认值重新对这个角色下没有自己设置过的人生效。必须带幂等键。");
+            .WithSummary("移除角色级偏好设置")
+            .WithDescription("仅移除指定角色的设置。允许且有效的个人设置仍优先；否则取允许的系统层有效值，无可用值时使用代码默认值。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("偏好键")] string key, [Description("角色 ID")] RoleId roleId, ResetPreferenceLayerRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ResetPreferenceLayerCommand(key, roleId, request.ExpectedVersion), ct)).ToOk();

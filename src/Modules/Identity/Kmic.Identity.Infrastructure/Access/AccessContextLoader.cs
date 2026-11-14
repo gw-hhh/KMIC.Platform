@@ -17,10 +17,8 @@ namespace Kmic.Identity.Infrastructure.Access;
 /// 访问上下文加载器：每个请求一次状态查询，角色与组织树的内容按版本缓存
 /// </summary>
 /// <remarks>
-/// 状态查询每次都查库：会话是否有效、用户是否启用、授予是否还在、角色是否启用，这些变化要在下一个请求就生效，不能缓存。
-/// 角色授权快照与组织树快照的键里带版本号，内容不可变，所以不需要失效。
-/// 快照里的版本号是权威的：状态查询之后、读取快照之前角色又被修改时，读到的是更新的版本，本次请求用快照自己的版本，
-/// 内容与版本始终一致，并且不让错位的内容留在缓存里
+/// 会话、用户、授予和角色状态每次查库，使变更从下一个请求起生效。
+/// 角色和组织树按版本缓存；加载结果与缓存键的版本不符时移除该项，本次使用快照自身的版本
 /// </remarks>
 internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCache cache, PermissionCatalog permissions, TimeProvider time) : IAccessContextLoader
 {
@@ -36,7 +34,6 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
     private static readonly DataScopeGrant _selfOnly = new(ScopeLevel.Self, FrozenDictionary<string, ScopeLevel>.Empty, [], FrozenDictionary<string, IReadOnlyList<Guid>>.Empty);
 
     /// <inheritdoc />
-    /// <inheritdoc />
     public async Task<AccessLoadResult> LoadForRequestAsync(UserId user, SessionId session, RoleId role, CancellationToken ct) =>
         await queries.RunAsync<IdentityQueryDbContext, AccessLoadResult>(CallOrigin.Http, (db, token) => LoadRequestAsync(db, user, session, role, token), ct);
 
@@ -48,7 +45,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
     {
         var state = await ReadSessionStateAsync(db, session, role, ct);
 
-        // 访问令牌里的角色和会话当前的角色不一致时以会话为准：切换角色之后旧令牌不能继续用旧角色操作
+        // 令牌角色与会话当前角色不一致时拒绝请求，防止切换后继续使用旧角色
         if (state is not { SessionStatus: { } status, AbsoluteExpiresAt: { } expires, SessionUserId: { } sessionUser, CurrentRoleId: { } currentRole }
             || !string.Equals(status, SessionStatus.Active.Code, StringComparison.Ordinal)
             || time.GetUtcNow() >= expires
@@ -129,7 +126,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         var snapshot = await cache.GetOrCreateAsync(key, new RoleSnapshotLoader(db, permissions, role), static (loader, token) => loader.LoadAsync(token), _versionedEntry, cancellationToken: ct);
         if (snapshot.Version != version)
         {
-            // 键里的版本比内容旧：不让错位的内容留在缓存里，本次请求用快照自己的版本
+            // 版本与缓存键不符时移除缓存，本次仍使用已加载的快照
             await cache.RemoveAsync(key, ct);
         }
 
@@ -153,8 +150,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         return snapshot;
     }
 
-    // 缓存的加载状态不直接传查询上下文：上下文有公开可写的属性，缓存值与状态的可变性检查按类型逐个看，
-    // 包一层后依赖都是私有的，对外没有可变成员
+    // 用私有加载器封装查询上下文，避免将上下文的可写属性直接暴露给缓存状态检查
     private sealed class RoleSnapshotLoader(IdentityQueryDbContext db, PermissionCatalog catalog, RoleId roleId)
     {
         public async ValueTask<RoleSnapshot> LoadAsync(CancellationToken ct)
@@ -165,7 +161,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
                 .Include(r => r.DataScopes)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(r => r.Id == roleId, ct)
-                ?? throw new InvalidOperationException($"角色 {roleId.Value} 不存在，授予指向了一个不存在的角色。");
+                ?? throw new InvalidOperationException($"授予指向不存在的角色 {roleId.Value}。");
 
             // 全权限角色不存权限点行，拥有当前目录里的全部；其余角色只保留目录里还有的，已退役的权限点没有代码会检查它
             var codes = role.GrantsAllPermissions

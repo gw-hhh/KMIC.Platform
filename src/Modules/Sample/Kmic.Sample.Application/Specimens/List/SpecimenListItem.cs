@@ -3,9 +3,9 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.List;
 
 /// <summary>
-/// 列表里的一行示例标本
+/// 示例列表项
 /// </summary>
-/// <param name="Id">标本</param>
+/// <param name="Id">示例 ID</param>
 /// <param name="Number">编号</param>
 /// <param name="Title">标题</param>
 /// <param name="Status">状态</param>

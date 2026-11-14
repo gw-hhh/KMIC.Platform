@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Impersonation.Start;
 
 /// <summary>
-/// 处理 <see cref="StartImpersonationCommand"/>
+/// 创建独立的身份模拟会话
 /// </summary>
 public sealed class StartImpersonationCommandHandler(
     IUserRepository users,
@@ -35,7 +35,7 @@ public sealed class StartImpersonationCommandHandler(
     /// <inheritdoc />
     protected override async ValueTask<Result<AuthTokens>> ExecuteAsync(StartImpersonationCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
-        // 在模拟会话里再开始模拟，会得到一条看不出真正操作人的链
+        // 禁止嵌套模拟，确保能明确追溯实际操作人
         if (access.ImpersonatorUserId is not null)
         {
             return IdentityErrors.ImpersonationDenied;
@@ -56,7 +56,7 @@ public sealed class StartImpersonationCommandHandler(
         var role = await ChooseRoleAsync(target, command.RoleId, cancellationToken);
         if (role is null)
         {
-            return IdentityErrors.ImpersonationDenied.WithDetail(command.RoleId is null ? "他没有可用的角色" : "他没有这个角色，或这个角色已停用");
+            return IdentityErrors.ImpersonationDenied.WithDetail(command.RoleId is null ? "目标用户没有可用角色" : "目标用户未获授该角色，或该角色已停用");
         }
 
         // 能不能写由“模拟身份时允许写入”权限点决定，开始时确定，会话期间不变
@@ -78,7 +78,7 @@ public sealed class StartImpersonationCommandHandler(
             },
         });
 
-        // 没有刷新令牌，访问令牌的有效期就是会话的上限；撤销照样立即生效，因为每个请求都会查会话状态
+        // 不签发刷新令牌，访问令牌随会话到期；每次请求校验会话状态，撤销仍会立即生效
         var accessToken = tokens.Issue(target.Id, session.Id, role.Id, ClientKinds.Claim(ClientType.Web), now, lifetime);
         return new AuthTokens(accessToken.Value, "Bearer", (int)(accessToken.ExpiresAt - now).TotalSeconds, null, PasswordChangeRequired: false);
     }

@@ -8,7 +8,7 @@ using Npgsql;
 namespace Kmic.MigrationRunner;
 
 /// <summary>
-/// 各个命令共用的环境：配置、本次要处理的模块、输出和时间
+/// 迁移命令共用的配置、目标模块、输出及时间服务
 /// </summary>
 internal sealed class RunnerContext(IConfiguration configuration, IReadOnlyList<IModule> modules, TextWriter output, TimeProvider time)
 {
@@ -27,7 +27,7 @@ internal sealed class RunnerContext(IConfiguration configuration, IReadOnlyList<
             ? KmicConnectionString.Normalize(connection)
             : throw new InvalidOperationException($"没有配置迁移账号的连接串 {RunnerApp.ConnectionStringKey}。");
 
-    // 模块的服务注册类只登记自己的数据库上下文，迁移只需要这些登记
+    // 通过模块注册取得迁移所需的数据库上下文，不启动宿主或后台工作器
     public ServiceProvider Services()
     {
         var services = new ServiceCollection();

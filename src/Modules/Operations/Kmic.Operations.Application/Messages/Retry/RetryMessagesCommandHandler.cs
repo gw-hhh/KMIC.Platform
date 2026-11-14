@@ -6,11 +6,11 @@ using Kmic.Operations.Domain.Messages;
 namespace Kmic.Operations.Application.Messages.Retry;
 
 /// <summary>
-/// 处理 <see cref="RetryMessagesCommand"/>
+/// 重试死信并逐条返回结果
 /// </summary>
 /// <remarks>
-/// 写的是各模块自己的发件箱、收件箱表，不在 Operations 命令的事务里：这是框架存储的基础设施写入，和投递、处理程序改状态一样。
-/// 每个状态条件都在 SQL 里，重复提交同一批不会改到别的行
+/// 直接更新各模块的消息存储，不参与 Operations 命令事务。
+/// SQL 按消息 ID 和死信状态更新，重复提交不会修改其他消息
 /// </remarks>
 public sealed class RetryMessagesCommandHandler(IModuleMessageStores stores) : ICommandHandler<RetryMessagesCommand, MessageReceipts>
 {
@@ -41,7 +41,7 @@ public sealed class RetryMessagesCommandHandler(IModuleMessageStores stores) : I
         result.Outcome switch
         {
             MessageActionOutcome.Done => new MessageReceipt(module, box, result.Id, MessageReceiptStatus.Done, null),
-            MessageActionOutcome.NotFound => new MessageReceipt(module, box, result.Id, MessageReceiptStatus.NotFound, "没有这一行"),
-            _ => new MessageReceipt(module, box, result.Id, MessageReceiptStatus.WrongState, "这一行不是死信：已经处理完、正在处理，或者已经放弃了"),
+            MessageActionOutcome.NotFound => new MessageReceipt(module, box, result.Id, MessageReceiptStatus.NotFound, "消息不存在"),
+            _ => new MessageReceipt(module, box, result.Id, MessageReceiptStatus.WrongState, "消息当前不是死信，无法重试"),
         };
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Configuration.Application.Dictionaries.Admin;
 
 /// <summary>
-/// 处理 <see cref="GetDictionaryTypeQuery"/>
+/// 查询字典类型及全部字典项
 /// </summary>
 public sealed class GetDictionaryTypeQueryHandler(IConfigurationQueryDb db) : IQueryHandler<GetDictionaryTypeQuery, DictionaryTypeDetail>
 {

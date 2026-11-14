@@ -12,7 +12,7 @@ namespace Kmic.Identity.Application.Users;
 internal static class UserAdminLoading
 {
     /// <summary>
-    /// 加载要修改的用户（传了版本号时检查版本），并按资源策略检查操作者能否做这个动作
+    /// 加载目标用户并按资源策略授权，指定版本号时校验版本
     /// </summary>
     public static async Task<Result<User>> LoadForAsync(
         IUserRepository users,
@@ -24,7 +24,7 @@ internal static class UserAdminLoading
         IAccessContext access,
         CancellationToken ct)
     {
-        // 禁用要判断“是不是最后一个管理员”，先排队再读，两个并发的禁用才不会各自看到对方还启用着
+        // 禁用前串行检查受保护角色持有人，避免并发禁用后失去最后一位可登录的持有人
         if (action == UserAdminAction.Disable)
         {
             await users.LockProtectedHolderChecksAsync(ct);

@@ -9,7 +9,7 @@ namespace Kmic.Configuration.Domain.Dictionaries;
 public interface IDictionaryTypeRepository : IRepository<DictionaryType, DictionaryTypeId>
 {
     /// <summary>
-    /// 按编码取要修改的字典类型（连同全部字典项），传了期望版本号时版本不一致返回版本冲突
+    /// 按编码加载待修改的字典类型及全部字典项，指定预期版本号时校验版本
     /// </summary>
     Task<Result<DictionaryType>> GetByCodeForUpdateAsync(string typeCode, long? expectedVersion, CancellationToken ct);
 
@@ -19,7 +19,7 @@ public interface IDictionaryTypeRepository : IRepository<DictionaryType, Diction
     Task<IReadOnlyList<DictionaryType>> ListWithoutItemsAsync(CancellationToken ct);
 
     /// <summary>
-    /// 同步声明之前先拿到这把锁，直到事务结束：多个实例同时启动时，只有一个真正写入，后到的看到的是已经同步好的结果
+    /// 同步前取得事务级咨询锁并持有至事务结束，使多实例同步串行执行，后续实例读取已提交的同步结果
     /// </summary>
     Task LockCatalogSyncAsync(CancellationToken ct);
 }

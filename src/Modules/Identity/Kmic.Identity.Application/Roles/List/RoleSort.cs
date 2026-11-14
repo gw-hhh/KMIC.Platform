@@ -8,7 +8,7 @@ namespace Kmic.Identity.Application.Roles.List;
 public static class RoleSort
 {
     /// <summary>
-    /// 排序字段表，默认按次序再按名称
+    /// 排序字段表，默认按角色次序排序
     /// </summary>
     public static readonly SortMap<RoleListItem> Map = SortMap<RoleListItem>
         .Field("name", x => x.Name)

@@ -10,8 +10,8 @@ internal sealed class ListInstancesEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/messages/instances", HandleAsync)
             .Sends<ListInstancesQuery>()
-            .WithSummary("查询运行中的实例")
-            .WithDescription("每个实例的构建号、角色、最近一次心跳和它声明的订阅，最近有心跳的排前面。只用于诊断：判断哪些构建还在声明某个订阅。");
+            .WithSummary("查询消息处理实例")
+            .WithDescription("列出实例的构建号、角色、心跳和订阅，按最近心跳倒序。包含心跳已过期的记录，供诊断订阅声明情况。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListInstancesQuery(), ct)).ToOk();

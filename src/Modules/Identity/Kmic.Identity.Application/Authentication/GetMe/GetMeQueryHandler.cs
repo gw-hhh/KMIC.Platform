@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication.GetMe;
 
 /// <summary>
-/// 处理 <see cref="GetMeQuery"/>
+/// 查询当前用户及授权信息
 /// </summary>
 public sealed class GetMeQueryHandler(IIdentityQueryDb db, IExecutionContext execution, IOptions<BusinessTimeOptions> businessTime)
     : IQueryHandler<GetMeQuery, MeResponse>

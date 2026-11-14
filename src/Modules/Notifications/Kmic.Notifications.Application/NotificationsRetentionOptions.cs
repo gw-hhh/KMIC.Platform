@@ -16,25 +16,25 @@ public sealed class NotificationsRetentionOptions
     public const string Section = "Notifications:Retention";
 
     /// <summary>
-    /// 已读的站内消息保留多少天
+    /// 已读站内消息的保留天数
     /// </summary>
     [Range(1, 3650)]
     public int SiteMessageReadDays { get; init; } = 90;
 
     /// <summary>
-    /// 一直没读的站内消息保留多少天
+    /// 未读站内消息的保留天数
     /// </summary>
     [Range(1, 3650)]
     public int SiteMessageUnreadDays { get; init; } = 365;
 
     /// <summary>
-    /// 已完成的投递与发送记录保留多少天
+    /// 已完成投递及发送记录的保留天数
     /// </summary>
     [Range(1, 3650)]
     public int DeliveryDays { get; init; } = 180;
 
     /// <summary>
-    /// 非生产环境的捕获内容保留多少天
+    /// 捕获内容的保留天数
     /// </summary>
     [Range(1, 365)]
     public int CapturedDays { get; init; } = 30;

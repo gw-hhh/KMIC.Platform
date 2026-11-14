@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Presentation.Authentication;
 
 /// <summary>
-/// 携带刷新 Cookie 的端点的 CSRF 防护：Origin 必须在可信名单里，并且要带自定义请求头
+/// 刷新 Cookie 的 CSRF 防护：校验可信 Origin 和自定义请求头
 /// </summary>
 /// <remarks>
 /// 跨站请求带自定义头会触发 CORS 预检，而 CORS 只允许可信来源；再加上 Cookie 本身 SameSite=Strict，三者叠加
@@ -22,7 +22,7 @@ internal sealed class CookieEndpointGuard(IOptions<TrustedOriginsOptions> option
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(next);
 
-        // 防的是浏览器自动带上的 Cookie：请求里没有刷新令牌 Cookie（移动端在请求体里给令牌）就没有什么可防的
+        // 仅检查携带刷新 Cookie 的请求；移动端通过请求体提交令牌
         var request = context.HttpContext.Request;
         if (!request.Cookies.ContainsKey(RefreshCookie.Name))
         {

@@ -8,11 +8,10 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 
 /// <summary>
-/// 处理 <see cref="RunJobNowCommand"/>
+/// 立即触发定时任务
 /// </summary>
 /// <remarks>
-/// 触发是调度库里的写入，不在命令的事务里：事务之后才失败时，任务已经交给调度器了。这一点接受，
-/// 任务本来就要求可以重复执行
+/// 触发请求不参与命令事务，事务失败不会撤回已提交的调度请求；任务须支持重复执行
 /// </remarks>
 public sealed class RunJobNowCommandHandler(IScheduledJobControl control, IExecutionContext execution) : ICommandHandler<RunJobNowCommand>
 {
@@ -21,7 +20,7 @@ public sealed class RunJobNowCommandHandler(IScheduledJobControl control, IExecu
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // 模拟登录时记真正动手的人
+        // 模拟登录时记录实际操作人
         var user = execution.User;
         var by = user.ActualUserId ?? user.UserId ?? UserId.System;
         return await control.TriggerAsync(command.JobName, by, cancellationToken) switch

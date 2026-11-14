@@ -4,7 +4,7 @@ using Vogen;
 namespace Kmic.Identity.Domain.Roles;
 
 /// <summary>
-/// 角色数据范围覆盖 ID
+/// 角色数据范围配置 ID
 /// </summary>
 [ValueObject<Guid>(conversions: Conversions.SystemTextJson | Conversions.TypeConverter, parsableForPrimitives: ParsableForPrimitives.HoistMethodsAndInterfaces, toPrimitiveCasting: CastOperator.None, fromPrimitiveCasting: CastOperator.None)]
 public readonly partial struct RoleDataScopeId : IStronglyTypedId

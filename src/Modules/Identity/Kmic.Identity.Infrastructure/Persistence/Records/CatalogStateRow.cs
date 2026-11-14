@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Infrastructure.Persistence.Records;
 
 /// <summary>
-/// 目录同步状态表的一行：上次同步的目录哈希与时间，哈希没变就跳过同步
+/// 目录同步状态
 /// </summary>
 internal sealed class CatalogStateRow
 {

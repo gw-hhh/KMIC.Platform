@@ -9,7 +9,7 @@ using Kmic.Identity.Domain.Organization;
 namespace Kmic.Identity.Application.Organization.Enable;
 
 /// <summary>
-/// 处理 <see cref="EnableOrgUnitCommand"/>
+/// 启用组织单元
 /// </summary>
 public sealed class EnableOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<EnableOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)

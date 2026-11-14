@@ -11,14 +11,14 @@ namespace Kmic.Files.Domain.Errors;
 public static class FilesErrors
 {
     /// <summary>
-    /// 文件超过了上传档案的大小上限
+    /// 文件超过上传配置的大小上限
     /// </summary>
-    public static readonly Error TooLarge = Error.PayloadTooLarge("Files.TooLarge", "文件太大，超过了这类附件允许的大小");
+    public static readonly Error TooLarge = Error.PayloadTooLarge("Files.TooLarge", "文件超过大小上限");
 
     /// <summary>
-    /// 文件类型不被允许：扩展名不认识、内容与扩展名不符，或者这类附件不收这种类型
+    /// 文件类型不允许、扩展名不支持或文件内容与扩展名不符
     /// </summary>
-    public static readonly Error TypeNotAllowed = Error.UnsupportedMediaType("Files.TypeNotAllowed", "这类附件不允许上传这种文件，或者文件内容与扩展名不符");
+    public static readonly Error TypeNotAllowed = Error.UnsupportedMediaType("Files.TypeNotAllowed", "文件类型不允许，或文件内容与扩展名不符");
 
     /// <summary>
     /// 文件是空的
@@ -26,9 +26,9 @@ public static class FilesErrors
     public static readonly Error EmptyFile = Error.Validation("Files.EmptyFile", "文件是空的");
 
     /// <summary>
-    /// 上传档案不存在
+    /// 上传配置不存在
     /// </summary>
-    public static readonly Error ProfileNotFound = Error.Validation("Files.ProfileNotFound", "没有这类附件");
+    public static readonly Error ProfileNotFound = Error.Validation("Files.ProfileNotFound", "上传配置不存在");
 
     /// <summary>
     /// 文件不存在
@@ -41,7 +41,7 @@ public static class FilesErrors
     public static readonly Error StorageIssueNotFound = Error.NotFound("Files.StorageIssueNotFound", "存储问题不存在");
 
     /// <summary>
-    /// 文件还没准备好：生成的文件还没登记，或者正在恢复
+    /// 文件当前不可读取
     /// </summary>
     public static readonly Error NotReady = Error.Conflict("Files.NotReady", "文件还没准备好，请稍后再试").WithMetadata(ErrorMetadataKeys.Retryable, true);
 
@@ -51,32 +51,32 @@ public static class FilesErrors
     public static readonly Error Purged = Error.Gone("Files.Purged", "文件已被删除");
 
     /// <summary>
-    /// 一次关联的文件太多
+    /// 单次关联文件数超过上限
     /// </summary>
-    public static readonly Error TooManyFiles = Error.Validation("Files.TooManyFiles", "一次关联的文件太多");
+    public static readonly Error TooManyFiles = Error.Validation("Files.TooManyFiles", "单次关联文件数超过上限");
 
     /// <summary>
-    /// 文件不能关联：不是本人上传的、已经过期被清理、已经被拒绝
+    /// 上传人或文件状态不符合关联条件
     /// </summary>
-    public static readonly Error NotAttachable = Error.BusinessRule("Files.NotAttachable", "文件不能关联：不是本人上传的、已经过期，或者没有通过检查");
+    public static readonly Error NotAttachable = Error.BusinessRule("Files.NotAttachable", "文件不可关联，请检查上传人及文件状态");
 
     /// <summary>
-    /// 一个文件的引用太多
+    /// 文件引用数达到上限
     /// </summary>
-    public static readonly Error TooManyReferences = Error.BusinessRule("Files.TooManyReferences", "这个文件被引用的次数已经到达上限");
+    public static readonly Error TooManyReferences = Error.BusinessRule("Files.TooManyReferences", "文件引用数已达到上限");
 
     /// <summary>
-    /// 当前状态不能做这个操作
+    /// 文件状态不允许当前操作
     /// </summary>
-    public static readonly Error InvalidState = Error.BusinessRule("Files.InvalidState", "文件当前的状态不能做这个操作");
+    public static readonly Error InvalidState = Error.BusinessRule("Files.InvalidState", "文件当前状态不允许此操作");
 
     /// <summary>
-    /// 上传要有的权限点本人没有
+    /// 当前角色缺少上传配置要求的权限
     /// </summary>
     public static readonly Error UploadDenied = Error.Forbidden("Files.UploadDenied", "没有上传这类附件的权限");
 
     /// <summary>
-    /// 对账发现的差异太多，没有做任何处理
+    /// 对账差异超过上限或未列出预期对象，停止处理
     /// </summary>
-    public static readonly Error ReconcileSuspicious = Error.BusinessRule("Files.ReconcileSuspicious", "对账发现的差异太多，没有做任何处理。请先检查存储的配置，以及数据库是否被还原过");
+    public static readonly Error ReconcileSuspicious = Error.BusinessRule("Files.ReconcileSuspicious", "对账结果异常，本次未处理文件。请检查存储配置及数据库是否曾被还原");
 }

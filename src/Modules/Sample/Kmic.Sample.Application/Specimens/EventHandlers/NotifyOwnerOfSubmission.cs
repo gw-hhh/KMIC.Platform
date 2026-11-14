@@ -7,11 +7,11 @@ using Kmic.Sample.Domain.Specimens.Events;
 namespace Kmic.Sample.Application.Specimens.EventHandlers;
 
 /// <summary>
-/// 标本提交后通知负责人：演示业务模块怎样发通知
+/// 示例提交后通知负责人，演示业务模块发送通知
 /// </summary>
 /// <remarks>
-/// 和提交命令在同一个事务里，发送请求随业务数据一起写入 Outbox：事务回滚就不发，提交了才会投递。
-/// 去重键带上标本 ID，同一个标本的提交通知不会因为重试发两次
+/// 发送请求随提交命令在同一事务中写入 Outbox，事务回滚时不发送。
+/// 去重键包含示例 ID，用于避免重复生成同一示例的通知投递
 /// </remarks>
 internal sealed class NotifyOwnerOfSubmission(IIntegrationEventPublisher publisher) : IDomainEventHandler<SpecimenSubmitted>
 {

@@ -6,7 +6,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 处理 <see cref="EnableDictionaryItemCommand"/>
+/// 启用字典项
 /// </summary>
 public sealed class EnableDictionaryItemCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<EnableDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>

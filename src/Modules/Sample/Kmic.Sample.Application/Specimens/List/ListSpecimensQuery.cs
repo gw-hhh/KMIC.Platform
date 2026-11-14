@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Sample.Application.Specimens.List;
 
 /// <summary>
-/// 查询示例标本列表
+/// 查询示例列表
 /// </summary>
 /// <param name="Q">关键字，在编号和标题里模糊匹配</param>
 /// <param name="Status">状态编码，可以给多个</param>

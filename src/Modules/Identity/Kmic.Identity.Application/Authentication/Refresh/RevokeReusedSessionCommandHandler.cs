@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication.Refresh;
 
 /// <summary>
-/// 处理 <see cref="RevokeReusedSessionCommand"/>
+/// 作废发生刷新令牌重用的会话
 /// </summary>
 public sealed class RevokeReusedSessionCommandHandler(
     ISessionRepository sessions,

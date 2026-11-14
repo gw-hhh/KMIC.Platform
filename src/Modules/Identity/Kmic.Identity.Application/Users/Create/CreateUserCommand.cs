@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Application.Users.Create;
 
 /// <summary>
-/// 新建用户：不设置密码、所属组织和角色，这些由各自的命令设置
+/// 新建用户，不设置密码、所属组织或角色
 /// </summary>
 /// <param name="Account">登录名，不区分大小写唯一</param>
 /// <param name="DisplayName">姓名</param>

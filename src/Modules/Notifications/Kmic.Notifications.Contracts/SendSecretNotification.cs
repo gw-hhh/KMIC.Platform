@@ -9,8 +9,8 @@ namespace Kmic.Notifications.Contracts;
 /// 请求发送一条含一次性短时凭据的通知，如短信验证码
 /// </summary>
 /// <remarks>
-/// 消息载荷不能放凭据，这是唯一的例外：凭据只存哈希、用后即废，有效期不超过 5 分钟，所以载荷里的凭据过期就没有价值。
-/// 这类消息的载荷不进日志，不带附件，投递完成后 Notifications 清空渲染出的正文
+/// 仅允许携带一次性短时凭据：验证端只保存哈希，凭据用后失效，有效期不超过 5 分钟。
+/// 消息载荷不写日志、不带附件；Notifications 在投递成功、最终失败或跳过时清空正文及短信参数
 /// </remarks>
 /// <param name="TemplateKey">模板键，必须是含密模板</param>
 /// <param name="To">收件人</param>
@@ -20,7 +20,7 @@ namespace Kmic.Notifications.Contracts;
 public sealed record SendSecretNotification(string TemplateKey, IReadOnlyList<Recipient> To, JsonElement Model, string DedupKey) : IIntegrationRequest
 {
     /// <summary>
-    /// 凭据有效期，秒
+    /// 含密投递有效期（秒）
     /// </summary>
     public const int LifetimeSeconds = 300;
 
@@ -35,9 +35,9 @@ public sealed record SendSecretNotification(string TemplateKey, IReadOnlyList<Re
         ArgumentException.ThrowIfNullOrWhiteSpace(dedupKey);
 
         var template = typeof(TModel).GetCustomAttribute<NotificationTemplateAttribute>()
-            ?? throw new ArgumentException($"{typeof(TModel).Name} 没有标 [NotificationTemplate]。", nameof(model));
+            ?? throw new ArgumentException($"{typeof(TModel).Name} 未声明 [NotificationTemplate]。", nameof(model));
         return template.CarriesSecret
             ? new SendSecretNotification(template.Key, to, NotificationModelJson.Serialize(model), dedupKey)
-            : throw new ArgumentException($"{template.Key} 不是含密模板，要用 SendNotification 发送。", nameof(model));
+            : throw new ArgumentException($"{template.Key} 不是含密模板，须使用 SendNotification 发送。", nameof(model));
     }
 }

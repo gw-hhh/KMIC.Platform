@@ -5,10 +5,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Application.Users.ForceLogout;
 
 /// <summary>
-/// 强制用户下线：指定的一个会话，或他的全部会话（含他发起的模拟会话）
+/// 结束用户的指定会话或全部会话，包括相关的模拟会话
 /// </summary>
 /// <remarks>
-/// 管理员不能对自己用，自己的登录设备在“我的登录设备”里管理。对持有受保护角色的用户，只有同样持有受保护角色的人才能用
+/// 不能对自己执行此操作，请通过“我的登录设备”管理自己的会话。
+/// 目标用户持有受保护角色时，操作者的当前角色也必须受保护
 /// </remarks>
 /// <param name="Id">用户</param>
 /// <param name="SessionId">要下线的会话；不给就是全部</param>

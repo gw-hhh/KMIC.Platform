@@ -19,7 +19,7 @@ namespace Kmic.Identity.Application.Roles.Get;
 /// <param name="Permissions">拥有的权限点；内置角色拥有目录里的全部，这里为空</param>
 /// <param name="DataScopes">按范围对象单独设置的等级</param>
 /// <param name="HolderCount">持有人数</param>
-/// <param name="AllowedActions">当前用户现在可以对它执行的动作</param>
+/// <param name="AllowedActions">当前用户可执行的角色管理动作</param>
 public sealed record RoleDetailResponse(
     RoleId Id,
     [property: JsonPropertyName("version")] long ConcurrencyVersion,

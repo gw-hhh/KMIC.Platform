@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Domain.Users;
 
 /// <summary>
-/// 授予上的锚点：作为“本组织及下级”数据范围的计算起点的组织单元
+/// 角色授予的组织锚点，用于计算“本组织”和“本组织及下级”的数据范围
 /// </summary>
 public sealed class GrantAnchor : Entity<GrantAnchorId>
 {

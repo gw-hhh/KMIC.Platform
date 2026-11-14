@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Users.List;
 
 /// <summary>
-/// 处理 <see cref="ListUsersQuery"/>
+/// 分页查询用户列表
 /// </summary>
 public sealed class ListUsersQueryHandler(IIdentityQueryDb db) : IQueryHandler<ListUsersQuery, PagedResult<UserListItem>>
 {
@@ -23,7 +23,7 @@ public sealed class ListUsersQueryHandler(IIdentityQueryDb db) : IQueryHandler<L
             return statuses.Error;
         }
 
-        // 系统账号只是“系统”这个操作人的代号，不是人，不出现在用户列表里
+        // 系统账号用于记录系统操作，不作为普通用户展示
         var users = db.Users.Where(u => u.Kind == UserKind.Normal);
         if (!string.IsNullOrWhiteSpace(query.Q))
         {

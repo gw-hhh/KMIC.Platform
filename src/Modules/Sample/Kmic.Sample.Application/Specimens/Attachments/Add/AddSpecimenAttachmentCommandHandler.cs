@@ -9,7 +9,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Attachments.Add;
 
 /// <summary>
-/// 处理 <see cref="AddSpecimenAttachmentCommand"/>
+/// 为示例添加附件
 /// </summary>
 public sealed class AddSpecimenAttachmentCommandHandler(
     ISpecimenRepository specimens,
@@ -35,7 +35,7 @@ public sealed class AddSpecimenAttachmentCommandHandler(
             return allowed.Error;
         }
 
-        // 业务上不能改的先拒绝，不必去取文件的锁
+        // 先检查是否允许添加附件，不允许时无需获取文件锁
         var editable = specimen.CanEditAttachments();
         if (editable.IsFailure)
         {

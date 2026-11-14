@@ -9,8 +9,8 @@ namespace Kmic.Notifications.Application;
 /// Notifications 模块的查询入口
 /// </summary>
 /// <remarks>
-/// 查询处理器只从它出发：已经带了数据范围和软删除过滤，也不会读到命令里还没保存的修改。
-/// 站内消息不按组织范围，处理器要自己固定收件人条件
+/// 查询处理器通过此接口读取，不跟踪实体，也不读取命令中尚未保存的修改。
+/// 通知管理按权限点控制；站内消息须由处理器限定收件人
 /// </remarks>
 public interface INotificationsQueryDb
 {
@@ -30,12 +30,15 @@ public interface INotificationsQueryDb
     IQueryable<TemplateVersion> TemplateVersions { get; }
 
     /// <summary>
-    /// 投递记录；尝试次数、失败原因这些影子列用 EF.Property 读取，列名见 DeliveryColumns
+    /// 投递记录
     /// </summary>
+    /// <remarks>
+    /// 领取次数、失败原因等影子属性通过 EF.Property 读取，名称见 DeliveryColumns
+    /// </remarks>
     IQueryable<Delivery> Deliveries { get; }
 
     /// <summary>
-    /// 非生产环境捕获的内容
+    /// 捕获的通知内容
     /// </summary>
     IQueryable<CapturedMessage> CapturedMessages { get; }
 }

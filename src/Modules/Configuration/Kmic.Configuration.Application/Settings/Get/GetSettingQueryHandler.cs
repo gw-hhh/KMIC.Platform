@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Configuration.Application.Settings.Get;
 
 /// <summary>
-/// 处理 <see cref="GetSettingQuery"/>
+/// 查询系统设置详情
 /// </summary>
 public sealed class GetSettingQueryHandler(IConfigurationQueryDb db, SystemSettingCatalog catalog, IAllowedActions<SettingTarget> allowedActions) : IQueryHandler<GetSettingQuery, SettingItem>
 {

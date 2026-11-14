@@ -18,13 +18,13 @@ public static class ConfigurationPermissions
     public const string DictionaryManage = "Configuration.Dictionary.Manage";
 
     /// <summary>
-    /// 查看系统设置与它们的变更历史；修改还要该设置自己声明的权限点
+    /// 查看系统设置及变更历史；修改值还须具备该设置声明的权限
     /// </summary>
     [Permission("查看设置")]
     public const string SettingView = "Configuration.Setting.View";
 
     /// <summary>
-    /// 清除代码里已经不存在的设置留下的值
+    /// 清除已移除声明的设置值
     /// </summary>
     [Permission("清除不再使用的设置值", Sensitive = true)]
     public const string SettingManage = "Configuration.Setting.Manage";

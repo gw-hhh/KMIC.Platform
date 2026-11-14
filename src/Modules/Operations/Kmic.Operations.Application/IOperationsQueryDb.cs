@@ -10,8 +10,8 @@ namespace Kmic.Operations.Application;
 /// Operations 模块的查询入口
 /// </summary>
 /// <remarks>
-/// 查询处理器只从它出发：不跟踪实体，也不会读到命令里还没保存的修改。运维数据不声明数据范围，
-/// 谁能看由权限点决定：审计人员需要看到全部
+/// 查询处理器通过此接口读取，不跟踪实体，也不读取命令中尚未保存的修改。
+/// 运维数据不声明数据范围，访问由用例的权限要求决定
 /// </remarks>
 public interface IOperationsQueryDb
 {
@@ -41,7 +41,7 @@ public interface IOperationsQueryDb
     IQueryable<MessageRouteRow> MessageRoutes { get; }
 
     /// <summary>
-    /// 运行中的实例和它们声明的订阅，最近的心跳
+    /// 实例及其订阅声明和最近心跳
     /// </summary>
     IQueryable<MessagingInstanceRow> MessagingInstances { get; }
 

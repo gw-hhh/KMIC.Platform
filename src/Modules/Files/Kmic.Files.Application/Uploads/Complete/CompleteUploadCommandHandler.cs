@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Uploads.Complete;
 
 /// <summary>
-/// 处理 <see cref="CompleteUploadCommand"/>
+/// 登记上传结果并将文件标记为可用
 /// </summary>
 public sealed class CompleteUploadCommandHandler(IStoredFileRepository files, IExecutionContext execution, IOptions<FilesOptions> options, TimeProvider time)
     : ICommandHandler<CompleteUploadCommand, UploadCompleted>
@@ -21,7 +21,7 @@ public sealed class CompleteUploadCommandHandler(IStoredFileRepository files, IE
 
         var loaded = await files.GetForUpdateAsync(StoredFileId.From(command.FileId), null, cancellationToken);
 
-        // 别人的文件和不存在的文件一个样，不让人探测别人的文件 ID
+        // 无权访问和不存在的文件统一返回 NotFound，避免泄露文件是否存在
         if (loaded.IsFailure || loaded.Value.UploadedBy != execution.User.UserId)
         {
             return FilesErrors.NotFound;

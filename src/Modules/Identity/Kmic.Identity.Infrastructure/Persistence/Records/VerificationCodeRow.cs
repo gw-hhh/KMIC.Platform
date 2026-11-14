@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Infrastructure.Persistence.Records;
 
 /// <summary>
-/// 短信验证码表的一行：生命周期很短，只存哈希，用原子 SQL 校验与扣减次数
+/// 短信验证码记录
 /// </summary>
 internal sealed class VerificationCodeRow
 {
@@ -11,12 +11,12 @@ internal sealed class VerificationCodeRow
     public Guid Id { get; init; }
 
     /// <summary>
-    /// 手机号的 SHA-256，小写十六进制：手机号不存明文，不存在的号码也写一行，使频率限制对存在与不存在的号码一致
+    /// 手机号哈希，SHA-256 小写十六进制
     /// </summary>
     public required string PhoneHash { get; init; }
 
     /// <summary>
-    /// 用户；手机号不属于任何用户时为空，这一行不生成验证码
+    /// 关联用户 ID
     /// </summary>
     public Guid? UserId { get; init; }
 
@@ -36,7 +36,7 @@ internal sealed class VerificationCodeRow
     public DateTimeOffset ExpiresAt { get; init; }
 
     /// <summary>
-    /// 还能校验几次
+    /// 剩余校验次数
     /// </summary>
     public int AttemptsLeft { get; init; }
 
@@ -46,7 +46,7 @@ internal sealed class VerificationCodeRow
     public required string Status { get; init; }
 
     /// <summary>
-    /// 请求来源 IP，按 IP 限流用
+    /// 请求来源 IP
     /// </summary>
     public string? RequestIp { get; init; }
 

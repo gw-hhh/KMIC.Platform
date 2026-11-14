@@ -13,7 +13,7 @@ internal sealed class UnlockLoginEndpoint : IEndpoint
         group.MapPost("/users/{id}/unlock-login", HandleAsync)
             .Sends<UnlockLoginCommand>()
             .WithSummary("解锁登录")
-            .WithDescription("清零这个账号的登录失败计数。登录限制只影响新的登录尝试，不影响用户已有的会话。");
+            .WithDescription("清除登录失败计数及登录限制，不影响已有会话，也不会启用已禁用账号。");
 
     private static async Task<IResult> HandleAsync([Description("用户 ID")] UserId id, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new UnlockLoginCommand(id), ct)).ToOk();

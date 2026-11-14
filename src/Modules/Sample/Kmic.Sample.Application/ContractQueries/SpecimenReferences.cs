@@ -6,11 +6,11 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="ISpecimenReferences"/> 的实现：薄适配器，只把调用转成本模块的查询，经管道执行
+/// 为其他模块提供示例引用查询
 /// </summary>
 /// <remarks>
-/// 批量与分批由 <see cref="ContractBatch"/> 处理。引用解析没有业务上的失败，失败只可能是数据库不可用这类基础设施问题，
-/// 所以失败时抛异常，不让每个调用方都去处理 Result
+/// 通过 <see cref="ContractBatch"/> 分批查询引用信息。
+/// 查询失败时抛出异常
 /// </remarks>
 public sealed class SpecimenReferences(IContractQuerySender sender) : ISpecimenReferences
 {
@@ -26,6 +26,6 @@ public sealed class SpecimenReferences(IContractQuerySender sender) : ISpecimenR
             ct);
         return resolved.IsSuccess
             ? resolved.Value
-            : throw new InvalidOperationException($"解析标本引用失败：{resolved.Error.Code}。");
+            : throw new InvalidOperationException($"解析示例引用失败：{resolved.Error.Code}。");
     }
 }

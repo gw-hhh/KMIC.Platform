@@ -11,8 +11,8 @@ internal sealed class GetDeadMessageEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/messages/dead/{module}/{box}/{id}", HandleAsync)
             .Sends<GetDeadMessageQuery>()
-            .WithSummary("查看一条死信的全部内容")
-            .WithDescription("包括载荷与信封，也能看已经被放弃的消息。载荷原样显示：死信载荷按设计不含敏感字段，含密消息的载荷不进库。每次查看都会留下读取审计。");
+            .WithSummary("查看死信详情")
+            .WithDescription("返回原始消息内容和信封信息，也可查看已放弃的消息。内容可能含敏感信息，查看会记录读审计。");
 
     private static async Task<IResult> HandleAsync(
         [Description("所在模块，如 Sample")] string module,

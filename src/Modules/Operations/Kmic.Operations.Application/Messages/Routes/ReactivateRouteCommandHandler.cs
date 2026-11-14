@@ -6,7 +6,7 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.Messages.Routes;
 
 /// <summary>
-/// 处理 <see cref="ReactivateRouteCommand"/>
+/// 重新启用已终结的消息路由
 /// </summary>
 public sealed class ReactivateRouteCommandHandler(IMessageRouteAdmin routes) : ICommandHandler<ReactivateRouteCommand>
 {

@@ -6,17 +6,17 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 查询文件列表：管理员查看文件的元数据、状态和引用，不含内容和存储键
+/// 查询文件元数据列表，不含内容和存储键
 /// </summary>
-/// <param name="Q">关键字，在文件名里模糊匹配</param>
-/// <param name="Status">状态编码，可以给多个</param>
-/// <param name="Profile">上传档案</param>
-/// <param name="UploadedBy">上传的人</param>
-/// <param name="From">上传时间不早于</param>
-/// <param name="To">上传时间早于</param>
-/// <param name="OwnerModule">只看被这个模块的业务对象引用的文件</param>
-/// <param name="OwnerType">业务对象的类型，和 OwnerModule 一起给</param>
-/// <param name="OwnerId">业务对象的 ID，和 OwnerModule、OwnerType 一起给</param>
+/// <param name="Q">文件名搜索关键字</param>
+/// <param name="Status">状态编码，支持多个</param>
+/// <param name="Profile">上传配置名称；生成文件为 Generated:来源</param>
+/// <param name="UploadedBy">上传人或生成请求人 ID</param>
+/// <param name="From">上传时间下限（含）；生成文件按登记时间筛选</param>
+/// <param name="To">上传时间上限（不含）</param>
+/// <param name="OwnerModule">按引用文件的业务模块筛选</param>
+/// <param name="OwnerType">业务对象类型，须同时指定 OwnerModule</param>
+/// <param name="OwnerId">业务对象 ID，须同时指定 OwnerModule 和 OwnerType</param>
 /// <param name="Page">分页</param>
 /// <param name="Sort">排序</param>
 [RequirePermission(FilesPermissions.FileView)]

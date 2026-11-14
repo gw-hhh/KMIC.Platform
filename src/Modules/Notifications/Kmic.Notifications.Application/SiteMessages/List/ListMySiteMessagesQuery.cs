@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.SiteMessages.List;
 
 /// <summary>
-/// 查询我的站内消息：只有自己的，未读的在前、新的在前
+/// 查询本人的站内消息，默认未读在前、发送时间倒序
 /// </summary>
-/// <param name="Unread">只看未读（true）或只看已读（false），不给就都看</param>
-/// <param name="Category">只看某个类别</param>
+/// <param name="Unread">已读状态筛选：true 为未读，false 为已读，未指定则返回全部</param>
+/// <param name="Category">消息类别筛选</param>
 /// <param name="Page">分页</param>
 /// <param name="Sort">排序</param>
 [AllowAuthenticated]

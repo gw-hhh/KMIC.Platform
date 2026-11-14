@@ -18,7 +18,7 @@ public interface IPasswordService
     PasswordCheck Verify(User user, string password);
 
     /// <summary>
-    /// 做一次与校验相当的哈希计算，结果丢弃：账号不存在时也耗同样的时间，防止从响应时间判断账号是否存在
+    /// 账号不存在或未设置密码时，也执行哈希校验，降低按耗时枚举账号的风险
     /// </summary>
     void Burn(string password);
 }

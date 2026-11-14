@@ -3,23 +3,23 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 namespace Kmic.Files.Contracts;
 
 /// <summary>
-/// 请求 Files 登记一个模块自己生成的文件
+/// 登记业务模块生成的文件
 /// </summary>
 /// <remarks>
-/// 导出作业的结果文件、系统生成的 PDF 等：生成方先把对象写进存储，再用这条请求型消息登记，
-/// 与作业完成同一个事务进 Outbox。作业失败消息就不发，留下的对象由对账任务清理
+/// 用于导出结果、系统生成的 PDF 等。先写入对象存储，再在业务事务中将登记消息写入 Outbox。
+/// 事务回滚时不发送消息，遗留对象由对账任务清理
 /// </remarks>
 /// <param name="FileId">文件 ID，生成方预先生成</param>
 /// <param name="StorageKey">对象在存储里的键</param>
 /// <param name="ObjectVersionId">对象版本 ID，存储没有开启版本控制时为空</param>
-/// <param name="OriginalName">显示用的文件名</param>
+/// <param name="OriginalName">显示文件名</param>
 /// <param name="FileType">文件类型编码，见框架的 FileType</param>
 /// <param name="ContentType">内容类型</param>
 /// <param name="Size">字节数</param>
 /// <param name="Sha256">内容的 SHA-256，小写十六进制</param>
-/// <param name="Source">生成方，如 Sample.ExportSpecimens，登记后上传档案是 Generated:来源</param>
-/// <param name="RequestedBy">发起生成的用户；系统生成的没有</param>
-/// <param name="ExpiresAt">到这个时间还没有被关联就清理</param>
+/// <param name="Source">生成方，如 Sample.ExportSpecimens；登记后的 Profile 为 Generated:来源</param>
+/// <param name="RequestedBy">发起生成的用户 ID，无发起用户时为空</param>
+/// <param name="ExpiresAt">未关联文件的清理到期时间</param>
 [IntegrationMessage(RegisterGeneratedFile.MessageName)]
 [MessageSubjects(nameof(FileId))]
 public sealed record RegisterGeneratedFile(
@@ -36,7 +36,7 @@ public sealed record RegisterGeneratedFile(
     DateTimeOffset ExpiresAt) : IIntegrationRequest
 {
     /// <summary>
-    /// 消息类型名：对账删除存储里没有记录的对象之前，探查未完成的登记请求用
+    /// 消息类型名，供对账任务在删除未登记对象前探查未完成的登记请求
     /// </summary>
     public const string MessageName = "Files.RegisterGeneratedFile";
 }

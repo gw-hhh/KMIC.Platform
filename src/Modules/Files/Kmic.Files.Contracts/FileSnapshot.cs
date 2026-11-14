@@ -1,7 +1,7 @@
 namespace Kmic.Files.Contracts;
 
 /// <summary>
-/// 关联时从 Files 取到的文件快照：业务的关联行保存它，列表与详情就不用再查 Files
+/// 关联时的文件信息，业务方保存后可直接用于列表与详情显示
 /// </summary>
 /// <param name="FileId">文件 ID</param>
 /// <param name="Name">显示用的文件名</param>

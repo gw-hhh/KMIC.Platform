@@ -4,11 +4,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Sample.Domain.Specimens;
 
 /// <summary>
-/// 示例标本的附件
+/// 示例的附件
 /// </summary>
 /// <remarks>
-/// 聚合内的子实体，演示业务模块怎样保存文件的关联：只存文件 ID 和关联时取到的快照（名称、大小、类型），
-/// 列表与详情不用再查 Files。文件内容和生命周期归 Files，这里的行与 Files 里的引用登记是同一件事的两份记录
+/// 保存文件 ID 以及添加附件时的文件名、大小和类型，列表与详情直接使用这些信息。
+/// 文件内容和清理由 Files 模块管理，Files 另行维护文件引用记录
 /// </remarks>
 public sealed class SpecimenAttachment : Entity<SpecimenAttachmentId>
 {

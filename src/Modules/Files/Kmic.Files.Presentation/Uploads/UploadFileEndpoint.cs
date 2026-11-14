@@ -15,15 +15,15 @@ using Microsoft.Net.Http.Headers;
 namespace Kmic.Files.Presentation.Uploads;
 
 /// <summary>
-/// 上传端点：multipart/form-data，一次一个文件，流式读取、边读边写存储，不整体读入内存
+/// 以 multipart/form-data 流式上传单个文件，不将完整内容读入内存
 /// </summary>
 /// <remarks>
-/// 三步：用 StartUpload 登记一行“上传中”（短事务）；文件流写入存储（不持有数据库事务）；
-/// 用 CompleteUpload 或 RejectUpload 登记结果（短事务）。类型和大小的检查在写入过程中完成，不合规时没有对象留在存储里
+/// 先用 StartUpload 登记上传，再流式写入存储，最后用 CompleteUpload 或 RejectUpload 登记结果。
+/// 两次登记各用短事务，写存储期间不持有数据库事务；写入时检查类型和大小，失败后的残留对象由清理与对账处理
 /// </remarks>
 internal sealed class UploadFileEndpoint : IEndpoint
 {
-    // multipart 的边界、段头占不了多少，给请求体上限留一点余量
+    // 请求体上限预留 multipart 边界和段头所需空间
     private const long BodyOverhead = 64 * 1024;
 
     public void Map(IEndpointRouteBuilder group) =>
@@ -32,13 +32,13 @@ internal sealed class UploadFileEndpoint : IEndpoint
             .Accepts<IFormFile>("multipart/form-data")
             .WithRequestTimeout(TimeSpan.FromMinutes(10))
             .DisableAntiforgery()
-            .WithSummary("上传一个文件")
-            .WithDescription("multipart/form-data，一次一个文件，第一个带文件名的部分就是文件。profile 是上传档案名，决定大小上限、允许的类型和需要的权限点；类型按扩展名加文件头识别，不信任客户端声明的内容类型。成功得到文件 ID：这是临时文件，到期（默认 24 小时）还没有被业务对象关联就会清理。文件太大返回 413，类型不允许返回 415。");
+            .WithSummary("上传文件")
+            .WithDescription("使用 multipart/form-data，仅处理第一个带文件名的部分。profile 指定上传配置，决定大小上限、允许类型和所需权限；按扩展名及文件头识别类型，不采用客户端声明的内容类型。成功后返回临时文件 ID，须在保留期内（默认 24 小时）关联业务对象，未关联的到期后可被清理。超过大小上限返回 413，类型不允许返回 415。");
 
     private static async Task<IResult> HandleAsync(
         HttpContext http,
-        [Description("上传档案名，如 Sample.ContractScan")] string profile,
-        [Description("文件大小（字节），客户端知道时给，超过档案上限直接拒绝；不给就边读边按上限截断")] long? size,
+        [Description("上传配置名称，如 Sample.SpecimenAttachment")] string profile,
+        [Description("文件大小（字节），可选；声明大小超过配置上限时直接拒绝，实际读取仍受该上限限制")] long? size,
         ICommandSender sender,
         UploadProfileCatalog profiles,
         IFileUploadProcessor processor,
@@ -49,7 +49,7 @@ internal sealed class UploadFileEndpoint : IEndpoint
             return FailureOf(FilesErrors.ProfileNotFound);
         }
 
-        // 端点级的请求体上限按所有档案里最大的放宽，真正的上限在读流时按这个档案截断
+        // 请求体按所有上传配置中的最大上限预留空间，文件流仍受当前配置限制
         if (http.Features.Get<IHttpMaxRequestBodySizeFeature>() is { IsReadOnly: false } limit)
         {
             limit.MaxRequestBodySize = profiles.LargestMaxBytes + BodyOverhead;

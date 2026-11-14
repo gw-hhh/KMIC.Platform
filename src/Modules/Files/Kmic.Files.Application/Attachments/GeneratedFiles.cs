@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// <see cref="IGeneratedFiles"/> 的实现：用上传同样的流程写入存储，再请求登记
+/// 写入并请求登记模块生成的文件
 /// </summary>
 public sealed class GeneratedFiles(
     IFileUploadProcessor processor,
@@ -38,7 +38,7 @@ public sealed class GeneratedFiles(
         var id = Guid.CreateVersion7();
         var key = keys.KeyFor(id, now);
 
-        // 生成的文件不按上传档案限制类型，只限制大小
+        // 允许全局支持的文件类型，并单独限制生成文件大小
         var profile = new UploadProfile(
             StoredFile.GeneratedProfilePrefix + source,
             "生成的文件",

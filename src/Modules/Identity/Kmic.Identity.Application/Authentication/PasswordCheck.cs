@@ -6,17 +6,17 @@ namespace Kmic.Identity.Application.Authentication;
 public enum PasswordCheck
 {
     /// <summary>
-    /// 密码不对
+    /// 密码不匹配
     /// </summary>
     Failed,
 
     /// <summary>
-    /// 密码对
+    /// 密码匹配
     /// </summary>
     Success,
 
     /// <summary>
-    /// 密码对，但哈希参数已经过时，应当用新参数重新哈希并保存
+    /// 密码匹配，但哈希参数已过时，须重新计算并保存哈希
     /// </summary>
     SuccessRehashNeeded,
 }

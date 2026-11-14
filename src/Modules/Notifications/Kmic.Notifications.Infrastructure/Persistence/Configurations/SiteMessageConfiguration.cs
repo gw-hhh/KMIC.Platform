@@ -15,7 +15,7 @@ internal sealed class SiteMessageConfiguration : IEntityTypeConfiguration<SiteMe
         builder.Property(m => m.Link).HasMaxLength(SiteMessage.LinkMaxLength);
         builder.Property(m => m.Category).HasMaxLength(SiteMessage.CategoryMaxLength);
 
-        // 未读数与列表都按收件人、已读状态、时间走这个索引
+        // 供未读数和列表查询使用
         builder.HasIndex(m => new { m.RecipientUserId, m.ReadAt, m.SentAt });
         builder.HasNoDataScope("站内消息按收件人显式过滤，不按组织范围；谁的消息谁看");
     }

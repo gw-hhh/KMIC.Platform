@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Operations.Application.ClientErrors;
 
 /// <summary>
-/// 处理 <see cref="ReportClientErrorsCommand"/>
+/// 限流并记录前端上报的错误
 /// </summary>
 public sealed class ReportClientErrorsCommandHandler(
     IExecutionContext execution,

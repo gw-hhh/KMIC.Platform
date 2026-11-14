@@ -4,11 +4,11 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Operations.Application.Messages.Dead;
 
 /// <summary>
-/// 查看一条死信的全部内容，包括载荷与信封
+/// 查询死信或已放弃消息的详情，包含载荷与信封
 /// </summary>
 /// <remarks>
-/// 载荷原样显示给有权限点的人：遮盖已经在审计采集时完成，死信载荷按设计不含敏感字段，含密消息的载荷不进库。
-/// 每次查看都会留下读取审计
+/// 查询要求查看消息权限并记录读取审计。普通消息不得携带敏感信息，含密载荷不得通过管理接口暴露。
+/// 当前存储查询直接读取载荷，尚未按含密类型过滤，含密保护仍待补齐
 /// </remarks>
 /// <param name="Module">所在模块</param>
 /// <param name="Box">Outbox 或 Inbox</param>

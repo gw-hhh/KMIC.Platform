@@ -4,12 +4,12 @@ using Kmic.Operations.Domain.Jobs;
 namespace Kmic.Operations.Application.ScheduledJobs;
 
 /// <summary>
-/// 把执行记录行换成响应里的一项，并补上手动执行的人的名称
+/// 将定时任务执行记录转换为响应，并补充手动触发用户名称
 /// </summary>
 internal static class ScheduledJobRunItems
 {
     /// <summary>
-    /// 手动执行的人要解析名称，先把需要解析的用户收集起来
+    /// 收集手动触发用户 ID，供批量解析名称
     /// </summary>
     public static IReadOnlyCollection<Guid> UsersOf(IEnumerable<ScheduledJobRunRow> rows) =>
         [.. rows.Select(r => r.TriggeredBy).OfType<Guid>().Distinct()];

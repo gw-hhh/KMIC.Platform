@@ -6,7 +6,7 @@ using Kmic.Files.Contracts;
 namespace Kmic.Files.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IFileDownloads"/> 的实现：薄适配器，只把调用转成本模块的查询，经管道执行
+/// 通过查询管道获取文件下载信息
 /// </summary>
 public sealed class FileDownloads(IContractQuerySender sender) : IFileDownloads
 {

@@ -6,10 +6,10 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.Messages.Routes;
 
 /// <summary>
-/// 处理 <see cref="RedeliverCommand"/>
+/// 按序号范围重新投递消息
 /// </summary>
 /// <remarks>
-/// 写的是订阅方的收件箱，由框架在自己的事务里完成：这是框架存储的基础设施写入，和正常投递一样
+/// 由框架在独立事务中写入订阅方收件箱，不参与 Operations 命令事务
 /// </remarks>
 public sealed class RedeliverCommandHandler(IMessageRouteAdmin routes) : ICommandHandler<RedeliverCommand, RedeliverResponse>
 {

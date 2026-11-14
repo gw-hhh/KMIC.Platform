@@ -10,8 +10,8 @@ internal sealed class AbandonMessagesEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/messages/abandon", HandleAsync)
             .Sends<AbandonMessagesCommand>()
-            .WithSummary("放弃收件箱里的死信，单条或批量")
-            .WithDescription("放弃意味着这些消息永远不会被处理，原因必填。放弃之前先调接收方为这种消息注册的放弃检查，不让放弃的不改状态，回执里写明原因，只能重试。只有收件箱的死信能放弃。一次最多 200 条。必须带幂等键。");
+            .WithSummary("放弃收件箱死信")
+            .WithDescription("支持单条或批量操作，最多 200 条，原因必填。放弃后消息不再处理。接收方的放弃检查未通过时，保持原状态并在逐条结果中说明原因，只能重试。仅支持收件箱死信。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync(AbandonMessagesRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new AbandonMessagesCommand(request.Messages, request.Reason), ct)).ToOk();

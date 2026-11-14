@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Roles.Catalogs;
 
 /// <summary>
-/// 处理 <see cref="ListPermissionsQuery"/>
+/// 查询权限目录
 /// </summary>
 public sealed class ListPermissionsQueryHandler(PermissionCatalog catalog) : IQueryHandler<ListPermissionsQuery, IReadOnlyList<PermissionItem>>
 {

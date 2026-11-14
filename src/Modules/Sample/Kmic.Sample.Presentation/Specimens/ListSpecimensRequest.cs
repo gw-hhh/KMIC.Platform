@@ -1,7 +1,7 @@
 namespace Kmic.Sample.Presentation.Specimens;
 
 /// <summary>
-/// 查询示例标本列表的参数
+/// 查询示例列表的参数
 /// </summary>
 /// <param name="Q">关键字，在编号和标题里模糊匹配</param>
 /// <param name="Status">状态编码，重复参数名可以给多个，如 status=Draft&amp;status=Submitted</param>

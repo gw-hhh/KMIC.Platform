@@ -8,7 +8,7 @@ using Kmic.Operations.Domain.Messages;
 namespace Kmic.Operations.Application.Messages.Dead;
 
 /// <summary>
-/// 处理 <see cref="ListDeadMessagesQuery"/>
+/// 分页汇总各模块的死信
 /// </summary>
 public sealed class ListDeadMessagesQueryHandler(IModuleMessageStores stores, ICursorProtector protector)
     : IQueryHandler<ListDeadMessagesQuery, CursorPage<DeadMessageItem>>

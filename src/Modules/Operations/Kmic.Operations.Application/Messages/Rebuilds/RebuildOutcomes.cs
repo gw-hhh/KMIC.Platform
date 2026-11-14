@@ -5,7 +5,7 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
 /// <summary>
-/// 把框架的重建运维结果换成 Operations 的错误
+/// 将框架重建结果转换为成功或模块错误
 /// </summary>
 internal static class RebuildOutcomes
 {

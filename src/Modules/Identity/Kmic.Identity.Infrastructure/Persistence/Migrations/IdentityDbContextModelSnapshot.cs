@@ -838,7 +838,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.Property<string>("DeviceName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .HasComment("设备名称，App 上报或由 User-Agent 解析");
+                        .HasComment("登录时的 User-Agent");
 
                     b.Property<bool>("ImpersonationAllowsWrite")
                         .HasColumnType("boolean")
@@ -864,7 +864,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("RefreshExpiresAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("滑动过期时间");
+                        .HasComment("刷新令牌或模拟会话到期时间");
 
                     b.Property<DateTimeOffset?>("RevokedAt")
                         .HasColumnType("timestamp with time zone")
@@ -904,7 +904,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Session", "Identity", t =>
                         {
-                            t.HasComment("会话；Identity 模块；一行代表一次登录（含模拟身份）；作废或过期 30 天后由清理任务删除");
+                            t.HasComment("会话（Identity）：一条记录对应一次普通或模拟登录；按绝对到期或作废时间及配置保留期清理");
 
                             t.HasCheckConstraint("CK_Session_ClientType", "\"ClientType\" IN ('Web', 'App')");
 
@@ -966,7 +966,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
-                        .HasComment("登录名，唯一且不区分大小写；迁移来的用户沿用旧系统的手机号")
+                        .HasComment("登录名")
                         .UseCollation("CaseInsensitive");
 
                     b.Property<long>("ConcurrencyVersion")
@@ -1003,7 +1003,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.Property<string>("EnglishName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
-                        .HasComment("英文名，合同、报告上要印");
+                        .HasComment("英文名");
 
                     b.Property<string>("Kind")
                         .IsRequired()
@@ -1018,12 +1018,12 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.Property<string>("Mobile")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
-                        .HasComment("手机号，规范化为国际格式，填写时唯一；短信登录需要它")
+                        .HasComment("手机号")
                         .HasAnnotation("Kmic:AuditMode", "Masked:Personal");
 
                     b.Property<Guid?>("OrgUnitId")
                         .HasColumnType("uuid")
-                        .HasComment("所属组织单元，数据范围的“本组织”从它算起；为空时只剩“本人”的数据");
+                        .HasComment("所属组织单元");
 
                     b.Property<bool>("PasswordChangeRequired")
                         .HasColumnType("boolean")
@@ -1038,7 +1038,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.Property<string>("PasswordHash")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .HasComment("密码哈希；为空表示还没有设置过密码（迁移来的员工靠短信登录）")
+                        .HasComment("密码哈希")
                         .HasAnnotation("Kmic:AuditMode", "Hidden");
 
                     b.Property<string>("Status")
@@ -1217,7 +1217,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
 
                     b.ToTable("LoginThrottle", "Identity", t =>
                         {
-                            t.HasComment("登录失败计数；Identity 模块；一行代表一个登录名（哈希）的失败状态；24 小时没有新失败由每日清理任务删除");
+                            t.HasComment("登录失败计数（Identity）：每个登录名哈希一条失败状态记录；按配置的重置间隔清理，等待或锁定未结束时保留");
                         });
                 });
 
@@ -1315,7 +1315,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
 
                     b.ToTable("VerificationCode", "Identity", t =>
                         {
-                            t.HasComment("短信验证码；Identity 模块；一行代表一次发送请求（哈希），过期超过 1 天由每日清理任务删除");
+                            t.HasComment("预留的短信验证码记录（Identity）：保存验证码哈希及校验状态；发送、校验和清理流程尚未接入");
                         });
                 });
 

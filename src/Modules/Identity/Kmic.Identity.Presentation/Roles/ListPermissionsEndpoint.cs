@@ -11,7 +11,7 @@ internal sealed class ListPermissionsEndpoint : IEndpoint
         group.MapGet("/permissions", HandleAsync)
             .Sends<ListPermissionsQuery>()
             .WithSummary("查询权限点目录")
-            .WithDescription("全部模块声明的权限点，按模块与分组排好。");
+            .WithDescription("返回各模块声明的权限，按模块和分组排列。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListPermissionsQuery(), ct)).ToOk();

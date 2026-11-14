@@ -12,7 +12,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.SetDataScopes;
 
 /// <summary>
-/// 处理 <see cref="SetRoleDataScopesCommand"/>
+/// 替换角色数据范围
 /// </summary>
 public sealed class SetRoleDataScopesCommandHandler(
     IRoleRepository roles,
@@ -29,7 +29,7 @@ public sealed class SetRoleDataScopesCommandHandler(
         var unknown = command.Overrides.Keys.Where(code => !catalog.Contains(code)).ToList();
         if (unknown.Count > 0)
         {
-            return IdentityErrors.ScopeObjectUnknown.WithDetail($"不认识的范围对象：{string.Join("、", unknown)}");
+            return IdentityErrors.ScopeObjectUnknown.WithDetail($"未声明的数据范围对象：{string.Join("、", unknown)}");
         }
 
         var loaded = await RoleAdminLoading.LoadForAsync(roles, db, authorizer, command.Id, command.ExpectedVersion, RoleAdminAction.SetDataScopes, access, cancellationToken);

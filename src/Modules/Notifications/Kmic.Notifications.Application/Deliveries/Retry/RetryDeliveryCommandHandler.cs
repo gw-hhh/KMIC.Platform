@@ -8,7 +8,7 @@ using Kmic.Notifications.Domain.Errors;
 namespace Kmic.Notifications.Application.Deliveries.Retry;
 
 /// <summary>
-/// 处理 <see cref="RetryDeliveryCommand"/>
+/// 将失败的投递重新加入发送队列
 /// </summary>
 public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, NotificationTemplateCatalog catalog, TimeProvider time) : ICommandHandler<RetryDeliveryCommand>
 {

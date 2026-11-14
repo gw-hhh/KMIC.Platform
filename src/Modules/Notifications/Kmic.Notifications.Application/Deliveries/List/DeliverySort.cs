@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.Deliveries.List;
 public static class DeliverySort
 {
     /// <summary>
-    /// 排序字段表，默认新的在前
+    /// 排序字段表，默认按创建时间倒序
     /// </summary>
     public static readonly SortMap<DeliveryListItem> Map = SortMap<DeliveryListItem>
         .Field("createdAt", x => x.CreatedAt)

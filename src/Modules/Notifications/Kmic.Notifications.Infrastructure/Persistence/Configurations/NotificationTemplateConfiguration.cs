@@ -20,7 +20,7 @@ internal sealed class NotificationTemplateConfiguration : IEntityTypeConfigurati
         builder.Property(t => t.CodeHash).HasMaxLength(64).AuditHidden();
         builder.Property(t => t.ActiveVersions).HasColumnType("jsonb");
 
-        // 两个实例同时启动、同时登记同一个模板时，后一个撞上这里，重试一次就是更新
+        // 模板键唯一，防止重复登记
         builder.HasIndex(t => t.Key).IsUnique().MapsToError(NotificationsErrors.TemplateKeyDuplicated);
         builder.HasMany(t => t.Versions).WithOne().HasForeignKey(v => v.TemplateId);
         builder.HasNoDataScope("模板按权限点管理，不按组织范围");

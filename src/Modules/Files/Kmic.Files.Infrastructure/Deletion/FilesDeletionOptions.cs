@@ -13,31 +13,31 @@ public sealed class FilesDeletionOptions
     public const string Section = "Files:Deletion";
 
     /// <summary>
-    /// 同时删除几个文件
+    /// 并行删除的文件数
     /// </summary>
     [Range(1, 32)]
     public int Parallelism { get; init; } = 4;
 
     /// <summary>
-    /// 一个文件最多尝试几次：用完还没删掉的留在队列里等人工处理，不再自动领取
+    /// 单个文件的删除尝试上限，达到后停止自动领取，保留在队列中等待人工处理
     /// </summary>
     [Range(1, 100)]
     public int MaxAttempts { get; init; } = 8;
 
     /// <summary>
-    /// 领取之后多少分钟没有结果，别的实例可以接管
+    /// 领取租期（分钟），到期后其他实例可接管
     /// </summary>
     [Range(1, 120)]
     public int LeaseMinutes { get; init; } = 5;
 
     /// <summary>
-    /// 没有被唤醒时，隔多少秒查一次队列
+    /// 未收到唤醒时的队列轮询间隔（秒）
     /// </summary>
     [Range(1, 600)]
     public int PollSeconds { get; init; } = 10;
 
     /// <summary>
-    /// 领取的租期
+    /// 领取租期
     /// </summary>
     public TimeSpan Lease => TimeSpan.FromMinutes(LeaseMinutes);
 

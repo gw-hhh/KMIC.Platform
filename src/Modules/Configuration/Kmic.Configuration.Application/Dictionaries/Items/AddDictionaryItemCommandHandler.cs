@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 处理 <see cref="AddDictionaryItemCommand"/>
+/// 添加字典项
 /// </summary>
 public sealed class AddDictionaryItemCommandHandler(IDictionaryTypeRepository types, IOptions<DictionaryOptions> options, IAfterCommit afterCommit)
     : ICommandHandler<AddDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>

@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Configurations;
 
 internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
 {
-    // 投递队列与结果的列不属于聚合，是只由投递工作器和管理用例用带条件的语句更新的影子属性，列名集中定义
+    // 投递队列和结果使用影子属性，由工作器和管理用例按条件更新
     public const string Attempts = DeliveryColumns.Attempts;
     public const string NextAttemptAt = DeliveryColumns.NextAttemptAt;
     public const string LeaseToken = DeliveryColumns.LeaseToken;
@@ -33,7 +33,7 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(d => d.DedupKey).HasMaxLength(300);
         builder.Property(d => d.CodeHash).HasMaxLength(64).AuditHidden();
 
-        builder.Property<int>(Attempts).HasComment("已经尝试发送几次");
+        builder.Property<int>(Attempts).HasComment("领取次数，人工重试时清零");
         builder.Property<DateTimeOffset?>(NextAttemptAt).HasComment("下次可以领取的时间");
         builder.Property<Guid?>(LeaseToken).HasComment("投递工作器的领取令牌").AuditHidden();
         builder.Property<DateTimeOffset?>(LeaseUntil).HasComment("领取的到期时间");
@@ -43,7 +43,7 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property<DateTimeOffset?>(AbandonedAt).HasComment("放弃处理的时间，没有放弃为空");
         builder.Property<string?>(AbandonReason).HasMaxLength(500).HasComment("放弃处理的原因");
 
-        // 同一个模板、收件人、去重键、渠道只有一条投递：重复的请求或重试处理不会重复发送
+        // 同一模板、收件人键、去重键和渠道只创建一条投递记录；外部发送重试仍可能重复送达
         builder.HasIndex(d => new { d.TemplateKey, d.RecipientKey, d.DedupKey, d.Channel }).IsUnique().MapsToError(NotificationsErrors.DeliveryDuplicated);
         builder.HasIndex(d => d.RecipientUserId);
         builder.HasIndex(d => new { d.Status, d.Priority });

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Users.Get;
 
 /// <summary>
-/// 处理 <see cref="GetUserQuery"/>
+/// 查询用户详情
 /// </summary>
 public sealed class GetUserQueryHandler(
     IIdentityQueryDb db,

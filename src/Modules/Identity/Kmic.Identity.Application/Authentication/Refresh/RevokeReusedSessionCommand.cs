@@ -4,14 +4,13 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Identity.Application.Authentication.Refresh;
 
 /// <summary>
-/// 刷新令牌被重用之后，作废它所属的整个会话
+/// 确认刷新令牌重用后作废所属会话
 /// </summary>
 /// <remarks>
-/// 刷新命令发现重用时返回失败，事务回滚，作废做不了，所以由接口层随后发这个命令单独完成。
-/// 命令凭刷新令牌本身重新核实重用（旧令牌且已过宽限期），核实不通过什么也不改，所以不能被用来作废别人的会话
+/// 刷新命令发现重用后返回失败并回滚，由接口层随后发送此命令，在独立事务中作废会话。
+/// 须重新确认令牌已被轮换且超过宽限期，未确认时不修改会话，避免误作废其他会话
 /// </remarks>
-/// <param name="RefreshToken">客户端出示的刷新令牌</param>
 [AllowAnonymous]
-[NotAudited("结果记入安全事件")]
-[NotIdempotent("重复执行没有额外效果：会话已经作废")]
+[NotAudited("通过 RefreshTokenReused 安全事件记录令牌重用")]
+[NotIdempotent("会话不存在或已作废时直接返回成功，不重复记录事件")]
 public sealed record RevokeReusedSessionCommand(string RefreshToken) : ICommand;

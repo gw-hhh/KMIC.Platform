@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Application.Captured.Purge;
 
 /// <summary>
-/// 处理 <see cref="PurgeCapturedCommand"/>
+/// 清理超过保留期的捕获内容
 /// </summary>
 public sealed class PurgeCapturedCommandHandler(ICapturedMessageRepository captured, IOptions<NotificationsRetentionOptions> options, TimeProvider time)
     : ICommandHandler<PurgeCapturedCommand, ScheduledJobOutcome>

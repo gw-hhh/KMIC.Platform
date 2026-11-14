@@ -12,7 +12,6 @@ internal sealed class SessionRepository(IdentityDbContext context)
 {
     protected override Error NotFound => IdentityErrors.SessionNotFound;
 
-    // 刷新令牌总是一起加载
     protected override IQueryable<Session> Aggregate(IQueryable<Session> set) => set.Include(s => s.RefreshTokens);
 
     public async Task<Session?> FindByRefreshTokenForUpdateAsync(string tokenHash, CancellationToken ct)

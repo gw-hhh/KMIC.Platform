@@ -13,7 +13,7 @@ internal sealed class ListUsersEndpoint : IEndpoint
             .Sends<ListUsersQuery>()
             .Sortable(UserSort.Map)
             .WithSummary("查询用户列表")
-            .WithDescription("账号、姓名、工号、手机号、状态、所属组织和拥有的角色，分页。系统账号不在列表里。");
+            .WithDescription("分页返回账号、姓名、工号、手机号、状态、所属组织和角色，不包含系统账号。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListUsersRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListUsersQuery(request.Q, request.Status, request.RoleId, request.OrgUnitId, new PageRequest(request.Page, request.PageSize), new SortRequest(request.Sort)), ct)).ToOk();

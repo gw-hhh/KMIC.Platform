@@ -10,7 +10,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.UpdateProfile;
 
 /// <summary>
-/// 处理 <see cref="UpdateUserProfileCommand"/>
+/// 修改用户资料
 /// </summary>
 public sealed class UpdateUserProfileCommandHandler(
     IUserRepository users,

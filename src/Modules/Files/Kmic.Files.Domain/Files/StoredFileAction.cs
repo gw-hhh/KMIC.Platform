@@ -23,7 +23,7 @@ public sealed class StoredFileAction : Enumeration<StoredFileAction>
     public static readonly StoredFileAction PassScan = new("PassScan", "扫描通过");
 
     /// <summary>
-    /// 拒绝：类型或大小不符、扫描没通过、写入失败
+    /// 拒绝上传或扫描中的文件
     /// </summary>
     public static readonly StoredFileAction Reject = new("Reject", "拒绝");
 

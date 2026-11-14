@@ -16,7 +16,7 @@ public sealed class MessageRouteStatus : Enumeration<MessageRouteStatus>
     public static readonly MessageRouteStatus Active = new("Active", "生效");
 
     /// <summary>
-    /// 待终结：订阅已从代码里去掉，消息照常投递并积压，等运维确认
+    /// 继续投递，等待运维确认终结
     /// </summary>
     public static readonly MessageRouteStatus Retiring = new("Retiring", "待终结");
 

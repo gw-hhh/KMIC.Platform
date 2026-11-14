@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Operations.Application.Audit.Get;
 
 /// <summary>
-/// 处理 <see cref="GetAuditQuery"/>
+/// 查询审计记录详情
 /// </summary>
 public sealed class GetAuditQueryHandler(IOperationsQueryDb db, IUserReferences users, IRoleReferences roles) : IQueryHandler<GetAuditQuery, AuditDetail>
 {

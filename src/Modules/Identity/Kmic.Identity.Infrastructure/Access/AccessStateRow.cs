@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Infrastructure.Access;
 
 /// <summary>
-/// 访问上下文的状态查询的一行：会话、用户、授予、角色版本和组织树版本，一次查询取回
+/// 访问状态查询结果，一次读取会话、用户、授予及角色和组织树版本
 /// </summary>
 internal sealed class AccessStateRow
 {

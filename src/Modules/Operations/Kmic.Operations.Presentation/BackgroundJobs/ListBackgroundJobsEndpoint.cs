@@ -12,7 +12,7 @@ internal sealed class ListBackgroundJobsEndpoint : IEndpoint
         group.MapGet("/background-jobs", HandleAsync)
             .Sends<ListBackgroundJobsQuery>()
             .WithSummary("查询各模块的后台作业")
-            .WithDescription("遍历每个模块自己的作业表，按提交时间倒序归并，游标分页：响应里的 nextCursor 作为下一页的 after，没有 nextCursor 就是最后一页。能看到状态、进度、结果摘要和错误，看不到作业参数。");
+            .WithDescription("汇总各模块的作业，按提交时间倒序返回状态、进度、结果摘要和错误，不返回作业参数。使用游标分页：将 nextCursor 作为下一页的 after，未返回 nextCursor 表示已到末页。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListBackgroundJobsRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListBackgroundJobsQuery(request.Module, request.JobType, request.Status, request.SubmittedBy, new CursorRequest(request.After, request.Limit)), ct)).ToOk();

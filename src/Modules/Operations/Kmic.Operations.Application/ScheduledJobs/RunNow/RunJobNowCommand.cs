@@ -8,9 +8,8 @@ namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 /// </summary>
 /// <remarks>
 /// 交给运行着调度器的实例执行，执行记录里的触发方式是“手动”、触发人是操作人。
-/// 任务正在运行时拒绝，不排队。停用的任务也可以手动执行
+/// 检查到任务正在运行时拒绝触发。停用的任务也可以手动执行
 /// </remarks>
-/// <param name="JobName">任务名</param>
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]

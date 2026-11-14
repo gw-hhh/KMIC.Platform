@@ -12,8 +12,8 @@ internal sealed class AssignUserOrgUnitEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPut("/users/{id}/org-unit", HandleAsync)
             .Sends<AssignUserOrgUnitCommand>()
-            .WithSummary("设置用户所属的组织单元")
-            .WithDescription("直接改变用户的数据范围：“本组织”“本组织及下级”都从这里算起。调整之后他名下已有数据的所属组织不变。");
+            .WithSummary("设置用户所属组织")
+            .WithDescription("未指定角色授予锚点时，“本组织”和“本组织及下级”以用户所属组织为起点。修改所属组织不会变更已有业务数据的归属组织。");
 
     private static async Task<IResult> HandleAsync([Description("用户 ID")] UserId id, AssignUserOrgUnitRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new AssignUserOrgUnitCommand(id, request.ExpectedVersion, request.OrgUnitId), ct)).ToOk();

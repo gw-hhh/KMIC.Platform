@@ -3,10 +3,10 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Configuration.Domain.Settings;
 
 /// <summary>
-/// 被修改过的系统设置值：一个设置一行；没有这一行的设置用代码里的默认值
+/// 已保存的系统设置值，未保存时使用代码默认值
 /// </summary>
 /// <remarks>
-/// 值的校验不在聚合里：校验函数是设置类型自己的静态成员，由命令处理器按设置目录取到并执行，这里只存已经校验过的 JSON
+/// 值须由调用方按设置目录校验后再写入
 /// </remarks>
 public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
 {
@@ -28,7 +28,7 @@ public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
     public string Value { get; private set; }
 
     /// <summary>
-    /// 第一次修改某个设置：此前它用代码里的默认值
+    /// 创建设置值记录
     /// </summary>
     public static SystemSettingValue Create(string key, string value)
     {
@@ -39,7 +39,7 @@ public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
     }
 
     /// <summary>
-    /// 换成新的值
+    /// 更新设置值
     /// </summary>
     public void Set(string value)
     {

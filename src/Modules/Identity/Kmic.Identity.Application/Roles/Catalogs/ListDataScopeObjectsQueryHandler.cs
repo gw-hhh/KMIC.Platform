@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Roles.Catalogs;
 
 /// <summary>
-/// 处理 <see cref="ListDataScopeObjectsQuery"/>
+/// 查询数据范围对象目录
 /// </summary>
 public sealed class ListDataScopeObjectsQueryHandler(DataScopeObjectCatalog catalog) : IQueryHandler<ListDataScopeObjectsQuery, IReadOnlyList<DataScopeObjectItem>>
 {

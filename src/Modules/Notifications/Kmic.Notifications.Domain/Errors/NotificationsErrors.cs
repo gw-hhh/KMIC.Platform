@@ -21,13 +21,12 @@ public static class NotificationsErrors
     public static readonly Error SiteMessageLinkInvalid = Error.BusinessRule("Notifications.SiteMessageLinkInvalid", "站内消息的链接只能是站内地址");
 
     /// <summary>
-    /// 模板有误：语法错误、渲染超时、输出过大，原因写在消息里
+    /// 语法或渲染错误，具体原因见错误消息
     /// </summary>
-    /// <param name="reason">原因，包含出错的位置</param>
     public static Error TemplateInvalid(string reason) => Error.BusinessRule("Notifications.TemplateInvalid", $"模板有误：{reason}");
 
     /// <summary>
-    /// 模板键没有声明过，发送请求提到了一个不存在的模板
+    /// 通知模板未声明或不存在
     /// </summary>
     public static readonly Error TemplateNotFound = Error.NotFound("Notifications.TemplateNotFound", "通知模板不存在");
 
@@ -37,24 +36,24 @@ public static class NotificationsErrors
     public static readonly Error TemplateSecretMismatch = Error.BusinessRule("Notifications.TemplateSecretMismatch", "含密模板只能用含密通知发送，普通模板不能用含密通知发送");
 
     /// <summary>
-    /// 模板已经在代码里删除，不能再修改
+    /// 模板已从代码中移除，不能修改
     /// </summary>
-    public static readonly Error TemplateRetired = Error.BusinessRule("Notifications.TemplateRetired", "这个模板已经在代码里删除，不能再修改");
+    public static readonly Error TemplateRetired = Error.BusinessRule("Notifications.TemplateRetired", "模板已从代码中移除，不能修改");
 
     /// <summary>
-    /// 模板没有声明这个渠道
+    /// 模板未声明指定渠道
     /// </summary>
-    public static readonly Error TemplateChannelNotDeclared = Error.BusinessRule("Notifications.TemplateChannelNotDeclared", "这个模板没有这个渠道");
+    public static readonly Error TemplateChannelNotDeclared = Error.BusinessRule("Notifications.TemplateChannelNotDeclared", "模板未声明此渠道");
 
     /// <summary>
-    /// 模板键已经登记过：两个实例同时同步时，后一个撞上唯一索引
+    /// 模板键已存在，并发同步由唯一索引保护
     /// </summary>
-    public static readonly Error TemplateKeyDuplicated = Error.Conflict("Notifications.TemplateKeyDuplicated", "这个模板已经登记过");
+    public static readonly Error TemplateKeyDuplicated = Error.Conflict("Notifications.TemplateKeyDuplicated", "模板键已存在");
 
     /// <summary>
-    /// 版本号已经被占用：两个人同时发布同一个模板
+    /// 并发发布导致模板版本号冲突
     /// </summary>
-    public static readonly Error TemplateVersionDuplicated = Error.Conflict("Notifications.TemplateVersionDuplicated", "这个版本号已经被别人用了，请刷新后重试");
+    public static readonly Error TemplateVersionDuplicated = Error.Conflict("Notifications.TemplateVersionDuplicated", "模板版本号已被使用，请刷新后重试");
 
     /// <summary>
     /// 含密模板的预览只能用示例数据，不能传入真实数据
@@ -62,27 +61,27 @@ public static class NotificationsErrors
     public static readonly Error PreviewModelNotAllowed = Error.BusinessRule("Notifications.PreviewModelNotAllowed", "含密模板的预览只能用示例数据");
 
     /// <summary>
-    /// 只有失败、而且没有放弃的投递可以重试
+    /// 仅失败且未放弃的投递可重试
     /// </summary>
-    public static readonly Error DeliveryNotRetryable = Error.BusinessRule("Notifications.DeliveryNotRetryable", "只有失败、而且没有放弃的投递可以重试");
+    public static readonly Error DeliveryNotRetryable = Error.BusinessRule("Notifications.DeliveryNotRetryable", "仅失败且未放弃的投递可重试");
 
     /// <summary>
-    /// 含密通知已经过了有效期，不能重试
+    /// 含密通知已过期，不能重试
     /// </summary>
-    public static readonly Error DeliverySecretExpired = Error.BusinessRule("Notifications.DeliverySecretExpired", "含密通知已经过了有效期，不能重试");
+    public static readonly Error DeliverySecretExpired = Error.BusinessRule("Notifications.DeliverySecretExpired", "含密通知已过期，不能重试");
 
     /// <summary>
-    /// 只有失败、而且还没放弃的投递可以放弃
+    /// 仅失败且未放弃的投递可放弃
     /// </summary>
-    public static readonly Error DeliveryNotAbandonable = Error.BusinessRule("Notifications.DeliveryNotAbandonable", "只有失败、而且还没放弃的投递可以放弃");
+    public static readonly Error DeliveryNotAbandonable = Error.BusinessRule("Notifications.DeliveryNotAbandonable", "仅失败且未放弃的投递可放弃");
 
     /// <summary>
-    /// 同一个模板、收件人、去重键、渠道已经有一条投递
+    /// 通知发送请求或投递记录重复
     /// </summary>
-    public static readonly Error DeliveryDuplicated = Error.Conflict("Notifications.DeliveryDuplicated", "这条通知已经发给过这个收件人");
+    public static readonly Error DeliveryDuplicated = Error.Conflict("Notifications.DeliveryDuplicated", "通知记录已存在");
 
     /// <summary>
-    /// 发送请求里的数据和模板声明的数据模型对不上
+    /// 发送数据与模板声明的数据模型不符
     /// </summary>
     /// <param name="templateKey">模板键</param>
     public static Error ModelInvalid(string templateKey) => Error.BusinessRule("Notifications.ModelInvalid", $"通知数据和模板 {templateKey} 声明的数据模型不符");
@@ -98,7 +97,7 @@ public static class NotificationsErrors
     public static readonly Error DeliveryNotFound = Error.NotFound("Notifications.DeliveryNotFound", "投递记录不存在");
 
     /// <summary>
-    /// 捕获的内容不存在，或者当前环境不捕获（生产环境）
+    /// 捕获内容不存在或当前环境未启用捕获
     /// </summary>
-    public static readonly Error CapturedUnavailable = Error.NotFound("Notifications.CapturedUnavailable", "没有这条捕获的内容");
+    public static readonly Error CapturedUnavailable = Error.NotFound("Notifications.CapturedUnavailable", "捕获内容不存在或不可用");
 }

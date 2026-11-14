@@ -11,7 +11,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.Enable;
 
 /// <summary>
-/// 处理 <see cref="EnableRoleCommand"/>
+/// 启用角色
 /// </summary>
 public sealed class EnableRoleCommandHandler(
     IRoleRepository roles,

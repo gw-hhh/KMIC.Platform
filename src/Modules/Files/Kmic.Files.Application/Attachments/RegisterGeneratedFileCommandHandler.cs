@@ -6,7 +6,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// 处理 <see cref="RegisterGeneratedFileCommand"/>
+/// 登记系统生成的文件
 /// </summary>
 public sealed class RegisterGeneratedFileCommandHandler(IStoredFileRepository files, TimeProvider time) : ICommandHandler<RegisterGeneratedFileCommand>
 {

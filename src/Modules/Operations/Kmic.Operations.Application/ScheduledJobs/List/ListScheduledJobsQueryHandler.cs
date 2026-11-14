@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Operations.Application.ScheduledJobs.List;
 
 /// <summary>
-/// 处理 <see cref="ListScheduledJobsQuery"/>
+/// 查询定时任务及调度状态
 /// </summary>
 public sealed class ListScheduledJobsQueryHandler(
     IOperationsQueryDb db,

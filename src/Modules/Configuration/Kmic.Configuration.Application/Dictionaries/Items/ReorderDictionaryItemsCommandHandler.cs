@@ -6,7 +6,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 处理 <see cref="ReorderDictionaryItemsCommand"/>
+/// 调整同级字典项顺序
 /// </summary>
 public sealed class ReorderDictionaryItemsCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<ReorderDictionaryItemsCommand, VersionedResponse<DictionaryTypeId>>

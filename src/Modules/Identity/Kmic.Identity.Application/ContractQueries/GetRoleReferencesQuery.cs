@@ -6,7 +6,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// 按 ID 批量解析角色的引用信息，只给其他模块通过 <see cref="Kmic.Identity.Contracts.IRoleReferences"/> 调用
+/// 批量查询角色引用，供 <see cref="Kmic.Identity.Contracts.IRoleReferences"/> 调用
 /// </summary>
 /// <param name="Ids">角色 ID，一次最多 1000 个</param>
 [ContractQuery(ContractAccess.Reference)]

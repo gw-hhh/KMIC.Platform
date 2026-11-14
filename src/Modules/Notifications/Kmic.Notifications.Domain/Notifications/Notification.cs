@@ -4,10 +4,10 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Notifications.Domain.Notifications;
 
 /// <summary>
-/// 一次发送请求的记录：处理 SendNotification 时插入一行，之后不再修改
+/// 通知发送请求记录，创建后不再修改
 /// </summary>
 /// <remarks>
-/// 用来从投递或站内消息反查“这是哪次请求产生的”，也是按来源消息幂等的依据：同一条来源消息只处理一次
+/// 通过来源消息 ID 去重，并关联本次产生的投递和站内消息
 /// </remarks>
 public sealed class Notification : AggregateRoot<NotificationId>
 {
@@ -55,12 +55,9 @@ public sealed class Notification : AggregateRoot<NotificationId>
     /// <summary>
     /// 记录一次发送请求
     /// </summary>
-    /// <param name="templateKey">模板键</param>
-    /// <param name="templateVersions">各渠道实际用的版本号，JSON</param>
-    /// <param name="dedupKey">业务给的去重键</param>
-    /// <param name="sourceMessageId">来源消息的 ID</param>
-    /// <param name="sourceModule">发出请求的模块</param>
-    /// <param name="initiatorUserId">发起这件事的用户</param>
+    /// <remarks>
+    /// templateVersions 为渠道编码到版本号的 JSON，0 表示代码默认内容
+    /// </remarks>
     public static Notification Create(string templateKey, string templateVersions, string dedupKey, Guid sourceMessageId, string sourceModule, UserId? initiatorUserId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateKey);

@@ -5,11 +5,15 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Attachments.Remove;
 
 /// <summary>
-/// 移除示例标本的一个附件：同一个事务里解除文件的关联，文件进入保留期，期间可以重新关联
+/// 移除示例的附件
 /// </summary>
-/// <param name="Id">标本</param>
-/// <param name="AttachmentId">附件</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
+/// <remarks>
+/// 删除附件与发送解除关联请求在同一个事务中完成。
+/// 文件的全部引用解除后进入保留期，保留期间可以重新关联
+/// </remarks>
+/// <param name="Id">示例 ID</param>
+/// <param name="AttachmentId">附件 ID</param>
+/// <param name="ExpectedVersion">读取时的版本号，与当前版本不一致时返回版本冲突</param>
 [RequirePermission(SamplePermissions.Edit)]
 [Audited]
 public sealed record RemoveSpecimenAttachmentCommand(SpecimenId Id, SpecimenAttachmentId AttachmentId, long ExpectedVersion) : ICommand<VersionedResponse<SpecimenId>>;

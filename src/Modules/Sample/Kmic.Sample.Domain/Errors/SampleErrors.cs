@@ -8,9 +8,9 @@ namespace Kmic.Sample.Domain.Errors;
 public static class SampleErrors
 {
     /// <summary>
-    /// 单据不存在，或者当前用户看不到
+    /// 示例不存在或当前用户无权查看
     /// </summary>
-    public static readonly Error NotFound = Error.NotFound("Sample.NotFound", "示例标本不存在");
+    public static readonly Error NotFound = Error.NotFound("Sample.NotFound", "示例不存在");
 
     /// <summary>
     /// 没有明细不能提交
@@ -30,7 +30,7 @@ public static class SampleErrors
     /// <summary>
     /// 编号重复
     /// </summary>
-    public static readonly Error NumberDuplicated = Error.Conflict("Sample.NumberDuplicated", "示例标本的编号已存在");
+    public static readonly Error NumberDuplicated = Error.Conflict("Sample.NumberDuplicated", "示例编号已存在");
 
     /// <summary>
     /// 附件不存在
@@ -38,12 +38,12 @@ public static class SampleErrors
     public static readonly Error AttachmentNotFound = Error.NotFound("Sample.AttachmentNotFound", "附件不存在");
 
     /// <summary>
-    /// 同一个文件已经是这个标本的附件
+    /// 同一个文件已经是这个示例的附件
     /// </summary>
-    public static readonly Error AttachmentExists = Error.Conflict("Sample.AttachmentExists", "这个文件已经是这个标本的附件");
+    public static readonly Error AttachmentExists = Error.Conflict("Sample.AttachmentExists", "该文件已添加为此示例的附件");
 
     /// <summary>
     /// 用户没有所属组织，无法确定数据归属
     /// </summary>
-    public static readonly Error NoOrgUnit = Error.BusinessRule("Sample.NoOrgUnit", "当前用户没有所属组织，不能创建示例标本");
+    public static readonly Error NoOrgUnit = Error.BusinessRule("Sample.NoOrgUnit", "当前用户没有所属组织，无法创建示例");
 }

@@ -6,11 +6,12 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 用户管理的资源策略
+/// 用户管理的操作限制
 /// </summary>
 /// <remarks>
-/// 三条线：系统账号谁都不能动；不能对自己做会把自己踢出去的事；对持有受保护角色的人，凭据类动作只有同样持有受保护角色的人
-/// 才能做，并且不能让系统里一个启用的受保护角色持有人都不剩。这样“重置管理员的密码再登录”这条提权的近路被堵上
+/// 系统账号不可修改，不能禁用自己或强制自己下线。
+/// 目标用户持有受保护角色时，重置密码、修改登录凭据和强制下线要求操作者的当前角色也受保护。
+/// 不能禁用最后一位可登录且持有已启用受保护角色的用户
 /// </remarks>
 public sealed class UserPolicy : IResourcePolicy<UserTarget, UserAdminAction>
 {
@@ -21,8 +22,7 @@ public sealed class UserPolicy : IResourcePolicy<UserTarget, UserAdminAction>
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(action);
 
-        // 模拟身份比别的动作限制更严：自己、系统账号、受保护角色的持有人一律不能模拟，操作者自己持有受保护角色也不例外。
-        // 不然两个管理员互相模拟，就绕开了对管理员凭据的保护
+        // 禁止模拟自己、系统账号及受保护角色持有人，避免通过模拟身份绕过管理员凭据保护
         if (action == UserAdminAction.Impersonate || action == UserAdminAction.ImpersonateWrite)
         {
             return resource.User.Kind == UserKind.System || resource.User.Id == access.UserId || resource.HoldsProtectedRole

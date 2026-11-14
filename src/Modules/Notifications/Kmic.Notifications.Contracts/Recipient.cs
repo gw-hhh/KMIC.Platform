@@ -1,16 +1,16 @@
 namespace Kmic.Notifications.Contracts;
 
 /// <summary>
-/// 通知的收件人
+/// 通知收件人
 /// </summary>
 /// <remarks>
-/// 优先用用户 ID，联系方式由 Notifications 在发送时向 Identity 查询；直接给邮箱或手机号只用于系统外的对象，
-/// 如客户联系人，地址由业务模块从自己的数据里取
+/// 系统用户优先使用用户 ID，由 Notifications 向 Identity 查询联系方式；
+/// 仅外部收件人直接指定邮箱或手机号，地址由业务模块提供
 /// </remarks>
 /// <param name="UserId">用户 ID</param>
 /// <param name="Email">系统外对象的邮箱</param>
 /// <param name="Phone">系统外对象的手机号</param>
-/// <param name="Role">邮件里的角色，只对邮件有意义</param>
+/// <param name="Role">邮件收件角色，仅邮件渠道使用</param>
 public sealed record Recipient(Guid? UserId, string? Email = null, string? Phone = null, RecipientRole Role = RecipientRole.To)
 {
     /// <summary>

@@ -10,8 +10,8 @@ internal sealed class CreateSpecimenEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/specimens", HandleAsync)
             .Sends<CreateSpecimenCommand>()
-            .WithSummary("创建示例标本")
-            .WithDescription("创建一个草稿标本，负责人是当前用户。必须带幂等键，超时重试用同一个键。成功返回 201，Location 指向新标本。");
+            .WithSummary("创建示例")
+            .WithDescription("创建草稿，负责人为当前用户。必须提供幂等键，超时重试时使用同一个键。成功返回 201，Location 指向新建示例的地址。");
 
     private static async Task<IResult> HandleAsync(CreateSpecimenRequest request, ICommandSender sender, CancellationToken ct)
     {

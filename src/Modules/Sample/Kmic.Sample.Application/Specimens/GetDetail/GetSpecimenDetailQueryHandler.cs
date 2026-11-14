@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Sample.Application.Specimens.GetDetail;
 
 /// <summary>
-/// 处理 <see cref="GetSpecimenDetailQuery"/>
+/// 查询示例详情
 /// </summary>
 public sealed class GetSpecimenDetailQueryHandler(ISampleQueryDb db, IEntityFinder finder, IAllowedActions<Specimen> allowedActions)
     : IQueryHandler<GetSpecimenDetailQuery, SpecimenDetailResponse>
@@ -20,7 +20,7 @@ public sealed class GetSpecimenDetailQueryHandler(ISampleQueryDb db, IEntityFind
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        // 查询入口已经带了数据范围过滤：范围外的数据和不存在一样，返回 NotFound，同时记一条安全事件
+        // 范围外与不存在均返回 NotFound；仅范围外访问记安全事件
         var found = await finder.FindByIdOrNotFoundAsync(db.Specimens.Include(s => s.Items).Include(s => s.Attachments), query.Id, SampleErrors.NotFound, cancellationToken);
         if (found.IsFailure)
         {

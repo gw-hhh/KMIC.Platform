@@ -5,7 +5,7 @@ using Kmic.Notifications.Contracts;
 namespace Kmic.Notifications.Application.Processing;
 
 /// <summary>
-/// 处理 <see cref="ProcessSendNotificationCommand"/>
+/// 处理普通通知发送请求
 /// </summary>
 public sealed class ProcessSendNotificationCommandHandler(NotificationProcessor processor) : ICommandHandler<ProcessSendNotificationCommand>
 {

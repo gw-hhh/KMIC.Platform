@@ -10,8 +10,8 @@ internal sealed class RetryMessagesEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/messages/retry", HandleAsync)
             .Sends<RetryMessagesCommand>()
-            .WithSummary("重试死信，单条或批量")
-            .WithDescription("状态回到待处理，次数清零，马上可以被领取；一次最多 200 条。每条各有各的回执，已经不是死信的、不存在的不影响别的。重试不保证成功：问题没解决的消息会再次失败。必须带幂等键。");
+            .WithSummary("重试死信")
+            .WithDescription("支持单条或批量操作，最多 200 条。将死信恢复为待处理，重试次数清零并允许立即领取。逐条返回结果，不存在或状态不符的消息不影响其他消息。未解决的问题仍可能导致重试失败。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync(RetryMessagesRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new RetryMessagesCommand(request.Messages), ct)).ToOk();

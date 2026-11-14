@@ -3,7 +3,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Grants;
 
 /// <summary>
-/// 授权检查通过后交给命令的上下文：要修改的用户，加上角色当前是否启用
+/// 授权通过后的角色授予上下文，包含目标用户及角色启用状态
 /// </summary>
 /// <param name="User">要修改的用户</param>
 /// <param name="RoleIsActive">角色是否启用；授予时角色必须启用</param>

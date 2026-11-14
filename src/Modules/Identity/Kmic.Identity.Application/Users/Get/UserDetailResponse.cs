@@ -16,15 +16,15 @@ namespace Kmic.Identity.Application.Users.Get;
 /// <param name="Mobile">手机号</param>
 /// <param name="Email">邮箱</param>
 /// <param name="Status">状态</param>
-/// <param name="OrgUnitId">所属组织单元</param>
+/// <param name="OrgUnitId">所属组织单元 ID</param>
 /// <param name="OrgUnitName">所属组织单元的名称</param>
-/// <param name="HasPassword">是否设置过密码；迁移来的员工可能还没有，靠短信登录</param>
+/// <param name="HasPassword">是否已设置密码</param>
 /// <param name="PasswordChangeRequired">下次登录是否必须先改密码</param>
-/// <param name="PasswordChangedAt">密码最近一次变化的时间</param>
-/// <param name="LoginLockedUntil">登录被限制到什么时候；没有被限制时为空。只影响新的登录尝试，不影响已有会话</param>
+/// <param name="PasswordChangedAt">最近密码修改时间</param>
+/// <param name="LoginLockedUntil">登录等待或锁定的截止时间，无限制时为空；不影响已有会话</param>
 /// <param name="Grants">角色授予</param>
 /// <param name="ActiveSessionCount">仍然有效的会话数，含他发起的模拟会话</param>
-/// <param name="AllowedActions">当前用户现在可以对他执行的动作</param>
+/// <param name="AllowedActions">当前用户可对该用户执行的管理动作</param>
 public sealed record UserDetailResponse(
     UserId Id,
     [property: JsonPropertyName("version")] long ConcurrencyVersion,

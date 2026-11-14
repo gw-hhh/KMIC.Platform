@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Identity.Domain.Roles;
 
 /// <summary>
-/// 角色拥有的一个权限点（条目）
+/// 角色权限点
 /// </summary>
 public sealed class RolePermissionEntry : Entity<RolePermissionEntryId>
 {

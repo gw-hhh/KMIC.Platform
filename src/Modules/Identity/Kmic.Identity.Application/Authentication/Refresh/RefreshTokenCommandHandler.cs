@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication.Refresh;
 
 /// <summary>
-/// 处理 <see cref="RefreshTokenCommand"/>
+/// 轮换刷新令牌并签发访问令牌
 /// </summary>
 public sealed class RefreshTokenCommandHandler(
     ISessionRepository sessions,
@@ -25,7 +25,7 @@ public sealed class RefreshTokenCommandHandler(
 
         var presentedHash = RefreshTokens.Hash(command.RefreshToken);
 
-        // 按令牌找到会话并锁住：两个并发刷新请求在这里排队，后到的落入宽限期判断
+        // 锁定会话，使并发刷新依次执行，后到的请求按宽限期规则处理
         var session = await sessions.FindByRefreshTokenForUpdateAsync(presentedHash, cancellationToken);
         if (session is null)
         {
@@ -42,7 +42,7 @@ public sealed class RefreshTokenCommandHandler(
             session.ClientType == ClientType.Web ? options.WebRefreshLifetime : options.AppRefreshLifetime,
             options.RefreshGrace);
 
-        // 重用：这个命令随失败回滚，作废会话由接口层随后发的命令在独立事务里完成
+        // 失败会回滚当前事务，接口层须另发命令独立提交会话作废操作
         if (rotation.Outcome == RotationOutcome.Reused)
         {
             return IdentityErrors.RefreshTokenReused;

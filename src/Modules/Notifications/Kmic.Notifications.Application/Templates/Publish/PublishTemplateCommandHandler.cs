@@ -9,7 +9,7 @@ using Kmic.Notifications.Domain.Templates;
 namespace Kmic.Notifications.Application.Templates.Publish;
 
 /// <summary>
-/// 处理 <see cref="PublishTemplateCommand"/>
+/// 校验并发布通知模板的新版本
 /// </summary>
 public sealed class PublishTemplateCommandHandler(
     ITemplateRepository templates,
@@ -36,7 +36,7 @@ public sealed class PublishTemplateCommandHandler(
             return allowed.Error;
         }
 
-        // 用示例数据严格渲染一遍，模板有误、写错变量名在发布时就发现，不等到发通知时才出错
+        // 用示例数据严格渲染，只能检查本次执行到的变量，不能覆盖所有条件分支
         var definition = catalog.Find(template.Key);
         if (definition is null)
         {

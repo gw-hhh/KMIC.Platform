@@ -6,7 +6,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// 处理 <see cref="AttachFilesCommand"/>
+/// 将文件关联到业务对象
 /// </summary>
 public sealed class AttachFilesCommandHandler(IStoredFileRepository files, TimeProvider time) : ICommandHandler<AttachFilesCommand>
 {

@@ -17,7 +17,7 @@ internal static class AuditCsv
     public const string Header = "发生时间,模块,动作,来源,操作人编号,操作人,实际操作人编号,实际操作人,追踪编号,操作对象";
 
     /// <summary>
-    /// 一行：每个单元格按需加引号，Excel 会把 = + - @ 开头的单元格当成公式，前面补一个单引号
+    /// 生成一行 CSV
     /// </summary>
     public static string Line(
         DateTimeOffset occurredAt,
@@ -50,6 +50,7 @@ internal static class AuditCsv
             return string.Empty;
         }
 
+        // 公式前缀及制表符、回车开头的内容加单引号，避免被电子表格当作公式
         var text = value[0] is '=' or '+' or '-' or '@' or '\t' or '\r' ? "'" + value : value;
         if (!text.AsSpan().ContainsAny(_special))
         {

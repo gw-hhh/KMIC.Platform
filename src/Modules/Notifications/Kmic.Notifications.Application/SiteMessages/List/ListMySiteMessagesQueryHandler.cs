@@ -6,7 +6,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Notifications.Application.SiteMessages.List;
 
 /// <summary>
-/// 处理 <see cref="ListMySiteMessagesQuery"/>
+/// 查询本人的站内消息
 /// </summary>
 public sealed class ListMySiteMessagesQueryHandler(INotificationsQueryDb db, IExecutionContext execution)
     : IQueryHandler<ListMySiteMessagesQuery, PagedResult<SiteMessageItem>>

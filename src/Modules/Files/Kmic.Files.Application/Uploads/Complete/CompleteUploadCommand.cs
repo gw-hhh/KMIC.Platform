@@ -4,10 +4,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Files.Application.Uploads.Complete;
 
 /// <summary>
-/// 登记上传完成：内容已经写入存储，记下实际的类型、大小、SHA-256，文件转为可用
+/// 登记已写入存储的文件信息，将上传标记为完成
 /// </summary>
 /// <remarks>
-/// 只有上传它的人能登记，状态要是“上传中”。可用的文件是临时文件，过了临时有效期还没有被业务关联就清理
+/// 仅上传人可登记，文件须处于上传中。完成后文件暂存为可用，保留期内未关联业务对象则可被清理
 /// </remarks>
 /// <param name="FileId">文件 ID</param>
 /// <param name="FileType">识别出的文件类型编码</param>
@@ -16,6 +16,6 @@ namespace Kmic.Files.Application.Uploads.Complete;
 /// <param name="Sha256">内容的 SHA-256，小写十六进制</param>
 /// <param name="ObjectVersionId">存储里对象的版本 ID，没有开启版本控制时为空</param>
 [AllowAuthenticated]
-[NotAudited("上传结果由文件状态历史记录")]
-[NotIdempotent("只作用于上传中的文件，重复提交时状态已经不对")]
+[NotAudited("上传状态变化记入文件历史")]
+[NotIdempotent("仅接受上传中的文件，完成后重复提交将因状态不符而失败")]
 public sealed record CompleteUploadCommand(Guid FileId, string FileType, string ContentType, long Size, string Sha256, string? ObjectVersionId) : ICommand<UploadCompleted>;

@@ -10,7 +10,7 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.Audit.Export;
 
 /// <summary>
-/// 处理 <see cref="GetAuditExportFileQuery"/>
+/// 获取审计导出文件的下载信息
 /// </summary>
 public sealed class GetAuditExportFileQueryHandler(IModuleJobStores stores, IFileDownloads downloads, IExecutionContext execution)
     : IQueryHandler<GetAuditExportFileQuery, FileDownload>

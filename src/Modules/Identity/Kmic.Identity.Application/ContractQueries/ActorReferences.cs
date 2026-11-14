@@ -5,7 +5,7 @@ using Kmic.Identity.Contracts;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IActorReferences"/> 的实现：业务历史里的人员和角色名
+/// 为业务历史解析用户和角色名称
 /// </summary>
 public sealed class ActorReferences(IUserReferences users, IRoleReferences roles) : IActorReferences
 {

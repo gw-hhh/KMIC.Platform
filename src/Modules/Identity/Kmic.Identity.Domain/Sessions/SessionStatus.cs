@@ -8,7 +8,7 @@ namespace Kmic.Identity.Domain.Sessions;
 public sealed class SessionStatus : Enumeration<SessionStatus>
 {
     /// <summary>
-    /// 有效；超过绝对上限的会话也算失效，那是加载时按时间判断的，不改状态
+    /// 未作废；到期后不改状态，由调用方按绝对到期时间判断
     /// </summary>
     public static readonly SessionStatus Active = new("Active", "有效");
 

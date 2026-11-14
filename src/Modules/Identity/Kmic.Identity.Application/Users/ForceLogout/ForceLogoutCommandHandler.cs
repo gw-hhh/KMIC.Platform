@@ -13,7 +13,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.ForceLogout;
 
 /// <summary>
-/// 处理 <see cref="ForceLogoutCommand"/>
+/// 强制结束用户会话
 /// </summary>
 public sealed class ForceLogoutCommandHandler(
     IUserRepository users,

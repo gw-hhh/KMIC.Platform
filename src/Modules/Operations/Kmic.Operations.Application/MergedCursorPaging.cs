@@ -6,12 +6,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application;
 
 /// <summary>
-/// 跨模块的游标翻页：每个模块各取一批，按“时间加 ID”倒序归并
+/// 跨模块游标分页
 /// </summary>
 /// <remarks>
-/// 游标是“时间加 ID”，每个模块在自己的表里按这个位置往后取，归并后截取；各模块之间按同样的次序排，所以翻页不重不漏。
-/// 时间相同时按 ID，并且要按数据库比较 uuid 的次序（逐字节、大端）排，不能用 .NET 的 Guid 比较：
-/// 两者的次序不一样，归并和每个模块自己的次序不一致就会在同一时间的行之间漏行
+/// 各模块查询和合并结果均按时间、ID 倒序排列
 /// </remarks>
 internal static class MergedCursorPaging
 {
@@ -54,7 +52,8 @@ internal static class MergedCursorPaging
         return (items, next);
     }
 
-    // 数据库比较 uuid 是逐字节的，大端字节序
+    // ID 必须按 PostgreSQL 的 uuid 规则排序。
+    // Guid 默认排序与数据库不同，同一时刻的记录可能因此在翻页时遗漏
     private sealed class DatabaseUuidOrder : IComparer<Guid>
     {
         public static DatabaseUuidOrder Instance { get; } = new();

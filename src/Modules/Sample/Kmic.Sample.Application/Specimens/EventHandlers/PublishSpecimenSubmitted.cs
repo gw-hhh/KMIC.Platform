@@ -5,7 +5,7 @@ using Kmic.Sample.Domain.Specimens.Events;
 namespace Kmic.Sample.Application.Specimens.EventHandlers;
 
 /// <summary>
-/// 标本提交后通知其他模块：领域事件转成集成事件
+/// 示例提交后通知其他模块：领域事件转成集成事件
 /// </summary>
 /// <remarks>
 /// 和提交命令在同一个事务里，集成事件随业务数据一起写入 Outbox，提交之后才会投递

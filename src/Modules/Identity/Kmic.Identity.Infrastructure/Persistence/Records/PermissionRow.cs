@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Infrastructure.Persistence.Records;
 
 /// <summary>
-/// 权限点目录表的一行：代码里声明的权限点同步到这里，只由目录同步与清理写
+/// 权限点目录，仅由同步与清理更新
 /// </summary>
 internal sealed class PermissionRow
 {

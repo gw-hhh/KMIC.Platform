@@ -6,7 +6,7 @@ using Kmic.Notifications.Domain.SiteMessages;
 namespace Kmic.Notifications.Application.SiteMessages.MarkRead;
 
 /// <summary>
-/// 处理 <see cref="MarkAllSiteMessagesReadCommand"/>
+/// 将本人的全部未读站内消息标为已读
 /// </summary>
 public sealed class MarkAllSiteMessagesReadCommandHandler(ISiteMessageRepository messages, IExecutionContext execution, TimeProvider time)
     : ICommandHandler<MarkAllSiteMessagesReadCommand, MarkedReadResponse>

@@ -6,7 +6,7 @@ namespace Kmic.Identity.Application.Authentication;
 public interface IWeakPasswordList
 {
     /// <summary>
-    /// 是不是常见弱密码，不区分大小写
+    /// 是否为常见弱密码，不区分大小写
     /// </summary>
     bool Contains(string password);
 }

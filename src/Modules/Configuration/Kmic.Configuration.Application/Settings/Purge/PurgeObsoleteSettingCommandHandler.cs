@@ -9,7 +9,7 @@ using Kmic.Configuration.Domain.Settings;
 namespace Kmic.Configuration.Application.Settings.Purge;
 
 /// <summary>
-/// 处理 <see cref="PurgeObsoleteSettingCommand"/>
+/// 清除已移除声明的系统设置值
 /// </summary>
 public sealed class PurgeObsoleteSettingCommandHandler(SystemSettingCatalog catalog, ISystemSettingRepository settings, IAfterCommit afterCommit)
     : ICommandHandler<PurgeObsoleteSettingCommand, VersionedResponse<SystemSettingValueId>>
@@ -21,7 +21,7 @@ public sealed class PurgeObsoleteSettingCommandHandler(SystemSettingCatalog cata
 
         if (catalog.Find(command.Key) is not null)
         {
-            return ConfigurationErrors.InvalidState.WithDetail("这个设置在代码里还在用，不能清除，请用恢复默认");
+            return ConfigurationErrors.InvalidState.WithDetail("该设置仍有代码声明，不能清除；如需重置，请恢复默认值");
         }
 
         var loaded = await settings.GetByKeyForUpdateAsync(command.Key, command.ExpectedVersion, cancellationToken);
@@ -30,7 +30,7 @@ public sealed class PurgeObsoleteSettingCommandHandler(SystemSettingCatalog cata
             return loaded.Error;
         }
 
-        var row = loaded.Value ?? throw new InvalidOperationException("带着版本号清除设置值，却找不到值行，仓储应该已经返回版本冲突。");
+        var row = loaded.Value ?? throw new InvalidOperationException("未找到待清除的设置值，仓储应返回版本冲突。");
         settings.AddChange(SystemSettingChange.Record(command.Key, row.Value, null, command.Reason.Trim(), Activity.Current?.TraceId.ToString()));
         settings.Remove(row);
         afterCommit.InvalidateTags(ConfigurationCacheKeys.SettingsTag);

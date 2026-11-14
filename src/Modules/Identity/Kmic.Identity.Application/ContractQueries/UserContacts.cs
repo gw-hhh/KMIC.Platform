@@ -5,7 +5,7 @@ using Kmic.Identity.Contracts;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IUserContacts"/> 的实现：薄适配器，只把调用转成本模块的查询，经管道执行
+/// 通过查询管道分批解析用户联系方式
 /// </summary>
 public sealed class UserContacts(IContractQuerySender sender) : IUserContacts
 {

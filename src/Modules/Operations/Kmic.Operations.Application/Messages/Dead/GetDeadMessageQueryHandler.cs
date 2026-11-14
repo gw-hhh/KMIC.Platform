@@ -8,7 +8,7 @@ using Kmic.Operations.Domain.Messages;
 namespace Kmic.Operations.Application.Messages.Dead;
 
 /// <summary>
-/// 处理 <see cref="GetDeadMessageQuery"/>
+/// 查询死信或已放弃消息的详情
 /// </summary>
 public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores) : IQueryHandler<GetDeadMessageQuery, DeadMessageDetailItem>
 {
@@ -23,7 +23,7 @@ public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores) : IQ
         }
 
         var detail = stores.Find(query.Module) is { } store ? await store.GetAsync(MessageItems.ToBox(kind), query.Id, cancellationToken) : null;
-        // 不是死信也不是放弃的（待处理、处理中、已处理）按没有这条死信处理：这里不是看任意消息的入口
+        // 此接口只查询死信和已放弃消息，其他状态按不存在处理
         if (detail is null || detail.State == DeadMessageState.Other)
         {
             return OperationsErrors.MessageNotFound;

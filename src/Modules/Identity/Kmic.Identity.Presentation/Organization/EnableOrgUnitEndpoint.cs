@@ -13,7 +13,7 @@ internal sealed class EnableOrgUnitEndpoint : IEndpoint
         group.MapPost("/org-units/{id}/enable", HandleAsync)
             .Sends<EnableOrgUnitCommand>()
             .WithSummary("启用组织单元")
-            .WithDescription("它的上级必须是启用的。");
+            .WithDescription("上级组织单元必须已启用。");
 
     private static async Task<IResult> HandleAsync([Description("组织单元 ID")] OrgUnitId id, OrgUnitVersionRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new EnableOrgUnitCommand(request.ExpectedVersion, id), ct)).ToOk();

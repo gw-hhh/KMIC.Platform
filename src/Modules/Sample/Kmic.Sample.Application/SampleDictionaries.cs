@@ -9,9 +9,9 @@ namespace Kmic.Sample.Application;
 public static class SampleDictionaries
 {
     /// <summary>
-    /// 标本类别：不分层的字典
+    /// 示例类别：不分层的字典
     /// </summary>
-    [DictionaryType("标本类别")]
+    [DictionaryType("示例类别")]
     public const string Category = "Sample.Category";
 
     /// <summary>

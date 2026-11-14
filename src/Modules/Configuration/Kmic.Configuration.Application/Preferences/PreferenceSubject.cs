@@ -8,7 +8,7 @@ using Kmic.Configuration.Domain.Preferences;
 namespace Kmic.Configuration.Application.Preferences;
 
 /// <summary>
-/// 一个能读写的偏好：在偏好目录里声明过的，或者属于某个偏好族
+/// 可读写的偏好，来自目录声明或偏好族
 /// </summary>
 /// <param name="Key">键</param>
 /// <param name="DisplayName">显示名称</param>
@@ -22,7 +22,7 @@ internal sealed record PreferenceSubject(string Key, string DisplayName, Prefere
     public bool IsFamily => Definition is null;
 
     /// <summary>
-    /// 按键找：先看目录，再看偏好族；都不是就是不存在
+    /// 按键查找偏好，优先匹配目录声明，其次匹配偏好族
     /// </summary>
     public static Result<PreferenceSubject> Find(PreferenceCatalog catalog, string key)
     {
@@ -40,7 +40,7 @@ internal sealed record PreferenceSubject(string Key, string DisplayName, Prefere
     }
 
     /// <summary>
-    /// 这个偏好是否允许在这一层设置
+    /// 是否允许在指定层设置
     /// </summary>
     public Result CheckLayer(PreferenceLayer layer)
     {
@@ -50,7 +50,7 @@ internal sealed record PreferenceSubject(string Key, string DisplayName, Prefere
     }
 
     /// <summary>
-    /// 把调用方给的值整理成要存的 JSON：目录里的偏好按值类型读出并校验，偏好族里的只要求是不超大小的 JSON 对象
+    /// 校验并生成存储用的 JSON；已声明偏好按类型校验，偏好族只检查对象格式和大小
     /// </summary>
     public Result<string> Normalize(JsonElement value, int familyMaxKb)
     {
@@ -67,7 +67,7 @@ internal sealed record PreferenceSubject(string Key, string DisplayName, Prefere
 
         var json = value.GetRawText();
         return Encoding.UTF8.GetByteCount(json) > familyMaxKb * 1024
-            ? ConfigurationErrors.PreferenceInvalid.WithDetail($"值太大，不能超过 {familyMaxKb} KB")
+            ? ConfigurationErrors.PreferenceInvalid.WithDetail($"偏好值不能超过 {familyMaxKb} KB")
             : json;
     }
 

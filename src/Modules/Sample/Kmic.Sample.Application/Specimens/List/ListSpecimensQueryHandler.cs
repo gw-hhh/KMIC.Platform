@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Sample.Application.Specimens.List;
 
 /// <summary>
-/// 处理 <see cref="ListSpecimensQuery"/>
+/// 查询示例列表
 /// </summary>
 public sealed class ListSpecimensQueryHandler(ISampleQueryDb db) : IQueryHandler<ListSpecimensQuery, PagedResult<SpecimenListItem>>
 {

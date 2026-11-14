@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.Messages.Blocked;
 
 /// <summary>
-/// 处理 <see cref="ListBlockedKeysQuery"/>
+/// 汇总被死信阻塞的顺序键
 /// </summary>
 public sealed class ListBlockedKeysQueryHandler(IModuleMessageStores stores) : IQueryHandler<ListBlockedKeysQuery, IReadOnlyList<BlockedKeyItem>>
 {

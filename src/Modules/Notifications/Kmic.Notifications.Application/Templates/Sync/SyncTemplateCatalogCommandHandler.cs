@@ -7,7 +7,7 @@ using Kmic.Notifications.Domain.Templates;
 namespace Kmic.Notifications.Application.Templates.Sync;
 
 /// <summary>
-/// 处理 <see cref="SyncTemplateCatalogCommand"/>
+/// 同步代码声明的通知模板目录
 /// </summary>
 public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalog catalog, ITemplateRepository templates, ITransactionLocks locks)
     : ICommandHandler<SyncTemplateCatalogCommand, TemplateSyncResult>
@@ -19,7 +19,7 @@ public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalo
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // 别的实例正在同步，它会做完同样的事
+        // 同步锁由其他实例持有时跳过，不等待
         if ((await locks.TryAcquireExclusiveAsync("Notifications.TemplateSync", [_lockId], cancellationToken)).Count == 0)
         {
             return new TemplateSyncResult(0, 0, 0);

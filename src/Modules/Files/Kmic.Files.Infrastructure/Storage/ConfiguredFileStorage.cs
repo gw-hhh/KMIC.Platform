@@ -4,10 +4,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Infrastructure.Storage;
 
 /// <summary>
-/// 按部署配置在本地目录和 S3 之间选一种存储，其余全部转给选中的那个
+/// 按部署配置选择本地或 S3 存储，并转发存储操作
 /// </summary>
 /// <remarks>
-/// 选择在构造时做一次：配置不对（S3 缺桶名等）在第一次用到之前就暴露，而不是等到第一次上传
+/// 构造时选择存储并校验其配置；错误在创建服务时暴露
 /// </remarks>
 internal sealed class ConfiguredFileStorage : IFileStorage, IDisposable
 {

@@ -6,7 +6,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Delete;
 
 /// <summary>
-/// 处理 <see cref="DeleteSpecimenCommand"/>
+/// 删除示例
 /// </summary>
 public sealed class DeleteSpecimenCommandHandler(ISpecimenRepository specimens) : ICommandHandler<DeleteSpecimenCommand>
 {

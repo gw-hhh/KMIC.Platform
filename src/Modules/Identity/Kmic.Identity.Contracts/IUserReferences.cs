@@ -3,19 +3,16 @@ using Kmic.BuildingBlocks.Contracts.References;
 namespace Kmic.Identity.Contracts;
 
 /// <summary>
-/// 其他模块解析用户引用时用的接口
+/// 供其他模块批量解析用户引用
 /// </summary>
 /// <remarks>
-/// 只返回显示所需的最少信息：ID、名称、编码、状态。按 ID 批量查询，没有找到的 ID 不会出现在结果里，
-/// 调用方显示为“已删除”之类的占位。参数里 ID 可以重复，数量没有上限，实现会自动分批。
-/// 用户不删除只停用，所以已停用的用户仍能解析出来，状态为已停用
+/// 按 ID 返回显示信息及状态，未找到的 ID 不返回，由调用方显示占位文字。
+/// 允许重复 ID，不限制调用方批次大小，实现自动分批；已禁用用户仍可解析，并保留其状态
 /// </remarks>
 public interface IUserReferences
 {
     /// <summary>
     /// 批量解析用户引用
     /// </summary>
-    /// <param name="ids">用户 ID</param>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct);
 }

@@ -14,7 +14,7 @@ internal sealed class FileReferenceConfiguration : IEntityTypeConfiguration<File
         builder.Property(r => r.OwnerModule).HasMaxLength(50);
         builder.Property(r => r.OwnerType).HasMaxLength(100);
 
-        // 同一个业务对象对同一个文件只登记一次；聚合里关联是幂等的，撞上唯一索引只可能是两个请求同时登记，重试即可
+        // 同一业务对象对同一文件仅登记一次；并发重复登记由唯一索引兜底，返回版本冲突后可重试
         builder.HasIndex("StoredFileId", nameof(FileReference.OwnerModule), nameof(FileReference.OwnerType), nameof(FileReference.OwnerId))
             .IsUnique()
             .MapsToError(CommonErrors.VersionConflict);

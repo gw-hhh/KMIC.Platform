@@ -12,7 +12,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 处理 <see cref="PurgeFileCommand"/>
+/// 标记文件为已彻底删除
 /// </summary>
 public sealed class PurgeFileCommandHandler(
     IStoredFileRepository files,
@@ -39,7 +39,7 @@ public sealed class PurgeFileCommandHandler(
             return new VersionedResponse<StoredFileId>(file.Id);
         }
 
-        // 和清理一样走互斥协议：业务正在关联它（持有共享锁）或者还有关联请求在路上，这时彻底删除会让那条关联请求落空，稍后再试
+        // 先取排他锁并探查未完成的关联请求；存在并发关联时返回暂时冲突，避免使已提交的关联请求失效
         var locked = await locks.TryAcquireExclusiveAsync(FileAttachments.LockScope, [file.Id.Value], cancellationToken);
         if (locked.Count == 0 || (await probe.FindSubjectsAsync(AttachFiles.MessageName, [file.Id.Value], cancellationToken)).Count > 0)
         {

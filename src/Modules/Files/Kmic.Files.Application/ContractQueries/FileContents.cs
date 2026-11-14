@@ -7,7 +7,7 @@ using Kmic.Files.Contracts;
 namespace Kmic.Files.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IFileContents"/> 的实现：经契约查询确认文件能读，再从存储打开内容
+/// 经契约查询确认文件可读，再打开存储流
 /// </summary>
 public sealed class FileContents(IContractQuerySender sender, IFileContentReader reader) : IFileContents
 {

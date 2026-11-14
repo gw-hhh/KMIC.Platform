@@ -5,11 +5,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Files.Application.Cleanup;
 
 /// <summary>
-/// 把上传中断的文件标记为被拒绝：开始上传之后一直没有结果的，客户端断开或服务重启都会这样
+/// 将超时未完成的上传标记为被拒绝
 /// </summary>
 /// <remarks>
-/// 每小时执行。被拒绝的文件保留一小段时间之后由到期清理标记为“删除中”；已经写进存储的部分一并清理，
-/// 没来得及登记的对象由对账发现
+/// 处理客户端断开或服务重启等导致的上传中断。被拒绝的文件保留期满后可进入删除队列；未登记的存储对象由对账任务处理
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]

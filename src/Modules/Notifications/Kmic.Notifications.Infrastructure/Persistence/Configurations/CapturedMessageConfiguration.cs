@@ -9,7 +9,7 @@ internal sealed class CapturedMessageConfiguration : IEntityTypeConfiguration<Ca
 {
     public void Configure(EntityTypeBuilder<CapturedMessage> builder)
     {
-        builder.ToTable(t => t.HasComment("非生产环境捕获的邮件与短信；Notifications 模块；本该发出去的内容留在这里供查看，只在非生产环境有数据，超过保留期由清理任务删除"));
+        builder.ToTable(t => t.HasComment("捕获内容（Notifications）：一条记录对应一次邮件或短信投递；开启捕获时保存内容而不实际发送，按保留期清理"));
         builder.Property(c => c.Address).HasMaxLength(320);
         builder.Property(c => c.Subject).HasMaxLength(500);
         builder.Property(c => c.Body).IsUnboundedText();

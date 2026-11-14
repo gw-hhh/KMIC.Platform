@@ -6,8 +6,8 @@ namespace Kmic.Files.Domain.Files;
 /// 一个业务对象对文件的引用
 /// </summary>
 /// <remarks>
-/// 引用登记只由关联、解除关联的请求消息维护，是业务模块里那份关联的最终一致的副本，只用来判断文件的生命周期：
-/// 有引用就保留，没有引用了才进入保留期
+/// 引用记录通过关联和解除关联消息更新，可能晚于业务模块中的实际关联。
+/// 用于判断文件是否可以清理：有引用时保留文件，全部解除后进入保留期
 /// </remarks>
 public sealed class FileReference : Entity<FileReferenceId>
 {
@@ -41,7 +41,7 @@ public sealed class FileReference : Entity<FileReferenceId>
     public DateTimeOffset AttachedAt { get; private set; }
 
     /// <summary>
-    /// 是不是同一个业务对象的引用
+    /// 是否属于指定业务对象
     /// </summary>
     public bool IsOwnedBy(string module, string type, Guid id) =>
         string.Equals(OwnerModule, module, StringComparison.Ordinal) && string.Equals(OwnerType, type, StringComparison.Ordinal) && OwnerId == id;

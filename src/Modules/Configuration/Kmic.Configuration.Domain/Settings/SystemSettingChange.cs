@@ -3,12 +3,11 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Configuration.Domain.Settings;
 
 /// <summary>
-/// 设置的一次变更：谁在什么时候把什么改成了什么，为什么
+/// 系统设置变更记录，包含新旧值、原因及操作追踪信息
 /// </summary>
 /// <remarks>
-/// 只追加，不改不删：表上对运行账号撤销了修改与删除权限。谁改的、什么时候改的是创建人和创建时间。
-/// 自己就是一个聚合：它与被改的设置值不在同一个聚合里，设置值恢复默认后行被删掉，历史还在。
-/// 新旧值原样保存，所以设置里不放密钥
+/// 运行账号仅可追加，不可修改或删除；操作人和时间使用创建人、创建时间字段。
+/// 与设置值独立保存，恢复默认并删除设置值后仍保留历史。新旧值原样保存，设置中不得包含密钥
 /// </remarks>
 public sealed class SystemSettingChange : AggregateRoot<SettingChangeId>
 {
@@ -28,13 +27,19 @@ public sealed class SystemSettingChange : AggregateRoot<SettingChangeId>
     public string Key { get; private set; }
 
     /// <summary>
-    /// 改之前的值；此前用的是默认值时为空
+    /// 修改前保存的值
     /// </summary>
+    /// <remarks>
+    /// 原无保存记录时为空。
+    /// </remarks>
     public string? OldValue { get; private set; }
 
     /// <summary>
-    /// 改之后的值；恢复默认时为空
+    /// 修改后保存的值
     /// </summary>
+    /// <remarks>
+    /// 恢复默认或清除设置时为空。
+    /// </remarks>
     public string? NewValue { get; private set; }
 
     /// <summary>

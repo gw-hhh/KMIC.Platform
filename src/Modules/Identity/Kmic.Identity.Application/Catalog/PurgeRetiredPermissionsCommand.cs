@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Identity.Application.Catalog;
 
 /// <summary>
-/// 清理退役很久的权限点与范围对象，以及角色上对它们的配置
+/// 清理超过保留期的退役权限、数据范围对象及角色配置
 /// </summary>
 /// <remarks>
-/// 每周执行。退役是为了版本回滚时角色配置不丢；退役超过保留期之后回滚的可能性可以忽略，再留着只会让表和角色越来越脏
+/// 退役后保留角色配置以支持版本回滚，保留期满后才删除
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]

@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Sample.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="GetSpecimenReferencesQuery"/>
+/// 批量查询示例的引用信息
 /// </summary>
-[BypassesDataScope("引用解析只返回名称和状态，不受调用方数据范围限制：解析的是调用方已经保存下来的引用")]
+[BypassesDataScope("解析调用方已保存的引用，仅返回 ID、编号、名称和状态，不受调用方数据范围限制")]
 public sealed class GetSpecimenReferencesQueryHandler(ISampleQueryDb db)
     : IQueryHandler<GetSpecimenReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
@@ -26,7 +26,7 @@ public sealed class GetSpecimenReferencesQueryHandler(ISampleQueryDb db)
             .Select(s => new { s.Id, s.Number, s.Title, s.Status })
             .ToListAsync(cancellationToken);
 
-        // 已关闭的标本不能再被选用，对引用方来说就是“停用”
+        // 已关闭的示例对引用方显示为“停用”
         return rows.ToDictionary(
             r => r.Id.Value,
             r => new ReferenceInfo(r.Id.Value, r.Title, r.Number, r.Status == SpecimenStatus.Closed ? ReferenceStatus.Disabled : ReferenceStatus.Active));

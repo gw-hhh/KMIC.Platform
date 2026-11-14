@@ -12,9 +12,9 @@ internal sealed class PreferenceValueConfiguration : IEntityTypeConfiguration<Pr
     {
         builder.ToTable(t =>
         {
-            t.HasComment("偏好在某一层上的值；Configuration 模块；系统层、角色层、用户在角色下的层，各层同一个键只有一行");
+            t.HasComment("分层偏好值（Configuration）：按键、层级、角色和用户组合唯一；系统层无归属，角色层按角色保存，个人层按用户和角色保存");
 
-            // 层与两个归属列一一对应，工厂方法之外的写入（手工修数据）也不能破坏它
+            // 用数据库检查约束保证层级与角色、用户归属一致，手工写入也须满足
             t.HasCheckConstraint(
                 "CK_PreferenceValue_LayerOwner",
                 """
@@ -26,7 +26,7 @@ internal sealed class PreferenceValueConfiguration : IEntityTypeConfiguration<Pr
         builder.Property(v => v.Key).HasMaxLength(PreferenceValue.MaxKeyLength);
         builder.Property(v => v.Value).HasColumnType("jsonb");
 
-        // 归属列为空的行也要互相排斥：系统层的两列都是空，普通唯一索引会把空值当成互不相同
+        // 空归属组合仍须唯一；普通唯一索引将 null 视为不同值，因此显式关闭空值区分
         builder.HasIndex(v => new { v.Key, v.Layer, v.RoleId, v.UserId })
             .IsUnique()
             .AreNullsDistinct(false)

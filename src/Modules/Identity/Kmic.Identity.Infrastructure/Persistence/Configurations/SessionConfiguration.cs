@@ -9,7 +9,7 @@ internal sealed class SessionConfiguration : IEntityTypeConfiguration<Session>
 {
     public void Configure(EntityTypeBuilder<Session> builder)
     {
-        builder.ToTable(t => t.HasComment("会话；Identity 模块；一行代表一次登录（含模拟身份）；作废或过期 30 天后由清理任务删除"));
+        builder.ToTable(t => t.HasComment("会话（Identity）：一条记录对应一次普通或模拟登录；按绝对到期或作废时间及配置保留期清理"));
         builder.Property(s => s.DeviceName).HasMaxLength(200);
         builder.Property(s => s.LoginIp).HasMaxLength(45);
         builder.Property(s => s.ImpersonationReason).HasMaxLength(500);

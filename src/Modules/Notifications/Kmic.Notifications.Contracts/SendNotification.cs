@@ -16,7 +16,7 @@ namespace Kmic.Notifications.Contracts;
 /// <param name="TemplateKey">模板键，如 Sample.Approved</param>
 /// <param name="To">收件人</param>
 /// <param name="Model">模板数据，结构由模板声明决定</param>
-/// <param name="DedupKey">业务去重键：同一模板、同一收件人、同一键只发一次，如 Sample.Approved:{单据 ID}:{修订号}</param>
+/// <param name="DedupKey">业务去重键：同一模板、收件人、键和渠道仅生成一条投递，如 Sample.Approved:{单据 ID}:{修订号}</param>
 /// <param name="AttachmentFileIds">附件的文件 ID，投递时读取内容</param>
 /// <param name="Priority">优先级</param>
 [IntegrationMessage("Notifications.SendNotification")]
@@ -44,9 +44,9 @@ public sealed record SendNotification(
         ArgumentException.ThrowIfNullOrWhiteSpace(dedupKey);
 
         var template = typeof(TModel).GetCustomAttribute<NotificationTemplateAttribute>()
-            ?? throw new ArgumentException($"{typeof(TModel).Name} 没有标 [NotificationTemplate]。", nameof(model));
+            ?? throw new ArgumentException($"{typeof(TModel).Name} 未声明 [NotificationTemplate]。", nameof(model));
         return template.CarriesSecret
-            ? throw new ArgumentException($"{template.Key} 是含密模板，要用 SendSecretNotification 发送。", nameof(model))
+            ? throw new ArgumentException($"{template.Key} 是含密模板，须使用 SendSecretNotification 发送。", nameof(model))
             : new SendNotification(template.Key, to, NotificationModelJson.Serialize(model), dedupKey, attachmentFileIds, priority);
     }
 }

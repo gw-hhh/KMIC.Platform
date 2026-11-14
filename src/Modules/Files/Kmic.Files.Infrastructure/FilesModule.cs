@@ -25,7 +25,7 @@ namespace Kmic.Files.Infrastructure;
 /// Files 模块的服务端注册类
 /// </summary>
 /// <remarks>
-/// 处理器、校验器、EF 配置自动发现；这里只写自动发现做不到的注册
+/// 处理器和校验器自动发现，此处补充模块服务注册
 /// </remarks>
 public sealed class FilesModule : IModule
 {
@@ -83,7 +83,7 @@ public sealed class FilesModule : IModule
         ArgumentNullException.ThrowIfNull(scheduling);
 
         scheduling.Schedule("Files.PurgeExpired", "0 15 * * * ?", run => new PurgeExpiredFilesCommand(run.ScheduledFireTime), o => o.DisplayName("清理到期的文件"));
-        scheduling.Schedule("Files.ResetStaleUploads", "0 45 * * * ?", run => new ResetStaleUploadsCommand(run.ScheduledFireTime), o => o.DisplayName("重置上传中断的文件"));
+        scheduling.Schedule("Files.ResetStaleUploads", "0 45 * * * ?", run => new ResetStaleUploadsCommand(run.ScheduledFireTime), o => o.DisplayName("处理超时未完成的上传"));
         scheduling.Schedule("Files.ReconcileStorage", "0 0 4 ? * SUN", run => new ReconcileStorageCommand(run.ScheduledFireTime), o => o.DisplayName("核对存储与文件记录"));
     }
 }

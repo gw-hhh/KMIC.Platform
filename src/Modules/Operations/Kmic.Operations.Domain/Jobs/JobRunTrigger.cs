@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Operations.Domain.Jobs;
 
 /// <summary>
-/// 定时任务这次执行是怎么触发的
+/// 定时任务触发方式
 /// </summary>
 public sealed class JobRunTrigger : Enumeration<JobRunTrigger>
 {
@@ -13,7 +13,7 @@ public sealed class JobRunTrigger : Enumeration<JobRunTrigger>
     public static readonly JobRunTrigger Schedule = new("Schedule", "按计划");
 
     /// <summary>
-    /// 管理员点了立即执行
+    /// 通过“立即执行”请求触发
     /// </summary>
     public static readonly JobRunTrigger Manual = new("Manual", "手动执行");
 

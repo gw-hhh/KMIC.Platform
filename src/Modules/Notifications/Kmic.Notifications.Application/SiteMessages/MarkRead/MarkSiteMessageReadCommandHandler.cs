@@ -7,7 +7,7 @@ using Kmic.Notifications.Domain.SiteMessages;
 namespace Kmic.Notifications.Application.SiteMessages.MarkRead;
 
 /// <summary>
-/// 处理 <see cref="MarkSiteMessageReadCommand"/>
+/// 将当前用户的站内消息标为已读
 /// </summary>
 public sealed class MarkSiteMessageReadCommandHandler(ISiteMessageRepository messages, IExecutionContext execution, TimeProvider time)
     : ICommandHandler<MarkSiteMessageReadCommand>

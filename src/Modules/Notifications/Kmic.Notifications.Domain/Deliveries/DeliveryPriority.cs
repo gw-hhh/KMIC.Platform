@@ -13,7 +13,7 @@ public sealed class DeliveryPriority : Enumeration<DeliveryPriority>
     public static readonly DeliveryPriority Normal = new("Normal", "普通");
 
     /// <summary>
-    /// 高：验证码这类等着用的
+    /// 验证码等需要及时发送的通知
     /// </summary>
     public static readonly DeliveryPriority High = new("High", "高");
 

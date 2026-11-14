@@ -13,7 +13,7 @@ internal sealed class ListStorageIssuesEndpoint : IEndpoint
             .Sends<ListStorageIssuesQuery>()
             .Sortable(StorageIssueSort.Map)
             .WithSummary("查询存储问题")
-            .WithDescription("对账发现库里有记录而存储里找不到对象的文件，分页。“可以还原”的对象版本还在，运维按手册还原后用“标为已解决”关闭。");
+            .WithDescription("分页查询对象缺失的存储问题。“可以还原”表示记录中的对象版本仍存在；运维还原后可登记处理结果。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListStorageIssuesRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(

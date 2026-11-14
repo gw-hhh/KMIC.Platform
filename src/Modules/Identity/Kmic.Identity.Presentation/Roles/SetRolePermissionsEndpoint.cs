@@ -12,8 +12,8 @@ internal sealed class SetRolePermissionsEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPut("/roles/{id}/permissions", HandleAsync)
             .Sends<SetRolePermissionsCommand>()
-            .WithSummary("整体替换角色的权限点")
-            .WithDescription("只接受权限点目录里存在的编码。内置的系统管理员角色拥有全部权限点，不能手工修改。");
+            .WithSummary("替换角色权限")
+            .WithDescription("仅接受权限目录中已声明的编码。内置系统管理员角色拥有全部权限，不能手动修改其权限配置。");
 
     private static async Task<IResult> HandleAsync([Description("角色 ID")] RoleId id, SetRolePermissionsRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SetRolePermissionsCommand(id, request.ExpectedVersion, request.Permissions), ct)).ToOk();

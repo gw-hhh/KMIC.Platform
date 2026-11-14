@@ -22,7 +22,7 @@ internal sealed class LoginThrottleStore(IIndependentDatabase database, LoginThr
         await database.InTransactionAsync(
             async (connection, transaction, token) =>
             {
-                // 没有这一行时先插一个“空”行再锁定：两个并发的第一次失败不会各插一行，也不会丢计数
+                // 先确保初始记录存在，再锁行累计失败；唯一键冲突时跳过插入，避免并发首次失败丢失计数
                 await using (var ensure = Command(connection, transaction, """
                     INSERT INTO "Identity"."LoginThrottle" ("LoginNameHash", "FailureCount", "LockLevel", "LastFailedAt")
                     VALUES (@hash, 0, 0, @now) ON CONFLICT ("LoginNameHash") DO NOTHING

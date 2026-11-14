@@ -12,14 +12,14 @@ using Microsoft.Extensions.Caching.Hybrid;
 namespace Kmic.Configuration.Infrastructure.Preferences;
 
 /// <summary>
-/// <see cref="IPreferenceLayers" /> 的实现：系统层、每个角色层各占一个缓存项，按标签失效；用户层每次直接读库
+/// 读取分层偏好：系统层和各角色层分别缓存并按标签失效，用户层直接读库
 /// </summary>
 /// <remarks>
-/// 用户层不缓存：每个用户只在启动时读一次，缓存收益很小，却要为每个用户记一份、改一次失效一次
+/// 用户层按用户和角色分别读取，不维护逐用户缓存及其失效标签
 /// </remarks>
 internal sealed class PreferenceLayerReader(IQueryScopeFactory queries, HybridCache cache) : IPreferenceLayers
 {
-    // 正常靠标签失效；过期时间只是失效广播万一丢了的兜底
+    // 定期过期，避免失效通知丢失后一直读取旧值
     private static readonly HybridCacheEntryOptions _entry = new()
     {
         LocalCacheExpiration = TimeSpan.FromMinutes(10),

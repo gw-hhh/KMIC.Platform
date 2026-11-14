@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Application.SecurityEvents;
 
 /// <summary>
-/// 安全事件表里的一行，只用来读：表由框架的安全事件写入器写，字段与表一一对应
+/// 框架安全事件的只读查询结果
 /// </summary>
 public sealed record SecurityEventRow
 {
@@ -31,27 +31,27 @@ public sealed record SecurityEventRow
     public string? Reason { get; init; }
 
     /// <summary>
-    /// 用户
+    /// 用户 ID
     /// </summary>
     public Guid? UserId { get; init; }
 
     /// <summary>
-    /// 模拟身份时实际操作的人
+    /// 实际操作人 ID
     /// </summary>
     public Guid? ActualUserId { get; init; }
 
     /// <summary>
-    /// 当时的角色
+    /// 操作时使用的角色 ID
     /// </summary>
     public Guid? RoleId { get; init; }
 
     /// <summary>
-    /// 会话
+    /// 会话 ID
     /// </summary>
     public Guid? SessionId { get; init; }
 
     /// <summary>
-    /// 登录失败时输入的账号
+    /// 事件关联的账号
     /// </summary>
     public string? AttemptedAccount { get; init; }
 

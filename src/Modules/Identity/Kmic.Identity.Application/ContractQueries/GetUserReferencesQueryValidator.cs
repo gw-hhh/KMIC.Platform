@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.Messaging;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// 校验 <see cref="GetUserReferencesQuery"/>：一次的 ID 数量有上限，适配器负责分批
+/// 校验单批用户引用查询的 ID 数量
 /// </summary>
 internal sealed class GetUserReferencesQueryValidator : AbstractValidator<GetUserReferencesQuery>
 {

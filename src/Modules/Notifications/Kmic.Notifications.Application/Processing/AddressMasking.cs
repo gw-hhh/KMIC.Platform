@@ -9,7 +9,7 @@ namespace Kmic.Notifications.Application.Processing;
 internal static class AddressMasking
 {
     /// <summary>
-    /// 手机号只留前三位和后四位，如 138****0000
+    /// 保留手机号的前 3 个和后 4 个字符，中间用星号替换；不超过 7 个字符时全部隐藏
     /// </summary>
     public static string Phone(string phone)
     {
@@ -28,7 +28,7 @@ internal static class AddressMasking
     }
 
     /// <summary>
-    /// 直接给的地址的去重键：地址小写的 SHA-256，不把地址本身放进键里
+    /// 地址去重键：去除首尾空白、转小写后计算 SHA-256，以 a: 开头
     /// </summary>
     public static string KeyOfAddress(string address) =>
         "a:" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(address.Trim().ToLowerInvariant())));

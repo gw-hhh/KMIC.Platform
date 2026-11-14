@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Sample.Application.Specimens.Attachments.GetContent;
 
 /// <summary>
-/// 处理 <see cref="GetSpecimenAttachmentContentQuery"/>
+/// 获取示例附件的下载信息
 /// </summary>
 public sealed class GetSpecimenAttachmentContentQueryHandler(ISampleQueryDb db, IEntityFinder finder, IFileDownloads files)
     : IQueryHandler<GetSpecimenAttachmentContentQuery, FileDownload>
@@ -19,7 +19,7 @@ public sealed class GetSpecimenAttachmentContentQueryHandler(ISampleQueryDb db, 
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        // 数据范围外的标本和不存在一样；授权完成之后才能向 Files 取下载信息
+        // 范围外的示例按不存在处理，访问权限和附件归属确认后再查询下载信息
         var found = await finder.FindByIdOrNotFoundAsync(db.Specimens.Include(s => s.Attachments), query.Id, SampleErrors.NotFound, cancellationToken);
         if (found.IsFailure)
         {

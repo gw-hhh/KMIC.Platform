@@ -8,7 +8,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Create;
 
 /// <summary>
-/// 处理 <see cref="CreateSpecimenCommand"/>
+/// 创建示例
 /// </summary>
 public sealed class CreateSpecimenCommandHandler(ISpecimenRepository specimens, INumberGenerator numbers, IExecutionContext execution)
     : ICommandHandler<CreateSpecimenCommand, CreatedResponse<SpecimenId>>
@@ -18,8 +18,8 @@ public sealed class CreateSpecimenCommandHandler(ISpecimenRepository specimens, 
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // 授权已经保证有登录用户；所属组织是数据范围的依据，没有就无法确定数据归谁
-        var access = execution.Access ?? throw new InvalidOperationException("创建示例标本要求用户身份。");
+        // 必须明确所属组织，才能按组织限制数据访问范围
+        var access = execution.Access ?? throw new InvalidOperationException("创建示例需要用户身份。");
         if (access.OrgUnitId is not { } orgUnit)
         {
             return SampleErrors.NoOrgUnit;

@@ -8,7 +8,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Catalog;
 
 /// <summary>
-/// 处理 <see cref="SyncPermissionCatalogCommand"/>
+/// 同步权限及数据范围对象目录
 /// </summary>
 public sealed class SyncPermissionCatalogCommandHandler(
     PermissionCatalog permissions,

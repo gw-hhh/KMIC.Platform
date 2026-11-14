@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Configuration.Application.Settings.Set;
 
 /// <summary>
-/// 处理 <see cref="SetSettingCommand"/>
+/// 保存系统设置
 /// </summary>
 public sealed class SetSettingCommandHandler(
     SystemSettingCatalog catalog,
@@ -47,7 +47,7 @@ public sealed class SetSettingCommandHandler(
         var json = DeclaredValues.ToJson(definition, parsed.Value);
         if (Encoding.UTF8.GetByteCount(json) > options.Value.ValueMaxKb * 1024)
         {
-            return ConfigurationErrors.SettingInvalid.WithDetail($"值太大，序列化后不能超过 {options.Value.ValueMaxKb} KB");
+            return ConfigurationErrors.SettingInvalid.WithDetail($"设置值序列化后不能超过 {options.Value.ValueMaxKb} KB");
         }
 
         var loaded = await settings.GetByKeyForUpdateAsync(definition.Key, command.ExpectedVersion, cancellationToken);

@@ -1,7 +1,7 @@
 namespace Kmic.Operations.Application.Messages.Instances;
 
 /// <summary>
-/// 实例心跳表里的一行，只用来读：由各实例定期登记
+/// 实例心跳表的只读查询结果
 /// </summary>
 public sealed record MessagingInstanceRow
 {

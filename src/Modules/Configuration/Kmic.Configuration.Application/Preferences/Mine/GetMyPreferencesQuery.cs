@@ -4,10 +4,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
 /// <summary>
-/// 本人在当前角色下全部偏好的生效值
+/// 查询当前角色下生效的个人偏好
 /// </summary>
 /// <remarks>
-/// 目录里声明的偏好都在，再加上偏好族里已经有值的键；每项带着值来自哪一层。前端启动时拉一次。
+/// 包含已声明的偏好和已有可用值的偏好族键，每项标明生效值的来源。
 /// 模拟登录时返回的是被模拟用户的偏好
 /// </remarks>
 [AllowAuthenticated]

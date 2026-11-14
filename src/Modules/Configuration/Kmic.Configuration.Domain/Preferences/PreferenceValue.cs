@@ -4,11 +4,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Configuration.Domain.Preferences;
 
 /// <summary>
-/// 偏好在某一层上的值：同一个键在同一层只有一行
+/// 分层保存的偏好值
 /// </summary>
 /// <remarks>
-/// 层与角色、用户列的对应由三个工厂方法保证，数据库另有检查约束。
-/// 值的校验不在聚合里：校验函数是偏好类型自己的静态成员，由命令处理器按偏好目录取到并执行，这里只存已经校验过的 JSON
+/// 同一键、层级、角色和用户组合只有一条记录；工厂方法与数据库约束保证层级和归属一致。
+/// 值须由调用方按偏好目录校验后再写入
 /// </remarks>
 public sealed class PreferenceValue : AggregateRoot<PreferenceValueId>
 {
@@ -71,7 +71,7 @@ public sealed class PreferenceValue : AggregateRoot<PreferenceValueId>
         Create(key, PreferenceLayer.UserRole, roleId, userId, value);
 
     /// <summary>
-    /// 换成新的值
+    /// 更新偏好值
     /// </summary>
     public void Set(string value)
     {

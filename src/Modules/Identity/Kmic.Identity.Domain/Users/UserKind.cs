@@ -3,12 +3,12 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Identity.Domain.Users;
 
 /// <summary>
-/// 用户的种类
+/// 用户类型
 /// </summary>
 public sealed class UserKind : Enumeration<UserKind>
 {
     /// <summary>
-    /// 能登录系统的人
+    /// 普通用户账号
     /// </summary>
     public static readonly UserKind Normal = new("Normal", "普通用户");
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Configuration.Application.Settings.Changes;
 
 /// <summary>
-/// 处理 <see cref="ListSettingChangesQuery"/>
+/// 分页查询系统设置变更记录
 /// </summary>
 public sealed class ListSettingChangesQueryHandler(IConfigurationQueryDb db, IUserReferences users) : IQueryHandler<ListSettingChangesQuery, PagedResult<SettingChangeItem>>
 {

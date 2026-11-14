@@ -5,7 +5,7 @@ using Npgsql;
 namespace Kmic.Operator;
 
 /// <summary>
-/// 各个命令共用的环境：配置、标准输入、输出和时间
+/// 运维命令共用的配置、标准输入输出及时间服务
 /// </summary>
 internal sealed class OperatorContext(IConfiguration configuration, TextReader input, TextWriter output, TimeProvider time)
 {
@@ -18,11 +18,11 @@ internal sealed class OperatorContext(IConfiguration configuration, TextReader i
             ? KmicConnectionString.Normalize(connection)
             : throw new InvalidOperationException($"没有配置运维账号的连接串 {OperatorApp.ConnectionStringKey}。");
 
-    // 密码从标准输入读第一行；输入已经结束或是空行都当作没有给
+    // 密码仅读取标准输入首行，输入结束或空行均视为缺失
     public async Task<string> ReadPasswordAsync()
     {
         var line = await input.ReadLineAsync();
-        return string.IsNullOrEmpty(line) ? throw new InvalidOperationException("标准输入里没有读到密码：请用管道或重定向给出，不要写在命令行参数里。") : line;
+        return string.IsNullOrEmpty(line) ? throw new InvalidOperationException("未从标准输入读取到密码，请通过管道或重定向提供，勿放入命令行参数。") : line;
     }
 
     // 连不上数据库和参数不合规都说明原因并返回 1，不让异常堆栈直接打到部署日志里

@@ -1,9 +1,9 @@
 namespace Kmic.Sample.Application.Specimens.Shared;
 
 /// <summary>
-/// 标本附件，用关联时保存的快照显示，不查 Files
+/// 示例附件信息，使用关联时保存的文件名、大小和类型
 /// </summary>
-/// <param name="Id">附件</param>
+/// <param name="Id">附件 ID</param>
 /// <param name="Name">文件名</param>
 /// <param name="Size">字节数</param>
 /// <param name="FileType">文件类型编码</param>

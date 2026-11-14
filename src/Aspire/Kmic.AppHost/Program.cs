@@ -13,8 +13,7 @@ var migrator = builder.AddProject<Projects.Kmic_MigrationRunner>("migrator")
     .WithEnvironment("Kmic__Migration__ConnectionString", database.Resource.ConnectionStringExpression)
     .WaitFor(database);
 
-// Operations 和 Identity 模块还没有（消息路由表、调度表、安全事件表、访问上下文加载器都在它们里面），应用现在起不来，
-// 起得来之后：Api 角色要 Identity，先用 Worker；Identity 就绪后改成 "Api,Worker"
+// 当前开发编排仅配置 Worker 角色；接口联调还需同时启用 Api 角色
 builder.AddProject<Projects.Kmic_Api>("api")
     .WithEnvironment("Kmic__Roles", "Worker")
     .WithEnvironment("Kmic__Database__ConnectionString", database.Resource.ConnectionStringExpression)

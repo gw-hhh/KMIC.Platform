@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Infrastructure.Files;
 namespace Kmic.Files.Infrastructure.Storage;
 
 /// <summary>
-/// 下载响应读取内容的入口：只转给文件存储
+/// 从文件存储读取下载响应的内容
 /// </summary>
 internal sealed class FileContentReader(IFileStorage storage) : IFileContentReader
 {

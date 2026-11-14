@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Application.Deliveries.Purge;
 
 /// <summary>
-/// 处理 <see cref="PurgeDeliveriesCommand"/>
+/// 清理超过保留期的投递和发送请求记录
 /// </summary>
 public sealed class PurgeDeliveriesCommandHandler(IDeliveryRepository deliveries, INotificationRepository notifications, IOptions<NotificationsRetentionOptions> options, TimeProvider time)
     : ICommandHandler<PurgeDeliveriesCommand, ScheduledJobOutcome>

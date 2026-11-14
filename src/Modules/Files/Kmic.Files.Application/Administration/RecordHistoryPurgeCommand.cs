@@ -5,15 +5,15 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 登记运维已经在对象存储里彻底删除了一个文件的历史版本
+/// 登记文件历史版本已由运维清除
 /// </summary>
 /// <remarks>
-/// 应用的存储账号没有删除指定版本的权限，历史版本由运维另行清除，这里只留执行记录。
-/// 只有已经彻底删除的文件可以登记；在登记之前，内容只存在于非当前版本里，应用不提供任何读取路径
+/// 应用存储账号无权删除指定版本；运维须先清除历史版本，再通过此命令登记。
+/// 仅已彻底删除的文件可登记；文件标记为已彻底删除后，应用不再提供内容读取
 /// </remarks>
-/// <param name="Id">文件</param>
+/// <param name="Id">文件 ID</param>
 /// <param name="Note">执行记录，如工单号，必填</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
+/// <param name="ExpectedVersion">预期版本号，与当前版本不符时返回版本冲突</param>
 [RequirePermission(FilesPermissions.FilePurge)]
 [Audited]
 public sealed record RecordHistoryPurgeCommand(StoredFileId Id, string Note, long ExpectedVersion) : ICommand<VersionedResponse<StoredFileId>>;

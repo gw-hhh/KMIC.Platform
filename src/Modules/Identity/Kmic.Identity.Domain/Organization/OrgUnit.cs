@@ -7,8 +7,7 @@ namespace Kmic.Identity.Domain.Organization;
 /// 组织单元：组织树上的节点
 /// </summary>
 /// <remarks>
-/// 聚合内的子实体：只能通过 OrgTree 创建和修改。旧系统里的“大区负责人”这类对组织的业务描述不放在这里，
-/// 组织单元只回答“谁在哪个单元下”，是数据范围的输入
+/// 组织树内的子实体，只能通过 OrgTree 创建和修改；表示组织层级，为数据范围计算提供依据
 /// </remarks>
 public sealed class OrgUnit : Entity<OrgUnitId>
 {

@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Operations.Application.ScheduledJobs;
 
 /// <summary>
-/// 对定时任务的动作：详情页与列表里的“可用动作”据此计算
+/// 定时任务管理动作
 /// </summary>
 public sealed class ScheduledJobAction : Enumeration<ScheduledJobAction>
 {

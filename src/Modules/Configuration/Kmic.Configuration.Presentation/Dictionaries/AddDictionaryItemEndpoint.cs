@@ -12,7 +12,7 @@ internal sealed class AddDictionaryItemEndpoint : IEndpoint
         group.MapPost("/dictionary-types/{typeCode}/items", HandleAsync)
             .Sends<AddDictionaryItemCommand>()
             .WithSummary("添加字典项")
-            .WithDescription("编码在同一类型内唯一（不区分大小写），创建后不能改。不分层的字典不能给父项。必须带幂等键。");
+            .WithDescription("同一类型内的编码唯一，不区分大小写，创建后不可修改。非层级字典不能指定父项。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("字典类型编码")] string typeCode, AddDictionaryItemRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new AddDictionaryItemCommand(typeCode, request.ExpectedVersion, request.Code, request.Name, request.ParentCode, request.SortOrder), ct)).ToOk();

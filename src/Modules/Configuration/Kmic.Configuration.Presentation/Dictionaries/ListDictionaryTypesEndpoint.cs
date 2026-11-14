@@ -11,7 +11,7 @@ internal sealed class ListDictionaryTypesEndpoint : IEndpoint
         group.MapGet("/dictionary-types", HandleAsync)
             .Sends<ListDictionaryTypesQuery>()
             .WithSummary("查询全部字典类型")
-            .WithDescription("类型、所属模块、字典项数、状态。字典类型由代码声明，这里只能维护它们的字典项。");
+            .WithDescription("返回字典类型、所属模块、字典项数量和状态。类型由代码声明，管理页仅维护字典项。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListDictionaryTypesQuery(), ct)).ToOk();

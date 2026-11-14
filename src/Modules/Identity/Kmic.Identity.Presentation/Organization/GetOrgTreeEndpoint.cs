@@ -10,8 +10,8 @@ internal sealed class GetOrgTreeEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/org-tree", HandleAsync)
             .Sends<GetOrgTreeQuery>()
-            .WithSummary("查询整棵组织树")
-            .WithDescription("登录即可用。平铺的全部单元（含已停用的），按上级分组、同一上级下按次序排好，前端按 parentId 拼成树；version 是修改组织树时要带的版本号。");
+            .WithSummary("查询完整组织树")
+            .WithDescription("登录即可查询，返回包含停用单元的平铺列表，按上级分组、同级按顺序排列。前端通过 parentId 组装树；修改组织树时须提交返回的 version。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetOrgTreeQuery(), ct)).ToOk();

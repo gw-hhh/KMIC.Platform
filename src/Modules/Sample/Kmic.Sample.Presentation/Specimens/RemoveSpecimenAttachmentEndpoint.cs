@@ -13,11 +13,11 @@ internal sealed class RemoveSpecimenAttachmentEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapDelete("/specimens/{id}/attachments/{attachmentId}", HandleAsync)
             .Sends<RemoveSpecimenAttachmentCommand>()
-            .WithSummary("移除示例标本的附件")
-            .WithDescription("只有负责人可以移除，已关闭的标本不能移除。文件解除关联后保留一段时间，期间可以重新关联。成功返回 204。");
+            .WithSummary("移除示例附件")
+            .WithDescription("只有负责人可以移除附件，示例关闭后不能移除。文件的全部引用解除后进入保留期，期间可以重新关联。成功返回 204。");
 
     private static async Task<IResult> HandleAsync(
-        [Description("标本 ID")] SpecimenId id,
+        [Description("示例 ID")] SpecimenId id,
         [Description("附件 ID")] SpecimenAttachmentId attachmentId,
         [FromBody] RemoveSpecimenAttachmentRequest request,
         ICommandSender sender,

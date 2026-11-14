@@ -13,7 +13,7 @@ public sealed class TemplateChannel : Enumeration<TemplateChannel>
     public static readonly TemplateChannel Email = new("Email", "邮件");
 
     /// <summary>
-    /// 短信：纯文本。实际发出的是阿里云审核过的模板加参数，这里的内容供查看
+    /// 短信：纯文本供预览，发送使用已审核的模板编码和参数
     /// </summary>
     public static readonly TemplateChannel Sms = new("Sms", "短信");
 

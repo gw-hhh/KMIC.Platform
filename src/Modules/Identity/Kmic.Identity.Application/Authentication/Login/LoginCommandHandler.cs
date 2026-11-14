@@ -12,10 +12,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication.Login;
 
 /// <summary>
-/// 处理 <see cref="LoginCommand"/>
+/// 校验账号密码并创建登录会话
 /// </summary>
 /// <remarks>
-/// 登录失败要计数，计数在独立事务里提交，命令回滚也不丢。等待与锁定期间不校验密码、不累加次数
+/// 登录失败计数独立提交，不随命令回滚；等待或锁定期间不校验密码，也不增加失败次数
 /// </remarks>
 public sealed class LoginCommandHandler(
     IUserRepository users,
@@ -85,7 +85,7 @@ public sealed class LoginCommandHandler(
         return new AuthTokens(accessToken.Value, "Bearer", (int)(accessToken.ExpiresAt - now).TotalSeconds, refreshToken, verified.PasswordChangeRequired);
     }
 
-    // 返回失败原因；通过则返回空。通过但哈希过时时顺手升级
+    // 校验成功返回 null，并在需要时升级密码哈希
     private string? CheckCredentials(User? user, string password)
     {
         if (user is null)

@@ -7,7 +7,7 @@ using Kmic.Notifications.Domain.Deliveries;
 namespace Kmic.Notifications.Application.Deliveries.Purge;
 
 /// <summary>
-/// 处理 <see cref="ClearSecretBodiesCommand"/>
+/// 清空含密通知残留的正文和短信参数
 /// </summary>
 public sealed class ClearSecretBodiesCommandHandler(IDeliveryRepository deliveries, NotificationTemplateCatalog catalog)
     : ICommandHandler<ClearSecretBodiesCommand, ScheduledJobOutcome>

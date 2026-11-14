@@ -11,7 +11,7 @@ internal sealed class ListPreferenceDefinitionsEndpoint : IEndpoint
         group.MapGet("/preferences", HandleAsync)
             .Sends<ListPreferenceDefinitionsQuery>()
             .WithSummary("查询偏好清单")
-            .WithDescription("管理页用：目录里声明的偏好和偏好族里已经有系统层或角色层值的键，各自允许的层、默认值、系统层和各角色层现有的值与版本。本人那一层不在这里。");
+            .WithDescription("供管理页使用，返回偏好定义及系统、角色层的设置值和版本，包括允许设置的层、代码默认值，以及已有系统或角色设置的偏好族键。不包含个人设置。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListPreferenceDefinitionsQuery(), ct)).ToOk();

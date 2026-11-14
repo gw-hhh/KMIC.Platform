@@ -7,7 +7,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 处理 <see cref="ResolveStorageIssueCommand"/>
+/// 将存储问题标记为已解决
 /// </summary>
 public sealed class ResolveStorageIssueCommandHandler(IStorageIssueRepository issues, IExecutionContext execution, TimeProvider time)
     : ICommandHandler<ResolveStorageIssueCommand, VersionedResponse<StorageIssueId>>

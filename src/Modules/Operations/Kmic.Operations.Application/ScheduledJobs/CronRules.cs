@@ -5,22 +5,22 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.ScheduledJobs;
 
 /// <summary>
-/// 运维填的执行时间要满足的规则
+/// 定时任务的 Cron 校验规则
 /// </summary>
 internal static class CronRules
 {
     /// <summary>
-    /// 两次执行之间至少隔这么久：秒级触发对这套系统没有业务意义，还可能压垮数据库
+    /// 最小执行间隔，限制频繁触发造成的数据库负载
     /// </summary>
     public static readonly TimeSpan MinimumInterval = TimeSpan.FromMinutes(1);
 
     /// <summary>
-    /// 预览时给出接下来几次触发
+    /// 预览触发次数上限
     /// </summary>
     public const int PreviewCount = 5;
 
     /// <summary>
-    /// 检查预览结果：写法合法、以后还会触发、间隔不短于下限
+    /// 校验 Cron 格式、未来触发时间和最小执行间隔
     /// </summary>
     /// <param name="preview">对表达式的预览</param>
     /// <param name="path">出错时指向的字段</param>
@@ -35,11 +35,11 @@ internal static class CronRules
 
         if (preview.NextFireTimes.Count == 0)
         {
-            return OperationsErrors.CronInvalidWith(path, "这个时间以后不会再触发");
+            return OperationsErrors.CronInvalidWith(path, "该表达式未来不会再触发");
         }
 
         return preview.MinimumGap is { } gap && gap < MinimumInterval
-            ? OperationsErrors.CronInvalidWith(path, "两次执行之间至少要隔 1 分钟")
+            ? OperationsErrors.CronInvalidWith(path, "执行间隔不能少于 1 分钟")
             : Result.Success();
     }
 }

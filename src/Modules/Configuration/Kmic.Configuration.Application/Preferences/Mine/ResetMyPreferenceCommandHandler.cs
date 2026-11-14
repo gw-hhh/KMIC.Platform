@@ -7,7 +7,7 @@ using Kmic.Configuration.Domain.Preferences;
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
 /// <summary>
-/// 处理 <see cref="ResetMyPreferenceCommand"/>
+/// 移除当前角色下的个人偏好设置
 /// </summary>
 public sealed class ResetMyPreferenceCommandHandler(
     PreferenceCatalog catalog,

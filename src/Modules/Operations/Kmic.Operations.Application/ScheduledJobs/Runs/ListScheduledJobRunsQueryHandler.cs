@@ -6,7 +6,7 @@ using Kmic.Identity.Contracts;
 namespace Kmic.Operations.Application.ScheduledJobs.Runs;
 
 /// <summary>
-/// 处理 <see cref="ListScheduledJobRunsQuery"/>
+/// 分页查询定时任务执行记录
 /// </summary>
 public sealed class ListScheduledJobRunsQueryHandler(IOperationsQueryDb db, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListScheduledJobRunsQuery, CursorPage<ScheduledJobRunItem>>

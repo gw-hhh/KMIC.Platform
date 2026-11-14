@@ -9,11 +9,11 @@ using MimeKit;
 namespace Kmic.Notifications.Infrastructure.Channels;
 
 /// <summary>
-/// <see cref="IEmailSender" /> 的实现：MailKit 经 SMTP 发送
+/// 通过 MailKit 和 SMTP 发送邮件
 /// </summary>
 /// <remarks>
-/// 每封邮件开一个连接，发完关闭；邮件头 Message-ID 由投递 ID 生成，重试发的是同一个标识，收件端可以据此去重。
-/// 失败分类：服务器返回 4xx、网络和超时、认证失败（配置修好之后重试能成功）是暂时的；5xx、地址格式不对、没有配置发件账号是永久的
+/// 每封邮件单独建立连接；Message-ID 由投递 ID 生成，重试时保持不变，供收件端去重。
+/// SMTP 4xx、网络、超时及认证异常归为暂时失败；5xx、地址解析失败及缺少发件账号归为永久失败
 /// </remarks>
 internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> options) : IEmailSender
 {
@@ -33,7 +33,7 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
         }
         catch (ParseException)
         {
-            return SendResult.Permanent("收件地址格式不对");
+            return SendResult.Permanent("邮件地址或附件类型格式无效");
         }
 
         try
@@ -52,11 +52,11 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
         catch (SmtpCommandException exception)
         {
             // 4xx 是暂时的（邮箱忙、稍后再试），5xx 是永久的（邮箱不存在、被拒绝）
-            return (int)exception.StatusCode >= 500 ? SendResult.Permanent($"服务器拒绝：{(int)exception.StatusCode}") : SendResult.Transient($"服务器暂时不可用：{(int)exception.StatusCode}");
+            return (int)exception.StatusCode >= 500 ? SendResult.Permanent($"服务器拒绝：{(int)exception.StatusCode}") : SendResult.Transient($"邮件服务器暂时拒绝发送：{(int)exception.StatusCode}");
         }
         catch (Exception exception) when (exception is AuthenticationException or SaslException or ProtocolException or ServiceNotConnectedException or ServiceNotAuthenticatedException or IOException or SocketException or TimeoutException or OperationCanceledException)
         {
-            // 网络、协议、超时、认证：配置或网络恢复之后重试能成功
+            // 网络、协议、超时及认证异常可在网络或配置恢复后重试
             return SendResult.Transient($"连接或认证失败：{exception.GetType().Name}");
         }
     }

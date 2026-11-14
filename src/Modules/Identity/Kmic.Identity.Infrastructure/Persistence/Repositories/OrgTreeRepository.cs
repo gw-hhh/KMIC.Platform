@@ -11,6 +11,5 @@ internal sealed class OrgTreeRepository(IdentityDbContext context)
 {
     protected override Error NotFound => IdentityErrors.OrgUnitNotFound;
 
-    // 整棵树总是一起加载
     protected override IQueryable<OrgTree> Aggregate(IQueryable<OrgTree> set) => set.Include(t => t.Units);
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Kmic.Notifications.Infrastructure.Channels;
 
 /// <summary>
-/// 一个发件账号：发件人身份和 SMTP 服务器
+/// 发件账号配置，包含发件人身份及 SMTP 服务器
 /// </summary>
 public sealed class EmailSenderOptions
 {
@@ -31,7 +31,7 @@ public sealed class EmailSenderOptions
     public int Port { get; init; } = 587;
 
     /// <summary>
-    /// 连接的加密方式：StartTls（先明文再升级）、SslOnConnect（一开始就加密）、None（不加密，只在内网的测试服务器上用）
+    /// 连接加密方式：StartTls（连接后升级加密）、SslOnConnect（建立连接即加密）、None（不加密，仅用于内网测试服务器）
     /// </summary>
     [Required]
     public string Security { get; init; } = "StartTls";

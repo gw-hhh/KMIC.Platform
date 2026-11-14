@@ -12,8 +12,8 @@ internal sealed class ListRoutesEndpoint : IEndpoint
         group.MapGet("/messages/routes", HandleAsync)
             .Sends<ListRoutesQuery>()
             .WithSummary("查询订阅路由")
-            .WithDescription("哪种消息投递给哪个模块的哪个订阅，状态（生效、待终结、已终结），以及现在还在运行的实例里哪些构建声明了它。终结一个订阅之前先看这里。");
+            .WithDescription("返回消息类型、订阅方模块、订阅名及路由状态，并列出心跳未过期且声明该订阅的构建，供终结前核对。");
 
-    private static async Task<IResult> HandleAsync([Description("状态编码，重复参数名可以给多个，如 status=Retiring；不给就是全部")] string[]? status, IQuerySender sender, CancellationToken ct) =>
+    private static async Task<IResult> HandleAsync([Description("状态编码，多值须重复参数名；未指定时查询全部状态")] string[]? status, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListRoutesQuery(status), ct)).ToOk();
 }

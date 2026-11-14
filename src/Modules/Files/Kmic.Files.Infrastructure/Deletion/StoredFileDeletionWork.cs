@@ -9,13 +9,12 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Infrastructure.Deletion;
 
 /// <summary>
-/// 删除队列：领取“删除中”的文件，在事务之外先删对象、再删行
+/// 处理文件删除队列，在数据库事务之外先删除存储对象，再更新数据库记录
 /// </summary>
 /// <remarks>
-/// 先删对象再删行：中途失败最多留下一个可重试的“删除中”行，不会出现“库里有行、对象已经没了”。
-/// 删除失败的按尝试次数退避；尝试次数用完的留在队列里，等人工在管理页面上重试。
-/// 已彻底删除的文件也走这里：只删对象、行保留。对象不存在不算失败（删除是幂等的）。
-/// 领取循环由框架提供，这里只写怎样领取、怎样处理一条
+/// 先删除存储对象，再删除或更新数据库记录；中途失败时保留队列记录，可重复删除对象后重试数据库操作。
+/// 删除失败按尝试次数退避，达到上限后等待人工重试。已彻底删除的文件仅删除对象并保留记录；对象不存在也视为删除成功。
+/// 队列循环由框架提供，此处负责领取和处理文件
 /// </remarks>
 internal sealed class StoredFileDeletionWork(
     IExecutionScopeFactory scopes,
@@ -37,7 +36,7 @@ internal sealed class StoredFileDeletionWork(
             .ClaimAsync(max, token, options.Value.Lease, options.Value.MaxAttempts, ct);
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "存储的任何失败都按“这次没删掉”处理：记日志、退避、下次重试，不能让这一条影响别的")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "存储删除失败时记录日志并退避重试，避免单个文件的失败中断队列处理")]
     public async Task ProcessAsync(DeletionItem item, Guid token, CancellationToken ct)
     {
         try

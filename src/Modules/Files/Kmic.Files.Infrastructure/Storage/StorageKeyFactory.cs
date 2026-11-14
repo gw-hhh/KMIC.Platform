@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Infrastructure.Storage;
 
 /// <summary>
-/// <see cref="IStorageKeyFactory" /> 的实现：环境名加年月加文件 ID，环境名来自配置
+/// 根据配置的环境名、年月和文件 ID 生成存储键
 /// </summary>
 internal sealed class StorageKeyFactory(IOptions<FilesStorageOptions> options) : IStorageKeyFactory
 {

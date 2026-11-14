@@ -13,7 +13,7 @@ public sealed class OrgUnitStatus : Enumeration<OrgUnitStatus>
     public static readonly OrgUnitStatus Active = new("Active", "启用");
 
     /// <summary>
-    /// 已停用：不能再分配用户、不能作为锚点，下面不能有启用的下级或用户
+    /// 不可新分配用户或设为锚点；停用前须无启用的下级和所属用户
     /// </summary>
     public static readonly OrgUnitStatus Disabled = new("Disabled", "已停用");
 

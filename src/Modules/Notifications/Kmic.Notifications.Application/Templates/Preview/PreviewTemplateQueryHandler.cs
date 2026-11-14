@@ -7,7 +7,7 @@ using Kmic.Notifications.Domain.Errors;
 namespace Kmic.Notifications.Application.Templates.Preview;
 
 /// <summary>
-/// 处理 <see cref="PreviewTemplateQuery"/>
+/// 预览通知模板的渲染结果
 /// </summary>
 public sealed class PreviewTemplateQueryHandler(NotificationTemplateCatalog catalog, ITemplateRenderer renderer) : IQueryHandler<PreviewTemplateQuery, TemplatePreviewResponse>
 {

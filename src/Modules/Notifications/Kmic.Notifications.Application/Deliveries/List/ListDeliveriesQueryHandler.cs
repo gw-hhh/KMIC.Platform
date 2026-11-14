@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Application.Deliveries.List;
 
 /// <summary>
-/// 处理 <see cref="ListDeliveriesQuery"/>
+/// 查询投递记录列表
 /// </summary>
 public sealed class ListDeliveriesQueryHandler(INotificationsQueryDb db) : IQueryHandler<ListDeliveriesQuery, PagedResult<DeliveryListItem>>
 {

@@ -9,7 +9,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.Create;
 
 /// <summary>
-/// 处理 <see cref="CreateRoleCommand"/>
+/// 创建角色
 /// </summary>
 public sealed class CreateRoleCommandHandler(IRoleRepository roles, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<CreateRoleCommand, CreatedResponse<RoleId>>(recheck, execution)

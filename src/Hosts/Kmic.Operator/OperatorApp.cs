@@ -8,7 +8,7 @@ namespace Kmic.Operator;
 /// </summary>
 /// <remarks>
 /// 命令随需要它的模块一起加：首个管理员初始化与应急重置随 Identity 模块。
-/// 退出码：0 成功；1 执行失败；2 命令行写错了。
+/// 退出码：0 成功；1 执行失败；2 命令行参数错误。
 /// 密码从标准输入读第一行，不出现在命令行参数和 shell 历史里；连接串从配置读（Kmic:Operator:ConnectionString）
 /// </remarks>
 internal static class OperatorApp
@@ -25,7 +25,7 @@ internal static class OperatorApp
             IdentityCommands.Build(context),
         };
 
-        // 命令行写错了统一返回 2：System.CommandLine 默认返回 1，会和“执行失败”混在一起
+        // 参数解析失败统一返回 2，与执行失败的退出码 1 区分
         var parsed = root.Parse(args);
         if (parsed.Errors.Count > 0)
         {

@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
 /// <summary>
-/// 处理 <see cref="TriggerRebuildCommand"/>
+/// 启动读模型重建
 /// </summary>
 /// <remarks>
-/// 写的是订阅方模块的轮次和作业表，由框架在自己的事务里完成，不在 Operations 命令的事务里
+/// 框架在订阅方模块的事务中写入重建轮次和作业，不参与 Operations 命令事务
 /// </remarks>
 public sealed class TriggerRebuildCommandHandler(IReadModelRebuildAdmin rebuilds) : ICommandHandler<TriggerRebuildCommand>
 {

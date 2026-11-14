@@ -11,7 +11,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.Disable;
 
 /// <summary>
-/// 处理 <see cref="DisableRoleCommand"/>
+/// 停用角色
 /// </summary>
 public sealed class DisableRoleCommandHandler(
     IRoleRepository roles,

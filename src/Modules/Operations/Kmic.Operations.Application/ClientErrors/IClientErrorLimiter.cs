@@ -3,14 +3,14 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Operations.Application.ClientErrors;
 
 /// <summary>
-/// 前端错误上报的限流：每个用户每分钟最多几次请求
+/// 按用户和分钟限制前端错误上报请求数
 /// </summary>
 public interface IClientErrorLimiter
 {
     /// <summary>
-    /// 这个用户这次请求放不放行
+    /// 判断是否允许用户本次上报
     /// </summary>
     /// <param name="user">上报的用户</param>
-    /// <returns>放行时为空；超限时是多久以后可以再报</returns>
+    /// <returns>允许时返回 null，超限时返回距下次可上报的时长</returns>
     TimeSpan? TryAcquire(UserId user);
 }

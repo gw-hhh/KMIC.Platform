@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 查询存储问题：对账发现库里有记录而存储里找不到对象的文件，待运维还原
+/// 查询存储问题列表
 /// </summary>
 /// <param name="Status">状态编码，可以给多个</param>
 /// <param name="Page">分页</param>

@@ -5,13 +5,11 @@ using Kmic.Notifications.Domain.Deliveries;
 namespace Kmic.Notifications.Application.Deliveries.Abandon;
 
 /// <summary>
-/// 放弃一条失败的投递
+/// 放弃失败的投递
 /// </summary>
 /// <remarks>
-/// 状态仍是失败，加上放弃标记，之后不再出现在待处理清单里，过了保留期由清理任务删除。只有失败、而且还没放弃的投递可以放弃
+/// 须填写放弃原因；放弃记录在保留期满后可由清理任务删除
 /// </remarks>
-/// <param name="Id">投递</param>
-/// <param name="Reason">放弃的原因，必填</param>
 [RequirePermission(NotificationsPermissions.DeliveryManage)]
 [Audited]
 [Idempotent]

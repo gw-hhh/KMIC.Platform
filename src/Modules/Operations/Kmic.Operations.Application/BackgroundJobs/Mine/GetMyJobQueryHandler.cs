@@ -8,7 +8,7 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 
 /// <summary>
-/// 处理 <see cref="GetMyJobQuery"/>
+/// 查询本人提交的后台作业详情
 /// </summary>
 public sealed class GetMyJobQueryHandler(IExecutionContext execution, IModuleJobStores stores, IUserReferences users)
     : IQueryHandler<GetMyJobQuery, BackgroundJobItem>

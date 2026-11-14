@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
 /// <summary>
-/// 处理 <see cref="SetMyPreferenceCommand"/>
+/// 保存当前角色下的个人偏好
 /// </summary>
 public sealed class SetMyPreferenceCommandHandler(
     PreferenceCatalog catalog,

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Application.Deliveries.Get;
 
 /// <summary>
-/// 处理 <see cref="GetDeliveryQuery"/>
+/// 查询投递详情
 /// </summary>
 public sealed class GetDeliveryQueryHandler(INotificationsQueryDb db) : IQueryHandler<GetDeliveryQuery, DeliveryDetailResponse>
 {

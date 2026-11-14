@@ -4,7 +4,7 @@ using Vogen;
 namespace Kmic.Operations.Domain.Audit;
 
 /// <summary>
-/// 审计记录的 ID：就是审计消息里的 AuditId，由产生审计的那一端生成
+/// 审计记录 ID，沿用审计消息中的 AuditId
 /// </summary>
 [ValueObject<Guid>(conversions: Conversions.SystemTextJson | Conversions.TypeConverter, parsableForPrimitives: ParsableForPrimitives.HoistMethodsAndInterfaces, toPrimitiveCasting: CastOperator.None, fromPrimitiveCasting: CastOperator.None)]
 public readonly partial struct AuditLogId : IStronglyTypedId

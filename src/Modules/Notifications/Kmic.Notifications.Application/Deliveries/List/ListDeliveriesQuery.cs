@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.Deliveries.List;
 
 /// <summary>
-/// 查询投递记录：看通知发给了谁、发没发出去、为什么失败
+/// 查询投递记录
 /// </summary>
 /// <remarks>
-/// 只显示脱敏的地址和状态，不含正文。记录里有收件人，查询会记读审计
+/// 返回脱敏地址和投递状态等信息，不含正文；查询记录读取审计
 /// </remarks>
 /// <param name="RecipientUserId">按收件用户筛选</param>
 /// <param name="Channel">按渠道筛选：Email、Sms</param>

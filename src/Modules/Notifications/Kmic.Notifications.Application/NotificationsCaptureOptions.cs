@@ -1,11 +1,11 @@
 namespace Kmic.Notifications.Application;
 
 /// <summary>
-/// 是否把邮件和短信捕获下来而不真的发送
+/// 邮件和短信捕获配置
 /// </summary>
 /// <remarks>
-/// 部署配置，节名 Notifications:Capture。默认捕获：开发、测试、预发布环境不能误发给真实的人，
-/// 生产环境要明确配置成不捕获。捕获的内容在管理页面上查看
+/// 配置节为 Notifications:Capture，默认捕获邮件和短信，避免非生产环境误发。
+/// 生产环境须显式关闭捕获；捕获内容可在管理页面查看
 /// </remarks>
 public sealed class NotificationsCaptureOptions
 {

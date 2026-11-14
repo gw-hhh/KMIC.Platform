@@ -7,8 +7,8 @@ namespace Kmic.Operations.Application.Messages.Retry;
 /// 重试死信，单条或批量
 /// </summary>
 /// <remarks>
-/// 状态回到待处理，次数清零，马上可以被领取。每条各有各的回执：已经不是死信的、不存在的不影响别的。
-/// 重试不保证成功：问题没解决的消息会再次失败，再次成为死信
+/// 将死信重置为待处理并清零尝试次数，之后可被领取。逐条返回结果，非死信或不存在的记录不影响其他消息。
+/// 重试不保证处理成功，原问题未解决时仍可能再次进入死信
 /// </remarks>
 /// <param name="Messages">要重试的消息，最多 200 条</param>
 [RequirePermission(OperationsPermissions.MessagesManage)]

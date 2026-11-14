@@ -53,27 +53,27 @@ public static class IdentityErrors
     public static readonly Error OrgUnitNameExists = Error.Conflict("Identity.OrgUnitNameExists", "同一上级下已有同名的组织单元");
 
     /// <summary>
-    /// 账号格式不对
+    /// 账号格式无效
     /// </summary>
     public static readonly Error AccountInvalid = Error.Validation("Identity.AccountInvalid", "账号不能为空，最长 100 个字符，不能含空白或控制字符");
 
     /// <summary>
-    /// 姓名格式不对
+    /// 姓名格式无效
     /// </summary>
     public static readonly Error DisplayNameInvalid = Error.Validation("Identity.DisplayNameInvalid", "姓名不能为空，最长 100 个字符");
 
     /// <summary>
-    /// 手机号格式不对
+    /// 手机号格式无效
     /// </summary>
-    public static readonly Error MobileInvalid = Error.Validation("Identity.MobileInvalid", "手机号格式不对");
+    public static readonly Error MobileInvalid = Error.Validation("Identity.MobileInvalid", "手机号格式无效");
 
     /// <summary>
-    /// 邮箱格式不对
+    /// 邮箱格式无效
     /// </summary>
-    public static readonly Error EmailInvalid = Error.Validation("Identity.EmailInvalid", "邮箱格式不对");
+    public static readonly Error EmailInvalid = Error.Validation("Identity.EmailInvalid", "邮箱格式无效");
 
     /// <summary>
-    /// 工号格式不对
+    /// 工号格式无效
     /// </summary>
     public static readonly Error EmployeeNoInvalid = Error.Validation("Identity.EmployeeNoInvalid", "工号最长 50 个字符，不能含空白或控制字符");
 
@@ -93,12 +93,12 @@ public static class IdentityErrors
     public static readonly Error RoleDisabled = Error.BusinessRule("Identity.RoleDisabled", "角色已停用");
 
     /// <summary>
-    /// 系统管理员这类内置角色不能停用、不能手工改权限点
+    /// 内置系统管理员角色不能停用或修改权限、数据范围
     /// </summary>
-    public static readonly Error SystemRoleImmutable = Error.BusinessRule("Identity.SystemRoleImmutable", "内置的系统管理员角色不能停用，也不能手工修改权限点");
+    public static readonly Error SystemRoleImmutable = Error.BusinessRule("Identity.SystemRoleImmutable", "内置系统管理员角色不能停用，也不能修改权限或数据范围");
 
     /// <summary>
-    /// 角色名称格式不对
+    /// 角色名称格式无效
     /// </summary>
     public static readonly Error RoleNameInvalid = Error.Validation("Identity.RoleNameInvalid", "角色名称不能为空，最长 100 个字符");
 
@@ -138,7 +138,7 @@ public static class IdentityErrors
     public static readonly Error OrgRootExists = Error.Conflict("Identity.OrgRootExists", "组织树已经有根单元");
 
     /// <summary>
-    /// 组织单元名称格式不对
+    /// 组织单元名称格式无效
     /// </summary>
     public static readonly Error OrgUnitNameInvalid = Error.Validation("Identity.OrgUnitNameInvalid", "组织单元名称不能为空，最长 100 个字符");
 
@@ -148,9 +148,9 @@ public static class IdentityErrors
     public static readonly Error OrgUnitOrderInvalid = Error.Validation("Identity.OrgUnitOrderInvalid", "排序必须包含该上级下的全部组织单元，且不能重复");
 
     /// <summary>
-    /// 受保护角色只有受保护角色的持有人能管理
+    /// 此操作要求操作者当前角色受保护
     /// </summary>
-    public static readonly Error ProtectedRoleChangeDenied = Error.Forbidden("Identity.ProtectedRoleChangeDenied", "只有拥有受保护角色的人才能管理受保护角色及其持有人的凭据");
+    public static readonly Error ProtectedRoleChangeDenied = Error.Forbidden("Identity.ProtectedRoleChangeDenied", "当前角色须为受保护角色，才能执行此操作");
 
     /// <summary>
     /// 任何人不能修改自己的授予
@@ -158,9 +158,9 @@ public static class IdentityErrors
     public static readonly Error CannotChangeOwnGrants = Error.Forbidden("Identity.CannotChangeOwnGrants", "不能修改自己的角色授予");
 
     /// <summary>
-    /// 系统里必须至少留一个启用的受保护角色持有人
+    /// 系统须保留至少一位可登录且持有已启用受保护角色的用户
     /// </summary>
-    public static readonly Error LastProtectedHolder = Error.BusinessRule("Identity.LastProtectedHolder", "系统中必须至少保留一个启用的系统管理员");
+    public static readonly Error LastProtectedHolder = Error.BusinessRule("Identity.LastProtectedHolder", "须保留至少一位可登录且持有已启用受保护角色的用户");
 
     /// <summary>
     /// 不能对自己做这个操作
@@ -168,9 +168,9 @@ public static class IdentityErrors
     public static readonly Error CannotActOnSelf = Error.Forbidden("Identity.CannotActOnSelf", "不能对自己执行这个操作");
 
     /// <summary>
-    /// 授权管理命令提交前重查操作者没通过
+    /// 授权管理命令重新校验操作者时发现授权变化
     /// </summary>
-    public static readonly Error AuthorizationChanged = Error.Conflict("Identity.AuthorizationChanged", "你的授权刚刚发生了变化，请刷新后重试")
+    public static readonly Error AuthorizationChanged = Error.Conflict("Identity.AuthorizationChanged", "当前授权已变化，请刷新后重试")
         .WithMetadata(ErrorMetadataKeys.Retryable, true);
 
     /// <summary>
@@ -184,14 +184,14 @@ public static class IdentityErrors
     public static readonly Error ScopeObjectUnknown = Error.Validation("Identity.ScopeObjectUnknown", "数据范围对象不存在");
 
     /// <summary>
-    /// 账号或密码不对，也可能是账号被禁用；对外不区分
+    /// 账号、密码无效或账号被禁用，对外统一提示
     /// </summary>
-    public static readonly Error InvalidCredentials = Error.Unauthenticated("Identity.InvalidCredentials", "账号或密码不对");
+    public static readonly Error InvalidCredentials = Error.Unauthenticated("Identity.InvalidCredentials", "账号或密码错误");
 
     /// <summary>
-    /// 验证码不对、已过期或已用完次数
+    /// 验证码错误、已过期或尝试次数已耗尽
     /// </summary>
-    public static readonly Error InvalidSmsCode = Error.Unauthenticated("Identity.InvalidSmsCode", "验证码不对或已过期");
+    public static readonly Error InvalidSmsCode = Error.Unauthenticated("Identity.InvalidSmsCode", "验证码错误或已过期");
 
     /// <summary>
     /// 刷新令牌无效
@@ -214,7 +214,7 @@ public static class IdentityErrors
     public static readonly Error SmsCodeThrottled = Error.TooManyRequests("Identity.SmsCodeThrottled", "验证码发送过于频繁，请稍后再试", TimeSpan.FromMinutes(1));
 
     /// <summary>
-    /// 没有可用的角色，登录不了
+    /// 没有可用角色，无法登录
     /// </summary>
     public static readonly Error NoRoleAvailable = Error.Forbidden("Identity.NoRoleAvailable", "你没有可用的角色，请联系管理员");
 
@@ -224,9 +224,9 @@ public static class IdentityErrors
     public static readonly Error RoleNotSwitchable = Error.Forbidden("Identity.RoleNotSwitchable", "不能切换到这个角色");
 
     /// <summary>
-    /// 旧密码不对
+    /// 旧密码错误
     /// </summary>
-    public static readonly Error OldPasswordWrong = Error.Validation("Identity.OldPasswordWrong", "旧密码不对");
+    public static readonly Error OldPasswordWrong = Error.Validation("Identity.OldPasswordWrong", "旧密码错误");
 
     /// <summary>
     /// 新密码不符合密码规则
@@ -239,27 +239,27 @@ public static class IdentityErrors
     public static readonly Error PasswordChangeRequired = Error.Forbidden("Identity.PasswordChangeRequired", "请先修改密码");
 
     /// <summary>
-    /// 模拟身份的目标不合法
+    /// 当前用户、目标角色或会话条件不允许模拟身份
     /// </summary>
-    public static readonly Error ImpersonationDenied = Error.Forbidden("Identity.ImpersonationDenied", "不能模拟这个用户：不能模拟自己，也不能模拟系统管理员");
+    public static readonly Error ImpersonationDenied = Error.Forbidden("Identity.ImpersonationDenied", "当前条件不允许模拟该用户");
 
     /// <summary>
     /// 当前会话不是模拟会话
     /// </summary>
-    public static readonly Error NotImpersonating = Error.BusinessRule("Identity.NotImpersonating", "当前不是模拟身份");
+    public static readonly Error NotImpersonating = Error.BusinessRule("Identity.NotImpersonating", "当前会话不是模拟会话");
 
     /// <summary>
-    /// 初始化只能在系统里没有任何用户时执行
+    /// 初始化仅允许在尚无普通用户时执行
     /// </summary>
-    public static readonly Error AlreadyBootstrapped = Error.Conflict("Identity.AlreadyBootstrapped", "系统里已经有用户，不能再初始化");
+    public static readonly Error AlreadyBootstrapped = Error.Conflict("Identity.AlreadyBootstrapped", "系统中已有普通用户，不能再次初始化");
 
     /// <summary>
-    /// 应急重置只能对持有受保护角色的账号执行
-    /// </summary>
-    /// <summary>
-    /// 携带刷新 Cookie 的请求来源不可信：Origin 不在名单里，或没有带自定义请求头
+    /// 刷新 Cookie 请求缺少可信 Origin 或必需的自定义请求头
     /// </summary>
     public static readonly Error CsrfRejected = Error.Forbidden("Identity.CsrfRejected", "请求来源不可信");
 
-    public static readonly Error NotProtectedHolder = Error.BusinessRule("Identity.NotProtectedHolder", "这个账号不是系统管理员，不能用应急命令重置");
+    /// <summary>
+    /// 应急重置仅允许用于受保护角色持有人账号
+    /// </summary>
+    public static readonly Error NotProtectedHolder = Error.BusinessRule("Identity.NotProtectedHolder", "此账号未持有受保护角色，不能执行应急密码重置");
 }

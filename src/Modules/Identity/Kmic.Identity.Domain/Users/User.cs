@@ -34,8 +34,11 @@ public sealed class User : AggregateRoot<UserId>
     }
 
     /// <summary>
-    /// 登录名，唯一且不区分大小写；迁移来的用户沿用旧系统的手机号
+    /// 登录名
     /// </summary>
+    /// <remarks>
+    /// 唯一，不区分大小写。
+    /// </remarks>
     public string Account { get; private set; }
 
     /// <summary>
@@ -44,7 +47,7 @@ public sealed class User : AggregateRoot<UserId>
     public string DisplayName { get; private set; }
 
     /// <summary>
-    /// 英文名，合同、报告上要印
+    /// 英文名
     /// </summary>
     public string? EnglishName { get; private set; }
 
@@ -54,8 +57,11 @@ public sealed class User : AggregateRoot<UserId>
     public string? EmployeeNo { get; private set; }
 
     /// <summary>
-    /// 手机号，规范化为国际格式，填写时唯一；短信登录需要它
+    /// 手机号
     /// </summary>
+    /// <remarks>
+    /// 规范化为国际格式，填写时唯一。
+    /// </remarks>
     public string? Mobile { get; private set; }
 
     /// <summary>
@@ -64,8 +70,11 @@ public sealed class User : AggregateRoot<UserId>
     public string? Email { get; private set; }
 
     /// <summary>
-    /// 所属组织单元，数据范围的“本组织”从它算起；为空时只剩“本人”的数据
+    /// 所属组织单元
     /// </summary>
+    /// <remarks>
+    /// 未指定角色授予锚点时，作为“本组织”范围的起点。
+    /// </remarks>
     public OrgUnitId? OrgUnitId { get; private set; }
 
     /// <summary>
@@ -79,7 +88,7 @@ public sealed class User : AggregateRoot<UserId>
     public UserStatus Status { get; private set; } = null!;
 
     /// <summary>
-    /// 密码哈希；为空表示还没有设置过密码（迁移来的员工靠短信登录）
+    /// 密码哈希
     /// </summary>
     public string? PasswordHash { get; private set; }
 
@@ -109,7 +118,7 @@ public sealed class User : AggregateRoot<UserId>
     public bool CanLogin => Kind == UserKind.Normal && Status == UserStatus.Active;
 
     /// <summary>
-    /// 创建用户：没有密码、没有所属组织，也没有角色，这些由各自的命令设置
+    /// 创建用户，不设置密码、所属组织或角色
     /// </summary>
     public static Result<User> Create(string? account, string? displayName, string? englishName, string? employeeNo, string? mobile, string? email, string? reason = null)
     {
@@ -147,10 +156,10 @@ public sealed class User : AggregateRoot<UserId>
     }
 
     /// <summary>
-    /// 这次修改会不会改动登录凭据（账号、手机号）
+    /// 账号或手机号是否变化
     /// </summary>
     /// <remarks>
-    /// 输入本身不合法时当作没有改动：随后的修改会因为同一个原因失败，不必在这里重复报错
+    /// 仅比较校验通过的字段；校验失败的字段由后续修改操作报错
     /// </remarks>
     public bool WouldChangeCredentials(string? account, string? mobile)
     {
@@ -229,7 +238,7 @@ public sealed class User : AggregateRoot<UserId>
     }
 
     /// <summary>
-    /// 哈希器要求升级哈希参数时，原地换成新哈希，不算一次密码变化
+    /// 升级密码哈希参数，保留原改密时间，不发布密码变更事件
     /// </summary>
     public void RehashPassword(string passwordHash)
     {

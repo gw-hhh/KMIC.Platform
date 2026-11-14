@@ -5,11 +5,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.Deliveries.Purge;
 
 /// <summary>
-/// 清空含密通知投递里还留着的正文和短信参数
+/// 清空含密投递残留的正文和短信参数
 /// </summary>
 /// <remarks>
-/// 兜底：正常情况下投递发完或最终失败时就已经清空，这里补救进程崩溃等极端情况。每小时执行一次。
-/// 非生产环境的捕获内容不在这里处理，捕获的验证码按设计留给测试人员看
+/// 补清已发送、失败或已跳过投递的残留内容。捕获内容不在此范围，由捕获内容清理任务按保留期删除
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]

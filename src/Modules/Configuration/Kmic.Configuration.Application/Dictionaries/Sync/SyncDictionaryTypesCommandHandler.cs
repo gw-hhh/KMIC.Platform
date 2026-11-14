@@ -7,7 +7,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Sync;
 
 /// <summary>
-/// 处理 <see cref="SyncDictionaryTypesCommand"/>
+/// 同步代码中声明的字典类型
 /// </summary>
 public sealed class SyncDictionaryTypesCommandHandler(DictionaryTypeCatalog catalog, IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<SyncDictionaryTypesCommand, DictionarySyncResult>

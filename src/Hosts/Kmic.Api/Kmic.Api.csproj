@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <!--
     唯一的应用宿主：按配置 Kmic:Roles 以 Api、Worker 角色运行。
-    AddMediator 要在这里调用——源码生成器只在调用它的项目里生成分发代码，所以所有模块的 Application 项目都要引用到这里
+    宿主调用 AddMediator 生成分发代码，因此须能引用各模块的 Application 处理器
   -->
   <ItemGroup>
     <PackageReference Include="Mediator.SourceGenerator" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />

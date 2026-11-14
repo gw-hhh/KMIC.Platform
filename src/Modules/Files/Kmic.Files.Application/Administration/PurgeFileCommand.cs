@@ -5,15 +5,15 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 彻底删除一个文件：对象由删除工作器删除（存储里只留删除标记），元数据留下记录，引用它的单据显示“文件已删除”
+/// 彻底删除文件并保留元数据记录，存储对象由删除工作器处理
 /// </summary>
 /// <remarks>
-/// 不可恢复。误传了敏感文件时用；历史版本由运维在对象存储里另行清除，之后用 RecordHistoryPurge 登记。
-/// 已经彻底删除或正在删除的文件再来一次什么也不改，算成功。业务正在关联这个文件时返回暂时冲突，稍后再试
+/// 用于清除误传的敏感文件，操作不可恢复，引用方显示“文件已删除”。历史版本须由运维另行清除并通过 RecordHistoryPurge 登记。
+/// 版本校验通过后，已彻底删除或正在删除的文件重复操作直接成功；存在并发关联或未完成的关联请求时返回暂时冲突，可稍后重试
 /// </remarks>
-/// <param name="Id">文件</param>
-/// <param name="Reason">原因，必填，写进文件的记录</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
+/// <param name="Id">文件 ID</param>
+/// <param name="Reason">删除原因，必填，保存到文件记录</param>
+/// <param name="ExpectedVersion">预期版本号，与当前版本不符时返回版本冲突</param>
 [RequirePermission(FilesPermissions.FilePurge)]
 [Audited]
 [Idempotent]

@@ -10,7 +10,7 @@ namespace Kmic.Notifications.Application.Templates;
 /// </summary>
 internal static class ChannelRendering
 {
-    // strict 为真时，模板里用到数据模型没有的变量也算有误（发布和预览时用）
+    // 严格模式将渲染时遇到的未知变量视为错误
     public static async ValueTask<Result<ChannelContent>> RenderAsync(ITemplateRenderer renderer, TemplateChannel channel, string subject, string body, object model, bool strict, CancellationToken ct)
     {
         var renderedSubject = await RenderOneAsync(renderer, subject, model, RenderFormat.Text, strict, ct);

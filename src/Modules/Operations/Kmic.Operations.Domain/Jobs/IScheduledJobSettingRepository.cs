@@ -9,10 +9,10 @@ namespace Kmic.Operations.Domain.Jobs;
 public interface IScheduledJobSettingRepository : IRepository<ScheduledJobSetting, ScheduledJobSettingId>
 {
     /// <summary>
-    /// 按任务名取要修改的设置：没有这一行（任务一直用默认值）时得到空
+    /// 按任务名读取待修改的设置
     /// </summary>
-    /// <param name="jobName">任务名</param>
-    /// <param name="expectedVersion">调用方看到的版本号；空表示调用方看到的是没有设置，这时已经有这一行就是版本冲突</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 未指定 expectedVersion 时要求尚无设置记录，并返回 null；指定版本时要求记录存在且版本一致，否则返回版本冲突
+    /// </remarks>
     Task<Result<ScheduledJobSetting?>> GetByJobNameForUpdateAsync(string jobName, long? expectedVersion, CancellationToken ct);
 }

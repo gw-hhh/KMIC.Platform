@@ -17,8 +17,8 @@ namespace Kmic.Identity.Infrastructure.Operations;
 /// 运维命令的实现：首个管理员初始化、应急重置管理员密码
 /// </summary>
 /// <remarks>
-/// 用运维账号的连接串直接连库，不经过命令管道，因为这两件事发生在系统还没有任何用户的时候或没有人能登录的时候。
-/// 每个操作写一条安全事件，操作人记为系统账号，便于事后追溯
+/// 使用运维连接直接执行首次初始化或应急恢复，不经过命令管道。
+/// 操作成功后记录安全事件，实际操作人记为系统账号
 /// </remarks>
 public sealed class IdentityBootstrapper
 {
@@ -85,8 +85,8 @@ public sealed class IdentityBootstrapper
     /// 应急重置：为持有受保护角色的账号设置新密码，作废它的全部会话，清零登录限制
     /// </summary>
     /// <remarks>
-    /// 唯一的管理员忘了密码、又没有可用的手机号时的恢复路径。它的权限和直接改库相当，做成命令是为了留痕。
-    /// 新密码要满足密码规则；账号带“必须修改密码”标记，下次登录先改密码
+    /// 用于管理员无法登录时的应急恢复，依赖运维数据库权限，并记录安全事件。
+    /// 新密码须满足密码规则，登录后须修改密码；重置不会启用已禁用账号
     /// </remarks>
     /// <param name="connectionString">运维账号的连接串</param>
     /// <param name="account">管理员账号</param>
@@ -139,7 +139,7 @@ public sealed class IdentityBootstrapper
         return Result.Success();
     }
 
-    // 安全事件写入器只在请求与作业里可用；运维命令直接插一行，操作人是系统账号
+    // 运维命令直接写入安全事件，以系统账号记录实际操作人
     private static async Task WriteEventAsync(IdentityDbContext db, string type, string severity, UserId target, string account, DateTimeOffset now, CancellationToken ct)
     {
         var severityValue = string.Equals(severity, "High", StringComparison.Ordinal) ? (short)2 : (short)0;

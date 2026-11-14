@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Application.SiteMessages.Purge;
 
 /// <summary>
-/// 处理 <see cref="PurgeSiteMessagesCommand"/>
+/// 按保留期清理站内消息
 /// </summary>
 public sealed class PurgeSiteMessagesCommandHandler(ISiteMessageRepository messages, IOptions<NotificationsRetentionOptions> options, TimeProvider time)
     : ICommandHandler<PurgeSiteMessagesCommand, ScheduledJobOutcome>

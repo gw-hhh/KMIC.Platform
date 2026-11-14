@@ -5,11 +5,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Operations.Domain.Audit;
 
 /// <summary>
-/// 一条审计记录：谁在什么时候、以什么方式、对什么对象做了什么，字段怎么变的
+/// 审计记录
 /// </summary>
 /// <remarks>
-/// 只插入，不改不删：表上对运行账号撤销了修改与删除权限，保留期到期的数据只能由迁移程序的维护命令删除。
-/// 不是聚合行为，是把审计消息落成一行。写入这一行的时间是创建时间，和发生时间 <see cref="OccurredAt" /> 不同
+/// 仅追加，运行账号无权修改或删除；超过保留期后由迁移程序的维护命令清理。
+/// 创建时间是汇总写入时间，与操作发生时间 <see cref="OccurredAt" /> 不同
 /// </remarks>
 public sealed class AuditLog : AggregateRoot<AuditLogId>
 {
@@ -89,7 +89,7 @@ public sealed class AuditLog : AggregateRoot<AuditLogId>
     public string Details { get; private set; } = "{}";
 
     /// <summary>
-    /// 把一条审计消息落成一行
+    /// 根据审计消息创建记录
     /// </summary>
     public static AuditLog Record(
         AuditLogId id,

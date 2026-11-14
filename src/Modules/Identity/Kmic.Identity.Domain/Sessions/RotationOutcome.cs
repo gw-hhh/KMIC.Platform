@@ -11,7 +11,7 @@ public enum RotationOutcome
     Rotated,
 
     /// <summary>
-    /// 令牌无效：不属于这个会话、已过期，或者会话已作废、已过期
+    /// 令牌或会话不符合刷新条件
     /// </summary>
     Invalid,
 

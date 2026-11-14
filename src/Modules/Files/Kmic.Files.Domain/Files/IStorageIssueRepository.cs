@@ -9,9 +9,7 @@ namespace Kmic.Files.Domain.Files;
 public interface IStorageIssueRepository : IRepository<StorageIssue, StorageIssueId>
 {
     /// <summary>
-    /// 这些文件里，哪些已经有待处理的问题
+    /// 查询指定文件中已有待处理问题的文件 ID
     /// </summary>
-    /// <param name="fileIds">要查的文件</param>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlySet<StoredFileId>> FindOpenFileIdsAsync(IReadOnlyCollection<StoredFileId> fileIds, CancellationToken ct);
 }

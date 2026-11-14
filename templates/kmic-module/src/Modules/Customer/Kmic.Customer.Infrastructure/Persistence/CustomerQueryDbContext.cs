@@ -17,6 +17,6 @@ internal sealed class CustomerQueryDbContext(DbContextOptions<CustomerQueryDbCon
     /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // 与 CustomerDbContext 一致
+        // 与写入上下文使用相同的强类型 ID 转换器
     }
 }

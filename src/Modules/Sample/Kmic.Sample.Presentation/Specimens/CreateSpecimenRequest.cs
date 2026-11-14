@@ -1,7 +1,7 @@
 namespace Kmic.Sample.Presentation.Specimens;
 
 /// <summary>
-/// 创建示例标本的请求
+/// 创建示例的请求
 /// </summary>
 /// <remarks>
 /// 字段名与命令里的同名属性一致，校验错误的路径才能和请求体对上

@@ -8,12 +8,12 @@ namespace Kmic.Files.Domain.Files;
 public sealed class StorageIssueKind : Enumeration<StorageIssueKind>
 {
     /// <summary>
-    /// 可以还原：记录的对象版本还在，只是被删除标记盖住了
+    /// 当前对象缺失，但记录的对象版本仍可还原
     /// </summary>
     public static readonly StorageIssueKind RestorableMissing = new("RestorableMissing", "可以还原");
 
     /// <summary>
-    /// 已经丢失：记录的对象版本也找不到了
+    /// 对象缺失，未找到可还原的记录版本
     /// </summary>
     public static readonly StorageIssueKind LostMissing = new("LostMissing", "已经丢失");
 

@@ -33,12 +33,9 @@ public static class ServiceDefaultsExtensions
     /// 配置日志、追踪与指标
     /// </summary>
     /// <remarks>
-    /// 日志：开发环境输出可读格式，其他环境输出一行一条的 JSON，不写本地文件；级别默认 Information，
-    /// Microsoft.*、System.* 和 EF 的 SQL 命令日志为 Warning，可用 Serilog 配置节覆盖。每条日志带服务、实例、角色、版本，
-    /// 名字像密码、令牌的属性一律遮盖。追踪与指标：框架的 Kmic.* 源与 Meter、ASP.NET Core、HttpClient、Npgsql、运行时，
-    /// 应用全量记录、不做采样（采样由收集器做尾部采样）；配置了 OTEL_EXPORTER_OTLP_ENDPOINT 才导出
+    /// 默认输出控制台日志，按数据分类和敏感属性名脱敏；日志级别可通过 Serilog 配置覆盖。
+    /// 追踪遵循父级采样决定，无父级时全量采样。配置 OTEL_EXPORTER_OTLP_ENDPOINT 后导出日志、追踪和指标
     /// </remarks>
-    /// <param name="builder">宿主构建器</param>
     public static WebApplicationBuilder AddKmicServiceDefaults(this WebApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -57,13 +54,13 @@ public static class ServiceDefaultsExtensions
     }
 
     /// <summary>
-    /// 每个请求记一条摘要日志：方法、路由模板、状态码、耗时、用户、角色、客户端地址
+    /// 记录请求完成日志
     /// </summary>
     /// <remarks>
-    /// 要放在管道的最前面，错误处理之前，这样 500 也能记到。路由模板不含具体 ID，路径和查询串里的内容不进摘要，
-    /// 请求头（除截断的 User-Agent）、请求体、响应体都不记，健康检查不记。可用 Kmic:Observability:RequestLog 关闭
+    /// 须在错误处理中间件之前注册，以记录 500 响应。摘要模板使用路由，结构化属性仍含实际 RequestPath，不含查询串。
+    /// 不记录请求体或响应体，User-Agent 最多保留 200 个字符。健康检查使用 Verbose 级别，默认不输出。
+    /// 可通过 Kmic:Observability:RequestLog 关闭
     /// </remarks>
-    /// <param name="app">应用</param>
     public static WebApplication UseKmicRequestLogging(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -96,7 +93,7 @@ public static class ServiceDefaultsExtensions
     {
         var development = builder.Environment.IsDevelopment();
 
-        // 默认的控制台提供程序去掉，不然每条日志输出两遍；同时写给其他日志提供程序：配置了 OTLP 时，OpenTelemetry 的日志提供程序靠这条路收到日志
+        // 清除默认控制台提供程序以免重复输出；保留向其他提供程序转发，供启用 OTLP 后收集日志
         builder.Logging.ClearProviders();
         builder.Services.AddSerilog(
             (services, logger) =>

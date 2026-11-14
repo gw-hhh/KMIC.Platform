@@ -8,11 +8,11 @@ using Kmic.BuildingBlocks.Application.Settings;
 namespace Kmic.Configuration.Infrastructure.Settings;
 
 /// <summary>
-/// 全部被修改过的系统设置值的快照，进缓存
+/// 已保存系统设置值的缓存快照
 /// </summary>
 /// <remarks>
-/// 不可变：值只在构造时给定。各类型读出来的结果在快照里按类型记着，同一个快照里每个类型只反序列化一次，
-/// 业务代码拿到的是同一个不可变记录。这个记录表只是缓存，不进 JSON
+/// JSON 值在构造时固定，解析结果按类型缓存并复用，调用方须保持返回值不可变。
+/// 并发首次读取可能重复解析，类型缓存仅在内存中使用，不参与 JSON 序列化
 /// </remarks>
 [ImmutableObject(true)]
 internal sealed class SettingsSnapshot(IReadOnlyDictionary<string, string> values)
@@ -25,7 +25,7 @@ internal sealed class SettingsSnapshot(IReadOnlyDictionary<string, string> value
     public IReadOnlyDictionary<string, string> Values { get; } = values;
 
     /// <summary>
-    /// 取一个设置的值：被修改过就读出修改后的，否则或者存着的值已经读不出来时（设置的结构后来改过）用默认值
+    /// 读取指定设置，未保存、JSON 解析失败或解析结果为 null 时使用代码默认值
     /// </summary>
     public T Get<T>(string key)
         where T : class, ISystemSetting<T> =>

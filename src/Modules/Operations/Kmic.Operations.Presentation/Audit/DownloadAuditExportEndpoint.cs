@@ -12,7 +12,7 @@ internal sealed class DownloadAuditExportEndpoint : IEndpoint
         group.MapGet("/audit/exports/{jobId}/file", HandleAsync)
             .Sends<GetAuditExportFileQuery>()
             .WithSummary("下载审计导出的文件")
-            .WithDescription("只有提交导出的人和有管理作业权限的人能下载，别人看到的和不存在的一样，返回 404。作业没做完、文件还没登记完返回可重试的 409，作业失败或被取消返回 422。每次下载都有审计记录。");
+            .WithDescription("仅提交人或有管理作业权限的用户可下载；无权查看或作业不存在时返回 404。作业未完成返回可重试的 409，失败或取消返回 422。文件未登记或不存在时返回 404。下载会记录读审计。");
 
     private static async Task<IResult> HandleAsync([Description("导出作业 ID")] Guid jobId, IQuerySender sender, CancellationToken ct)
     {

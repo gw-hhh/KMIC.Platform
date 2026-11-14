@@ -6,8 +6,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// 登录失败的等待与锁定算法
 /// </summary>
 /// <remarks>
-/// 纯计算，不碰数据库：状态怎样原子地存取由存储层负责。计数按规范化后的登录名，
-/// 不存在的登录名同样计数、同样等待，所以不会暴露账号是否存在
+/// 仅计算状态，原子读写由存储层负责。按规范化登录名计数，不存在的账号使用相同规则，避免泄露账号是否存在
 /// </remarks>
 /// <param name="settings">规则</param>
 public sealed class LoginThrottlePolicy(IOptions<LoginThrottleOptions> settings)
@@ -15,7 +14,7 @@ public sealed class LoginThrottlePolicy(IOptions<LoginThrottleOptions> settings)
     private LoginThrottleOptions Options => settings.Value;
 
     /// <summary>
-    /// 现在还要等多久才能尝试；可以尝试时为空
+    /// 距离下次允许登录的等待时间；无需等待时返回 null
     /// </summary>
     public static TimeSpan? Remaining(LoginThrottleState? state, DateTimeOffset now)
     {
@@ -29,11 +28,11 @@ public sealed class LoginThrottlePolicy(IOptions<LoginThrottleOptions> settings)
     }
 
     /// <summary>
-    /// 又失败了一次之后的新状态
+    /// 计算本次登录失败后的状态
     /// </summary>
     public LoginThrottleState OnFailure(LoginThrottleState? previous, DateTimeOffset now)
     {
-        // 很久没有失败，从头开始数
+        // 超过重置间隔时，失败次数和锁定等级一并重置
         var current = previous is not null && now - previous.LastFailedAt <= Options.ResetAfter ? previous : null;
         var count = (current?.FailureCount ?? 0) + 1;
         var level = current?.LockLevel ?? 0;

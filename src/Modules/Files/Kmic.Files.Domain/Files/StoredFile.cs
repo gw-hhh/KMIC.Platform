@@ -7,22 +7,20 @@ using Kmic.Files.Domain.Errors;
 namespace Kmic.Files.Domain.Files;
 
 /// <summary>
-/// 一个文件：元数据、状态、引用
+/// 存储文件
 /// </summary>
 /// <remarks>
-/// 内容在对象存储里，这里只有元数据。状态流转记入业务历史，可以追溯文件何时、因何被删除。
-/// 批量清理不经聚合的整体加载：把文件改为“删除中”要按关联与清理的互斥协议（排他咨询锁、探查未完成的关联消息、
-/// 带状态条件的更新）由基础设施用 SQL 完成，聚合上的 <see cref="Expire" /> 只用于单个文件的人工处理与测试
+/// 内容保存在对象存储中，状态变更记入业务历史
 /// </remarks>
 public sealed class StoredFile : AggregateRoot<StoredFileId>
 {
     /// <summary>
-    /// 一个文件最多被多少个对象引用：防御性上限，防止一个文件的引用无限增长
+    /// 单文件引用数上限，防止引用集合无限增长
     /// </summary>
     public const int MaxReferences = 100;
 
     /// <summary>
-    /// 模块生成的文件，上传档案名的前缀：Generated:来源。这类文件没有被关联也可以下载，到期清理
+    /// 生成文件的 Profile 前缀，完整值为 Generated:来源。未关联时也可下载，到期可清理
     /// </summary>
     public const string GeneratedProfilePrefix = "Generated:";
 
@@ -46,7 +44,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public string StorageKey { get; private set; }
 
     /// <summary>
-    /// 显示用的文件名：去掉路径与控制字符，只作显示
+    /// 显示文件名
     /// </summary>
     public string OriginalName { get; private set; }
 
@@ -76,18 +74,24 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public string? ObjectVersionId { get; private set; }
 
     /// <summary>
-    /// 上传档案名；生成的文件是 Generated:来源
+    /// 上传配置名称
     /// </summary>
+    /// <remarks>
+    /// 保存上传配置的 Name；生成文件使用 Generated:来源。
+    /// </remarks>
     public string Profile { get; private set; }
 
     /// <summary>
-    /// 上传的人；系统生成的文件没有
+    /// 上传人或生成请求人
     /// </summary>
     public UserId? UploadedBy { get; private set; }
 
     /// <summary>
-    /// 上传开始的时间
+    /// 文件登记时间
     /// </summary>
+    /// <remarks>
+    /// 上传文件在开始上传时记录；生成文件在处理登记消息时记录。
+    /// </remarks>
     public DateTimeOffset UploadedAt { get; private set; }
 
     /// <summary>
@@ -96,22 +100,25 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public StoredFileStatus Status { get; private set; } = null!;
 
     /// <summary>
-    /// 成为清理候选的时间：临时、已解除关联、被拒绝的文件才有，已关联的文件为空
+    /// 清理到期时间
     /// </summary>
+    /// <remarks>
+    /// 到期后成为清理候选，实际清理由文件状态、互斥检查和后台任务决定。
+    /// </remarks>
     public DateTimeOffset? ExpiresAt { get; private set; }
 
     /// <summary>
-    /// 被拒绝的原因：类型不符、超过大小、扫描没通过、写入失败
+    /// 拒绝原因
     /// </summary>
     public string? RejectReason { get; private set; }
 
     /// <summary>
-    /// 彻底删除的时间
+    /// 彻底删除标记时间
     /// </summary>
     public DateTimeOffset? PurgedAt { get; private set; }
 
     /// <summary>
-    /// 彻底删除的人
+    /// 彻底删除操作人
     /// </summary>
     public UserId? PurgedBy { get; private set; }
 
@@ -121,20 +128,21 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public string? PurgeReason { get; private set; }
 
     /// <summary>
-    /// 运维彻底删除历史版本之后登记的时间；为空表示历史版本可能仍在
+    /// 历史版本清除登记时间
     /// </summary>
     public DateTimeOffset? HistoryPurgedAt { get; private set; }
 
     /// <summary>
-    /// 彻底删除历史版本的执行记录，如工单号
+    /// 历史版本清除记录
     /// </summary>
     public string? HistoryPurgeNote { get; private set; }
 
     /// <summary>
-    /// 对象在存储里被删除的时间：只有彻底删除的文件需要，空表示对象还在、等删除工作器处理
+    /// 对象删除登记时间
     /// </summary>
     /// <remarks>
-    /// 只由删除工作器在删除对象之后更新，不经聚合方法；到期清理的文件整行删除，没有这个值
+    /// 删除工作器确认删除成功后登记，包含对象已不存在的情况；为空不代表对象仍在。
+    /// 到期清理会删除整条记录；历史版本另行处理。
     /// </remarks>
     public DateTimeOffset? ObjectDeletedAt { get; private set; }
 
@@ -158,7 +166,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 登记一个模块自己生成的文件（导出结果、系统生成的 PDF）：对象已经写进存储，直接可用，到期没有被关联就清理
+    /// 登记已写入存储的模块生成文件，初始状态为可用，未关联文件到期后可清理
     /// </summary>
     public static StoredFile RegisterGenerated(
         StoredFileId id,
@@ -182,7 +190,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 写入完成：有扫描器时转“扫描中”，否则“可用”，临时文件的清理时间是现在加临时有效期
+    /// 完成上传并设置临时保留期；需要扫描时进入扫描中，否则为可用
     /// </summary>
     public Result CompleteUpload(string fileType, string contentType, long size, string sha256, string? objectVersionId, bool needsScan, DateTimeOffset now, TimeSpan temporaryLifetime)
     {
@@ -199,7 +207,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 扫描通过：转“可用”，清理时间从现在重新算
+    /// 扫描通过后转为可用，重新计算临时保留期
     /// </summary>
     public Result PassScan(DateTimeOffset now, TimeSpan temporaryLifetime)
     {
@@ -213,7 +221,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 拒绝：上传时类型或大小不符、写入失败，或扫描没通过；保留一小段时间就清理
+    /// 将上传或扫描失败的文件标记为被拒绝，保留期满后可清理
     /// </summary>
     public Result Reject(string reason, DateTimeOffset now, TimeSpan retention)
     {
@@ -230,7 +238,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 对象丢失：存储里找不到这个版本的内容，当成被拒绝处理，保留一小段时间就清理
+    /// 将对象丢失的文件标记为被拒绝，保留期满后可清理
     /// </summary>
     public Result MarkLost(string reason, DateTimeOffset now, TimeSpan retention)
     {
@@ -250,8 +258,8 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// 被业务对象关联
     /// </summary>
     /// <remarks>
-    /// 可用或已解除关联的文件转“已关联”；已经是“已关联”的，同一个对象再关联什么也不改（幂等），别的对象再关联只是多一个引用。
-    /// 删除中、已彻底删除的文件不能关联：业务事务已经在锁内检查过可关联性，到这里还失败是程序缺陷
+    /// 可用或已解除关联的文件转为已关联；同一业务对象重复关联不新增引用，其他对象关联会增加引用。
+    /// 删除中或已彻底删除时禁止关联，调用方须在锁内检查文件是否允许关联
     /// </remarks>
     public Result Attach(string ownerModule, string ownerType, Guid ownerId, DateTimeOffset now)
     {
@@ -286,7 +294,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 业务对象解除关联：引用为零时转“已解除关联”，保留期满才清理；引用不存在时什么也不改
+    /// 解除业务引用，最后一个引用解除后进入保留期；引用不存在时直接返回成功
     /// </summary>
     public Result Detach(string ownerModule, string ownerType, Guid ownerId, DateTimeOffset now, TimeSpan retention)
     {
@@ -312,13 +320,21 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 到期进入删除队列：临时、已解除关联、被拒绝的文件
+    /// 将到期文件转为删除中
     /// </summary>
+    /// <remarks>
+    /// 仅允许可用、已解除关联或被拒绝状态，到期条件由调用方检查。
+    /// 清理可用或已解除关联的文件前，调用方须取得排他咨询锁、探查未完成的关联消息，再重读文件并核对到期时间。
+    /// 本方法只校验状态，不获取锁或探查消息
+    /// </remarks>
     public Result Expire(string reason) => _machine.Fire(this, StoredFileAction.Expire, reason);
 
     /// <summary>
-    /// 彻底删除：除“删除中”之外任何状态都可以，之后不能关联、不能恢复；引用保留，引用方显示“文件已删除”
+    /// 标记文件为已彻底删除
     /// </summary>
+    /// <remarks>
+    /// 保留引用，禁止再次关联或恢复；引用方显示“文件已删除”。删除中或已彻底删除时拒绝
+    /// </remarks>
     public Result Purge(string reason, UserId by, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
@@ -352,7 +368,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 当前状态能否执行某个动作，给“可用动作”判断用
+    /// 检查当前状态是否允许指定操作
     /// </summary>
     public Result CanFire(StoredFileAction action) => _machine.CanFire(this, action);
 
@@ -379,7 +395,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
             builder.Permit(from, StoredFileAction.Purge, StoredFileStatus.Purged);
         }
 
-        // 对账发现对象丢失：只有应该有内容的这三种状态会遇到
+        // 对账发现对象丢失
         foreach (var from in new[] { StoredFileStatus.Available, StoredFileStatus.Attached, StoredFileStatus.Detached })
         {
             builder.Permit(from, StoredFileAction.Lose, StoredFileStatus.Rejected);

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Application.Captured.Get;
 
 /// <summary>
-/// 处理 <see cref="GetCapturedQuery"/>
+/// 查询捕获内容详情
 /// </summary>
 public sealed class GetCapturedQueryHandler(INotificationsQueryDb db, IOptions<NotificationsCaptureOptions> capture) : IQueryHandler<GetCapturedQuery, CapturedDetailResponse>
 {

@@ -13,13 +13,13 @@ public sealed class ClientErrorOptions
     public const string Section = "Operations:ClientErrors";
 
     /// <summary>
-    /// 一次请求最多带多少条错误
+    /// 单次请求的错误条数上限
     /// </summary>
     [Range(1, 200)]
     public int MaxPerRequest { get; init; } = 20;
 
     /// <summary>
-    /// 每个用户每分钟最多上报几次请求；超出时 429，前端丢弃不重试。按实例各自计数，是防刷的下限而不是精确限额
+    /// 每用户每分钟的上报请求数上限，超出返回 429，前端丢弃本批且不重试。按实例计数，仅用于防滥用，不保证多实例下的全局精确限额
     /// </summary>
     [Range(1, 10_000)]
     public int RequestsPerUserPerMinute { get; init; } = 30;

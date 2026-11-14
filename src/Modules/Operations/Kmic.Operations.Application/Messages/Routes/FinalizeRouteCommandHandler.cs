@@ -9,11 +9,10 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.Messages.Routes;
 
 /// <summary>
-/// 处理 <see cref="FinalizeRouteCommand"/>
+/// 终结消息订阅路由
 /// </summary>
 /// <remarks>
-/// 写的是路由表和订阅方的收件箱，由框架在同一个事务里完成，不在 Operations 命令的事务里：
-/// 这是框架存储的基础设施写入，和重试、放弃死信一样
+/// 路由表和订阅方收件箱由框架在同一事务中更新，不参与 Operations 命令事务
 /// </remarks>
 public sealed class FinalizeRouteCommandHandler(IMessageRouteAdmin routes, IExecutionContext execution)
     : ICommandHandler<FinalizeRouteCommand, FinalizeRouteResponse>

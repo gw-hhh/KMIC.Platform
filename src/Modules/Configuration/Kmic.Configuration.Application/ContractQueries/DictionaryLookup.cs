@@ -4,10 +4,10 @@ using Kmic.Configuration.Contracts;
 namespace Kmic.Configuration.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IDictionaries"/> 的实现：薄适配器，只把调用转成本模块的查询，经管道执行
+/// 通过查询管道读取字典快照并检查字典项是否可选
 /// </summary>
 /// <remarks>
-/// 读字典没有业务上的失败，失败只可能是基础设施问题，所以失败时抛异常，不让每个调用方都去处理 Result
+/// 类型不存在时返回 null；查询管道返回失败时抛异常，由统一异常处理机制接管
 /// </remarks>
 public sealed class DictionaryLookup(IContractQuerySender sender) : IDictionaries
 {

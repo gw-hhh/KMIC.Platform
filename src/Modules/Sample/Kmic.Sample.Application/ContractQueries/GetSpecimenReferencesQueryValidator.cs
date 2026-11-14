@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.Messaging;
 namespace Kmic.Sample.Application.ContractQueries;
 
 /// <summary>
-/// 校验 <see cref="GetSpecimenReferencesQuery"/>：一次的 ID 数量有上限，适配器负责分批
+/// 示例引用查询的参数校验
 /// </summary>
 internal sealed class GetSpecimenReferencesQueryValidator : AbstractValidator<GetSpecimenReferencesQuery>
 {
@@ -13,5 +13,5 @@ internal sealed class GetSpecimenReferencesQueryValidator : AbstractValidator<Ge
             .NotNull()
             .Must(ids => ids.Count <= ContractBatch.DefaultSize)
             .WithErrorCode("Range")
-            .WithMessage($"一次最多解析 {ContractBatch.DefaultSize} 个标本。");
+            .WithMessage($"一次最多解析 {ContractBatch.DefaultSize} 个示例。");
 }

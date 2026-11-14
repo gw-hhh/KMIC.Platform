@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 生成管理员重置密码时给用户的一次性临时密码
+/// 生成管理员重置密码时使用的临时密码
 /// </summary>
 /// <remarks>
-/// 临时密码要靠人念出来或抄下来交给用户，所以字母表里去掉了容易看错的字符（0 与 O、1 与 l 与 I）。
-/// 用户用它登录后马上要改密码，它只在重置的那次响应里出现，不写日志、不进审计、不经短信或邮件发送
+/// 排除易混淆字符（0、O、1、l、I），便于人工传递。
+/// 临时密码仅在重置响应中返回，不写日志或审计，不通过短信或邮件发送；登录后必须修改密码
 /// </remarks>
 public sealed class TemporaryPasswordGenerator(IOptions<PasswordOptions> settings)
 {

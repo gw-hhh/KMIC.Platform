@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.Settings;
 namespace Kmic.Configuration.Application.Preferences;
 
 /// <summary>
-/// <see cref="IPreferences" /> 的实现：当前用户在当前角色下，本人 → 角色 → 系统 → 默认值，取第一个读得出来的
+/// 按个人层、角色层、系统层依次选择可解析且校验通过的偏好值，否则使用代码默认值
 /// </summary>
 public sealed class PreferencesReader(IExecutionContext execution, IPreferenceLayers layers, PreferenceCatalog catalog) : IPreferences
 {

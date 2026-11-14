@@ -10,7 +10,7 @@ namespace Kmic.Identity.Infrastructure.Access;
 internal static class IdentityCacheKeys
 {
     /// <summary>
-    /// 角色授权快照，键里带版本号，内容不可变，不需要失效
+    /// 角色授权快照，版本变化后使用新的缓存键
     /// </summary>
     public static string RoleSnapshot(RoleId role, long version) => CacheKey.Of(IdentityModuleInfo.Name, "RoleSnapshot", role.Value, version);
 

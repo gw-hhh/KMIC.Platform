@@ -12,8 +12,8 @@ internal sealed class GetMeEndpoint : IEndpoint
         group.MapGet("/me", HandleAsync)
             .Sends<GetMeQuery>()
             .AllowWhenRoleUnavailable()
-            .WithSummary("当前用户")
-            .WithDescription("当前用户、当前角色、可切换的角色、当前角色的权限点、授权版本、是否必须改密码、是否模拟身份和业务时区。当前角色不可用时也能调用，前端据此引导重新选择角色。");
+            .WithSummary("查询当前用户信息")
+            .WithDescription("返回用户资料、当前及可切换角色、当前权限、授权版本、密码修改要求、身份模拟状态和业务时区。当前角色不可用时仍可调用，供前端引导重新选择角色。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetMeQuery(), ct)).ToOk();

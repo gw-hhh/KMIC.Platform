@@ -9,11 +9,11 @@ namespace Kmic.Configuration.Domain.Settings;
 public interface ISystemSettingRepository : IRepository<SystemSettingValue, SystemSettingValueId>
 {
     /// <summary>
-    /// 按设置键取要修改的值行：没有这一行（设置用的是默认值）时得到空
+    /// 按设置键读取待修改的值
     /// </summary>
-    /// <param name="key">设置键</param>
-    /// <param name="expectedVersion">调用方看到的版本号；空表示调用方看到的是默认值，这时已经有这一行就是版本冲突</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 未指定 expectedVersion 时要求尚无保存值，并返回 null；指定版本时要求记录存在且版本一致，否则返回版本冲突
+    /// </remarks>
     Task<Result<SystemSettingValue?>> GetByKeyForUpdateAsync(string key, long? expectedVersion, CancellationToken ct);
 
     /// <summary>

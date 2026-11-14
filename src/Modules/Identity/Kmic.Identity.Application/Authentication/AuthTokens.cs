@@ -10,7 +10,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// </remarks>
 /// <param name="AccessToken">访问令牌</param>
 /// <param name="TokenType">固定为 Bearer</param>
-/// <param name="ExpiresIn">访问令牌还有多少秒过期</param>
+/// <param name="ExpiresIn">访问令牌有效期（秒）</param>
 /// <param name="RefreshToken">刷新令牌；没有新签发时为空</param>
 /// <param name="PasswordChangeRequired">是否必须先修改密码</param>
 public sealed record AuthTokens(

@@ -1,19 +1,19 @@
 namespace Kmic.Files.Application.Uploads;
 
 /// <summary>
-/// 文件名的整理：只作显示用，去掉路径和控制字符，长度有上限
+/// 清理用于显示的文件名，移除路径和控制字符并限制长度
 /// </summary>
 internal static class FileNames
 {
     /// <summary>
-    /// 保存下来的文件名最长多少个字符
+    /// 文件名最大字符数
     /// </summary>
     public const int MaxLength = 200;
 
     private static readonly char[] _separators = ['/', '\\'];
 
     /// <summary>
-    /// 去掉路径部分与控制字符，超长时截断主干、保留扩展名；整理完是空的返回空
+    /// 清理文件名，超长时截断；扩展名不超过 20 个字符时保留，结果为空、"." 或 ".." 时返回 null
     /// </summary>
     /// <param name="fileName">客户端给的文件名</param>
     public static string? Sanitize(string fileName)

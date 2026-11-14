@@ -11,7 +11,7 @@ namespace Kmic.MigrationRunner;
 /// 迁移程序的命令
 /// </summary>
 /// <remarks>
-/// 退出码：0 成功；1 执行失败；2 命令行写错了；3 status 发现有未执行的迁移。
+/// 退出码：0 成功；1 执行失败；2 命令行参数错误；3 status 发现待执行迁移。
 /// 连接串只从配置读（环境变量 Kmic__Migration__ConnectionString 或密钥管理注入），不接受命令行参数，免得出现在进程列表和日志里
 /// </remarks>
 internal static class RunnerApp
@@ -108,7 +108,7 @@ internal static class RunnerApp
         table.AcceptOnlyFromAmong([.. AppendOnlyPurge.Targets.Keys]);
         var days = new Option<int>("--older-than-days")
         {
-            Description = "保留期（天）：发生时间早于这么多天之前的行被删除。保留期由运维按制度给出，没有默认值",
+            Description = "保留期（天），删除发生时间早于保留截止时间的记录；须按运维制度显式指定，无默认值",
             Required = true,
         };
         var batch = new Option<int>("--batch-size")

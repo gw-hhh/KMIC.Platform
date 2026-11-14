@@ -8,7 +8,7 @@ using Kmic.Identity.Domain.Sessions;
 namespace Kmic.Identity.Application.Impersonation.End;
 
 /// <summary>
-/// 处理 <see cref="EndImpersonationCommand"/>
+/// 结束当前身份模拟会话
 /// </summary>
 public sealed class EndImpersonationCommandHandler(ISessionRepository sessions, IExecutionContext execution, ISecurityEventWriter securityEvents, TimeProvider time) : ICommandHandler<EndImpersonationCommand>
 {

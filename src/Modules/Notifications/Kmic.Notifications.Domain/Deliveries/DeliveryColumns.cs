@@ -9,7 +9,7 @@ namespace Kmic.Notifications.Domain.Deliveries;
 public static class DeliveryColumns
 {
     /// <summary>
-    /// 已经尝试发送几次
+    /// 领取次数，人工重试时清零
     /// </summary>
     public const string Attempts = nameof(Attempts);
 

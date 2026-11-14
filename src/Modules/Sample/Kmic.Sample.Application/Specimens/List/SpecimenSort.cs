@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Application.Querying;
 namespace Kmic.Sample.Application.Specimens.List;
 
 /// <summary>
-/// 示例标本列表允许排序的字段
+/// 示例列表允许排序的字段
 /// </summary>
 public static class SpecimenSort
 {

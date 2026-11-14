@@ -1,10 +1,10 @@
 namespace Kmic.Identity.Application;
 
 /// <summary>
-/// 命令里为判断而读取其他数据的入口
+/// 供命令读取跨聚合判断所需的数据
 /// </summary>
 /// <remarks>
-/// 和仓储用同一个上下文、同一个事务：读到的是这个事务里的最新状态，加了咨询锁之后再读，看到的就是别的事务已经提交的结果。
-/// 命令里要判断“还有没有别的管理员”“组织单元是否有启用的用户”这类跨聚合的事实时用它，不用查询侧的 <see cref="IIdentityQueryDb" />
+/// 与仓储共用上下文和事务，须在取得相应咨询锁后读取，才能纳入此前已提交的并发变更。
+/// 用于检查其他管理员是否存在、组织下是否有启用用户等跨聚合事实，不得改用查询侧的 <see cref="IIdentityQueryDb" />
 /// </remarks>
 public interface IIdentityCommandReads : IIdentityReads;

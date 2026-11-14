@@ -3,7 +3,7 @@ namespace Kmic.Configuration.Presentation.Settings;
 /// <summary>
 /// 查询设置变更历史的参数
 /// </summary>
-/// <param name="Key">只看这个设置的；不给就是全部</param>
+/// <param name="Key">设置键筛选，未指定时查询全部设置</param>
 /// <param name="From">起始时间，含</param>
 /// <param name="To">结束时间，不含</param>
 /// <param name="Page">页码，从 1 开始</param>

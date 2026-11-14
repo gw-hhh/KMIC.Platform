@@ -56,4 +56,4 @@ M:Microsoft.AspNetCore.Http.TypedResults.StatusCode(System.Int32);返回 Result�
 # 文件关联：只经 IFileAttachments，它按互斥协议先取锁、检查再发请求（05-11）
 M:Kmic.Files.Contracts.AttachFiles.#ctor(System.Collections.Generic.IReadOnlyList{System.Guid},System.String,System.String,System.Guid);使用 IFileAttachments.AttachAsync，它先取锁、检查再发请求（05-11）
 M:Kmic.Files.Contracts.DetachFiles.#ctor(System.Collections.Generic.IReadOnlyList{System.Guid},System.String,System.String,System.Guid);使用 IFileAttachments.DetachAsync（05-11）
-M:Kmic.Files.Contracts.RegisterGeneratedFile.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.Int64,System.String,System.String,System.Nullable{System.Guid},System.DateTimeOffset);使用 IGeneratedFiles.WriteAsync，它先写入存储再请求登记（05-11）
+M:Kmic.Files.Contracts.RegisterGeneratedFile.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.Int64,System.String,System.String,System.Nullable{System.Guid},System.DateTimeOffset);先用 IGeneratedFiles.WriteAsync 写入存储，再在业务事务中调用 IGeneratedFiles.Register 请求登记

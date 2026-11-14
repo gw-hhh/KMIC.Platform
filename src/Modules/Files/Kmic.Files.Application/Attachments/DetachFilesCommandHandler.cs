@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// 处理 <see cref="DetachFilesCommand"/>
+/// 解除文件与业务对象的关联
 /// </summary>
 public sealed class DetachFilesCommandHandler(IStoredFileRepository files, IOptions<FilesOptions> options, TimeProvider time) : ICommandHandler<DetachFilesCommand>
 {

@@ -6,7 +6,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.Create;
 
 /// <summary>
-/// 新建角色：没有任何权限点，之后用设置权限点与数据范围的命令配置
+/// 创建不含权限点的角色
 /// </summary>
 /// <param name="Name">名称，不区分大小写唯一</param>
 /// <param name="Description">说明</param>

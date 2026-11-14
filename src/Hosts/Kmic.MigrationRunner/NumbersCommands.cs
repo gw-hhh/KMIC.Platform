@@ -44,7 +44,7 @@ internal static class NumbersCommands
         var date = new Option<string>("--date") { Description = $"旧编号所在的日期（{DateFormat}），决定属于哪个周期；周期重置的规则必填" };
         var partition = new Option<string>("--partition") { Description = "分组键，按分组的规则必填" };
 
-        var command = new Command("ensure-at-least", "保证计数不小于给定值：新编号从这个值加一开始；已经更大的计数不会回退，可以重复执行")
+        var command = new Command("ensure-at-least", "将计数提高到至少指定值，不降低已有计数；下一个序号为调整后计数加一，支持重复执行")
         {
             rule,
             value,
@@ -68,7 +68,7 @@ internal static class NumbersCommands
                 return RunnerApp.UsageExitCode;
             }
 
-            // 不重置的规则周期键固定，日期随便取
+            // 不重置的规则使用固定周期键，日期不影响计数范围
             if (!DateOnly.TryParseExact(day ?? "2000-01-01", DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var businessDate))
             {
                 await context.Output.WriteLineAsync($"--date 的格式是 {DateFormat}。");

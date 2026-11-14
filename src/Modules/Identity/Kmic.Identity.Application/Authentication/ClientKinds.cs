@@ -4,7 +4,7 @@ using Kmic.Identity.Domain.Sessions;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 客户端类型在接口上的写法：小写的 web、app
+/// 接口客户端类型编码，使用小写 web 或 app
 /// </summary>
 public static class ClientKinds
 {
@@ -19,7 +19,7 @@ public static class ClientKinds
     public const string App = "app";
 
     /// <summary>
-    /// 解析接口上的写法
+    /// 尝试解析客户端类型编码
     /// </summary>
     public static bool TryParse(string? text, [NotNullWhen(true)] out ClientType? clientType)
     {
@@ -33,13 +33,13 @@ public static class ClientKinds
     }
 
     /// <summary>
-    /// 解析接口上的写法，不认识时抛异常；请求已经校验过，走到这里不认识说明是程序缺陷
+    /// 解析已校验的客户端类型编码；未知编码表示调用缺陷并抛异常
     /// </summary>
     public static ClientType Parse(string text) =>
-        TryParse(text, out var clientType) ? clientType : throw new ArgumentException($"不认识的客户端类型：{text}。", nameof(text));
+        TryParse(text, out var clientType) ? clientType : throw new ArgumentException($"未知客户端类型：{text}。", nameof(text));
 
     /// <summary>
-    /// 令牌里 cty 声明的写法
+    /// 访问令牌中 cty 声明的编码
     /// </summary>
     public static string Claim(ClientType clientType)
     {

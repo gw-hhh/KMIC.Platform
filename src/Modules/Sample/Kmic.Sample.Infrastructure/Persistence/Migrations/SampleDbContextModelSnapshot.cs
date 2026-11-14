@@ -499,11 +499,11 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("OrgUnitId")
                         .HasColumnType("uuid")
-                        .HasComment("所属组织，数据范围按它判断");
+                        .HasComment("所属组织");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
-                        .HasComment("负责人，创建者");
+                        .HasComment("负责人");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -535,7 +535,7 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Specimen", "Sample", t =>
                         {
-                            t.HasComment("示例标本；Sample 模块；一行代表一个标本；可软删除，有状态流转");
+                            t.HasComment("业务模块示例（Sample）：一条记录对应一个示例；草稿可软删除，提交后可关闭");
 
                             t.HasCheckConstraint("CK_Specimen_Status", "\"Status\" IN ('Draft', 'Submitted', 'Closed')");
                         });
@@ -594,7 +594,7 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
 
                     b.ToTable("SpecimenAttachment", "Sample", t =>
                         {
-                            t.HasComment("示例标本的附件；Sample 模块；一行代表一个附件，保存文件 ID 和关联时的快照，随标本一起保存");
+                            t.HasComment("示例附件（Sample）：一条记录对应一个附件，保存文件 ID 及关联时的文件信息，随示例一起保存");
                         });
                 });
 
@@ -640,7 +640,7 @@ namespace Kmic.Sample.Infrastructure.Persistence.Migrations
 
                     b.ToTable("SpecimenItem", "Sample", t =>
                         {
-                            t.HasComment("示例标本的明细；Sample 模块；一行代表一项明细，随标本一起保存");
+                            t.HasComment("示例明细（Sample）：一条记录对应一项明细，随示例一起保存");
                         });
                 });
 

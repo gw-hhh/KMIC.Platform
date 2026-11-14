@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 处理 <see cref="GetFileQuery"/>
+/// 查询文件详情及状态历史
 /// </summary>
 public sealed class GetFileQueryHandler(IFilesQueryDb db, IStateHistoryQuery history) : IQueryHandler<GetFileQuery, FileDetail>
 {

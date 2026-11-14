@@ -9,20 +9,17 @@ namespace Kmic.Notifications.Domain.SiteMessages;
 public interface ISiteMessageRepository : IRepository<SiteMessage, SiteMessageId>
 {
     /// <summary>
-    /// 把一个用户的全部未读消息标为已读
+    /// 将用户的全部未读消息标为已读
     /// </summary>
-    /// <param name="recipient">收件人</param>
-    /// <param name="now">已读时间</param>
-    /// <param name="ct">取消令牌</param>
-    /// <returns>标了几条</returns>
+    /// <returns>标为已读的消息数</returns>
     Task<int> MarkAllReadAsync(UserId recipient, DateTimeOffset now, CancellationToken ct);
 
     /// <summary>
-    /// 删除过期的消息：已读的超过一个期限，未读的超过另一个期限
+    /// 按已读和未读各自的截止时间删除站内消息
     /// </summary>
-    /// <param name="readBefore">已读时间早于它的删除</param>
-    /// <param name="unreadCreatedBefore">没读过且创建时间早于它的删除</param>
-    /// <param name="ct">取消令牌</param>
-    /// <returns>删了几条</returns>
+    /// <remarks>
+    /// 已读消息的已读时间须早于 readBefore；未读消息的发送时间须早于 unreadCreatedBefore
+    /// </remarks>
+    /// <returns>删除的消息数</returns>
     Task<int> PurgeAsync(DateTimeOffset readBefore, DateTimeOffset unreadCreatedBefore, CancellationToken ct);
 }

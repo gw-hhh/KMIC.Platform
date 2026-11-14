@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Infrastructure.Access;
 
 /// <summary>
-/// <see cref="IPermissionCatalogStore" /> 的实现：用写上下文，和命令同一个事务，随命令一起保存
+/// 通过写上下文同步权限点与范围对象目录，与命令共用事务
 /// </summary>
 internal sealed class PermissionCatalogStore(IdentityDbContext context) : IPermissionCatalogStore
 {

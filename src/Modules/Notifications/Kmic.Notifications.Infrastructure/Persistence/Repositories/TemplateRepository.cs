@@ -11,7 +11,7 @@ internal sealed class TemplateRepository(NotificationsDbContext context)
 {
     protected override Error NotFound => NotificationsErrors.TemplateNotFound;
 
-    // 发布和恢复要看全部版本才能算下一个版本号
+    // 加载完整版本历史，供发布时计算下一个版本号
     protected override IQueryable<NotificationTemplate> Aggregate(IQueryable<NotificationTemplate> set) => set.Include(t => t.Versions);
 
     public async Task<Result<NotificationTemplate>> GetByKeyForUpdateAsync(string key, long? expectedVersion, CancellationToken ct)

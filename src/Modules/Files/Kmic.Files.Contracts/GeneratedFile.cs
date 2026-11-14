@@ -4,7 +4,7 @@ namespace Kmic.Files.Contracts;
 /// 已经写进存储、等待登记的生成文件
 /// </summary>
 /// <remarks>
-/// 登记请求的内容都在这里：调用方把它带到要登记的那个命令里，用 <see cref="IGeneratedFiles.Register" /> 登记
+/// 将此结果传入业务命令，并在事务中调用 <see cref="IGeneratedFiles.Register" /> 请求登记
 /// </remarks>
 /// <param name="FileId">文件 ID，登记完成之后用它关联或下载</param>
 /// <param name="StorageKey">对象在存储里的键</param>
@@ -15,8 +15,8 @@ namespace Kmic.Files.Contracts;
 /// <param name="Size">字节数</param>
 /// <param name="Sha256">内容的 SHA-256，小写十六进制</param>
 /// <param name="Source">生成方</param>
-/// <param name="RequestedBy">发起生成的用户；系统生成的没有</param>
-/// <param name="ExpiresAt">到这个时间还没有被关联就清理</param>
+/// <param name="RequestedBy">生成请求人 ID，可为空</param>
+/// <param name="ExpiresAt">未关联文件的清理到期时间</param>
 public sealed record GeneratedFile(
     Guid FileId,
     string StorageKey,

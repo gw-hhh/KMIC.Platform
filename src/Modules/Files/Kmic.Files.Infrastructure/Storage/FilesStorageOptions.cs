@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Infrastructure.Files;
 namespace Kmic.Files.Infrastructure.Storage;
 
 /// <summary>
-/// 文件存储的部署配置：用本地目录还是 S3 兼容的对象存储
+/// 文件存储部署配置，支持本地目录和 S3 兼容存储
 /// </summary>
 public sealed class FilesStorageOptions
 {
@@ -14,13 +14,13 @@ public sealed class FilesStorageOptions
     public const string Section = "Files:Storage";
 
     /// <summary>
-    /// 存储键里的环境名，不能含“/”或“.”：同一个桶可以放几个环境的文件而互不干扰
+    /// 存储键中的环境名，不得含“/”或“.”；用于隔离同一桶中的不同环境
     /// </summary>
     [Required]
     public string Environment { get; init; } = "dev";
 
     /// <summary>
-    /// 用哪种存储：Local 是本地目录（开发、测试），S3 是 S3 兼容的对象存储（生产是阿里云 OSS）
+    /// 存储提供程序：Local 为本地目录（开发、测试），S3 为兼容对象存储（生产使用阿里云 OSS）
     /// </summary>
     [Required]
     public string Provider { get; init; } = "Local";
@@ -31,7 +31,7 @@ public sealed class FilesStorageOptions
     public string LocalRoot { get; init; } = string.Empty;
 
     /// <summary>
-    /// S3 存储的连接设置，Provider 是 S3 时才用；密钥来自密钥源，不进仓库
+    /// S3 连接配置，仅 Provider 为 S3 时使用；密钥从密钥源读取，不写入仓库
     /// </summary>
     public S3FileStorageOptions S3 { get; init; } = new();
 }

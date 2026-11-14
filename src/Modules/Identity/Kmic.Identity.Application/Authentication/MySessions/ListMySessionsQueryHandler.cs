@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Authentication.MySessions;
 
 /// <summary>
-/// 处理 <see cref="ListMySessionsQuery"/>
+/// 查询本人的有效登录会话
 /// </summary>
 public sealed class ListMySessionsQueryHandler(IIdentityQueryDb db, IExecutionContext execution, TimeProvider time) : IQueryHandler<ListMySessionsQuery, IReadOnlyList<MySessionItem>>
 {
@@ -17,7 +17,7 @@ public sealed class ListMySessionsQueryHandler(IIdentityQueryDb db, IExecutionCo
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var access = execution.Access ?? throw new InvalidOperationException("查询登录设备需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("查询登录会话需要已登录的访问上下文。");
         var now = time.GetUtcNow();
         var current = access.SessionId;
         var rows = await db.Sessions

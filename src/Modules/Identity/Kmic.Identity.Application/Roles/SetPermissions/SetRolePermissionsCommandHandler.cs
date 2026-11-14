@@ -12,7 +12,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.SetPermissions;
 
 /// <summary>
-/// 处理 <see cref="SetRolePermissionsCommand"/>
+/// 替换角色权限
 /// </summary>
 public sealed class SetRolePermissionsCommandHandler(
     IRoleRepository roles,
@@ -29,7 +29,7 @@ public sealed class SetRolePermissionsCommandHandler(
         var unknown = command.Permissions.Where(code => !catalog.Contains(code)).Distinct(StringComparer.Ordinal).ToList();
         if (unknown.Count > 0)
         {
-            return IdentityErrors.PermissionUnknown.WithDetail($"不认识的权限点：{string.Join("、", unknown)}");
+            return IdentityErrors.PermissionUnknown.WithDetail($"未声明的权限：{string.Join("、", unknown)}");
         }
 
         var loaded = await RoleAdminLoading.LoadForAsync(roles, db, authorizer, command.Id, command.ExpectedVersion, RoleAdminAction.SetPermissions, access, cancellationToken);

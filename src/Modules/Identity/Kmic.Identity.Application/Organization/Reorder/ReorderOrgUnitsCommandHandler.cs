@@ -9,7 +9,7 @@ using Kmic.Identity.Domain.Organization;
 namespace Kmic.Identity.Application.Organization.Reorder;
 
 /// <summary>
-/// 处理 <see cref="ReorderOrgUnitsCommand"/>
+/// 调整直属下级的顺序
 /// </summary>
 public sealed class ReorderOrgUnitsCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<ReorderOrgUnitsCommand, VersionedResponse<OrgTreeId>>(recheck, execution)

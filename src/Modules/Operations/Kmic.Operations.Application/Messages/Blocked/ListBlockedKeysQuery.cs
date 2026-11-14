@@ -4,12 +4,12 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Operations.Application.Messages.Blocked;
 
 /// <summary>
-/// 被有序订阅里的死信挡住的顺序键
+/// 查询有序订阅中被死信阻塞的顺序键
 /// </summary>
 /// <remarks>
-/// 有序订阅里，同一个键下排在死信后面的消息都在等它：处理掉那条死信（重试，或确认不需要而放弃）才能放开。
-/// 每个模块最多列 500 个键，等得最多的排前面
+/// 同一顺序键中，死信会阻塞后续消息，须重试成功或经检查允许后放弃才能继续。
+/// 每个模块最多返回 500 个键，按等待消息数倒序排列
 /// </remarks>
-/// <param name="Module">只看这个模块的；不给就是全部模块</param>
+/// <param name="Module">模块筛选，未指定时查询全部模块</param>
 [RequirePermission(OperationsPermissions.MessagesView)]
 public sealed record ListBlockedKeysQuery(string? Module) : IQuery<IReadOnlyList<BlockedKeyItem>>;

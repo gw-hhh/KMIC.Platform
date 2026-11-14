@@ -6,7 +6,7 @@ namespace Kmic.Identity.Presentation.Users;
 /// 查询用户列表的参数
 /// </summary>
 /// <param name="Q">关键字，在账号、姓名、英文名、工号、手机号里模糊匹配</param>
-/// <param name="Status">状态编码，重复参数名可以给多个，如 status=Active&amp;status=Disabled</param>
+/// <param name="Status">状态编码，多个值须重复参数名，如 status=Active&amp;status=Disabled</param>
 /// <param name="RoleId">只看拥有这个角色的用户</param>
 /// <param name="OrgUnitId">只看直接属于这个组织单元的用户</param>
 /// <param name="Page">页码，从 1 开始</param>

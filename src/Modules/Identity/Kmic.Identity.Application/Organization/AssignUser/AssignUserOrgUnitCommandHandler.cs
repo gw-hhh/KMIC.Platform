@@ -14,7 +14,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Organization.AssignUser;
 
 /// <summary>
-/// 处理 <see cref="AssignUserOrgUnitCommand"/>
+/// 设置用户所属组织
 /// </summary>
 public sealed class AssignUserOrgUnitCommandHandler(
     IUserRepository users,
@@ -28,7 +28,7 @@ public sealed class AssignUserOrgUnitCommandHandler(
     /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(AssignUserOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
-        // 锁住组织树这一行再检查单元是否启用：停用单元的命令同样先锁树，不会在这边检查通过之后单元被停用
+        // 先锁定组织树，防止检查通过后组织单元被并发停用
         var tree = await trees.GetForUpdateLockedAsync(OrgTreeId.Default, null, cancellationToken);
         if (tree.IsFailure)
         {

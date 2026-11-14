@@ -12,8 +12,8 @@ internal sealed class GetCapturedEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/captured/{id}", HandleAsync)
             .Sends<GetCapturedQuery>()
-            .WithSummary("查询一条捕获的通知内容")
-            .WithDescription("包含正文。没有开启捕获（生产环境）时返回 404。内容可能含验证码，查看会记读审计。");
+            .WithSummary("查询捕获内容详情")
+            .WithDescription("返回捕获内容及正文。未开启捕获或记录不存在时返回 404。内容可能含验证码，查看会记录读审计。");
 
     private static async Task<IResult> HandleAsync([Description("捕获内容 ID")] CapturedMessageId id, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetCapturedQuery(id), ct)).ToOk();

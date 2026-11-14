@@ -12,14 +12,12 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// <see cref="IFileAttachments"/> 的实现：关联与清理的互斥协议
+/// 为业务对象关联文件或解除文件关联
 /// </summary>
 /// <remarks>
-/// 步骤：按文件 ID 取事务级共享咨询锁；取到锁之后检查文件现在能不能关联，不经缓存、不看到期时间；
-/// 发 AttachFiles，和业务关联行同一个事务提交，锁持有到提交。清理一方取排他锁、探查未完成的关联消息后才删除，
-/// 所以到期的文件在业务事务提交之前不会被删。
-/// 检查要用系统身份（它是只给系统调用的契约查询），所以另开一个系统身份的作用域去调；读到的是已经提交的状态，
-/// 清理改状态的事务先提交再放锁，我们取到共享锁时它已经提交了
+/// 获取文件锁后检查是否允许关联，再发送关联请求；文件锁持有到业务事务结束。
+/// 清理任务使用同一文件的排他锁，防止关联期间文件被删除。
+/// 可关联性检查使用系统身份，直接查询已提交的数据，不使用缓存或按到期时间拒绝关联
 /// </remarks>
 public sealed class FileAttachments(
     ITransactionLocks locks,
@@ -70,7 +68,7 @@ public sealed class FileAttachments(
         return ids.Select(id => byId[id]).ToList();
     }
 
-    // 构造函数注入的服务带着调用者的身份；检查必须用系统身份，只能从刚建的系统作用域里取。这是唯一的例外，所以逐处豁免
+    // 从系统作用域解析检查服务，使查询以系统身份执行
     [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "检查要用系统身份，服务只能从系统作用域里取，不能构造函数注入")]
     private async Task<IReadOnlyList<FileSnapshot>> CheckAsSystemAsync(IReadOnlyCollection<Guid> ids, UserId uploader, CancellationToken ct)
     {

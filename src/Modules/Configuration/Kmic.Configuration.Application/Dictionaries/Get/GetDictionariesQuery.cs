@@ -4,12 +4,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Configuration.Application.Dictionaries.Get;
 
 /// <summary>
-/// 取一批字典：前端启动时和字典变化后拉
+/// 批量查询字典，供前端启动及字典变更后加载
 /// </summary>
 /// <remarks>
-/// 登录即可，不需要权限点。含停用的项并带状态，前端据此把历史数据显示成“已停用”。一次最多 20 个类型；
-/// 不存在的类型不出现在结果里
+/// 登录即可，返回字典项及启用状态，包含历史数据显示所需的已停用项。一次最多查询 20 个类型，不存在的类型不返回
 /// </remarks>
-/// <param name="Types">字典类型编码</param>
 [AllowAuthenticated]
 public sealed record GetDictionariesQuery(IReadOnlyList<string> Types) : IQuery<DictionariesResponse>;

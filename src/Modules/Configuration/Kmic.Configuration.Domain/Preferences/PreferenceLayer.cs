@@ -6,7 +6,7 @@ namespace Kmic.Configuration.Domain.Preferences;
 /// 偏好存在哪一层
 /// </summary>
 /// <remarks>
-/// 读取时由下往上取第一个有值的：用户在当前角色下的设置、角色、系统，都没有就用代码里的默认值
+/// 按允许的个人层、角色层、系统层依次选择可用值；均无可用值时使用代码默认值
 /// </remarks>
 public sealed class PreferenceLayer : Enumeration<PreferenceLayer>
 {

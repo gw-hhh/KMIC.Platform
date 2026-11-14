@@ -8,8 +8,8 @@ namespace Kmic.Notifications.Application.Templates.Sync;
 /// </summary>
 /// <remarks>
 /// 启动任务，迁移之后、接收请求之前执行。新声明的登记，声明变了的更新，代码里已经删掉的标为退役。
-/// 多个实例同时启动时只有一个做同步，其余直接跳过
+/// 同步锁已被其他实例持有时跳过，不等待
 /// </remarks>
 [SystemOnly]
-[NotAudited("目录同步，没有操作人")]
+[NotAudited("按代码声明同步模板目录")]
 public sealed record SyncTemplateCatalogCommand : ICommand<TemplateSyncResult>;

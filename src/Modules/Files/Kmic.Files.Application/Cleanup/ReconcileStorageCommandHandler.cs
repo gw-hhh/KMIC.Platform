@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Cleanup;
 
 /// <summary>
-/// 处理 <see cref="ReconcileStorageCommand"/>
+/// 核对文件记录与存储对象并处理差异
 /// </summary>
 public sealed class ReconcileStorageCommandHandler(
     IStorageInventory storage,
@@ -32,7 +32,7 @@ public sealed class ReconcileStorageCommandHandler(
         var now = time.GetUtcNow();
         var cutoff = now - options.Value.ReconcileMinAge;
 
-        // 先全部查清楚再动手：差异太多时整个放弃，不留下做了一半的处理
+        // 先收集差异并校验结果；空清单异常或差异数量超限时，不执行删除和问题登记
         var scan = await ScanStorageAsync(cutoff, cancellationToken);
         var missing = await FindMissingAsync(scan.Present, cutoff, cancellationToken);
         var limit = options.Value.ReconcileMaxChanges;
@@ -53,7 +53,6 @@ public sealed class ReconcileStorageCommandHandler(
             $"检查了 {scan.Present.Count} 个对象、{missing.Examined} 个文件；删除存储里多出的对象 {scan.Orphans.Count} 个，记录存储问题 {recorded} 个");
     }
 
-    // 列出存储里的对象，边列边找出库里没有记录的
     private async Task<StorageScan> ScanStorageAsync(DateTimeOffset cutoff, CancellationToken ct)
     {
         var present = new HashSet<Guid>();
@@ -78,8 +77,7 @@ public sealed class ReconcileStorageCommandHandler(
         return new StorageScan(present, orphans);
     }
 
-    // 先探查消息再查库：登记请求处理完之前一定先在消息里。反过来先查库的话，
-    // 请求恰好在两次查询之间处理完，就会把刚登记的文件当成多余的对象
+    // 先查未完成的登记消息，再查文件记录，避免登记在两次查询之间提交时误删对象
     private async Task<IReadOnlyList<InventoryObject>> FindOrphansAsync(List<InventoryObject> batch, CancellationToken ct)
     {
         if (batch.Count == 0)
@@ -92,7 +90,7 @@ public sealed class ReconcileStorageCommandHandler(
         return [.. batch.Where(o => !pending.Contains(o.FileId) && !known.Contains(StoredFileId.From(o.FileId)))];
     }
 
-    // 库里应该有对象的文件，对象不在列表里的。列表可能比查库早一点，所以逐个再确认一次当前对象
+    // 清单与文件记录可能不同步，逐个确认当前对象是否缺失，避免误报
     private async Task<MissingFiles> FindMissingAsync(HashSet<Guid> present, DateTimeOffset cutoff, CancellationToken ct)
     {
         var missing = new List<StoredObjectRef>();
@@ -142,7 +140,7 @@ public sealed class ReconcileStorageCommandHandler(
         return recorded;
     }
 
-    // 读到之后文件的状态可能变了（刚被清理或彻底删除），那就不再算存储问题
+    // 重读文件并校验状态，避免将已进入删除流程的文件标记为丢失
     private async Task<bool> MarkLostAsync(StoredFileId id, DateTimeOffset now, CancellationToken ct)
     {
         var loaded = await files.GetForUpdateAsync(id, null, ct);

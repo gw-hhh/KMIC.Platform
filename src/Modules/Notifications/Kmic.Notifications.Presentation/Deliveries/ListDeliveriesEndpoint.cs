@@ -13,7 +13,7 @@ internal sealed class ListDeliveriesEndpoint : IEndpoint
             .Sends<ListDeliveriesQuery>()
             .Sortable(DeliverySort.Map)
             .WithSummary("查询投递记录")
-            .WithDescription("每条是把一条通知用一个渠道发给一个收件人：状态、脱敏地址、尝试次数、失败原因，不含正文。可以按收件用户、渠道、状态、模板、创建时间筛选，分页。");
+            .WithDescription("分页返回投递状态、脱敏地址、领取次数和失败原因，不含正文。每条记录对应一个收件人和一个渠道，可按收件用户、渠道、状态、模板和创建时间筛选。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListDeliveriesRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(

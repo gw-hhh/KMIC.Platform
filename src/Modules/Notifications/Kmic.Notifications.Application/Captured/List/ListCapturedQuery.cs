@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.Captured.List;
 
 /// <summary>
-/// 查询非生产环境捕获的通知内容：本该发出去的邮件和短信
+/// 查询捕获的通知内容列表
 /// </summary>
 /// <remarks>
-/// 不显示正文。没有开启捕获（生产环境）时返回找不到。内容可能含验证码，查询会记读审计
+/// 列表不含正文；未开启捕获时返回找不到。内容可能含验证码，查询须记录读审计
 /// </remarks>
 /// <param name="Channel">按渠道筛选：Email、Sms</param>
 /// <param name="Page">分页</param>

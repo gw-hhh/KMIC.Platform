@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Application.Templates.List;
 
 /// <summary>
-/// 处理 <see cref="ListTemplatesQuery"/>
+/// 查询通知模板列表
 /// </summary>
 public sealed class ListTemplatesQueryHandler(INotificationsQueryDb db) : IQueryHandler<ListTemplatesQuery, TemplateListResponse>
 {

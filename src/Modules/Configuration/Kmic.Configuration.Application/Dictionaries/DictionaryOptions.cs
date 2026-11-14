@@ -13,7 +13,7 @@ public sealed class DictionaryOptions
     public const string Section = "Configuration:Dictionary";
 
     /// <summary>
-    /// 一个字典类型最多多少个字典项：整个类型一起加载、一起缓存，所以有上限
+    /// 单个字典类型的字典项数量上限，限制整体加载和缓存的规模
     /// </summary>
     [Range(10, 20_000)]
     public int MaxItemsPerType { get; init; } = 2000;

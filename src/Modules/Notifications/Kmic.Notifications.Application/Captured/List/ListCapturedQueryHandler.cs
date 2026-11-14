@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Application.Captured.List;
 
 /// <summary>
-/// 处理 <see cref="ListCapturedQuery"/>
+/// 查询捕获内容列表
 /// </summary>
 public sealed class ListCapturedQueryHandler(INotificationsQueryDb db, IOptions<NotificationsCaptureOptions> capture)
     : IQueryHandler<ListCapturedQuery, PagedResult<CapturedListItem>>

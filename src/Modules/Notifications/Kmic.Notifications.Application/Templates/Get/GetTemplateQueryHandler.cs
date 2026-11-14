@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Application.Templates.Get;
 
 /// <summary>
-/// 处理 <see cref="GetTemplateQuery"/>
+/// 查询通知模板及其版本
 /// </summary>
 public sealed class GetTemplateQueryHandler(INotificationsQueryDb db, NotificationTemplateCatalog catalog) : IQueryHandler<GetTemplateQuery, TemplateDetailResponse>
 {

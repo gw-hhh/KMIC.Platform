@@ -7,8 +7,8 @@ namespace Kmic.Identity.Application.Users.Enable;
 /// <summary>
 /// 启用用户
 /// </summary>
-/// <param name="Id">用户</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
+/// <param name="Id">用户 ID</param>
+/// <param name="ExpectedVersion">预期版本号，不匹配时返回版本冲突</param>
 [RequirePermission(IdentityPermissions.UserManage)]
 [Audited]
 [Idempotent]

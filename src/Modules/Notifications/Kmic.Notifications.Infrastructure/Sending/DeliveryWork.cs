@@ -13,12 +13,12 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Infrastructure.Sending;
 
 /// <summary>
-/// 投递队列：领取待发送的投递，在事务之外调用渠道，再用带令牌条件的语句记录结果
+/// 处理投递队列，在数据库事务之外调用发送渠道，再按领取令牌记录结果
 /// </summary>
 /// <remarks>
-/// 领取循环由框架提供，这里只写怎样领取、怎样发一条。发送时向 Identity 取收件人最新的联系方式，
-/// 已经禁用或没有地址的记为已跳过。含密模板有有效期，过了不再发送，发完或最终失败就清空正文。
-/// 暂时失败的按尝试次数退避，次数用完或永久失败的转为失败，等人工处理
+/// 队列循环由框架提供。发送时查询系统用户的最新联系方式；用户不存在、已禁用或无地址时记为已跳过。
+/// 含密投递超过创建后的有效期时不再发送；成功、最终失败或跳过时清空正文及短信参数。
+/// 暂时失败退避重试，达到次数上限或永久失败时标记为失败，等待人工处理
 /// </remarks>
 internal sealed class DeliveryWork(
     IExecutionScopeFactory scopes,
@@ -71,7 +71,7 @@ internal sealed class DeliveryWork(
         await RecordResultAsync(item, token, result, secret, ct);
     }
 
-    // 用户收件人向 Identity 取最新的联系方式；直接给的地址就是记录里的那个
+    // 系统用户使用 Identity 中的最新地址；外部收件人使用投递记录中的地址
     private async Task<(string? Address, DeliverySkipReason? Skip)> ResolveAddressAsync(DeliveryItem item, CancellationToken ct)
     {
         if (item.RecipientUserId is not { } userId)
@@ -95,7 +95,7 @@ internal sealed class DeliveryWork(
         return string.IsNullOrWhiteSpace(address) ? (null, DeliverySkipReason.NoAddress) : (address.Trim(), null);
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "渠道客户端的任何异常（网络、超时、协议）都按暂时失败处理：记录原因、退避重试，不能让这一条影响别的")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "未取消时，将发送异常记为暂时失败并退避重试，避免单条投递中断队列处理")]
     private async Task<SendResult> SendAsync(DeliveryItem item, string senderProfile, string address, CancellationToken ct)
     {
         try

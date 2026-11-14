@@ -6,7 +6,7 @@ using Kmic.Identity.Contracts;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IRoleReferences"/> 的实现：薄适配器，只把调用转成本模块的查询，经管道执行
+/// 通过查询管道分批解析角色引用
 /// </summary>
 public sealed class RoleReferences(IContractQuerySender sender) : IRoleReferences
 {

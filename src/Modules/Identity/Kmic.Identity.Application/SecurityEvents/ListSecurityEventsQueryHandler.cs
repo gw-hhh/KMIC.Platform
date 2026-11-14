@@ -7,7 +7,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.SecurityEvents;
 
 /// <summary>
-/// 处理 <see cref="ListSecurityEventsQuery"/>
+/// 查询安全事件列表
 /// </summary>
 public sealed class ListSecurityEventsQueryHandler(IIdentityQueryDb db) : IQueryHandler<ListSecurityEventsQuery, PagedResult<SecurityEventItem>>
 {

@@ -10,12 +10,11 @@ namespace Kmic.Identity.Infrastructure.Persistence.Repositories;
 internal sealed class UserRepository(IdentityDbContext context)
     : EfRepository<IdentityDbContext, User, UserId>(context), IUserRepository
 {
-    // 咨询锁的键只要在整个库里不和别的用途撞上；Identity 只有这一处用咨询锁
+    // 受保护角色持有人检查共用此咨询锁键，须与其他锁用途区分
     private const long ProtectedHolderLockKey = 0x4B4D_4943_0001;
 
     protected override Error NotFound => IdentityErrors.UserNotFound;
 
-    // 授予与锚点总是一起加载
     protected override IQueryable<User> Aggregate(IQueryable<User> set) => set.Include(u => u.Grants).ThenInclude(g => g.Anchors);
 
     public async Task<User?> FindByAccountAsync(string account, CancellationToken ct) =>

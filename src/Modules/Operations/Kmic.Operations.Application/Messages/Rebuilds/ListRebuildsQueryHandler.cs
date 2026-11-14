@@ -6,7 +6,7 @@ using Kmic.Operations.Domain.Messages;
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
 /// <summary>
-/// 处理 <see cref="ListRebuildsQuery"/>
+/// 查询读模型重建记录
 /// </summary>
 public sealed class ListRebuildsQueryHandler(IReadModelRebuildAdmin rebuilds) : IQueryHandler<ListRebuildsQuery, IReadOnlyList<RebuildItem>>
 {

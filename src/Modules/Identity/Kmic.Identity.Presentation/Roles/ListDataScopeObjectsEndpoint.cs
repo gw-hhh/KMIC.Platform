@@ -11,7 +11,7 @@ internal sealed class ListDataScopeObjectsEndpoint : IEndpoint
         group.MapGet("/data-scope-objects", HandleAsync)
             .Sends<ListDataScopeObjectsQuery>()
             .WithSummary("查询数据范围对象目录")
-            .WithDescription("可以单独设置范围等级的对象。");
+            .WithDescription("返回可单独配置数据范围等级的对象。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListDataScopeObjectsQuery(), ct)).ToOk();

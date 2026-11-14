@@ -20,11 +20,11 @@ internal sealed class SystemSettingRepository(ConfigurationDbContext context)
             .SingleOrDefaultAsync(ct);
         if (id is null)
         {
-            // 调用方说它看到的是某个版本，值行却已经没有了：别人在这期间恢复了默认值
+            // 带版本号但设置值已不存在，按版本冲突处理
             return expectedVersion is null ? (SystemSettingValue?)null : CommonErrors.VersionConflict;
         }
 
-        // 调用方没给版本号，说明它看到的是默认值，而现在已经有人改过了
+        // 未带版本号表示读取时没有设置值，现在已有值则发生了版本冲突
         if (expectedVersion is null)
         {
             return CommonErrors.VersionConflict;

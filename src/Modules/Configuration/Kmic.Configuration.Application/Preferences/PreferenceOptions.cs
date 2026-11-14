@@ -13,7 +13,7 @@ public sealed class PreferenceOptions
     public const string Section = "Configuration:Preference";
 
     /// <summary>
-    /// 偏好族的一个值最大多少 KB：后端不理解族里的内容，只限制大小
+    /// 单个偏好族值的大小上限（KB），后端不按业务模型解释其内容
     /// </summary>
     [Range(1, 256)]
     public int FamilyValueMaxKb { get; init; } = 16;

@@ -6,12 +6,12 @@ using Kmic.Operations.Domain.Audit;
 namespace Kmic.Operations.Application.Audit;
 
 /// <summary>
-/// 审计记录的筛选条件：列表和导出用同一份，导出的就是列表筛出来的全部
+/// 审计列表和导出共用的筛选条件
 /// </summary>
 internal static class AuditFilters
 {
     /// <summary>
-    /// 套上筛选条件，没给的条件不筛
+    /// 按指定条件筛选审计记录
     /// </summary>
     public static IQueryable<AuditLog> Apply(
         IOperationsQueryDb db,
@@ -48,7 +48,7 @@ internal static class AuditFilters
         return TargetFilter(resourceType, resourceId) is { } targets ? db.WithTarget(audits, targets) : audits;
     }
 
-    // 只写给了的条件：对象类型和对象 ID 可以只给一个
+    // 类型和 ID 可单独筛选，未指定的字段不写入条件
     private static string? TargetFilter(string? resourceType, Guid? resourceId)
     {
         if (resourceType is not { Length: > 0 } && resourceId is null)

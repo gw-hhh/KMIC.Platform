@@ -7,13 +7,9 @@ namespace Kmic.Identity.Application.Users.Grants.RevokeRole;
 /// <summary>
 /// 收回用户的一个角色
 /// </summary>
-/// <remarks>
-/// 不能改自己的授予；受保护角色只有当前角色也是受保护角色的人才能收回；
-/// 不能收回最后一个启用的受保护角色持有人的受保护角色。正在用这个角色的会话，下一个请求起得到 403，要重新选择角色
-/// </remarks>
-/// <param name="Id">用户</param>
-/// <param name="ExpectedVersion">调用方看到的用户版本号，别人改过就返回版本冲突</param>
-/// <param name="RoleId">角色</param>
+/// <param name="Id">用户 ID</param>
+/// <param name="ExpectedVersion">用户的预期版本号，不匹配时返回版本冲突</param>
+/// <param name="RoleId">角色 ID</param>
 [RequirePermission(IdentityPermissions.UserGrant)]
 [Audited]
 [Idempotent]

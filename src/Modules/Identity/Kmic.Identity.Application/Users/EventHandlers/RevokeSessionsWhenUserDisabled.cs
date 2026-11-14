@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Users.EventHandlers;
 /// 用户被禁用：作废他的全部会话，含他作为实际操作人发起的模拟会话
 /// </summary>
 /// <remarks>
-/// 和禁用命令在同一个事务里。会话状态只是记录，正确性不依赖它：每个请求都会连同用户状态一起查
+/// 与禁用命令共用事务；请求还会检查用户状态，禁用期间拒绝访问
 /// </remarks>
 internal sealed class RevokeSessionsWhenUserDisabled(ISessionRepository sessions, TimeProvider time) : IDomainEventHandler<UserDisabled>
 {

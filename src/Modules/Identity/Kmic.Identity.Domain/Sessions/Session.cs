@@ -7,8 +7,7 @@ namespace Kmic.Identity.Domain.Sessions;
 /// 会话：一次登录的服务端记录
 /// </summary>
 /// <remarks>
-/// 访问令牌里只有用户、会话和角色三个标识，每个请求按会话状态判断是否还有效，
-/// 所以作废会话立即生效，不必等访问令牌过期。刷新令牌每次换新，旧令牌在宽限期之外再次出现就作废整个会话
+/// 访问令牌携带会话标识，每次请求都会检查会话状态；会话作废后，后续请求被拒绝，无需等待令牌过期
 /// </remarks>
 public sealed class Session : AggregateRoot<SessionId>
 {
@@ -40,7 +39,7 @@ public sealed class Session : AggregateRoot<SessionId>
     public ClientType ClientType { get; private set; }
 
     /// <summary>
-    /// 设备名称，App 上报或由 User-Agent 解析
+    /// 登录时的 User-Agent
     /// </summary>
     public string? DeviceName { get; private set; }
 
@@ -70,8 +69,11 @@ public sealed class Session : AggregateRoot<SessionId>
     public DateTimeOffset LastRefreshedAt { get; private set; }
 
     /// <summary>
-    /// 滑动过期时间
+    /// 刷新令牌或模拟会话到期时间
     /// </summary>
+    /// <remarks>
+    /// 普通会话随刷新令牌续期；模拟会话不签发刷新令牌，此值为会话到期时间。
+    /// </remarks>
     public DateTimeOffset RefreshExpiresAt { get; private set; }
 
     /// <summary>
@@ -105,7 +107,7 @@ public sealed class Session : AggregateRoot<SessionId>
     public bool IsImpersonation => ImpersonatorUserId is not null;
 
     /// <summary>
-    /// 开始一个普通会话，同时签发第一个刷新令牌
+    /// 创建普通会话，保存首个刷新令牌的哈希
     /// </summary>
     public static Session Start(
         UserId userId,
@@ -134,7 +136,7 @@ public sealed class Session : AggregateRoot<SessionId>
     }
 
     /// <summary>
-    /// 开始一个模拟会话：不签发刷新令牌，到期就结束，不超过 <paramref name="lifetime" />
+    /// 创建模拟会话，不签发刷新令牌，按指定时长到期失效
     /// </summary>
     public static Session StartImpersonation(
         UserId targetUserId,
@@ -164,7 +166,7 @@ public sealed class Session : AggregateRoot<SessionId>
     }
 
     /// <summary>
-    /// 此刻是否还能用：没有作废，也没有超过绝对上限
+    /// 会话未作废，且当前时间早于绝对到期时间
     /// </summary>
     public bool IsUsable(DateTimeOffset now) => Status == SessionStatus.Active && now < AbsoluteExpiresAt;
 
@@ -172,14 +174,9 @@ public sealed class Session : AggregateRoot<SessionId>
     /// 用刷新令牌换新令牌
     /// </summary>
     /// <remarks>
-    /// 会话当前的令牌正常轮换；刚被轮换掉的旧令牌在宽限期内再次出现，视为多个标签页并发刷新，
-    /// 从当前的令牌继续轮换；宽限期之外的旧令牌再次出现是重用，整个会话作废
+    /// 旧令牌在宽限期内再次使用时，从当前令牌继续轮换；超出宽限期则作废整个会话。
+    /// 新令牌按滑动有效期计算到期时间，且不晚于会话绝对到期时间
     /// </remarks>
-    /// <param name="presentedHash">客户端出示的令牌的哈希</param>
-    /// <param name="newHash">新令牌的哈希</param>
-    /// <param name="now">当前时间</param>
-    /// <param name="refreshLifetime">滑动有效期</param>
-    /// <param name="grace">并发刷新的宽限期</param>
     public Rotation Rotate(string presentedHash, string newHash, DateTimeOffset now, TimeSpan refreshLifetime, TimeSpan grace)
     {
         ArgumentNullException.ThrowIfNull(presentedHash);
@@ -217,12 +214,13 @@ public sealed class Session : AggregateRoot<SessionId>
     }
 
     /// <summary>
-    /// 出示的令牌是不是被重用：它是已被换掉的旧令牌，并且已经过了宽限期；是的话作废整个会话
+    /// 核实刷新令牌重用并作废会话
     /// </summary>
     /// <remarks>
-    /// 刷新命令发现重用时会失败回滚，作废要靠这个方法在另一个事务里重新核实后完成
+    /// 仅在会话仍可用、旧令牌已使用且超过宽限期时作废。
+    /// 刷新命令失败会回滚，须在独立事务中重新核实并作废
     /// </remarks>
-    /// <returns>确实是重用并且这次作废了会话时为真</returns>
+    /// <returns>本次作废会话时返回 true，否则返回 false</returns>
     public bool RevokeIfReused(string presentedHash, DateTimeOffset now, TimeSpan grace)
     {
         ArgumentNullException.ThrowIfNull(presentedHash);
@@ -243,7 +241,7 @@ public sealed class Session : AggregateRoot<SessionId>
     public void SwitchRole(RoleId roleId) => CurrentRoleId = roleId;
 
     /// <summary>
-    /// 作废；已经作废的保持最初的原因
+    /// 作废会话；已作废时保留原原因和时间
     /// </summary>
     public void Revoke(RevokeReason reason, DateTimeOffset now)
     {

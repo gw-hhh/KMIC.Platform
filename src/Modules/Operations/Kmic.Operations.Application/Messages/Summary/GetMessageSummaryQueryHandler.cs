@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.Messages.Summary;
 
 /// <summary>
-/// 处理 <see cref="GetMessageSummaryQuery"/>
+/// 汇总各模块的消息积压
 /// </summary>
 public sealed class GetMessageSummaryQueryHandler(IModuleMessageStores stores) : IQueryHandler<GetMessageSummaryQuery, MessageSummaryResponse>
 {

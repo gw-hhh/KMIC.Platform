@@ -12,11 +12,11 @@ namespace Kmic.Notifications.Application.Templates.Get;
 /// <param name="SenderProfile">发件账号名，只对邮件渠道有意义</param>
 /// <param name="CarriesSecret">内容含一次性短时凭据</param>
 /// <param name="Status">状态编码：Active、Retired</param>
-/// <param name="ConcurrencyVersion">并发版本号，发布和恢复时作为期望版本传回，输出为 version</param>
+/// <param name="ConcurrencyVersion">并发版本号，以 version 输出；发布或恢复默认时用作预期版本号</param>
 /// <param name="Channels">各渠道当前的内容</param>
 /// <param name="Variables">模板里能用的变量名</param>
 /// <param name="Example">示例数据，预览默认用它；代码里已经删掉的模板没有</param>
-/// <param name="Versions">发布过的版本，新的在前</param>
+/// <param name="Versions">已发布版本，按版本号倒序</param>
 public sealed record TemplateDetailResponse(
     string Key,
     string DisplayName,

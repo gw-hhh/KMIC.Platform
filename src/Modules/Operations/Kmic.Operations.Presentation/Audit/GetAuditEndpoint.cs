@@ -12,8 +12,8 @@ internal sealed class GetAuditEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/audit/{id}", HandleAsync)
             .Sends<GetAuditQuery>()
-            .WithSummary("查询一条审计记录的详情")
-            .WithDescription("含字段级变更与补充说明；操作人、角色的名称实时解析，已经不存在的显示为空。这个查询本身也会留下读取审计。");
+            .WithSummary("查询审计记录详情")
+            .WithDescription("包含字段变更和补充说明。操作人、角色名称实时查询，不存在时返回 null。查询本身也记录读取审计。");
 
     private static async Task<IResult> HandleAsync([Description("审计记录 ID")] AuditLogId id, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetAuditQuery(id), ct)).ToOk();

@@ -16,27 +16,27 @@ namespace Kmic.Notifications.Domain.Templates;
 public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
 {
     /// <summary>
-    /// 模板键最长多少个字符
+    /// 模板键最大长度
     /// </summary>
     public const int KeyMaxLength = 200;
 
     /// <summary>
-    /// 显示名最长多少个字符
+    /// 显示名最大长度
     /// </summary>
     public const int DisplayNameMaxLength = 100;
 
     /// <summary>
-    /// 模块名最长多少个字符
+    /// 模块名最大长度
     /// </summary>
     public const int ModuleMaxLength = 50;
 
     /// <summary>
-    /// 发件账号名最长多少个字符
+    /// 发件账号名最大长度
     /// </summary>
     public const int SenderProfileMaxLength = 50;
 
     /// <summary>
-    /// 渠道清单最长多少个字符
+    /// 渠道清单最大长度
     /// </summary>
     public const int ChannelsMaxLength = 50;
 
@@ -125,7 +125,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     public IReadOnlyList<TemplateChannel> ChannelList => [.. TemplateChannel.All.Where(Supports)];
 
     /// <summary>
-    /// 模板有没有这个渠道
+    /// 是否支持指定渠道
     /// </summary>
     public bool Supports(TemplateChannel channel)
     {
@@ -163,19 +163,16 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     }
 
     /// <summary>
-    /// 代码里已经删掉这个模板
+    /// 将已移除声明的模板标为退役
     /// </summary>
     public void Retire() => Status = TemplateStatus.Retired;
 
     /// <summary>
-    /// 在某个渠道发布一个新版本并立即生效
+    /// 发布新版本并设为该渠道的生效版本
     /// </summary>
-    /// <param name="channel">渠道，必须是模板声明过的</param>
-    /// <param name="subject">主题；站内消息里是标题</param>
-    /// <param name="body">正文</param>
-    /// <param name="publishedBy">发布人</param>
-    /// <param name="remark">备注</param>
-    /// <param name="now">现在，作为发布时间</param>
+    /// <remarks>
+    /// 渠道须已声明；主题在站内消息中用作标题
+    /// </remarks>
     public Result<TemplateVersion> Publish(TemplateChannel channel, string subject, string body, UserId publishedBy, string? remark, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(channel);
@@ -234,9 +231,8 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     }
 
     /// <summary>
-    /// 能不能改某个渠道的内容：模板已退役或没有这个渠道都不行
+    /// 检查渠道内容是否可修改；模板已退役或未声明该渠道时返回错误
     /// </summary>
-    /// <param name="channel">渠道</param>
     public Result CanChange(TemplateChannel channel)
     {
         ArgumentNullException.ThrowIfNull(channel);

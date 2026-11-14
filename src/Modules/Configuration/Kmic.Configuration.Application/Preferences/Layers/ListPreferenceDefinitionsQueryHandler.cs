@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Configuration.Application.Preferences.Layers;
 
 /// <summary>
-/// 处理 <see cref="ListPreferenceDefinitionsQuery"/>
+/// 查询偏好定义及系统、角色层的设置值
 /// </summary>
 public sealed class ListPreferenceDefinitionsQueryHandler(IConfigurationQueryDb db, PreferenceCatalog catalog, IRoleReferences roles)
     : IQueryHandler<ListPreferenceDefinitionsQuery, PreferenceDefinitionsResponse>

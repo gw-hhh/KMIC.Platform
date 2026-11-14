@@ -16,7 +16,7 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// <param name="RetiredReason">退役原因，待终结和已终结的才有</param>
 /// <param name="FinalizedAt">终结的时间</param>
 /// <param name="FinalizedBy">终结的人</param>
-/// <param name="DeclaredByBuilds">现在还在运行的实例里，哪些构建声明了它：判断能不能终结要看这个</param>
+/// <param name="DeclaredByBuilds">存活实例中声明该订阅的构建及实例数，供终结前检查</param>
 public sealed record RouteItem(
     string MessageType,
     string Subscription,

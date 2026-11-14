@@ -39,7 +39,7 @@ public sealed class CatalogContent
     }
 
     /// <summary>
-    /// 内容的哈希（SHA-256，小写十六进制）：编码、显示名、敏感与改名信息有任何变化，哈希就变
+    /// 用于比较目录变化的 SHA-256，返回小写十六进制
     /// </summary>
     public string Hash()
     {

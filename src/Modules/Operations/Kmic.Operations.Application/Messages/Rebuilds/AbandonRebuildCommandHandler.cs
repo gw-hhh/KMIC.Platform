@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
 /// <summary>
-/// 处理 <see cref="AbandonRebuildCommand"/>
+/// 放弃读模型重建
 /// </summary>
 public sealed class AbandonRebuildCommandHandler(IReadModelRebuildAdmin rebuilds) : ICommandHandler<AbandonRebuildCommand>
 {

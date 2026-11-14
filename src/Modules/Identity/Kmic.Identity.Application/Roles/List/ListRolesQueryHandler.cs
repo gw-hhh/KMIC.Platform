@@ -6,7 +6,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.List;
 
 /// <summary>
-/// 处理 <see cref="ListRolesQuery"/>
+/// 分页查询角色列表
 /// </summary>
 public sealed class ListRolesQueryHandler(IIdentityQueryDb db) : IQueryHandler<ListRolesQuery, PagedResult<RoleListItem>>
 {

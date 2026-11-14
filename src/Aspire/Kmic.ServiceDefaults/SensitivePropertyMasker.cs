@@ -7,8 +7,8 @@ namespace Kmic.ServiceDefaults;
 /// 按属性名兜底脱敏
 /// </summary>
 /// <remarks>
-/// 脱敏的主要依据是数据分类的声明；这里是最后一道网：名字里带 Password、Token、Secret 等字样的属性，
-/// 不论值是什么都输出成 ***。对象和集合里嵌套的属性同样处理
+/// 以数据分类标注为主要脱敏依据；此处补充遮盖名称含 Password、Token、Secret 等敏感词的属性。
+/// 属性值统一替换为 ***，嵌套对象、字典和集合也递归处理
 /// </remarks>
 internal sealed class SensitivePropertyMasker : ILogEventEnricher
 {

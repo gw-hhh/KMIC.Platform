@@ -5,10 +5,10 @@ using Kmic.Operations.Domain.Jobs;
 namespace Kmic.Operations.Application.ScheduledJobs.Restore;
 
 /// <summary>
-/// 把一个定时任务恢复成代码里的默认开关与执行时间
+/// 恢复定时任务的默认设置
 /// </summary>
 /// <remarks>
-/// 设置行保留、两项清空，便于追溯；之后跟着代码里的默认值变化
+/// 清空自定义启用状态和执行计划，保留设置记录；之后使用代码默认值
 /// </remarks>
 /// <param name="JobName">任务名</param>
 /// <param name="ExpectedVersion">调用方看到的版本号</param>

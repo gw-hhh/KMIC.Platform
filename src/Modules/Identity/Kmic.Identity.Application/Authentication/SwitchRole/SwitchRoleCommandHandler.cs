@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Authentication.SwitchRole;
 
 /// <summary>
-/// 处理 <see cref="SwitchRoleCommand"/>
+/// 切换会话角色并签发访问令牌
 /// </summary>
 public sealed class SwitchRoleCommandHandler(
     IUserRepository users,

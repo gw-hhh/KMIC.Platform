@@ -18,7 +18,7 @@ public sealed class DeliverySkipReason : Enumeration<DeliverySkipReason>
     public static readonly DeliverySkipReason UserDisabled = new("UserDisabled", "用户已禁用");
 
     /// <summary>
-    /// 收件人不是系统里的用户，也没有给地址
+    /// 收件用户不存在
     /// </summary>
     public static readonly DeliverySkipReason UnknownUser = new("UnknownUser", "用户不存在");
 

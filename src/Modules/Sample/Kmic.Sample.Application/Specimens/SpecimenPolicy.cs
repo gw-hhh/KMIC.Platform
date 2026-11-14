@@ -6,10 +6,11 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens;
 
 /// <summary>
-/// 示例标本的资源策略：只有负责人可以提交、关闭和增删附件
+/// 示例的操作权限
 /// </summary>
 /// <remarks>
-/// 策略只看资源和身份，不访问数据库；状态能不能流转由状态机判断，不在这里重复
+/// 提交、关闭和增删附件要求当前用户是负责人。
+/// 这里只检查身份与归属，不访问数据库；状态限制由各操作检查
 /// </remarks>
 public sealed class SpecimenPolicy : IResourcePolicy<Specimen, SpecimenAction>
 {

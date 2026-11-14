@@ -13,7 +13,7 @@ internal sealed class RetryDeliveryEndpoint : IEndpoint
         group.MapPost("/deliveries/{id}/retry", HandleAsync)
             .Sends<RetryDeliveryCommand>()
             .WithSummary("重试一条失败的投递")
-            .WithDescription("放回队列，尝试次数清零。只有失败、而且没有放弃的投递可以重试，否则返回 422；含密通知超过有效期的不能重试。成功返回 204。必须带幂等键。");
+            .WithDescription("仅可重试失败且未放弃的投递，否则返回 422；含密通知超过投递有效期时也不能重试。重试后重新排队，领取次数清零。成功返回 204。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("投递 ID")] DeliveryId id, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new RetryDeliveryCommand(id), ct)).ToNoContent();

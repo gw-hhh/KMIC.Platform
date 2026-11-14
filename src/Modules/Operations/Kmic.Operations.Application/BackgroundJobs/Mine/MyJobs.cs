@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.Jobs;
 namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 
 /// <summary>
-/// “我的作业”的归属判断：只认提交人，管理员看别人的作业走管理视图
+/// 按提交人判断作业归属，跨用户查询使用管理接口
 /// </summary>
 internal static class MyJobs
 {

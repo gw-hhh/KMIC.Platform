@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Kmic.Notifications.Application;
 
 /// <summary>
-/// 模板渲染的上限
+/// 模板渲染限制
 /// </summary>
 /// <remarks>
 /// 部署配置，节名 Notifications:Template
@@ -16,19 +16,19 @@ public sealed class NotificationsRenderOptions
     public const string Section = "Notifications:Template";
 
     /// <summary>
-    /// 单次渲染最多用多少毫秒
+    /// 单次渲染时限（毫秒）
     /// </summary>
     [Range(50, 30_000)]
     public int RenderTimeoutMs { get; init; } = 1000;
 
     /// <summary>
-    /// 单次渲染的输出最多多少 KB
+    /// 单次渲染输出长度上限，每单位为 1024 个字符
     /// </summary>
     [Range(1, 10_240)]
     public int MaxOutputKb { get; init; } = 1024;
 
     /// <summary>
-    /// 单次渲染最多执行多少步：循环再大也有上限
+    /// 单次渲染的执行步数上限，用于限制模板循环
     /// </summary>
     [Range(100, 10_000_000)]
     public int MaxSteps { get; init; } = 100_000;

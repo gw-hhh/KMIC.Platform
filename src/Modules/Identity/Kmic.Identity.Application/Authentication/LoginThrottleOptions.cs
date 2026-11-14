@@ -14,17 +14,17 @@ public sealed class LoginThrottleOptions
     public const string Section = "Identity:LoginThrottle";
 
     /// <summary>
-    /// 前几次失败不限制
+    /// 开始限流前允许的失败次数
     /// </summary>
     public int FreeFailures { get; init; } = 2;
 
     /// <summary>
-    /// 不限制的失败之后，每次失败要等多久才能再试，依次对应第 FreeFailures + 1 次、之后每一次；用完后沿用最后一项，直到锁定
+    /// 超过 FreeFailures 后的逐次等待时长，依次对应后续每次失败；列表用完后沿用最后一项，直至锁定
     /// </summary>
     public IReadOnlyList<TimeSpan> Waits { get; init; } = [TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(5)];
 
     /// <summary>
-    /// 连续失败到第几次时锁定
+    /// 触发锁定的连续失败次数
     /// </summary>
     public int LockAfterFailures { get; init; } = 10;
 
@@ -34,7 +34,7 @@ public sealed class LoginThrottleOptions
     public TimeSpan FirstLock { get; init; } = TimeSpan.FromMinutes(30);
 
     /// <summary>
-    /// 锁定解除后，每再失败多少次重新锁定
+    /// 解锁后再次触发锁定所需的新增失败次数
     /// </summary>
     public int RelockEveryFailures { get; init; } = 5;
 
@@ -44,7 +44,7 @@ public sealed class LoginThrottleOptions
     public TimeSpan MaxLock { get; init; } = TimeSpan.FromHours(24);
 
     /// <summary>
-    /// 多久没有新的失败，计数就清零
+    /// 无新增失败时的计数保留时长，到期后重置
     /// </summary>
     public TimeSpan ResetAfter { get; init; } = TimeSpan.FromHours(24);
 }

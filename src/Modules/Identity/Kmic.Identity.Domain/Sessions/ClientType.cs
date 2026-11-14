@@ -13,7 +13,7 @@ public sealed class ClientType : Enumeration<ClientType>
     public static readonly ClientType Web = new("Web", "网页");
 
     /// <summary>
-    /// 移动端：刷新令牌在响应体里返回，由 App 存进系统安全存储
+    /// 移动端：刷新令牌随响应返回，App 须存入系统安全存储
     /// </summary>
     public static readonly ClientType App = new("App", "移动端");
 

@@ -5,14 +5,11 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Application.Users.Disable;
 
 /// <summary>
-/// 禁用用户：他的全部会话随之作废
+/// 禁用用户并作废其全部会话
 /// </summary>
 /// <remarks>
-/// 不能禁用自己，也不能禁用最后一个启用的受保护角色持有人
+/// 预期版本不匹配时返回版本冲突；原因记入状态历史
 /// </remarks>
-/// <param name="Id">用户</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
-/// <param name="Reason">原因，记入状态历史</param>
 [RequirePermission(IdentityPermissions.UserManage)]
 [Audited]
 [Idempotent]

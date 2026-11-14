@@ -8,8 +8,8 @@ namespace Kmic.Operations.Infrastructure.ClientErrors;
 /// 把前端上报的错误写成 Warning 级结构化日志，分类 Kmic.ClientErrors
 /// </summary>
 /// <remarks>
-/// 不用类型作分类：观测平台上按这个固定名字筛选前端错误，类名改了名字不能跟着变。
-/// 前端的消息与堆栈是用户的页面里产生的文本，当作不可信的内容原样记在字段里，不拼进消息模板
+/// 日志分类固定，避免重命名类型后破坏观测平台的筛选条件。
+/// 前端消息和堆栈按不可信内容写入结构化字段，不拼入日志模板
 /// </remarks>
 internal sealed partial class ClientErrorLog(ILoggerFactory loggers) : IClientErrorLog
 {

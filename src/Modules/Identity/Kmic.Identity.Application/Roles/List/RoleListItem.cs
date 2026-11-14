@@ -5,7 +5,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.List;
 
 /// <summary>
-/// 角色列表的一行
+/// 角色列表项
 /// </summary>
 /// <param name="Id">角色 ID</param>
 /// <param name="Name">名称</param>

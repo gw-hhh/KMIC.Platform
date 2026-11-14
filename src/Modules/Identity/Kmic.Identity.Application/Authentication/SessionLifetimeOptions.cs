@@ -40,7 +40,7 @@ public sealed class SessionLifetimeOptions
     public TimeSpan AppAbsoluteLifetime { get; init; } = TimeSpan.FromDays(90);
 
     /// <summary>
-    /// 并发刷新的宽限期：刚被轮换掉的旧令牌在这段时间内再次出现，视为多个标签页同时刷新
+    /// 并发刷新宽限期，已轮换的旧令牌在此期间再次出现时按并发刷新处理
     /// </summary>
     [TimeSpanRange("00:00:00", "00:01:00")]
     public TimeSpan RefreshGrace { get; init; } = TimeSpan.FromSeconds(10);
@@ -52,7 +52,7 @@ public sealed class SessionLifetimeOptions
     public TimeSpan ImpersonationLifetime { get; init; } = TimeSpan.FromHours(1);
 
     /// <summary>
-    /// 已经结束的会话在表里保留多久：超过绝对上限、或作废之后过了这么久，定时清理才删除
+    /// 会话绝对到期或被作废后的保留时长，超过后由定时任务删除
     /// </summary>
     [TimeSpanRange("1.00:00:00", "365.00:00:00")]
     public TimeSpan EndedRetention { get; init; } = TimeSpan.FromDays(30);

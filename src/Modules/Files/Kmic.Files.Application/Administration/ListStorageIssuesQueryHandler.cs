@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 处理 <see cref="ListStorageIssuesQuery"/>
+/// 查询存储问题列表
 /// </summary>
 public sealed class ListStorageIssuesQueryHandler(IFilesQueryDb db) : IQueryHandler<ListStorageIssuesQuery, PagedResult<StorageIssueItem>>
 {
@@ -39,7 +39,7 @@ public sealed class ListStorageIssuesQueryHandler(IFilesQueryDb db) : IQueryHand
 
         var page = paged.Value;
 
-        // 文件名在文件的行上；行已经清理的没有
+        // 文件记录可能已清理，仍保留问题记录并允许文件名为空
         var fileIds = page.Items.Select(i => i.FileId).Distinct().ToList();
         var names = await db.Files
             .Where(f => fileIds.Contains(f.Id))

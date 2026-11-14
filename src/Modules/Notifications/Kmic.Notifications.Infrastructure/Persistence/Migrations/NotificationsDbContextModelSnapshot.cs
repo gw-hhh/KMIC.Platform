@@ -531,7 +531,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
 
                     b.ToTable("CapturedMessage", "Notifications", t =>
                         {
-                            t.HasComment("非生产环境捕获的邮件与短信；Notifications 模块；本该发出去的内容留在这里供查看，只在非生产环境有数据，超过保留期由清理任务删除");
+                            t.HasComment("捕获内容（Notifications）：一条记录对应一次邮件或短信投递；开启捕获时保存内容而不实际发送，按保留期清理");
 
                             t.HasCheckConstraint("CK_CapturedMessage_Channel", "\"Channel\" IN ('Email', 'Sms')");
 
@@ -571,11 +571,11 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("Attempts")
                         .HasColumnType("integer")
-                        .HasComment("已经尝试发送几次");
+                        .HasComment("领取次数，人工重试时清零");
 
                     b.Property<string>("Body")
                         .HasColumnType("text")
-                        .HasComment("渲染好的正文；含密模板投递完成后清空")
+                        .HasComment("渲染后的正文")
                         .HasAnnotation("Kmic:AuditMode", "Hidden");
 
                     b.Property<string>("Channel")
@@ -588,7 +588,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
-                        .HasComment("渲染时代码里默认内容的哈希，事后能知道发出的是哪一版默认内容")
+                        .HasComment("模板声明及默认内容的哈希")
                         .HasAnnotation("Kmic:AuditMode", "Hidden");
 
                     b.Property<long>("ConcurrencyVersion")
@@ -670,7 +670,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("SmsParameters")
                         .HasColumnType("jsonb")
-                        .HasComment("短信模板的参数，JSON；只有短信有。短信服务只收模板编码和参数，实际发送用它，含密模板投递完成后清空")
+                        .HasComment("短信模板参数（JSON）")
                         .HasAnnotation("Kmic:AuditMode", "Hidden");
 
                     b.Property<string>("Status")

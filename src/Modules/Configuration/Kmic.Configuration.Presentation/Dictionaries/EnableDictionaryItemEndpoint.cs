@@ -12,7 +12,7 @@ internal sealed class EnableDictionaryItemEndpoint : IEndpoint
         group.MapPost("/dictionary-types/{typeCode}/items/{code}/enable", HandleAsync)
             .Sends<EnableDictionaryItemCommand>()
             .WithSummary("启用字典项")
-            .WithDescription("它的父项必须是启用的。");
+            .WithDescription("有父项时，父项必须已启用。");
 
     private static async Task<IResult> HandleAsync([Description("字典类型编码")] string typeCode, [Description("字典项编码")] string code, DictionaryItemVersionRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new EnableDictionaryItemCommand(typeCode, request.ExpectedVersion, code), ct)).ToOk();

@@ -12,7 +12,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Grants.GrantRole;
 
 /// <summary>
-/// 处理 <see cref="GrantRoleCommand"/>
+/// 为用户授予角色
 /// </summary>
 public sealed class GrantRoleCommandHandler(
     IUserRepository users,

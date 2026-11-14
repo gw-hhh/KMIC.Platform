@@ -12,8 +12,8 @@ internal sealed class ListSpecimensEndpoint : IEndpoint
         group.MapGet("/specimens", HandleAsync)
             .Sends<ListSpecimensQuery>()
             .Sortable(SpecimenSort.Map)
-            .WithSummary("查询示例标本列表")
-            .WithDescription("按当前用户的数据范围返回标本，分页。页码超过末页返回空列表，每页数量超出 1 到 200 返回 400。");
+            .WithSummary("查询示例列表")
+            .WithDescription("分页返回当前用户有权查看的示例。页码超过末页返回空列表，每页条数须为 1 到 200，否则返回 400。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListSpecimensRequest request, IQuerySender sender, CancellationToken ct)
     {

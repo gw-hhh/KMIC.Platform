@@ -5,7 +5,7 @@ using Kmic.Files.Contracts;
 namespace Kmic.Operations.Application.Audit.Export;
 
 /// <summary>
-/// 处理 <see cref="RegisterAuditExportFileCommand"/>
+/// 请求登记审计导出文件
 /// </summary>
 public sealed class RegisterAuditExportFileCommandHandler(IGeneratedFiles generatedFiles) : ICommandHandler<RegisterAuditExportFileCommand>
 {

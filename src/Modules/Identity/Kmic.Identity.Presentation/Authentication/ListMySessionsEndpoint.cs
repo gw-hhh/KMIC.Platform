@@ -11,7 +11,7 @@ internal sealed class ListMySessionsEndpoint : IEndpoint
         group.MapGet("/me/sessions", HandleAsync)
             .Sends<ListMySessionsQuery>()
             .WithSummary("查询我的登录设备")
-            .WithDescription("自己当前有效的会话：设备、IP、登录时间、最近刷新时间，标出哪个是当前会话。不含别人以我的身份开始的模拟会话。");
+            .WithDescription("返回本人的有效登录会话，包括设备、IP、登录时间、最近刷新时间和当前会话标记，不包含模拟会话。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListMySessionsQuery(), ct)).ToOk();

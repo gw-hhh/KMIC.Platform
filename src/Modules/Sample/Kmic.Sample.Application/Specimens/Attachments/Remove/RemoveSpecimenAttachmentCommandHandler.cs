@@ -8,7 +8,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Attachments.Remove;
 
 /// <summary>
-/// 处理 <see cref="RemoveSpecimenAttachmentCommand"/>
+/// 移除示例的附件
 /// </summary>
 public sealed class RemoveSpecimenAttachmentCommandHandler(
     ISpecimenRepository specimens,

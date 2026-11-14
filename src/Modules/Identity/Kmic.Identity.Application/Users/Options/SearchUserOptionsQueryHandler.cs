@@ -6,7 +6,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Options;
 
 /// <summary>
-/// 处理 <see cref="SearchUserOptionsQuery"/>
+/// 分页查询用户选择列表
 /// </summary>
 public sealed class SearchUserOptionsQueryHandler(IIdentityQueryDb db) : IQueryHandler<SearchUserOptionsQuery, PagedResult<UserOption>>
 {
@@ -24,7 +24,6 @@ public sealed class SearchUserOptionsQueryHandler(IIdentityQueryDb db) : IQueryH
                 || KmicFunctions.ContainsText(u.Account, query.Q));
         }
 
-        // 所属组织的名称在投影里联出来：选人下拉每次只取一页，单元表也不大
         return await users
             .Select(u => new UserOption(
                 u.Id,

@@ -11,8 +11,8 @@ internal sealed class ListMyJobsEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/my-jobs", HandleAsync)
             .Sends<ListMyJobsQuery>()
-            .WithSummary("查询我在各模块提交的后台作业")
-            .WithDescription("登录就能看，只看得到自己提交的；外壳的“作业入口”用它。按提交时间倒序，游标分页：响应里的 nextCursor 作为下一页的 after，没有 nextCursor 就是最后一页。");
+            .WithSummary("查询本人提交的后台作业")
+            .WithDescription("登录后可查询本人在各模块提交的作业，供页面中的作业入口使用。按提交时间倒序，使用游标分页：将 nextCursor 作为下一页的 after，未返回 nextCursor 表示已到末页。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListMyJobsRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListMyJobsQuery(request.Status, new CursorRequest(request.After, request.Limit)), ct)).ToOk();

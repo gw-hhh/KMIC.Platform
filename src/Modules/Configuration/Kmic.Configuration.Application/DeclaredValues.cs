@@ -6,15 +6,15 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Configuration.Application;
 
 /// <summary>
-/// 系统设置、偏好这类“代码里声明了值类型”的值，与 JSON 之间的转换和校验
+/// 转换和校验系统设置、偏好中声明的值类型与 JSON
 /// </summary>
 internal static class DeclaredValues
 {
     /// <summary>
-    /// 把调用方给的 JSON 读成声明的值类型，再执行声明自己的校验
+    /// 按声明的值类型解析 JSON 并校验
     /// </summary>
     /// <remarks>
-    /// 校验函数是值类型的静态成员，逐字段的错误原样带回去，界面按成员名放回对应的输入框
+    /// 调用值类型声明的静态校验函数，原样返回字段错误，供界面定位输入项
     /// </remarks>
     /// <param name="definition">设置或偏好的定义</param>
     /// <param name="json">调用方给的值</param>
@@ -33,7 +33,7 @@ internal static class DeclaredValues
         }
         catch (JsonException exception)
         {
-            return invalid.WithDetail($"值的格式不对：{exception.Message}");
+            return invalid.WithDetail($"值的格式无效：{exception.Message}");
         }
 
         if (value is null)
@@ -51,7 +51,7 @@ internal static class DeclaredValues
     }
 
     /// <summary>
-    /// 读已经存着的值：存的时候通过了校验，但值类型后来可能改过，读不出来或通不过校验时返回空
+    /// 读取已存储的值，解析或校验失败时返回 null，以兼容值类型后续变更
     /// </summary>
     public static object? TryRead(DeclaredValueDefinition definition, string json)
     {
@@ -69,7 +69,7 @@ internal static class DeclaredValues
     }
 
     /// <summary>
-    /// 值序列化成存储用的 JSON：按声明的值类型重新序列化，调用方多给的成员不会混进来
+    /// 按声明的值类型序列化，避免保存类型定义之外的成员
     /// </summary>
     public static string ToJson(DeclaredValueDefinition definition, object value)
     {
@@ -84,7 +84,7 @@ internal static class DeclaredValues
     public static JsonElement DefaultOf(DeclaredValueDefinition definition) => ElementOf(ToJson(definition, definition.DefaultValue));
 
     /// <summary>
-    /// 把存储的 JSON 文本变成可以放进响应的 JSON 元素
+    /// 将存储的 JSON 文本转换为响应中的 JSON 元素
     /// </summary>
     public static JsonElement ElementOf(string json)
     {

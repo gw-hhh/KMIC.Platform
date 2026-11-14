@@ -11,7 +11,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Grants.SetAnchors;
 
 /// <summary>
-/// 处理 <see cref="SetGrantAnchorsCommand"/>
+/// 替换角色授予的组织锚点
 /// </summary>
 public sealed class SetGrantAnchorsCommandHandler(
     IUserRepository users,

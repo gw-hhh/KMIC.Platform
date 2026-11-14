@@ -8,7 +8,7 @@ namespace Kmic.Files.Domain.Files;
 /// 对账发现的存储问题：库里有记录，存储里的对象找不到
 /// </summary>
 /// <remarks>
-/// 由对账任务创建，同一个文件有待处理的问题时不重复创建。运维按运维手册把对象还原之后，在页面上标为已解决
+/// 由对账任务创建；同一文件已有待处理问题时不重复创建。运维处理后登记解决结果
 /// </remarks>
 public sealed class StorageIssue : AggregateRoot<StorageIssueId>
 {
@@ -68,7 +68,7 @@ public sealed class StorageIssue : AggregateRoot<StorageIssueId>
         new(StorageIssueId.New(), fileId, kind, objectVersionId, now);
 
     /// <summary>
-    /// 标为已解决；已经解决的再来一次什么也不改
+    /// 标为已解决；已解决时保留原处理记录并返回成功
     /// </summary>
     public Result Resolve(string note, UserId by, DateTimeOffset now)
     {

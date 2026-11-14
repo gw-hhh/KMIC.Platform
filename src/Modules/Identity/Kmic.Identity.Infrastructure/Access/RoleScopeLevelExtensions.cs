@@ -9,7 +9,7 @@ namespace Kmic.Identity.Infrastructure.Access;
 internal static class RoleScopeLevelExtensions
 {
     /// <summary>
-    /// 转成框架的等级，用数值存进角色快照；两边的编码都是成员名，有对应测试保证每个等级都转得过去
+    /// 按同名编码转换为框架范围等级，并以数值存入角色快照
     /// </summary>
     public static int ToScopeLevel(this RoleScopeLevel level)
     {

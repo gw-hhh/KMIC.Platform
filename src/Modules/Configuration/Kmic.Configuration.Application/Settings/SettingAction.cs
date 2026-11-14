@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Configuration.Application.Settings;
 
 /// <summary>
-/// 对系统设置的动作：资源策略与列表里的“可用动作”都按它
+/// 系统设置操作，供资源策略和可用操作列表使用
 /// </summary>
 public sealed class SettingAction : Enumeration<SettingAction>
 {

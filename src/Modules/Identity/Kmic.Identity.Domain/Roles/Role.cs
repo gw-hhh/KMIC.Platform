@@ -112,7 +112,7 @@ public sealed class Role : AggregateRoot<RoleId>
     /// </summary>
     public static Role CreateSystemAdministrator(string name = "系统管理员")
     {
-        var role = new Role(RoleId.New(), name, "拥有全部权限点，只有持有它的人才能管理它", 0, RoleScopeLevel.All)
+        var role = new Role(RoleId.New(), name, "拥有全部权限点，管理此角色时须使用受保护角色", 0, RoleScopeLevel.All)
         {
             IsProtected = true,
             GrantsAllPermissions = true,
@@ -179,7 +179,7 @@ public sealed class Role : AggregateRoot<RoleId>
     }
 
     /// <summary>
-    /// 权限点改名之后，把角色上的旧编码换成新编码；新编码已经有了就只去掉旧的。返回有没有改动
+    /// 按映射替换权限编码，已存在新编码时移除旧项；返回是否有改动
     /// </summary>
     public bool RenamePermissions(IReadOnlyDictionary<string, string> renames)
     {
@@ -205,7 +205,7 @@ public sealed class Role : AggregateRoot<RoleId>
     }
 
     /// <summary>
-    /// 去掉这些权限点：它们退役很久了，角色上不再保留对它们的配置。返回有没有改动
+    /// 移除指定权限配置，返回是否有改动
     /// </summary>
     public bool RemovePermissions(IReadOnlyCollection<string> codes)
     {
@@ -215,7 +215,7 @@ public sealed class Role : AggregateRoot<RoleId>
     }
 
     /// <summary>
-    /// 去掉对这些范围对象单独设置的等级：范围对象退役很久了。返回有没有改动
+    /// 移除指定数据范围配置，返回是否有改动
     /// </summary>
     public bool RemoveDataScopeOverrides(IReadOnlyCollection<string> scopeObjects)
     {

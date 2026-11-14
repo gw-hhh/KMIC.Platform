@@ -26,7 +26,7 @@ internal static class GrantLoading
         IAccessContext access,
         CancellationToken ct)
     {
-        // 收回要判断“是不是最后一个管理员”，先排队再读
+        // 收回角色前串行检查受保护角色持有人，避免并发操作移除最后一位可登录的持有人
         if (action == GrantAction.Revoke)
         {
             await users.LockProtectedHolderChecksAsync(ct);
@@ -52,7 +52,7 @@ internal static class GrantLoading
         return allowed.IsFailure ? allowed.Error : new GrantContext(user, roleIsActive);
     }
 
-    // 收回这个角色之后：他自己不再是启用的受保护角色持有人（没有别的受保护角色顶着），而且没有别人
+    // 仅当目标用户可登录、将失去最后一个已启用受保护角色，且无其他可登录持有人时返回 true
     private static async Task<bool> RemovesLastHolderAsync(IIdentityReads db, User user, RoleId revoked, CancellationToken ct)
     {
         if (!user.CanLogin)
@@ -66,7 +66,7 @@ internal static class GrantLoading
     }
 
     /// <summary>
-    /// 安全事件里记下是哪个角色
+    /// 生成安全事件中的角色标识
     /// </summary>
     public static IReadOnlyDictionary<string, string> RoleDetails(RoleId roleId) =>
         new Dictionary<string, string>(StringComparer.Ordinal) { ["roleId"] = roleId.Value.ToString() };

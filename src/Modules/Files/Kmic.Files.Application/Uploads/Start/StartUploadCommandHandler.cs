@@ -11,7 +11,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Uploads.Start;
 
 /// <summary>
-/// 处理 <see cref="StartUploadCommand"/>
+/// 校验上传权限并创建上传记录
 /// </summary>
 public sealed class StartUploadCommandHandler(
     UploadProfileCatalog profiles,
@@ -44,7 +44,7 @@ public sealed class StartUploadCommandHandler(
 
         if (FileNames.Sanitize(command.FileName) is not { } name)
         {
-            return ValueTask.FromResult<Result<UploadStarted>>(CommonErrors.ValidationFailedWith([new FieldError("fileName", "Invalid", "文件名不能是空的")]));
+            return ValueTask.FromResult<Result<UploadStarted>>(CommonErrors.ValidationFailedWith([new FieldError("fileName", "Invalid", "文件名不能为空")]));
         }
 
         var now = time.GetUtcNow();

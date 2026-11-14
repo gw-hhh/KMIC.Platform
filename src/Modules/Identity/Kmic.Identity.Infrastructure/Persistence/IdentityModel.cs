@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Infrastructure.Persistence;
 
 /// <summary>
-/// 写入上下文与查询上下文共用同一个模型
+/// 读写上下文共用的实体配置清单
 /// </summary>
 internal static class IdentityModel
 {

@@ -4,11 +4,11 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Configuration.Application.Dictionaries.Sync;
 
 /// <summary>
-/// 把代码里声明的字典类型同步进数据库：登记新类型、更新显示名与层级属性、把代码里已经删除的类型标为退役
+/// 将代码中的字典类型声明同步到数据库
 /// </summary>
 /// <remarks>
-/// 启动时迁移之后、接收请求之前执行，多个实例同时启动也安全：先拿咨询锁，后到的实例看到的已经是同步好的结果。
-/// 类型的字典项是管理员维护的数据，同步从不动它们
+/// 新类型自动登记，已有类型更新显示名、层级属性和状态，已移除声明的类型标为退役。
+/// 在启动迁移后、接收请求前执行，通过咨询锁避免多实例同时同步；不修改管理员维护的字典项
 /// </remarks>
 [SystemOnly]
 [NotAudited("目录同步，结果记入启动日志")]

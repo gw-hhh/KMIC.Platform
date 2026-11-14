@@ -12,7 +12,6 @@ internal sealed class RoleRepository(IdentityDbContext context)
 {
     protected override Error NotFound => IdentityErrors.RoleNotFound;
 
-    // 权限点与数据范围覆盖总是一起加载
     protected override IQueryable<Role> Aggregate(IQueryable<Role> set) => set.Include(r => r.Permissions).Include(r => r.DataScopes);
 
     public async Task<IReadOnlyList<Role>> ListWithPermissionsAsync(IReadOnlyCollection<string> permissionCodes, CancellationToken ct) =>

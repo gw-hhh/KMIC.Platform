@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
 /// <summary>
-/// 处理 <see cref="ConfirmRebuildCommand"/>
+/// 确认读模型重建结果
 /// </summary>
 public sealed class ConfirmRebuildCommandHandler(IReadModelRebuildAdmin rebuilds) : ICommandHandler<ConfirmRebuildCommand>
 {

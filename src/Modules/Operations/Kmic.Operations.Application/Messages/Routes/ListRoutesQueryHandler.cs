@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Operations.Application.Messages.Routes;
 
 /// <summary>
-/// 处理 <see cref="ListRoutesQuery"/>
+/// 查询消息订阅路由
 /// </summary>
 public sealed class ListRoutesQueryHandler(IOperationsQueryDb db, TimeProvider time) : IQueryHandler<ListRoutesQuery, IReadOnlyList<RouteItem>>
 {
@@ -30,7 +30,7 @@ public sealed class ListRoutesQueryHandler(IOperationsQueryDb db, TimeProvider t
             routes = [.. routes.Where(r => wanted.Contains(MessageRouteStatus.FromCode(r.Status)))];
         }
 
-        // 只看现在还在运行的实例：已经停掉的构建不影响能不能终结
+        // 仅计入心跳未过期且声明了该订阅的实例
         var now = time.GetUtcNow();
         var alive = (await db.MessagingInstances.ToListAsync(cancellationToken)).Where(i => InstanceSubscriptions.IsAlive(i, now)).ToList();
         var declared = alive

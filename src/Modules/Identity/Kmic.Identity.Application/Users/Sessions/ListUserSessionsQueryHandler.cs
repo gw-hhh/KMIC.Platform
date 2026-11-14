@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Users.Sessions;
 
 /// <summary>
-/// 处理 <see cref="ListUserSessionsQuery"/>
+/// 查询用户有效会话
 /// </summary>
 public sealed class ListUserSessionsQueryHandler(IIdentityQueryDb db, TimeProvider time) : IQueryHandler<ListUserSessionsQuery, IReadOnlyList<UserSessionItem>>
 {

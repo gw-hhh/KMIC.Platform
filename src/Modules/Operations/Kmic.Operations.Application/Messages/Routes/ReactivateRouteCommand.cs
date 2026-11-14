@@ -4,11 +4,11 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Operations.Application.Messages.Routes;
 
 /// <summary>
-/// 重新激活一个已终结的订阅：恢复成生效，从现在起重新投递
+/// 重新激活已终结的订阅
 /// </summary>
 /// <remarks>
-/// 终结期间漏掉的消息不会自动补回，要核对缺口区间，再用补投按序号区间补。
-/// 之后声明这个订阅的构建才能启动
+/// 终结期间的消息不会自动补投，须核对缺口后按来源序号补投。
+/// 须先重新激活，再启动声明该订阅的构建
 /// </remarks>
 /// <param name="MessageType">消息名称</param>
 /// <param name="Subscription">订阅名</param>

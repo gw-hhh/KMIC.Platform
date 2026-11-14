@@ -6,14 +6,15 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Attachments.Add;
 
 /// <summary>
-/// 给示例标本添加一个附件：文件要先经上传端点上传，凭得到的文件 ID 关联
+/// 为示例添加附件
 /// </summary>
 /// <remarks>
-/// 关联走框架的 IFileAttachments：先取文件的共享锁、检查文件现在能不能关联，再写本模块的附件行并发出关联请求，三步在同一个事务里
+/// 文件须先上传，调用时传入上传返回的文件 ID。
+/// 通过 IFileAttachments 获取文件锁、检查文件并发出关联请求，再保存附件信息，全部在同一个事务中完成
 /// </remarks>
-/// <param name="Id">标本</param>
+/// <param name="Id">示例 ID</param>
 /// <param name="FileId">上传得到的文件 ID</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
+/// <param name="ExpectedVersion">读取时的版本号，与当前版本不一致时返回版本冲突</param>
 [RequirePermission(SamplePermissions.Edit)]
 [Audited]
 public sealed record AddSpecimenAttachmentCommand(SpecimenId Id, StoredFileId FileId, long ExpectedVersion) : ICommand<VersionedResponse<SpecimenId>>;

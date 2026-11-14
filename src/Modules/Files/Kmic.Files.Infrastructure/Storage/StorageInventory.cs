@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Infrastructure.Storage;
 
 /// <summary>
-/// <see cref="IStorageInventory"/> 的实现：用文件存储，只看本环境的前缀
+/// 列出本环境前缀下可识别的文件对象，并提供对象存在检查和删除操作
 /// </summary>
 internal sealed class StorageInventory(IFileStorage storage, IOptions<FilesStorageOptions> options) : IStorageInventory
 {

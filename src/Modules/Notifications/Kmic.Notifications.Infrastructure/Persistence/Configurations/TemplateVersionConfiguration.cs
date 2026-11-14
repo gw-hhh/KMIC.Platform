@@ -15,7 +15,7 @@ internal sealed class TemplateVersionConfiguration : IEntityTypeConfiguration<Te
         builder.Property(v => v.Body).HasMaxLength(TemplateVersion.BodyMaxLength);
         builder.Property(v => v.Remark).HasMaxLength(TemplateVersion.RemarkMaxLength);
 
-        // 版本号在模板内递增；两个人同时发布时，后一个撞上这里，刷新后重新发布
+        // 同一模板的版本号唯一，跨渠道共用序列
         builder.HasIndex(v => new { v.TemplateId, v.Version }).IsUnique().MapsToError(NotificationsErrors.TemplateVersionDuplicated);
     }
 }

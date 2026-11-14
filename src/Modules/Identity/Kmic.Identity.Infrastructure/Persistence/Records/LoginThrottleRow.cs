@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Infrastructure.Persistence.Records;
 
 /// <summary>
-/// 登录失败计数表的一行：按规范化登录名的哈希，不经过聚合，用原子 SQL 更新
+/// 登录失败计数记录
 /// </summary>
 internal sealed class LoginThrottleRow
 {

@@ -3,11 +3,10 @@ using System.Text;
 namespace Kmic.Notifications.Infrastructure.Rendering;
 
 /// <summary>
-/// 超过输出大小或渲染时间上限就抛异常的文本写入器
+/// 限制模板输出大小和渲染用时的文本写入器
 /// </summary>
 /// <remarks>
-/// Fluid 没有自带的挂钟时间限制，只有步数上限；渲染往这里写的每一次都检查已经用了多久，
-/// 写个不停的循环会在到点时被打断，不写输出的循环由步数上限兜底
+/// 每次写入时检查实际用时和输出大小；持续输出的循环超限即中断，不输出的循环由 Fluid 步数上限限制
 /// </remarks>
 internal sealed class CappedWriter(int maxChars, TimeSpan timeout, TimeProvider time) : TextWriter
 {

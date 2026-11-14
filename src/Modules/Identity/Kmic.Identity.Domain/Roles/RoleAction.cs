@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Identity.Domain.Roles;
 
 /// <summary>
-/// 角色上会引起状态流转的动作
+/// 角色状态变更动作
 /// </summary>
 public sealed class RoleAction : Enumeration<RoleAction>
 {

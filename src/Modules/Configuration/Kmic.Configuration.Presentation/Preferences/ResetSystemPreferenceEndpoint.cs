@@ -11,8 +11,8 @@ internal sealed class ResetSystemPreferenceEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/preferences/{key}/layers/system/reset", HandleAsync)
             .Sends<ResetPreferenceLayerCommand>()
-            .WithSummary("删除偏好的系统层")
-            .WithDescription("只删系统层，代码里的默认值重新对没有被覆盖的人生效。必须带幂等键。");
+            .WithSummary("移除系统级偏好设置")
+            .WithDescription("移除系统层设置后，个人层和角色层均无允许且有效的值时使用代码默认值。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("偏好键")] string key, ResetPreferenceLayerRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ResetPreferenceLayerCommand(key, null, request.ExpectedVersion), ct)).ToOk();

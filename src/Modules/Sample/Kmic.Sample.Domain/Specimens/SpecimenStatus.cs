@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Sample.Domain.Specimens;
 
 /// <summary>
-/// 示例标本的状态
+/// 示例的状态
 /// </summary>
 public sealed class SpecimenStatus : Enumeration<SpecimenStatus>
 {

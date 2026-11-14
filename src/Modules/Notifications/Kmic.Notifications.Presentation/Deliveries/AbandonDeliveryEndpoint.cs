@@ -13,7 +13,7 @@ internal sealed class AbandonDeliveryEndpoint : IEndpoint
         group.MapPost("/deliveries/{id}/abandon", HandleAsync)
             .Sends<AbandonDeliveryCommand>()
             .WithSummary("放弃一条失败的投递")
-            .WithDescription("状态仍是失败，加上放弃标记，不再出现在待处理清单里。只有失败、而且还没放弃的投递可以放弃，否则返回 422。成功返回 204。必须带幂等键。");
+            .WithDescription("仅可放弃失败且未放弃的投递，否则返回 422。放弃后保留失败状态并记录原因和时间；之后不可重试，可按保留期清理。成功返回 204。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("投递 ID")] DeliveryId id, AbandonDeliveryRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new AbandonDeliveryCommand(id, request.Reason), ct)).ToNoContent();

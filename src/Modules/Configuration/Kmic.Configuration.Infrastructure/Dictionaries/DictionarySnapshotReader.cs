@@ -11,11 +11,11 @@ using Microsoft.Extensions.Caching.Hybrid;
 namespace Kmic.Configuration.Infrastructure.Dictionaries;
 
 /// <summary>
-/// 读字典快照：一个类型一个缓存项，键与标签都是 <see cref="ConfigurationCacheKeys.Dictionary" />，管理员改动提交之后按标签失效
+/// 按类型缓存字典快照，修改提交后按标签失效
 /// </summary>
 internal sealed class DictionarySnapshotReader(IQueryScopeFactory queries, HybridCache cache) : IDictionarySnapshots
 {
-    // 正常靠标签失效；过期时间只是失效广播万一丢了的兜底
+    // 定期过期，避免失效通知丢失后一直读取旧缓存
     private static readonly HybridCacheEntryOptions _entry = new()
     {
         LocalCacheExpiration = TimeSpan.FromMinutes(10),

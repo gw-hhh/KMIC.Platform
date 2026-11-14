@@ -12,7 +12,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.UnlockLogin;
 
 /// <summary>
-/// 处理 <see cref="UnlockLoginCommand"/>
+/// 清除账号的登录失败计数
 /// </summary>
 public sealed class UnlockLoginCommandHandler(
     IUserRepository users,

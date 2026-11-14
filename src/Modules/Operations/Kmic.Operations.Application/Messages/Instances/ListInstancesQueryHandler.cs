@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Operations.Application.Messages.Instances;
 
 /// <summary>
-/// 处理 <see cref="ListInstancesQuery"/>
+/// 查询消息处理实例及其心跳状态
 /// </summary>
 public sealed class ListInstancesQueryHandler(IOperationsQueryDb db, TimeProvider time) : IQueryHandler<ListInstancesQuery, IReadOnlyList<InstanceItem>>
 {

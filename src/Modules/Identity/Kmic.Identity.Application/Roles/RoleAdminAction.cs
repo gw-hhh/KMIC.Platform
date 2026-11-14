@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Identity.Application.Roles;
 
 /// <summary>
-/// 管理角色时的动作：资源策略与详情里的“可用动作”都按它
+/// 角色管理操作，供资源策略和可用操作列表使用
 /// </summary>
 public sealed class RoleAdminAction : Enumeration<RoleAdminAction>
 {

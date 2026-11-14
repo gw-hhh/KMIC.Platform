@@ -6,7 +6,7 @@ namespace Kmic.Notifications.Application.Channels;
 public enum SendOutcome
 {
     /// <summary>
-    /// 渠道接受了，已发送
+    /// 渠道已接受发送请求，不代表收件人已收到
     /// </summary>
     Sent,
 
@@ -16,7 +16,7 @@ public enum SendOutcome
     Transient,
 
     /// <summary>
-    /// 永久失败：地址不合法、模板无效、账号被拒，重试没有意义
+    /// 永久失败，如地址或模板无效，不再自动重试
     /// </summary>
     Permanent,
 }

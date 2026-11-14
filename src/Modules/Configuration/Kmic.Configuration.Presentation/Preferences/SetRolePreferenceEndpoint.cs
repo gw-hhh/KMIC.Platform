@@ -12,8 +12,8 @@ internal sealed class SetRolePreferenceEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPut("/preferences/{key}/layers/roles/{roleId}", HandleAsync)
             .Sends<SetPreferenceLayerCommand>()
-            .WithSummary("设置偏好在一个角色上的值")
-            .WithDescription("这个角色下没有自己设置过的人会看到它。角色必须存在。声明里不允许角色层的偏好会被拒绝。必须带幂等键。");
+            .WithSummary("设置角色级偏好")
+            .WithDescription("允许且有效的个人设置优先于角色设置。角色必须存在，偏好声明须允许角色层设置。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("偏好键")] string key, [Description("角色 ID")] RoleId roleId, SetPreferenceLayerRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SetPreferenceLayerCommand(key, roleId, request.Value, request.ExpectedVersion), ct)).ToOk();

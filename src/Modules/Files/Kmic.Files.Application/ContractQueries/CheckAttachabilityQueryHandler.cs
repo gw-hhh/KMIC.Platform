@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Files.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="CheckAttachabilityQuery"/>
+/// 查询可关联的文件并返回文件信息
 /// </summary>
 public sealed class CheckAttachabilityQueryHandler(IFilesQueryDb db) : IQueryHandler<CheckAttachabilityQuery, IReadOnlyList<FileSnapshot>>
 {

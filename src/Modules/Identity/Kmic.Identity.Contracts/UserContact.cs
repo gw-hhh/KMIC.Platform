@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Contracts;
 
 /// <summary>
-/// 一个用户的联系方式
+/// 用户联系方式
 /// </summary>
 /// <param name="UserId">用户 ID</param>
 /// <param name="DisplayName">姓名</param>

@@ -5,9 +5,9 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Configuration.Application.Settings.Changes;
 
 /// <summary>
-/// 查询系统设置的变更历史：谁在什么时候把什么改成了什么，为什么
+/// 查询系统设置变更历史，包含操作人、时间、新旧值和原因
 /// </summary>
-/// <param name="Key">只看这个设置的；不给就是全部</param>
+/// <param name="Key">设置键筛选，未指定时查询全部设置</param>
 /// <param name="From">起始时间，含</param>
 /// <param name="To">结束时间，不含</param>
 /// <param name="Page">分页</param>

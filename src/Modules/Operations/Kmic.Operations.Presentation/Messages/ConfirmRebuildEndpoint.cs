@@ -11,7 +11,7 @@ internal sealed class ConfirmRebuildEndpoint : IEndpoint
         group.MapPost("/messages/rebuilds/confirm", HandleAsync)
             .Sends<ConfirmRebuildCommand>()
             .WithSummary("确认读模型重建收尾")
-            .WithDescription("源端找不到的行太多而暂停的一轮，运维核实它们确实没有了之后确认：另排一个作业把这些行置为终态并完成这一轮。没有暂停的一轮返回 409。成功返回 204。必须带幂等键。");
+            .WithDescription("运维核实缺失行在源端确实不存在后，确认等待收尾的重建。系统另排作业，将这些行置为终态并完成重建。没有等待确认的重建时返回 409；成功返回 204。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync(RebuildRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ConfirmRebuildCommand(request.Subscription), ct)).ToNoContent();

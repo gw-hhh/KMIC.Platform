@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.Captured.List;
 public static class CapturedSort
 {
     /// <summary>
-    /// 排序字段表，默认新的在前
+    /// 排序字段表，默认按捕获时间倒序
     /// </summary>
     public static readonly SortMap<CapturedListItem> Map = SortMap<CapturedListItem>
         .Field("capturedAt", x => x.CapturedAt)

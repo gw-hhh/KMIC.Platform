@@ -8,13 +8,13 @@ namespace Kmic.Identity.Domain.Users;
 /// 手机号的规范化
 /// </summary>
 /// <remarks>
-/// 统一存成国际格式：国内号码写成 +86 加 11 位，其他国家的号码按 E.164 保留。
+/// 大陆手机号统一加 +86，其他号码按国际号码格式校验。
 /// 手机号是登录凭据，也是短信的收件地址，不统一写法会让同一个号码对应多个用户
 /// </remarks>
 public static partial class MobileNumbers
 {
     /// <summary>
-    /// 规范化；输入可以带空格、短横线、括号，国内号码可以带 86、0086 或 +86 前缀
+    /// 允许空白、短横线和括号；大陆号码可带 86、0086 或 +86 前缀
     /// </summary>
     public static Result<string> Normalize(string? input)
     {
@@ -39,7 +39,7 @@ public static partial class MobileNumbers
             return "+86" + compact[^11..];
         }
 
-        // 其他国家：已经带国家码的国际格式
+        // 其他号码须已包含国际区号
         return International().IsMatch(compact) && !compact.StartsWith("+86", StringComparison.Ordinal) ? compact : IdentityErrors.MobileInvalid;
     }
 

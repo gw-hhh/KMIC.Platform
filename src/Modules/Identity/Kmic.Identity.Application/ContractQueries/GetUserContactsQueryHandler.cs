@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="GetUserContactsQuery"/>
+/// 批量查询用户联系方式
 /// </summary>
 public sealed class GetUserContactsQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetUserContactsQuery, IReadOnlyDictionary<Guid, UserContact>>
 {

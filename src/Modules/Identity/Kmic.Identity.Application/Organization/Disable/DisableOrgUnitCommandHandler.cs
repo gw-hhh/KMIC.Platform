@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Organization.Disable;
 
 /// <summary>
-/// 处理 <see cref="DisableOrgUnitCommand"/>
+/// 停用组织单元
 /// </summary>
 public sealed class DisableOrgUnitCommandHandler(IOrgTreeRepository trees, IIdentityCommandReads db, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<DisableOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
@@ -19,7 +19,7 @@ public sealed class DisableOrgUnitCommandHandler(IOrgTreeRepository trees, IIden
     /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<OrgTreeId>>> ExecuteAsync(DisableOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
-        // 先锁住组织树这一行再查归属的用户：把用户分配到这个单元的命令同样先锁树，两边排队，不会一边停用、一边又放进了人
+        // 与用户组织分配操作使用同一组织树锁，防止停用检查期间新增所属用户
         var loaded = await trees.GetForUpdateLockedAsync(OrgTreeId.Default, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

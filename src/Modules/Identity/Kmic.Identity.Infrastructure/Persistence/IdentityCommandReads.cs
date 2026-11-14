@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Infrastructure.Persistence;
 
 /// <summary>
-/// <see cref="IIdentityCommandReads" /> 的实现：从写上下文读，和仓储同一个连接、同一个事务，不跟踪实体
+/// 从写上下文读取命令判断所需数据，与仓储共用连接和事务，不跟踪实体
 /// </summary>
 internal sealed class IdentityCommandReads(IdentityDbContext context) : IIdentityCommandReads
 {

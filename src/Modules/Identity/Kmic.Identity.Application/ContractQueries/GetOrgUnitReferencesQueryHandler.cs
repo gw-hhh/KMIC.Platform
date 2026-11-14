@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="GetOrgUnitReferencesQuery"/>
+/// 批量查询组织单元引用信息
 /// </summary>
 /// <remarks>
-/// 组织单元不删除，只停用：业务数据里保存着的所属组织，停用之后仍然解析得出来，状态是“已停用”。编码取单元编码
+/// 停用的组织单元仍返回名称、单元编码及停用状态，供历史记录显示
 /// </remarks>
 public sealed class GetOrgUnitReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetOrgUnitReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {

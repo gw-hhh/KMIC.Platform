@@ -3,11 +3,11 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Operations.Domain.Jobs;
 
 /// <summary>
-/// 运维对一个定时任务改过的开关与执行时间：只存改过的项，没改的项是空，跟着代码里的默认值走
+/// 定时任务的自定义启用状态和执行计划
 /// </summary>
 /// <remarks>
-/// 一个任务一行，行里两项都是空就是“已恢复默认”（行留着，便于追溯）。任务从代码里删除后行也保留，
-/// 回滚到还有这个任务的版本时，运维改过的设置还在。框架在同步触发器时读这张表，不写它
+/// 空值使用代码默认值；恢复默认或移除任务声明后仍保留记录，便于追溯和版本回滚。
+/// 调度器同步时只读取此表
 /// </remarks>
 public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
 {
@@ -35,7 +35,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
     public bool IsDefault => Enabled is null && Cron is null;
 
     /// <summary>
-    /// 第一次改某个任务
+    /// 创建定时任务自定义设置
     /// </summary>
     public static ScheduledJobSetting Create(string jobName, bool? enabled, string? cron)
     {
@@ -47,7 +47,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
     }
 
     /// <summary>
-    /// 整体换成新的覆盖：空的项恢复成跟着默认值
+    /// 替换自定义设置，空值表示使用代码默认值
     /// </summary>
     public void Apply(bool? enabled, string? cron)
     {
@@ -61,7 +61,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
     }
 
     /// <summary>
-    /// 恢复默认：两项都清空，行保留
+    /// 恢复默认设置，保留记录
     /// </summary>
     public void RestoreDefault()
     {

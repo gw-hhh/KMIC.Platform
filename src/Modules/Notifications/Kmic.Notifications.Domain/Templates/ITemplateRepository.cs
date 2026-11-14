@@ -9,23 +9,23 @@ namespace Kmic.Notifications.Domain.Templates;
 public interface ITemplateRepository : IRepository<NotificationTemplate, NotificationTemplateId>
 {
     /// <summary>
-    /// 按模板键读取，用于修改，连同发布过的版本；传了期望版本号时，不一致返回版本冲突
+    /// 按模板键读取待修改的模板及其已发布版本
     /// </summary>
-    /// <param name="key">模板键</param>
-    /// <param name="expectedVersion">调用方看到的并发版本号</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 指定 expectedVersion 时校验并发版本，不一致则返回版本冲突
+    /// </remarks>
     Task<Result<NotificationTemplate>> GetByKeyForUpdateAsync(string key, long? expectedVersion, CancellationToken ct);
 
     /// <summary>
-    /// 全部模板，不含版本，用于和代码里的声明对账
+    /// 查询全部模板，不加载版本，供目录同步使用
     /// </summary>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlyList<NotificationTemplate>> ListAllAsync(CancellationToken ct);
 
     /// <summary>
-    /// 一个模板各渠道当前生效的发布版本；用默认内容的渠道不在其中，模板不存在返回空
+    /// 查询模板各渠道当前生效的发布版本
     /// </summary>
-    /// <param name="key">模板键</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 使用代码默认内容的渠道不在结果中；模板不存在时返回空集合
+    /// </remarks>
     Task<IReadOnlyDictionary<TemplateChannel, TemplateVersion>> GetActiveVersionsAsync(string key, CancellationToken ct);
 }

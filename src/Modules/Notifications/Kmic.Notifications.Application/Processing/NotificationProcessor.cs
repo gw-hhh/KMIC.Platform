@@ -18,13 +18,12 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Application.Processing;
 
 /// <summary>
-/// 处理一次发送请求：渲染内容，给每个收件人在每个渠道生成投递或站内消息
+/// 处理通知发送请求，按收件人和渠道生成投递记录或站内消息
 /// </summary>
 /// <remarks>
-/// 在 Notifications 自己的事务里完成，没有外部调用：渲染的结果随投递一起保存，投递由工作器之后再发出去。
-/// 每个渠道用它当前生效的内容：发布过版本的用发布的版本，否则用代码里的默认内容。
-/// 同一条来源消息只处理一次；同一个模板、收件人、去重键、渠道已经有投递的跳过。
-/// 业务失败（模板不存在、模型不符）返回错误，消息进入死信，不是对用户的错误
+/// 在 Notifications 的事务中保存渲染结果和投递记录，不调用外部发送渠道；实际发送由投递工作器完成。
+/// 各渠道优先使用已发布版本，否则使用代码默认内容。同一来源消息只处理一次，已存在相同模板、收件人、去重键和渠道的投递时跳过。
+/// 模板不存在或模型不符等业务失败返回错误，由消息管道转入死信
 /// </remarks>
 public sealed class NotificationProcessor(
     NotificationTemplateCatalog catalog,
@@ -41,8 +40,6 @@ public sealed class NotificationProcessor(
     /// <summary>
     /// 处理一次发送请求
     /// </summary>
-    /// <param name="request">发送请求</param>
-    /// <param name="ct">取消令牌</param>
     public async Task<Result> ProcessAsync(NotificationRequest request, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -58,7 +55,7 @@ public sealed class NotificationProcessor(
             return NotificationsErrors.TemplateSecretMismatch;
         }
 
-        // 同一条来源消息只处理一次：重复投递的消息到这里什么也不做
+        // 来源消息已处理时直接成功，避免重复生成通知
         if (await notifications.ExistsForAsync(request.SourceMessageId, ct))
         {
             return Result.Success();
@@ -136,7 +133,7 @@ public sealed class NotificationProcessor(
 
     private void AddSiteMessage(UserId userId, FanOut context)
     {
-        // 链接约定取模型上叫 Link 的字符串属性；不是站内地址就不带链接，不能因为一个链接让整条通知发不出去
+        // 约定读取模型的 Link 字符串属性；链接无效时移除链接重建消息，避免因此中断通知
         var link = context.ModelType.GetProperty("Link")?.GetValue(context.Model) as string;
         var content = context.Content.For(TemplateChannel.InApp);
         var created = SiteMessage.Create(userId, context.NotificationId, content.Subject, content.Body, link, context.Definition.Module, context.Now);
@@ -180,7 +177,7 @@ public sealed class NotificationProcessor(
         deliveries.Add(Delivery.Queue(context.NotificationId, channel, userId, key, masked, direct, role, content.Subject, content.Body, parameters, attachments, definition.Key, context.DedupKey, content.Version, context.Content.CodeHash, context.Priority));
     }
 
-    // 附件只有邮件用，存文件 ID，内容到发送时才读；重复的 ID 去掉，没有附件存空
+    // 邮件附件仅保存去重后的文件 ID，发送时再读取内容；无附件时存 null
     private static string? AttachmentsOf(NotificationRequest request) =>
         request.AttachmentFileIds is { Count: > 0 } ids ? JsonSerializer.Serialize(ids.Distinct()) : null;
 
@@ -188,13 +185,13 @@ public sealed class NotificationProcessor(
     private static string? SmsParametersOf(object model) =>
         model is ISmsTemplateModel sms ? JsonSerializer.Serialize(sms.ToSmsParameters()) : null;
 
-    // 收件人在这个渠道的地址：用户向联系方式查，直接给的用其中的邮箱或手机号；没有地址或用户不可用时给出跳过的原因
+    // 系统用户从联系方式中取地址，外部收件人使用请求中的地址；地址缺失或用户不可用时返回跳过原因
     private static (UserId? UserId, string Key, string? Address, DeliverySkipReason? Skip) Resolve(Recipient recipient, DeliveryChannel channel, FanOut context)
     {
         var direct = channel == DeliveryChannel.Email ? recipient.Email : recipient.Phone;
         if (recipient.UserId is not { } id)
         {
-            // 系统外的收件人：这个渠道给了地址就用它；没给就按他给的另一个地址（都没有就是占位）记一条跳过的投递
+            // 当前渠道地址缺失时，用另一地址或占位值生成去重键，保留跳过记录
             if (string.IsNullOrWhiteSpace(direct))
             {
                 return (null, AddressMasking.KeyOfAddress(recipient.Email ?? recipient.Phone ?? "-"), null, DeliverySkipReason.NoAddress);
@@ -223,7 +220,7 @@ public sealed class NotificationProcessor(
         return (UserId.From(id), key, address.Trim(), null);
     }
 
-    // 处理一次请求用到的共享状态：已经渲染好的内容、联系方式、已有的投递、本次已经生成的投递键
+    // 单次分发共用渲染结果、联系方式和去重状态
     private sealed class FanOut(
         NotificationId notificationId,
         NotificationTemplateDefinition definition,

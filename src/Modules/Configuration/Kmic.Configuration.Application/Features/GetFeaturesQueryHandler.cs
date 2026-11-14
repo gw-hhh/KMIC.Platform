@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Configuration.Application.Features;
 
 /// <summary>
-/// 处理 <see cref="GetFeaturesQuery"/>
+/// 查询已启用的功能开关
 /// </summary>
 public sealed class GetFeaturesQueryHandler(IFeatureFlags features) : IQueryHandler<GetFeaturesQuery, FeaturesResponse>
 {

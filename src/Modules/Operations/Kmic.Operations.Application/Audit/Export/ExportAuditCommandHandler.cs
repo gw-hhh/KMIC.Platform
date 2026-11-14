@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.Audit.Export;
 
 /// <summary>
-/// 处理 <see cref="ExportAuditCommand"/>
+/// 提交审计导出作业
 /// </summary>
 public sealed class ExportAuditCommandHandler(IBackgroundJobs jobs) : ICommandHandler<ExportAuditCommand, JobAccepted>
 {

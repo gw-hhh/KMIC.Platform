@@ -6,7 +6,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 处理 <see cref="RetryDeletionCommand"/>
+/// 重置文件删除重试次数
 /// </summary>
 public sealed class RetryDeletionCommandHandler(IStoredFileRepository files) : ICommandHandler<RetryDeletionCommand>
 {
@@ -15,7 +15,7 @@ public sealed class RetryDeletionCommandHandler(IStoredFileRepository files) : I
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // 不在删除队列里（文件不存在，或没有要删的）：对管理员来说都是“没有可重试的”
+        // 文件不存在或不在删除队列中，均返回未找到
         return await files.ResetDeletionAsync(command.Id, cancellationToken) ? Result.Success() : FilesErrors.NotFound;
     }
 }

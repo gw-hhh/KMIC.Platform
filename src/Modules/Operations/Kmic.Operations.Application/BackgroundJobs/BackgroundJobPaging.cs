@@ -9,7 +9,7 @@ using Kmic.Operations.Domain.Jobs;
 namespace Kmic.Operations.Application.BackgroundJobs;
 
 /// <summary>
-/// 作业的跨模块翻页：归并规则见 <see cref="MergedCursorPaging" />，这里补上提交人、取消人的名称
+/// 归并跨模块后台作业分页结果，并补充提交人和取消请求人的名称
 /// </summary>
 internal static class BackgroundJobPaging
 {

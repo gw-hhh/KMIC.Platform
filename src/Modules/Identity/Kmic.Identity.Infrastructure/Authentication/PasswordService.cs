@@ -5,13 +5,13 @@ using Microsoft.AspNetCore.Identity;
 namespace Kmic.Identity.Infrastructure.Authentication;
 
 /// <summary>
-/// 用 ASP.NET Core 的密码哈希器（PBKDF2-HMAC-SHA512，哈希里带参数，参数过时时能识别出来）
+/// 基于 ASP.NET Core 的密码哈希服务
 /// </summary>
 internal sealed class PasswordService : IPasswordService
 {
     private readonly PasswordHasher<User> _hasher = new();
 
-    // 一次真实哈希的成本参照：账号不存在时的假计算用它，耗时才和真实校验接近
+    // 无账号或未设置密码时也执行哈希校验，减少响应耗时差异
     private readonly string _decoyHash;
 
     public PasswordService() => _decoyHash = _hasher.HashPassword(null!, "kmic-decoy-password");

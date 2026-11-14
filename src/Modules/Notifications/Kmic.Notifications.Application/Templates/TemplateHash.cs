@@ -5,8 +5,11 @@ using Kmic.BuildingBlocks.Application.Notifications;
 namespace Kmic.Notifications.Application.Templates;
 
 /// <summary>
-/// 代码里声明的哈希：声明或默认内容一变，哈希就变，同步时据此判断要不要更新
+/// 模板同步用的哈希，包含声明属性和默认内容
 /// </summary>
+/// <remarks>
+/// 不包含模型结构和示例数据
+/// </remarks>
 internal static class TemplateHash
 {
     public static string Of(NotificationTemplateDefinition definition)

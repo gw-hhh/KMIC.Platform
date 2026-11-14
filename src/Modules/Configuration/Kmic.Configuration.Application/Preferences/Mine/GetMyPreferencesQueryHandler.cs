@@ -7,7 +7,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
 /// <summary>
-/// 处理 <see cref="GetMyPreferencesQuery"/>
+/// 查询当前角色下生效的个人偏好
 /// </summary>
 public sealed class GetMyPreferencesQueryHandler(IExecutionContext execution, IPreferenceLayers layers, PreferenceCatalog catalog)
     : IQueryHandler<GetMyPreferencesQuery, MyPreferencesResponse>
@@ -31,7 +31,7 @@ public sealed class GetMyPreferencesQueryHandler(IExecutionContext execution, IP
                 : new MyPreferenceItem(definition.Key, definition.DisplayName, false, DeclaredValues.ElementOf(json), source, CanSet(subject)));
         }
 
-        // 偏好族的键没有声明，有值才出现；库里留着的、既不在目录里也不属于任何族的键（声明已删除）不返回
+        // 偏好族只返回有值的键；既无声明也不属于偏好族的历史键忽略
         foreach (var key in stack.Keys.Where(k => catalog.Find(k) is null && PreferenceFamilies.Find(k) is not null))
         {
             var subject = PreferenceSubject.Find(catalog, key).Value;

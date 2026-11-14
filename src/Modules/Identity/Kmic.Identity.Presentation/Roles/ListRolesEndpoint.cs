@@ -13,7 +13,7 @@ internal sealed class ListRolesEndpoint : IEndpoint
             .Sends<ListRolesQuery>()
             .Sortable(RoleSort.Map)
             .WithSummary("查询角色列表")
-            .WithDescription("角色、状态、是否受保护和持有人数，分页。");
+            .WithDescription("分页返回角色、状态、是否受保护及持有人数。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListRolesRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListRolesQuery(request.Q, request.Status, new PageRequest(request.Page, request.PageSize), new SortRequest(request.Sort)), ct)).ToOk();

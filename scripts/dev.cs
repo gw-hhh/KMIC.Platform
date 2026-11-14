@@ -209,7 +209,7 @@ void EnsureDatabaseAndRoles()
 
 void EnsureAdministrator(string superConnection)
 {
-    // 系统里自带一个内置的 system 用户，只数真人用户
+    // 忽略内置系统账号，仅统计普通用户
     var users = Psql(Database, "SELECT count(*) FROM \"Identity\".\"User\" WHERE \"Kind\" = 'Normal'").Output.Trim();
     if (!string.Equals(users, "0", StringComparison.Ordinal))
     {

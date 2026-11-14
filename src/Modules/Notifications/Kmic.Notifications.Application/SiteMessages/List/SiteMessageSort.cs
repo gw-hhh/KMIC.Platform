@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.SiteMessages.List;
 public static class SiteMessageSort
 {
     /// <summary>
-    /// 排序字段表，默认未读在前、新的在前
+    /// 排序字段表，默认未读在前，再按发送时间倒序
     /// </summary>
     public static readonly SortMap<SiteMessageItem> Map = SortMap<SiteMessageItem>
         .Field("isRead", x => x.IsRead)

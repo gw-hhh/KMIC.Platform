@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.Captured.Purge;
 /// 清理超过保留期的捕获内容
 /// </summary>
 /// <remarks>
-/// 每天执行一次，保留期见 Notifications:Retention。生产环境没有捕获内容，执行也是空操作
+/// 每天按 Notifications:Retention 中的保留期清理捕获内容
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]

@@ -33,7 +33,7 @@ public sealed class RevokeReason : Enumeration<RevokeReason>
     public static readonly RevokeReason ForcedByAdmin = new("ForcedByAdmin", "被管理员强制下线");
 
     /// <summary>
-    /// 旧的刷新令牌在宽限期之外再次出现，判定为被盗用
+    /// 旧刷新令牌在宽限期外再次使用
     /// </summary>
     public static readonly RevokeReason RefreshTokenReused = new("RefreshTokenReused", "刷新令牌被重复使用");
 

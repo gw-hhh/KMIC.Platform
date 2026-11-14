@@ -13,7 +13,7 @@ internal sealed class GetFileEndpoint : IEndpoint
         group.MapGet("/{id}", HandleAsync)
             .Sends<GetFileQuery>()
             .WithSummary("查询文件详情")
-            .WithDescription("元数据、状态、引用和彻底删除的记录。不返回存储键和下载地址：管理员也不经这里下载内容，下载走业务对象。");
+            .WithDescription("返回文件元数据、状态、引用、状态历史及彻底删除记录，不提供存储键或下载地址。管理员下载也须通过业务对象授权。");
 
     private static async Task<IResult> HandleAsync([Description("文件 ID")] StoredFileId id, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetFileQuery(id), ct)).ToOk();

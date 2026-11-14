@@ -18,7 +18,7 @@ public sealed class StoredFileStatus : Enumeration<StoredFileStatus>
     public static readonly StoredFileStatus Scanning = new("Scanning", "扫描中");
 
     /// <summary>
-    /// 可用：临时文件，24 小时内没有被业务关联就会清理
+    /// 可用：未关联的上传文件或模块生成文件，达到各自保留期限后可清理
     /// </summary>
     public static readonly StoredFileStatus Available = new("Available", "临时");
 
@@ -33,7 +33,7 @@ public sealed class StoredFileStatus : Enumeration<StoredFileStatus>
     public static readonly StoredFileStatus Detached = new("Detached", "已解除关联");
 
     /// <summary>
-    /// 被拒绝：类型或大小不符、扫描没通过、写入失败，不能关联，很快清理
+    /// 被拒绝：文件检查失败或存储对象丢失，不可关联，保留期满后可清理
     /// </summary>
     public static readonly StoredFileStatus Rejected = new("Rejected", "被拒绝");
 
@@ -43,7 +43,7 @@ public sealed class StoredFileStatus : Enumeration<StoredFileStatus>
     public static readonly StoredFileStatus Deleting = new("Deleting", "删除中");
 
     /// <summary>
-    /// 已彻底删除：运维按“彻底删除”处理过，行保留作记录，引用方显示“文件已删除”，不能恢复
+    /// 已彻底删除：保留元数据和引用，禁止读取或恢复；存储对象由删除工作器处理
     /// </summary>
     public static readonly StoredFileStatus Purged = new("Purged", "已彻底删除");
 

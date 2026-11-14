@@ -5,9 +5,6 @@ namespace Kmic.Notifications.Application.Channels;
 /// <summary>
 /// 投递工作器的部署配置
 /// </summary>
-/// <remarks>
-/// 节名 Notifications:Delivery
-/// </remarks>
 public sealed class NotificationsDeliveryOptions
 {
     /// <summary>
@@ -16,37 +13,37 @@ public sealed class NotificationsDeliveryOptions
     public const string Section = "Notifications:Delivery";
 
     /// <summary>
-    /// 同时发送几条
+    /// 并行投递数
     /// </summary>
     [Range(1, 32)]
     public int Parallelism { get; init; } = 4;
 
     /// <summary>
-    /// 一条最多尝试几次：用完还没发出去的转为失败，等人工处理
+    /// 暂时失败时，领取次数小于此值才会自动重试
     /// </summary>
     [Range(1, 20)]
     public int MaxAttempts { get; init; } = 5;
 
     /// <summary>
-    /// 领取之后多少分钟没有结果，别的实例可以接管
+    /// 领取租期（分钟），到期后其他实例可接管
     /// </summary>
     [Range(1, 60)]
     public int LeaseMinutes { get; init; } = 5;
 
     /// <summary>
-    /// 没有可领取的投递时，隔多少秒查一次队列
+    /// 无可领取投递时的轮询间隔（秒）
     /// </summary>
     [Range(1, 300)]
     public int PollSeconds { get; init; } = 5;
 
     /// <summary>
-    /// 一封邮件的附件加起来最多多少 MB，超过的这封邮件不发（永久失败）
+    /// 单封邮件的附件总大小上限（MB），超过时判为永久失败
     /// </summary>
     [Range(1, 100)]
     public int MaxAttachmentMb { get; init; } = 20;
 
     /// <summary>
-    /// 领取的租期
+    /// 领取租期
     /// </summary>
     public TimeSpan Lease => TimeSpan.FromMinutes(LeaseMinutes);
 

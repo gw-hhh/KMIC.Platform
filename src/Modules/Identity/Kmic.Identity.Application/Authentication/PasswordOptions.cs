@@ -6,7 +6,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// 密码规则
 /// </summary>
 /// <remarks>
-/// 部署配置，节名 Identity:Password。按 NIST SP 800-63B 的思路：只看长度和常见弱密码，不强制字符组合，不定期强制修改
+/// 配置节为 Identity:Password，设置密码长度范围。密码策略另行检查常见弱密码及与账号、手机号重复的情况，不强制字符组合或定期改密
 /// </remarks>
 public sealed class PasswordOptions
 {

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 新密码要满足的规则
+/// 新密码校验规则
 /// </summary>
 /// <param name="settings">长度规则</param>
 /// <param name="weakPasswords">常见弱密码清单</param>
@@ -25,7 +25,7 @@ public sealed class PasswordPolicy(IOptions<PasswordOptions> settings, IWeakPass
 
         if (string.IsNullOrEmpty(password) || password.Length < Options.MinLength || password.Length > Options.MaxLength)
         {
-            return IdentityErrors.PasswordTooWeak.WithDetail($"密码长度要在 {Options.MinLength} 到 {Options.MaxLength} 个字符之间");
+            return IdentityErrors.PasswordTooWeak.WithDetail($"密码长度须为 {Options.MinLength} 到 {Options.MaxLength} 个字符");
         }
 
         if (weakPasswords.Contains(password) || SameAs(password, account) || (mobile is not null && SameAs(password, mobile)))
@@ -36,7 +36,7 @@ public sealed class PasswordPolicy(IOptions<PasswordOptions> settings, IWeakPass
         return Result.Success();
     }
 
-    // 手机号带了 +86 前缀时，用户输入的往往是不带前缀的 11 位，两种写法都要挡
+    // 同时拒绝带 +86 前缀和不带前缀的手机号作为密码
     private static bool SameAs(string password, string other)
     {
         if (string.Equals(password, other, StringComparison.OrdinalIgnoreCase))

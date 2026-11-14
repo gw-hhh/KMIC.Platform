@@ -591,7 +591,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.ToTable("StorageIssue", "Files", t =>
                         {
-                            t.HasComment("存储问题；Files 模块；对账发现库里有记录而存储里找不到对象的文件，待运维还原后标为已解决");
+                            t.HasComment("存储问题（Files）：一条记录对应一次对象缺失问题；登记处理结果，不执行还原，文件记录清理后仍保留");
 
                             t.HasCheckConstraint("CK_StorageIssue_Kind", "\"Kind\" IN ('RestorableMissing', 'LostMissing')");
 
@@ -625,11 +625,11 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("DeleteAttempts")
                         .HasColumnType("integer")
-                        .HasComment("删除队列已经试了几次");
+                        .HasComment("删除队列领取次数，人工重试时清零");
 
                     b.Property<DateTimeOffset?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("成为清理候选的时间：临时、已解除关联、被拒绝的文件才有，已关联的文件为空");
+                        .HasComment("清理到期时间");
 
                     b.Property<string>("FileType")
                         .HasMaxLength(50)
@@ -639,11 +639,11 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
                     b.Property<string>("HistoryPurgeNote")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
-                        .HasComment("彻底删除历史版本的执行记录，如工单号");
+                        .HasComment("历史版本清除记录");
 
                     b.Property<DateTimeOffset?>("HistoryPurgedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("运维彻底删除历史版本之后登记的时间；为空表示历史版本可能仍在");
+                        .HasComment("历史版本清除登记时间");
 
                     b.Property<Guid?>("LeaseToken")
                         .HasColumnType("uuid")
@@ -660,7 +660,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset?>("ObjectDeletedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("对象在存储里被删除的时间：只有彻底删除的文件需要，空表示对象还在、等删除工作器处理");
+                        .HasComment("对象删除登记时间");
 
                     b.Property<string>("ObjectVersionId")
                         .HasMaxLength(200)
@@ -671,13 +671,13 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .HasComment("显示用的文件名：去掉路径与控制字符，只作显示");
+                        .HasComment("显示文件名");
 
                     b.Property<string>("Profile")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .HasComment("上传档案名；生成的文件是 Generated:来源");
+                        .HasComment("上传配置名称");
 
                     b.Property<string>("PurgeReason")
                         .HasMaxLength(500)
@@ -686,16 +686,16 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset?>("PurgedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("彻底删除的时间");
+                        .HasComment("彻底删除标记时间");
 
                     b.Property<Guid?>("PurgedBy")
                         .HasColumnType("uuid")
-                        .HasComment("彻底删除的人");
+                        .HasComment("彻底删除操作人");
 
                     b.Property<string>("RejectReason")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
-                        .HasComment("被拒绝的原因：类型不符、超过大小、扫描没通过、写入失败");
+                        .HasComment("拒绝原因");
 
                     b.Property<string>("Sha256")
                         .HasMaxLength(64)
@@ -728,11 +728,11 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("上传开始的时间");
+                        .HasComment("文件登记时间");
 
                     b.Property<Guid?>("UploadedBy")
                         .HasColumnType("uuid")
-                        .HasComment("上传的人；系统生成的文件没有");
+                        .HasComment("上传人或生成请求人");
 
                     b.HasKey("Id");
 
@@ -746,7 +746,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.ToTable("StoredFile", "Files", t =>
                         {
-                            t.HasComment("文件元数据；Files 模块；一行一个文件，内容在对象存储里；状态是删除队列：删除中的行由删除工作器领取，先删对象再删行");
+                            t.HasComment("文件元数据（Files）：一条记录对应一个文件，内容存于对象存储；到期清理先删对象再删记录，彻底删除保留记录");
 
                             t.HasCheckConstraint("CK_StoredFile_Status", "\"Status\" IN ('Uploading', 'Scanning', 'Available', 'Attached', 'Detached', 'Rejected', 'Deleting', 'Purged')");
                         });

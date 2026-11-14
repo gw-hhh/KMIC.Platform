@@ -4,7 +4,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens;
 
 /// <summary>
-/// 示例标本的资源动作目录：详情响应里的“可用动作”据此计算
+/// 示例的操作目录，用于计算详情中的可用操作
 /// </summary>
 public sealed class SpecimenActions : ResourceActionCatalog<Specimen, SpecimenAction>
 {

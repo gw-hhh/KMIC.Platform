@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Infrastructure.Persistence.Records;
 
 /// <summary>
-/// 范围对象目录表的一行：代码里声明的范围对象同步到这里，只由目录同步与清理写
+/// 数据范围对象目录，仅由同步与清理更新
 /// </summary>
 internal sealed class DataScopeObjectRow
 {

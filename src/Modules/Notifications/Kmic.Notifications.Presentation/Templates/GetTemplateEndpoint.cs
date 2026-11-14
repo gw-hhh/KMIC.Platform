@@ -11,8 +11,8 @@ internal sealed class GetTemplateEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/templates/{key}", HandleAsync)
             .Sends<GetTemplateQuery>()
-            .WithSummary("查询一个通知模板")
-            .WithDescription("各渠道当前的内容和代码里的默认内容、模板里能用的变量、示例数据、发布过的版本。响应里的 version 在发布和恢复时作为期望版本传回。");
+            .WithSummary("查询通知模板详情")
+            .WithDescription("返回各渠道的当前内容、代码默认内容、可用变量、示例数据及已发布版本。发布或恢复默认内容时，须将响应中的 version 作为预期版本号提交。");
 
     private static async Task<IResult> HandleAsync([Description("模板键，如 Sample.SpecimenSubmitted")] string key, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetTemplateQuery(key), ct)).ToOk();

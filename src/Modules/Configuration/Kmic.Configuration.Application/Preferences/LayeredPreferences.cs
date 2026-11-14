@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Application.Settings;
 namespace Kmic.Configuration.Application.Preferences;
 
 /// <summary>
-/// 一个用户在当前角色下能看到的三层偏好值：键到 JSON
+/// 用户在当前角色下的三层偏好，按键保存 JSON 值
 /// </summary>
 /// <remarks>
 /// 按“本人 → 角色 → 系统”的顺序取值。偏好声明里不允许的层，即使库里有值也不取
@@ -19,7 +19,7 @@ public sealed class LayeredPreferences(
     public IEnumerable<string> Keys => user.Keys.Concat(role.Keys).Concat(system.Keys).Distinct(StringComparer.Ordinal);
 
     /// <summary>
-    /// 键在各个允许的层上的值，按优先级由高到低；调用方取第一个读得出来的
+    /// 按优先级返回指定键在允许层级中的值，调用方选择首个解析和校验成功的值
     /// </summary>
     public IEnumerable<(PreferenceSource Source, string Json)> Candidates(string key, PreferenceLayers allowed)
     {

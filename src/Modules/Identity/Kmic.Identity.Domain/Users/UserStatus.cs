@@ -16,7 +16,7 @@ public sealed class UserStatus : Enumeration<UserStatus>
     public static readonly UserStatus Active = new("Active", "启用");
 
     /// <summary>
-    /// 已禁用：不能登录，已有会话全部作废；用户被大量业务数据引用，所以只禁用不删除
+    /// 禁止登录，已有会话全部作废
     /// </summary>
     public static readonly UserStatus Disabled = new("Disabled", "已禁用");
 

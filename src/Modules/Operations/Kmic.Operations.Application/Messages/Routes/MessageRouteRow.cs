@@ -1,7 +1,7 @@
 namespace Kmic.Operations.Application.Messages.Routes;
 
 /// <summary>
-/// 订阅路由表里的一行，只用来读：路由由框架在实例启动时登记
+/// 框架订阅路由的只读查询结果
 /// </summary>
 /// <remarks>
 /// 状态在查询里已经换成编码文字，见 <c>MessageRouteStatus</c>
@@ -39,7 +39,7 @@ public sealed record MessageRouteRow
     public DateTimeOffset RegisteredAt { get; init; }
 
     /// <summary>
-    /// 是否还需要初始化：新订阅登记时要重建读模型
+    /// 是否仍需初始化读模型
     /// </summary>
     public bool NeedsInitialization { get; init; }
 

@@ -6,12 +6,9 @@ namespace Kmic.Identity.Application.Authentication.Logout;
 /// <summary>
 /// 退出登录：作废当前会话
 /// </summary>
-/// <remarks>
-/// 天然幂等：会话已经作废时再次退出什么也不改变
-/// </remarks>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]
-[NotAudited("结果记入安全事件")]
-[NotIdempotent("退出天然幂等：会话已经作废时再次退出不改变任何东西")]
+[NotAudited("通过 SessionRevoked 安全事件记录会话撤销")]
+[NotIdempotent("撤销会话会保留已有撤销信息，无需缓存退出响应")]
 public sealed record LogoutCommand : ICommand;

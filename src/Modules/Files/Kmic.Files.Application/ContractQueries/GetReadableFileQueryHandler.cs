@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Files.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="GetReadableFileQuery"/>
+/// 查询系统读取文件所需的信息
 /// </summary>
 public sealed class GetReadableFileQueryHandler(IFilesQueryDb db) : IQueryHandler<GetReadableFileQuery, FileDownload>
 {
@@ -33,7 +33,6 @@ public sealed class GetReadableFileQueryHandler(IFilesQueryDb db) : IQueryHandle
             return refused;
         }
 
-        // 能读的状态一定写完了，类型、大小、摘要都有；缺哪个都是数据损坏，当作还没准备好
         return row.FileType is null || row.ContentType is null || row.Size is null || row.Sha256 is null
             ? FilesErrors.NotReady
             : new FileDownload(row.Id.Value, row.StorageKey, row.OriginalName, row.ContentType, row.Size.Value, row.Sha256, row.FileType);

@@ -7,30 +7,30 @@ using Kmic.Notifications.Domain.Notifications;
 namespace Kmic.Notifications.Domain.SiteMessages;
 
 /// <summary>
-/// 站内消息：发给某个用户的一条消息，登录后在页面上看到
+/// 用户的站内消息
 /// </summary>
 /// <remarks>
-/// 只有已读状态会改。访问只按收件人：不按组织范围，也没有权限点，谁的消息谁看
+/// 仅更新已读状态；按收件人控制访问，不另设权限点或组织范围限制
 /// </remarks>
 public sealed class SiteMessage : AggregateRoot<SiteMessageId>
 {
     /// <summary>
-    /// 标题最长多少个字符
+    /// 标题最大长度（字符数）
     /// </summary>
     public const int TitleMaxLength = 200;
 
     /// <summary>
-    /// 正文最长多少个字符
+    /// 正文最大长度（字符数）
     /// </summary>
     public const int BodyMaxLength = 2000;
 
     /// <summary>
-    /// 类别最长多少个字符
+    /// 类别最大长度（字符数）
     /// </summary>
     public const int CategoryMaxLength = 50;
 
     /// <summary>
-    /// 链接最长多少个字符
+    /// 链接最大长度（字符数）
     /// </summary>
     public const int LinkMaxLength = 500;
 
@@ -119,7 +119,7 @@ public sealed class SiteMessage : AggregateRoot<SiteMessageId>
     }
 
     /// <summary>
-    /// 标为已读；已经读过的什么也不改
+    /// 标为已读，已读消息保留原已读时间
     /// </summary>
     /// <param name="now">现在</param>
     public void MarkRead(DateTimeOffset now) => ReadAt ??= now;

@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Sample.Domain.Specimens;
 
 /// <summary>
-/// 示例标本上会引起状态流转的动作
+/// 示例的可用操作
 /// </summary>
 public sealed class SpecimenAction : Enumeration<SpecimenAction>
 {

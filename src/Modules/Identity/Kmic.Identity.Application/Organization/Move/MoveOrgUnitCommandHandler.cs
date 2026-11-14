@@ -9,7 +9,7 @@ using Kmic.Identity.Domain.Organization;
 namespace Kmic.Identity.Application.Organization.Move;
 
 /// <summary>
-/// 处理 <see cref="MoveOrgUnitCommand"/>
+/// 移动组织单元及其下级
 /// </summary>
 public sealed class MoveOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<MoveOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)

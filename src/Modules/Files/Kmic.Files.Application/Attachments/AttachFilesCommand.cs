@@ -5,13 +5,12 @@ using Kmic.Files.Contracts;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// 处理业务模块发来的关联请求：文件转“已关联”并登记引用
+/// 处理业务文件关联请求，登记引用并将文件转为已关联
 /// </summary>
 /// <remarks>
-/// 订阅 Files.AttachFiles。可用或已解除关联的文件转“已关联”；已是“已关联”且已有同一引用的幂等成功。
-/// 文件已经在删除中、已彻底删除、不存在属于程序缺陷（业务事务已经在锁内检查过可关联性），进入死信，不可放弃，只能重试
+/// 订阅 Files.AttachFiles；可用或已解除关联的文件转为已关联，同一引用重复登记直接成功。
+/// 业务事务已在锁内检查可关联性，文件不存在、删除中或已彻底删除均属异常，消息进入死信且不可放弃，须排除问题后重试
 /// </remarks>
-/// <param name="Message">关联请求</param>
 [SystemOnly]
-[NotAudited("文件状态历史记录")]
+[NotAudited("内部关联请求，状态变更记入文件历史")]
 public sealed record AttachFilesCommand(AttachFiles Message) : ICommand;

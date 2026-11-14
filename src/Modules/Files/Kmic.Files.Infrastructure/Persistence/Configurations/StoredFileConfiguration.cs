@@ -7,7 +7,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Configurations;
 
 internal sealed class StoredFileConfiguration : IEntityTypeConfiguration<StoredFile>
 {
-    // 删除队列的列不属于聚合，是只由删除工作器与清理更新的影子属性，列名在这里集中定义
+    // 删除队列用影子属性保存领取和重试状态，列名集中定义在此
     public const string LeaseToken = nameof(LeaseToken);
     public const string LeaseUntil = nameof(LeaseUntil);
     public const string DeleteAttempts = nameof(DeleteAttempts);
@@ -15,7 +15,7 @@ internal sealed class StoredFileConfiguration : IEntityTypeConfiguration<StoredF
 
     public void Configure(EntityTypeBuilder<StoredFile> builder)
     {
-        builder.ToTable(t => t.HasComment("文件元数据；Files 模块；一行一个文件，内容在对象存储里；状态是删除队列：删除中的行由删除工作器领取，先删对象再删行"));
+        builder.ToTable(t => t.HasComment("文件元数据（Files）：一条记录对应一个文件，内容存于对象存储；到期清理先删对象再删记录，彻底删除保留记录"));
         builder.Property(f => f.StorageKey).HasMaxLength(300);
         builder.Property(f => f.OriginalName).HasMaxLength(200);
         builder.Property(f => f.FileType).HasMaxLength(50);
@@ -27,16 +27,16 @@ internal sealed class StoredFileConfiguration : IEntityTypeConfiguration<StoredF
         builder.Property(f => f.PurgeReason).HasMaxLength(500);
         builder.Property(f => f.HistoryPurgeNote).HasMaxLength(500);
 
-        // 删除队列的领取列：只由删除工作器与清理的状态条件更新，不经聚合
+        // 队列列按状态条件更新，不经聚合
         builder.Property<Guid?>(LeaseToken).HasComment("删除队列的领取令牌").AuditHidden();
         builder.Property<DateTimeOffset?>(LeaseUntil).HasComment("删除队列的领取到期时间");
-        builder.Property<int>(DeleteAttempts).HasComment("删除队列已经试了几次");
+        builder.Property<int>(DeleteAttempts).HasComment("删除队列领取次数，人工重试时清零");
         builder.Property<DateTimeOffset?>(NextAttemptAt).HasComment("删除队列下次可以领取的时间");
 
         builder.HasMany(f => f.References).WithOne().HasForeignKey("StoredFileId").OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(f => f.References).AutoInclude();
 
-        // 清理按到期时间找候选；删除工作器按状态领取；管理列表按上传人、档案筛选
+        // 清理按到期时间找候选；删除工作器按状态领取；管理列表按上传人、上传配置筛选
         builder.HasIndex(f => new { f.Status, f.ExpiresAt });
         builder.HasIndex(f => new { f.UploadedBy, f.UploadedAt });
         builder.HasIndex(f => f.Profile);

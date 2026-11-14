@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Configuration.Application.Preferences.Layers;
 
 /// <summary>
-/// 处理 <see cref="SetPreferenceLayerCommand"/>
+/// 保存系统或角色层的偏好设置
 /// </summary>
 public sealed class SetPreferenceLayerCommandHandler(
     PreferenceCatalog catalog,

@@ -8,7 +8,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Authentication.ChangePassword;
 
 /// <summary>
-/// 处理 <see cref="ChangePasswordCommand"/>
+/// 修改当前用户密码
 /// </summary>
 public sealed class ChangePasswordCommandHandler(
     IUserRepository users,

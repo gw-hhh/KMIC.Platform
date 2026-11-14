@@ -8,9 +8,9 @@ namespace Kmic.Operations.Application.BackgroundJobs.List;
 /// 查询各模块的后台作业
 /// </summary>
 /// <remarks>
-/// 遍历每个模块自己的作业表，按提交时间倒序归并，游标分页。看不到作业参数
+/// 跨模块按提交时间倒序归并，使用游标分页，不返回作业参数
 /// </remarks>
-/// <param name="Module">只看这个模块的；不给就是全部模块</param>
+/// <param name="Module">模块筛选，未指定时查询全部模块</param>
 /// <param name="JobType">作业类型名</param>
 /// <param name="Status">状态编码：Queued、Running、Succeeded、Failed、Cancelling、Cancelled</param>
 /// <param name="SubmittedBy">提交人</param>

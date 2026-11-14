@@ -11,11 +11,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Operations.Application.Audit.Export;
 
 /// <summary>
-/// 处理 <see cref="ExportAuditJob"/>：把审计记录逐行写进一个临时 CSV，再交给 Files 保存
+/// 将审计记录导出为 CSV 文件
 /// </summary>
 /// <remarks>
-/// 读数据走框架的导出入口（流式，不把全部数据装进内存）；文件写进存储之后，由最后发的那个命令请求登记，
-/// 登记请求和命令同一个事务进发件箱。临时文件不管成败都删除
+/// 流式导出；文件登记请求与检查点在最后一批事务中提交，临时文件在 finally 中清理
 /// </remarks>
 public sealed class ExportAuditJobHandler(
     IExportReader<IOperationsQueryDb> reader,
@@ -25,7 +24,7 @@ public sealed class ExportAuditJobHandler(
     TimeProvider time) : IJobHandler<ExportAuditJob>
 {
     /// <summary>
-    /// 生成方名称，写进文件的上传档案
+    /// 生成文件的来源标识
     /// </summary>
     public const string Source = "Operations.AuditExport";
 
@@ -58,7 +57,7 @@ public sealed class ExportAuditJobHandler(
         var names = new Dictionary<Guid, string?>();
         await using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
 
-        // 带 BOM 的 UTF-8：Excel 才会把中文当成 UTF-8 打开
+        // 写入 UTF-8 BOM，便于 Excel 识别中文
         await using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         await writer.WriteLineAsync(AuditCsv.Header.AsMemory(), ct);
         var rows = await reader.ReadAsync(
@@ -94,7 +93,7 @@ public sealed class ExportAuditJobHandler(
             return written.Error;
         }
 
-        // 登记请求放进最后这个命令里，和命令同一个事务进发件箱：作业中途失败就不会登记，写进存储的对象由对账清理
+        // 登记请求与检查点一起提交；未登记的存储对象由对账任务清理
         var registered = await context.SendBatchAsync(new RegisterAuditExportFileCommand(written.Value), new AuditExportCheckpoint(Registered: true), rows);
         return registered.IsFailure
             ? registered.Error

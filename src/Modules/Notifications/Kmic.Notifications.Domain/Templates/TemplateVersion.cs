@@ -12,17 +12,17 @@ namespace Kmic.Notifications.Domain.Templates;
 public sealed class TemplateVersion : Entity<TemplateVersionId>
 {
     /// <summary>
-    /// 主题最长多少个字符
+    /// 主题字符数上限
     /// </summary>
     public const int SubjectMaxLength = 200;
 
     /// <summary>
-    /// 正文最长多少个字符
+    /// 正文字符数上限
     /// </summary>
     public const int BodyMaxLength = 20000;
 
     /// <summary>
-    /// 备注最长多少个字符
+    /// 备注字符数上限
     /// </summary>
     public const int RemarkMaxLength = 500;
 

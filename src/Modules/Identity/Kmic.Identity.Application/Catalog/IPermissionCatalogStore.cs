@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Catalog;
 public interface IPermissionCatalogStore
 {
     /// <summary>
-    /// 同步之前先拿到这把锁，直到事务结束：多个实例同时启动时只有一个真正写入，后到的看到的已经是同步好的结果
+    /// 同步前取得事务级咨询锁并持有至事务结束，使多实例同步串行执行，后续实例读取已提交结果
     /// </summary>
     Task LockSyncAsync(CancellationToken ct);
 

@@ -10,11 +10,11 @@ using Microsoft.Extensions.Caching.Hybrid;
 namespace Kmic.Configuration.Infrastructure.Settings;
 
 /// <summary>
-/// <see cref="ISettings" /> 的实现：全部被修改过的值放在一个缓存项里，按标签失效；没有被修改过的设置用代码里的默认值
+/// 通过统一缓存读取已保存的系统设置，按标签失效，缺少值时使用代码默认值
 /// </summary>
 internal sealed class SettingsReader(IQueryScopeFactory queries, HybridCache cache, SystemSettingCatalog catalog) : ISettings
 {
-    // 正常靠标签失效；过期时间只是失效广播万一丢了的兜底
+    // 定期过期，避免失效通知丢失后一直读取旧值
     private static readonly HybridCacheEntryOptions _entry = new()
     {
         LocalCacheExpiration = TimeSpan.FromMinutes(10),

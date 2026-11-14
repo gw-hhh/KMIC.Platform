@@ -6,7 +6,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 处理 <see cref="DisableDictionaryItemCommand"/>
+/// 停用字典项
 /// </summary>
 public sealed class DisableDictionaryItemCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<DisableDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>

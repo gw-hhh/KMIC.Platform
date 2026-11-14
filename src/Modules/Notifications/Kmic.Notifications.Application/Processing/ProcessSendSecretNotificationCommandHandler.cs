@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Notifications.Application.Processing;
 
 /// <summary>
-/// 处理 <see cref="ProcessSendSecretNotificationCommand"/>
+/// 处理含密通知发送请求
 /// </summary>
 public sealed class ProcessSendSecretNotificationCommandHandler(NotificationProcessor processor) : ICommandHandler<ProcessSendSecretNotificationCommand>
 {

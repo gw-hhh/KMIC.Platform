@@ -11,7 +11,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Grants.RevokeRole;
 
 /// <summary>
-/// 处理 <see cref="RevokeRoleCommand"/>
+/// 收回用户角色
 /// </summary>
 public sealed class RevokeRoleCommandHandler(
     IUserRepository users,

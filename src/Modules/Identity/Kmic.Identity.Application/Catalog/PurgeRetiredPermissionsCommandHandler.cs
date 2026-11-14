@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Catalog;
 
 /// <summary>
-/// 处理 <see cref="PurgeRetiredPermissionsCommand"/>
+/// 清理超过保留期的退役权限及数据范围配置
 /// </summary>
 public sealed class PurgeRetiredPermissionsCommandHandler(
     IPermissionCatalogStore store,

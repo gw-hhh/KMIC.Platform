@@ -5,12 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Infrastructure.Sending;
 
 /// <summary>
-/// 投递队列的读写：领取、记录结果，都是带令牌条件的单条语句，不经聚合、不开事务
+/// 直接读写投递队列，领取与结果更新均使用单条 SQL，不经聚合或显式事务
 /// </summary>
 /// <remarks>
-/// 队列就是 Delivery 表里待发送的和领取已经到期的行。领取用 FOR UPDATE SKIP LOCKED，多个实例同时领取互不重复，
-/// 高优先级的先领；结果写入都带“状态是发送中且领取令牌仍是本次”的条件，领取到期被别人接管之后，
-/// 原来那个实例迟到的结果不会覆盖新的。含密模板发完（或最终失败）就把正文和短信参数清空
+/// 领取待发送或租约已过期的发送中记录，高优先级优先；通过 FOR UPDATE SKIP LOCKED 避免多实例重复领取。
+/// 结果更新须同时匹配发送中状态和本次领取令牌，防止接管后被旧实例覆盖。含密通知发送成功、最终失败或跳过时清空正文及短信参数
 /// </remarks>
 internal sealed class DeliveryStore(NotificationsDbContext context)
 {

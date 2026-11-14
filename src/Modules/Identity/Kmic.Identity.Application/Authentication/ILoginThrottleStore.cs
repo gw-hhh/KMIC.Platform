@@ -5,7 +5,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// </summary>
 /// <remarks>
 /// 失败计数必须在登录命令回滚后仍然保留，所以实现用独立事务提交，不走命令事务。
-/// 键是规范化登录名的 SHA-256，不存不存在账号的明文
+/// 键为规范化登录名的 SHA-256，无论账号是否存在，均不保存登录名明文
 /// </remarks>
 public interface ILoginThrottleStore
 {
@@ -20,12 +20,12 @@ public interface ILoginThrottleStore
     Task<LoginThrottleState> RecordFailureAsync(string loginNameHash, DateTimeOffset now, CancellationToken ct);
 
     /// <summary>
-    /// 清零：登录成功、管理员解锁或用短信重置密码之后
+    /// 清除指定登录名的失败计数和登录限制
     /// </summary>
     Task ClearAsync(string loginNameHash, CancellationToken ct);
 
     /// <summary>
-    /// 删除不再有意义的行：最近一次失败早于 <paramref name="lastFailedBefore" />，而且当前没有处在等待或锁定中，返回删除的行数
+    /// 删除最近失败时间早于 <paramref name="lastFailedBefore" /> 且当前不在等待或锁定中的记录，返回删除条数
     /// </summary>
     Task<int> PurgeAsync(DateTimeOffset lastFailedBefore, DateTimeOffset now, CancellationToken ct);
 }

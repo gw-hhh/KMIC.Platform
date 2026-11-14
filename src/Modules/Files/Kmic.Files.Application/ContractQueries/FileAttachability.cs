@@ -4,7 +4,7 @@ using Kmic.Files.Contracts;
 namespace Kmic.Files.Application.ContractQueries;
 
 /// <summary>
-/// <see cref="IFileAttachability"/> 的实现：薄适配器，只把调用转成本模块的查询，经管道执行
+/// 通过查询管道检查文件关联条件
 /// </summary>
 public sealed class FileAttachability(IContractQuerySender sender) : IFileAttachability
 {
@@ -16,6 +16,6 @@ public sealed class FileAttachability(IContractQuerySender sender) : IFileAttach
         var result = await sender.SendAsync(new CheckAttachabilityQuery(fileIds, uploaderId), ct);
         return result.IsSuccess
             ? result.Value
-            : throw new InvalidOperationException($"检查文件能不能关联失败：{result.Error.Code}。");
+            : throw new InvalidOperationException($"查询文件关联条件失败：{result.Error.Code}。");
     }
 }

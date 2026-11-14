@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Operations.Domain.Messages;
 
 /// <summary>
-/// 读模型重建一轮的状态
+/// 读模型重建状态
 /// </summary>
 /// <remarks>
 /// 编码和框架里重建轮次的状态一一对应，领域层不引用应用层，所以单独定义，由应用层转换
@@ -16,7 +16,7 @@ public sealed class RebuildRunStatus : Enumeration<RebuildRunStatus>
     public static readonly RebuildRunStatus Active = new("Active", "进行中");
 
     /// <summary>
-    /// 源端找不到的行太多，暂停等运维确认
+    /// 源端缺失行数超限，等待运维确认
     /// </summary>
     public static readonly RebuildRunStatus AwaitingConfirmation = new("AwaitingConfirmation", "等待确认");
 
@@ -26,7 +26,7 @@ public sealed class RebuildRunStatus : Enumeration<RebuildRunStatus>
     public static readonly RebuildRunStatus Completed = new("Completed", "已完成");
 
     /// <summary>
-    /// 运维放弃了这一轮
+    /// 已由运维放弃
     /// </summary>
     public static readonly RebuildRunStatus Abandoned = new("Abandoned", "已放弃");
 

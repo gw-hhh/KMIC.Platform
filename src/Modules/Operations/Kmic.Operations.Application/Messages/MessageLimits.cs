@@ -6,7 +6,7 @@ namespace Kmic.Operations.Application.Messages;
 internal static class MessageLimits
 {
     /// <summary>
-    /// 一次重试或放弃最多多少条
+    /// 单次重试或放弃的消息数上限
     /// </summary>
     public const int MaxPerRequest = 200;
 }

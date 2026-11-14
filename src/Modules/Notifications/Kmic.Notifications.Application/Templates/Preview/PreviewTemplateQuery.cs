@@ -8,9 +8,6 @@ namespace Kmic.Notifications.Application.Templates.Preview;
 /// <summary>
 /// 预览一段模板内容的渲染结果，不保存
 /// </summary>
-/// <remarks>
-/// 渲染的限时和输出上限与正式处理一样。模板有误时不当作调用失败，错误原因放在响应里，方便边写边看
-/// </remarks>
 /// <param name="Key">模板键</param>
 /// <param name="Channel">渠道，必须是模板声明过的</param>
 /// <param name="Subject">主题</param>

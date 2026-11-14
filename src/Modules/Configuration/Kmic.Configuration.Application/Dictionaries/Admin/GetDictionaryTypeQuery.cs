@@ -4,8 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Configuration.Application.Dictionaries.Admin;
 
 /// <summary>
-/// 查询一个字典类型的全部字典项（含停用的）与版本号，管理页使用
+/// 查询字典类型详情，包含已停用字典项
 /// </summary>
-/// <param name="TypeCode">字典类型编码</param>
 [RequirePermission(ConfigurationPermissions.DictionaryManage)]
 public sealed record GetDictionaryTypeQuery(string TypeCode) : IQuery<DictionaryTypeDetail>;

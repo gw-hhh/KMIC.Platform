@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Maintenance;
 
 /// <summary>
-/// 处理 <see cref="PurgeLoginThrottleCommand"/>
+/// 清理过期的登录失败记录
 /// </summary>
 public sealed class PurgeLoginThrottleCommandHandler(ILoginThrottleStore throttles, IOptions<LoginThrottleOptions> options, TimeProvider time)
     : ICommandHandler<PurgeLoginThrottleCommand, ScheduledJobOutcome>

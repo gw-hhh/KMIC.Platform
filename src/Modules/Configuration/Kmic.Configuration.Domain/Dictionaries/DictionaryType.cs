@@ -9,8 +9,8 @@ namespace Kmic.Configuration.Domain.Dictionaries;
 /// 字典类型和它的全部字典项
 /// </summary>
 /// <remarks>
-/// 字典类型由代码声明，启动时同步进来；字典项由管理员维护。一个类型一个聚合：编码唯一、父项存在、不成环、
-/// 停用时没有启用的子项这些跨项的规则，在聚合里一处保证，字典项的变化都递增类型的版本
+/// 字典类型由代码声明并在启动时同步，字典项由管理员维护。每个类型作为一个聚合，统一保证编码唯一、父项有效、层级无环及停用前无启用子项。
+/// 字典项变更递增所属类型的版本号，并使用该版本进行并发校验
 /// </remarks>
 public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
 {
@@ -59,7 +59,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     public IReadOnlyList<DictionaryItem> Items => _items;
 
     /// <summary>
-    /// 登记一个新的字典类型：代码里新增了声明时由启动任务调用
+    /// 登记代码中新增的字典类型
     /// </summary>
     public static DictionaryType Register(string code, string ownerModule, string displayName, bool isHierarchical)
     {
@@ -71,7 +71,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 按代码里的声明更新显示名与层级属性，退役的类型重新出现时回到使用中；返回有没有变化
+    /// 按代码声明同步显示名和层级属性，恢复重新声明的退役类型，返回是否发生变化
     /// </summary>
     public bool Synchronize(string displayName, bool isHierarchical)
     {
@@ -85,7 +85,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 代码里已经没有这个类型：标为退役，数据保留；返回有没有变化
+    /// 将代码中已移除的类型标为退役并保留数据，返回是否发生变化
     /// </summary>
     public bool Retire()
     {
@@ -104,18 +104,18 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     public DictionaryItem? FindItem(string? code) => code is null ? null : _items.Find(i => string.Equals(i.Code, code, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
-    /// 这个编码现在能不能选用：存在而且启用
+    /// 指定编码的字典项是否存在且启用
     /// </summary>
     public bool IsSelectable(string? code) => FindItem(code)?.Status == DictionaryItemStatus.Active;
 
     /// <summary>
     /// 添加字典项
     /// </summary>
-    /// <param name="code">编码，字母、数字、点、短横线、下划线，1 到 50 位</param>
+    /// <param name="code">编码，须为 1～50 个字符，仅支持字母、数字、点、短横线和下划线</param>
     /// <param name="name">显示名</param>
     /// <param name="parentCode">父项编码；不分层的字典必须为空</param>
     /// <param name="sortOrder">次序；不给就排在同级最后</param>
-    /// <param name="maxItems">这个类型最多多少项</param>
+    /// <param name="maxItems">该类型的字典项数量上限</param>
     public Result<DictionaryItem> AddItem(string? code, string? name, string? parentCode, int? sortOrder, int maxItems)
     {
         var active = EnsureActive();
@@ -179,7 +179,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 层级字典里改父项，排在新父项下的最后；不给新父项就移到顶层
+    /// 变更字典项父项时排在新同级末尾，未指定新父项时移至顶层
     /// </summary>
     public Result MoveItem(string? code, string? newParentCode)
     {
@@ -206,7 +206,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 调整同一父项下全部字典项的次序：必须给全，不能多、不能重复，排序重排为 10、20、30……
+    /// 按完整且无重复的同级编码列表调整次序，排序值重排为 10、20、30……
     /// </summary>
     public Result ReorderItems(string? parentCode, IReadOnlyList<string> orderedCodes)
     {
@@ -234,7 +234,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 停用：下面有启用的子项时拒绝
+    /// 停用字典项；存在启用的子项时拒绝
     /// </summary>
     public Result DisableItem(string? code)
     {
@@ -260,7 +260,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 启用：父项必须是启用的
+    /// 启用字典项；有父项时，父项须已启用
     /// </summary>
     public Result EnableItem(string? code)
     {

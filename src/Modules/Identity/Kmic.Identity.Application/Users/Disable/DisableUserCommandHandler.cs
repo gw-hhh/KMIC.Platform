@@ -10,7 +10,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Disable;
 
 /// <summary>
-/// 处理 <see cref="DisableUserCommand"/>
+/// 禁用用户
 /// </summary>
 public sealed class DisableUserCommandHandler(
     IUserRepository users,

@@ -13,13 +13,13 @@ public sealed class AuditExportOptions
     public const string Section = "Operations:Audit";
 
     /// <summary>
-    /// 导出的文件保留多少天，到期没有被关联就清理
+    /// 导出文件保留天数，到期且未关联时可清理
     /// </summary>
     [Range(1, 30)]
     public int ExportRetentionDays { get; init; } = 7;
 
     /// <summary>
-    /// 文件保留多久
+    /// 导出文件保留时长
     /// </summary>
     public TimeSpan ExportRetention => TimeSpan.FromDays(ExportRetentionDays);
 }

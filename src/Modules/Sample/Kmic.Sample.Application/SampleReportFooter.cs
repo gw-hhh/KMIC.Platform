@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Sample.Application;
 
 /// <summary>
-/// 示例偏好：报告页脚的文字，只允许管理员在系统层和角色层设置，个人不能改
+/// 示例报告页脚偏好，仅允许系统层和角色层设置
 /// </summary>
 /// <param name="Text">页脚文字</param>
 [Preference("Sample.Report.Footer", "报告页脚", Layers = PreferenceLayers.System | PreferenceLayers.Role)]

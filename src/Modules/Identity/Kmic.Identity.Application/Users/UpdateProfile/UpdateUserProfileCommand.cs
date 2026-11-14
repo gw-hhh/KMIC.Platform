@@ -8,10 +8,10 @@ namespace Kmic.Identity.Application.Users.UpdateProfile;
 /// 修改用户资料
 /// </summary>
 /// <remarks>
-/// 账号和手机号是登录凭据：对持有受保护角色的用户，只有同样持有受保护角色的人才能改这两项，其余资料不受这条限制
+/// 修改受保护角色持有人的账号或手机号时，操作者的当前角色也必须受保护；其他资料不受此限制
 /// </remarks>
 /// <param name="Id">用户</param>
-/// <param name="ExpectedVersion">调用方看到的版本号，别人改过就返回版本冲突</param>
+/// <param name="ExpectedVersion">预期版本号，与当前版本不符时返回版本冲突</param>
 /// <param name="Account">登录名</param>
 /// <param name="DisplayName">姓名</param>
 /// <param name="EnglishName">英文名</param>

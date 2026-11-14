@@ -8,7 +8,7 @@ using Kmic.Identity.Domain.Sessions;
 namespace Kmic.Identity.Application.Authentication.MySessions;
 
 /// <summary>
-/// 处理 <see cref="RevokeMySessionCommand"/>
+/// 结束当前用户的指定登录会话
 /// </summary>
 public sealed class RevokeMySessionCommandHandler(ISessionRepository sessions, IExecutionContext execution, ISecurityEventWriter securityEvents, TimeProvider time) : ICommandHandler<RevokeMySessionCommand>
 {
@@ -17,10 +17,10 @@ public sealed class RevokeMySessionCommandHandler(ISessionRepository sessions, I
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var access = execution.Access ?? throw new InvalidOperationException("结束登录设备需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("结束登录会话需要已登录的访问上下文。");
         var loaded = await sessions.GetForUpdateAsync(command.SessionId, null, cancellationToken);
 
-        // 别人的会话、模拟会话和不存在的会话一样处理，不让人探测别的用户有哪些会话
+        // 他人会话和模拟会话统一按不存在处理，避免泄露会话信息
         if (loaded.IsFailure || loaded.Value.UserId != access.UserId || loaded.Value.IsImpersonation)
         {
             return IdentityErrors.SessionNotFound;

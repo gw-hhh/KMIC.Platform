@@ -6,7 +6,7 @@ using Kmic.Files.Domain.Files;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 处理 <see cref="ListFilesQuery"/>
+/// 查询文件列表
 /// </summary>
 public sealed class ListFilesQueryHandler(IFilesQueryDb db) : IQueryHandler<ListFilesQuery, PagedResult<FileListItem>>
 {

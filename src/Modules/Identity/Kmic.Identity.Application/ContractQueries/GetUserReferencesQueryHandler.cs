@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="GetUserReferencesQuery"/>
+/// 批量查询用户引用信息
 /// </summary>
 /// <remarks>
-/// 用户不删除，只禁用：别的模块里保存着的负责人、创建人，禁用之后仍然解析得出来，状态是“已停用”。
-/// 编码取工号。Identity 的数据不按数据范围过滤，所以不需要绕过声明
+/// 禁用用户仍返回姓名、工号及停用状态，供历史记录显示。
+/// Identity 不按数据范围过滤，无需声明绕过过滤
 /// </remarks>
 public sealed class GetUserReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetUserReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {

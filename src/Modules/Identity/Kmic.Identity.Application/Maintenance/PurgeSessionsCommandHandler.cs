@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Maintenance;
 
 /// <summary>
-/// 处理 <see cref="PurgeSessionsCommand"/>
+/// 清理超过保留期的已结束会话
 /// </summary>
 public sealed class PurgeSessionsCommandHandler(ISessionRepository sessions, IOptions<SessionLifetimeOptions> options, TimeProvider time)
     : ICommandHandler<PurgeSessionsCommand, ScheduledJobOutcome>

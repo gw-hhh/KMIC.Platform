@@ -6,7 +6,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Close;
 
 /// <summary>
-/// 处理 <see cref="CloseSpecimenCommand"/>
+/// 关闭示例
 /// </summary>
 public sealed class CloseSpecimenCommandHandler(ISpecimenRepository specimens, IResourceAuthorizer<Specimen, SpecimenAction> authorizer)
     : ICommandHandler<CloseSpecimenCommand, VersionedResponse<SpecimenId>>

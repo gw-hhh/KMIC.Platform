@@ -5,7 +5,7 @@ using Kmic.Notifications.Domain.Templates;
 namespace Kmic.Notifications.Application.Templates.Revert;
 
 /// <summary>
-/// 处理 <see cref="RevertTemplateCommand"/>
+/// 将通知模板恢复为代码默认内容
 /// </summary>
 public sealed class RevertTemplateCommandHandler(ITemplateRepository templates) : ICommandHandler<RevertTemplateCommand, VersionedResponse<NotificationTemplateId>>
 {

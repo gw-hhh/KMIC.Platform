@@ -11,8 +11,8 @@ internal sealed class GetMyJobEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapGet("/my-jobs/{module}/{id}", HandleAsync)
             .Sends<GetMyJobQuery>()
-            .WithSummary("查询我提交的一个后台作业")
-            .WithDescription("页面轮询进度用，登录就能看，建议每 2 秒查一次、结束后停止。别人提交的作业和不存在的一样返回 404 Operations.BackgroundJobNotFound。");
+            .WithSummary("查询本人提交的后台作业详情")
+            .WithDescription("登录后可查询当前用户提交的作业。建议每 2 秒轮询一次，作业结束后停止。作业不存在或由其他用户提交时，均返回 404 Operations.BackgroundJobNotFound。");
 
     private static async Task<IResult> HandleAsync(
         [Description("作业所在的模块，如 Sample")] string module,

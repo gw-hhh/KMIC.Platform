@@ -6,10 +6,10 @@ using Kmic.Identity.Domain.Errors;
 namespace Kmic.Identity.Domain.Organization;
 
 /// <summary>
-/// 组织树：整棵树是一个聚合
+/// 组织树
 /// </summary>
 /// <remarks>
-/// 不成环、同级不重名、停用的单元下没有启用的下级，这些约束跨越多个节点，只有把整棵树放进一个聚合才能在一处保证。
+/// 整棵树作为一个聚合，统一保证无环、同级不重名，以及停用单元下没有启用下级等约束。
 /// 树的并发版本号就是组织树版本号，访问上下文按它缓存树快照。规模按不超过几千个单元设计
 /// </remarks>
 public sealed class OrgTree : AggregateRoot<OrgTreeId>
@@ -311,6 +311,6 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
     private static Result<string?> Code(string? input)
     {
         var code = string.IsNullOrWhiteSpace(input) ? null : input.Trim();
-        return code is not null && (code.Length > 50 || code.Any(c => char.IsWhiteSpace(c) || char.IsControl(c))) ? IdentityErrors.OrgUnitNameInvalid.WithDetail("编码最长 50 个字符，不能含空白") : code;
+        return code is not null && (code.Length > 50 || code.Any(c => char.IsWhiteSpace(c) || char.IsControl(c))) ? IdentityErrors.OrgUnitNameInvalid.WithDetail("编码最多 50 个字符，不能包含空白或控制字符") : code;
     }
 }

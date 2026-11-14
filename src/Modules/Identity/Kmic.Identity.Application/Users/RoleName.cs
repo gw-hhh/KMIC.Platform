@@ -1,7 +1,7 @@
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 按角色 ID 批量取名字的结果
+/// 角色名称及启用、保护标记
 /// </summary>
 /// <param name="Name">角色名称</param>
 /// <param name="IsActive">角色是否启用</param>

@@ -3,12 +3,12 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Operations.Domain.Messages;
 
 /// <summary>
-/// 管理视图里一条消息的状态：只有运维关心的两种
+/// 消息运维列表的状态
 /// </summary>
 public sealed class MessageState : Enumeration<MessageState>
 {
     /// <summary>
-    /// 死信：可以重试或放弃
+    /// 自动处理已停止，需人工介入
     /// </summary>
     public static readonly MessageState Dead = new("Dead", "死信");
 

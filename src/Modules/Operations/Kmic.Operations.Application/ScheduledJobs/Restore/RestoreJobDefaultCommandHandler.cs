@@ -8,7 +8,7 @@ using Kmic.Operations.Domain.Jobs;
 namespace Kmic.Operations.Application.ScheduledJobs.Restore;
 
 /// <summary>
-/// 处理 <see cref="RestoreJobDefaultCommand"/>
+/// 恢复定时任务默认设置
 /// </summary>
 public sealed class RestoreJobDefaultCommandHandler(
     IScheduledJobControl control,
@@ -31,7 +31,7 @@ public sealed class RestoreJobDefaultCommandHandler(
             return loaded.Error;
         }
 
-        // 一直没改过的任务没有设置行：调用方看到的是它自己的默认状态，没有什么可恢复的
+        // 没有自定义设置记录时，按任务不存在处理
         if (loaded.Value is not { } setting)
         {
             return OperationsErrors.JobNotFound;

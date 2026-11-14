@@ -13,17 +13,17 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Notifications.Infrastructure.Rendering;
 
 /// <summary>
-/// <see cref="ITemplateRenderer" /> 的实现：Fluid（Liquid 语法）
+/// 使用 Fluid 渲染 Liquid 通知模板
 /// </summary>
 /// <remarks>
-/// 沙箱：成员访问只登记数据模型自己的类型，别的类型和方法都访问不到；不设文件提供器，include、render 读不到任何文件；
-/// 步数、用时、输出大小都有上限（Fluid 只有步数上限，用时与输出大小由写入器检查）。HTML 渲染对变量的值转义
+/// 仅注册模型及其公开属性可达的类型，不配置文件提供器。
+/// 执行步数受限，用时和输出长度在写入时检查；HTML 变量值默认转义
 /// </remarks>
 internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions> options, TimeProvider time) : ITemplateRenderer
 {
     private static readonly FluidParser _parser = new();
 
-    // 只转义 HTML 的特殊字符；默认的编码器会把中文也转成 &#x....;，邮件里的汉字就成了乱码一样的实体
+    // 转义 HTML 特殊字符，保留中文，避免生成不必要的字符实体
     private static readonly HtmlEncoder _html = HtmlEncoder.Create(UnicodeRanges.All);
 
     public Result Check(string template)
@@ -44,8 +44,8 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
             : rendered;
     }
 
-    // undefined 不为空时，把模板里用到的、数据模型没有的变量名记进去（渲染照常继续，按空处理）
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "模板来自管理员，渲染过程中模板能触发的任何异常都按“模板有误”处理，不能让它变成未处理的错误")]
+    // 传入 undefined 列表时收集未定义变量名；渲染继续，变量按空值处理
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "将不可信模板触发的渲染异常转换为模板错误，避免异常中断请求")]
     private async ValueTask<Result<string>> RenderCoreAsync(string template, object model, RenderFormat format, List<string>? undefined, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(template);
@@ -81,7 +81,7 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
         }
     }
 
-    // 模板能访问的只有数据模型沿着公开属性能走到的类型：模型本身、嵌套的对象、集合里的元素。别的类型一概访问不到
+    // 仅注册模型及其公开属性可达的嵌套类型和集合元素类型，限制模板成员访问
     private static void Register(TemplateOptions options, Type type, HashSet<Type> seen)
     {
         var element = ElementOf(type) ?? type;

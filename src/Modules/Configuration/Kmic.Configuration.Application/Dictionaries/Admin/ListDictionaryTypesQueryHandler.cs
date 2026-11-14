@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Configuration.Application.Dictionaries.Admin;
 
 /// <summary>
-/// 处理 <see cref="ListDictionaryTypesQuery"/>
+/// 查询字典类型列表
 /// </summary>
 public sealed class ListDictionaryTypesQueryHandler(IConfigurationQueryDb db) : IQueryHandler<ListDictionaryTypesQuery, IReadOnlyList<DictionaryTypeListItem>>
 {

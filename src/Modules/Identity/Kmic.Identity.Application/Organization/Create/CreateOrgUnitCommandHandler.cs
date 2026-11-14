@@ -10,7 +10,7 @@ using Kmic.Identity.Domain.Organization;
 namespace Kmic.Identity.Application.Organization.Create;
 
 /// <summary>
-/// 处理 <see cref="CreateOrgUnitCommand"/>
+/// 添加组织单元
 /// </summary>
 public sealed class CreateOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<CreateOrgUnitCommand, CreatedResponse<OrgUnitId>>(recheck, execution)
@@ -32,7 +32,7 @@ public sealed class CreateOrgUnitCommandHandler(IOrgTreeRepository trees, ISecur
 
         AuthorizationChangeEvents.Write(securityEvents, "OrgUnit", added.Value.Id.Value, "OrgUnitCreated");
 
-        // 新单元是组织树里的子实体，保存后回填的版本号是整棵树的
+        // 组织单元属于组织树，返回整棵树保存后的版本号
         return new CreatedResponse<OrgUnitId>(added.Value.Id, OwnerId: OrgTreeId.Default.Value);
     }
 }

@@ -23,7 +23,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email).HasMaxLength(200).Classified(KmicData.Personal);
         builder.Property(u => u.PasswordHash).HasMaxLength(200).Classified(KmicData.Secret);
 
-        // 名字里有 Password 的另外两列不是密钥，但审计里不记它们的值：“是否必须改密码”“密码何时变化”不该暴露给查看审计的人
+        // 密码修改要求在审计中隐藏值，密码修改时间不参与审计，避免暴露密码管理信息
         builder.Property(u => u.PasswordChangeRequired).AuditHidden();
         builder.Property(u => u.PasswordChangedAt).ExcludeFromAudit();
         builder.HasIndex(u => u.OrgUnitId);

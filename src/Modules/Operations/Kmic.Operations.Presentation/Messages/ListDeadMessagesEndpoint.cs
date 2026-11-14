@@ -12,7 +12,7 @@ internal sealed class ListDeadMessagesEndpoint : IEndpoint
         group.MapGet("/messages/dead", HandleAsync)
             .Sends<ListDeadMessagesQuery>()
             .WithSummary("查询各模块的死信")
-            .WithDescription("遍历每个模块自己的发件箱与收件箱，按发生时间倒序归并，游标分页：响应里的 nextCursor 作为下一页的 after，没有 nextCursor 就是最后一页。只列死信，不含载荷；载荷用详情接口看。");
+            .WithDescription("汇总各模块收件箱和发件箱的死信，按发生时间倒序返回。使用游标分页：将 nextCursor 作为下一页的 after，未返回 nextCursor 表示已到末页。列表不含消息内容，需通过详情接口查看。");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListDeadMessagesRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListDeadMessagesQuery(request.Module, request.Box, request.Subscription, request.MessageType, new CursorRequest(request.After, request.Limit)), ct)).ToOk();

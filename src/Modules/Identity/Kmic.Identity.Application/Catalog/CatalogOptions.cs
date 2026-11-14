@@ -13,7 +13,7 @@ public sealed class CatalogOptions
     public const string Section = "Identity:Catalog";
 
     /// <summary>
-    /// 退役的权限点与范围对象保留多久：部署回滚要能找回角色上的配置
+    /// 退役权限点及范围对象的保留时长，用于在部署回滚时保留角色配置
     /// </summary>
     [TimeSpanRange("1.00:00:00", "3650.00:00:00")]
     public TimeSpan RetiredRetention { get; init; } = TimeSpan.FromDays(180);

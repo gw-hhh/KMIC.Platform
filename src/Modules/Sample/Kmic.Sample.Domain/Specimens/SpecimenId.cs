@@ -4,7 +4,7 @@ using Vogen;
 namespace Kmic.Sample.Domain.Specimens;
 
 /// <summary>
-/// 示例标本 ID
+/// 示例 ID
 /// </summary>
 [ValueObject<Guid>(conversions: Conversions.SystemTextJson | Conversions.TypeConverter, parsableForPrimitives: ParsableForPrimitives.HoistMethodsAndInterfaces, toPrimitiveCasting: CastOperator.None, fromPrimitiveCasting: CastOperator.None)]
 public readonly partial struct SpecimenId : IStronglyTypedId

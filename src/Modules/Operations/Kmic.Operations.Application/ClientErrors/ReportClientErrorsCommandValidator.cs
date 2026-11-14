@@ -14,7 +14,7 @@ internal sealed class ReportClientErrorsCommandValidator : AbstractValidator<Rep
             error.RuleFor(e => e.Stack).MaximumLength(8000);
             error.RuleFor(e => e.RouteName).MaximumLength(200);
             error.RuleFor(e => e.AppVersion).MaximumLength(50);
-            error.RuleFor(e => e.TraceId).Must(IsTraceId).WithMessage("追踪 ID 应是 32 位十六进制");
+            error.RuleFor(e => e.TraceId).Must(IsTraceId).WithMessage("追踪 ID 必须是 32 位小写十六进制字符串");
         });
     }
 

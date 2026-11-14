@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Cleanup;
 
 /// <summary>
-/// 处理 <see cref="PurgeExpiredFilesCommand"/>
+/// 将到期文件加入删除队列
 /// </summary>
 public sealed class PurgeExpiredFilesCommandHandler(
     IStoredFileRepository files,
@@ -31,11 +31,11 @@ public sealed class PurgeExpiredFilesCommandHandler(
         var batch = options.Value.PurgeBatchSize;
         var marked = 0;
 
-        // 被拒绝的文件不能关联，用不着互斥协议
+        // 被拒绝的文件不可关联，无需获取关联锁
         var rejected = await files.FindExpiredAsync(StoredFileStatus.Rejected, now, batch, cancellationToken);
         marked += await ExpireAsync(rejected, "被拒绝的文件到期", cancellationToken);
 
-        // 临时文件与已解除关联的文件：业务可能正在（或刚刚）关联它们，要走互斥协议。两类共用一批的额度
+        // 临时文件和已解除关联的文件可能存在并发关联，须先检查互斥条件；共用本批剩余额度
         var remaining = batch - rejected.Count;
         if (remaining > 0)
         {
@@ -48,7 +48,7 @@ public sealed class PurgeExpiredFilesCommandHandler(
         return new ScheduledJobOutcome(marked);
     }
 
-    // 取排他锁之后探查未完成的关联请求，再读文件、核对状态和到期时间、改状态：锁一直持有到这个命令的事务提交
+    // 取得排他锁后先探查未完成的关联请求，再重读文件并核对到期时间和状态；锁持有至命令事务结束
     private async Task<int> ExpireGuardedAsync(IReadOnlyList<StoredFileId> candidates, string reason, CancellationToken ct)
     {
         if (candidates.Count == 0)
@@ -74,7 +74,7 @@ public sealed class PurgeExpiredFilesCommandHandler(
         {
             var loaded = await files.GetForUpdateAsync(id, null, ct);
 
-            // 取锁之前读到的只是候选；读到的现在的状态不再是到期的，说明被处理过了，这次不动
+            // 候选状态可能已变化；重读后仅处理仍到期且允许清理的文件
             if (loaded.IsSuccess && loaded.Value.ExpiresAt <= now && loaded.Value.Expire(reason).IsSuccess)
             {
                 expired++;

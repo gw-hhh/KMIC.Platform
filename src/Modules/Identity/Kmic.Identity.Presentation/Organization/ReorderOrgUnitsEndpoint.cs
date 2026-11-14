@@ -12,8 +12,8 @@ internal sealed class ReorderOrgUnitsEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPut("/org-units/{parentId}/children-order", HandleAsync)
             .Sends<ReorderOrgUnitsCommand>()
-            .WithSummary("调整某个单元下全部直接下级的次序")
-            .WithDescription("整体提交：必须包含该单元下的全部直接下级，且不重复。");
+            .WithSummary("调整直属下级的顺序")
+            .WithDescription("必须提交指定组织单元的全部直属下级，且不能重复。");
 
     private static async Task<IResult> HandleAsync([Description("上级组织单元 ID")] OrgUnitId parentId, ReorderOrgUnitsRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ReorderOrgUnitsCommand(request.ExpectedVersion, parentId, request.OrderedChildren), ct)).ToOk();

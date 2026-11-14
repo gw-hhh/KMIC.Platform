@@ -8,7 +8,7 @@ namespace Kmic.Operations.Domain.Audit;
 public interface IAuditRepository : IRepository<AuditLog, AuditLogId>
 {
     /// <summary>
-    /// 这条审计是不是已经落过了：消息重复投递时据此跳过
+    /// 用于跳过重复投递的审计消息
     /// </summary>
     Task<bool> ExistsAsync(AuditLogId id, CancellationToken ct);
 }

@@ -8,7 +8,7 @@ internal sealed class LoginThrottleRowConfiguration : IEntityTypeConfiguration<L
 {
     public void Configure(EntityTypeBuilder<LoginThrottleRow> builder)
     {
-        builder.ToTable("LoginThrottle", t => t.HasComment("登录失败计数；Identity 模块；一行代表一个登录名（哈希）的失败状态；24 小时没有新失败由每日清理任务删除"));
+        builder.ToTable("LoginThrottle", t => t.HasComment("登录失败计数（Identity）：每个登录名哈希一条失败状态记录；按配置的重置间隔清理，等待或锁定未结束时保留"));
         builder.HasKey(r => r.LoginNameHash);
         builder.Property(r => r.LoginNameHash).HasMaxLength(64);
     }

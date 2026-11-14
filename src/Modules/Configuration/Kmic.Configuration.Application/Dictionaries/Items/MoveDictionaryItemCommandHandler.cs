@@ -6,7 +6,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 处理 <see cref="MoveDictionaryItemCommand"/>
+/// 调整字典项的父项
 /// </summary>
 public sealed class MoveDictionaryItemCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<MoveDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>

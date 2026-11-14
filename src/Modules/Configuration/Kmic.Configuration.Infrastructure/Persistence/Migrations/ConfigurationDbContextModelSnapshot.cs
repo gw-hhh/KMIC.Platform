@@ -659,7 +659,7 @@ namespace Kmic.Configuration.Infrastructure.Persistence.Migrations
 
                     b.ToTable("PreferenceValue", "Configuration", t =>
                         {
-                            t.HasComment("偏好在某一层上的值；Configuration 模块；系统层、角色层、用户在角色下的层，各层同一个键只有一行");
+                            t.HasComment("分层偏好值（Configuration）：按键、层级、角色和用户组合唯一；系统层无归属，角色层按角色保存，个人层按用户和角色保存");
 
                             t.HasCheckConstraint("CK_PreferenceValue_Layer", "\"Layer\" IN ('System', 'Role', 'UserRole')");
 
@@ -694,11 +694,11 @@ namespace Kmic.Configuration.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("NewValue")
                         .HasColumnType("jsonb")
-                        .HasComment("改之后的值；恢复默认时为空");
+                        .HasComment("修改后保存的值");
 
                     b.Property<string>("OldValue")
                         .HasColumnType("jsonb")
-                        .HasComment("改之前的值；此前用的是默认值时为空");
+                        .HasComment("修改前保存的值");
 
                     b.Property<string>("Reason")
                         .IsRequired()

@@ -9,7 +9,7 @@ using Kmic.Identity.Domain.Organization;
 namespace Kmic.Identity.Application.Organization.Update;
 
 /// <summary>
-/// 处理 <see cref="UpdateOrgUnitCommand"/>
+/// 修改组织单元名称和编码
 /// </summary>
 public sealed class UpdateOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<UpdateOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)

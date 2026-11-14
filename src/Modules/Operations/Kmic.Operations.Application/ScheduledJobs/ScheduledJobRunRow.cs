@@ -1,7 +1,7 @@
 namespace Kmic.Operations.Application.ScheduledJobs;
 
 /// <summary>
-/// 定时任务执行记录表里的一行，只用来读：记录由框架的调度器写，字段与表一一对应
+/// 框架定时任务执行记录的只读查询结果
 /// </summary>
 /// <remarks>
 /// 状态与触发方式在查询里已经换成编码文字，见 <c>JobRunStatus</c>、<c>JobRunTrigger</c>

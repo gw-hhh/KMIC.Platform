@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.SiteMessages.Purge;
 
 /// <summary>
-/// 清理过期的站内消息：已读的超过保留期、一直没读的超过更长的保留期
+/// 按已读和未读各自的保留期清理站内消息
 /// </summary>
 /// <remarks>
 /// 每天执行一次，保留期见 Notifications:Retention

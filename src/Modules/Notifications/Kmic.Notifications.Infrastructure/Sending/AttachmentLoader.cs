@@ -5,12 +5,11 @@ using Kmic.Notifications.Application.Channels;
 namespace Kmic.Notifications.Infrastructure.Sending;
 
 /// <summary>
-/// 发送邮件时读取附件：投递记录里只存文件 ID，内容到发送时才向 Files 取
+/// 发送邮件时读取附件
 /// </summary>
 /// <remarks>
-/// 附件永远读不到（文件不存在、已被彻底删除）、总大小超过上限，这封邮件都发不出去，算永久失败；
-/// 文件还没登记完、对象正在恢复这类稍后能读到的，算暂时失败，退避之后重试。
-/// 打开的流在成功时交给调用方释放，失败时这里已经全部释放
+/// 文件不存在、已彻底删除或附件总大小超限时，判为永久失败；其他读取错误按暂时失败重试。
+/// 成功时由调用方释放流，失败时由本方法清理已打开的流
 /// </remarks>
 internal sealed class AttachmentLoader(IFileContents files)
 {
@@ -34,7 +33,7 @@ internal sealed class AttachmentLoader(IFileContents files)
                 if (total > maxBytes)
                 {
                     await ReleaseAsync(opened);
-                    return AttachmentLoad.Failed(SendResult.Permanent($"附件加起来超过了 {maxBytes / (1024 * 1024)} MB"));
+                    return AttachmentLoad.Failed(SendResult.Permanent($"附件总大小超过 {maxBytes / (1024 * 1024)} MB"));
                 }
             }
 
@@ -47,7 +46,7 @@ internal sealed class AttachmentLoader(IFileContents files)
         }
     }
 
-    // 文件没了，等多久都读不到；其余（还没准备好、对象正在恢复）稍后可以再试
+    // 文件不存在或已删除时停止自动重试；其他读取错误可稍后重试
     private static SendResult FailureOf(Error error) =>
         error.Type is ErrorType.NotFound or ErrorType.Gone
             ? SendResult.Permanent("附件不存在或已经被删除")

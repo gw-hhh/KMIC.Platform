@@ -49,7 +49,7 @@ foreach (var (name, run) in steps)
     }
 }
 
-Console.WriteLine($"== 模块 {module} 已建好。下一步：写设计文档、按用例逐个实现，并运行 dotnet run scripts/check.cs -- --fix");
+Console.WriteLine($"== 模块 {module} 已创建。下一步：按已确认的模块设计逐个实现用例，并运行 dotnet run scripts/check.cs -- --fix");
 return 0;
 
 static string FindRepositoryRoot()
@@ -150,7 +150,7 @@ static int Register(string root, string module)
     text = text.Replace("builder.AddKmicHost(host => host", $"builder.AddKmicHost(host => host{Environment.NewLine}    .AddModule<{module}Module, {module}Endpoints>()", StringComparison.Ordinal);
     File.WriteAllText(program, text);
 
-    // 迁移程序也有一份模块清单（运维命令还没有命令，加了模块清单再登记）
+    // 在迁移程序中单独登记模块及其项目引用
     var directory = Path.Combine(root, "src", "Hosts", MigrationRunner);
     InsertAfterLast(Path.Combine(directory, $"{MigrationRunner}.csproj"), "<ProjectReference ", $"""<ProjectReference Include="../../Modules/{module}/Kmic.{module}.Infrastructure/Kmic.{module}.Infrastructure.csproj" />""");
     var toolProgram = Path.Combine(directory, "Program.cs");

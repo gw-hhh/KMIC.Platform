@@ -13,7 +13,7 @@ namespace Kmic.Identity.Application.Roles;
 internal static class RoleAdminLoading
 {
     /// <summary>
-    /// 加载要修改的角色（带版本检查），并按资源策略检查操作者能否做这个动作
+    /// 加载目标角色并校验版本，再按资源策略授权操作
     /// </summary>
     public static async Task<Result<Role>> LoadForAsync(
         IRoleRepository roles,

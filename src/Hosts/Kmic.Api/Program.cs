@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 日志、追踪、指标的默认配置，要在模块注册之前
 builder.AddKmicServiceDefaults();
 
-// 模块在这里显式注册，Sample 是参考模块，只在开发与测试环境运行
+// 显式注册模块；Sample 为参考模块，仅在非生产环境注册
 builder.AddKmicHost(host => host
     .AddModule<NotificationsModule, NotificationsEndpoints>()
     .AddModule<FilesModule, FilesEndpoints>()
@@ -57,7 +57,7 @@ var app = builder.Build();
 app.UseKmicRequestLogging();
 app.UseKmicHost();
 
-// 接口文档与界面只在开发和测试环境开放
+// 接口文档与界面仅在非生产环境开放
 if (!app.Environment.IsProduction())
 {
     app.MapOpenApi();

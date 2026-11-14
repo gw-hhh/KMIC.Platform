@@ -11,8 +11,8 @@ internal sealed class ReorderDictionaryItemsEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPut("/dictionary-types/{typeCode}/items-order", HandleAsync)
             .Sends<ReorderDictionaryItemsCommand>()
-            .WithSummary("调整同一父项下全部字典项的次序")
-            .WithDescription("整体提交：必须包含该父项下的全部字典项，缺项或多项都拒绝，避免别人同时添加的项被丢掉。");
+            .WithSummary("调整同级字典项顺序")
+            .WithDescription("必须提交同一父项下的全部字典项，不能缺少、增加或重复，避免遗漏并发新增的项。");
 
     private static async Task<IResult> HandleAsync([Description("字典类型编码")] string typeCode, ReorderDictionaryItemsRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ReorderDictionaryItemsCommand(typeCode, request.ExpectedVersion, request.ParentCode, request.OrderedCodes), ct)).ToOk();

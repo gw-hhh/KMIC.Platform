@@ -3,10 +3,10 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Sample.Domain.Specimens;
 
 /// <summary>
-/// 示例标本的明细
+/// 示例的明细
 /// </summary>
 /// <remarks>
-/// 聚合内的子实体：只能通过聚合根创建和修改，随聚合一起保存
+/// 明细由示例创建，并随示例一起保存
 /// </remarks>
 public sealed class SpecimenItem : Entity<SpecimenItemId>
 {

@@ -1,12 +1,12 @@
 <Project Sdk="Aspire.AppHost.Sdk">
   <!--
     本地开发编排：PostgreSQL 容器、迁移程序、应用，仪表盘里看日志、追踪、指标。
-    只给开发机用，生产不部署 Aspire；Domain、Application 不引用 Aspire（05-12 第 7 节）
+    仅用于本地开发，生产环境不部署 Aspire；Domain、Application 不引用 Aspire
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
-    <!-- 我们用 dotnet run 启动，不用 Aspire CLI 的打包与部署功能，不需要 CLI 压缩包 -->
+    <!-- 通过 dotnet run 启动，不使用 Aspire CLI 打包或部署，无需下载 CLI 压缩包 -->
     <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
   </PropertyGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
 // 依次执行：编码与换行 → 注释格式 → 用词 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 前端（依赖、生成类型、类型检查、代码检查与边界样例、格式、测试、构建）→ 密钥扫描 → 拼写。任一步失败即停止，返回非零退出码
 // 需要 Docker：数据库测试用测试容器，密钥扫描用 Gitleaks 的官方镜像
-// CI 流水线只调用本脚本，本地通过即 CI 通过
+// 本地与 CI 使用同一套检查，结果仍受运行环境和配置影响
 // 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查。Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次。CI 不加这个参数
 using System.Diagnostics;
 using System.Text;
@@ -14,7 +14,7 @@ var fix = args.Contains("--fix", StringComparer.Ordinal);
 var steps = new (string Name, Func<int> Run)[]
 {
     ("编码与换行（UTF-8 无 BOM、LF）", () => CheckEncoding(root, fix)),
-    ("注释格式（summary 三行、末尾不加句号）", () => CheckCommentStyle(root)),
+    ("注释格式（summary 标签独占行、末尾不加句号）", () => CheckCommentStyle(root)),
     ("用词（设计文档编号、不用的说法）", () => CheckWording(root)),
     ("格式（dotnet format --verify-no-changes）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes")),
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
@@ -28,7 +28,7 @@ var steps = new (string Name, Func<int> Run)[]
     ("前端格式（prettier --check）", () => RunWeb(root, "run format:check")),
     ("前端测试", () => RunWeb(root, "run test")),
     ("前端构建", () => RunWeb(root, "run build")),
-    // 扫描全部提交历史，CI 检出时也要取完整历史。推送前就能发现，密钥不会离开本机
+    // 扫描提交历史，CI 检出时须保留完整历史；推送前应在本地检查
     ("密钥扫描（Gitleaks）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
@@ -96,7 +96,7 @@ static int Run(string root, string fileName, string arguments)
     return process.ExitCode;
 }
 
-// 只检查 Git 跟踪与待提交的文本文件；二进制文件由 .gitattributes 声明
+// 检查已跟踪及未被忽略的未跟踪文件，按扩展名跳过二进制文件
 static int CheckEncoding(string root, bool fix)
 {
     var files = ListFiles(root);
@@ -159,7 +159,7 @@ static int CheckEncoding(string root, bool fix)
     return problems == 0 ? 0 : 1;
 }
 
-// Git 跟踪与待提交（未被忽略）的文件，路径相对仓库根目录、以 / 分隔
+// 已跟踪及未被忽略的未跟踪文件，路径相对仓库根目录、以 / 分隔
 static string[] ListFiles(string root)
 {
     var startInfo = new ProcessStartInfo("git", "-c core.quotepath=off ls-files -z --cached --others --exclude-standard")
@@ -212,7 +212,7 @@ static int CheckWording(string root)
 
             if (Kmic.Scripts.Patterns.AvoidedWording().Match(lines[i]) is { Success: true } wording)
             {
-                Console.WriteLine($"   {file}:{i + 1} “{wording.Value}”是设计文档里的说法或空话，换成直接的描述");
+                Console.WriteLine($"   {file}:{i + 1} “{wording.Value}”命中项目用词检查，请结合上下文改为直接表达");
                 problems++;
             }
         }
@@ -286,7 +286,7 @@ namespace Kmic.Scripts
         [GeneratedRegex(@"第 ?\d+(\.\d+)* ?节|\b[FR]?\d{2}(-\d{2})? ?D\d+\b|（[FR]?\d{2}-\d{2}[ ）]|原型 ?#\d+|\bS\d-\d{2}\b|实施待办", RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
         public static partial Regex DesignReference();
 
-        // 只收没有正当用法的说法：设计文档里的说法、自造词、空话。评审发现新的同类说法再加
+        // 检查项目约定避免的措辞，新增规则前须确认不会误伤正常表达
         [GeneratedRegex("定稿|挂接|租约|管道第|落地|收口|闭环|赋能|抓手|进行统一处理|高效管理|完整、灵活|完整性与可靠性", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
         public static partial Regex AvoidedWording();
     }

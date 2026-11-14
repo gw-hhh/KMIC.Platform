@@ -10,7 +10,7 @@ using Kmic.Configuration.Domain.Settings;
 namespace Kmic.Configuration.Application.Settings.Reset;
 
 /// <summary>
-/// 处理 <see cref="ResetSettingCommand"/>
+/// 恢复系统设置默认值
 /// </summary>
 public sealed class ResetSettingCommandHandler(
     SystemSettingCatalog catalog,
@@ -41,8 +41,7 @@ public sealed class ResetSettingCommandHandler(
             return loaded.Error;
         }
 
-        // 已经是默认值：没有什么可恢复的
-        var row = loaded.Value ?? throw new InvalidOperationException("带着版本号恢复默认值，却找不到值行，仓储应该已经返回版本冲突。");
+        var row = loaded.Value ?? throw new InvalidOperationException("未找到待重置的设置值，仓储应返回版本冲突。");
         settings.AddChange(SystemSettingChange.Record(definition.Key, row.Value, null, command.Reason.Trim(), Activity.Current?.TraceId.ToString()));
         settings.Remove(row);
         afterCommit.InvalidateTags(ConfigurationCacheKeys.SettingsTag);

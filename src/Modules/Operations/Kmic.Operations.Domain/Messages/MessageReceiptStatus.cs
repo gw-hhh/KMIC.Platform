@@ -8,22 +8,22 @@ namespace Kmic.Operations.Domain.Messages;
 public sealed class MessageReceiptStatus : Enumeration<MessageReceiptStatus>
 {
     /// <summary>
-    /// 已经做了
+    /// 操作已完成
     /// </summary>
     public static readonly MessageReceiptStatus Done = new("Done", "已处理");
 
     /// <summary>
-    /// 这个模块的这个箱里没有这一行
+    /// 指定模块的收件箱或发件箱中不存在该消息
     /// </summary>
     public static readonly MessageReceiptStatus NotFound = new("NotFound", "不存在");
 
     /// <summary>
-    /// 这一行不是死信：已经处理完、正在处理，或者早就放弃了，没有改它
+    /// 消息当前不是死信，未执行操作
     /// </summary>
     public static readonly MessageReceiptStatus WrongState = new("WrongState", "状态不对");
 
     /// <summary>
-    /// 接收方的放弃检查不让放弃，原因见回执；没有改它
+    /// 接收方拒绝放弃消息，状态不变，原因见返回结果
     /// </summary>
     public static readonly MessageReceiptStatus Refused = new("Refused", "被拒绝");
 

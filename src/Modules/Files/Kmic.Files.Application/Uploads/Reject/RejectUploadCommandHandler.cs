@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Files.Application.Uploads.Reject;
 
 /// <summary>
-/// 处理 <see cref="RejectUploadCommand"/>
+/// 记录上传拒绝原因并将文件标记为拒绝
 /// </summary>
 public sealed class RejectUploadCommandHandler(IStoredFileRepository files, IExecutionContext execution, IOptions<FilesOptions> options, TimeProvider time)
     : ICommandHandler<RejectUploadCommand>

@@ -6,11 +6,11 @@ using Kmic.Operations.Domain.Messages;
 namespace Kmic.Operations.Application.Messages.Abandon;
 
 /// <summary>
-/// 处理 <see cref="AbandonMessagesCommand"/>
+/// 检查并放弃收件箱死信
 /// </summary>
 /// <remarks>
-/// 先逐条取回内容、问接收方的放弃检查，通过的再一起改状态；检查不让放弃的、不存在的、不是死信的，各有各的回执，不影响别的。
-/// 写的是各模块自己的收件箱表，不在 Operations 命令的事务里（框架存储的基础设施写入）
+/// 逐条执行接收方的放弃检查，通过后再批量更新；未通过的消息单独返回原因，不影响其他消息。
+/// 直接更新各模块的收件箱，不参与 Operations 命令事务
 /// </remarks>
 public sealed class AbandonMessagesCommandHandler(IModuleMessageStores stores, IAbandonGuard guard) : ICommandHandler<AbandonMessagesCommand, MessageReceipts>
 {
@@ -30,11 +30,11 @@ public sealed class AbandonMessagesCommandHandler(IModuleMessageStores stores, I
                 var detail = store is null ? null : await store.GetAsync(MessageBox.Inbox, id, cancellationToken);
                 if (detail is null)
                 {
-                    receipts[(group.Key, id)] = Receipt(group.Key, id, MessageReceiptStatus.NotFound, "没有这一行");
+                    receipts[(group.Key, id)] = Receipt(group.Key, id, MessageReceiptStatus.NotFound, "消息不存在");
                 }
                 else if (detail.State != DeadMessageState.Dead)
                 {
-                    receipts[(group.Key, id)] = Receipt(group.Key, id, MessageReceiptStatus.WrongState, detail.State == DeadMessageState.Abandoned ? "这一行已经放弃了" : "这一行不是死信：已经处理完，或者正在处理");
+                    receipts[(group.Key, id)] = Receipt(group.Key, id, MessageReceiptStatus.WrongState, detail.State == DeadMessageState.Abandoned ? "消息已放弃" : "消息当前不是死信，无法放弃");
                 }
                 else if (await guard.CheckAsync(detail, cancellationToken) is { IsFailure: true } refused)
                 {
@@ -56,10 +56,9 @@ public sealed class AbandonMessagesCommandHandler(IModuleMessageStores stores, I
                 receipts[(group.Key, result.Id)] = result.Outcome switch
                 {
                     MessageActionOutcome.Done => Receipt(group.Key, result.Id, MessageReceiptStatus.Done, null),
-                    MessageActionOutcome.NotFound => Receipt(group.Key, result.Id, MessageReceiptStatus.NotFound, "没有这一行"),
+                    MessageActionOutcome.NotFound => Receipt(group.Key, result.Id, MessageReceiptStatus.NotFound, "消息不存在"),
 
-                    // 检查通过之后、改状态之前被别人处理了
-                    _ => Receipt(group.Key, result.Id, MessageReceiptStatus.WrongState, "这一行已经不是死信了"),
+                    _ => Receipt(group.Key, result.Id, MessageReceiptStatus.WrongState, "消息状态已改变，无法放弃"),
                 };
             }
         }

@@ -5,8 +5,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Files.Application.Administration;
 
 /// <summary>
-/// 查询一个文件的详情：不返回存储键，也没有下载地址，管理员也不经这里下载内容
+/// 查询文件详情，不返回存储键或下载地址；管理员下载也须通过业务对象授权
 /// </summary>
-/// <param name="Id">文件</param>
 [RequirePermission(FilesPermissions.FileView)]
 public sealed record GetFileQuery(StoredFileId Id) : IQuery<FileDetail>;

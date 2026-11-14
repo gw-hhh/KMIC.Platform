@@ -13,7 +13,7 @@ internal sealed class PurgeFileEndpoint : IEndpoint
         group.MapPost("/{id}/purge", HandleAsync)
             .Sends<PurgeFileCommand>()
             .WithSummary("彻底删除文件")
-            .WithDescription("内容无法再读取，不可恢复；引用它的单据显示“文件已删除”。原因必填。历史版本要运维另行清除。已经彻底删除的再来一次算成功。业务正在关联这个文件时返回 503，稍后再试。");
+            .WithDescription("彻底删除后无法读取内容，操作不可恢复，引用方显示“文件已删除”。删除原因必填，历史版本须由运维另行清除。版本校验通过后，文件已彻底删除或正在删除时重复操作直接成功。存在并发关联或未完成的关联请求时返回 503，可稍后重试。");
 
     private static async Task<IResult> HandleAsync([Description("文件 ID")] StoredFileId id, PurgeFileRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new PurgeFileCommand(id, request.Reason, request.ExpectedVersion), ct)).ToOk();

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    各宿主共用的可观测性默认配置：日志（Serilog）、追踪与指标（OpenTelemetry）、请求日志。
-    业务代码只用 ILogger，Serilog 只出现在这里（03 选型原则 5）；Domain、Application 不引用本项目
+    各宿主共用的日志、追踪和指标配置。
+    业务代码使用 ILogger，Serilog 配置集中在此；Domain、Application 不引用本项目
   -->
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

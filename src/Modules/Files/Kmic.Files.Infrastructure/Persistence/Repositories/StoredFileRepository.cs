@@ -52,7 +52,7 @@ internal sealed class StoredFileRepository(FilesDbContext context)
             .Take(limit)
             .ToListAsync(ct);
 
-    // 在删除队列里的：删除中，或已彻底删除而对象还没删。只改领取与重试的列，不经聚合
+    // 仅重置删除中或已彻底删除但尚未删除对象的文件；直接更新租约与重试列，不经聚合
     public async Task<bool> ResetDeletionAsync(StoredFileId id, CancellationToken ct) =>
         await UpdateWhereAsync(
             f => f.Id == id && (f.Status == StoredFileStatus.Deleting || (f.Status == StoredFileStatus.Purged && f.ObjectDeletedAt == null)),

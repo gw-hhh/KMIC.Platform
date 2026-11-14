@@ -9,7 +9,7 @@ using Kmic.Identity.Contracts;
 namespace Kmic.Configuration.Application.Preferences.Layers;
 
 /// <summary>
-/// 处理 <see cref="ResetPreferenceLayerCommand"/>
+/// 移除系统或角色层的偏好设置
 /// </summary>
 public sealed class ResetPreferenceLayerCommandHandler(
     PreferenceCatalog catalog,
@@ -38,7 +38,7 @@ public sealed class ResetPreferenceLayerCommandHandler(
         var row = await preferences.FindForUpdateAsync(found.Value.Key, target.Layer, target.RoleId, null, cancellationToken);
         if (row is null)
         {
-            // 调用方看到过这一层的值，现在已经没有了：别人在这期间删除了它
+            // 读取后设置已被移除，按版本冲突处理
             return CommonErrors.VersionConflict;
         }
 

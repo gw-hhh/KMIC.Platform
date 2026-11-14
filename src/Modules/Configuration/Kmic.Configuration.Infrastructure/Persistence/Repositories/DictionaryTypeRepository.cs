@@ -9,12 +9,11 @@ namespace Kmic.Configuration.Infrastructure.Persistence.Repositories;
 internal sealed class DictionaryTypeRepository(ConfigurationDbContext context)
     : EfRepository<ConfigurationDbContext, DictionaryType, DictionaryTypeId>(context), IDictionaryTypeRepository
 {
-    // 咨询锁的键只要在整个库里不和别的用途撞上
+    // 字典目录同步的事务锁标识，须与数据库中其他用途的锁区分
     private const long CatalogSyncLockKey = 0x4B4D_4943_0002;
 
     protected override Error NotFound => ConfigurationErrors.DictionaryTypeNotFound;
 
-    // 字典项总是一起加载
     protected override IQueryable<DictionaryType> Aggregate(IQueryable<DictionaryType> set) => set.Include(t => t.Items);
 
     public async Task<Result<DictionaryType>> GetByCodeForUpdateAsync(string typeCode, long? expectedVersion, CancellationToken ct)

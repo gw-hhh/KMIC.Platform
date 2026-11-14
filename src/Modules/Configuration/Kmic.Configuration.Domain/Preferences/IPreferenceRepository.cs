@@ -9,12 +9,10 @@ namespace Kmic.Configuration.Domain.Preferences;
 public interface IPreferenceRepository : IRepository<PreferenceValue, PreferenceValueId>
 {
     /// <summary>
-    /// 取某一层上这个键的值行，没有就返回空：调用方据此新增或覆盖
+    /// 读取指定层的偏好值，供修改；不存在时返回 null
     /// </summary>
-    /// <param name="key">偏好键</param>
-    /// <param name="layer">层</param>
-    /// <param name="roleId">角色层和用户层要给；系统层不给</param>
-    /// <param name="userId">用户层要给；其余层不给</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 角色层和用户层须提供 roleId，用户层还须提供 userId；其余归属参数为空
+    /// </remarks>
     Task<PreferenceValue?> FindForUpdateAsync(string key, PreferenceLayer layer, RoleId? roleId, UserId? userId, CancellationToken ct);
 }

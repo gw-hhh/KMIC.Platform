@@ -11,7 +11,7 @@ public enum NotificationPriority
     Normal,
 
     /// <summary>
-    /// 高：验证码这类要立刻送到的通知，投递程序优先领取
+    /// 高优先级，如验证码通知，由投递工作器优先领取
     /// </summary>
     High,
 }

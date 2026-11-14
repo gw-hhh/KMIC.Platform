@@ -6,7 +6,7 @@ using Kmic.Sample.Domain.Specimens;
 namespace Kmic.Sample.Application.Specimens.Submit;
 
 /// <summary>
-/// 处理 <see cref="SubmitSpecimenCommand"/>
+/// 提交示例
 /// </summary>
 public sealed class SubmitSpecimenCommandHandler(ISpecimenRepository specimens, IResourceAuthorizer<Specimen, SpecimenAction> authorizer)
     : ICommandHandler<SubmitSpecimenCommand, VersionedResponse<SpecimenId>>
@@ -22,7 +22,6 @@ public sealed class SubmitSpecimenCommandHandler(ISpecimenRepository specimens, 
             return loaded.Error;
         }
 
-        // 先检查能不能做，再改状态：两步不能写成同时求值
         var specimen = loaded.Value;
         var allowed = authorizer.Check(specimen, SpecimenAction.Submit);
         if (allowed.IsFailure)

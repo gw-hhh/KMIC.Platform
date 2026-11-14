@@ -6,7 +6,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 处理 <see cref="RenameDictionaryItemCommand"/>
+/// 修改字典项名称
 /// </summary>
 public sealed class RenameDictionaryItemCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<RenameDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>

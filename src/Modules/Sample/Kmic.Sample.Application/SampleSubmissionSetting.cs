@@ -5,12 +5,15 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Sample.Application;
 
 /// <summary>
-/// 示例设置：标本提交时的限制
+/// 示例：声明并校验提交设置
 /// </summary>
-/// <param name="MaxItems">一个标本最多有多少个明细</param>
+/// <remarks>
+/// 当前创建和提交命令未读取这些设置，不据此限制明细数量或要求提交说明
+/// </remarks>
+/// <param name="MaxItems">明细数量上限</param>
 /// <param name="ReasonRequired">提交时是否必须写说明</param>
-/// <param name="ContactEmail">出问题时联系谁</param>
-[SystemSetting("Sample.Submission", "标本提交", Group = "示例", EditPermission = SamplePermissions.SettingManage)]
+/// <param name="ContactEmail">联系邮箱</param>
+[SystemSetting("Sample.Submission", "示例提交", Group = "示例", EditPermission = SamplePermissions.SettingManage)]
 public sealed record SampleSubmissionSetting(
     [property: SettingField("明细上限", Unit = "个")] int MaxItems = 50,
     [property: SettingField("提交必须写说明")] bool ReasonRequired = false,
@@ -32,7 +35,7 @@ public sealed record SampleSubmissionSetting(
 
         if (value.ContactEmail is { Length: > 0 } email && !email.Contains('@', StringComparison.Ordinal))
         {
-            problems.Add(new FieldError("contactEmail", "Invalid", "邮箱格式不对"));
+            problems.Add(new FieldError("contactEmail", "Invalid", "邮箱格式不正确"));
         }
 
         if (problems.Count > 0)

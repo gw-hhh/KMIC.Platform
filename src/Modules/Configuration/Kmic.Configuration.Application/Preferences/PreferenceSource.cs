@@ -8,7 +8,7 @@ namespace Kmic.Configuration.Application.Preferences;
 public sealed class PreferenceSource : Enumeration<PreferenceSource>
 {
     /// <summary>
-    /// 没有任何一层设置过，用代码里的默认值
+    /// 所有允许层均无可用值时使用代码默认值
     /// </summary>
     public static readonly PreferenceSource Default = new("Default", "默认");
 

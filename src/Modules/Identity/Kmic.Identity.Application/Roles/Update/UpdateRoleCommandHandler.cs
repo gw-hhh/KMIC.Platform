@@ -10,7 +10,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.Update;
 
 /// <summary>
-/// 处理 <see cref="UpdateRoleCommand"/>
+/// 修改角色名称、说明和顺序
 /// </summary>
 public sealed class UpdateRoleCommandHandler(
     IRoleRepository roles,

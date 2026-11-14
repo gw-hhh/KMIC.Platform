@@ -13,9 +13,9 @@ internal sealed class DeleteSpecimenEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapDelete("/specimens/{id}", HandleAsync)
             .Sends<DeleteSpecimenCommand>()
-            .WithSummary("删除示例标本")
-            .WithDescription("只能删除草稿，软删除。成功返回 204。");
+            .WithSummary("删除示例")
+            .WithDescription("仅支持软删除草稿。成功返回 204。");
 
-    private static async Task<IResult> HandleAsync([Description("标本 ID")] SpecimenId id, [FromBody] DeleteSpecimenRequest request, ICommandSender sender, CancellationToken ct) =>
+    private static async Task<IResult> HandleAsync([Description("示例 ID")] SpecimenId id, [FromBody] DeleteSpecimenRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new DeleteSpecimenCommand(id, request.ExpectedVersion), ct)).ToNoContent();
 }

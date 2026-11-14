@@ -9,7 +9,7 @@ namespace Kmic.ServiceDefaults;
 public static class RedactionExtensions
 {
     /// <summary>
-    /// 注册按 <see cref="KmicData" /> 分类取脱敏器的提供者
+    /// 注册按数据分类脱敏的服务
     /// </summary>
     /// <remarks>
     /// Secret 输出 ***，Personal 部分遮盖，Internal 原样。需要把某个值按分类脱敏的服务注入 IRedactorProvider

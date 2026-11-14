@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application.ScheduledJobs.Preview;
 
 /// <summary>
-/// 处理 <see cref="PreviewCronQuery"/>
+/// 校验 Cron 并预览触发时间
 /// </summary>
 public sealed class PreviewCronQueryHandler(IScheduledJobControl control, TimeProvider time) : IQueryHandler<PreviewCronQuery, CronPreviewResponse>
 {

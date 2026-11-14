@@ -5,12 +5,11 @@ using Kmic.Files.Contracts;
 namespace Kmic.Files.Application.Attachments;
 
 /// <summary>
-/// 处理业务模块发来的解除关联请求：删除引用，引用为零的文件转“已解除关联”
+/// 解除业务文件引用，最后一个引用解除后进入保留期
 /// </summary>
 /// <remarks>
-/// 订阅 Files.DetachFiles。引用不存在、文件已经不在了都幂等成功：解除关联的目的是文件不再被这个对象需要，到这里已经满足
+/// 订阅 Files.DetachFiles；文件不存在时跳过，引用不存在时返回成功
 /// </remarks>
-/// <param name="Message">解除关联请求</param>
 [SystemOnly]
-[NotAudited("文件状态历史记录")]
+[NotAudited("内部解除关联请求，状态变更记入文件历史")]
 public sealed record DetachFilesCommand(DetachFiles Message) : ICommand;

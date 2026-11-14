@@ -8,10 +8,10 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.BackgroundJobs.Cancel;
 
 /// <summary>
-/// 处理 <see cref="CancelBackgroundJobCommand"/>
+/// 请求取消后台作业
 /// </summary>
 /// <remarks>
-/// 取消写的是作业所在模块的表，不在 Operations 命令的事务里：这是框架存储的基础设施写入，和执行器自己改作业状态一样
+/// 取消请求直接更新作业所属模块的存储，不参与 Operations 命令事务
 /// </remarks>
 public sealed class CancelBackgroundJobCommandHandler(IModuleJobStores stores, IExecutionContext execution) : ICommandHandler<CancelBackgroundJobCommand>
 {

@@ -5,10 +5,10 @@ using Kmic.Configuration.Domain.Dictionaries;
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
 /// <summary>
-/// 层级字典里改字典项的父项，排在新父项下的最后
+/// 调整字典项的父项，变更后排在新同级末尾
 /// </summary>
 /// <param name="TypeCode">字典类型编码</param>
-/// <param name="ExpectedVersion">调用方看到的类型版本号，别人改过就返回版本冲突</param>
+/// <param name="ExpectedVersion">字典类型的预期版本号，不匹配时返回版本冲突</param>
 /// <param name="Code">字典项编码</param>
 /// <param name="NewParentCode">新的父项编码；不给就移到顶层。不能是自己或自己的后代</param>
 [RequirePermission(ConfigurationPermissions.DictionaryManage)]

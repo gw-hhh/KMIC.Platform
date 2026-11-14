@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Roles.Get;
 
 /// <summary>
-/// 处理 <see cref="GetRoleQuery"/>
+/// 查询角色详情
 /// </summary>
 public sealed class GetRoleQueryHandler(
     IIdentityQueryDb db,

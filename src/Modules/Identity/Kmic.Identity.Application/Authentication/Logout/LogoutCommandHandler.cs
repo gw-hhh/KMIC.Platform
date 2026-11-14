@@ -7,7 +7,7 @@ using Kmic.Identity.Domain.Sessions;
 namespace Kmic.Identity.Application.Authentication.Logout;
 
 /// <summary>
-/// 处理 <see cref="LogoutCommand"/>
+/// 作废当前登录会话
 /// </summary>
 public sealed class LogoutCommandHandler(ISessionRepository sessions, IExecutionContext execution, ISecurityEventWriter securityEvents, TimeProvider time)
     : ICommandHandler<LogoutCommand>

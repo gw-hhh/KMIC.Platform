@@ -1,7 +1,7 @@
 namespace Kmic.Sample.Application.Specimens.Create;
 
 /// <summary>
-/// 创建时给出的一项明细
+/// 新建示例时提交的明细项
 /// </summary>
 /// <param name="Name">名称</param>
 /// <param name="Quantity">数量</param>

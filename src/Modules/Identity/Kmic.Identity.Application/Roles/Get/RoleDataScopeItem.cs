@@ -3,7 +3,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles.Get;
 
 /// <summary>
-/// 角色详情里一个范围对象的单独设置
+/// 角色对指定数据范围对象的等级配置
 /// </summary>
 /// <param name="ScopeObject">范围对象编码</param>
 /// <param name="DisplayName">显示名；对象已退役时为空</param>

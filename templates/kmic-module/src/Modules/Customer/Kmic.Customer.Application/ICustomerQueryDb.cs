@@ -4,7 +4,7 @@ namespace Kmic.Customer.Application;
 /// Customer 模块的查询入口
 /// </summary>
 /// <remarks>
-/// 查询处理器只从它出发：已经带了数据范围和软删除过滤，也不会读到命令里还没保存的修改。
-/// 每个聚合加一个 IQueryable 属性
+/// 查询已应用数据范围和软删除过滤，不返回命令中尚未保存的修改。
+/// 为可查询的聚合添加 IQueryable 属性
 /// </remarks>
 public interface ICustomerQueryDb;

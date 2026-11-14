@@ -8,7 +8,7 @@ using Kmic.Operations.Domain.Jobs;
 namespace Kmic.Operations.Application.ScheduledJobs.Set;
 
 /// <summary>
-/// 处理 <see cref="SetJobOverrideCommand"/>
+/// 保存定时任务的自定义设置
 /// </summary>
 public sealed class SetJobOverrideCommandHandler(
     IScheduledJobControl control,

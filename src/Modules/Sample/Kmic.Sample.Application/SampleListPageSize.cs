@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Sample.Application;
 
 /// <summary>
-/// 示例偏好：标本列表每页多少条，系统、角色、本人三层都可以设置
+/// 示例列表每页条数，支持系统、角色和个人设置
 /// </summary>
 /// <param name="Value">每页条数</param>
-[Preference("Sample.List.PageSize", "标本列表每页条数")]
+[Preference("Sample.List.PageSize", "示例列表每页条数")]
 public sealed record SampleListPageSize(int Value = 20) : IPreference<SampleListPageSize>
 {
     /// <inheritdoc />

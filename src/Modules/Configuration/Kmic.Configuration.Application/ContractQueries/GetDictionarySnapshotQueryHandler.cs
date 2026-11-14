@@ -6,7 +6,7 @@ using Kmic.Configuration.Contracts;
 namespace Kmic.Configuration.Application.ContractQueries;
 
 /// <summary>
-/// 处理 <see cref="GetDictionarySnapshotQuery"/>
+/// 读取字典快照
 /// </summary>
 public sealed class GetDictionarySnapshotQueryHandler(IDictionarySnapshots snapshots) : IQueryHandler<GetDictionarySnapshotQuery, DictionarySnapshot?>
 {

@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 为一个用户算出交给资源策略的事实
+/// 构建用户管理策略所需的授权事实
 /// </summary>
 internal static class UserTargets
 {
     /// <summary>
-    /// 用命令里加载的用户（带着授予）算
+    /// 根据命令加载的用户及其授予构建策略目标
     /// </summary>
     public static async Task<UserTarget> BuildAsync(IIdentityReads db, User user, IAccessContext access, CancellationToken ct) =>
         await BuildAsync(db, user, [.. user.Grants.Select(g => g.RoleId)], access, ct);
 
     /// <summary>
-    /// 查询里读出来的用户不带授予，由调用方把他拥有的角色一起给进来
+    /// 根据查询取得的用户和调用方提供的角色 ID 构建策略目标
     /// </summary>
     public static async Task<UserTarget> BuildAsync(IIdentityReads db, User user, IReadOnlyList<RoleId> roleIds, IAccessContext access, CancellationToken ct)
     {

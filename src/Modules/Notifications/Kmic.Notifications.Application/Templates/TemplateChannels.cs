@@ -5,7 +5,7 @@ using Kmic.Notifications.Domain.Templates;
 namespace Kmic.Notifications.Application.Templates;
 
 /// <summary>
-/// 代码里声明的渠道组合和模板渠道之间的对应
+/// 模板渠道转换及默认正文选择
 /// </summary>
 internal static class TemplateChannels
 {

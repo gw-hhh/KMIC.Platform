@@ -8,7 +8,7 @@ using Kmic.Identity.Contracts;
 namespace Kmic.Operations.Application.BackgroundJobs.List;
 
 /// <summary>
-/// 处理 <see cref="ListBackgroundJobsQuery"/>
+/// 汇总各模块的后台作业
 /// </summary>
 public sealed class ListBackgroundJobsQueryHandler(IModuleJobStores stores, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListBackgroundJobsQuery, CursorPage<BackgroundJobItem>>
@@ -23,7 +23,7 @@ public sealed class ListBackgroundJobsQueryHandler(IModuleJobStores stores, ICur
         {
             if (!Enum.TryParse<BackgroundJobState>(status, ignoreCase: false, out var parsed) || !Enum.IsDefined(parsed))
             {
-                return CommonErrors.ValidationFailedWith([new FieldError("status", "Invalid", "状态不认识")]);
+                return CommonErrors.ValidationFailedWith([new FieldError("status", "Invalid", "无效的作业状态")]);
             }
 
             state = parsed;

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Application.SiteMessages.UnreadCount;
 
 /// <summary>
-/// 处理 <see cref="GetMyUnreadCountQuery"/>
+/// 查询本人的未读站内消息数
 /// </summary>
 public sealed class GetMyUnreadCountQueryHandler(INotificationsQueryDb db, IExecutionContext execution)
     : IQueryHandler<GetMyUnreadCountQuery, UnreadCountResponse>

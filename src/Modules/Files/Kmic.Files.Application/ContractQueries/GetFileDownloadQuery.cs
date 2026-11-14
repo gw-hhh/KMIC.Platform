@@ -6,12 +6,10 @@ using Kmic.Files.Contracts;
 namespace Kmic.Files.Application.ContractQueries;
 
 /// <summary>
-/// 按文件 ID 取下载信息，经 <see cref="IFileDownloads"/> 给业务的下载查询用
+/// 按文件 ID 获取下载信息，供业务下载查询通过 <see cref="IFileDownloads"/> 调用
 /// </summary>
 /// <remarks>
-/// 不检查权限点、不套数据范围：知道文件 ID 就能取到下载信息（含存储键，不含内容）。调用方必须先完成业务对象的授权。
-/// 返回的是下载信息而不是引用信息，所以在特性上写明例外的原因
+/// 不检查权限点或数据范围，调用方必须先完成业务对象授权。结果含元数据和存储键，不含文件内容
 /// </remarks>
-/// <param name="FileId">文件 ID</param>
-[ContractQuery(ContractAccess.Reference, ResultExemption = "返回下载信息（元数据与存储键，不含内容）：业务的下载查询要用它组装下载，调用方先完成业务对象的授权")]
+[ContractQuery(ContractAccess.Reference, ResultExemption = "返回供业务下载使用的元数据和存储键，不含内容；调用方须先完成业务对象授权")]
 public sealed record GetFileDownloadQuery(Guid FileId) : IQuery<FileDownload>;

@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Identity.Domain.Users;
 
 /// <summary>
-/// 用户上会引起状态流转的动作
+/// 用户状态变更动作
 /// </summary>
 public sealed class UserAction : Enumeration<UserAction>
 {

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Organization.Get;
 
 /// <summary>
-/// 处理 <see cref="GetOrgTreeQuery"/>
+/// 查询完整组织树
 /// </summary>
 public sealed class GetOrgTreeQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetOrgTreeQuery, OrgTreeResponse>
 {

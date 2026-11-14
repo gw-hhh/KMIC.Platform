@@ -9,8 +9,8 @@ namespace Kmic.Sample.Application;
 public static class SampleScopes
 {
     /// <summary>
-    /// 示例标本
+    /// 示例
     /// </summary>
-    [DataScopeObject("示例标本")]
+    [DataScopeObject("示例")]
     public const string Specimen = "Sample.Specimen";
 }
