@@ -260,3 +260,4 @@ src/Modules/Configuration/Kmic.Configuration.Application/Features/GetFeaturesQue
 src/Modules/Configuration/Kmic.Configuration.Application/Features/FeaturesResponse.cs
 src/Modules/Configuration/Kmic.Configuration.Application/Features/GetFeaturesQueryHandler.cs
 src/Modules/Configuration/Kmic.Configuration.Presentation/Features/GetFeaturesEndpoint.cs
+docs/implementation/协作交接记录.md
