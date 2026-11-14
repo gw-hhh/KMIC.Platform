@@ -35,7 +35,7 @@ internal sealed class DeliveryStore(NotificationsDbContext context)
                 FOR UPDATE SKIP LOCKED) AS c
             WHERE d."Id" = c."Id"
             RETURNING d."Id" AS "Id", d."Channel" AS "Channel", d."RecipientUserId" AS "RecipientUserId", d."Address" AS "Address", d."Role" AS "Role",
-                      d."Subject" AS "Subject", d."Body" AS "Body", d."SmsParameters"::text AS "SmsParameters", d."TemplateKey" AS "TemplateKey",
+                      d."Subject" AS "Subject", d."Body" AS "Body", d."SmsParameters"::text AS "SmsParameters", d."AttachmentFileIds"::text AS "AttachmentFileIds", d."TemplateKey" AS "TemplateKey",
                       d."Attempts" AS "Attempts", d."CreatedAt" AS "CreatedAt"
             """).ToListAsync(ct);
 

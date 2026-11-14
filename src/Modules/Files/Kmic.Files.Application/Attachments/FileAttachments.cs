@@ -34,6 +34,7 @@ public sealed class FileAttachments(
     public const string LockScope = "Files";
 
     /// <inheritdoc />
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "这里是唯一按互斥协议发出关联请求的地方")]
     public async Task<Result<IReadOnlyList<FileSnapshot>>> AttachAsync(string ownerModule, string ownerType, Guid ownerId, IReadOnlyCollection<Guid> fileIds, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerModule);
@@ -78,6 +79,7 @@ public sealed class FileAttachments(
     }
 
     /// <inheritdoc />
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "这里是唯一发出解除关联请求的地方")]
     public Task DetachAsync(string ownerModule, string ownerType, Guid ownerId, IReadOnlyCollection<Guid> fileIds, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerModule);

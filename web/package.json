@@ -1,0 +1,44 @@
+{
+  "name": "kmic-web",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.28.9",
+  "engines": {
+    "node": ">=24.21.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint . --max-warnings 0 && node scripts/check-boundaries.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "generate:api": "node scripts/generate-api.mjs"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.17.0",
+    "pinia": "4.1.0",
+    "vue": "3.5.45",
+    "vue-router": "5.5.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@vitejs/plugin-vue": "6.0.11",
+    "@vue/test-utils": "2.5.1",
+    "eslint": "10.14.0",
+    "eslint-import-resolver-typescript": "4.4.5",
+    "eslint-plugin-boundaries": "7.4.1",
+    "eslint-plugin-vue": "10.12.1",
+    "globals": "17.14.0",
+    "msw": "3.0.5",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0",
+    "vue-eslint-parser": "10.4.2",
+    "vue-tsc": "3.3.14"
+  }
+}

@@ -565,6 +565,10 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasComment("脱敏后的地址，管理页和日志里只显示它");
 
+                    b.Property<string>("AttachmentFileIds")
+                        .HasColumnType("jsonb")
+                        .HasComment("邮件附件的文件 ID，JSON 数组；只有邮件有，发送时才读取文件内容");
+
                     b.Property<int>("Attempts")
                         .HasColumnType("integer")
                         .HasComment("已经尝试发送几次");

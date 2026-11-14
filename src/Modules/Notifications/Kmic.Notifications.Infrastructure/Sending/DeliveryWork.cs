@@ -102,7 +102,7 @@ internal sealed class DeliveryWork(
         {
             if (string.Equals(item.Channel, DeliveryChannel.Email.Code, StringComparison.Ordinal))
             {
-                return await email.SendAsync(new EmailMessage(item.Id, senderProfile, address, item.Role, item.Subject, item.Body ?? string.Empty), ct);
+                return await SendEmailAsync(item, senderProfile, address, ct);
             }
 
             var parameters = JsonSerializer.Deserialize<Dictionary<string, string>>(item.SmsParameters ?? "{}") ?? [];
@@ -112,6 +112,36 @@ internal sealed class DeliveryWork(
         {
             NotificationsLog.ChannelCallFailed(logger, exception, item.Id, item.Channel);
             return SendResult.Transient($"调用渠道时出错：{exception.GetType().Name}");
+        }
+    }
+
+    // 有附件的邮件发送时才读文件内容，流在发完之后释放；读不到附件按暂时或永久失败记在投递上
+    private async Task<SendResult> SendEmailAsync(DeliveryItem item, string senderProfile, string address, CancellationToken ct)
+    {
+        var ids = item.AttachmentFileIds is { } json ? JsonSerializer.Deserialize<List<Guid>>(json) ?? [] : [];
+        if (ids.Count == 0)
+        {
+            return await email.SendAsync(new EmailMessage(item.Id, senderProfile, address, item.Role, item.Subject, item.Body ?? string.Empty, []), ct);
+        }
+
+        await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, CurrentUser.System());
+        var load = await ActivatorUtilities.CreateInstance<AttachmentLoader>(scope.ServiceProvider)
+            .LoadAsync(ids, options.Value.MaxAttachmentMb * 1024L * 1024L, ct);
+        if (load.Failure is { } failure)
+        {
+            return failure;
+        }
+
+        try
+        {
+            return await email.SendAsync(new EmailMessage(item.Id, senderProfile, address, item.Role, item.Subject, item.Body ?? string.Empty, load.Attachments), ct);
+        }
+        finally
+        {
+            foreach (var attachment in load.Attachments)
+            {
+                await attachment.Content.DisposeAsync();
+            }
         }
     }
 

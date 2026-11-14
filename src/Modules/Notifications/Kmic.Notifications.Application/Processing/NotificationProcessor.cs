@@ -81,7 +81,7 @@ public sealed class NotificationProcessor(
         notifications.Add(notification);
         var existing = await deliveries.FindExistingAsync(definition.Key, request.DedupKey, ct);
         var users = await contacts.GetAsync([.. request.To.Where(r => r.UserId is not null).Select(r => r.UserId!.Value).Distinct()], ct);
-        var context = new FanOut(notification.Id, definition, request.DedupKey, content.Value, model.Value, request.HighPriority ? DeliveryPriority.High : DeliveryPriority.Normal, users, existing, time.GetUtcNow());
+        var context = new FanOut(notification.Id, definition, request.DedupKey, content.Value, model.Value, request.HighPriority ? DeliveryPriority.High : DeliveryPriority.Normal, users, existing, time.GetUtcNow(), AttachmentsOf(request));
         foreach (var recipient in request.To)
         {
             Distribute(recipient, context);
@@ -100,7 +100,7 @@ public sealed class NotificationProcessor(
             var (subject, body, version) = published.TryGetValue(channel, out var active)
                 ? (active.Subject, active.Body, active.Version)
                 : (definition.DefaultSubject, TemplateChannels.DefaultBody(definition, channel), 0);
-            var rendered = await ChannelRendering.RenderAsync(renderer, channel, subject, body, model, ct);
+            var rendered = await ChannelRendering.RenderAsync(renderer, channel, subject, body, model, strict: false, ct);
             if (rendered.IsFailure)
             {
                 return rendered.Error;
@@ -168,16 +168,21 @@ public sealed class NotificationProcessor(
         var masked = channel == DeliveryChannel.Email ? AddressMasking.Email(address) : AddressMasking.Phone(address);
         var direct = userId is null ? address : null;
         var parameters = channel == DeliveryChannel.Sms ? SmsParametersOf(context.Model) : null;
+        var attachments = channel == DeliveryChannel.Email ? context.Attachments : null;
         if (capture.Value.Enabled)
         {
-            var captureDelivery = Delivery.Capture(context.NotificationId, channel, userId, key, masked, direct, role, content.Subject, content.Body, parameters, definition.Key, context.DedupKey, content.Version, context.Content.CodeHash, context.Priority);
+            var captureDelivery = Delivery.Capture(context.NotificationId, channel, userId, key, masked, direct, role, content.Subject, content.Body, parameters, attachments, definition.Key, context.DedupKey, content.Version, context.Content.CodeHash, context.Priority);
             deliveries.Add(captureDelivery);
             captured.Add(CapturedMessage.Create(captureDelivery.Id, channel, address, role, content.Subject, content.Body, context.Now));
             return;
         }
 
-        deliveries.Add(Delivery.Queue(context.NotificationId, channel, userId, key, masked, direct, role, content.Subject, content.Body, parameters, definition.Key, context.DedupKey, content.Version, context.Content.CodeHash, context.Priority));
+        deliveries.Add(Delivery.Queue(context.NotificationId, channel, userId, key, masked, direct, role, content.Subject, content.Body, parameters, attachments, definition.Key, context.DedupKey, content.Version, context.Content.CodeHash, context.Priority));
     }
+
+    // 附件只有邮件用，存文件 ID，内容到发送时才读；重复的 ID 去掉，没有附件存空
+    private static string? AttachmentsOf(NotificationRequest request) =>
+        request.AttachmentFileIds is { Count: > 0 } ids ? JsonSerializer.Serialize(ids.Distinct()) : null;
 
     // 短信只能发已审核的模板编码加参数：参数随投递保存，发送时用
     private static string? SmsParametersOf(object model) =>
@@ -228,7 +233,8 @@ public sealed class NotificationProcessor(
         DeliveryPriority priority,
         IReadOnlyDictionary<Guid, UserContact> users,
         IReadOnlySet<string> existing,
-        DateTimeOffset now)
+        DateTimeOffset now,
+        string? attachments)
     {
         public NotificationId NotificationId => notificationId;
 
@@ -249,6 +255,8 @@ public sealed class NotificationProcessor(
         public IReadOnlySet<string> Existing => existing;
 
         public DateTimeOffset Now => now;
+
+        public string? Attachments => attachments;
 
         public HashSet<string> Seen { get; } = new(StringComparer.Ordinal);
     }

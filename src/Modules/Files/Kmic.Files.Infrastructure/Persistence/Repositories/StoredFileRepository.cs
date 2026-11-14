@@ -16,6 +16,26 @@ internal sealed class StoredFileRepository(FilesDbContext context)
     public async Task<bool> ExistsAsync(StoredFileId id, CancellationToken ct) =>
         await Context.Set<StoredFile>().AnyAsync(f => f.Id == id, ct);
 
+    public async Task<IReadOnlySet<StoredFileId>> FindExistingAsync(IReadOnlyCollection<StoredFileId> ids, CancellationToken ct) =>
+        (await Context.Set<StoredFile>().Where(f => ids.Contains(f.Id)).Select(f => f.Id).ToListAsync(ct)).ToHashSet();
+
+    public async Task<IReadOnlyList<StoredObjectRef>> FindExpectedObjectsAsync(StoredFileId? after, DateTimeOffset uploadedBefore, int limit, CancellationToken ct)
+    {
+        var files = Context.Set<StoredFile>()
+            .Where(f => (f.Status == StoredFileStatus.Available || f.Status == StoredFileStatus.Attached || f.Status == StoredFileStatus.Detached)
+                && f.UploadedAt <= uploadedBefore);
+        if (after is { } last)
+        {
+            files = files.Where(f => f.Id.CompareTo(last) > 0);
+        }
+
+        return await files
+            .OrderBy(f => f.Id)
+            .Select(f => new StoredObjectRef(f.Id, f.StorageKey, f.ObjectVersionId))
+            .Take(limit)
+            .ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<StoredFileId>> FindExpiredAsync(StoredFileStatus status, DateTimeOffset now, int limit, CancellationToken ct) =>
         await Context.Set<StoredFile>()
             .Where(f => f.Status == status && f.ExpiresAt <= now)

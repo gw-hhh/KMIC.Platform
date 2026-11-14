@@ -44,7 +44,7 @@ public sealed class PreviewTemplateQueryHandler(NotificationTemplateCatalog cata
             model = read.Value;
         }
 
-        var rendered = await ChannelRendering.RenderAsync(renderer, query.Channel, query.Subject, query.Body, model, cancellationToken);
+        var rendered = await ChannelRendering.RenderAsync(renderer, query.Channel, query.Subject, query.Body, model, strict: true, cancellationToken);
         return rendered.IsSuccess
             ? new TemplatePreviewResponse(rendered.Value.Subject, rendered.Value.Body, null)
             : new TemplatePreviewResponse(null, null, rendered.Error.Message);

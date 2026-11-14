@@ -1,5 +1,6 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Access;
+using Kmic.BuildingBlocks.Application.Auditing;
 using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Application.Startup;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
@@ -58,6 +59,9 @@ public sealed class IdentityModule : IModule
         services.AddScoped<IRoleReferences, RoleReferences>();
         services.AddScoped<IOrgUnitReferences, OrgUnitReferences>();
         services.AddScoped<IUserContacts, UserContacts>();
+
+        // 框架的业务历史查询用它取人员和角色的显示名
+        services.AddScoped<IActorReferences, ActorReferences>();
 
         // 单例：后台作业的执行器是单例，每次加载自己开一个作用域；请求里同样如此
         services.AddSingleton<IAccessContextLoader, AccessContextLoader>();

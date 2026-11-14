@@ -1,5 +1,7 @@
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Operations.Application;
+using Kmic.Operations.Application.Messages.Instances;
+using Kmic.Operations.Application.Messages.Routes;
 using Kmic.Operations.Application.ScheduledJobs;
 using Kmic.Operations.Contracts;
 using Kmic.Operations.Domain.Audit;
@@ -43,6 +45,23 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
                "ItemsProcessed", "Note", "ErrorCode", "ErrorMessage", "InstanceId", "TraceId"
         FROM "Operations"."ScheduledJobRun"
         ORDER BY "JobName", "StartedAt" DESC, "Id" DESC
+        """);
+
+    // 路由表和心跳表由框架读写，不进模型；路由状态在查询里就换成编码文字，取值见路由状态约定
+    /// <inheritdoc />
+    public IQueryable<MessageRouteRow> MessageRoutes => Database.SqlQuery<MessageRouteRow>(
+        $"""
+        SELECT "MessageType", "Subscription", "Module",
+               CASE "Status" WHEN 0 THEN 'Active' WHEN 1 THEN 'Retiring' ELSE 'Finalized' END AS "Status",
+               "RegisteredBuild", "RegisteredAt", "NeedsInitialization", "DisplayName", "RetiredReason", "FinalizedAt", "FinalizedBy"
+        FROM "Operations"."MessageRoute"
+        """);
+
+    /// <inheritdoc />
+    public IQueryable<MessagingInstanceRow> MessagingInstances => Database.SqlQuery<MessagingInstanceRow>(
+        $"""
+        SELECT "Id", "Host", "Roles", "Build", "Subscriptions"::text AS "Subscriptions", "StartedAt", "HeartbeatAt"
+        FROM "Operations"."MessagingInstance"
         """);
 
     /// <inheritdoc />

@@ -19,6 +19,12 @@ public static class OperationsPermissions
     public const string AuditView = "Operations.Audit.View";
 
     /// <summary>
+    /// 导出审计：把一段时间的审计记录导成文件，能带走全部人的操作记录，所以是敏感权限点，用到它的命令都记审计
+    /// </summary>
+    [Permission("导出审计", Sensitive = true)]
+    public const string AuditExport = "Operations.Audit.Export";
+
+    /// <summary>
     /// 查看定时任务与它们的执行记录、全部后台作业
     /// </summary>
     [Permission("查看定时任务与后台作业")]

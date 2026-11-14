@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.Notifications.Application.Channels;
 using Shouldly;
@@ -49,7 +50,7 @@ public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDa
     }
 
     private static EmailMessage Message(string address = "to@example.com", string role = "To", string profile = "Default") =>
-        new(Guid.CreateVersion7(), profile, address, role, "Hello", "<p>hello</p>");
+        new(Guid.CreateVersion7(), profile, address, role, "Hello", "<p>hello</p>", []);
 
     [Fact]
     public async Task AMail_IsSentWithAMessageIdMadeFromTheDeliveryId()
@@ -66,6 +67,23 @@ public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDa
         mail.Data.ShouldContain($"Message-ID: <{message.DeliveryId:D}@kmic>");
         mail.Data.ShouldContain("Subject: Hello");
         mail.Data.ShouldContain("Content-Type: text/html");
+    }
+
+    [Fact]
+    public async Task AnAttachment_IsSentAsABase64PartWithItsFileName()
+    {
+        var content = Encoding.ASCII.GetBytes("%PDF-1.7 attachment body");
+        await using var stream = new MemoryStream(content);
+        var message = Message() with { Attachments = [new EmailAttachment("contract.pdf", "application/pdf", stream)] };
+
+        var result = await Sender.SendAsync(message, Ct);
+
+        result.Outcome.ShouldBe(SendOutcome.Sent);
+        var mail = _smtp.Mails.ShouldHaveSingleItem();
+        mail.Data.ShouldContain("multipart/mixed");
+        mail.Data.ShouldContain("Content-Type: application/pdf");
+        mail.Data.ShouldContain("contract.pdf");
+        mail.Data.ShouldContain(Convert.ToBase64String(content));
     }
 
     [Fact]

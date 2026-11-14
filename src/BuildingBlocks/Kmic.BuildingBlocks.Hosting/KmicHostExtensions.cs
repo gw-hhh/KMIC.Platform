@@ -1,5 +1,6 @@
 using Kmic.BuildingBlocks.Application;
 using Kmic.BuildingBlocks.Hosting.Health;
+using Kmic.BuildingBlocks.Infrastructure.Features;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Presentation;
@@ -68,6 +69,7 @@ public static class KmicHostExtensions
             services.AddKmicScheduling(module.Name, module.ConfigureScheduling);
         }
 
+        services.AddKmicFeatures(builder.Configuration);
         services.AddKmicFrameworkOptions();
         services.AddKmicBackgroundProcessing(roles);
         if (roles.HasFlag(HostRoles.Api))

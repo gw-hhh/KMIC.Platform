@@ -486,7 +486,15 @@ Identity：`IUserReferences`（上传者显示名）。
 | 删除工作器 | 模块里的 `LeasedQueueWorker` 子类 | 模块实现框架的 `ILeasedWork<DeletionItem>`，循环由框架运行，在 `IModule.AddWorkerServices` 里登记 | 架构规则不许模块实现后台组件；循环的细节（槽位、退避、停机）本来也不该每个模块写一遍 |
 | 彻底删除后的对象 | “对象立即由删除工作器删除”，没有说怎样标记待删 | `StoredFile.ObjectDeletedAt`：空表示对象还在，删除队列领取“删除中”和“已彻底删除且 `ObjectDeletedAt` 为空”的行；删完记下时间，行保留 | 不另建队列表，也不用状态表示“对象已删”；管理员能看到对象删除的时间 |
 | 彻底删除与关联的互斥 | 没写 | `PurgeFile` 也取排他锁并探查未完成的关联请求，取不到或有请求在路上返回暂时冲突（503，可重试） | 否则关联请求会落在已彻底删除的文件上，变成不可放弃的死信 |
-| 文件详情里的状态历史 | 详情含状态历史 | 暂时没有：框架的 `IStateHistoryQuery` 只有接口、没有实现，等有实现再加 | 不在模块里重复写一份读历史表的 SQL |
+| 文件详情里的状态历史 | 详情含状态历史 | 详情的 `history` 用框架的 `IStateHistoryQuery`（2026-11-13 实现，操作人和角色名经 Identity 的 `IActorReferences` 取），每项有从哪个状态到哪个状态、动作、原因、操作人（系统任务没有操作人）、时间 | 不在模块里重复写一份读历史表的 SQL |
+| 对账读存储 | `ReconcileStorage` 直接用 `IFileStorage` 列对象、核对 | Application 里的窄接口 `IStorageInventory`（列出本环境下键符合写法的对象、核对单个对象、删除），Infrastructure 用 `IFileStorage` 实现；`IFileStorage` 增加 `ExistsAsync(key, versionId)` | 存储只有 Files 的基础设施能用，Application 不能引用它 |
+| 对象的年龄 | “列出存储中超过 2 天的对象” | 存储列表只给键，没有修改时间；文件 ID 是 UUID v7，前 48 位就是创建时间，对账按它判断“超过 2 天”（不是 v7 的 ID 当作不够老，不动） | 不为对账给 `IFileStorage` 增加列表元数据，也不另查存储的对象属性 |
+| 对账先查清楚再动手，差异太多整个放弃 | 没写 | 先探查再查库地找出多出的对象、再找出缺对象的文件，两类各超过 `Files:ReconcileMaxChanges`（默认 200）就返回 `Files.ReconcileSuspicious`，整个事务回滚、什么也不删；列出的对象一个也没有而库里有文件时同样放弃 | 存储配置不对（环境名写错、桶换了）或数据库被还原到较早的时间点时，按设计的规则会一次性删光对象或把全部文件标为丢失，这个保护比单个文件的核对更要紧 |
+| 对象丢失怎样处理 | 记录的版本也不存在 → 标记 `Rejected` | 新增状态机动作 `Lose`（对象丢失）：可用、已关联、已解除关联三种状态可以转“被拒绝”，原因写“对象丢失”，保留 `RejectedRetentionDays` 后清理；`StorageIssue` 记 `LostMissing`。记录的版本还在的记 `RestorableMissing`，文件不动。先用 `ExistsAsync` 再确认一次当前对象，列表之后才出现的对象不算丢失 | 原设计没有给状态机补这条流转 |
+| 模块生成的文件 | `IGeneratedFiles.WriteAsync` 一步：写入存储再发登记请求 | 分两步：`WriteAsync` 只写存储、不碰数据库，返回带登记全部内容的 `GeneratedFile`；`Register(file)` 在命令里发 `RegisterGeneratedFile`。接口在 `Kmic.Files.Contracts`，实现在 Files.Application（和 `IFileAttachments` 一样，框架不能引用模块的契约）。写入的上限 `Files:GeneratedFileMaxMb`（默认 200） | 后台作业的处理器不在事务里、不能发请求，要把登记放进它最后发的那个命令里 |
+| 生成的文件怎样下载 | 状态必须是已关联 | 上传档案是 `Generated:来源` 的文件，登记完成（可用）就能经 `IFileDownloads` 下载，不要求先关联；到期没有被关联就清理 | 导出结果这类文件没有关联对象，要求先关联就得再设计一个“等登记完成再关联”的步骤；下载的授权仍由业务（作业的提交人或管理员）先完成 |
+| 读取文件内容 | `IFileContents.OpenReadAsync(fileId)` 返回流 | 返回 `Result<FileContent>`（文件名、内容类型、大小、流）；经只给系统身份的契约查询 `GetReadableFileQuery` 确认状态（已关联、可用、已解除关联能读），再用 `IFileContentReader` 打开 | 读不到对象返回 `Common.FileContentMissing`，不抛异常给调用方 |
+| 直接发 `AttachFiles` 的分析器 | 分析器拦截 | 业务模块的禁用 API 清单禁用 `AttachFiles`、`DetachFiles`、`RegisterGeneratedFile` 的构造函数，只有 `FileAttachments`、`GeneratedFiles` 里逐处豁免并写明理由 | 不另写 Roslyn 分析器，禁用清单本来就会逐条核对符号是否写对 |
 | 清理候选的读取 | “决定删不删的是锁 + 探查 + 状态条件” | 候选只取 ID；取锁、探查之后才加载聚合，核对状态与到期时间，再用状态机改状态，状态历史照常写入 | 不用批量 SQL 改状态，状态历史才完整；一次最多一批（`Files:PurgeBatchSize`，默认 1000），一个事务持有的锁有限 |
 
 ## 14. 决策汇总
@@ -508,5 +516,7 @@ Identity：`IUserReferences`（上传者显示名）。
 
 同日完成：管理查询与命令（列表、详情、彻底删除、登记历史版本清除、重试删除）、定时任务 `Files.PurgeExpired`（每小时 15 分）与 `Files.ResetStaleUploads`（每小时 45 分）、删除队列；权限点 `Files.File.View`、`Files.File.Manage`、`Files.File.Purge`。
 
-未做（按设计 4.3、4.5、7 节）：对账任务 `Files.ReconcileStorage` 与 `StorageIssue`（待还原清单、标记已解决）、`IGeneratedFiles` 与 `RegisterGeneratedFile` 的发送端、`IFileContents`、文件详情里的状态历史、直接 `Send(AttachFiles)` 的分析器、预签名下载与 S3 的范围读取（已登记延后事项）。
+同日又完成：对账任务 `Files.ReconcileStorage`（每周日 04:00）与 `StorageIssue`（列表 `GET /api/v1/files/storage-issues`、标记已解决 `POST …/storage-issues/{id}/resolve`，迁移 `StorageIssues`）；`IGeneratedFiles`（写入与登记两步）与 `RegisterGeneratedFile` 的发送端；`IFileContents`；文件详情里的状态历史；直接构造 `AttachFiles` 等请求的拦截（禁用 API 清单）。测试：对账 7（含超限放弃）、生成的文件与读取内容 6、存储契约的 `ExistsAsync`（本地与 MinIO，含开启版本控制时被删除标记盖住的对象）、详情里的状态历史 1。
+
+未做：预签名下载与 S3 的范围读取（已登记延后事项）。
 

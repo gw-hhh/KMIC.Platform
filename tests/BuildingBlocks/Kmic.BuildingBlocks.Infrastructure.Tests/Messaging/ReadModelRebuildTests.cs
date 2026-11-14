@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Application.Startup;
 using Kmic.BuildingBlocks.Contracts.References;
@@ -209,6 +210,92 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         again.ShouldBeNull();
     }
 
+    // 找不到的行太多而暂停的一轮：三行本地有、源端没有，上限设成 1
+    private static ProbeHarness PausingHarness(string connectionString) =>
+        new(
+            connectionString,
+            messaging: o =>
+            {
+                o.Rebuild.PageSize = 2;
+                o.Rebuild.MaxMissingCount = 1;
+                o.Rebuild.MaxMissingRatio = 0;
+            },
+            withRebuild: true);
+
+    private async Task<Guid> PausedRunAsync(ProbeHarness harness)
+    {
+        await SeedAsync(Id(1), "还在", version: 1);
+        await SeedAsync(Id(2), "没了一", version: 1);
+        await SeedAsync(Id(3), "没了二", version: 1);
+        await SeedAsync(Id(4), "没了三", version: 1);
+        harness.TicketSource.Set("还在", version: 1, Id(1));
+        await RunStartupTasksAsync(harness);
+        await harness.Services.RunJobsAsync(Ct);
+        var run = (await RunsAsync()).Single();
+        run.Status.ShouldBe(RebuildRunStatus.AwaitingConfirmation);
+        return run.Id;
+    }
+
+    [Fact]
+    public async Task Admin_Confirm_MarksTheMissingRowsAndCompletesTheRun()
+    {
+        await using var harness = PausingHarness(database.ConnectionString);
+        var runId = await PausedRunAsync(harness);
+        var admin = harness.Services.GetRequiredService<IReadModelRebuildAdmin>();
+
+        (await admin.ConfirmAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.Done);
+        (await RunAsync(runId)).Status.ShouldBe(RebuildRunStatus.Active, "确认之后回到进行中，另排的作业只做收尾");
+        await harness.Services.RunJobsAsync(Ct);
+
+        var run = await RunAsync(runId);
+        run.Status.ShouldBe(RebuildRunStatus.Completed);
+        run.MissingCount.ShouldBe(3);
+        var rows = await SummariesAsync();
+        rows[Id(1)].IsTerminal.ShouldBeFalse();
+        new[] { Id(2), Id(3), Id(4) }.ShouldAllBe(id => rows[id].IsTerminal);
+        (await NeedsInitializationAsync()).ShouldBeFalse();
+        (await admin.ConfirmAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.NotAwaitingConfirmation, "已经完成的不能再确认");
+    }
+
+    [Fact]
+    public async Task Admin_Abandon_EndsTheRunAndStopsAutomaticRebuilds()
+    {
+        await using var harness = PausingHarness(database.ConnectionString);
+        var runId = await PausedRunAsync(harness);
+        var admin = harness.Services.GetRequiredService<IReadModelRebuildAdmin>();
+        (await NeedsInitializationAsync()).ShouldBeTrue();
+
+        (await admin.AbandonAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.Done);
+
+        var run = await RunAsync(runId);
+        run.Status.ShouldBe(RebuildRunStatus.Abandoned);
+        run.FinishedAt.ShouldNotBeNull();
+        (await NeedsInitializationAsync()).ShouldBeFalse("放弃就是“我已处理”，之后不再自动排队");
+        (await SummariesAsync()).Values.ShouldAllBe(r => !r.IsTerminal);
+        (await admin.AbandonAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.NotAwaitingConfirmation);
+    }
+
+    [Fact]
+    public async Task Admin_Trigger_QueuesOneRun_AndTheRunsAreListed()
+    {
+        Source.Set("一", version: 1, Id(1));
+        var admin = _harness.Services.GetRequiredService<IReadModelRebuildAdmin>();
+
+        var first = await admin.TriggerAsync(ProbeHarness.MirrorSubscription, Ct);
+        var second = await admin.TriggerAsync(ProbeHarness.MirrorSubscription, Ct);
+        var unknown = await admin.TriggerAsync("Echo.NoSuchSubscription", Ct);
+
+        first.ShouldBe(RebuildAdminOutcome.Done);
+        second.ShouldBe(RebuildAdminOutcome.AlreadyRunning);
+        unknown.ShouldBe(RebuildAdminOutcome.UnknownSubscription);
+        var listed = (await admin.ListAsync(Ct)).Single(r => string.Equals(r.Subscription, ProbeHarness.MirrorSubscription, StringComparison.Ordinal));
+        listed.Module.ShouldBe(Module);
+        listed.State.ShouldBe(RebuildRunState.Active);
+
+        await _harness.Services.RunJobsAsync(Ct);
+        (await admin.ListAsync(Ct)).Single(r => string.Equals(r.Subscription, ProbeHarness.MirrorSubscription, StringComparison.Ordinal)).State.ShouldBe(RebuildRunState.Completed);
+    }
+
     [Fact]
     public async Task Shutdown_ReleasedThenResumesFromCheckpoint()
     {
@@ -331,9 +418,9 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
     }
 
     // 宿主启动时和重建有关的两个启动任务：登记路由，再给还没初始化的订阅排队
-    private async Task RunStartupTasksAsync()
+    private async Task RunStartupTasksAsync(ProbeHarness? harness = null)
     {
-        await using var work = _harness.BeginAsSystem();
+        await using var work = (harness ?? _harness).BeginAsSystem();
         var tasks = work.Services.GetServices<IStartupTask>()
             .Where(t => t.Name is "Framework.RegisterMessageRoutes" or "Framework.QueueReadModelRebuilds")
             .OrderBy(t => t.Order);

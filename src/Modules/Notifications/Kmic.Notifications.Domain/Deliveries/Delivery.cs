@@ -26,6 +26,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         string subject,
         string? body,
         string? smsParameters,
+        string? attachmentFileIds,
         string templateKey,
         string dedupKey,
         int templateVersion,
@@ -45,6 +46,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         Subject = subject;
         Body = body;
         SmsParameters = smsParameters;
+        AttachmentFileIds = attachmentFileIds;
         TemplateKey = templateKey;
         DedupKey = dedupKey;
         TemplateVersion = templateVersion;
@@ -105,6 +107,11 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
     public string? SmsParameters { get; private set; }
 
     /// <summary>
+    /// 邮件附件的文件 ID，JSON 数组；只有邮件有，发送时才读取文件内容
+    /// </summary>
+    public string? AttachmentFileIds { get; private set; }
+
+    /// <summary>
     /// 模板键
     /// </summary>
     public string TemplateKey { get; private set; }
@@ -153,12 +160,13 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         string subject,
         string body,
         string? smsParameters,
+        string? attachmentFileIds,
         string templateKey,
         string dedupKey,
         int templateVersion,
         string codeHash,
         DeliveryPriority priority) =>
-        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Pending, null);
+        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, attachmentFileIds, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Pending, null);
 
     /// <summary>
     /// 创建一条已跳过的投递：没有地址或用户已禁用，留一条记录说明为什么没有发
@@ -176,7 +184,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         string codeHash,
         DeliveryPriority priority,
         DeliverySkipReason reason) =>
-        Create(notificationId, channel, recipientUserId, recipientKey, string.Empty, null, role, subject, null, null, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Skipped, reason);
+        Create(notificationId, channel, recipientUserId, recipientKey, string.Empty, null, role, subject, null, null, null, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Skipped, reason);
 
     /// <summary>
     /// 创建一条已捕获的投递：非生产环境不真的发送
@@ -192,12 +200,13 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         string subject,
         string body,
         string? smsParameters,
+        string? attachmentFileIds,
         string templateKey,
         string dedupKey,
         int templateVersion,
         string codeHash,
         DeliveryPriority priority) =>
-        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Captured, null);
+        Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, attachmentFileIds, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Captured, null);
 
     private static Delivery Create(
         NotificationId notificationId,
@@ -210,6 +219,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         string subject,
         string? body,
         string? smsParameters,
+        string? attachmentFileIds,
         string templateKey,
         string dedupKey,
         int templateVersion,
@@ -225,6 +235,6 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         ArgumentNullException.ThrowIfNull(priority);
 
         return new Delivery(
-            DeliveryId.New(), notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, templateKey, dedupKey, templateVersion, codeHash, priority, status, skipReason);
+            DeliveryId.New(), notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, attachmentFileIds, templateKey, dedupKey, templateVersion, codeHash, priority, status, skipReason);
     }
 }

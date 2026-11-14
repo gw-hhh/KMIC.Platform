@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.Auditing;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.Files.Domain.Files;
 
@@ -26,6 +27,7 @@ namespace Kmic.Files.Application.Administration;
 /// <param name="HistoryPurgedAt">运维登记彻底删除历史版本的时间，空表示历史版本可能仍在</param>
 /// <param name="HistoryPurgeNote">彻底删除历史版本的执行记录</param>
 /// <param name="References">引用它的业务对象</param>
+/// <param name="History">状态流转记录，按时间从早到晚</param>
 public sealed record FileDetail(
     StoredFileId Id,
     long Version,
@@ -46,4 +48,5 @@ public sealed record FileDetail(
     DateTimeOffset? ObjectDeletedAt,
     DateTimeOffset? HistoryPurgedAt,
     string? HistoryPurgeNote,
-    IReadOnlyList<FileReferenceItem> References);
+    IReadOnlyList<FileReferenceItem> References,
+    IReadOnlyList<StateHistoryItem> History);

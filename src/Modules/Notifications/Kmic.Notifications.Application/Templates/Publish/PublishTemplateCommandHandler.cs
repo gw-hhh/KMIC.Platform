@@ -36,14 +36,14 @@ public sealed class PublishTemplateCommandHandler(
             return allowed.Error;
         }
 
-        // 用示例数据渲染一遍，模板有误在发布时就发现，不等到发通知时才出错
+        // 用示例数据严格渲染一遍，模板有误、写错变量名在发布时就发现，不等到发通知时才出错
         var definition = catalog.Find(template.Key);
         if (definition is null)
         {
             return NotificationsErrors.TemplateRetired;
         }
 
-        var rendered = await ChannelRendering.RenderAsync(renderer, command.Channel, command.Subject, command.Body, definition.Example, cancellationToken);
+        var rendered = await ChannelRendering.RenderAsync(renderer, command.Channel, command.Subject, command.Body, definition.Example, strict: true, cancellationToken);
         if (rendered.IsFailure)
         {
             return rendered.Error;

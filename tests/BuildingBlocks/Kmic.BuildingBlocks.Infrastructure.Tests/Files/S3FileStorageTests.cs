@@ -20,12 +20,14 @@ public sealed class S3FileStorageTests : FileStorageContractTests, IClassFixture
 
     protected override IFileStorage Storage => _storage;
 
+    private AmazonS3Client Admin() => new(
+        new Amazon.Runtime.BasicAWSCredentials(_minio.OptionsFor(_bucket).AccessKeyId, _minio.OptionsFor(_bucket).SecretAccessKey),
+        new AmazonS3Config { ServiceURL = _minio.ServiceUrl, ForcePathStyle = true });
+
     // 每个测试开始前创建自己的桶
     public async ValueTask InitializeAsync()
     {
-        using var admin = new AmazonS3Client(
-            new Amazon.Runtime.BasicAWSCredentials(_minio.OptionsFor(_bucket).AccessKeyId, _minio.OptionsFor(_bucket).SecretAccessKey),
-            new AmazonS3Config { ServiceURL = _minio.ServiceUrl, ForcePathStyle = true });
+        using var admin = Admin();
         await admin.PutBucketAsync(_bucket, Ct);
     }
 
@@ -42,6 +44,25 @@ public sealed class S3FileStorageTests : FileStorageContractTests, IClassFixture
         response.EnsureSuccessStatusCode();
         (await response.Content.ReadAsByteArrayAsync(Ct)).ShouldBe([1, 2, 3, 4]);
         response.Content.Headers.ContentDisposition!.FileNameStar.ShouldBe("合同 一.pdf");
+    }
+
+    [Fact]
+    public async Task Exists_WithVersioning_DeleteMarkerHidesTheObjectButNotItsVersion()
+    {
+        using var admin = Admin();
+        await admin.PutBucketVersioningAsync(new Amazon.S3.Model.PutBucketVersioningRequest
+        {
+            BucketName = _bucket,
+            VersioningConfig = new Amazon.S3.Model.S3BucketVersioningConfig { Status = VersionStatus.Enabled },
+        }, Ct);
+        var stored = await Storage.WriteAsync("test/versioned", new MemoryStream([1, 2]), "application/octet-stream", Ct);
+        stored.VersionId.ShouldNotBeNull();
+
+        await Storage.DeleteAsync("test/versioned", Ct);
+
+        (await Storage.ExistsAsync("test/versioned", null, Ct)).ShouldBeFalse("当前对象被删除标记覆盖");
+        (await Storage.ExistsAsync("test/versioned", stored.VersionId, Ct)).ShouldBeTrue("旧版本还在，可以还原");
+        (await Storage.ExistsAsync("test/versioned", Guid.CreateVersion7().ToString(), Ct)).ShouldBeFalse("没有这个版本");
     }
 
     private static ServiceProvider BuildHttp()

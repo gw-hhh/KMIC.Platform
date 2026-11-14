@@ -15,6 +15,7 @@ namespace Kmic.Notifications.Application.Processing;
 /// <param name="SourceMessageId">来源消息的 ID</param>
 /// <param name="SourceModule">发出请求的模块</param>
 /// <param name="InitiatorUserId">发起这件事的用户</param>
+/// <param name="AttachmentFileIds">邮件附件的文件 ID；没有附件为空</param>
 public sealed record NotificationRequest(
     string TemplateKey,
     IReadOnlyList<Recipient> To,
@@ -24,4 +25,5 @@ public sealed record NotificationRequest(
     bool HighPriority,
     Guid SourceMessageId,
     string SourceModule,
-    Guid? InitiatorUserId);
+    Guid? InitiatorUserId,
+    IReadOnlyList<Guid>? AttachmentFileIds = null);

@@ -9,4 +9,5 @@ namespace Kmic.Notifications.Application.Channels;
 /// <param name="Role">To、Cc 或 Bcc</param>
 /// <param name="Subject">主题</param>
 /// <param name="HtmlBody">HTML 正文</param>
-public sealed record EmailMessage(Guid DeliveryId, string SenderProfile, string Address, string Role, string Subject, string HtmlBody);
+/// <param name="Attachments">附件；内容的流由发送方读，发完之后调用方负责释放</param>
+public sealed record EmailMessage(Guid DeliveryId, string SenderProfile, string Address, string Role, string Subject, string HtmlBody, IReadOnlyList<EmailAttachment> Attachments);

@@ -12,8 +12,14 @@ namespace Kmic.Api.Tests.Files;
 /// <remarks>
 /// 带 Worker 角色的测试会让关联、解除关联的请求消息真的被处理，不带的只验证 Api 一侧
 /// </remarks>
-public abstract class FilesApiTestBase(ClassDatabase<ApiTemplate> database, ApiTemplate template, bool withWorker = false)
-    : ApiTestBase(database, template, SettingsFor(withWorker))
+public abstract class FilesApiTestBase(
+    ClassDatabase<ApiTemplate> database,
+    ApiTemplate template,
+    bool withWorker = false,
+    string? storageRoot = null,
+    IReadOnlyDictionary<string, string>? moreSettings = null,
+    Action<IServiceCollection>? configureServices = null)
+    : ApiTestBase(database, template, SettingsFor(withWorker, storageRoot ?? _storageRoot, moreSettings), configureServices)
 {
     protected const string Profile = "Sample.SpecimenAttachment";
 
@@ -34,9 +40,14 @@ public abstract class FilesApiTestBase(ClassDatabase<ApiTemplate> database, ApiT
     private protected static async Task<bool> IsNullAsync(IdentitySeed seed, Guid fileId, string column) =>
         await seed.ScalarAsync<bool>($"""SELECT "{column}" IS NULL FROM "Files"."StoredFile" WHERE "Id" = @id""", ("id", fileId));
 
-    private static Dictionary<string, string> SettingsFor(bool withWorker)
+    private static Dictionary<string, string> SettingsFor(bool withWorker, string storageRoot, IReadOnlyDictionary<string, string>? moreSettings)
     {
-        var settings = new Dictionary<string, string>(StringComparer.Ordinal) { ["Files:Storage:LocalRoot"] = _storageRoot };
+        var settings = new Dictionary<string, string>(StringComparer.Ordinal) { ["Files:Storage:LocalRoot"] = storageRoot };
+        foreach (var (key, value) in moreSettings ?? new Dictionary<string, string>(StringComparer.Ordinal))
+        {
+            settings[key] = value;
+        }
+
         if (withWorker)
         {
             settings["Kmic:Roles"] = "Api,Worker";

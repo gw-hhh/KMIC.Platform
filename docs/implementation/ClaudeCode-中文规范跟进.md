@@ -157,3 +157,208 @@
 | 2026-11-13 21:59 | `README.md` | 目录前新增的“本机运行”一条 | 部分 | 其余未检查 |
 | 2026-11-13 21:59 | `.gitignore` | 新增的 .local 一行及其注释 | 部分 | 其余未检查 |
 | 2026-11-13 21:59 | `tests/Kmic.Api.Tests/Notifications/DeliveryManagementTests.cs` | 变量 dedups 改名为 keys | 部分 | 只改名字，通过拼写检查；其余按之前的记录 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Auditing/IActorReferences.cs` | 接口及两个方法的说明 | 整份完成 | 新增，业务历史里解析操作人与角色名 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/History/StateHistoryQuery.cs` | 类说明、方法注释、“已删除”显示文字 | 整份完成 | 新增，业务历史查询的实现 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Pipeline/ModuleQueryContext.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Pipeline/ModuleQueryContexts.cs` | 类说明、异常消息 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Persistence/PersistenceServiceCollectionExtensions.cs` | AddModuleContextRegistries 上的注释 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Files/IFileStorage.cs` | ExistsAsync 的说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Files/FileStorageKeys.cs` | TryGetFileId、CreatedAt 的说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StorageIssueId.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StorageIssueKind.cs` | 类说明、两个种类的说明与显示名 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StorageIssueStatus.cs` | 类说明、两个状态的说明与显示名 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StorageIssue.cs` | 类、属性、方法说明 | 整份完成 | 新增，对账发现的存储问题 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/IStorageIssueRepository.cs` | 接口说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StoredObjectRef.cs` | 类说明与属性说明 | 整份完成 | 新增，对账用的查询结果 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StoredFile.cs` | GeneratedProfilePrefix、MarkLost、对象丢失流转的注释 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/StoredFileAction.cs` | Lose 的说明与显示名 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Files/IStoredFileRepository.cs` | FindExistingAsync、FindExpectedObjectsAsync 的说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Domain/Errors/FilesErrors.cs` | StorageIssueNotFound、ReconcileSuspicious 的说明与提示 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/IStorageInventory.cs` | 接口与方法说明 | 整份完成 | 新增，对账读存储的窄接口 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/InventoryObject.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/FilesOptions.cs` | ReconcileMinAgeDays、ReconcileBatchSize、ReconcileMaxChanges、GeneratedFileMaxMb、ReconcileMinAge 的说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Cleanup/ReconcileStorageCommand.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Cleanup/ReconcileStorageCommandHandler.cs` | 方法注释、结果说明文字 | 整份完成 | 新增，对账 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Administration/ResolveStorageIssueCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Administration/StorageIssueItem.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Administration/StorageIssueSort.cs` | 类与字段说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Administration/ListStorageIssuesQuery.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Administration/ListStorageIssuesQueryHandler.cs` | 方法注释 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Administration/FileDetail.cs` | History 参数的说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/ContractQueries/GetReadableFileQuery.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/ContractQueries/GetReadableFileQueryHandler.cs` | 方法注释 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/ContractQueries/FileContents.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/ContractQueries/GetFileDownloadQueryHandler.cs` | 整份注释 | 整份完成 | 改写：生成的文件登记完成就能下载 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Application/Attachments/GeneratedFiles.cs` | 类说明、方法注释、异常消息、登记豁免的理由 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Contracts/GeneratedFile.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Contracts/IGeneratedFiles.cs` | 接口与方法说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Contracts/IFileContents.cs` | 接口与方法说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Contracts/FileContent.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Contracts/RegisterGeneratedFile.cs` | MessageName 的说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Infrastructure/Persistence/Configurations/StorageIssueConfiguration.cs` | 表说明与注释 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Infrastructure/FilesModule.cs` | 对账任务的显示名 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Presentation/Administration/ListStorageIssuesRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Presentation/Administration/ListStorageIssuesEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Presentation/Administration/ResolveStorageIssueRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Files/Kmic.Files.Presentation/Administration/ResolveStorageIssueEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Identity/Kmic.Identity.Application/ContractQueries/ActorReferences.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Identity/Kmic.Identity.Infrastructure/IdentityModule.cs` | IActorReferences 注册上的注释 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/AuditFilters.cs` | 类与方法说明、注释 | 整份完成 | 新增，列表和导出共用的筛选 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/AuditExportOptions.cs` | 类与属性说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/ExportAuditCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/ExportAuditCommandValidator.cs` | 校验提示 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/ExportAuditJob.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/ExportAuditJobHandler.cs` | 类说明、方法注释、文件名和进度文字 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/AuditCsv.cs` | 类说明、表头、方法说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/AuditExportSummary.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/AuditExportCheckpoint.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/RegisterAuditExportFileCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/RegisterAuditExportFileCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/GetAuditExportFileQuery.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/GetAuditExportFileQueryHandler.cs` | 类说明、注释 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Application/OperationsPermissions.cs` | AuditExport 的说明与显示名 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Domain/Errors/OperationsErrors.cs` | AuditExportNotFound、AuditExportNotReady、AuditExportFailed 的说明与提示 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Audit/ExportAuditRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Audit/ExportAuditEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Audit/DownloadAuditExportEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Files/FileReconciliationTests.cs` | 类说明、测试里的断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Files/FileReconciliationGuardTests.cs` | 类说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Files/GeneratedFileTests.cs` | 类说明、测试里的断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Files/FilesApiTestBase.cs` | 新增参数的处理 | 部分 | 其余按之前的记录 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Files/FileAdministrationTests.cs` | Detail_ShowsTheStateHistoryInOrder_WithTheNamesOfThePeopleInvolved 里的说明与测试数据 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Operations/AuditExportTests.cs` | 类说明、等待方法的注释与超时信息、测试数据 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Identity/JobAccessLoadingTests.cs` | 类说明、断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-13 23:10 | `tests/Kmic.Api.Tests/Identity/AccessContextLoadingBenchmark.cs` | 类说明、报告文字、测试数据 | 整份完成 | 新增，默认不跑的参考测量 |
+| 2026-11-13 23:10 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Files/FileStorageContractTests.cs` | Exists_TrueAfterWrite_FalseAfterDeleteOrWhenNeverWritten | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Files/S3FileStorageTests.cs` | Exists_WithVersioning_DeleteMarkerHidesTheObjectButNotItsVersion、Admin 的注释与断言说明 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `BannedSymbols.Modules.txt` | 文件关联相关的三组新增条目的注释与替代做法 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `docs/modules/files/README.md` | 13.1 新增的行、第 15 节新增的两段 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `docs/modules/operations/README.md` | 状态行、审计导出一节、第 13 节被吞掉的行内代码的补回 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `docs/framework/05-infrastructure/05-09-审计与业务历史.md` | 修订记录新增一行 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `docs/framework/05-infrastructure/05-11-文件与通知.md` | 修订记录新增一行 | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `docs/framework/05-infrastructure/05-04-认证与会话.md` | 修订记录新增一行（压测参考数据） | 部分 | 其余未检查 |
+| 2026-11-13 23:10 | `docs/implementation/S3-平台模块.md` | S3-02、S3-04、S3-06 及新增的进展记录 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Application/Channels/EmailAttachment.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Application/Channels/EmailMessage.cs` | Attachments 参数的说明 | 部分 | 其余按之前的记录 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Application/Channels/NotificationsDeliveryOptions.cs` | MaxAttachmentMb 的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Application/Processing/NotificationRequest.cs` | AttachmentFileIds 参数的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Application/Processing/NotificationProcessor.cs` | AttachmentsOf 的注释 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Domain/Deliveries/Delivery.cs` | AttachmentFileIds 属性的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryItem.cs` | AttachmentFileIds 参数的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryWork.cs` | SendEmailAsync 的注释 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/AttachmentLoader.cs` | 类说明、注释、失败原因文字 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/AttachmentLoad.cs` | 类与属性说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Notifications/DeliveryAttachmentTests.cs` | 类说明、断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Notifications/RecordingEmailSender.cs` | 类说明与注释 | 整份完成 | 改写：记录附件内容 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Notifications/MailKitEmailSenderTests.cs` | AnAttachment_IsSentAsABase64PartWithItsFileName | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/MessagingInstanceTable.cs` | 类说明、表注释、字段说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/InstanceHeartbeat.cs` | 类说明、注释 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/InstanceIdentity.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/MessageRouteAdmin.cs` | 类说明、方法注释、放弃时写进错误说明的文字 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/RebuildAdmin.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/RebuildRunStore.cs` | ConfirmAsync、AbandonAsync、ListAsync、NotifyJobsAsync 的说明与注释 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/MessagingOptions.cs` | HeartbeatInterval 的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Messaging/ReadModelRebuildHandler.cs` | 确认收尾相关的注释 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Persistence/PersistenceServiceCollectionExtensions.cs` | AddOperationsAdminServices 的注释 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/IMessageRouteAdmin.cs` | 接口、方法与常量说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/RouteAdminOutcome.cs` | 枚举与成员说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/RouteFinalizeResult.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/RedeliverResult.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/IReadModelRebuildAdmin.cs` | 接口与方法说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/RebuildRunState.cs` | 枚举与成员说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/RebuildRunInfo.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/RebuildAdminOutcome.cs` | 枚举与成员说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Jobs/ReadModelRebuildJob.cs` | ConfirmMissing、Scanned 参数的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Domain/Messages/MessageRouteStatus.cs` | 类说明、状态说明与显示名 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Domain/Messages/RebuildRunStatus.cs` | 类说明、状态说明与显示名 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Domain/Errors/OperationsErrors.cs` | 路由、补投、读模型重建相关错误的说明与提示 | 部分 | 其余按之前的记录 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/MessageRouteRow.cs` | 类与属性说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/RouteItem.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/RouteBuild.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/ListRoutesQuery.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/ListRoutesQueryHandler.cs` | 类说明与注释 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/FinalizeRouteCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/FinalizeRouteResponse.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/FinalizeRouteCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/ReactivateRouteCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/ReactivateRouteCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/RedeliverCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/RedeliverResponse.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/RedeliverCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Routes/RedeliverCommandValidator.cs` | 校验提示 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Instances/MessagingInstanceRow.cs` | 类与属性说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Instances/InstanceSubscriptions.cs` | 类与方法说明、注释 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Instances/InstanceSubscription.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Instances/InstanceItem.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Instances/ListInstancesQuery.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Instances/ListInstancesQueryHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/RebuildItem.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/ListRebuildsQuery.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/ListRebuildsQueryHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/TriggerRebuildCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/ConfirmRebuildCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/AbandonRebuildCommand.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/TriggerRebuildCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/ConfirmRebuildCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/AbandonRebuildCommandHandler.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Rebuilds/RebuildOutcomes.cs` | 类说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Application/IOperationsQueryDb.cs` | MessageRoutes、MessagingInstances 的说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/OperationsQueryDbContext.cs` | 路由表与心跳表查询上的注释 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261113155025_MessagingInstances.cs` | 迁移里的注释 | 部分 | 其余是工具生成的 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/ListRoutesEndpoint.cs` | 接口摘要、说明、参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/ListInstancesEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/FinalizeRouteRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/FinalizeRouteEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/ReactivateRouteRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/ReactivateRouteEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/RedeliverRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/RedeliverEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/ListRebuildsEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/RebuildRequest.cs` | 类与参数说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/TriggerRebuildEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/ConfirmRebuildEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `src/Modules/Operations/Kmic.Operations.Presentation/Messages/AbandonRebuildEndpoint.cs` | 接口摘要与说明 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Operations/RouteAndInstanceTests.cs` | 类说明、断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Operations/RouteFinalizeTests.cs` | 类说明、断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Operations/RedeliverTests.cs` | 类说明、断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/Kmic.Api.Tests/Operations/RebuildManagementTests.cs` | 类说明、断言说明、测试数据 | 整份完成 | 新增 |
+| 2026-11-14 01:10 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Messaging/ReadModelRebuildTests.cs` | Admin_ 开头的三个测试及它们的辅助方法 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `docs/modules/operations/README.md` | 状态行、第 13 节末新增的“路由、实例、终结、补投、读模型重建”一节 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `docs/modules/notifications/README.md` | 邮件附件的实现说明 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `docs/framework/05-infrastructure/05-07-模块间通信.md` | 修订记录新增一行 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `docs/framework/00-README.md` | 延后事项新增两行 | 部分 | 其余未检查 |
+| 2026-11-14 01:10 | `docs/implementation/S3-平台模块.md` | S3-02、S3-05 的状态与新增的进展记录 | 部分 | 其余未检查 |
+| 2026-11-14 03:02 | `web/src/platform/api/kmicError.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/api/kmicFetch.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/api/client.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/api/index.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/api/kmicFetch.test.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/api/kmicError.test.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/session/session.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/platform/session/session.test.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/app/main.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/app/router.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/app/App.vue` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/src/shell/pages/HomePage.vue` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/env.d.ts` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/eslint.config.js` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/eslint/boundaries.js` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/eslint/restrictions.js` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/scripts/check-boundaries.mjs` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/scripts/generate-api.mjs` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/pnpm-workspace.yaml` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/tests/boundaries/eslint.config.js` | 全部 | 整份完成 | 前端骨架新写，注释、提示、测试名都按要求写 |
+| 2026-11-14 03:02 | `web/tests/boundaries/legal/**`、`web/tests/boundaries/violations/**` | 全部样例文件 | 整份完成 | 边界样例，只有页面里的几个中文词 |
+| 2026-11-14 03:02 | `scripts/check.cs` | 顶部说明、前端七步的名称、`RunWeb` 的注释 | 部分 | 其余未检查 |
+| 2026-11-14 03:02 | `docs/implementation/S0-04-版本与许可.md` | 第 4 节前端版本行与第 7 节修订记录 | 部分 | 其余未检查 |
+| 2026-11-14 03:02 | `docs/frontend/F03-前端架构.md`、`docs/frontend/F04-前端编码规范.md`、`docs/frontend/00-README.md` | 修订记录新增一行；F04 第 3.1 节 ESLint 配置行；README 进度表实现列 | 部分 | 其余未检查 |
+| 2026-11-14 03:02 | `docs/implementation/S3-平台模块.md` | S3-07 状态、进展记录里的前端骨架一行 | 部分 | 其余未检查 |
+| 2026-11-14 09:48 | `src/Modules/Operations/Kmic.Operations.Application/BackgroundJobs/Mine/` | GetMyJobQuery、GetMyJobQueryHandler、MyJobs、CancelMyJobCommand、CancelMyJobCommandHandler 及两个校验器 | 整份完成 | 新文件 |
+| 2026-11-14 09:48 | `src/Modules/Operations/Kmic.Operations.Presentation/BackgroundJobs/` | GetMyJobEndpoint、CancelMyJobEndpoint | 整份完成 | 新文件，接口摘要与说明 |
+| 2026-11-14 09:48 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/` | FeatureGateAttribute、IFeatureFlags、FeatureGateBehavior；UseCase.FeatureGate；CommonErrors.FeatureDisabled | 部分 | 只处理新增的成员 |
+| 2026-11-14 09:48 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Features/` | FeatureFlags、FeatureServiceCollectionExtensions | 整份完成 | 新文件 |
+| 2026-11-14 09:48 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Persistence/` | IDataScopeSql、DataScopeSql、SqlFragments | 整份完成 | 新文件 |
+| 2026-11-14 09:48 | `src/Modules/Configuration/（Application/Features、Presentation/Features）` | GetFeaturesQuery、FeaturesResponse、GetFeaturesQueryHandler、GetFeaturesEndpoint | 整份完成 | 新文件 |
+| 2026-11-14 09:48 | `src/Modules/Notifications/` | ITemplateRenderer.RenderStrictAsync、FluidTemplateRenderer 严格渲染、ChannelRendering 的 strict 参数、模板错误提示 | 部分 | 只处理新增的成员 |
+| 2026-11-14 09:48 | `tests/（Operations/BackgroundJobTests、Notifications/TemplateRendererTests、NotificationTemplateTests、Configuration/FeatureTests、BuildingBlocks 下 DataScopeSqlTests、FeatureFlagsTests、FeatureGateTests 与相关夹具）` | 本批新增的测试 | 部分 | 只处理新增的测试，其余未检查 |
+| 2026-11-14 09:48 | `docs/framework/05-infrastructure/（05-02、05-05、05-08、05-10）、docs/framework/00-README.md、docs/modules/（operations、notifications、configuration）、docs/implementation/（S0-04、S2-18-规则核对、S3-平台模块）` | 本批新增或改写的段落与修订记录 | 部分 | 其余未检查 |

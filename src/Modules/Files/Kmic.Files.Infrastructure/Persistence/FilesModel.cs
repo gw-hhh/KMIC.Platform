@@ -9,5 +9,6 @@ internal static class FilesModel
     {
         modelBuilder.ApplyConfiguration(new StoredFileConfiguration());
         modelBuilder.ApplyConfiguration(new FileReferenceConfiguration());
+        modelBuilder.ApplyConfiguration(new StorageIssueConfiguration());
     }
 }

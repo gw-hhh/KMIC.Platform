@@ -4,8 +4,10 @@ using Kmic.BuildingBlocks.Contracts.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
+using Kmic.Files.Contracts;
 using Kmic.Identity.Contracts;
 using Kmic.Operations.Application;
+using Kmic.Operations.Application.Audit.Export;
 using Kmic.Operations.Application.Audit.Record;
 using Kmic.Operations.Application.ClientErrors;
 using Kmic.Operations.Contracts;
@@ -41,6 +43,7 @@ public sealed class OperationsModule : IModule
         services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IScheduledJobSettingRepository, ScheduledJobSettingRepository>();
         services.AddKmicOptions<ClientErrorOptions>(ClientErrorOptions.Section);
+        services.AddKmicOptions<AuditExportOptions>(AuditExportOptions.Section);
         services.AddSingleton<IClientErrorLimiter, ClientErrorLimiter>();
         services.AddSingleton<IClientErrorLog, ClientErrorLog>();
     }
@@ -60,5 +63,6 @@ public sealed class OperationsModule : IModule
         ArgumentNullException.ThrowIfNull(dependencies);
 
         dependencies.DependsOn(IdentityModuleInfo.Name);
+        dependencies.DependsOn(FilesModuleInfo.Name);
     }
 }

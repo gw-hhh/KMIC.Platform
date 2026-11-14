@@ -21,6 +21,11 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// </summary>
     public const int MaxReferences = 100;
 
+    /// <summary>
+    /// 模块生成的文件，上传档案名的前缀：Generated:来源。这类文件没有被关联也可以下载，到期清理
+    /// </summary>
+    public const string GeneratedProfilePrefix = "Generated:";
+
     private static readonly StateMachine<StoredFile, StoredFileStatus, StoredFileAction> _machine = Build();
 
     private readonly List<FileReference> _references = [];
@@ -169,7 +174,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         DateTimeOffset now,
         DateTimeOffset expiresAt)
     {
-        var file = Start(id, storageKey, originalName, "Generated:" + source, requestedBy, now);
+        var file = Start(id, storageKey, originalName, GeneratedProfilePrefix + source, requestedBy, now);
         file.FinishWrite(fileType, contentType, size, sha256, objectVersionId);
         file.ExpiresAt = expiresAt;
         _machine.Fire(file, StoredFileAction.Complete, "生成的文件已登记");
@@ -215,6 +220,23 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
         var fired = _machine.Fire(this, StoredFileAction.Reject, reason);
+        if (fired.IsSuccess)
+        {
+            RejectReason = reason;
+            ExpiresAt = now + retention;
+        }
+
+        return fired;
+    }
+
+    /// <summary>
+    /// 对象丢失：存储里找不到这个版本的内容，当成被拒绝处理，保留一小段时间就清理
+    /// </summary>
+    public Result MarkLost(string reason, DateTimeOffset now, TimeSpan retention)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+        var fired = _machine.Fire(this, StoredFileAction.Lose, reason);
         if (fired.IsSuccess)
         {
             RejectReason = reason;
@@ -355,6 +377,12 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         foreach (var from in new[] { StoredFileStatus.Uploading, StoredFileStatus.Scanning, StoredFileStatus.Available, StoredFileStatus.Attached, StoredFileStatus.Detached, StoredFileStatus.Rejected })
         {
             builder.Permit(from, StoredFileAction.Purge, StoredFileStatus.Purged);
+        }
+
+        // 对账发现对象丢失：只有应该有内容的这三种状态会遇到
+        foreach (var from in new[] { StoredFileStatus.Available, StoredFileStatus.Attached, StoredFileStatus.Detached })
+        {
+            builder.Permit(from, StoredFileAction.Lose, StoredFileStatus.Rejected);
         }
 
         return builder.Build();

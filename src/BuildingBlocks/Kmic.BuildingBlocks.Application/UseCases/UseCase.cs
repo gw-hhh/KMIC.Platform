@@ -74,6 +74,11 @@ public sealed record UseCase
     public bool AuditedRead { get; init; }
 
     /// <summary>
+    /// 功能开关名；没有声明时为空
+    /// </summary>
+    public string? FeatureGate { get; init; }
+
+    /// <summary>
     /// 绕过数据权限的原因
     /// </summary>
     public string? BypassesDataScope { get; init; }

@@ -55,6 +55,31 @@ public sealed class FilesOptions
     public int StaleUploadMinutes { get; init; } = 60;
 
     /// <summary>
+    /// 对账只看存在了至少多少天的对象和文件：更新的可能还在写入或等待登记
+    /// </summary>
+    [Range(1, 30)]
+    public int ReconcileMinAgeDays { get; init; } = 2;
+
+    /// <summary>
+    /// 对账每次处理多少个，限制单次查询和探查的规模
+    /// </summary>
+    [Range(10, 2000)]
+    public int ReconcileBatchSize { get; init; } = 500;
+
+    /// <summary>
+    /// 对账一次最多处理多少个差异：存储里多出的对象、库里缺对象的文件各算一类。
+    /// 超过就整个放弃，因为这更像是存储配置不对，或者数据库被还原过，而不是个别文件出了问题
+    /// </summary>
+    [Range(1, 100000)]
+    public int ReconcileMaxChanges { get; init; } = 200;
+
+    /// <summary>
+    /// 模块生成的单个文件最大多少 MB，超过的写入失败
+    /// </summary>
+    [Range(1, 2048)]
+    public int GeneratedFileMaxMb { get; init; } = 200;
+
+    /// <summary>
     /// 临时文件保留多久
     /// </summary>
     public TimeSpan TempExpiry => TimeSpan.FromHours(TempExpiryHours);
@@ -73,4 +98,9 @@ public sealed class FilesOptions
     /// 上传多久没有结果算中断
     /// </summary>
     public TimeSpan StaleUpload => TimeSpan.FromMinutes(StaleUploadMinutes);
+
+    /// <summary>
+    /// 对账的最小年龄
+    /// </summary>
+    public TimeSpan ReconcileMinAge => TimeSpan.FromDays(ReconcileMinAgeDays);
 }

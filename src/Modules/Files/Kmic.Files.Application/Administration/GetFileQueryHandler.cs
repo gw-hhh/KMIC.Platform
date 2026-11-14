@@ -1,6 +1,8 @@
+using Kmic.BuildingBlocks.Application.Auditing;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Files.Domain.Errors;
+using Kmic.Files.Domain.Files;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Application.Administration;
@@ -8,7 +10,7 @@ namespace Kmic.Files.Application.Administration;
 /// <summary>
 /// 处理 <see cref="GetFileQuery"/>
 /// </summary>
-public sealed class GetFileQueryHandler(IFilesQueryDb db) : IQueryHandler<GetFileQuery, FileDetail>
+public sealed class GetFileQueryHandler(IFilesQueryDb db, IStateHistoryQuery history) : IQueryHandler<GetFileQuery, FileDetail>
 {
     /// <inheritdoc />
     public async ValueTask<Result<FileDetail>> Handle(GetFileQuery query, CancellationToken cancellationToken)
@@ -21,6 +23,7 @@ public sealed class GetFileQueryHandler(IFilesQueryDb db) : IQueryHandler<GetFil
             return FilesErrors.NotFound;
         }
 
+        var states = await history.GetAsync<StoredFile>(file.Id.Value, cancellationToken);
         return new FileDetail(
             file.Id,
             file.ConcurrencyVersion,
@@ -41,6 +44,7 @@ public sealed class GetFileQueryHandler(IFilesQueryDb db) : IQueryHandler<GetFil
             file.ObjectDeletedAt,
             file.HistoryPurgedAt,
             file.HistoryPurgeNote,
-            [.. file.References.Select(r => new FileReferenceItem(r.OwnerModule, r.OwnerType, r.OwnerId, r.AttachedAt))]);
+            [.. file.References.Select(r => new FileReferenceItem(r.OwnerModule, r.OwnerType, r.OwnerId, r.AttachedAt))],
+            states);
     }
 }

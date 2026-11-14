@@ -57,6 +57,8 @@ public static class BackgroundProcessingServiceCollectionExtensions
         services.AddKmicStartupTasks();
         services.AddKmicSecurityEvents();
         services.AddKmicBacklogSampling();
+        services.AddSingleton(new InstanceIdentity(Guid.CreateVersion7(), Environment.MachineName, roles.ToString()));
+        services.AddHostedService<InstanceHeartbeat>();
         services.AddKmicScheduler();
         if (roles.HasFlag(HostRoles.Worker))
         {

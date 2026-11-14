@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
@@ -35,16 +36,8 @@ internal sealed class RebuildRunStore(ModuleFrameworkTables tables, DataSources 
             return null;
         }
 
-        await InsertJobAsync(connection, transaction, names, (jobId, subscription, runId), ct);
-
-        // 通知在提交时才送达，执行器被唤醒时一定读得到作业行
-        await using (var notify = new NpgsqlCommand("SELECT pg_notify(@channel, @module)", connection, transaction))
-        {
-            notify.Parameters.AddWithValue("channel", MessagingChannels.Jobs);
-            notify.Parameters.AddWithValue("module", module);
-            await notify.ExecuteNonQueryAsync(ct);
-        }
-
+        await InsertJobAsync(connection, transaction, names, jobId, new ReadModelRebuildJob(subscription, runId), ct);
+        await NotifyJobsAsync(connection, transaction, module, ct);
         await transaction.CommitAsync(ct);
         return runId;
     }
@@ -87,7 +80,7 @@ internal sealed class RebuildRunStore(ModuleFrameworkTables tables, DataSources 
     }
 
     private async Task InsertJobAsync(
-        NpgsqlConnection connection, NpgsqlTransaction transaction, FrameworkTableNames names, (Guid JobId, string Subscription, Guid RunId) job, CancellationToken ct)
+        NpgsqlConnection connection, NpgsqlTransaction transaction, FrameworkTableNames names, Guid jobId, ReadModelRebuildJob job, CancellationToken ct)
     {
         var type = jobs.Describe(typeof(ReadModelRebuildJob));
         await using var command = new NpgsqlCommand(
@@ -97,12 +90,12 @@ internal sealed class RebuildRunStore(ModuleFrameworkTables tables, DataSources 
             """,
             connection,
             transaction);
-        command.Parameters.AddWithValue("id", job.JobId);
+        command.Parameters.AddWithValue("id", jobId);
         command.Parameters.AddWithValue("type", type.Name);
         command.Parameters.AddWithValue("version", type.Version);
         command.Parameters.Add(new NpgsqlParameter("args", NpgsqlDbType.Jsonb)
         {
-            Value = JsonSerializer.Serialize(new ReadModelRebuildJob(job.Subscription, job.RunId), KmicJsonOptions.Stored),
+            Value = JsonSerializer.Serialize(job, KmicJsonOptions.Stored),
         });
         await command.ExecuteNonQueryAsync(ct);
     }
@@ -162,6 +155,130 @@ internal sealed class RebuildRunStore(ModuleFrameworkTables tables, DataSources 
         AddCounts(command, runId, scanned, missing);
         await command.ExecuteNonQueryAsync(ct);
     }
+
+    // 通知在提交时才送达，执行器被唤醒时一定读得到作业行
+    private static async Task NotifyJobsAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, string module, CancellationToken ct)
+    {
+        await using var notify = new NpgsqlCommand("SELECT pg_notify(@channel, @module)", connection, transaction);
+        notify.Parameters.AddWithValue("channel", MessagingChannels.Jobs);
+        notify.Parameters.AddWithValue("module", module);
+        await notify.ExecuteNonQueryAsync(ct);
+    }
+
+    /// <summary>
+    /// 运维确认收尾：暂停等确认的一轮回到进行中，另排一个只做收尾的作业。没有暂停的一轮时返回 false
+    /// </summary>
+    public async Task<bool> ConfirmAsync(string module, string subscription, CancellationToken ct)
+    {
+        var names = tables.For(module);
+        await using var connection = await dataSources.Transactions(CallOrigin.Http).OpenConnectionAsync(ct);
+        await using var transaction = await connection.BeginTransactionAsync(ct);
+
+        Guid runId;
+        long scanned;
+        var jobId = Guid.CreateVersion7();
+        await using (var resume = new NpgsqlCommand(
+            $"""
+            UPDATE {names.RebuildRuns}
+            SET "Status" = {RebuildRunStatus.Active}, "JobId" = @jobId
+            WHERE "Subscription" = @subscription AND "Status" = {RebuildRunStatus.AwaitingConfirmation}
+            RETURNING "Id", "ScannedCount"
+            """,
+            connection,
+            transaction))
+        {
+            resume.Parameters.AddWithValue("jobId", jobId);
+            resume.Parameters.AddWithValue("subscription", subscription);
+            await using var reader = await resume.ExecuteReaderAsync(ct);
+            if (!await reader.ReadAsync(ct))
+            {
+                return false;
+            }
+
+            runId = reader.GetGuid(0);
+            scanned = reader.GetInt64(1);
+        }
+
+        await InsertJobAsync(connection, transaction, names, jobId, new ReadModelRebuildJob(subscription, runId, ConfirmMissing: true, Scanned: scanned), ct);
+        await NotifyJobsAsync(connection, transaction, module, ct);
+        await transaction.CommitAsync(ct);
+        return true;
+    }
+
+    /// <summary>
+    /// 运维放弃暂停的一轮，同时清除订阅的“需要初始化”标记，此后不会自动重建。没有暂停的一轮时返回 false
+    /// </summary>
+    public async Task<bool> AbandonAsync(string module, string subscription, CancellationToken ct)
+    {
+        await using var connection = await dataSources.Transactions(CallOrigin.Http).OpenConnectionAsync(ct);
+        await using var transaction = await connection.BeginTransactionAsync(ct);
+
+        await using (var abandon = new NpgsqlCommand(
+            $"""
+            UPDATE {tables.For(module).RebuildRuns}
+            SET "Status" = {RebuildRunStatus.Abandoned}, "FinishedAt" = clock_timestamp()
+            WHERE "Subscription" = @subscription AND "Status" = {RebuildRunStatus.AwaitingConfirmation}
+            """,
+            connection,
+            transaction))
+        {
+            abandon.Parameters.AddWithValue("subscription", subscription);
+            if (await abandon.ExecuteNonQueryAsync(ct) == 0)
+            {
+                return false;
+            }
+        }
+
+        await using (var initialized = new NpgsqlCommand($"""UPDATE {MessageRouteTable.Name} SET "NeedsInitialization" = false WHERE "Subscription" = @subscription""", connection, transaction))
+        {
+            initialized.Parameters.AddWithValue("subscription", subscription);
+            await initialized.ExecuteNonQueryAsync(ct);
+        }
+
+        await transaction.CommitAsync(ct);
+        return true;
+    }
+
+    /// <summary>
+    /// 一个模块最近的重建轮次，新的在前
+    /// </summary>
+    public async Task<IReadOnlyList<RebuildRunInfo>> ListAsync(string module, int take, CancellationToken ct)
+    {
+        await using var command = dataSources.Reads(CallOrigin.Http).CreateCommand(
+            $"""
+            SELECT "Id", "Subscription", "ReadModel", "JobId", "Status", "ScannedCount", "MissingCount", "StartedAt", "FinishedAt"
+            FROM {tables.For(module).RebuildRuns} ORDER BY "StartedAt" DESC, "Id" DESC LIMIT @take
+            """);
+        command.Parameters.AddWithValue("take", take);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        var runs = new List<RebuildRunInfo>();
+        while (await reader.ReadAsync(ct))
+        {
+            runs.Add(new RebuildRunInfo(
+                module,
+                reader.GetGuid(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetGuid(3),
+                StateOf(reader.GetInt16(4)),
+                reader.GetInt64(5),
+                reader.GetInt64(6),
+                await reader.GetFieldValueAsync<DateTimeOffset>(7, ct),
+                await reader.IsDBNullAsync(8, ct) ? null : await reader.GetFieldValueAsync<DateTimeOffset>(8, ct)));
+        }
+
+        return runs;
+    }
+
+    private static RebuildRunState StateOf(short status) =>
+        status switch
+        {
+            RebuildRunStatus.Active => RebuildRunState.Active,
+            RebuildRunStatus.AwaitingConfirmation => RebuildRunState.AwaitingConfirmation,
+            RebuildRunStatus.Completed => RebuildRunState.Completed,
+            RebuildRunStatus.Abandoned => RebuildRunState.Abandoned,
+            _ => RebuildRunState.Failed,
+        };
 
     private static void AddCounts(NpgsqlCommand command, Guid runId, long scanned, long missing)
     {

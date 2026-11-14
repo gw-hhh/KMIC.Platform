@@ -42,15 +42,19 @@ public sealed class FilesModule : IModule
 
         services.AddModuleDbContexts<FilesDbContext, FilesQueryDbContext, IFilesQueryDb>();
         services.AddScoped<IStoredFileRepository, StoredFileRepository>();
+        services.AddScoped<IStorageIssueRepository, StorageIssueRepository>();
         services.AddKmicOptions<FilesOptions>(FilesOptions.Section);
         services.AddKmicOptions<FilesStorageOptions>(FilesStorageOptions.Section);
         services.AddSingleton<IStorageKeyFactory, StorageKeyFactory>();
         services.AddSingleton<IFileStorage, ConfiguredFileStorage>();
+        services.AddSingleton<IStorageInventory, StorageInventory>();
         services.AddSingleton<IFileUploadProcessor, FileUploadProcessor>();
         services.AddSingleton<IFileContentReader, FileContentReader>();
         services.AddScoped<IFileDownloads, FileDownloads>();
         services.AddScoped<IFileAttachability, FileAttachability>();
         services.AddScoped<IFileAttachments, FileAttachments>();
+        services.AddScoped<IGeneratedFiles, GeneratedFiles>();
+        services.AddScoped<IFileContents, FileContents>();
     }
 
     /// <inheritdoc />
@@ -80,5 +84,6 @@ public sealed class FilesModule : IModule
 
         scheduling.Schedule("Files.PurgeExpired", "0 15 * * * ?", run => new PurgeExpiredFilesCommand(run.ScheduledFireTime), o => o.DisplayName("清理到期的文件"));
         scheduling.Schedule("Files.ResetStaleUploads", "0 45 * * * ?", run => new ResetStaleUploadsCommand(run.ScheduledFireTime), o => o.DisplayName("重置上传中断的文件"));
+        scheduling.Schedule("Files.ReconcileStorage", "0 0 4 ? * SUN", run => new ReconcileStorageCommand(run.ScheduledFireTime), o => o.DisplayName("核对存储与文件记录"));
     }
 }

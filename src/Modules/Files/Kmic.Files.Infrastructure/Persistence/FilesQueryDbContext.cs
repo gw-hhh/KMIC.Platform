@@ -19,6 +19,9 @@ internal sealed class FilesQueryDbContext(DbContextOptions<FilesQueryDbContext> 
     public IQueryable<StoredFile> Files => Set<StoredFile>();
 
     /// <inheritdoc />
+    public IQueryable<StorageIssue> StorageIssues => Set<StorageIssue>();
+
+    /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
         configurationBuilder.RegisterAllInFilesIdConverters();
 

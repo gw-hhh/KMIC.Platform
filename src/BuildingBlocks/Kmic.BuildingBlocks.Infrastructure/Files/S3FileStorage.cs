@@ -83,6 +83,20 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         await _client.DeleteObjectAsync(_bucket, key, ct);
 
     /// <inheritdoc />
+    public async Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct)
+    {
+        try
+        {
+            await _client.GetObjectMetadataAsync(new GetObjectMetadataRequest { BucketName = _bucket, Key = key, VersionId = versionId }, ct);
+            return true;
+        }
+        catch (AmazonS3Exception exception) when (exception.StatusCode == HttpStatusCode.NotFound)
+        {
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<Uri> GetDownloadUrlAsync(string key, TimeSpan validFor, string downloadName, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(downloadName);

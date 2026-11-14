@@ -1,3 +1,5 @@
+using Kmic.Operations.Application.Messages.Instances;
+using Kmic.Operations.Application.Messages.Routes;
 using Kmic.Operations.Application.ScheduledJobs;
 using Kmic.Operations.Domain.Audit;
 using Kmic.Operations.Domain.Jobs;
@@ -32,6 +34,16 @@ public interface IOperationsQueryDb
     /// 每个定时任务最近一次的执行记录
     /// </summary>
     IQueryable<ScheduledJobRunRow> LatestScheduledJobRuns { get; }
+
+    /// <summary>
+    /// 订阅路由：哪种消息投递给哪个模块的哪个订阅
+    /// </summary>
+    IQueryable<MessageRouteRow> MessageRoutes { get; }
+
+    /// <summary>
+    /// 运行中的实例和它们声明的订阅，最近的心跳
+    /// </summary>
+    IQueryable<MessagingInstanceRow> MessagingInstances { get; }
 
     /// <summary>
     /// 只留下操作对象里包含给定内容的审计记录

@@ -60,7 +60,7 @@ public sealed class ProbeTemplate : PostgresTemplateDatabase
         {
             await connection.OpenAsync(ct);
             await using var routes = connection.CreateCommand();
-            routes.CommandText = """CREATE SCHEMA "Operations";""" + MessageRouteTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql() + IdentitySchemaSql + SecurityEventTable.CreateSql;
+            routes.CommandText = """CREATE SCHEMA "Operations";""" + MessageRouteTable.CreateSql + MessagingInstanceTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql() + IdentitySchemaSql + SecurityEventTable.CreateSql;
             await routes.ExecuteNonQueryAsync(ct);
         }
     }

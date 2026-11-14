@@ -77,6 +77,11 @@ public sealed class MessagingOptions
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(10);
 
     /// <summary>
+    /// 实例登记心跳的间隔，运维界面据此看哪些实例还活着
+    /// </summary>
+    public TimeSpan HeartbeatInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
     /// 每个模块同时处理 Inbox 消息的数量
     /// </summary>
     public int InboxParallelism { get; set; } = 4;

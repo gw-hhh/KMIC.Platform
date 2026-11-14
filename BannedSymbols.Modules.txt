@@ -53,3 +53,7 @@ M:Microsoft.AspNetCore.Http.TypedResults.Problem(System.String,System.String,Sys
 M:Microsoft.AspNetCore.Http.TypedResults.Problem(System.String,System.String,System.Nullable{System.Int32},System.String,System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}});返回 Result，由框架转换（05-06）
 M:Microsoft.AspNetCore.Http.TypedResults.Problem(Microsoft.AspNetCore.Mvc.ProblemDetails);返回 Result，由框架转换（05-06）
 M:Microsoft.AspNetCore.Http.TypedResults.StatusCode(System.Int32);返回 Result，由框架转换（05-06）
+# 文件关联：只经 IFileAttachments，它按互斥协议先取锁、检查再发请求（05-11）
+M:Kmic.Files.Contracts.AttachFiles.#ctor(System.Collections.Generic.IReadOnlyList{System.Guid},System.String,System.String,System.Guid);使用 IFileAttachments.AttachAsync，它先取锁、检查再发请求（05-11）
+M:Kmic.Files.Contracts.DetachFiles.#ctor(System.Collections.Generic.IReadOnlyList{System.Guid},System.String,System.String,System.Guid);使用 IFileAttachments.DetachAsync（05-11）
+M:Kmic.Files.Contracts.RegisterGeneratedFile.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.Int64,System.String,System.String,System.Nullable{System.Guid},System.DateTimeOffset);使用 IGeneratedFiles.WriteAsync，它先写入存储再请求登记（05-11）

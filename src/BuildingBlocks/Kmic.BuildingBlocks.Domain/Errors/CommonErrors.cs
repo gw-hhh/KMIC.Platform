@@ -122,6 +122,12 @@ public static class CommonErrors
         Error.Conflict("Common.JobTimedOut", "任务运行时间太长被停止，请缩小范围后重新提交；已经完成的部分会保留");
 
     /// <summary>
+    /// 功能开关关闭，用例不执行：对调用方就是“这个功能不存在”
+    /// </summary>
+    public static readonly Error FeatureDisabled =
+        Error.NotFound("Common.FeatureDisabled", "功能不存在");
+
+    /// <summary>
     /// 导出的行数超过上限
     /// </summary>
     public static readonly Error ExportTooLarge =

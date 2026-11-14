@@ -40,6 +40,7 @@ builder.Services.AddMediator(options =>
     [
         typeof(LoggingBehavior<,>),
         typeof(ExceptionTranslationBehavior<,>),
+        typeof(FeatureGateBehavior<,>),
         typeof(ValidationBehavior<,>),
         typeof(AuthorizationBehavior<,>),
         typeof(ReadAuditBehavior<,>),

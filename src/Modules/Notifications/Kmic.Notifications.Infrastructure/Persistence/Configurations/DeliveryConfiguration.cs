@@ -28,6 +28,7 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(d => d.Subject).HasMaxLength(500);
         builder.Property(d => d.Body).IsUnboundedText().AuditHidden();
         builder.Property(d => d.SmsParameters).HasColumnType("jsonb").AuditHidden();
+        builder.Property(d => d.AttachmentFileIds).HasColumnType("jsonb");
         builder.Property(d => d.TemplateKey).HasMaxLength(200);
         builder.Property(d => d.DedupKey).HasMaxLength(300);
         builder.Property(d => d.CodeHash).HasMaxLength(64).AuditHidden();

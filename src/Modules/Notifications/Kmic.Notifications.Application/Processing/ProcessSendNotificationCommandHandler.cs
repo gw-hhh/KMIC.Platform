@@ -17,7 +17,7 @@ public sealed class ProcessSendNotificationCommandHandler(NotificationProcessor 
         var message = command.Message;
         return await processor.ProcessAsync(
             new NotificationRequest(
-                message.TemplateKey, message.To, message.Model, message.DedupKey, Secret: false, message.Priority == NotificationPriority.High, command.SourceMessageId, command.SourceModule, command.InitiatorUserId),
+                message.TemplateKey, message.To, message.Model, message.DedupKey, Secret: false, message.Priority == NotificationPriority.High, command.SourceMessageId, command.SourceModule, command.InitiatorUserId, message.AttachmentFileIds),
             cancellationToken);
     }
 }

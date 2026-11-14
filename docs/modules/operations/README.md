@@ -1,6 +1,6 @@
 # Operations 模块设计
 
-- 实现：审计汇总与查询已实现并通过端到端测试（2026-11-13）；定时任务管理、后台作业汇总、消息管理、前端错误接收、审计导出未做（需要 13.1 里的框架服务）。实现时的差异已就地订正，汇总见第 13 节末。
+- 实现：审计汇总与查询、审计导出、定时任务管理、后台作业汇总、前端错误接收、消息管理的积压／死信／重试／放弃已实现并通过端到端测试（2026-11-13）；消息管理的路由与实例、补投、订阅终结与重新激活、读模型重建的触发与收尾确认已实现（2026-11-14，见第 13 节末）。实现时的差异已就地订正，汇总见第 13 节末。
 - 状态：**已确认**（2026-11-12）。起草当天，用户授权“遇到需要选择的地方，默认采用最推荐的方案”，D-O1～D-O3 与小项均按建议决定；第 12 节的待确认事项（保留期、量级、前端错误限额）依赖合规或试运行数据，不阻塞编码。开工前先补框架的公开服务（第 13.1 节）。
 - 模块名 / schema / 编号：`Operations` / `"Operations"` / 11（平台模块，登记见 `docs/modules/README.md`）；`[LoggerMessage]` 的 `EventId` 使用 11000～11999
 - 项目：`Kmic.Operations.Domain`、`Application`、`Infrastructure`、`Presentation`、`Contracts`
@@ -152,8 +152,10 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 | 用例 | 授权 | 说明 |
 |---|---|---|
 | `ListBackgroundJobsQuery` | `Operations.Jobs.View` | 遍历各模块的作业存储，按模块、类型、状态、提交人筛选；按模块并行取、归并分页 |
-| `CancelBackgroundJobCommand` | `Operations.Jobs.Manage` | 请求取消（05-08 第 6.6 节）；提交人本人取消走各模块路由组下的框架端点，不经这里 |
+| `CancelBackgroundJobCommand` | `Operations.Jobs.Manage` | 请求取消（05-08 第 6.6 节）；提交人取消自己的作业用 `CancelMyJobCommand` |
 | `ListMyJobsQuery` | `[AllowAuthenticated]` | `GET /api/v1/operations/my-jobs`：汇总当前用户在各模块提交的作业（外壳的“作业入口”使用，F03 7.9） |
+| `GetMyJobQuery` | `[AllowAuthenticated]` | `GET /api/v1/operations/my-jobs/{模块}/{id}`：页面轮询一个作业的进度；别人提交的和不存在的一样返回 404 |
+| `CancelMyJobCommand` | `[AllowAuthenticated]`、`[Audited]`、`[Idempotent]` | `POST /api/v1/operations/my-jobs/{模块}/{id}/cancel`：提交人取消自己的作业，规则同管理员取消；别人的作业返回 404 |
 
 ### 4.4 消息管理
 
@@ -420,20 +422,39 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 
 ### 实现时的其他差异：前端错误与后台作业（2026-11-13）
 
-- **前端错误上报**（）：登录就能报，叠加  与 （出错的页面恰好可能是改密码页或只读的模拟登录会话）；，不要求幂等键（重复上报只是多一条日志）。字段白名单靠框架的严格 JSON 选项（未知字段整个请求被拒），长度上限在校验器里，一次最多条数与每用户每分钟请求数是配置项 （默认 20、30）。限流用进程内的固定窗口，按用户分区、每个实例各数各的：这是防刷而不是计费，不放进数据库或缓存；超限返回 429  带 Retry-After。日志分类固定为 ，Warning 级，字段原样写进结构化属性（不拼进消息模板）；消息与堆栈是用户页面里产生的文本，没有做正则扫描式的脱敏（05-12 第 2.3 节否决了这种做法），靠“不收请求体、表单值、查询参数”的白名单把风险限在字段里，与前端联调时再核对。校验不过时整个请求被拒，一条也不写。
-- **后台作业汇总**：（模块、类型、状态、提交人筛选）、（登录就能看，只看自己提交的）、。各模块的作业表各取一批，按“提交时间加 ID”归并、游标分页；归并时同一时间的作业按数据库比较 uuid 的次序（逐字节、大端）排，不能用 .NET 的 Guid 比较，否则跨模块的同时提交的作业翻页时会漏行（有测试覆盖）。响应里状态是智能枚举 ，结果摘要是 JSON，看不到作业参数。管理员取消写的是作业所在模块的表，不在 Operations 命令的事务里（框架存储的基础设施写入，和执行器自己改作业状态一样）。
+- **前端错误上报**（`ReportClientErrorsCommand`）：登录就能报，叠加 `[AllowWhenPasswordChangeRequired]` 与 `[AllowWhenImpersonationReadOnly]`（出错的页面恰好可能是改密码页或只读的模拟登录会话）；`[NotAudited]`，不要求幂等键（重复上报只是多一条日志）。字段白名单靠框架的严格 JSON 选项（未知字段整个请求被拒），长度上限在校验器里，一次最多条数与每用户每分钟请求数是配置项 `Operations:ClientErrors:MaxPerRequest`、`RequestsPerUserPerMinute`（默认 20、30）。限流用进程内的固定窗口，按用户分区、每个实例各数各的：这是防刷而不是计费，不放进数据库或缓存；超限返回 429 `Operations.ClientErrorsThrottled`，带 Retry-After。日志分类固定为 `Kmic.ClientErrors`，Warning 级，字段原样写进结构化属性（不拼进消息模板）；消息与堆栈是用户页面里产生的文本，没有做正则扫描式的脱敏（05-12 第 2.3 节否决了这种做法），靠“不收请求体、表单值、查询参数”的白名单把风险限在字段里，与前端联调时再核对。校验不过时整个请求被拒，一条也不写。
+- **后台作业汇总**：`ListBackgroundJobsQuery`（模块、类型、状态、提交人筛选）、`ListMyJobsQuery`（登录就能看，只看自己提交的）、`GetMyJobQuery`、`CancelMyJobCommand`（提交人取消自己的作业）、`CancelBackgroundJobCommand`。各模块的作业表各取一批，按“提交时间加 ID”归并、游标分页；归并时同一时间的作业按数据库比较 uuid 的次序（逐字节、大端）排，不能用 .NET 的 Guid 比较，否则跨模块的同时提交的作业翻页时会漏行（有测试覆盖）。响应里状态是智能枚举 `BackgroundJobStatus`，结果摘要是 JSON，看不到作业参数。管理员取消写的是作业所在模块的表，不在 Operations 命令的事务里（框架存储的基础设施写入，和执行器自己改作业状态一样）。
 - **未做**：各模块路由组下提交人自己查看与取消作业的端点（05-08 第 6.6 节，设计写在框架 Presentation，随 S2-12 余项，Operations 的取消不依赖它）；按作业类型显示名（作业声明里没有显示名，界面自己映射）。
 
 ### 实现时的其他差异：消息管理（2026-11-13，只做了积压、死信、重试、放弃）
 
-- **已实现**：、（模块、箱、订阅、消息类型筛选，游标分页）、（，含载荷与信封，也能看已放弃的）、、、。权限点 、（敏感）。
+- **已实现**：`GetMessageSummaryQuery`、`ListDeadMessagesQuery`（模块、箱、订阅、消息类型筛选，游标分页）、`GetDeadMessageQuery`（`[AuditedRead]`，含载荷与信封，也能看已放弃的）、`ListBlockedKeysQuery`、`RetryMessagesCommand`、`AbandonMessagesCommand`。权限点 `Operations.Messages.View`、`Operations.Messages.Manage`（敏感）。
 - **未做（仍在 13.1 的清单里）**：路由与实例列表（要先做  心跳与建表）、补投、订阅终结与重新激活、读模型重建的手动触发与收尾确认（含 D-O2 的放弃）。这些各自要新的框架服务与更细的并发设计，按“每片可测可用”分批做。
 - **死信 ID 是行 ID**：收件箱里一条消息对每个订阅一行，所以重试、放弃用的是收件箱行的 ID（列表里的 ），不是消息 ID；列表同时给出 。
-- **回执**：重试与放弃返回逐条回执（、、，放弃还有 ），一条失败不影响别的；命令响应是 （架构规则要求命令响应是带属性的收据对象，不能直接返回数组）。每条的状态条件都写在 SQL 里：重试只改死信（状态回到待处理、次数清零、马上可领取），放弃只改收件箱的死信，重复提交同一批不会改到别的行。
-- **放弃**：原因必填；发件箱的死信只能重试（投递本身出的问题）。收件箱里的行没有单独的“放弃原因”列，原因连同原来的错误一起写进错误说明（），审计里也有这个命令。放弃之前先调接收方为这种消息注册的 （在系统身份的作用域里执行，没有注册就放行）。**消息类型当前版本不认识、或载荷读不出来的消息一律不让放弃**：运维要放弃一条看不懂的消息，先要有人把它看懂。
+- **回执**：重试与放弃返回逐条回执（`Module`、`Box`、`Id`、`Status`，放弃还有 `Reason`），一条失败不影响别的；命令响应是 `MessageReceipts`（`{ receipts: [...] }`；架构规则要求命令响应是带属性的收据对象，不能直接返回数组）。每条的状态条件都写在 SQL 里：重试只改死信（状态回到待处理、次数清零、马上可领取），放弃只改收件箱的死信，重复提交同一批不会改到别的行。
+- **放弃**：原因必填；发件箱的死信只能重试（投递本身出的问题）。收件箱里的行没有单独的“放弃原因”列，原因连同原来的错误一起写进错误说明（`LastError`），审计里也有这个命令。放弃之前先调接收方为这种消息注册的 `IAbandonPolicy<TRequest>`（在系统身份的作用域里执行，没有注册就放行）。**消息类型当前版本不认识、或载荷读不出来的消息一律不让放弃**：运维要放弃一条看不懂的消息，先要有人把它看懂。
 - **被挡住的键**：只对声明了  的订阅有意义。按键列出死信条数、排在最早一条死信后面还在等的条数、最早一条死信的行 ID（处理它才能放开），每个模块最多 500 个。这个 Api 测试宿主里没有有序订阅，所以端到端只测了空结果，存储本身在框架测试里用 Echo 的有序订阅测过。
-- **汇总**：待终结订阅带 ，界面单独显示、不计入通用积压告警；最老一条的年龄，发件箱按发布时间，收件箱按收到时间。
+- **汇总**：待终结订阅带 `IsRetiring`，界面单独显示、不计入通用积压告警；最老一条的年龄，发件箱按发布时间，收件箱按收到时间。
 - 写入各模块自己的发件箱、收件箱表，不在 Operations 命令的事务里（框架存储的基础设施写入，和投递、处理程序改状态一样）。
+
+
+### 实现时的其他差异：审计导出（2026-11-13）
+
+- **提交与下载**：`POST /api/v1/operations/audit/exports`（`ExportAuditCommand`，`Operations.Audit.Export`，敏感，`[Audited]`、`[Idempotent]`）返回 202，`jobId` 是作业 ID，`Location` 指向结果文件；`GET …/audit/exports/{jobId}/file` 下载。筛选条件和审计列表一样，两边共用 `AuditFilters`，导出的就是列表筛出来的全部；时间范围没有 93 天的限制，只要求结束晚于开始，真正的上限是导出的行数。
+- **行数上限**用框架的 `Kmic:Jobs:ExportMaxRows`（默认 100000），不是设计写的 100 万、也不是模块自己的配置：框架的导出入口只认这一个值，超过时作业失败（`Common.ExportTooLarge`）、要缩小时间范围；审计量大的部署把它调高。`Operations:Audit:ExportRetentionDays`（默认 7）是导出文件保留的天数。
+- **作业**：`ExportAuditJob`（`Operations.ExportAudit`，声明可续跑、作业结束写审计）。处理器用 `IExportReader` 流式读、逐行写进临时 CSV（带 BOM 的 UTF-8；表头中文；操作人名字每人只查一次；以 `= + - @` 开头的单元格前面补单引号，防 Excel 当成公式），再用 Files 的 `IGeneratedFiles.WriteAsync` 写进存储，最后发 `RegisterAuditExportFileCommand`（`[Audited]`，因为用了敏感权限点）在命令里 `Register` 登记，登记请求和命令同一个事务进发件箱；作业结果的 `ResultFileId` 是这个文件。临时文件不管成败都删除。
+- **下载的授权**：`GetAuditExportFileQuery`（`[AuditedRead]`，返回 `FileDownload`）只给提交人和有 `Operations.Jobs.Manage` 的人，别人看到的和不存在的一样（404）；作业没做完、文件还没登记完是可重试的 409 `Operations.AuditExportNotReady`，作业失败或被取消是 422 `Operations.AuditExportFailed`。文件是 `Generated:Operations.AuditExport` 档案、不关联任何对象，登记完成就能下载，到期清理（见 Files 文档 13.1）。
+- **顺带发现并修了一个 Identity 的缺陷**：按提交人为后台作业加载访问上下文的 SQL（`AccessContextLoader` 的作业路径）缺少共用行类型需要的会话列，真实加载器下一定报“column k.AbsoluteExpiresAt does not exist”，作业一直停在运行中直到领取过期。之前的作业测试都用测试加载器，所以没发现；现在补了加载器作业路径的测试（`JobAccessLoadingTests`），导出的端到端测试走的也是真实加载器。
+- 测试：导出的 CSV 内容与筛选、公式安全单元格、提交人与管理者能下载而别的导出人不能、没有权限与时间范围不对、超过行数上限作业失败共 4 个；加载器作业路径 2 个。
+
+### 实现时的其他差异：路由、实例、终结、补投、读模型重建（2026-11-14）
+
+- **实例心跳**：每个实例（Api 和 Worker 都登记）启动任务做完之后，每 30 秒（`Kmic:Messaging:HeartbeatInterval`）往 `"Operations"."MessagingInstance"` 登记一行：进程 ID（每次启动重新生成）、机器名、角色、构建号、声明的订阅（jsonb，属性名小写开头，终结订阅时按包含运算匹配）、启动与最近心跳时间；登记时顺手删掉超过一天没有心跳的旧行。表的建表语句是框架的 `MessagingInstanceTable`，Operations 的迁移 `MessagingInstances` 执行；测试用的框架表结构也加上了。
+- **查询**：`GET /api/v1/operations/messages/routes`（`ListRoutesQuery`，可按状态筛）列出路由、状态，以及**现在还在运行的实例里哪些构建声明了它**（两分钟内有心跳的才算）；`GET …/messages/instances`（`ListInstancesQuery`）列出实例与它们声明的订阅，最近有心跳的在前。两张表都不进模型，用原生 SQL 映射到只读行类型。权限点 `Operations.Messages.View`。
+- **终结与重新激活**（`POST …/messages/routes/finalize`、`…/routes/reactivate`，`Operations.Messages.Manage`、`[Audited]`、`[Idempotent]`）：框架新增 `IMessageRouteAdmin`，在一个事务里先取登记路由用的同一把咨询锁，锁住路由行，按顺序检查：路由必须是待终结（`Operations.RouteNotRetiring`）；没有运行中的实例还在声明它（`Operations.RouteStillDeclared`）；订阅方收件箱里没有占用还没到期的处理中消息（`Operations.RouteInFlight`，可重试）；有没处理完的消息（待处理、死信、占用已到期的处理中）而没有选择放弃时拒绝（`Operations.RouteHasUnfinished`，说明条数）。选择放弃（`abandonUnfinished`）时这些消息在同一个事务里置为已放弃，原因连同原来的错误写进错误说明。重新激活只对已终结的路由，恢复成生效。设计里的“转交替代订阅”首期没做，已登记在延后事项里。
+- **补投**（`POST …/messages/redeliver`，同一个权限点）：框架 `IMessageRouteAdmin.RedeliverAsync(来源模块, 消息名称, 订阅, 起止序号)`：先对来源发件箱里已经投递过的、序号在区间里的行加共享锁，再用和正常投递同样的列写进订阅方收件箱（序号沿用来源的序号，`(MessageId, Subscription)` 唯一约束挡住订阅收到过的），写入后通知订阅方模块；订阅已终结要先重新激活，一次最多 5000 条（`Operations.RedeliverTooMany`）。**来源模块要由调用方给**：序号是来源模块发件箱里的序号，订阅方不一定知道；发件箱没有“载荷已清空”的标记（首期不提前清空载荷），所以“载荷完整”按“行还在、已投递”判断。
+- **读模型重建管理**（`GET …/messages/rebuilds`、`POST …/rebuilds/trigger|confirm|abandon`）：框架新增 `IReadModelRebuildAdmin`。触发排一轮（和启动任务同一个写法，已有没结束的一轮时 `Operations.RebuildAlreadyRunning`）；**确认收尾**把暂停等确认的一轮改回进行中，另排一个只做收尾的作业（`ReadModelRebuildJob` 增加 `ConfirmMissing`、`Scanned` 两个带默认值的参数：不再扫描，也不受“找不到的行太多”的限制，把确认过的行置为终态并完成这一轮）；**放弃**按 D-O2 把这一轮改为已放弃并清除路由的“需要初始化”标记。订阅要在本实例的代码里声明了重建方式，否则 `Operations.RebuildSubscriptionUnknown`。API 测试宿主里现在没有模块声明重建，所以 Operations 这一侧只测了入口的授权与错误；暂停、确认收尾、放弃、手动触发在框架测试里用 Echo 的重建订阅覆盖。
+- 测试：路由与实例 4、终结与重新激活 5、补投 4、重建管理入口 5（API）；重建运维 3（框架）。
 
 ---
 

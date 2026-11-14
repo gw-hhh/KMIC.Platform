@@ -10,6 +10,7 @@ using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.ReadModels;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Caching;
+using Kmic.BuildingBlocks.Infrastructure.History;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Numbering;
@@ -45,7 +46,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<ModuleDbContextServices>();
         services.AddKmicCache();
         services.AddKmicSlowQueryLog();
-        services.TryAddScoped<ModuleWriteContexts>();
+        services.AddModuleContextRegistries();
+        services.AddOperationsAdminServices();
         services.TryAddScoped<CommandTransaction>();
         services.TryAddScoped<ITransactionLocks, TransactionLocks>();
         services.TryAddScoped<IUnfinishedMessageProbe, UnfinishedMessageProbe>();
@@ -58,9 +60,6 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped(typeof(IReadModelMaintenance<>), typeof(ReadModelWriter<>));
         services.TryAddScoped<IBackgroundJobs, BackgroundJobs>();
         services.TryAddSingleton<JobStore>();
-        services.TryAddSingleton<IModuleJobStores, ModuleJobStores>();
-        services.TryAddSingleton<IModuleMessageStores, ModuleMessageStores>();
-        services.TryAddSingleton<IAbandonGuard, AbandonGuard>();
         services.TryAddSingleton<RebuildRunStore>();
         services.TryAddScoped<INumberGenerator, NumberGenerator>();
         services.TryAddScoped<AuditRecorder>();
@@ -75,6 +74,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<IAfterCommit>(provider => provider.GetRequiredService<CommandTransaction>());
         services.TryAddScoped<DomainEventDispatcher>();
         services.TryAddScoped<QueryVisibilityGuard>();
+        services.TryAddScoped<IDataScopeSql, DataScopeSql>();
         return services;
     }
 
@@ -112,6 +112,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<TQueryDb>(provider => provider.GetRequiredService<TQueryContext>());
         services.AddScoped<IExportReader<TQueryDb>, ExportReader<TQueryDb, TQueryContext>>();
         services.AddSingleton(new ModuleWriteContext(ModuleNames.Of(typeof(TContext)), typeof(TContext)));
+        services.AddSingleton(new ModuleQueryContext(ModuleNames.Of(typeof(TContext)), typeof(TQueryContext)));
         return services;
     }
 
@@ -119,6 +120,26 @@ public static class PersistenceServiceCollectionExtensions
     {
         ((IDbContextOptionsBuilderInfrastructure)options).AddOrUpdateExtension(new KmicFunctionsExtension());
         options.AddInterceptors(provider.GetRequiredService<SlowQueryInterceptor>());
+    }
+
+    // 给 Operations 的管理视图用：作业、消息、路由的汇总与运维操作，都是框架基础设施读写各模块框架表
+    private static void AddOperationsAdminServices(this IServiceCollection services)
+    {
+        services.TryAddSingleton<IModuleJobStores, ModuleJobStores>();
+        services.TryAddSingleton<IModuleMessageStores, ModuleMessageStores>();
+        services.TryAddSingleton<IAbandonGuard, AbandonGuard>();
+        services.TryAddSingleton<IMessageRouteAdmin, MessageRouteAdmin>();
+        services.TryAddSingleton<IReadModelRebuildAdmin, RebuildAdmin>();
+    }
+
+    // 模块上下文的登记，以及依赖它们的业务历史查询。
+    // 历史查询用工厂注册：没有 Identity 的宿主（迁移程序等）用不到它，构建时不必检查 IActorReferences
+    private static void AddModuleContextRegistries(this IServiceCollection services)
+    {
+        services.TryAddScoped<ModuleWriteContexts>();
+        services.TryAddScoped<ModuleQueryContexts>();
+        services.TryAddScoped<IStateHistoryQuery>(provider => new StateHistoryQuery(
+            provider.GetRequiredService<ModuleQueryContexts>(), provider.GetRequiredService<IActorReferences>()));
     }
 
     private static CallOrigin EntryOrigin(IServiceProvider provider) => provider.GetRequiredService<ExecutionScope>().EntryOrigin;

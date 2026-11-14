@@ -516,6 +516,89 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Kmic.Files.Domain.Files.StorageIssue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasComment("ID");
+
+                    b.Property<long>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasComment("并发版本号");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("创建时间");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("创建人");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uuid")
+                        .HasComment("出问题的文件");
+
+                    b.Property<DateTimeOffset>("FoundAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("发现的时间");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("种类");
+
+                    b.Property<string>("ObjectVersionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasComment("发现时文件记录的对象版本");
+
+                    b.Property<string>("ResolutionNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasComment("处理说明，如还原的工单号");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("标为已解决的时间");
+
+                    b.Property<Guid?>("ResolvedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("标为已解决的人");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasComment("状态");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasComment("修改时间");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasComment("修改人");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("FileId");
+
+                    b.HasIndex("Status", "FoundAt");
+
+                    b.ToTable("StorageIssue", "Files", t =>
+                        {
+                            t.HasComment("存储问题；Files 模块；对账发现库里有记录而存储里找不到对象的文件，待运维还原后标为已解决");
+
+                            t.HasCheckConstraint("CK_StorageIssue_Kind", "\"Kind\" IN ('RestorableMissing', 'LostMissing')");
+
+                            t.HasCheckConstraint("CK_StorageIssue_Status", "\"Status\" IN ('Open', 'Resolved')");
+                        });
+                });
+
             modelBuilder.Entity("Kmic.Files.Domain.Files.StoredFile", b =>
                 {
                     b.Property<Guid>("Id")

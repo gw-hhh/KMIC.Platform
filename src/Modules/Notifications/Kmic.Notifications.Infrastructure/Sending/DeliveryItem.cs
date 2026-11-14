@@ -11,6 +11,7 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// <param name="Subject">主题</param>
 /// <param name="Body">渲染好的正文</param>
 /// <param name="SmsParameters">短信模板的参数，JSON</param>
+/// <param name="AttachmentFileIds">邮件附件的文件 ID，JSON 数组</param>
 /// <param name="TemplateKey">模板键</param>
 /// <param name="Attempts">包括这一次在内已经尝试几次</param>
 /// <param name="CreatedAt">投递创建的时间</param>
@@ -23,6 +24,7 @@ internal sealed record DeliveryItem(
     string Subject,
     string? Body,
     string? SmsParameters,
+    string? AttachmentFileIds,
     string TemplateKey,
     int Attempts,
     DateTimeOffset CreatedAt);

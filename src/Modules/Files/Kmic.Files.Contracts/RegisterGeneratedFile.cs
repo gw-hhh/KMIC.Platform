@@ -20,7 +20,7 @@ namespace Kmic.Files.Contracts;
 /// <param name="Source">生成方，如 Sample.ExportSpecimens，登记后上传档案是 Generated:来源</param>
 /// <param name="RequestedBy">发起生成的用户；系统生成的没有</param>
 /// <param name="ExpiresAt">到这个时间还没有被关联就清理</param>
-[IntegrationMessage("Files.RegisterGeneratedFile")]
+[IntegrationMessage(RegisterGeneratedFile.MessageName)]
 [MessageSubjects(nameof(FileId))]
 public sealed record RegisterGeneratedFile(
     Guid FileId,
@@ -33,4 +33,10 @@ public sealed record RegisterGeneratedFile(
     string Sha256,
     string Source,
     Guid? RequestedBy,
-    DateTimeOffset ExpiresAt) : IIntegrationRequest;
+    DateTimeOffset ExpiresAt) : IIntegrationRequest
+{
+    /// <summary>
+    /// 消息类型名：对账删除存储里没有记录的对象之前，探查未完成的登记请求用
+    /// </summary>
+    public const string MessageName = "Files.RegisterGeneratedFile";
+}

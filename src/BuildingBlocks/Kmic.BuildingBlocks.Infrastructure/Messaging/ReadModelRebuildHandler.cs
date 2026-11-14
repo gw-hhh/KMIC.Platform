@@ -38,7 +38,10 @@ internal sealed class ReadModelRebuildHandler(
         }
 
         var settings = options.Value.Rebuild;
-        var state = context.GetCheckpoint<RebuildCheckpoint>() ?? new RebuildCheckpoint(false, null, 0);
+        // 运维确认收尾的作业不再扫描：扫描在前一次作业里已经做完
+        var state = job.ConfirmMissing
+            ? new RebuildCheckpoint(true, null, job.Scanned)
+            : context.GetCheckpoint<RebuildCheckpoint>() ?? new RebuildCheckpoint(false, null, 0);
         var scanned = state.Scanned;
 
         if (!state.ScanFinished)
@@ -70,7 +73,7 @@ internal sealed class ReadModelRebuildHandler(
     {
         var settings = options.Value.Rebuild;
         var total = await rebuild.CountAsync(services, ct);
-        var limit = Math.Max(settings.MaxMissingCount, (long)(total * settings.MaxMissingRatio));
+        var limit = job.ConfirmMissing ? long.MaxValue : Math.Max(settings.MaxMissingCount, (long)(total * settings.MaxMissingRatio));
         var done = new RebuildCheckpoint(true, null, scanned);
 
         // 候选里源端还有的，按重建写入处理；没有的先记下来，数量不超限才置终态

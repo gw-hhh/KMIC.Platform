@@ -1,0 +1,4 @@
+# pnpm 11 默认拦截依赖的安装脚本并当作错误；这两个脚本对本项目没有用，显式关掉
+allowBuilds:
+  '@parcel/watcher': false
+  vue-demi: false

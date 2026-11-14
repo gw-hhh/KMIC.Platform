@@ -102,6 +102,7 @@ public sealed class UseCaseCatalog
         var countBefore = problems.Count;
         var access = ReadAccess(type, name, kind, problems);
         var audit = ReadAudit(type, name, kind, problems);
+        var featureGate = ReadFeatureGate(type, name, problems);
         if (problems.Count > countBefore)
         {
             return null;
@@ -123,8 +124,26 @@ public sealed class UseCaseCatalog
             Audited = kind == MessageKind.Command ? audit.Audited is not null : null,
             AuditAction = AuditActionOf(audit, module, type),
             AuditedRead = audit.AuditedRead,
+            FeatureGate = featureGate,
             BypassesDataScope = bypassesDataScope,
         };
+    }
+
+    // 开关名是“模块.功能”，和模块代码一个写法
+    private static string? ReadFeatureGate(Type type, string name, List<string> problems)
+    {
+        if (type.GetCustomAttribute<FeatureGateAttribute>() is not { } gate)
+        {
+            return null;
+        }
+
+        if (!ModuleCodes.IsValidFeatureName(gate.Name))
+        {
+            problems.Add($"{name}：功能开关名 \"{gate.Name}\" 不对，格式是 模块.功能，如 Sample.NewImport。");
+            return null;
+        }
+
+        return gate.Name;
     }
 
     // [BypassesDataScope] 标在处理器上，记到它处理的消息名下

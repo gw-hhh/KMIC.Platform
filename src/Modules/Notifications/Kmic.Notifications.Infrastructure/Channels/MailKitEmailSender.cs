@@ -79,7 +79,13 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
                 break;
         }
 
-        mime.Body = new BodyBuilder { HtmlBody = message.HtmlBody }.ToMessageBody();
+        var builder = new BodyBuilder { HtmlBody = message.HtmlBody };
+        foreach (var attachment in message.Attachments)
+        {
+            builder.Attachments.Add(attachment.Name, attachment.Content, ContentType.Parse(attachment.ContentType));
+        }
+
+        mime.Body = builder.ToMessageBody();
         return mime;
     }
 

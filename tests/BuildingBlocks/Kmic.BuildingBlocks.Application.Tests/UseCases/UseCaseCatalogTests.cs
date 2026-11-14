@@ -34,6 +34,7 @@ public sealed class UseCaseCatalogTests
 
     [Theory]
     [InlineData(typeof(CatalogSamples.NoDeclarationCommand), "必须且只能有")]
+    [InlineData(typeof(CatalogSamples.BadFeatureNameQuery), "功能开关名")]
     [InlineData(typeof(CatalogSamples.TwoDeclarationsQuery), "现在有 2 个")]
     [InlineData(typeof(CatalogSamples.SystemOnlyWithAllowSystemCommand), "[AllowSystem] 只能")]
     [InlineData(typeof(CatalogSamples.PasswordExemptWithPermissionCommand), "[AllowWhenPasswordChangeRequired] 只能")]
@@ -49,6 +50,15 @@ public sealed class UseCaseCatalogTests
         var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.Build([messageType]));
 
         thrown.Problems.ShouldContain(p => p.Contains(reason, StringComparison.Ordinal) && p.Contains(messageType.Name, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Build_ReadsTheFeatureGate_AndLeavesItEmptyWhenThereIsNone()
+    {
+        var catalog = UseCaseCatalog.Build([typeof(GatedThingQuery), typeof(GetThingQuery)]);
+
+        catalog.Get(typeof(GatedThingQuery)).FeatureGate.ShouldBe(GatedThingQuery.Feature);
+        catalog.Get(typeof(GetThingQuery)).FeatureGate.ShouldBeNull();
     }
 
     [Fact]

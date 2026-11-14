@@ -36,6 +36,11 @@ public static class FilesErrors
     public static readonly Error NotFound = Error.NotFound("Files.NotFound", "文件不存在");
 
     /// <summary>
+    /// 存储问题不存在
+    /// </summary>
+    public static readonly Error StorageIssueNotFound = Error.NotFound("Files.StorageIssueNotFound", "存储问题不存在");
+
+    /// <summary>
     /// 文件还没准备好：生成的文件还没登记，或者正在恢复
     /// </summary>
     public static readonly Error NotReady = Error.Conflict("Files.NotReady", "文件还没准备好，请稍后再试").WithMetadata(ErrorMetadataKeys.Retryable, true);
@@ -69,4 +74,9 @@ public static class FilesErrors
     /// 上传要有的权限点本人没有
     /// </summary>
     public static readonly Error UploadDenied = Error.Forbidden("Files.UploadDenied", "没有上传这类附件的权限");
+
+    /// <summary>
+    /// 对账发现的差异太多，没有做任何处理
+    /// </summary>
+    public static readonly Error ReconcileSuspicious = Error.BusinessRule("Files.ReconcileSuspicious", "对账发现的差异太多，没有做任何处理。请先检查存储的配置，以及数据库是否被还原过");
 }

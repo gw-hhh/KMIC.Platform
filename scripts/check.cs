@@ -1,7 +1,7 @@
 #:property RestorePackagesWithLockFile=false
 
 // 本地与 CI 共用的质量检查：dotnet run scripts/check.cs
-// 依次执行：编码与换行 → 注释格式 → 用词 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 密钥扫描 → 拼写。任一步失败即停止，返回非零退出码
+// 依次执行：编码与换行 → 注释格式 → 用词 → 格式 → 编译（零警告）→ 测试 → 依赖漏洞 → 前端（依赖、生成类型、类型检查、代码检查与边界样例、格式、测试、构建）→ 密钥扫描 → 拼写。任一步失败即停止，返回非零退出码
 // 需要 Docker：数据库测试用测试容器，密钥扫描用 Gitleaks 的官方镜像
 // CI 流水线只调用本脚本，本地通过即 CI 通过
 // 加 -- --fix 时先去掉 BOM、把 CRLF 改为 LF 再检查。Windows 上的 dotnet sln、dotnet ef 等工具按 CRLF 写文件（迁移还带 BOM），用过之后运行一次。CI 不加这个参数
@@ -20,6 +20,14 @@ var steps = new (string Name, Func<int> Run)[]
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
     ("依赖漏洞（含传递依赖）", () => RunWhenProjectsExist(root, "dotnet", "list Kmic.slnx package --vulnerable --include-transitive")),
+    // 前端用的 pnpm 版本与 web/package.json 的 packageManager 一致。生成类型的比对依赖后端测试导出的 OpenAPI 文档，所以排在后端测试之后
+    ("前端依赖（pnpm install --frozen-lockfile）", () => RunWeb(root, "install --frozen-lockfile")),
+    ("前端生成类型与 OpenAPI 文档一致", () => RunWeb(root, "run generate:api -- --check")),
+    ("前端类型检查", () => RunWeb(root, "run typecheck")),
+    ("前端代码检查与边界样例", () => RunWeb(root, "run lint")),
+    ("前端格式（prettier --check）", () => RunWeb(root, "run format:check")),
+    ("前端测试", () => RunWeb(root, "run test")),
+    ("前端构建", () => RunWeb(root, "run build")),
     // 扫描全部提交历史，CI 检出时也要取完整历史。推送前就能发现，密钥不会离开本机
     ("密钥扫描（Gitleaks）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
@@ -61,6 +69,18 @@ static int RunWhenProjectsExist(string root, string fileName, string arguments)
     }
 
     return Run(root, fileName, arguments);
+}
+
+// 没有 web 目录时跳过
+static int RunWeb(string root, string pnpmArguments)
+{
+    if (!Directory.Exists(Path.Combine(root, "web")))
+    {
+        Console.WriteLine("   没有 web 目录，跳过");
+        return 0;
+    }
+
+    return Run(root, "npx", $"--yes pnpm@11.28.9 --dir web {pnpmArguments}");
 }
 
 static int Run(string root, string fileName, string arguments)

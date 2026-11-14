@@ -80,6 +80,51 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
         Renderer.Check("单据 {{ Number }}").IsSuccess.ShouldBeTrue();
     }
 
+    private async Task<string?> StrictFailureAsync(string text)
+    {
+        var rendered = await Renderer.RenderStrictAsync(text, _order, RenderFormat.Text, Ct);
+        return rendered.IsFailure ? rendered.Error.Message : null;
+    }
+
+    [Fact]
+    public async Task StrictRendering_NamesTheVariablesTheModelDoesNotHave()
+    {
+        var misspelled = await StrictFailureAsync("单据 {{ Absent }}，{{ Address.City }}，{{ Missing }}，{{ Absent }}");
+        var inLoop = await StrictFailureAsync("{% for line in Lines %}{{ line.Name }}{{ item.Name }}{% endfor %}");
+
+        misspelled.ShouldBe("模板有误：用到了没有声明的变量：Absent、Missing");
+        inLoop.ShouldBe("模板有误：用到了没有声明的变量：item");
+    }
+
+    [Fact]
+    public async Task StrictRendering_AlsoCatchesAMisspelledPropertyOfANestedObject()
+    {
+        var nested = await StrictFailureAsync("{{ Address.Cty }}");
+
+        nested.ShouldNotBeNull().ShouldContain("Cty");
+    }
+
+    [Fact]
+    public async Task StrictRendering_AcceptsWhatTheModelHas_AndTemplateOwnVariables()
+    {
+        // 属性、嵌套对象与集合元素、assign / capture / for 自己定义的变量、过滤器都不是“没有声明”
+        var text = "{% assign total = 0 %}{% for line in Lines %}{% assign total = total | plus: line.Quantity %}{{ forloop.index }}{% endfor %}"
+            + "{% capture note %}{{ Customer | size }}{% endcapture %}{{ Number }}/{{ Address.City }}/{{ total }}/{{ note }}";
+
+        var failure = await StrictFailureAsync(text);
+
+        failure.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task StrictRendering_ASyntaxErrorOrALimit_StillFailsTheSameWay_AndLenientRenderingIgnoresUnknownVariables()
+    {
+        (await StrictFailureAsync("单据 {{ Number ")).ShouldNotBeNull().ShouldStartWith("模板有误：");
+        (await StrictFailureAsync("{% for i in (1..4000) %}{{ Number }}{% endfor %}")).ShouldNotBeNull().ShouldContain("输出超过");
+
+        (await RenderOkAsync("[{{ Absent }}]")).ShouldBe("[]", "发通知时没有的变量按空处理，不让通知发不出去");
+    }
+
     [Fact]
     public async Task AnEndlessLoop_IsStoppedByTheStepLimit()
     {

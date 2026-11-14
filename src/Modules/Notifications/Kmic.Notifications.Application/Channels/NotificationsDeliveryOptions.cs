@@ -40,6 +40,12 @@ public sealed class NotificationsDeliveryOptions
     public int PollSeconds { get; init; } = 5;
 
     /// <summary>
+    /// 一封邮件的附件加起来最多多少 MB，超过的这封邮件不发（永久失败）
+    /// </summary>
+    [Range(1, 100)]
+    public int MaxAttachmentMb { get; init; } = 20;
+
+    /// <summary>
     /// 领取的租期
     /// </summary>
     public TimeSpan Lease => TimeSpan.FromMinutes(LeaseMinutes);

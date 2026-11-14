@@ -13,7 +13,7 @@ public sealed partial class HostRuleTests
     // 管道行为的执行顺序，宿主在 AddMediator 里照抄
     private static readonly string[] _expectedBehaviors =
     [
-        "LoggingBehavior", "ExceptionTranslationBehavior", "ValidationBehavior", "AuthorizationBehavior",
+        "LoggingBehavior", "ExceptionTranslationBehavior", "FeatureGateBehavior", "ValidationBehavior", "AuthorizationBehavior",
         "ReadAuditBehavior", "IdempotencyBehavior", "TransactionBehavior",
     ];
 

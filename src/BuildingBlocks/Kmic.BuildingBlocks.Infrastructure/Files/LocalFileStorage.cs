@@ -57,6 +57,10 @@ public sealed class LocalFileStorage(string root) : IFileStorage
     }
 
     /// <inheritdoc />
+    public Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct) =>
+        Task.FromResult(File.Exists(PathOf(key)));
+
+    /// <inheritdoc />
     public Task<Uri> GetDownloadUrlAsync(string key, TimeSpan validFor, string downloadName, CancellationToken ct) =>
         throw new NotSupportedException("本地存储不能生成下载地址，由应用转发文件。");
 

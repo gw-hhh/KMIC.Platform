@@ -16,6 +16,25 @@ public interface IStoredFileRepository : IRepository<StoredFile, StoredFileId>
     Task<bool> ExistsAsync(StoredFileId id, CancellationToken ct);
 
     /// <summary>
+    /// 这些 ID 里，哪些已经登记为文件
+    /// </summary>
+    /// <param name="ids">要查的文件 ID</param>
+    /// <param name="ct">取消令牌</param>
+    Task<IReadOnlySet<StoredFileId>> FindExistingAsync(IReadOnlyCollection<StoredFileId> ids, CancellationToken ct);
+
+    /// <summary>
+    /// 按 ID 顺序分页取出应该有对象的文件：可用、已关联、已解除关联，上传得不晚于 <paramref name="uploadedBefore" />
+    /// </summary>
+    /// <remarks>
+    /// 对账用。不加载聚合，只返回存储位置
+    /// </remarks>
+    /// <param name="after">上一页最后一个文件，从头开始时为空</param>
+    /// <param name="uploadedBefore">上传开始的时间不晚于它</param>
+    /// <param name="limit">最多几个</param>
+    /// <param name="ct">取消令牌</param>
+    Task<IReadOnlyList<StoredObjectRef>> FindExpectedObjectsAsync(StoredFileId? after, DateTimeOffset uploadedBefore, int limit, CancellationToken ct);
+
+    /// <summary>
     /// 找出到期的文件：处于某个状态、到期时间不晚于现在，最早到期的在前
     /// </summary>
     /// <remarks>

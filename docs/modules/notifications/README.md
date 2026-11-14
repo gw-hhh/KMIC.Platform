@@ -375,7 +375,7 @@ Fluid（03 第 4.4 节），只能访问模型中的数据；禁用 `include` �
 | HTML 转义 | HTML 渲染要用 `HtmlEncoder.Create(UnicodeRanges.All)`：默认编码器会把中文也转成 `&#x…;` 实体 |
 | 配置 | `Notifications:Template:RenderTimeoutMs`（1000）、`MaxOutputKb`（1024）、`MaxSteps`（100000） |
 
-没有做的：发布前检查“正文里出现的变量必须在模板的变量结构里”。Fluid 的语法树不容易枚举变量引用，先用“用示例数据渲染并检查未定义变量为空的位置”近似，等写发布用例时再定（见 15 节）。
+发布前检查“模板里出现的变量必须在模板的变量结构里”：Fluid 的语法树不容易枚举变量引用，改用它的“遇到未定义变量”回调（`TemplateOptions.Undefined`）——发布和预览时用示例数据严格渲染一遍（`ITemplateRenderer.RenderStrictAsync`），用到数据模型没有的变量（根变量或嵌套属性写错）就返回“模板有误：用到了没有声明的变量：…”并列出名字，一次列全。assign、capture、for 自己定义的变量和 `forloop` 不算。**限制**：只能查到这次渲染实际走到的地方，条件分支没走到的写错变量发布时发现不了；发通知时仍宽松渲染，没有的变量按空处理，不让一个变量名挡住整条通知（见 15 节）。
 
 ### 8.4 渠道实现
 
@@ -588,4 +588,6 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 
 实现时的小调整（决定不变）：①`Delivery` 增加影子列 `AbandonedAt`、`AbandonReason` 作为放弃标记（迁移 `DeliveryManagement`）；②影子列的列名集中在 `DeliveryColumns`，查询用 `EF.Property` 读取；③“捕获内容仅非生产环境可用”按 `Notifications:Capture:Enabled` 判断，不另外判断环境名。
 
-未做：阿里云短信网关（已搁置，需要时再做）、邮件附件和纯文本备选正文、发布时的变量检查。
+邮件附件（2026-11-13）：`SendNotification.AttachmentFileIds` 去重后存进 `Delivery.AttachmentFileIds`（jsonb，只有邮件渠道有，迁移 `DeliveryAttachments`），发送时才经 Files 的 `IFileContents` 读内容（`AttachmentLoader`，在系统身份的作用域里），流在发完之后释放。附件总大小超过 `Notifications:Delivery:MaxAttachmentMb`（默认 20）、文件不存在或已彻底删除是永久失败（投递转失败，等人工处理）；文件还没登记完、对象正在恢复是暂时失败，退避之后重试。MailKit 用 `BodyBuilder.Attachments` 加附件。测试：投递带附件 4 个（内容与文件名、文件不存在、超过上限、还没准备好后补发），MailKit 附件 1 个。与设计的差异：捕获的内容（`CapturedMessage`）没有记 `AttachmentNames`，要查附件只能看投递上的文件 ID：记名称和大小得在处理发送请求时就向 Files 取文件，而那一步按设计没有外部调用，捕获只在非生产环境用，不值得为它破这条规则。
+
+未做：阿里云短信网关（已搁置，需要时再做）、纯文本备选正文。

@@ -39,6 +39,11 @@ internal static partial class ModuleCodes
     }
 
     /// <summary>
+    /// 功能开关名是不是“模块.功能”格式
+    /// </summary>
+    public static bool IsValidFeatureName(string name) => Pattern().IsMatch(name);
+
+    /// <summary>
     /// 编码全系统唯一，显示名称在模块内唯一
     /// </summary>
     public static void CheckUnique<T>(IReadOnlyList<T> items, Func<T, string> code, Func<T, (string Module, string DisplayName)> name, string kind, List<string> problems)

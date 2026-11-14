@@ -1,6 +1,7 @@
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Features;
 using Kmic.BuildingBlocks.Application.Security;
 using Kmic.BuildingBlocks.Application.Tests.Fixtures;
 using Kmic.BuildingBlocks.Application.UseCases;
@@ -29,6 +30,7 @@ internal sealed class TestHost : IAsyncDisposable
         services.AddSingleton<TimeProvider>(Time);
         services.AddSingleton<ISecurityEventWriter>(SecurityEvents);
         services.AddSingleton(Probe);
+        services.AddSingleton<IFeatureFlags>(Features);
 
         var catalog = UseCaseCatalog.Build(
         [
@@ -39,6 +41,7 @@ internal sealed class TestHost : IAsyncDisposable
             typeof(ChangePasswordCommand),
             typeof(SendInsideCommand),
             typeof(SlowThingQuery),
+            typeof(GatedThingQuery),
         ]);
         services.AddKmicApplication(catalog, [typeof(TestHost).Assembly]);
 
@@ -50,6 +53,7 @@ internal sealed class TestHost : IAsyncDisposable
             options.PipelineBehaviors =
             [
                 typeof(LoggingBehavior<,>),
+                typeof(FeatureGateBehavior<,>),
                 typeof(ValidationBehavior<,>),
                 typeof(AuthorizationBehavior<,>),
             ];
@@ -63,6 +67,8 @@ internal sealed class TestHost : IAsyncDisposable
     public RecordingSecurityEventWriter SecurityEvents { get; } = new();
 
     public HandlerProbe Probe { get; } = new();
+
+    public FakeFeatureFlags Features { get; } = new();
 
     public FakeLogCollector Logs => _provider.GetFakeLogCollector();
 

@@ -153,6 +153,70 @@ public sealed class BackgroundJobTests(ClassDatabase<ApiTemplate> database, ApiT
     }
 
     [Fact]
+    public async Task MyJob_ReturnsOneOfMyOwnJobs_AndHidesOthersAndUnknownOnesTheSameWay()
+    {
+        var (token, me) = await LoginAsync("bg-one-user", [], "我");
+        var mine = await InsertAsync("Sample", "Sample.Export", status: 1, _base, me, summary: """{"rows":40}""");
+        var others = await InsertAsync("Sample", "Sample.Export", status: 1, _base, Guid.CreateVersion7());
+        var system = await InsertAsync("Sample", "Sample.Export", status: 1, _base, null);
+
+        var own = await GetAsync(token, $"/my-jobs/Sample/{mine}");
+        var other = await GetAsync(token, $"/my-jobs/Sample/{others}");
+        var bySystem = await GetAsync(token, $"/my-jobs/Sample/{system}");
+        var unknownJob = await GetAsync(token, $"/my-jobs/Sample/{Guid.CreateVersion7()}");
+        var unknownModule = await GetAsync(token, $"/my-jobs/NoSuchModule/{mine}");
+        using var anonymous = NewClient();
+        var unauthenticated = await anonymous.GetAsync($"{Root}/my-jobs/Sample/{mine}", Ct);
+
+        own.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var item = await JsonAsync(own);
+        item.GetProperty("id").GetGuid().ShouldBe(mine);
+        item.GetProperty("status").GetString().ShouldBe("Running");
+        item.GetProperty("progressDone").GetInt64().ShouldBe(40);
+        item.GetProperty("submittedByName").GetString().ShouldBe("我");
+        item.GetProperty("resultSummary").GetProperty("rows").GetInt32().ShouldBe(40);
+        JsonSerializer.Serialize(item).ShouldNotContain("筛选条件");
+        foreach (var refused in new[] { other, bySystem, unknownJob, unknownModule })
+        {
+            refused.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            CodeOf(await JsonAsync(refused)).ShouldBe("Operations.BackgroundJobNotFound", "别人的和不存在的一样，不暴露它存在");
+        }
+
+        unauthenticated.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task TheSubmitter_CancelsTheirOwnJob_ButNotSomeoneElses_AndNotOneThatIsFinished()
+    {
+        var (token, me) = await LoginAsync("bg-own-cancel", [], "提交人");
+        var queued = await InsertAsync("Sample", "Sample.Export", status: 0, _base, me);
+        var running = await InsertAsync("Sample", "Sample.Export", status: 1, _base.AddMinutes(1), me);
+        var finished = await InsertAsync("Sample", "Sample.Export", status: 2, _base.AddMinutes(2), me);
+        var others = await InsertAsync("Sample", "Sample.Export", status: 0, _base.AddMinutes(3), Guid.CreateVersion7());
+
+        var cancelQueued = await SendAsync(HttpMethod.Post, $"{Root}/my-jobs/Sample/{queued}/cancel", token);
+        var cancelRunning = await SendAsync(HttpMethod.Post, $"{Root}/my-jobs/Sample/{running}/cancel", token);
+        var cancelFinished = await SendAsync(HttpMethod.Post, $"{Root}/my-jobs/Sample/{finished}/cancel", token);
+        var cancelOthers = await SendAsync(HttpMethod.Post, $"{Root}/my-jobs/Sample/{others}/cancel", token);
+        var unknownModule = await SendAsync(HttpMethod.Post, $"{Root}/my-jobs/NoSuchModule/{queued}/cancel", token);
+
+        cancelQueued.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        cancelRunning.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        cancelFinished.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        CodeOf(await JsonAsync(cancelFinished)).ShouldBe("Operations.BackgroundJobFinished");
+        cancelOthers.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        CodeOf(await JsonAsync(cancelOthers)).ShouldBe("Operations.BackgroundJobNotFound");
+        unknownModule.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        var states = (await WalkAsync(token, "/my-jobs", 50)).ToDictionary(j => j.GetProperty("id").GetGuid());
+        states[queued].GetProperty("status").GetString().ShouldBe("Cancelled");
+        states[running].GetProperty("status").GetString().ShouldBe("Cancelling");
+        states[running].GetProperty("cancelRequestedBy").GetGuid().ShouldBe(me);
+        states[finished].GetProperty("status").GetString().ShouldBe("Succeeded");
+        var stillQueued = await Seed.ScalarAsync<short>($"""SELECT "Status" FROM "Sample"."BackgroundJob" WHERE "Id" = '{others}'""");
+        stillQueued.ShouldBe((short)0, "别人的作业没有被动过");
+    }
+
+    [Fact]
     public async Task AnAdministrator_CancelsAQueuedJobAtOnce_ARunningOneIsMarkedCancelling_AFinishedOneRefuses()
     {
         var manager = await LoginAsync("bg-cancel-manager", _manage, "取消作业的人");

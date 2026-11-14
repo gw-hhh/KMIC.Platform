@@ -83,3 +83,6 @@ Unconfigured
 Abandonable
 isready
 rolname
+uuidv
+forloop
+endcapture

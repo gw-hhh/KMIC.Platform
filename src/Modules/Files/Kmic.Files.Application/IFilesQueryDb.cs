@@ -15,4 +15,9 @@ public interface IFilesQueryDb
     /// 文件，带着引用
     /// </summary>
     IQueryable<StoredFile> Files { get; }
+
+    /// <summary>
+    /// 对账发现的存储问题
+    /// </summary>
+    IQueryable<StorageIssue> StorageIssues { get; }
 }

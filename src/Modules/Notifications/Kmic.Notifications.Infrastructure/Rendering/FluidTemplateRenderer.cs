@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Fluid;
+using Fluid.Values;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Notifications.Application;
 using Kmic.Notifications.Application.Rendering;
@@ -31,8 +32,21 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
         return _parser.TryParse(template, out _, out var error) ? Result.Success() : NotificationsErrors.TemplateInvalid(error);
     }
 
+    public ValueTask<Result<string>> RenderAsync(string template, object model, RenderFormat format, CancellationToken ct) =>
+        RenderCoreAsync(template, model, format, undefined: null, ct);
+
+    public async ValueTask<Result<string>> RenderStrictAsync(string template, object model, RenderFormat format, CancellationToken ct)
+    {
+        var undefined = new List<string>();
+        var rendered = await RenderCoreAsync(template, model, format, undefined, ct);
+        return rendered.IsSuccess && undefined.Count > 0
+            ? NotificationsErrors.TemplateInvalid($"用到了没有声明的变量：{string.Join("、", undefined.Distinct(StringComparer.Ordinal))}")
+            : rendered;
+    }
+
+    // undefined 不为空时，把模板里用到的、数据模型没有的变量名记进去（渲染照常继续，按空处理）
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "模板来自管理员，渲染过程中模板能触发的任何异常都按“模板有误”处理，不能让它变成未处理的错误")]
-    public async ValueTask<Result<string>> RenderAsync(string template, object model, RenderFormat format, CancellationToken ct)
+    private async ValueTask<Result<string>> RenderCoreAsync(string template, object model, RenderFormat format, List<string>? undefined, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(model);
@@ -44,6 +58,15 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
 
         var limits = options.Value;
         var templateOptions = new TemplateOptions { MaxSteps = limits.MaxSteps };
+        if (undefined is not null)
+        {
+            templateOptions.Undefined = name =>
+            {
+                undefined.Add(name);
+                return ValueTask.FromResult<FluidValue>(NilValue.Instance);
+            };
+        }
+
         Register(templateOptions, model.GetType(), []);
         var context = new TemplateContext(model, templateOptions);
         using var writer = new CappedWriter(limits.MaxOutputKb * 1024, TimeSpan.FromMilliseconds(limits.RenderTimeoutMs), time);

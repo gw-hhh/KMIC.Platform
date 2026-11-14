@@ -91,6 +91,23 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
     }
 
     [Fact]
+    public async Task Detail_ShowsTheStateHistoryInOrder_WithTheNamesOfThePeopleInvolved()
+    {
+        using var admin = ClientFor(Admin());
+        await using var seed = NewSeed();
+        await seed.UserAsync("jia", password: null, displayName: "甲先生", id: Alice.UserId.Value);
+        var (_, fileId) = await AttachedAsync();
+
+        var detail = await JsonAsync(await admin.GetAsync($"{Root}/{fileId}", Ct));
+
+        var history = detail.GetProperty("history").EnumerateArray().ToList();
+        history.Select(h => h.GetProperty("toCode").GetString()).ShouldBe(["Uploading", "Available", "Attached"]);
+        history[0].GetProperty("fromCode").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null);
+        history[0].GetProperty("actor").GetProperty("displayName").GetString().ShouldBe("甲先生");
+        history[2].GetProperty("actor").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Null, "关联由系统任务处理");
+    }
+
+    [Fact]
     public async Task Admin_Endpoints_NeedTheirPermissions()
     {
         using var viewer = ClientFor(Viewer());

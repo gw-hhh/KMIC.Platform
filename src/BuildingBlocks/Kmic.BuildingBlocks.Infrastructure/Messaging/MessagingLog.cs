@@ -39,4 +39,7 @@ internal static partial class MessagingLog
 
     [LoggerMessage(EventId = 2111, Level = LogLevel.Information, Message = "Rebuild of {Subscription} finished: {Scanned} rows scanned, {Marked} marked as gone")]
     public static partial void RebuildFinished(ILogger logger, string subscription, long scanned, long marked);
+
+    [LoggerMessage(EventId = 2112, Level = LogLevel.Warning, Message = "Registering the instance heartbeat failed, retrying at the next interval")]
+    public static partial void HeartbeatFailed(ILogger logger, Exception exception);
 }

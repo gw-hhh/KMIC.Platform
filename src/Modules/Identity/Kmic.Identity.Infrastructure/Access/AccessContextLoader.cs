@@ -210,7 +210,9 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
     private static async Task<AccessStateRow?> ReadUserStateAsync(IdentityQueryDbContext db, UserId user, RoleId role, CancellationToken ct) =>
         await db.Database.SqlQuery<AccessStateRow>(
             $"""
-            SELECT u."Status" AS "UserStatus", u."Kind" AS "UserKind", u."OrgUnitId", u."PasswordChangeRequired",
+            SELECT NULL::uuid AS "SessionUserId", NULL::text AS "SessionStatus", NULL::timestamptz AS "AbsoluteExpiresAt", NULL::uuid AS "CurrentRoleId",
+                   NULL::uuid AS "ImpersonatorUserId", false AS "ImpersonationAllowsWrite",
+                   u."Status" AS "UserStatus", u."Kind" AS "UserKind", u."OrgUnitId", u."PasswordChangeRequired",
                    g."Id" AS "GrantId", r."Status" AS "RoleStatus", r."ConcurrencyVersion" AS "RoleVersion",
                    COALESCE(a."Ids", ARRAY[]::uuid[]) AS "AnchorIds",
                    (SELECT t."ConcurrencyVersion" FROM "Identity"."OrgTree" t LIMIT 1) AS "TreeVersion"

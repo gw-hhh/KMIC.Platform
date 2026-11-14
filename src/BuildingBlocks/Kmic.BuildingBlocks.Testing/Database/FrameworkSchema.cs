@@ -41,7 +41,7 @@ public static class FrameworkSchema
                 CREATE SCHEMA "Operations";
                 GRANT USAGE ON SCHEMA "Operations" TO {MigrationBuilderExtensions.RuntimeRole};
                 ALTER DEFAULT PRIVILEGES IN SCHEMA "Operations" GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {MigrationBuilderExtensions.RuntimeRole};
-                """ + MessageRouteTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql();
+                """ + MessageRouteTable.CreateSql + MessagingInstanceTable.CreateSql + SchedulingTables.CreateSql + SchedulingTables.QuartzCreateSql();
         command.CommandText = operations + identity + (identityHasMigrations ? string.Empty : SecurityEventTable.CreateSql);
         await command.ExecuteNonQueryAsync(ct);
     }

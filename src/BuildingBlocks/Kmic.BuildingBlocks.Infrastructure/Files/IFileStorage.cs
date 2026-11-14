@@ -31,6 +31,18 @@ public interface IFileStorage
     Task DeleteAsync(string key, CancellationToken ct);
 
     /// <summary>
+    /// 对象是否存在
+    /// </summary>
+    /// <remarks>
+    /// 不给版本号时看当前对象，被删除标记覆盖的算不存在；给了版本号就看那个版本是否还在，
+    /// 对账用它区分“只是被删除标记覆盖、可以还原”和“版本也没了”。本地存储没有版本，忽略版本号
+    /// </remarks>
+    /// <param name="key">存储键</param>
+    /// <param name="versionId">对象版本号</param>
+    /// <param name="ct">取消令牌</param>
+    Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct);
+
+    /// <summary>
     /// 带有效期的下载地址，只有 S3 实现支持，本地存储抛 NotSupportedException，调用方退回由应用转发
     /// </summary>
     /// <param name="key">存储键</param>

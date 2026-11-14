@@ -18,6 +18,10 @@ public static class CatalogSamples
     public sealed record NoDeclarationCommand : ICommand;
 
     [AllowAuthenticated]
+    [FeatureGate("new import")]
+    public sealed record BadFeatureNameQuery : IQuery<int>;
+
+    [AllowAuthenticated]
     [RequirePermission("Test.Thing.View")]
     public sealed record TwoDeclarationsQuery : IQuery<int>;
 
@@ -78,6 +82,11 @@ public static class CatalogSamples
     public sealed class NoDeclarationCommandHandler : ICommandHandler<NoDeclarationCommand>
     {
         public ValueTask<Result> Handle(NoDeclarationCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    public sealed class BadFeatureNameQueryHandler : IQueryHandler<BadFeatureNameQuery, int>
+    {
+        public ValueTask<Result<int>> Handle(BadFeatureNameQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<int>>(0);
     }
 
     public sealed class TwoDeclarationsQueryHandler : IQueryHandler<TwoDeclarationsQuery, int>

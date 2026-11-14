@@ -8,5 +8,7 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// </remarks>
 /// <param name="Subscription">订阅名</param>
 /// <param name="RunId">重建轮次，在订阅方模块的轮次记录里</param>
+/// <param name="ConfirmMissing">运维确认过源端找不到的行：只做收尾，不再受“找不到的行太多”的限制</param>
+/// <param name="Scanned">确认收尾时，前一次作业已经扫描的行数</param>
 [BackgroundJob("BuildingBlocks.RebuildReadModel", SystemOnly = true, Resumable = true, MaxConcurrentPerUser = 1)]
-internal sealed record ReadModelRebuildJob(string Subscription, Guid RunId) : IBackgroundJob;
+internal sealed record ReadModelRebuildJob(string Subscription, Guid RunId, bool ConfirmMissing = false, long Scanned = 0) : IBackgroundJob;

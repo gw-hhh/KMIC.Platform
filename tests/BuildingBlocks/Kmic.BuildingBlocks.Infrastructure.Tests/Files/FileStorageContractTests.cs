@@ -55,6 +55,17 @@ public abstract class FileStorageContractTests
         await Should.ThrowAsync<FileNotFoundException>(() => Storage.OpenReadAsync(_prefix + "missing", Ct));
 
     [Fact]
+    public async Task Exists_TrueAfterWrite_FalseAfterDeleteOrWhenNeverWritten()
+    {
+        await Storage.WriteAsync(_prefix + "here", new MemoryStream([1]), "application/octet-stream", Ct);
+
+        (await Storage.ExistsAsync(_prefix + "here", null, Ct)).ShouldBeTrue();
+        (await Storage.ExistsAsync(_prefix + "never", null, Ct)).ShouldBeFalse();
+        await Storage.DeleteAsync(_prefix + "here", Ct);
+        (await Storage.ExistsAsync(_prefix + "here", null, Ct)).ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task List_ReturnsOnlyKeysUnderThePrefix()
     {
         await Storage.WriteAsync(_prefix + "a/1", new MemoryStream([1]), "application/octet-stream", Ct);

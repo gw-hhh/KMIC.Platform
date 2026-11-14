@@ -36,6 +36,8 @@ internal sealed class ConfiguredFileStorage : IFileStorage, IDisposable
 
     public Task DeleteAsync(string key, CancellationToken ct) => _inner.DeleteAsync(key, ct);
 
+    public Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct) => _inner.ExistsAsync(key, versionId, ct);
+
     public Task<Uri> GetDownloadUrlAsync(string key, TimeSpan validFor, string downloadName, CancellationToken ct) =>
         _inner.GetDownloadUrlAsync(key, validFor, downloadName, ct);
 

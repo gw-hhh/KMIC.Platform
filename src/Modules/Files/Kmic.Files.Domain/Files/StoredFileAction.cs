@@ -47,6 +47,11 @@ public sealed class StoredFileAction : Enumeration<StoredFileAction>
     /// </summary>
     public static readonly StoredFileAction Purge = new("Purge", "彻底删除");
 
+    /// <summary>
+    /// 对象丢失：对账发现存储里已经没有它的内容
+    /// </summary>
+    public static readonly StoredFileAction Lose = new("Lose", "对象丢失");
+
     private StoredFileAction(string code, string name)
         : base(code, name)
     {

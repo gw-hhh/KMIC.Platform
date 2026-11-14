@@ -1,6 +1,6 @@
 # Configuration 模块设计
 
-- 实现：字典、系统设置、偏好已实现并通过端到端测试（2026-11-13）；功能开关查询（`GetFeaturesQuery`，P2）未做，等第一个有前端开关的功能出现（4.4）。实现时发现的差异已就地订正，汇总见第 13 节末。
+- 实现：字典、系统设置、偏好已实现并通过端到端测试（2026-11-13）；功能开关查询（`GetFeaturesQuery`）已实现（2026-11-14，见 4.4）。实现时发现的差异已就地订正，汇总见第 13 节末。
 - 状态：**已确认**（2026-11-12）。起草当天，用户授权“遇到需要选择的地方，默认采用最推荐的方案”，第 12 节的决定均按建议确定；第 12.3 节的待确认事项是需要业务方或旧库数据回答的事实，不阻塞编码。
 - 模块名 / schema / 编号：`Configuration` / `"Configuration"` / 12（平台模块，登记见 `docs/modules/README.md`）；`[LoggerMessage]` 的 `EventId` 使用 12000～12999
 - 项目：`Kmic.Configuration.Domain`、`Application`、`Infrastructure`、`Presentation`、`Contracts`（07 第 2 节）
@@ -246,7 +246,7 @@ stateDiagram-v2
 
 | 用例 | 声明 | 说明 |
 |---|---|---|
-| `GetFeaturesQuery` | `[AllowAuthenticated]` | `GET /api/v1/configuration/features`：当前对其开放的开关名列表（`待确认`：第一个有前端开关的功能出现时再核对返回结构；P2，首期只有端点，没有管理页面） |
+| `GetFeaturesQuery` | `[AllowAuthenticated]` | `GET /api/v1/configuration/features`：当前对其开放的开关名，返回 `{ "enabled": [...] }`（2026-11-14 实现；开关的值来自部署配置，框架部分见 05-10 第 8.1 节；没有管理页面） |
 | `SyncDictionaryTypesCommand` | `[SystemOnly]`，启动任务 | 迁移之后、接收请求之前：按 `DictionaryTypeCatalog` 登记新类型、更新显示名、把代码里已删除的类型标为 `Retired`；内容哈希未变则跳过；`[NotAudited("目录同步")]` |
 
 本模块没有定时任务。
@@ -491,7 +491,7 @@ ADR-0016 第 3 节写“复杂设置结构与自动生成设置界面，需求�
 - 设置的值类型成员标 `[SettingField]`（显示名、单位），已在 `BuildingBlocks.Application.Settings` 实现，设置列表据此返回字段清单。
 - 偏好族键格式、系统层/角色层缓存、四层解析都在本模块；框架增加 `PreferenceFamily` / `PreferenceFamilies`（05-10 7.2）。
 - 偏好的各层读取放在 Application 的 `IPreferenceLayers` 接口后面（实现在 Infrastructure，用 HybridCache），读取逻辑与 `IPreferences`、`GetMyPreferencesQuery` 共用。
-- 尚未实现：`GetFeaturesQuery`（4.4，P2）。
+- `GetFeaturesQuery`（4.4）已于 2026-11-14 实现，3 个端到端测试。
 
 ---
 
