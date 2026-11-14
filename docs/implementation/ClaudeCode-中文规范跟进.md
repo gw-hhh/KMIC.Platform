@@ -362,3 +362,4 @@
 | 2026-11-14 09:48 | `src/Modules/Notifications/` | ITemplateRenderer.RenderStrictAsync、FluidTemplateRenderer 严格渲染、ChannelRendering 的 strict 参数、模板错误提示 | 部分 | 只处理新增的成员 |
 | 2026-11-14 09:48 | `tests/（Operations/BackgroundJobTests、Notifications/TemplateRendererTests、NotificationTemplateTests、Configuration/FeatureTests、BuildingBlocks 下 DataScopeSqlTests、FeatureFlagsTests、FeatureGateTests 与相关夹具）` | 本批新增的测试 | 部分 | 只处理新增的测试，其余未检查 |
 | 2026-11-14 09:48 | `docs/framework/05-infrastructure/（05-02、05-05、05-08、05-10）、docs/framework/00-README.md、docs/modules/（operations、notifications、configuration）、docs/implementation/（S0-04、S2-18-规则核对、S3-平台模块）` | 本批新增或改写的段落与修订记录 | 部分 | 其余未检查 |
+| 2026-11-14 10:56 | `docs/framework/00-README.md` | 待决事项表新增三行（作业端点位置、功能开关关闭时后台入口的处理、功能开关包名） | 部分 | 其余未检查 |
