@@ -997,3 +997,16 @@ src/Modules/Sample/Kmic.Sample.Infrastructure/Persistence/SampleQueryDbContext.c
 src/Modules/Identity/Kmic.Identity.Application/Users/EventHandlers/RevokeSessionsWhenPasswordChanged.cs
 src/Modules/Notifications/Kmic.Notifications.Presentation/Templates/ListTemplatesEndpoint.cs
 src/Modules/Notifications/Kmic.Notifications.Application/Templates/Get/TemplateChannelInfo.cs
+docs/framework/06-coding-standards.md
+docs/framework/00-README.md
+docs/framework/05-infrastructure/05-03-数据访问.md
+src/Modules/Files/Kmic.Files.Application/Administration/FileSort.cs
+src/Modules/Configuration/Kmic.Configuration.Application/Settings/SettingActions.cs
+src/Modules/Identity/Kmic.Identity.Application/Roles/RoleActions.cs
+src/Modules/Identity/Kmic.Identity.Application/Users/UserActions.cs
+src/Modules/Files/Kmic.Files.Application/InventoryObject.cs
+src/Modules/Notifications/Kmic.Notifications.Contracts/RecipientRole.cs
+src/Modules/Notifications/Kmic.Notifications.Domain/Deliveries/DeliveryRole.cs
+src/Modules/Notifications/Kmic.Notifications.Application/Templates/Get/TemplateVersionInfo.cs
+templates/kmic-module/src/Modules/Customer/Kmic.Customer.Infrastructure/CustomerModule.cs
+CLAUDE.md

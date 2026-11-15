@@ -16,5 +16,5 @@ namespace Kmic.Identity.Application.Authentication.Login;
 /// <param name="UserAgent">客户端 User-Agent，由接口层取得</param>
 [AllowAnonymous]
 [NotAudited("登录结果记入安全事件")]
-[NotIdempotent("成功登录会创建新会话并签发新凭据，防滥用由限流和登录失败限制负责")]
+[NotIdempotent("每次成功登录都会创建新会话，令牌不写入幂等记录")]
 public sealed record LoginCommand(string Account, string Password, string ClientType, string? ClientIp, string? UserAgent) : ICommand<AuthTokens>;

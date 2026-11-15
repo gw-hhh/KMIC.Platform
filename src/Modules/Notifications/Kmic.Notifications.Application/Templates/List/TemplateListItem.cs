@@ -1,7 +1,7 @@
 namespace Kmic.Notifications.Application.Templates.List;
 
 /// <summary>
-/// 列表里的一个模板
+/// 通知模板列表项
 /// </summary>
 /// <param name="Key">模板键</param>
 /// <param name="DisplayName">显示名</param>

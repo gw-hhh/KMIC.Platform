@@ -1,10 +1,9 @@
 #:property RestorePackagesWithLockFile=false
 
-// 新建业务模块：dotnet run scripts/new-module.cs -- <模块名> <编号>
-// 先在 docs/modules/README.md 的登记表里登记模块名与编号，再运行本脚本。依次执行：
-// 对照登记表校验 → dotnet new kmic-module → 加入 Kmic.slnx → 宿主、迁移程序与架构测试引用新模块并登记 →
-// 编译 → 生成初始迁移（补 InitializeModuleSchema）→ 规整 dotnet 工具写出的换行与 BOM。
-// 之后运行 dotnet run scripts/check.cs -- --fix 做完整检查
+// 创建模块骨架：dotnet run scripts/new-module.cs -- <模块名> <编号>
+// 先在 docs/modules/README.md 登记模块名和编号。
+// 脚本会更新项目引用和模块注册、编译解决方案，并生成含 schema 初始化的初始迁移。
+// 完成后按已确认的模块设计实现用例，再运行 dotnet run scripts/check.cs -- --fix。
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -35,7 +34,7 @@ var steps = new (string Name, Func<int> Run)[]
     ("宿主、迁移程序与架构测试引用新模块并登记", () => Register(root, module)),
     ("编译", () => Run(root, "dotnet", "build Kmic.slnx --nologo")),
     ("生成初始迁移", () => Migration(root, module)),
-    ("规整换行与 BOM", () => Normalize(root, module)),
+    ("修复编码与换行", () => Normalize(root, module)),
 };
 
 foreach (var (name, run) in steps)

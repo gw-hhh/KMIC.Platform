@@ -6,7 +6,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Configuration.Application;
 
 /// <summary>
-/// 转换和校验系统设置、偏好中声明的值类型与 JSON
+/// 按声明类型转换和校验系统设置、偏好值
 /// </summary>
 internal static class DeclaredValues
 {
@@ -19,7 +19,7 @@ internal static class DeclaredValues
     /// <param name="definition">设置或偏好的定义</param>
     /// <param name="json">调用方给的值</param>
     /// <param name="invalid">值不合法时的错误</param>
-    /// <param name="invalidWith">带逐字段错误的同一个错误</param>
+    /// <param name="invalidWith">生成包含字段错误的业务错误</param>
     public static Result<object> Parse(DeclaredValueDefinition definition, JsonElement json, Error invalid, Func<IReadOnlyList<FieldError>, Error> invalidWith)
     {
         ArgumentNullException.ThrowIfNull(definition);

@@ -1,7 +1,7 @@
 namespace Kmic.Notifications.Contracts;
 
 /// <summary>
-/// 邮件收件人的角色
+/// 邮件收件方式
 /// </summary>
 public enum RecipientRole
 {

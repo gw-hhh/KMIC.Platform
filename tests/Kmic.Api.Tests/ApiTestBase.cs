@@ -86,9 +86,9 @@ public abstract class ApiTestBase(
     }
 
     /// <summary>
-    /// 创建一个标本，返回它的 ID 和版本号
+    /// 创建示例并返回 ID 和版本号
     /// </summary>
-    protected static async Task<(Guid Id, long Version)> CreateAsync(HttpClient client, string title = "第一个标本", params (string Name, int Quantity)[] items)
+    protected static async Task<(Guid Id, long Version)> CreateAsync(HttpClient client, string title = "第一个示例", params (string Name, int Quantity)[] items)
     {
         var body = new
         {

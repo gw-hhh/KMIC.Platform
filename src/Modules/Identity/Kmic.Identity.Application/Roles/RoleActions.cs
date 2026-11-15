@@ -5,7 +5,7 @@ using Kmic.Identity.Domain.Errors;
 namespace Kmic.Identity.Application.Roles;
 
 /// <summary>
-/// 角色管理的资源动作目录：详情响应里的“可用动作”据此计算
+/// 角色管理操作目录，用于计算详情中的可用操作
 /// </summary>
 public sealed class RoleActions : ResourceActionCatalog<RoleTarget, RoleAdminAction>
 {

@@ -13,6 +13,6 @@ namespace Kmic.Identity.Application.Authentication.Refresh;
 /// <param name="RefreshToken">客户端出示的刷新令牌</param>
 /// <param name="ClientIp">客户端 IP，由接口层取得</param>
 [AllowAnonymous]
-[NotAudited("响应包含访问令牌和刷新令牌，令牌重用另记安全事件")]
-[NotIdempotent("刷新每次换新令牌，重试由宽限期处理")]
+[NotAudited("仅轮换会话凭据，令牌重用通过安全事件记录")]
+[NotIdempotent("成功刷新会轮换令牌，旧令牌重试受宽限期限制")]
 public sealed record RefreshTokenCommand(string RefreshToken, string? ClientIp) : ICommand<AuthTokens>;

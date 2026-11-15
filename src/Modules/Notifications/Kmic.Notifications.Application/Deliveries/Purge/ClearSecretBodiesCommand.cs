@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.Deliveries.Purge;
 /// 清空含密投递残留的正文和短信参数
 /// </summary>
 /// <remarks>
-/// 补清已发送、失败或已跳过投递的残留内容。捕获内容不在此范围，由捕获内容清理任务按保留期删除
+/// 清空已发送、失败或已跳过投递的残留内容；捕获内容由独立任务按保留期清理
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]

@@ -7,7 +7,7 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// <param name="Channel">渠道编码</param>
 /// <param name="RecipientUserId">系统内收件人 ID；外部收件人为空</param>
 /// <param name="Address">外部收件人地址；系统内用户为空，发送时查询最新地址</param>
-/// <param name="Role">邮件里的角色编码</param>
+/// <param name="Role">邮件收件方式编码</param>
 /// <param name="Subject">主题</param>
 /// <param name="Body">渲染好的正文</param>
 /// <param name="SmsParameters">短信模板的参数，JSON</param>

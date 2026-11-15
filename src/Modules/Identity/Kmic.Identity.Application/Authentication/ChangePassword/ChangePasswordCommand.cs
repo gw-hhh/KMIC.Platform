@@ -11,5 +11,5 @@ namespace Kmic.Identity.Application.Authentication.ChangePassword;
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [NotAudited("通过 PasswordChanged 安全事件记录修改，密码不进审计")]
-[NotIdempotent("修改前须按当前密码状态校验，不能用缓存结果代替执行")]
+[NotIdempotent("每次修改都须校验旧密码，首次设置密码除外")]
 public sealed record ChangePasswordCommand(string? OldPassword, string NewPassword) : ICommand;

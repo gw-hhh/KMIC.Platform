@@ -66,8 +66,7 @@ public sealed class FileAttachments(
         return ids.Select(id => byId[id]).ToList();
     }
 
-    // 从系统作用域解析检查服务，使查询以系统身份执行
-    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "检查要用系统身份，服务只能从系统作用域里取，不能构造函数注入")]
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "须从新建的系统作用域解析服务，确保以系统身份检查关联条件")]
     private async Task<IReadOnlyList<FileSnapshot>> CheckAsSystemAsync(IReadOnlyCollection<Guid> ids, UserId uploader, CancellationToken ct)
     {
         await using var scope = scopes.CreateScope(CallOrigin.ModuleCall, CurrentUser.System());

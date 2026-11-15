@@ -49,7 +49,7 @@ public sealed class DictionaryAdministrationTests(ClassDatabase<ApiTemplate> dat
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var types = (await JsonAsync(response)).EnumerateArray().ToList();
         var category = types.Single(t => string.Equals(t.GetProperty("code").GetString(), SampleDictionaries.Category, StringComparison.Ordinal));
-        category.GetProperty("displayName").GetString().ShouldBe("标本类别");
+        category.GetProperty("displayName").GetString().ShouldBe("示例类别");
         category.GetProperty("ownerModule").GetString().ShouldBe("Sample");
         category.GetProperty("isHierarchical").GetBoolean().ShouldBeFalse();
         category.GetProperty("status").GetString().ShouldBe("Active");

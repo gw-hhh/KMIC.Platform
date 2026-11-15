@@ -8,7 +8,7 @@ namespace Kmic.Files.Application.Administration;
 public static class FileSort
 {
     /// <summary>
-    /// 排序字段表，默认按上传时间倒序
+    /// 排序字段表，默认按文件登记时间倒序
     /// </summary>
     public static readonly SortMap<FileListItem> Map = SortMap<FileListItem>
         .Field("uploadedAt", x => x.UploadedAt)

@@ -9,8 +9,7 @@ namespace Kmic.Operations.Application.Messages.Retry;
 /// 重试死信并逐条返回结果
 /// </summary>
 /// <remarks>
-/// 直接更新各模块的消息存储，不参与 Operations 命令事务。
-/// SQL 按消息 ID 和死信状态更新，重复提交不会修改其他消息
+/// 直接更新各模块的消息存储，不参与 Operations 命令事务
 /// </remarks>
 public sealed class RetryMessagesCommandHandler(IModuleMessageStores stores) : ICommandHandler<RetryMessagesCommand, MessageReceipts>
 {

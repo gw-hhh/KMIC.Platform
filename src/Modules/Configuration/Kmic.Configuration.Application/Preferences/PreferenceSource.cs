@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Configuration.Application.Preferences;
 
 /// <summary>
-/// 一个偏好当前生效的值来自哪里
+/// 偏好生效值的来源
 /// </summary>
 public sealed class PreferenceSource : Enumeration<PreferenceSource>
 {

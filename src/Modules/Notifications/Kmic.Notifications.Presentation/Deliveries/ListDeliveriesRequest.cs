@@ -7,8 +7,8 @@ namespace Kmic.Notifications.Presentation.Deliveries;
 /// <param name="Channel">按渠道筛选：Email、Sms</param>
 /// <param name="Status">按状态筛选：Pending、Sending、Sent、Failed、Skipped、Captured</param>
 /// <param name="TemplateKey">按模板键筛选</param>
-/// <param name="From">创建时间起，含</param>
-/// <param name="To">创建时间止，不含</param>
+/// <param name="From">创建时间下限（含）</param>
+/// <param name="To">创建时间上限（不含）</param>
 /// <param name="Page">页码，从 1 开始</param>
 /// <param name="PageSize">每页数量，1 到 200，默认 20</param>
 /// <param name="Sort">排序，如 -createdAt：逗号分隔，字段名前加 - 表示倒序，默认按创建时间倒序</param>

@@ -5,12 +5,12 @@ using Kmic.Notifications.Domain.Notifications;
 namespace Kmic.Notifications.Application.Deliveries.Get;
 
 /// <summary>
-/// 一条投递的详情
+/// 投递详情
 /// </summary>
 /// <param name="Id">投递 ID</param>
 /// <param name="NotificationId">产生它的发送请求</param>
 /// <param name="Channel">渠道</param>
-/// <param name="Role">邮件收件角色</param>
+/// <param name="Role">邮件收件方式：To、Cc 或 Bcc</param>
 /// <param name="Status">状态</param>
 /// <param name="SkipReason">跳过的原因，没跳过为空</param>
 /// <param name="RecipientUserId">系统内收件人 ID；外部收件人为空</param>

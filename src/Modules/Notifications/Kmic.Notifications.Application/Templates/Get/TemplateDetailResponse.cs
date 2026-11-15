@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Kmic.Notifications.Application.Templates.Get;
 
 /// <summary>
-/// 一个通知模板的详情
+/// 通知模板详情
 /// </summary>
 /// <param name="Key">模板键</param>
 /// <param name="DisplayName">显示名</param>
@@ -15,7 +15,7 @@ namespace Kmic.Notifications.Application.Templates.Get;
 /// <param name="ConcurrencyVersion">并发版本号，以 version 输出；发布或恢复默认时用作预期版本号</param>
 /// <param name="Channels">各渠道当前的内容</param>
 /// <param name="Variables">模板里能用的变量名</param>
-/// <param name="Example">示例数据，预览默认用它；代码里已经删掉的模板没有</param>
+/// <param name="Example">预览默认使用的示例数据；声明已移除时为空</param>
 /// <param name="Versions">已发布版本，按版本号倒序</param>
 public sealed record TemplateDetailResponse(
     string Key,

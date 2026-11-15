@@ -5,7 +5,7 @@ using Kmic.Operations.Domain.Audit;
 namespace Kmic.Operations.Application.Audit.Get;
 
 /// <summary>
-/// 一条审计记录的详情，含字段级变更
+/// 查询审计详情，含字段变更
 /// </summary>
 [RequirePermission(OperationsPermissions.AuditView)]
 [AuditedRead]

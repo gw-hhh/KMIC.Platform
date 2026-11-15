@@ -40,7 +40,7 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
         var undefined = new List<string>();
         var rendered = await RenderCoreAsync(template, model, format, undefined, ct);
         return rendered.IsSuccess && undefined.Count > 0
-            ? NotificationsErrors.TemplateInvalid($"用到了没有声明的变量：{string.Join("、", undefined.Distinct(StringComparer.Ordinal))}")
+            ? NotificationsErrors.TemplateInvalid($"未声明的变量：{string.Join("、", undefined.Distinct(StringComparer.Ordinal))}")
             : rendered;
     }
 

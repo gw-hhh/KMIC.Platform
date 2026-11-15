@@ -6,7 +6,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 用户管理的资源动作目录：详情响应里的“可用动作”据此计算
+/// 用户管理操作目录，用于计算详情中的可用操作
 /// </summary>
 public sealed class UserActions : ResourceActionCatalog<UserTarget, UserAdminAction>
 {

@@ -8,7 +8,7 @@ using Kmic.Operations.Domain.Errors;
 namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 
 /// <summary>
-/// 取消本人提交的后台作业
+/// 请求取消本人提交的后台作业
 /// </summary>
 /// <remarks>
 /// 直接更新作业所属模块的存储，不参与 Operations 命令事务

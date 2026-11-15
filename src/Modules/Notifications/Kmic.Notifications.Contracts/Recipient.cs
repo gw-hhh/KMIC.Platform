@@ -10,7 +10,7 @@ namespace Kmic.Notifications.Contracts;
 /// <param name="UserId">用户 ID</param>
 /// <param name="Email">系统外对象的邮箱</param>
 /// <param name="Phone">系统外对象的手机号</param>
-/// <param name="Role">邮件收件角色，仅邮件渠道使用</param>
+/// <param name="Role">邮件收件方式，仅邮件渠道使用</param>
 public sealed record Recipient(Guid? UserId, string? Email = null, string? Phone = null, RecipientRole Role = RecipientRole.To)
 {
     /// <summary>

@@ -64,7 +64,7 @@ public sealed class SettingAdministrationTests(ClassDatabase<ApiTemplate> databa
         var asViewer = await JsonAsync(await CallAsync(HttpMethod.Get, "/settings", viewer));
 
         var setting = asEditor.GetProperty("settings").EnumerateArray().Single(s => string.Equals(s.GetProperty("key").GetString(), Key, StringComparison.Ordinal));
-        setting.GetProperty("displayName").GetString().ShouldBe("标本提交");
+        setting.GetProperty("displayName").GetString().ShouldBe("示例提交");
         setting.GetProperty("module").GetString().ShouldBe("Sample");
         setting.GetProperty("group").GetString().ShouldBe("示例");
         setting.GetProperty("editPermission").GetString().ShouldBe(SamplePermissions.SettingManage);

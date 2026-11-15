@@ -16,7 +16,7 @@ public enum RotationOutcome
     Invalid,
 
     /// <summary>
-    /// 旧令牌在宽限期之外再次出现，判定为重用，整个会话已被作废
+    /// 旧令牌在宽限期外重用；会话作废尚需提交事务
     /// </summary>
     Reused,
 }

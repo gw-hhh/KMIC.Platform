@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 namespace Kmic.Notifications.Domain.Deliveries;
 
 /// <summary>
-/// 邮件收件人的角色
+/// 邮件收件方式
 /// </summary>
 public sealed class DeliveryRole : Enumeration<DeliveryRole>
 {

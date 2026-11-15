@@ -191,7 +191,7 @@ public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiT
         (await IsNullAsync(seed, fileId, "ExpiresAt")).ShouldBeTrue();
     }
 
-    // 建一个标本、上传并关联一个 PDF，等 Worker 把文件处理成“已关联”
+    // 创建示例并添加 PDF 附件，等待后台处理完成文件关联
     private async Task<(Guid Specimen, Guid File, Guid Attachment)> AttachedAsync(HttpClient client, byte[]? content = null)
     {
         var (specimen, version) = await CreateAsync(client);

@@ -6,7 +6,7 @@ namespace Kmic.Sample.Application;
 /// 示例附件的上传配置
 /// </summary>
 /// <remarks>
-/// 上传要求业务的“编辑”权限，避免仅登录即可上传
+/// 上传须具备“编辑示例附件”权限
 /// </remarks>
 [UploadProfile(
     "Sample.SpecimenAttachment",

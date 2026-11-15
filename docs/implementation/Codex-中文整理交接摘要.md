@@ -1,19 +1,151 @@
 # 中文整理交接摘要
 
-更新时间：2026年11月15日 10:45:16（UTC+8）。初建 C2431；本轮源码复盘 C2471～C2517。精确原文、位置及依据见[修改记录](修改记录.md)。
+更新时间：2026年11月15日 12:34:55（UTC+8）。本轮规则同步 C2641～C2651，收尾 C2652；下一编号 C2653。未新增源码改动或提交。
 
-## 当前提交授权（2026年11月15日 10:56:06，UTC+8）
+## 本轮规则同步结果（2026年11月15日 12:34:55，UTC+8）
 
-C2518：先将本页列出的 119 源码、6 个既有模型文件及 7 份跟踪文档本地提交一次，不推送；原有 7 个 BuildingBlocks/测试改动不提交。提交实际哈希随后在开发交接与协作记录顶部登记。之后规范和检查脚本调整不再提交；下方此前“本地未提交”段落为本次提交前状态，历史范围保留。
+- 结果：已同步根 CLAUDE.md、06 编码规范和框架入口修订记录，11 项 C2641～C2651；C2652 收尾，下一编号 C2653。此前已有准确要求保留，只补执行缺口。
+- [根规则](../../CLAUDE.md)：覆盖所有中文，包括注释、文案、提示、异常、校验信息、字段说明、接口文档、特性理由、提交与交接说明及回复。
+- [编码规范 10.3 与附录 A](../framework/06-coding-standards.md#103-注释写法)：先核实含义并判断必要性；多余的删、简单的写短、必要约束说清楚；按用途决定是否写，不机械补摘要、参数或 inheritdoc；已准确顺口的保持稳定，修改后整篇复读及回查同类说明。
+- 增加具体删减示例：名称与代码已明确的 New/取值/转发说明可省；配置字段保留含义，简单 TimeSpan 换算不重复说明；普通 Handle 的无价值模板可省；复杂查询、权限、锁、事务和失败行为须保留。现有 CS1591、OpenAPI 与列说明要求保持。
+- [框架入口](../framework/00-README.md)追加修订记录；没有修改业务设计、检查脚本或工程约束。
+- 核对：3 份规则文件精确替换回放一致；本轮只改 3 份规则文档和 7 份跟踪文档，2695 个范围外文件字节不变；源码、检查脚本和原有本地成果保持原样。未编译、未运行测试、项目脚本或数据库操作；未暂存、提交或推送；当前 66 个已跟踪修改，无未跟踪，暂存区为空，HEAD 仍为 2d1a81f。
+- 边界：此前讨论的 New/Handle/换算属性等源码删减示例本轮未执行；本轮完成的是规则落文，不能写成源码已删减。已有 3 条持久化旧措辞及行为待办仍按前轮边界保留。
 
-## 当前结论与 Git 状态
+| 文件 | 逐项记录 |
+|---|---|
+| [CLAUDE.md](../../CLAUDE.md) | C2641 |
+| [06 编码规范](../framework/06-coding-standards.md) | C2642～C2650 |
+| [框架入口](../framework/00-README.md) | C2651 |
 
-- 本轮允许范围 1267 文件的中文提取、分区筛查及候选调用链复盘已完成：37 个源码文件新增 47 项文字修订 C2471～C2517，1142 个含中文文件保留、88 个无中文；上版推送后累计 119 个源码文件、199 项文字修订，另有 6 个既有模型相关文件。
-- 覆盖六模块、宿主、Aspire、开发脚本及模块模板，共 1174 个 C# 文件、93 个工程配套文件。完整提取 2017 组含中文 XML 注释，结合接口说明、局部注释、错误、特性及实际调用链复盘；其他准确文字结合当前同版本既有核对保留，路径清单不作为质量豁免。
-- 分支 `codex-cn-copy-cleanup-2026-11-14`，HEAD `e2f5ee9c3cadcdaf5820446f6fafdee7e40e6dd1`。上一版 e2f5ee9 已推送，之后四轮文字成果仍在本地，未合并 main。
-- 当前 134 个已跟踪修改、5 个原有未跟踪文件，暂存区为空。本轮无新增文件；四个未跟踪迁移/设计文件及本摘要完整保留。
-- 上版之后记录 C2312～C2517 共 206 项：199 项源码文字操作、6 项既有 EF 文件记录、1 项交接文档 C2431。C2430 补正 C2388；C2490 补正 C2484 的检查方向，因此操作数不等于最终差异条数。
-- 本轮“完成”指允许范围的中文复盘完成，不表示整站功能验收、测试通过或数据库更新。
+原文、改后内容、UTC+8 时间和核对依据见[修改记录](修改记录.md)；C2652 为本轮交接收尾，下一实际编号 C2653。下方按日期保留前轮源码结果。
+
+## 本轮中文表达复盘（2026年11月15日 12:14:12，UTC+8）
+
+- 结果：按用途复盘 1267 个源码及构建部署文件的中文，修订 34 文件；C2568～C2639 共 72 次逐处操作，含整篇复读后的修订，C2640 登记收尾。本轮重点是读起来是否顺口、说明是否必要；没有为统一措辞重写已有清楚内容。
+- 当前状态：2664 个本轮范围外既有文件 SHA-256 不变，包括前轮规范成果、原有 BuildingBlocks/测试修改及全部迁移快照；当前 65 个已跟踪修改，无未跟踪，暂存区为空。本轮实际改动 41 文件（34 源码/脚本/模板加 7 份跟踪文档），原有 32 个本地修改均保留；check.cs 在前轮规则改动基础上只改文字。
+- 核对：34 文件精确修改回放一致；Roslyn 只读解析无语法错误；除中文文字及 check.cs 汇总中删除的两处 files.Length 展示外，其余可执行标记一致；1173 个范围内 C# 文件只读扫描未发现旧引用标记。check.cs 删除候选文件总数的展示，避免把跳过的二进制文件、锁文件等算作已检查；条件、调用、检查顺序、计数与退出行为不变。
+- 限制：未编译、未运行测试、项目检查脚本或数据库操作；未暂存、提交或推送，HEAD 仍为 2d1a81f；静态核对不代表运行验收。未改持久化属性摘要、HasComment、存储值或迁移；没有降低检查标准。
+
+### 本轮改动与逐项记录
+
+| 文件 | 修改位置 | 记录 |
+|---|---|---|
+| [check.cs](../../scripts/check.cs) | 文件头：用途、失败行为与修复选项；前端检查前的依赖说明；接口类型检查步骤标题；依赖边界检查步骤标题；密钥扫描前说明；RunWhenProjectsExist 前重复注释；空解决方案提示；RunWeb 前重复注释；缺少前端目录提示；Run Windows 启动原因；CheckEncoding 前重复范围说明；NuGet 锁文件例外原因；修复单文件提示；BOM 提示；换行提示；编码检查结果汇总；ListFiles 集中说明；CheckTemporaryReferences 前规则说明；脚本自身排除原因；旧引用标记错误提示；旧引用扫描汇总；TemporaryReference 正则说明 | C2568、C2569、C2570、C2571、C2572、C2573、C2574、C2575、C2576、C2577、C2578、C2579、C2580、C2581、C2582、C2583、C2584、C2585、C2586、C2587、C2588、C2589 |
+| [DeclaredValues.cs](../../src/Modules/Configuration/Kmic.Configuration.Application/DeclaredValues.cs) | 类型用途；Parse.invalidWith 参数 | C2590、C2591 |
+| [PreferenceSource.cs](../../src/Modules/Configuration/Kmic.Configuration.Application/Preferences/PreferenceSource.cs) | 类型用途 | C2592 |
+| [SettingActions.cs](../../src/Modules/Configuration/Kmic.Configuration.Application/Settings/SettingActions.cs) | 操作目录用途 | C2593 |
+| [RoleActions.cs](../../src/Modules/Identity/Kmic.Identity.Application/Roles/RoleActions.cs) | 操作目录用途 | C2594 |
+| [UserActions.cs](../../src/Modules/Identity/Kmic.Identity.Application/Users/UserActions.cs) | 操作目录用途 | C2595 |
+| [FileAttachments.cs](../../src/Modules/Files/Kmic.Files.Application/Attachments/FileAttachments.cs) | CheckAsSystemAsync 重复注释；系统作用域豁免理由 | C2596、C2597 |
+| [ChangePasswordCommand.cs](../../src/Modules/Identity/Kmic.Identity.Application/Authentication/ChangePassword/ChangePasswordCommand.cs) | NotIdempotent 理由 | C2598 |
+| [LoginCommand.cs](../../src/Modules/Identity/Kmic.Identity.Application/Authentication/Login/LoginCommand.cs) | NotIdempotent 理由；NotIdempotent 理由整篇复读 | C2599、C2633 |
+| [RefreshTokenCommand.cs](../../src/Modules/Identity/Kmic.Identity.Application/Authentication/Refresh/RefreshTokenCommand.cs) | NotAudited 理由；NotIdempotent 理由；NotIdempotent 理由整篇复读 | C2600、C2601、C2634 |
+| [CapturedDetailResponse.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Captured/Get/CapturedDetailResponse.cs) | 类型 summary；Address 字段说明；Role 字段说明 | C2602、C2610、C2612 |
+| [CapturedListItem.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Captured/List/CapturedListItem.cs) | 类型 summary；Address 字段说明；Role 字段说明 | C2603、C2611、C2613 |
+| [DeliveryDetailResponse.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Deliveries/Get/DeliveryDetailResponse.cs) | 类型 summary；Role 字段说明 | C2604、C2614 |
+| [DeliveryListItem.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Deliveries/List/DeliveryListItem.cs) | 类型 summary | C2605 |
+| [TemplateDetailResponse.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Templates/Get/TemplateDetailResponse.cs) | 类型 summary；Example 字段说明 | C2606、C2620 |
+| [TemplateListItem.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Templates/List/TemplateListItem.cs) | 类型 summary | C2607 |
+| [TemplatePreviewResponse.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Templates/Preview/TemplatePreviewResponse.cs) | 类型 summary | C2608 |
+| [InventoryObject.cs](../../src/Modules/Files/Kmic.Files.Application/InventoryObject.cs) | 类型 summary | C2609 |
+| [RecipientRole.cs](../../src/Modules/Notifications/Kmic.Notifications.Contracts/RecipientRole.cs) | 枚举类型 summary | C2615 |
+| [DeliveryRole.cs](../../src/Modules/Notifications/Kmic.Notifications.Domain/Deliveries/DeliveryRole.cs) | 枚举类型 summary | C2616 |
+| [TemplateChannelInfo.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Templates/Get/TemplateChannelInfo.cs) | 类型用途；DefaultSubject 字段说明；DefaultBody 字段说明 | C2617、C2618、C2619 |
+| [TemplateVersionInfo.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Templates/Get/TemplateVersionInfo.cs) | 类型用途 | C2621 |
+| [ClearSecretBodiesCommand.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Deliveries/Purge/ClearSecretBodiesCommand.cs) | remarks 清理条件 | C2622 |
+| [FluidTemplateRenderer.cs](../../src/Modules/Notifications/Kmic.Notifications.Infrastructure/Rendering/FluidTemplateRenderer.cs) | 未声明变量错误 | C2623 |
+| [ListDeliveriesQuery.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Deliveries/List/ListDeliveriesQuery.cs) | From 时间筛选说明；To 时间筛选说明；remarks 列表和审计说明整篇复读 | C2624、C2625、C2639 |
+| [ListDeliveriesRequest.cs](../../src/Modules/Notifications/Kmic.Notifications.Presentation/Deliveries/ListDeliveriesRequest.cs) | From 时间筛选说明；To 时间筛选说明 | C2626、C2627 |
+| [ListMySiteMessagesQuery.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/SiteMessages/List/ListMySiteMessagesQuery.cs) | Unread 字段说明 | C2628 |
+| [ListMySiteMessagesRequest.cs](../../src/Modules/Notifications/Kmic.Notifications.Presentation/SiteMessages/ListMySiteMessagesRequest.cs) | Unread 字段说明 | C2629 |
+| [SetSettingEndpoint.cs](../../src/Modules/Configuration/Kmic.Configuration.Presentation/Settings/SetSettingEndpoint.cs) | WithDescription 常规流程复述 | C2630 |
+| [new-module.cs](../../scripts/new-module.cs) | 文件头使用说明；Normalize 步骤标题 | C2631、C2637 |
+| [CustomerModule.cs](../../templates/kmic-module/src/Modules/Customer/Kmic.Customer.Infrastructure/CustomerModule.cs) | 服务注册类 remarks | C2632 |
+| [Recipient.cs](../../src/Modules/Notifications/Kmic.Notifications.Contracts/Recipient.cs) | Role 参数说明 | C2635 |
+| [DeliveryItem.cs](../../src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryItem.cs) | Role 参数说明 | C2636 |
+| [GetAuditQuery.cs](../../src/Modules/Operations/Kmic.Operations.Application/Audit/Get/GetAuditQuery.cs) | 查询用途 | C2638 |
+
+逐处原文、改后文字、UTC+8 时间及实现依据见[修改记录](修改记录.md) C2568～C2639；C2640 为本轮交接收尾。[复核清单](Codex-中文源码全面复核清单.md)保存 1267 文件当前结论；历史轮结果按日期理解。
+
+### 本轮已采用的表达尺度
+
+| 原表达 | 处理后 | 判断依据 |
+|---|---|---|
+| check.cs 文件头重复列出全部步骤 | 保留用法、失败退出、Docker 和 --fix；执行步骤看下方数组 | 不维护重复目录，调用前提和写文件行为仍清楚 |
+| 已规整 | 已修复 | 使用常用动词 |
+| 检查候选文件总数，问题若干处 | 发现若干处编码或换行问题 | 不把跳过项计作实际检查量 |
+| 一条捕获内容的详情 | 捕获内容详情 | 标题写名称即可 |
+| 带逐字段错误的同一个错误 | 生成包含字段错误的业务错误 | 参数实际是错误生成函数 |
+| 响应含令牌，所以不记审计 | 仅轮换会话凭据，令牌重用通过安全事件记录 | 实际审计不自动记录响应，不能凭假设写理由 |
+| 查询记录读取审计 | 查询成功后记录读审计 | 补清谓语和实际记录条件 |
+
+### 稳定维护建议与结束条件
+
+建议这次集中审读完成后结束全仓改写，按具体问题维护。此建议不改变业务设计或质量检查配置。
+
+| 维护方式 | 效果与取舍 | 建议 |
+|---|---|---|
+| 反复全仓扫描并换词 | 容易发现新候选，也会重复改写已清楚的句子，难形成稳定版本 | 不作为日常方式 |
+| 固定当前尺度，随业务变更或具体问题修改 | 保持稳定；需要明确指出误导、病句、重复或遗漏，不能只因个人偏爱换词 | 推荐 |
+
+本轮结束条件已经逐项完成：全量中文归类审读；疑点结合实现核实；同类问题回查；34 个改动文件整篇复读；差异与保护核对；保留项和边界写明。自然度不靠禁词表、固定字数或注释标签数量判定。以后只有含义变化、实际误导、明显不顺或无价值重复才改；运行验收和范围外行为待办不冒充已完成。
+
+### 保留的持久化说明
+
+以下 3 条说明会进入数据库列注释，本轮没有改动，也没有把它们当成已经精修合格。改善这些表述须另行确定模型变更范围，不能只改摘要却留下旧模型，亦不直接改旧迁移。
+
+| 文件 | 属性 | 当前保留措辞 |
+|---|---|---|
+| [CapturedMessage.cs](../../src/Modules/Notifications/Kmic.Notifications.Domain/Captured/CapturedMessage.cs) | Address、Role | 本该发往的完整地址；邮件里的角色 |
+| [Delivery.cs](../../src/Modules/Notifications/Kmic.Notifications.Domain/Deliveries/Delivery.cs) | Role | 邮件里的角色 |
+
+CN-01/02/03、既有 API IDE0005、Sample 设置未接入业务及 BuildingBlocks 旧术语继续另列，未作为文案问题顺带改行为。接手前重核 Git 来源；最新记录 C2640，下一编号 C2641。
+
+## 上一轮按新规范复查结果（2026年11月15日 11:43:25，UTC+8）
+
+- 本轮进度：已完成；按调整后规范筛查 1267 个源码及构建部署文件，其中 1179 个含中文，共 5504 行；核实候选实现后只修订 14 文件/14 处（C2553～C2566），其余保持原样；C2567 登记复查收尾。
+- 结论：主要修正登记时间、失败状态、异步请求与实际完成、事务内标记与已持久化、严格渲染和预览校验边界，并删除两处低价值重复。Configuration 现有中文保留；未为统一格式重写简单成员。
+- 当前 Git：2684 个本轮范围外既有文件逐文件 SHA-256 不变，包含上一轮规范/脚本成果和原有 BuildingBlocks、测试改动；当前 32 个已跟踪修改，无未跟踪，暂存区为空。新增源码文字成果为本节 14 文件，前轮 3 规范文档/1 检查脚本仍保留未提交；7 份跟踪文档继续同步。按用户要求未编译、未运行测试、整套检查脚本或数据库操作；本轮未暂存、提交或推送，HEAD 保持 2d1a81f。
+- 静态核对：14 处精确替换回放一致；Roslyn 只读解析 14 文件无语法错误，除注释和两处 WithDescription 中文字符串外，可执行标记完全一致；未改持久化属性摘要或 HasComment，ChannelList 已确认未映射列。只读静态解析不代表产品编译或测试验收。
+
+| 文件 | 修改位置 | 记录 |
+|---|---|---|
+| [FileSort.cs](../../src/Modules/Files/Kmic.Files.Application/Administration/FileSort.cs) | Map 默认排序说明 | C2553 |
+| [RejectUploadCommandHandler.cs](../../src/Modules/Files/Kmic.Files.Application/Uploads/Reject/RejectUploadCommandHandler.cs) | RejectUploadCommandHandler summary | C2554 |
+| [RecordHistoryPurgeRequest.cs](../../src/Modules/Files/Kmic.Files.Presentation/Administration/RecordHistoryPurgeRequest.cs) | RecordHistoryPurgeRequest summary | C2555 |
+| [PublishTemplateCommand.cs](../../src/Modules/Notifications/Kmic.Notifications.Application/Templates/Publish/PublishTemplateCommand.cs) | PublishTemplateCommand remarks 发布校验 | C2556 |
+| [PublishTemplateEndpoint.cs](../../src/Modules/Notifications/Kmic.Notifications.Presentation/Templates/PublishTemplateEndpoint.cs) | 发布接口 WithDescription | C2557 |
+| [PreviewTemplateEndpoint.cs](../../src/Modules/Notifications/Kmic.Notifications.Presentation/Templates/PreviewTemplateEndpoint.cs) | 预览接口 WithDescription | C2558 |
+| [CancelMyJobCommandHandler.cs](../../src/Modules/Operations/Kmic.Operations.Application/BackgroundJobs/Mine/CancelMyJobCommandHandler.cs) | CancelMyJobCommandHandler summary | C2559 |
+| [SetJobOverrideRequest.cs](../../src/Modules/Operations/Kmic.Operations.Presentation/ScheduledJobs/SetJobOverrideRequest.cs) | Cron 参数的间隔约束 | C2560 |
+| [RetryMessagesCommandHandler.cs](../../src/Modules/Operations/Kmic.Operations.Application/Messages/Retry/RetryMessagesCommandHandler.cs) | RetryMessagesCommandHandler remarks | C2561 |
+| [RotationOutcome.cs](../../src/Modules/Identity/Kmic.Identity.Domain/Sessions/RotationOutcome.cs) | Reused 结果说明 | C2562 |
+| [UpdateUserProfileRequest.cs](../../src/Modules/Identity/Kmic.Identity.Presentation/Users/UpdateUserProfileRequest.cs) | Account 字段说明 | C2563 |
+| [SampleUploadProfiles.cs](../../src/Modules/Sample/Kmic.Sample.Application/SampleUploadProfiles.cs) | 上传权限 remarks | C2564 |
+| [RemoveSpecimenAttachmentCommandHandler.cs](../../src/Modules/Sample/Kmic.Sample.Application/Specimens/Attachments/Remove/RemoveSpecimenAttachmentCommandHandler.cs) | 解除关联调用前的事务说明 | C2565 |
+| [NotificationTemplate.cs](../../src/Modules/Notifications/Kmic.Notifications.Domain/Templates/NotificationTemplate.cs) | ChannelList 计算属性 summary | C2566 |
+
+每处原文、改后文字、UTC+8 时间及实现证据见[修改记录](修改记录.md) C2553～C2566；C2567 为范围及交接收尾。1267 文件逐项结论见[复核清单](Codex-中文源码全面复核清单.md)。
+
+## 此前本地提交与规范调整（本轮开始前）
+
+- 已按用户要求先本地提交一版：`2d1a81fe9bf90a64cb7ef9dc3ff30abe01e60ffe`，132 文件（119 源码、6 个此前授权生成并已验证的注释迁移相关文件、7 份跟踪文档）。未推送、未合并 main。C2518 记录这次一次性授权。
+- 随后完成规范与脚本调整：3 份规范文档、1 个检查脚本，33 项 C2519～C2551；C2552 为收尾记录。后续成果仅留工作区，不再次暂存提交，不推送。
+- 分支 `codex-cn-copy-cleanup-2026-11-14`，HEAD `2d1a81fe9bf90a64cb7ef9dc3ff30abe01e60ffe`。当时 18 个已跟踪修改：规范轮 11 文件（4 个目标和 7 份跟踪文档），加原有 7 个 BuildingBlocks/测试改动；当前状态见上方本轮结果。
+- 既有业务源码文案保持提交版本。本轮没有批量转换 XML 排版、增删现有业务注释，也未改业务逻辑、测试、web/、BuildingBlocks、迁移或快照。
+- 前轮 1267 文件复查及 119 源码/199 项文字修订已随提交保存，下面的原文示例与完整路径表用于追溯；不把此前“未提交”或旧规范描述当作当前状态。
+
+## 前轮保留的规范与检查脚本调整（未提交）
+
+| 文件 | 调整内容 | 逐项记录 |
+|---|---|---|
+| [06 编码规范](../framework/06-coding-standards.md) | 按信息价值决定是否说明；public/private 不决定注释数量；允许自然标点与单行/多行 XML；标签按需、参数组完整；保留有价值术语与引用，准确文字保持稳定 | C2519～C2539、C2545～C2546 |
+| [框架入口](../framework/00-README.md) | 同步用户已确认的规范尺度及修订记录，功能验收状态不变 | C2540～C2541 |
+| [检查脚本](../../scripts/check.cs) | 移除禁词、章节形状、句号及标签行数硬检查；仅拦截明确的旧临时引用标记；保留全部其他质量步骤 | C2542～C2544 |
+| [数据访问说明](../framework/05-infrastructure/05-03-数据访问.md) | 与新规范对齐，按实际机制说明编译收集属性摘要、建模写入列注释、模型检查缺失；没有改动模型或生成器 | C2547～C2551 |
+
+现有 Contracts/BuildingBlocks 的 CS1591、XML 语法及参数引用检查、OpenAPI 完整性和数据库列说明要求继续保留。当前脚本不新增跳过编译或测试的选项，完整执行时仍按原顺序运行这些步骤；本次按用户要求未执行。
 
 ## 接手时遵守的表达标准
 
@@ -68,9 +200,9 @@ FilesPermissions.FileManage 当前为“管理文件”，具体范围是“允�
 | 排序列表 | “全部、不能多不能少”重复，却没点明停用项 | 简短说明完整无重复列表，明确停用单元/字典项也须包含 | C2506～C2509 |
 | 用户资料授权、缓存和限流 | “登录凭据”抽象，基础编辑与额外检查不明确；架构备注重复；等待时长像保证 | 直接指明账号或手机号的额外授权；删去分层位置复述；限流返回建议等待时长 | C2511～C2517 |
 
-## 当前未提交的 119 个源码文件
+## 已提交文案版 2d1a81f 的 119 个源码文件
 
-下表汇总上版推送后四轮的全部源码文字变化。精确原文、现文、UTC+8 时间和实现核对依据见 C 编号；更早已提交的内容保留在修改记录历史中。
+下表汇总已随 2d1a81f 提交的四轮源码文字变化。精确原文、现文、UTC+8 时间和实现核对依据见 C 编号；更早已提交的内容保留在修改记录历史中。
 
 ### Configuration：16 个文件
 
@@ -236,27 +368,27 @@ FilesPermissions.FileManage 当前为“管理文件”，具体范围是“允�
 |---|---|---|
 | [scripts/dev.cs](../../scripts/dev.cs) | reset 时容器未运行的错误；status 用户数查询失败的提示；用户数为空时的检查方向（补正 C2484） | C2483～C2484、C2490 |
 
-## 已生成但未提交的 6 个模型相关文件
+## 随 2d1a81f 提交的 6 个既有模型相关文件
 
 这些是前轮已授权生成的结果，本交接轮未修改。两份迁移仅调整三条列注释：Configuration.SystemSettingChange.TraceId；Operations.ScheduledJobSetting.Enabled、Cron。旧迁移保留，不手改旧迁移、设计文件或快照。
 
 | 文件（相对仓库根目录） | 状态 | 记录 |
 |---|---|---|
-| [src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.Designer.cs](../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.Designer.cs) | 已生成，未跟踪 | C2349 |
-| [src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.cs](../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.cs) | 已生成，未跟踪 | C2350 |
-| [src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/ConfigurationDbContextModelSnapshot.cs](../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/ConfigurationDbContextModelSnapshot.cs) | 当前快照，已跟踪修改 | C2351 |
-| [src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.Designer.cs](../../src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.Designer.cs) | 已生成，未跟踪 | C2358 |
-| [src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.cs](../../src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.cs) | 已生成，未跟踪 | C2359 |
-| [src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/OperationsDbContextModelSnapshot.cs](../../src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/OperationsDbContextModelSnapshot.cs) | 当前快照，已跟踪修改 | C2360 |
+| [src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.Designer.cs](../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.Designer.cs) | 已随 2d1a81f 提交，本轮未改写 | C2349 |
+| [src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.cs](../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/20261114165501_SimplifySettingChangeTraceComment.cs) | 已随 2d1a81f 提交，本轮未改写 | C2350 |
+| [src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/ConfigurationDbContextModelSnapshot.cs](../../src/Modules/Configuration/Kmic.Configuration.Infrastructure/Persistence/Migrations/ConfigurationDbContextModelSnapshot.cs) | 已随 2d1a81f 提交，本轮未改写 | C2351 |
+| [src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.Designer.cs](../../src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.Designer.cs) | 已随 2d1a81f 提交，本轮未改写 | C2358 |
+| [src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.cs](../../src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/20261114170053_ClarifyJobSettingNullComments.cs) | 已随 2d1a81f 提交，本轮未改写 | C2359 |
+| [src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/OperationsDbContextModelSnapshot.cs](../../src/Modules/Operations/Kmic.Operations.Infrastructure/Persistence/Migrations/OperationsDbContextModelSnapshot.cs) | 已随 2d1a81f 提交，本轮未改写 | C2360 |
 
 ## 验证结果和未运行项目
 
-- 本轮：47 条精确替换回放一致；37 个修改文件除 10 处中文字符串外，可执行代码标记完全一致，49 个属性摘要和 HasComment 调用未变；全范围 2336 组 XML 注释语法有效，1174 个 C# 文件中的 336 组参数标签完整；业务逻辑、实体属性摘要、列说明、迁移和快照未修改。
-- 覆盖与保护：1267 文件内容 SHA 与逐文件结论一致；本轮范围外 2661 个既有文件逐文件 SHA-256 不变，包含原有 BuildingBlocks/测试改动、前轮模型成果及全部旧迁移；结束 134 个已跟踪修改、5 个原有未跟踪文件，分支/HEAD 不变、暂存区为空；Codex 路径 999 条无重复，ClaudeCode 清单保持 0 字节。
-- 先前几轮文字修订的精确回放与静态核对已完成。三条模型注释仅在此前授权轮调整：Configuration.TraceId、Operations.Enabled/Cron；当时两模块独立编译 0 警告/错误，模型与快照一致，正反向 SQL 各 3 条 COMMENT，无结构、索引、约束或业务数据变化。本轮未重跑或覆盖该结果。
-- 未编译产品项目、未运行测试、OpenAPI 生成或全套项目脚本，未执行数据库连接、SQL 或 database update；仅使用既有临时工具做静态核对；未暂存、提交或推送。临时 Roslyn 工具采用 --no-build，不编译产品项目；静态核对不等于测试通过。
-- 原始 API 既有 IDE0005（Files.Application/ContractQueries/GetReadableFileQuery.cs:4 未使用 using）未修复，不宣称整站构建通过；早期临时编译输入的说明仍在开发交接历史中。
-- 最终 git diff --check、交接链接及文件映射结果见最新协作记录。
+- 首次提交前，119 个源码相对 e2f5ee9 的静态可执行标记核对通过，差异仅为注释和中文字符串；提交准确包含 132 文件，原有 7 文件排除。
+- 本轮规范/脚本：33 项精确替换回放一致；scripts/check.cs 经已有 PowerShell Roslyn 解析，语法错误 0；同一正则对 2404 个 C#/TS/Vue 文件只读扫描，残留临时引用标记 0；其余 14 个检查步骤及 6 个基础辅助方法逐段保持一致，未引入编译/测试跳过开关；编译配置、分析器、模型和 OpenAPI 完整性检查实现均未改变。
+- 内容保护：提交后范围外 2694 个既有文件逐文件 SHA-256 不变，119 个业务源码成果和 6 个既有模型文件保持提交版本；原有 3 个 BuildingBlocks、4 个测试文件的本地改动字节保持；当前 18 个已跟踪修改（本轮 11 文件加原有 7 文件），无未跟踪项，暂存区为空，HEAD 为 2d1a81fe9bf90a64cb7ef9dc3ff30abe01e60ffe。
+- 产品编译、测试、整套 scripts/check.cs、OpenAPI 生成及数据库连接/SQL/database update 均未运行；静态语法与只读扫描不代表编译或运行验收通过；未推送；首次版本提交后没有再次暂存或提交。
+- 既有三条模型注释（Configuration.TraceId、Operations.Enabled/Cron）的离线编译/模型/SQL核对来自先前授权轮，已记录且本轮未重跑；本次只原样纳入首次提交，没有新模型改动。
+- 原始 API 的已有 IDE0005（GetReadableFileQuery.cs:4 未使用 using）未处理；不宣称整站构建通过。最终 diff、链接和文件映射结果见最新协作记录。
 
 ## 保留的原有本地改动
 
@@ -277,7 +409,7 @@ FilesPermissions.FileManage 当前为“管理文件”，具体范围是“允�
 - CN-01：含密死信管理接口的载荷保护尚未补齐；若需改 BuildingBlocks，先说明具体文件和影响，取得用户确认。
 - CN-02：Serilog RequestPath 与路由模板的记录方式；CN-03：手工触发任务时，运行检查与触发不是原子操作。
 - Sample 设置示例尚未接入创建/提交校验；已有说明明确其示例边界，不当作已生效的业务规则。
-- 检查脚本的机械词表/格式要求、BuildingBlocks 旧术语、既有 API IDE0005 均另列；不在本轮擅自修复。
+- 检查脚本的机械词表和格式硬要求已在本轮获准调整；BuildingBlocks 旧术语、既有 API IDE0005 继续另列，未修复。
 - 短信登录、短信网关、登录人机验证、病毒扫描等延后事项，继续按框架及实施待办处理；不因出现接口或占位实现就宣称已完成。
 - 数据库尚未应用任何本轮迁移；实际部署库注释与迁移历史未经核对，不能把离线验证记为数据库更新完成。
 
@@ -287,6 +419,6 @@ FilesPermissions.FileManage 当前为“管理文件”，具体范围是“允�
 2. 重新核对实际分支、HEAD、git status、暂存区和 diff；文档是交接索引，实际差异优先。旧段落的“待改”“整份排除已处理路径”属于历史阶段，当前标准以本文及开发交接顶部为准。双方已处理与未提交文件允许复审，但修改前仍需核对来源，不能覆盖他人改动。
 3. [Codex 路径清单](Codex-已按中文规范处理的文件.md)仅记录来源；[ClaudeCode 清单](ClaudeCode-已按中文规范处理的文件.md)按用户要求保持空文件，不据此认定合格。当前均无需再机械清空或重复整理。
 4. 如有新发现，先核对调用链、事务、状态与失败分支，再做最小文字修改；逐处记录并同步实际文件表、路径清单、开发交接、协作记录和 S3。不改业务逻辑、测试、web/、BuildingBlocks、旧迁移及快照；必要模型调整另核实授权。
-5. 本轮不暂存、不提交、不推送。上一版推送授权已履行，不自动延续到当前本地成果。接手时若有新的明确用户授权，以最新指令为准。
+5. 用户授权的一次性本地提交已完成（2d1a81f），未推送；之后规范/脚本成果不再暂存提交。接手时按最新用户授权决定后续操作，不能沿用此前一次性提交或推送授权。
 
-最新实际记录为 C2517，下一编号 C2518；始终以修改记录中的真实编号为准，不按历史正文提及的编号推断。
+最新实际记录为 C2567，下一编号 C2568；始终以修改记录中的真实编号为准，不按历史正文提及的编号推断。

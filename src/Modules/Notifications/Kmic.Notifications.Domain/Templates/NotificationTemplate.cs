@@ -120,7 +120,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     }
 
     /// <summary>
-    /// 在读取一个渠道清单字符串时还原成渠道
+    /// 模板支持的渠道列表
     /// </summary>
     public IReadOnlyList<TemplateChannel> ChannelList => [.. TemplateChannel.All.Where(Supports)];
 

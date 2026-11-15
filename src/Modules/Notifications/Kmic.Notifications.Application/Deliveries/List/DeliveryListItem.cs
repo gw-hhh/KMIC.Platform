@@ -4,7 +4,7 @@ using Kmic.Notifications.Domain.Deliveries;
 namespace Kmic.Notifications.Application.Deliveries.List;
 
 /// <summary>
-/// 投递列表里的一条，不含正文
+/// 投递列表项，不含正文
 /// </summary>
 /// <param name="Id">投递 ID</param>
 /// <param name="Channel">渠道</param>

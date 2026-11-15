@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Application.Authorization;
 namespace Kmic.Configuration.Application.Settings;
 
 /// <summary>
-/// 系统设置的资源动作目录：列表里每个设置的“可用动作”据此计算
+/// 系统设置的操作目录，用于计算各设置的可用操作
 /// </summary>
 public sealed class SettingActions : ResourceActionCatalog<SettingTarget, SettingAction>
 {
