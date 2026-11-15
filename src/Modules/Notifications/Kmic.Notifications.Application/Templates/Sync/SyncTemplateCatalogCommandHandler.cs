@@ -19,7 +19,6 @@ public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalo
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // 同步锁由其他实例持有时跳过，不等待
         if ((await locks.TryAcquireExclusiveAsync("Notifications.TemplateSync", [_lockId], cancellationToken)).Count == 0)
         {
             return new TemplateSyncResult(0, 0, 0);
@@ -43,7 +42,6 @@ public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalo
             }
         }
 
-        // 未匹配到代码声明的活动模板标为退役
         var stale = existing.Values.Where(t => t.Status == TemplateStatus.Active).ToList();
         foreach (var template in stale)
         {

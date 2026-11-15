@@ -28,7 +28,7 @@ public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, 
             return NotificationsErrors.DeliveryNotRetryable;
         }
 
-        // 含密通知只在有效期内有意义，过了就不重发了
+        // 含密通知过期后禁止重发
         DateTimeOffset? createdNotBefore = catalog.Find(loaded.Value.TemplateKey)?.CarriesSecret == true
             ? time.GetUtcNow() - TimeSpan.FromSeconds(SendSecretNotification.LifetimeSeconds)
             : null;

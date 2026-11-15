@@ -18,7 +18,7 @@ public interface IIdentityQueryDb : IIdentityReads
     IQueryable<Session> Sessions { get; }
 
     /// <summary>
-    /// 安全事件：表由框架的写入器写，这里只读，用原生 SQL 映射到只读的行类型
+    /// 安全事件的只读投影，写入由框架负责
     /// </summary>
     IQueryable<SecurityEventRow> SecurityEvents { get; }
 }

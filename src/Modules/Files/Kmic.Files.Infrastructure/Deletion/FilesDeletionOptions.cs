@@ -36,13 +36,7 @@ public sealed class FilesDeletionOptions
     [Range(1, 600)]
     public int PollSeconds { get; init; } = 10;
 
-    /// <summary>
-    /// 领取租期
-    /// </summary>
     public TimeSpan Lease => TimeSpan.FromMinutes(LeaseMinutes);
 
-    /// <summary>
-    /// 轮询间隔
-    /// </summary>
     public TimeSpan Poll => TimeSpan.FromSeconds(PollSeconds);
 }

@@ -7,11 +7,10 @@ using Kmic.Notifications.Domain.Errors;
 namespace Kmic.Notifications.Domain.Templates;
 
 /// <summary>
-/// 通知模板：代码里声明的一种通知，以及管理员在各渠道发布过的内容版本
+/// 通知模板及各渠道的发布版本
 /// </summary>
 /// <remarks>
-/// 声明（名称、渠道、发件账号）来自代码，每次启动时同步。内容默认取代码里的默认内容；
-/// 管理员在某个渠道发布版本后，这个渠道改用发布的版本，恢复默认后又回到代码里的内容
+/// 名称、渠道和发件账号在启动时同步；活动模板按渠道选用发布版本，未选用时使用代码默认内容
 /// </remarks>
 public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
 {
@@ -97,7 +96,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     public string CodeHash { get; private set; }
 
     /// <summary>
-    /// 各渠道当前生效的版本号，JSON：渠道编码到版本号；没有的渠道用代码里的默认内容
+    /// 各渠道选用的发布版本号（JSON：渠道编码到版本号）
     /// </summary>
     public string ActiveVersions { get; private set; }
 
@@ -134,7 +133,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     }
 
     /// <summary>
-    /// 某个渠道当前生效的版本号，用默认内容时为空
+    /// 指定渠道选用的发布版本号；未选用时为空
     /// </summary>
     public int? ActiveVersionOf(TemplateChannel channel)
     {
@@ -218,7 +217,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     }
 
     /// <summary>
-    /// 读出各渠道生效的版本号
+    /// 解析各渠道选用的发布版本号
     /// </summary>
     /// <param name="json">ActiveVersions 的内容</param>
     public static IReadOnlyDictionary<string, int> ParseActiveVersions(string json) =>

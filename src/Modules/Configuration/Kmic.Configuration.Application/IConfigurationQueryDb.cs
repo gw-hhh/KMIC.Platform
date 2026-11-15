@@ -18,7 +18,7 @@ public interface IConfigurationQueryDb
     IQueryable<DictionaryType> DictionaryTypes { get; }
 
     /// <summary>
-    /// 被修改过的系统设置值
+    /// 已保存的系统设置值
     /// </summary>
     IQueryable<SystemSettingValue> SettingValues { get; }
 

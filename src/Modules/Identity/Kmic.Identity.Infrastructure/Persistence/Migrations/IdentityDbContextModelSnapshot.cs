@@ -602,7 +602,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsProtected")
                         .HasColumnType("boolean")
-                        .HasComment("是否受保护：只有持有受保护角色的人才能管理它，也不能借管理它的持有人绕开");
+                        .HasComment("是否受保护");
 
                     b.Property<string>("Name")
                         .IsRequired()

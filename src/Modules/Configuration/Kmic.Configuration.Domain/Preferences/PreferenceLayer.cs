@@ -5,9 +5,6 @@ namespace Kmic.Configuration.Domain.Preferences;
 /// <summary>
 /// 偏好存在哪一层
 /// </summary>
-/// <remarks>
-/// 按允许的个人层、角色层、系统层依次选择可用值；均无可用值时使用代码默认值
-/// </remarks>
 public sealed class PreferenceLayer : Enumeration<PreferenceLayer>
 {
     /// <summary>

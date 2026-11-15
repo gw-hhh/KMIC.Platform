@@ -10,7 +10,7 @@ namespace Kmic.Identity.Presentation.Authentication;
 /// 刷新 Cookie 的 CSRF 防护：校验可信 Origin 和自定义请求头
 /// </summary>
 /// <remarks>
-/// 跨站请求带自定义头会触发 CORS 预检，而 CORS 只允许可信来源；再加上 Cookie 本身 SameSite=Strict，三者叠加
+/// 携带刷新 Cookie 时，Origin 须在可信列表中，且 X-Requested-With 须为 kmic；Cookie 使用 SameSite=Strict
 /// </remarks>
 internal sealed class CookieEndpointGuard(IOptions<TrustedOriginsOptions> options) : IEndpointFilter
 {

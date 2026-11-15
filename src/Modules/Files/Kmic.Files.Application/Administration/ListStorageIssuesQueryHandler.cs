@@ -39,7 +39,7 @@ public sealed class ListStorageIssuesQueryHandler(IFilesQueryDb db) : IQueryHand
 
         var page = paged.Value;
 
-        // 文件记录可能已清理，仍保留问题记录并允许文件名为空
+        // 文件记录不存在时仍返回问题记录，文件名为空
         var fileIds = page.Items.Select(i => i.FileId).Distinct().ToList();
         var names = await db.Files
             .Where(f => fileIds.Contains(f.Id))

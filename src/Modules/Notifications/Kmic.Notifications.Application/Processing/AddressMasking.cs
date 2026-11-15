@@ -18,7 +18,7 @@ internal static class AddressMasking
     }
 
     /// <summary>
-    /// 邮箱只留本地部分的第一个字符和域名，如 a***@example.com
+    /// 邮箱仅保留 @ 前的首字符和域名，如 a***@example.com
     /// </summary>
     public static string Email(string email)
     {

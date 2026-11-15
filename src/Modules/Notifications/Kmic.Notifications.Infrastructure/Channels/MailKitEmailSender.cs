@@ -33,7 +33,7 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
         }
         catch (ParseException)
         {
-            return SendResult.Permanent("邮件地址或附件类型格式无效");
+            return SendResult.Permanent("邮件地址或附件的内容类型格式有误");
         }
 
         try
@@ -52,7 +52,7 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
         catch (SmtpCommandException exception)
         {
             // 4xx 是暂时的（邮箱忙、稍后再试），5xx 是永久的（邮箱不存在、被拒绝）
-            return (int)exception.StatusCode >= 500 ? SendResult.Permanent($"服务器拒绝：{(int)exception.StatusCode}") : SendResult.Transient($"邮件服务器暂时拒绝发送：{(int)exception.StatusCode}");
+            return (int)exception.StatusCode >= 500 ? SendResult.Permanent($"邮件服务器拒绝发送：{(int)exception.StatusCode}") : SendResult.Transient($"邮件服务器暂时拒绝发送：{(int)exception.StatusCode}");
         }
         catch (Exception exception) when (exception is AuthenticationException or SaslException or ProtocolException or ServiceNotConnectedException or ServiceNotAuthenticatedException or IOException or SocketException or TimeoutException or OperationCanceledException)
         {

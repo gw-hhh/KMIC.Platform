@@ -83,7 +83,7 @@ public sealed class StartImpersonationCommandHandler(
         return new AuthTokens(accessToken.Value, "Bearer", (int)(accessToken.ExpiresAt - now).TotalSeconds, null, PasswordChangeRequired: false);
     }
 
-    // 指定了角色就必须是他拥有的、启用的；没指定时同登录：优先上次使用的，没有就取排在最前的启用角色
+    // 指定角色须已授予目标用户且启用；未指定时优先用上次角色，不可用时取排序最前的启用角色
     private async Task<Role?> ChooseRoleAsync(User target, RoleId? requested, CancellationToken ct)
     {
         List<RoleId> granted = [.. target.Grants.Select(g => g.RoleId)];

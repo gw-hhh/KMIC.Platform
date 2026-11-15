@@ -476,7 +476,7 @@ namespace Kmic.Operations.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("ActualUserId")
                         .HasColumnType("uuid")
-                        .HasComment("模拟登录时真正动手的人");
+                        .HasComment("模拟身份时的实际操作人");
 
                     b.Property<string>("Changes")
                         .IsRequired()
@@ -629,7 +629,7 @@ namespace Kmic.Operations.Infrastructure.Persistence.Migrations
 
                     b.ToTable("ScheduledJobSetting", "Operations", t =>
                         {
-                            t.HasComment("定时任务的覆盖值；Operations 模块；运维改过的开关与执行时间，只存改过的项，没改的项按代码里的默认值；框架同步触发器时读这张表");
+                            t.HasComment("定时任务的自定义设置；Operations 模块；空值使用代码默认值，恢复默认时保留记录；框架据此同步触发器");
                         });
                 });
 #pragma warning restore 612, 618

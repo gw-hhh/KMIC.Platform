@@ -63,7 +63,7 @@ public sealed class IdentityModule : IModule
         // 框架的业务历史查询用它取人员和角色的显示名
         services.AddScoped<IActorReferences, ActorReferences>();
 
-        // 单例：后台作业的执行器是单例，每次加载自己开一个作用域；请求里同样如此
+        // 加载器为单例，每次查询独立创建作用域，供请求和后台作业共用
         services.AddSingleton<IAccessContextLoader, AccessContextLoader>();
 
         services.AddSingleton<IPasswordService, PasswordService>();

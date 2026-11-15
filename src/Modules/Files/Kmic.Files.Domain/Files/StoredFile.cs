@@ -327,7 +327,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// </summary>
     /// <remarks>
     /// 仅允许可用、已解除关联或被拒绝状态，到期条件由调用方检查。
-    /// 清理可用或已解除关联的文件前，调用方须取得排他咨询锁、探查未完成的关联消息，再重读文件并核对到期时间。
+    /// 清理可用或已解除关联的文件前，调用方须取得文件关联的排他锁、探查未完成的关联消息，再重读文件并核对到期时间。
     /// 本方法只校验状态，不获取锁或探查消息
     /// </remarks>
     public Result Expire(string reason) => _machine.Fire(this, StoredFileAction.Expire, reason);
@@ -392,7 +392,6 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
             .Permit(StoredFileStatus.Detached, StoredFileAction.Expire, StoredFileStatus.Deleting)
             .Permit(StoredFileStatus.Rejected, StoredFileAction.Expire, StoredFileStatus.Deleting);
 
-        // 彻底删除：除“删除中”和已经彻底删除的之外，任何状态都可以
         foreach (var from in new[] { StoredFileStatus.Uploading, StoredFileStatus.Scanning, StoredFileStatus.Available, StoredFileStatus.Attached, StoredFileStatus.Detached, StoredFileStatus.Rejected })
         {
             builder.Permit(from, StoredFileAction.Purge, StoredFileStatus.Purged);

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 在主体查询或分页后批量解析用户、角色及组织名称，避免集合关联影响分页排序
+/// 批量解析用户、角色和组织名称
 /// </summary>
 internal static class UserNames
 {

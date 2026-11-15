@@ -40,7 +40,6 @@ public sealed class RemoveSpecimenAttachmentCommandHandler(
             return removed.Error;
         }
 
-        // 删除附件行和解除关联请求一起提交，事务回滚时不发送请求
         await files.DetachAsync(SampleModuleInfo.Name, nameof(Specimen), specimen.Id.Value, [removed.Value.FileId.Value], cancellationToken);
         return new VersionedResponse<SpecimenId>(specimen.Id);
     }

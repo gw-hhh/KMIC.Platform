@@ -34,12 +34,12 @@ public sealed class CapturedMessage : AggregateRoot<CapturedMessageId>
     public DeliveryChannel Channel { get; private set; } = null!;
 
     /// <summary>
-    /// 本该发往的完整地址
+    /// 收件地址（未脱敏）
     /// </summary>
     public string Address { get; private set; }
 
     /// <summary>
-    /// 邮件里的角色
+    /// 邮件收件方式
     /// </summary>
     public DeliveryRole Role { get; private set; } = null!;
 

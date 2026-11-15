@@ -56,7 +56,7 @@ public sealed class SyncPermissionCatalogCommandHandler(
 
     private static string Count(int value) => value.ToString(CultureInfo.InvariantCulture);
 
-    // 角色上配置的是权限点编码：声明了改名，就把所有角色上的旧编码换成新编码，角色的授权版本随之递增
+    // 权限改名时替换角色中的旧编码，并递增授权版本
     private async Task RenameOnRolesAsync(IReadOnlyDictionary<string, string> renames, CancellationToken ct)
     {
         if (renames.Count == 0)

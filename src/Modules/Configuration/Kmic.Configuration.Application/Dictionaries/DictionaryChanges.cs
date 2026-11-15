@@ -8,7 +8,7 @@ namespace Kmic.Configuration.Application.Dictionaries;
 internal static class DictionaryChanges
 {
     /// <summary>
-    /// 提交后使该类型的快照缓存失效，避免并发请求在提交前用旧数据回填缓存
+    /// 提交后使该类型的快照缓存失效
     /// </summary>
     public static void Invalidate(IAfterCommit afterCommit, string typeCode) =>
         afterCommit.InvalidateTags(ConfigurationCacheKeys.Dictionary(typeCode));

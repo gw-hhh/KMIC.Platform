@@ -19,7 +19,7 @@ public sealed record SendResult(SendOutcome Outcome, string? ProviderMessageId =
     public static SendResult Transient(string error) => new(SendOutcome.Transient, Error: error);
 
     /// <summary>
-    /// 永久失败，不再重试
+    /// 永久失败，不再自动重试
     /// </summary>
     public static SendResult Permanent(string error) => new(SendOutcome.Permanent, Error: error);
 }

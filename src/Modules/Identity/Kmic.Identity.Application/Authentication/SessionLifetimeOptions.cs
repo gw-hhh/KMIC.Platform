@@ -40,7 +40,7 @@ public sealed class SessionLifetimeOptions
     public TimeSpan AppAbsoluteLifetime { get; init; } = TimeSpan.FromDays(90);
 
     /// <summary>
-    /// 并发刷新宽限期，已轮换的旧令牌在此期间再次出现时按并发刷新处理
+    /// 并发刷新宽限期，已轮换且未过期的旧令牌在此期间再次使用时按并发刷新处理
     /// </summary>
     [TimeSpanRange("00:00:00", "00:01:00")]
     public TimeSpan RefreshGrace { get; init; } = TimeSpan.FromSeconds(10);

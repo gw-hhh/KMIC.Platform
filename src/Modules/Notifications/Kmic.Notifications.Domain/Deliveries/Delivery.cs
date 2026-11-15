@@ -86,7 +86,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
     public string? Address { get; private set; }
 
     /// <summary>
-    /// 邮件里的角色
+    /// 邮件收件方式
     /// </summary>
     public DeliveryRole Role { get; private set; } = null!;
 

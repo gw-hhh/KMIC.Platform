@@ -7,7 +7,7 @@ namespace Kmic.Operations.Domain.Jobs;
 /// </summary>
 /// <remarks>
 /// 值为 null 时使用代码默认值；恢复默认或移除任务声明后仍保留记录，便于追溯和版本回滚。
-/// 调度器同步时只读取此表
+/// 调度器只读这些设置，修改由管理命令负责
 /// </remarks>
 public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
 {

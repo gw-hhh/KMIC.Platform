@@ -4,12 +4,13 @@ namespace Kmic.Configuration.Contracts;
 /// 供其他模块读取字典名称及校验字典项是否可选
 /// </summary>
 /// <remarks>
-/// 不检查权限点，也不套数据范围：字典对所有登录用户一致。读缓存，管理员改动之后跨实例失效
+/// 不检查权限点或数据范围，所有登录用户读取相同字典。使用缓存，修改提交后使各实例缓存失效。
+/// 查询失败时抛出异常
 /// </remarks>
 public interface IDictionaries
 {
     /// <summary>
-    /// 取字典快照，含停用的项与状态；类型不存在返回空
+    /// 读取字典快照，包含停用项及状态；类型不存在时返回 null
     /// </summary>
     Task<DictionarySnapshot?> GetAsync(string typeCode, CancellationToken ct);
 

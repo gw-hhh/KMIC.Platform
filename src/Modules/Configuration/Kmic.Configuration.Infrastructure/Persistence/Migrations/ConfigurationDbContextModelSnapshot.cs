@@ -780,7 +780,7 @@ namespace Kmic.Configuration.Infrastructure.Persistence.Migrations
 
                     b.ToTable("SystemSettingValue", "Configuration", t =>
                         {
-                            t.HasComment("被修改过的系统设置值；Configuration 模块；一个设置一行，没有这一行就用代码里的默认值");
+                            t.HasComment("系统设置的已保存值；Configuration 模块；每个设置一行，无记录时使用代码默认值");
                         });
                 });
 

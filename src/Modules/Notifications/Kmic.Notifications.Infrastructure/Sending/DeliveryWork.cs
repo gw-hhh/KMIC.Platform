@@ -16,7 +16,7 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// 处理投递队列，在数据库事务之外调用发送渠道，再按领取令牌记录结果
 /// </summary>
 /// <remarks>
-/// 队列循环由框架提供。发送时查询系统内用户的最新联系方式；用户不存在、已禁用或无地址时记为已跳过。
+/// 发送时查询系统内用户的最新联系方式；用户不存在、已禁用或无地址时记为已跳过。
 /// 含密投递超过创建后的有效期时不再发送；成功、最终失败或跳过时清空正文及短信参数。
 /// 暂时失败退避重试，达到次数上限或永久失败时标记为失败，等待人工处理
 /// </remarks>
@@ -115,7 +115,7 @@ internal sealed class DeliveryWork(
         }
     }
 
-    // 有附件的邮件发送时才读文件内容，流在发完之后释放；读不到附件按暂时或永久失败记在投递上
+    // 发送时读取附件，发送结束后释放流；读取失败按返回的失败类型处理
     private async Task<SendResult> SendEmailAsync(DeliveryItem item, string senderProfile, string address, CancellationToken ct)
     {
         var ids = item.AttachmentFileIds is { } json ? JsonSerializer.Deserialize<List<Guid>>(json) ?? [] : [];

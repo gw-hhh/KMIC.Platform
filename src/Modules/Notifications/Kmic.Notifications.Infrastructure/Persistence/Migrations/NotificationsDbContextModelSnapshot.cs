@@ -467,7 +467,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)")
-                        .HasComment("本该发往的完整地址");
+                        .HasComment("收件地址（未脱敏）");
 
                     b.Property<string>("Body")
                         .IsRequired()
@@ -505,7 +505,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
-                        .HasComment("邮件里的角色");
+                        .HasComment("邮件收件方式");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -657,7 +657,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
-                        .HasComment("邮件里的角色");
+                        .HasComment("邮件收件方式");
 
                     b.Property<DateTimeOffset?>("SentAt")
                         .HasColumnType("timestamp with time zone")
@@ -890,7 +890,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Migrations
                     b.Property<string>("ActiveVersions")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasComment("各渠道当前生效的版本号，JSON：渠道编码到版本号；没有的渠道用代码里的默认内容");
+                        .HasComment("各渠道选用的发布版本号（JSON：渠道编码到版本号）");
 
                     b.Property<bool>("CarriesSecret")
                         .HasColumnType("boolean")

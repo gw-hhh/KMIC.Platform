@@ -4,7 +4,7 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// 框架订阅路由的只读查询结果
 /// </summary>
 /// <remarks>
-/// 状态在查询里已经换成编码文字，见 <c>MessageRouteStatus</c>
+/// 查询将状态转换为 <c>MessageRouteStatus</c> 编码
 /// </remarks>
 public sealed record MessageRouteRow
 {

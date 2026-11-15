@@ -8,7 +8,7 @@ namespace Kmic.Sample.Domain.Specimens;
 public sealed class SpecimenStatus : Enumeration<SpecimenStatus>
 {
     /// <summary>
-    /// 草稿，可以修改明细
+    /// 草稿
     /// </summary>
     public static readonly SpecimenStatus Draft = new("Draft", "草稿");
 

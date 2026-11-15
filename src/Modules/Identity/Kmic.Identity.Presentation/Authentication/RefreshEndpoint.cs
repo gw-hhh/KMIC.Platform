@@ -18,7 +18,7 @@ internal sealed class RefreshEndpoint : IEndpoint
             .AllowAnonymous()
             .AddEndpointFilter<CookieEndpointGuard>()
             .WithSummary("刷新令牌")
-            .WithDescription("网页客户端通过 HttpOnly Cookie 提交刷新令牌，须携带可信 Origin 和 X-Requested-With: kmic；移动端通过请求体中的 refreshToken 提交。刷新成功后更换刷新令牌；检测到宽限期外的旧令牌重用时，作废会话并返回 401。");
+            .WithDescription("网页客户端通过 HttpOnly Cookie 提交刷新令牌，须携带可信 Origin 和 X-Requested-With: kmic；移动端通过请求体中的 refreshToken 提交。刷新成功后更换刷新令牌；未过期的旧令牌在宽限期外重用时，作废会话并返回 401。");
 
     private static async Task<IResult> HandleAsync(
         RefreshRequest? request,

@@ -10,7 +10,7 @@ namespace Kmic.Files.Application.Uploads.Start;
 /// 文件流不进入消息，写存储时不持有数据库事务：先登记上传，再写存储，最后用 CompleteUpload 或 RejectUpload 登记结果。
 /// 操作者当前角色须具备上传配置要求的权限
 /// </remarks>
-/// <param name="Profile">上传配置名称，如 Sample.SpecimenAttachment</param>
+/// <param name="Profile">上传配置标识，如 Sample.SpecimenAttachment</param>
 /// <param name="FileName">客户端文件名，清理后仅用于显示</param>
 /// <param name="DeclaredSize">客户端声明的大小；超过配置上限时拒绝，实际大小以读到的字节为准</param>
 [AllowAuthenticated]

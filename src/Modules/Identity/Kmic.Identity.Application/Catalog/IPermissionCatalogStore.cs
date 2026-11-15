@@ -1,10 +1,10 @@
 namespace Kmic.Identity.Application.Catalog;
 
 /// <summary>
-/// 权限点与范围对象目录在数据库里的存储：模块内的框架表，只由同步与清理写
+/// 权限点与范围对象的目录存储，仅供同步与清理更新
 /// </summary>
 /// <remarks>
-/// 和命令同一个事务。这些表不是聚合：没有审计列和版本号，一次同步整体写入
+/// 与命令共用事务；目录表不是聚合，没有审计列或版本号，按次整体同步
 /// </remarks>
 public interface IPermissionCatalogStore
 {

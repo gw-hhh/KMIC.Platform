@@ -6,7 +6,7 @@ namespace Kmic.Operations.Application;
 /// Operations 模块的权限点
 /// </summary>
 /// <remarks>
-/// 权限点随用到它的用例一起加入：声明了却没有用例使用，宿主启动时会拒绝
+/// 未被用例或资源动作使用的权限点会导致启动失败
 /// </remarks>
 [PermissionGroup("Operations", "运维")]
 public static class OperationsPermissions

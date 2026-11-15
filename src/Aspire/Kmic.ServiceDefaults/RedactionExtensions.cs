@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Kmic.ServiceDefaults;
 
 /// <summary>
-/// 数据分类的脱敏器注册
+/// 注册数据分类脱敏器
 /// </summary>
 public static class RedactionExtensions
 {
@@ -12,7 +12,7 @@ public static class RedactionExtensions
     /// 注册按数据分类脱敏的服务
     /// </summary>
     /// <remarks>
-    /// Secret 输出 ***，Personal 部分遮盖，Internal 原样。需要把某个值按分类脱敏的服务注入 IRedactorProvider
+    /// Secret 输出 ***，Personal 部分遮盖，Internal 原样；调用方通过 IRedactorProvider 获取脱敏器
     /// </remarks>
     public static IServiceCollection AddKmicRedaction(this IServiceCollection services)
     {

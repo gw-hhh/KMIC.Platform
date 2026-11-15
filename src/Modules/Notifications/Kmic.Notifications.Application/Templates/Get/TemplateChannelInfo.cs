@@ -1,7 +1,7 @@
 namespace Kmic.Notifications.Application.Templates.Get;
 
 /// <summary>
-/// 指定渠道当前使用的模板内容
+/// 模板渠道的内容
 /// </summary>
 /// <param name="Channel">渠道编码：Email、Sms、InApp</param>
 /// <param name="ActiveVersion">当前选用的发布版本号；未选用时为空</param>

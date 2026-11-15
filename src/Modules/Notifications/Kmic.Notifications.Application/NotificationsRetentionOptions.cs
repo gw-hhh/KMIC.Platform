@@ -6,7 +6,7 @@ namespace Kmic.Notifications.Application;
 /// 通知相关数据的保留期
 /// </summary>
 /// <remarks>
-/// 部署配置，节名 Notifications:Retention。超过保留期的由每日的清理任务删除
+/// 配置节为 Notifications:Retention；各类记录按各自保留期由每日任务清理
 /// </remarks>
 public sealed class NotificationsRetentionOptions
 {

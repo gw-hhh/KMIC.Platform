@@ -3,10 +3,10 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 用户管理策略的目标，包含用户及跨聚合授权事实
+/// 用户管理策略的目标
 /// </summary>
 /// <remarks>
-/// 策略不访问数据库，所以这些事实由处理器查好后一起传入
+/// 调用方先查询角色保护状态和持有人信息，策略不查库
 /// </remarks>
 /// <param name="User">被管理的用户</param>
 /// <param name="OperatorIsProtected">操作者当前角色是否受保护</param>

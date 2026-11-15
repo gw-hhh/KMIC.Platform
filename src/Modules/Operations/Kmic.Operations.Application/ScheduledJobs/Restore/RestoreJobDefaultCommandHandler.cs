@@ -31,7 +31,6 @@ public sealed class RestoreJobDefaultCommandHandler(
             return loaded.Error;
         }
 
-        // 没有自定义设置记录时，按任务不存在处理
         if (loaded.Value is not { } setting)
         {
             return OperationsErrors.JobNotFound;

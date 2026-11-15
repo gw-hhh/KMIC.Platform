@@ -3,7 +3,7 @@ using Kmic.Identity.Domain.Roles;
 namespace Kmic.Identity.Application.Roles;
 
 /// <summary>
-/// 角色管理策略的目标，包含角色及跨聚合授权事实
+/// 角色管理策略的目标
 /// </summary>
 /// <remarks>
 /// 策略不访问数据库，操作者当前角色是否受保护由处理器查询后传入

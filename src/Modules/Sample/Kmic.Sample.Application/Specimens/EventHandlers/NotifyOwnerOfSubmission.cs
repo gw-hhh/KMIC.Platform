@@ -11,7 +11,6 @@ namespace Kmic.Sample.Application.Specimens.EventHandlers;
 /// </summary>
 /// <remarks>
 /// 发送请求随提交命令在同一事务中写入 Outbox，事务回滚时不发送。
-/// 去重键包含示例 ID，用于避免重复生成同一示例的通知投递
 /// </remarks>
 internal sealed class NotifyOwnerOfSubmission(IIntegrationEventPublisher publisher) : IDomainEventHandler<SpecimenSubmitted>
 {

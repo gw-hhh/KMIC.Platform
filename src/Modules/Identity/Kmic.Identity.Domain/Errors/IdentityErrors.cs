@@ -58,9 +58,9 @@ public static class IdentityErrors
     public static readonly Error AccountInvalid = Error.Validation("Identity.AccountInvalid", "账号不能为空，最长 100 个字符，不能含空白或控制字符");
 
     /// <summary>
-    /// 姓名格式无效
+    /// 姓名或英文名格式无效
     /// </summary>
-    public static readonly Error DisplayNameInvalid = Error.Validation("Identity.DisplayNameInvalid", "姓名不能为空，最长 100 个字符");
+    public static readonly Error DisplayNameInvalid = Error.Validation("Identity.DisplayNameInvalid", "姓名不能为空；姓名和英文名最多 100 个字符，不能含控制字符");
 
     /// <summary>
     /// 手机号格式无效
@@ -78,7 +78,7 @@ public static class IdentityErrors
     public static readonly Error EmployeeNoInvalid = Error.Validation("Identity.EmployeeNoInvalid", "工号最长 50 个字符，不能含空白或控制字符");
 
     /// <summary>
-    /// 系统账号不能被修改、授予或登录
+    /// 系统账号不可修改、不可登录，也不能向其授予角色
     /// </summary>
     public static readonly Error SystemUserImmutable = Error.BusinessRule("Identity.SystemUserImmutable", "系统账号不能修改");
 
@@ -100,10 +100,10 @@ public static class IdentityErrors
     /// <summary>
     /// 角色名称格式无效
     /// </summary>
-    public static readonly Error RoleNameInvalid = Error.Validation("Identity.RoleNameInvalid", "角色名称不能为空，最长 100 个字符");
+    public static readonly Error RoleNameInvalid = Error.Validation("Identity.RoleNameInvalid", "角色名称不能为空，最多 100 个字符，不能含控制字符");
 
     /// <summary>
-    /// 授予已存在
+    /// 用户已拥有该角色
     /// </summary>
     public static readonly Error GrantExists = Error.Conflict("Identity.GrantExists", "用户已经拥有这个角色");
 
@@ -140,7 +140,7 @@ public static class IdentityErrors
     /// <summary>
     /// 组织单元名称格式无效
     /// </summary>
-    public static readonly Error OrgUnitNameInvalid = Error.Validation("Identity.OrgUnitNameInvalid", "组织单元名称不能为空，最长 100 个字符");
+    public static readonly Error OrgUnitNameInvalid = Error.Validation("Identity.OrgUnitNameInvalid", "组织单元名称不能为空，最多 100 个字符，不能含控制字符");
 
     /// <summary>
     /// 重新排序时给出的组织单元和实际的下级不一致
@@ -153,7 +153,7 @@ public static class IdentityErrors
     public static readonly Error ProtectedRoleChangeDenied = Error.Forbidden("Identity.ProtectedRoleChangeDenied", "当前角色须为受保护角色，才能执行此操作");
 
     /// <summary>
-    /// 任何人不能修改自己的授予
+    /// 不能修改自己的角色授予
     /// </summary>
     public static readonly Error CannotChangeOwnGrants = Error.Forbidden("Identity.CannotChangeOwnGrants", "不能修改自己的角色授予");
 
@@ -199,7 +199,7 @@ public static class IdentityErrors
     public static readonly Error InvalidRefreshToken = Error.Unauthenticated("Identity.InvalidRefreshToken", "登录已失效，请重新登录");
 
     /// <summary>
-    /// 旧的刷新令牌在宽限期之外再次出现：内部使用，对外统一返回 InvalidRefreshToken
+    /// 未过期的旧刷新令牌在宽限期外重用；仅内部使用，对外返回 InvalidRefreshToken
     /// </summary>
     public static readonly Error RefreshTokenReused = Error.Unauthenticated("Identity.RefreshTokenReused", "登录已失效，请重新登录");
 
@@ -219,7 +219,7 @@ public static class IdentityErrors
     public static readonly Error NoRoleAvailable = Error.Forbidden("Identity.NoRoleAvailable", "你没有可用的角色，请联系管理员");
 
     /// <summary>
-    /// 切换的角色不属于当前用户或已停用
+    /// 目标角色未授予或已停用，或当前为模拟会话
     /// </summary>
     public static readonly Error RoleNotSwitchable = Error.Forbidden("Identity.RoleNotSwitchable", "不能切换到这个角色");
 
@@ -241,7 +241,7 @@ public static class IdentityErrors
     /// <summary>
     /// 当前用户、目标角色或会话条件不允许模拟身份
     /// </summary>
-    public static readonly Error ImpersonationDenied = Error.Forbidden("Identity.ImpersonationDenied", "当前条件不允许模拟该用户");
+    public static readonly Error ImpersonationDenied = Error.Forbidden("Identity.ImpersonationDenied", "无法模拟该用户身份");
 
     /// <summary>
     /// 当前会话不是模拟会话

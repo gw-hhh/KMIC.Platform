@@ -36,7 +36,6 @@ public sealed class SwitchRoleCommandHandler(
             return IdentityErrors.RoleNotSwitchable;
         }
 
-        // 目标角色必须是用户拥有的、启用的角色
         var user = loadedUser.Value;
         var active = user.HasRole(command.RoleId)
             && await db.Roles.AnyAsync(r => r.Id == command.RoleId && r.Status == RoleStatus.Active, cancellationToken);

@@ -55,7 +55,6 @@ public sealed class NotificationProcessor(
             return NotificationsErrors.TemplateSecretMismatch;
         }
 
-        // 来源消息已处理时直接成功，避免重复生成通知
         if (await notifications.ExistsForAsync(request.SourceMessageId, ct))
         {
             return Result.Success();
@@ -177,15 +176,14 @@ public sealed class NotificationProcessor(
         deliveries.Add(Delivery.Queue(context.NotificationId, channel, userId, key, masked, direct, role, content.Subject, content.Body, parameters, attachments, definition.Key, context.DedupKey, content.Version, context.Content.CodeHash, context.Priority));
     }
 
-    // 邮件附件仅保存去重后的文件 ID，发送时再读取内容；无附件时存 null
+    // 仅保存附件 ID，发送时再读取内容
     private static string? AttachmentsOf(NotificationRequest request) =>
         request.AttachmentFileIds is { Count: > 0 } ids ? JsonSerializer.Serialize(ids.Distinct()) : null;
 
-    // 短信只能发已审核的模板编码加参数：参数随投递保存，发送时用
+    // 短信使用已审核的模板编码，参数随投递保存
     private static string? SmsParametersOf(object model) =>
         model is ISmsTemplateModel sms ? JsonSerializer.Serialize(sms.ToSmsParameters()) : null;
 
-    // 系统内用户从联系方式中取地址，外部收件人使用请求中的地址；地址缺失或用户不可用时返回跳过原因
     private static (UserId? UserId, string Key, string? Address, DeliverySkipReason? Skip) Resolve(Recipient recipient, DeliveryChannel channel, FanOut context)
     {
         var direct = channel == DeliveryChannel.Email ? recipient.Email : recipient.Phone;

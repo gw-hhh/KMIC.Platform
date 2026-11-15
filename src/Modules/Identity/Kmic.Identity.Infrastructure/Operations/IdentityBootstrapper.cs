@@ -28,18 +28,12 @@ public sealed class IdentityBootstrapper
     private readonly PasswordPolicy _policy = new(Options.Create(new PasswordOptions()), new EmbeddedWeakPasswordList());
 
     /// <summary>
-    /// 初始化：创建首个管理员、内置的系统管理员角色、授予，以及组织树的根单元
+    /// 初始化首个管理员、系统管理员角色、角色授予及组织树根单元
     /// </summary>
     /// <remarks>
-    /// 只有系统里没有任何普通用户时才能执行，否则返回 <see cref="IdentityErrors.AlreadyBootstrapped" />
+    /// 仅限尚无普通用户的系统，否则返回 <see cref="IdentityErrors.AlreadyBootstrapped" />。
+    /// 密码按默认规则校验，首次登录后须修改；根单元名称为空或空白时使用“总部”
     /// </remarks>
-    /// <param name="connectionString">运维账号的连接串</param>
-    /// <param name="account">管理员账号</param>
-    /// <param name="displayName">管理员姓名</param>
-    /// <param name="password">管理员密码，要满足密码规则；用户首次登录后被要求修改</param>
-    /// <param name="rootUnitName">组织树根单元名称；为 null 或空白时使用“总部”</param>
-    /// <param name="now">当前时间</param>
-    /// <param name="ct">取消令牌</param>
     public async Task<Result> BootstrapAsync(string connectionString, string account, string displayName, string password, string? rootUnitName, DateTimeOffset now, CancellationToken ct)
     {
         await using var db = StandaloneContexts.Create<IdentityDbContext>(connectionString);
@@ -86,13 +80,8 @@ public sealed class IdentityBootstrapper
     /// </summary>
     /// <remarks>
     /// 用于管理员无法登录时的应急恢复，依赖运维数据库权限，并记录安全事件。
-    /// 新密码须满足密码规则，登录后须修改密码；重置不会启用已禁用账号
+    /// 新密码按默认规则校验，登录后须修改密码；重置不会启用已禁用账号
     /// </remarks>
-    /// <param name="connectionString">运维账号的连接串</param>
-    /// <param name="account">管理员账号</param>
-    /// <param name="password">新密码</param>
-    /// <param name="now">当前时间</param>
-    /// <param name="ct">取消令牌</param>
     public async Task<Result> ResetAdministratorPasswordAsync(string connectionString, string account, string password, DateTimeOffset now, CancellationToken ct)
     {
         await using var db = StandaloneContexts.Create<IdentityDbContext>(connectionString);
@@ -124,7 +113,7 @@ public sealed class IdentityBootstrapper
 
         await db.SaveForToolAsync(ct);
 
-        // 命令管道里这一步由领域事件的处理器完成；这里没有管道，直接作废会话并清零登录限制
+        // 命令管道通过领域事件作废会话；应急重置直接作废会话，并额外清零登录限制
         var loginHash = LoginNames.Hash(user.Account);
         await db.Database.ExecuteSqlAsync(
             $"""
@@ -139,7 +128,6 @@ public sealed class IdentityBootstrapper
         return Result.Success();
     }
 
-    // 运维命令直接写入安全事件，以系统账号记录实际操作人
     private static async Task WriteEventAsync(IdentityDbContext db, string type, string severity, UserId target, string account, DateTimeOffset now, CancellationToken ct)
     {
         var severityValue = string.Equals(severity, "High", StringComparison.Ordinal) ? (short)2 : (short)0;

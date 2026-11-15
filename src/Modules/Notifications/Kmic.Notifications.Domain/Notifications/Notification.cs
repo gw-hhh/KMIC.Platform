@@ -55,9 +55,6 @@ public sealed class Notification : AggregateRoot<NotificationId>
     /// <summary>
     /// 记录一次发送请求
     /// </summary>
-    /// <remarks>
-    /// templateVersions 为渠道编码到版本号的 JSON，0 表示代码默认内容
-    /// </remarks>
     public static Notification Create(string templateKey, string templateVersions, string dedupKey, Guid sourceMessageId, string sourceModule, UserId? initiatorUserId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateKey);

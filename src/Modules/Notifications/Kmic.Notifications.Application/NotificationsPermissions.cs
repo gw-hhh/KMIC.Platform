@@ -24,7 +24,7 @@ public static class NotificationsPermissions
     public const string TemplateManage = "Notifications.Template.Manage";
 
     /// <summary>
-    /// 查看投递记录和正文；记录里有收件人和通知内容，查看会写读审计
+    /// 查看投递记录及正文，须记录读审计
     /// </summary>
     [Permission("查看通知投递记录", Sensitive = true)]
     public const string DeliveryView = "Notifications.Delivery.View";

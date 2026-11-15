@@ -70,7 +70,6 @@ internal sealed class DeliveryStore(NotificationsDbContext context)
             WHERE "Id" = {item.Id} AND "LeaseToken" = {token} AND "Status" = {_sending}
             """, ct);
 
-    // 发送时发现收件人已经没有可用的地址：记为已跳过，原因同处理发送请求时
     public async Task SkippedAsync(DeliveryItem item, Guid token, DeliverySkipReason reason, bool clearSecret, CancellationToken ct)
     {
         var code = reason.Code;

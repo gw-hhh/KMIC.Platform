@@ -5,9 +5,6 @@ namespace Kmic.Notifications.Domain.Errors;
 /// <summary>
 /// Notifications 模块的错误目录
 /// </summary>
-/// <remarks>
-/// 错误码写成“Notifications.错误名”，按聚合分文件时拆成多个 *Errors 静态类
-/// </remarks>
 public static class NotificationsErrors
 {
     /// <summary>
@@ -16,9 +13,9 @@ public static class NotificationsErrors
     public static readonly Error SiteMessageNotFound = Error.NotFound("Notifications.SiteMessageNotFound", "消息不存在");
 
     /// <summary>
-    /// 站内消息的链接不是站内地址
+    /// 站内消息链接不符合相对路径要求
     /// </summary>
-    public static readonly Error SiteMessageLinkInvalid = Error.BusinessRule("Notifications.SiteMessageLinkInvalid", "站内消息链接必须使用站内地址");
+    public static readonly Error SiteMessageLinkInvalid = Error.BusinessRule("Notifications.SiteMessageLinkInvalid", "链接须为以单个 / 开头的站内相对路径");
 
     /// <summary>
     /// 语法或渲染错误，具体原因见错误消息
@@ -56,9 +53,9 @@ public static class NotificationsErrors
     public static readonly Error TemplateVersionDuplicated = Error.Conflict("Notifications.TemplateVersionDuplicated", "模板版本号已被使用，请刷新后重试");
 
     /// <summary>
-    /// 含密模板的预览只能用示例数据，不能传入真实数据
+    /// 含密模板预览固定使用示例数据，不接受自定义数据
     /// </summary>
-    public static readonly Error PreviewModelNotAllowed = Error.BusinessRule("Notifications.PreviewModelNotAllowed", "含密模板的预览只能用示例数据");
+    public static readonly Error PreviewModelNotAllowed = Error.BusinessRule("Notifications.PreviewModelNotAllowed", "含密模板预览不接受自定义数据，请移除 model 参数");
 
     /// <summary>
     /// 仅失败且未放弃的投递可重试

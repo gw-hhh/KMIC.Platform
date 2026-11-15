@@ -42,13 +42,7 @@ public sealed class NotificationsDeliveryOptions
     [Range(1, 100)]
     public int MaxAttachmentMb { get; init; } = 20;
 
-    /// <summary>
-    /// 领取租期
-    /// </summary>
     public TimeSpan Lease => TimeSpan.FromMinutes(LeaseMinutes);
 
-    /// <summary>
-    /// 轮询间隔
-    /// </summary>
     public TimeSpan Poll => TimeSpan.FromSeconds(PollSeconds);
 }

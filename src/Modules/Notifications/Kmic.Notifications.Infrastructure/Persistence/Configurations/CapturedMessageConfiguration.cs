@@ -15,6 +15,6 @@ internal sealed class CapturedMessageConfiguration : IEntityTypeConfiguration<Ca
         builder.Property(c => c.Body).IsUnboundedText();
         builder.HasIndex(c => c.DeliveryId);
         builder.HasIndex(c => c.CapturedAt);
-        builder.HasNoDataScope("捕获内容按权限点管理，只在非生产环境存在");
+        builder.HasNoDataScope("捕获内容按权限点管理，不按用户或组织划分");
     }
 }

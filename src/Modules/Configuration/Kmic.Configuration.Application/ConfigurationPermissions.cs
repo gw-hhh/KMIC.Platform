@@ -6,7 +6,7 @@ namespace Kmic.Configuration.Application;
 /// Configuration 模块的权限点
 /// </summary>
 /// <remarks>
-/// 资源名一律单数。读取字典、读取自己的偏好不需要权限点，登录即可
+/// 读取字典、读取自己的偏好不需要权限点，登录即可
 /// </remarks>
 [PermissionGroup("Configuration", "配置")]
 public static class ConfigurationPermissions

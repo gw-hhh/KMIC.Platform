@@ -36,7 +36,6 @@ public sealed class PublishTemplateCommandHandler(
             return allowed.Error;
         }
 
-        // 用示例数据严格渲染，只能检查本次执行到的变量，不能覆盖所有条件分支
         var definition = catalog.Find(template.Key);
         if (definition is null)
         {

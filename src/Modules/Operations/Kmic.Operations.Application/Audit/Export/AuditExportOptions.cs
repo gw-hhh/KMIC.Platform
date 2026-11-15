@@ -18,8 +18,5 @@ public sealed class AuditExportOptions
     [Range(1, 30)]
     public int ExportRetentionDays { get; init; } = 7;
 
-    /// <summary>
-    /// 导出文件保留时长
-    /// </summary>
     public TimeSpan ExportRetention => TimeSpan.FromDays(ExportRetentionDays);
 }

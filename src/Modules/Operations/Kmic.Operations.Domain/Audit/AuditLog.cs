@@ -44,7 +44,7 @@ public sealed class AuditLog : AggregateRoot<AuditLogId>
     public UserId? ActorUserId { get; private set; }
 
     /// <summary>
-    /// 模拟登录时真正动手的人
+    /// 模拟身份时的实际操作人
     /// </summary>
     public UserId? ActualUserId { get; private set; }
 

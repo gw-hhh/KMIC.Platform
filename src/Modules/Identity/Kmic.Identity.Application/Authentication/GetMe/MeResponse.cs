@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Authentication.GetMe;
 /// <param name="EnglishName">英文名</param>
 /// <param name="OrgUnitId">所属组织单元 ID</param>
 /// <param name="CurrentRole">当前角色</param>
-/// <param name="Roles">可以切换的角色（启用的）</param>
+/// <param name="Roles">已获授且启用的角色</param>
 /// <param name="Permissions">当前角色的权限点，按编码排序</param>
 /// <param name="AuthorizationVersion">授权版本号，变化时前端重新查询用户信息</param>
 /// <param name="PasswordChangeRequired">是否必须先修改密码</param>

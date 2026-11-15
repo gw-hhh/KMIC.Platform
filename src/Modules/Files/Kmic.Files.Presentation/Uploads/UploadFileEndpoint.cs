@@ -101,7 +101,7 @@ internal sealed class UploadFileEndpoint : IEndpoint
         return null;
     }
 
-    // 浏览器直接发 filename，也有客户端发 RFC 5987 编码的 filename*：后者带编码，优先用它
+    // 优先使用 RFC 5987 的 filename*，兼容带编码的文件名
     private static string? NameOf(ContentDispositionHeaderValue disposition) =>
         HeaderUtilities.RemoveQuotes(disposition.FileNameStar.HasValue ? disposition.FileNameStar : disposition.FileName).Value;
 

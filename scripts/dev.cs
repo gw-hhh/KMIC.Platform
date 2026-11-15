@@ -143,7 +143,7 @@ string EnsureDatabaseContainer()
     }
     else
     {
-        // 手工建的容器，密码在它的环境变量里
+        // 本机未保存密码时，从容器环境变量读取
         password = Get("PostgresPassword") ?? ReadContainerPassword();
         if (!existing.StartsWith("Up", StringComparison.Ordinal))
         {
@@ -334,7 +334,6 @@ static string FindRepositoryRoot()
     throw new InvalidOperationException("找不到仓库根目录（Kmic.slnx）。请在仓库里运行。");
 }
 
-// 本机状态（生成的密码）存在 .local/dev.json，一个名字对一个值
 string? Get(string key) => state.GetValueOrDefault(key);
 
 void Set(string key, string? value)

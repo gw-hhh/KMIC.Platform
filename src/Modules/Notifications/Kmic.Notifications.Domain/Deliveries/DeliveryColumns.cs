@@ -1,10 +1,10 @@
 namespace Kmic.Notifications.Domain.Deliveries;
 
 /// <summary>
-/// 投递表里不属于聚合属性的列名
+/// 投递表影子属性的列名
 /// </summary>
 /// <remarks>
-/// 这些列是影子属性，只由投递工作器和管理用例用带条件的语句更新；查询用 EF.Property 读取，列名集中在这里
+/// 仅由投递工作器或管理用例按条件更新，查询时通过 EF.Property 读取
 /// </remarks>
 public static class DeliveryColumns
 {

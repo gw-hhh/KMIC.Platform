@@ -15,7 +15,7 @@ public interface ILoginThrottleStore
     Task<LoginThrottleState?> GetAsync(string loginNameHash, CancellationToken ct);
 
     /// <summary>
-    /// 记一次失败：行上加锁后按规则算出新状态并保存，并发的失败不会丢计数
+    /// 记录登录失败；加行锁后更新状态，避免并发计数丢失
     /// </summary>
     Task<LoginThrottleState> RecordFailureAsync(string loginNameHash, DateTimeOffset now, CancellationToken ct);
 

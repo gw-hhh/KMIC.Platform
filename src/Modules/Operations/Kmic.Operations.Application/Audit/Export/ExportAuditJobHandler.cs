@@ -93,7 +93,6 @@ public sealed class ExportAuditJobHandler(
             return written.Error;
         }
 
-        // 登记请求与检查点一起提交；未登记的存储对象由对账任务清理
         var registered = await context.SendBatchAsync(new RegisterAuditExportFileCommand(written.Value), new AuditExportCheckpoint(Registered: true), rows);
         return registered.IsFailure
             ? registered.Error

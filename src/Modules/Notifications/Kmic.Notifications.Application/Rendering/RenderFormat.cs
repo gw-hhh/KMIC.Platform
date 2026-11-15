@@ -6,7 +6,7 @@ namespace Kmic.Notifications.Application.Rendering;
 public enum RenderFormat
 {
     /// <summary>
-    /// 邮件的 HTML 正文：变量的值默认转义，防止用户输入的内容变成标记
+    /// 邮件 HTML 正文：默认转义变量值，避免将输入内容解释为 HTML
     /// </summary>
     Html,
 

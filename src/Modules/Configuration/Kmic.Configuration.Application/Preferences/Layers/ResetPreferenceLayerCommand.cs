@@ -9,7 +9,7 @@ namespace Kmic.Configuration.Application.Preferences.Layers;
 /// 重置系统层或角色层的偏好
 /// </summary>
 /// <remarks>
-/// 删除指定层的保存值，生效值按允许层级回退；均无可用值时使用代码默认值。
+/// 删除指定层的保存值，后续读取按允许层级回退。
 /// </remarks>
 /// <param name="Key">偏好键</param>
 /// <param name="RoleId">角色 ID，未指定时操作系统层</param>

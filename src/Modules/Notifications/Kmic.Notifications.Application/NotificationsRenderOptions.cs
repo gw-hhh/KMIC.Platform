@@ -22,7 +22,7 @@ public sealed class NotificationsRenderOptions
     public int RenderTimeoutMs { get; init; } = 1000;
 
     /// <summary>
-    /// 单次渲染输出长度上限，每单位为 1024 个字符
+    /// 单次渲染输出长度上限，以 1024 个字符为单位
     /// </summary>
     [Range(1, 10_240)]
     public int MaxOutputKb { get; init; } = 1024;

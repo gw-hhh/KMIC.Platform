@@ -39,7 +39,7 @@ internal sealed class RunnerContext(IConfiguration configuration, IReadOnlyList<
         return services.BuildServiceProvider();
     }
 
-    // 参数不合规（分组键格式、序号不是正数）和连不上数据库都说明原因并返回 1，不让异常堆栈直接打到部署日志里
+    // 只输出错误原因并返回 1，避免将异常堆栈写入部署日志
     public async Task<int> GuardedAsync(Func<Task<int>> run)
     {
         try

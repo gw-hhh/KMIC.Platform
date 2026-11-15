@@ -6,9 +6,6 @@ namespace Kmic.Configuration.Application.ContractQueries;
 /// <summary>
 /// 通过查询管道读取字典快照并检查字典项是否可选
 /// </summary>
-/// <remarks>
-/// 类型不存在时返回 null；查询管道返回失败时抛异常，由统一异常处理机制接管
-/// </remarks>
 public sealed class DictionaryLookup(IContractQuerySender sender) : IDictionaries
 {
     /// <inheritdoc />

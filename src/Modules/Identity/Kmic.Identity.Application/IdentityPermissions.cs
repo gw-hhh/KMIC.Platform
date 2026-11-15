@@ -6,8 +6,8 @@ namespace Kmic.Identity.Application;
 /// Identity 模块的权限点
 /// </summary>
 /// <remarks>
-/// 资源名一律单数。标了敏感的权限点，用到它的命令必须审计，查询必须记读审计。
-/// 框架启动时检查每个权限点都被用例或资源动作用到，所以权限点随用到它的用例一起加入
+/// 使用敏感权限点的命令须记录审计，查询须记录读审计。
+/// 未被用例或资源动作使用的权限点会导致启动失败
 /// </remarks>
 [PermissionGroup("Identity", "身份与授权")]
 public static class IdentityPermissions
@@ -19,7 +19,7 @@ public static class IdentityPermissions
     public const string RoleView = "Identity.Role.View";
 
     /// <summary>
-    /// 角色的增改停用、权限点与范围配置
+    /// 创建、修改、启用或停用角色，配置权限点和数据范围
     /// </summary>
     [Permission("管理角色", Sensitive = true)]
     public const string RoleManage = "Identity.Role.Manage";
@@ -61,7 +61,7 @@ public static class IdentityPermissions
     public const string OrgUnitManage = "Identity.OrgUnit.Manage";
 
     /// <summary>
-    /// 授予、收回用户的角色与锚点
+    /// 授予或收回角色，设置角色授予的组织锚点
     /// </summary>
     [Permission("授予与收回角色", Sensitive = true)]
     public const string UserGrant = "Identity.User.Grant";

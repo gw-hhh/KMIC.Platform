@@ -9,14 +9,15 @@ namespace Kmic.Notifications.Contracts;
 /// 请求发送一条通知
 /// </summary>
 /// <remarks>
-/// 请求型消息，随业务事务写入 Outbox，由 Notifications 去重、渲染、投递；业务回滚则不发。
+/// 请求型消息，随业务事务写入 Outbox；业务回滚则不发。
+/// 邮件和短信按模板、收件人、去重键和渠道去重；投递记录清理后可再次生成。站内消息不按去重键去重。
 /// 内容含验证码这类凭据的模板不能用它，改用 <see cref="SendSecretNotification" />。
 /// 用 <see cref="For{TModel}" /> 构造，数据模型由框架序列化，和模板声明保持一致
 /// </remarks>
 /// <param name="TemplateKey">模板键，如 Sample.Approved</param>
 /// <param name="To">收件人</param>
 /// <param name="Model">模板数据，结构由模板声明决定</param>
-/// <param name="DedupKey">业务去重键：同一模板、收件人、键和渠道仅生成一条投递，如 Sample.Approved:{单据 ID}:{修订号}</param>
+/// <param name="DedupKey">业务去重键，如 Sample.Approved:{单据 ID}:{修订号}</param>
 /// <param name="AttachmentFileIds">附件的文件 ID，投递时读取内容</param>
 /// <param name="Priority">优先级</param>
 [IntegrationMessage("Notifications.SendNotification")]

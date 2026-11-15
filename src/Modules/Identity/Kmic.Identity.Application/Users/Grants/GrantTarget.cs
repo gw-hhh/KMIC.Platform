@@ -4,7 +4,7 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users.Grants;
 
 /// <summary>
-/// 角色授予策略的目标，包含用户、角色及跨聚合授权事实
+/// 角色授予策略的目标
 /// </summary>
 /// <param name="User">被授予的用户</param>
 /// <param name="RoleId">角色 ID</param>

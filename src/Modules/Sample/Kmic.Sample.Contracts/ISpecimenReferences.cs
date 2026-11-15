@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Contracts.References;
 namespace Kmic.Sample.Contracts;
 
 /// <summary>
-/// 其他模块解析示例引用时用的接口
+/// 供其他模块查询示例引用信息
 /// </summary>
 /// <remarks>
 /// 只返回 ID、编号、名称和状态。
@@ -15,5 +15,6 @@ public interface ISpecimenReferences
     /// <summary>
     /// 批量解析示例引用
     /// </summary>
+    /// <exception cref="InvalidOperationException">查询失败</exception>
     Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct);
 }

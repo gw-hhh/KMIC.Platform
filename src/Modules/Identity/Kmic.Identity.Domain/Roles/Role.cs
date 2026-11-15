@@ -51,7 +51,7 @@ public sealed class Role : AggregateRoot<RoleId>
     public RoleStatus Status { get; private set; } = null!;
 
     /// <summary>
-    /// 是否受保护：只有持有受保护角色的人才能管理它，也不能借管理它的持有人绕开
+    /// 是否受保护
     /// </summary>
     public bool IsProtected { get; private set; }
 

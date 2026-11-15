@@ -14,7 +14,7 @@ namespace Kmic.Files.Application.Administration;
 /// <param name="ContentType">内容类型</param>
 /// <param name="Size">字节数</param>
 /// <param name="Sha256">内容的 SHA-256</param>
-/// <param name="Profile">上传配置名称；生成文件为 Generated:来源</param>
+/// <param name="Profile">上传配置标识；生成文件为 Generated:来源</param>
 /// <param name="UploadedBy">上传人或生成请求人 ID，可为空</param>
 /// <param name="UploadedAt">文件登记时间</param>
 /// <param name="Status">状态</param>

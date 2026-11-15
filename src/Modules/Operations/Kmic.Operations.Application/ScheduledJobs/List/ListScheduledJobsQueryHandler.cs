@@ -17,7 +17,6 @@ public sealed class ListScheduledJobsQueryHandler(
     IUserReferences users,
     IAllowedActions<ScheduledJobTarget> allowedActions) : IQueryHandler<ListScheduledJobsQuery, IReadOnlyList<ScheduledJobItem>>
 {
-    // 代码里的默认值总是启用
     private const bool DefaultEnabled = true;
 
     /// <inheritdoc />

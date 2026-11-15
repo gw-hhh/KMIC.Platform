@@ -49,13 +49,13 @@ public sealed class FilesOptions
     public int PurgeBatchSize { get; init; } = 1000;
 
     /// <summary>
-    /// 上传超时阈值（分钟），超过后仍未完成则视为中断
+    /// 上传超时时长（分钟），达到后仍未完成则视为中断
     /// </summary>
     [Range(5, 24 * 60)]
     public int StaleUploadMinutes { get; init; } = 60;
 
     /// <summary>
-    /// 对账对象和文件的最短存续天数，避免处理仍在写入或等待登记的对象
+    /// 对账的最短等待天数，避免处理仍在写入或等待登记的对象
     /// </summary>
     [Range(1, 30)]
     public int ReconcileMinAgeDays { get; init; } = 2;
@@ -79,28 +79,13 @@ public sealed class FilesOptions
     [Range(1, 2048)]
     public int GeneratedFileMaxMb { get; init; } = 200;
 
-    /// <summary>
-    /// 临时文件保留时长
-    /// </summary>
     public TimeSpan TempExpiry => TimeSpan.FromHours(TempExpiryHours);
 
-    /// <summary>
-    /// 解除关联后的保留时长
-    /// </summary>
     public TimeSpan DetachedRetention => TimeSpan.FromDays(DetachedRetentionDays);
 
-    /// <summary>
-    /// 被拒绝文件的保留时长
-    /// </summary>
     public TimeSpan RejectedRetention => TimeSpan.FromDays(RejectedRetentionDays);
 
-    /// <summary>
-    /// 上传超时阈值
-    /// </summary>
     public TimeSpan StaleUpload => TimeSpan.FromMinutes(StaleUploadMinutes);
 
-    /// <summary>
-    /// 对账对象和文件的最短存续时长
-    /// </summary>
     public TimeSpan ReconcileMinAge => TimeSpan.FromDays(ReconcileMinAgeDays);
 }

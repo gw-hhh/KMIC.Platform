@@ -22,7 +22,7 @@ public interface ITemplateRepository : IRepository<NotificationTemplate, Notific
     Task<IReadOnlyList<NotificationTemplate>> ListAllAsync(CancellationToken ct);
 
     /// <summary>
-    /// 查询模板各渠道当前生效的发布版本
+    /// 查询模板各渠道选用的发布版本
     /// </summary>
     /// <remarks>
     /// 使用代码默认内容的渠道不在结果中；模板不存在时返回空集合

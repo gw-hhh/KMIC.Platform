@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.Authorization;
 namespace Kmic.Operations.Application.ScheduledJobs;
 
 /// <summary>
-/// 定时任务资源策略，不追加资源归属限制
+/// 定时任务资源策略
 /// </summary>
 /// <remarks>
 /// 访问权限由用例或动作目录检查，此策略不按任务归属追加限制。

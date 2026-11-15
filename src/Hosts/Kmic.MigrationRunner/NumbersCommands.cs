@@ -64,7 +64,7 @@ internal static class NumbersCommands
             var day = parse.GetValue(date);
             if (day is null && definition.Reset != NumberReset.Never)
             {
-                await context.Output.WriteLineAsync($"规则 {name} 按{definition.Reset}重置，要用 --date 指明旧编号所在的日期。");
+                await context.Output.WriteLineAsync($"规则 {name} 的重置周期为 {definition.Reset}，请用 --date 指定旧编号的日期。");
                 return RunnerApp.UsageExitCode;
             }
 

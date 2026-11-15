@@ -35,7 +35,7 @@ public sealed class PurgeExpiredFilesCommandHandler(
         var rejected = await files.FindExpiredAsync(StoredFileStatus.Rejected, now, batch, cancellationToken);
         marked += await ExpireAsync(rejected, "被拒绝的文件到期", cancellationToken);
 
-        // 临时文件和已解除关联的文件可能存在并发关联，须先检查互斥条件；共用本批剩余额度
+        // 两类文件共用剩余批次额度；清理前须排除并发关联
         var remaining = batch - rejected.Count;
         if (remaining > 0)
         {

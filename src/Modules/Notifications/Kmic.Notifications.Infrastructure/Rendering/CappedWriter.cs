@@ -3,10 +3,10 @@ using System.Text;
 namespace Kmic.Notifications.Infrastructure.Rendering;
 
 /// <summary>
-/// 限制模板输出大小和渲染用时的文本写入器
+/// 限制模板输出长度和渲染用时的文本写入器
 /// </summary>
 /// <remarks>
-/// 每次写入时检查实际用时和输出大小；持续输出的循环超限即中断，不输出的循环由 Fluid 步数上限限制
+/// 每次写入时检查耗时和输出长度；持续输出的循环超限即中断，不输出的循环由 Fluid 步数上限限制
 /// </remarks>
 internal sealed class CappedWriter(int maxChars, TimeSpan timeout, TimeProvider time) : TextWriter
 {
@@ -76,12 +76,12 @@ internal sealed class CappedWriter(int maxChars, TimeSpan timeout, TimeProvider 
     {
         if (_text.Length + count > maxChars)
         {
-            throw new InvalidOperationException($"输出超过了 {maxChars} 个字符的上限");
+            throw new InvalidOperationException($"输出长度超过上限（{maxChars} 个字符）");
         }
 
         if (time.GetElapsedTime(_started) > timeout)
         {
-            throw new TimeoutException($"渲染超过了 {timeout.TotalMilliseconds:0} 毫秒的上限");
+            throw new TimeoutException($"渲染耗时超过上限（{timeout.TotalMilliseconds:0} 毫秒）");
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Kmic.Files.Domain.Files;
 public sealed class StoredFileAction : Enumeration<StoredFileAction>
 {
     /// <summary>
-    /// 写入完成，没有扫描器
+    /// 写入完成，无需扫描
     /// </summary>
     public static readonly StoredFileAction Complete = new("Complete", "上传完成");
 

@@ -25,7 +25,7 @@ internal sealed class OperatorContext(IConfiguration configuration, TextReader i
         return string.IsNullOrEmpty(line) ? throw new InvalidOperationException("未从标准输入读取到密码，请通过管道或重定向提供，勿放入命令行参数。") : line;
     }
 
-    // 连不上数据库和参数不合规都说明原因并返回 1，不让异常堆栈直接打到部署日志里
+    // 只输出错误原因并返回 1，避免将异常堆栈写入部署日志
     public async Task<int> GuardedAsync(Func<Task<int>> run)
     {
         try

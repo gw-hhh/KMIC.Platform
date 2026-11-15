@@ -22,7 +22,7 @@ public sealed class TemporaryPasswordGenerator(IOptions<PasswordOptions> setting
     ];
 
     /// <summary>
-    /// 生成一个临时密码：用密码学随机数，长度不少于密码策略要求的最小长度
+    /// 使用密码学随机数生成临时密码，长度不低于配置的最小值
     /// </summary>
     public string Generate() => new(RandomNumberGenerator.GetItems<char>(_alphabet, Math.Max(PreferredLength, settings.Value.MinLength)));
 }

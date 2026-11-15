@@ -7,7 +7,7 @@ namespace Kmic.Files.Infrastructure.Storage;
 /// 按部署配置选择本地或 S3 存储，并转发存储操作
 /// </summary>
 /// <remarks>
-/// 构造时选择存储并校验其配置；错误在创建服务时暴露
+/// 构造时选择并创建存储实现，不主动检查连通性或读写权限
 /// </remarks>
 internal sealed class ConfiguredFileStorage : IFileStorage, IDisposable
 {

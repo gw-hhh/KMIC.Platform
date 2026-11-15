@@ -48,6 +48,6 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.HasIndex(d => d.RecipientUserId);
         builder.HasIndex(d => new { d.Status, d.Priority });
         builder.HasIndex(d => d.NotificationId);
-        builder.HasNoDataScope("投递记录按权限点管理，不按组织范围；收件人的联系方式已脱敏");
+        builder.HasNoDataScope("投递记录按权限点管理，不按组织范围");
     }
 }

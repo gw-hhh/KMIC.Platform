@@ -13,7 +13,7 @@ internal sealed class GetMeEndpoint : IEndpoint
             .Sends<GetMeQuery>()
             .AllowWhenRoleUnavailable()
             .WithSummary("查询当前用户信息")
-            .WithDescription("返回用户资料、当前及可切换角色、当前权限、授权版本、密码修改要求、身份模拟状态和业务时区。当前角色不可用时仍可调用，供前端引导重新选择角色。");
+            .WithDescription("返回用户资料、当前角色及已获授的启用角色、当前权限、授权版本、密码修改要求、身份模拟状态和业务时区。当前角色不可用时仍可调用，供前端引导重新选择角色。");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetMeQuery(), ct)).ToOk();

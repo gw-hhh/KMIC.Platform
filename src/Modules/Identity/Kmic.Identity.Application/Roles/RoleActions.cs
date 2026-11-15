@@ -21,6 +21,5 @@ public sealed class RoleActions : ResourceActionCatalog<RoleTarget, RoleAdminAct
         builder.Action(RoleAdminAction.Enable, IdentityPermissions.RoleManage);
     }
 
-    // 内置的系统管理员角色：权限点、数据范围不能手工改，也不能停用
     private static Result NotBuiltIn(RoleTarget target) => target.Role.IsBuiltIn ? IdentityErrors.SystemRoleImmutable : Result.Success();
 }

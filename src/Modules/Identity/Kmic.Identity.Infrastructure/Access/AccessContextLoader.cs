@@ -150,7 +150,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         return snapshot;
     }
 
-    // 用私有加载器封装查询上下文，避免将上下文的可写属性直接暴露给缓存状态检查
+    // 架构检查不允许加载状态公开可变成员，因此用私有加载器封装查询上下文
     private sealed class RoleSnapshotLoader(IdentityQueryDbContext db, PermissionCatalog catalog, RoleId roleId)
     {
         public async ValueTask<RoleSnapshot> LoadAsync(CancellationToken ct)
@@ -163,7 +163,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
                 .SingleOrDefaultAsync(r => r.Id == roleId, ct)
                 ?? throw new InvalidOperationException($"授予指向不存在的角色 {roleId.Value}。");
 
-            // 全权限角色不存权限点行，拥有当前目录里的全部；其余角色只保留目录里还有的，已退役的权限点没有代码会检查它
+            // 全权限角色使用当前目录的全部权限，其余角色过滤掉已退役权限
             var codes = role.GrantsAllPermissions
                 ? catalog.All.Select(p => p.Code)
                 : role.Permissions.Select(p => p.PermissionCode).Where(catalog.Contains);

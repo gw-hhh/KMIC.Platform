@@ -49,7 +49,7 @@ public interface IOperationsQueryDb
     /// 按操作对象筛选审计记录
     /// </summary>
     /// <remarks>
-    /// 操作对象存成 JSON 数组，按包含关系匹配，走表上的 GIN 索引。JSON 函数是数据库专有的，Application 不引用数据库驱动，所以放在查询入口里
+    /// 按 JSON 包含关系匹配，使用 GIN 索引；数据库函数留在实现层，避免 Application 依赖数据库驱动
     /// </remarks>
     /// <param name="audits">要筛选的审计记录</param>
     /// <param name="targetsJson">操作对象的 JSON 匹配条件，如 [{"resourceType":"User","resourceId":"…"}]；可只提供要匹配的属性</param>

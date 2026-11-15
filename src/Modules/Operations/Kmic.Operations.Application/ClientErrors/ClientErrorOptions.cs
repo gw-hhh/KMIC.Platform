@@ -19,7 +19,7 @@ public sealed class ClientErrorOptions
     public int MaxPerRequest { get; init; } = 20;
 
     /// <summary>
-    /// 每用户每分钟的上报请求数上限，超出返回 429，前端丢弃本批且不重试。按实例计数，仅用于防滥用，不保证多实例下的全局精确限额
+    /// 每个用户每分钟的上报次数上限；超限返回 429，本批数据不重试。各实例独立计数，仅用于防滥用，不保证全局限额
     /// </summary>
     [Range(1, 10_000)]
     public int RequestsPerUserPerMinute { get; init; } = 30;

@@ -24,7 +24,7 @@ public sealed class ResetStaleUploadsCommandHandler(IStoredFileRepository files,
         var rejected = 0;
         foreach (var id in stale)
         {
-            // 上传可能已完成，重读后由 Reject 校验是否仍为上传中
+            // 候选状态可能已变化；重读后仅拒绝仍在上传或扫描的文件
             var loaded = await files.GetForUpdateAsync(id, null, cancellationToken);
             if (loaded.IsSuccess && loaded.Value.Reject(Reason, now, options.Value.RejectedRetention).IsSuccess)
             {

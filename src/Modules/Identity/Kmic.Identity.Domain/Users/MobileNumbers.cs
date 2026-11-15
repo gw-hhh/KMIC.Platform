@@ -9,7 +9,6 @@ namespace Kmic.Identity.Domain.Users;
 /// </summary>
 /// <remarks>
 /// 大陆手机号统一加 +86，其他号码按国际号码格式校验。
-/// 统一号码格式以保证唯一性校验，避免同一手机号因写法不同对应多个用户。
 /// </remarks>
 public static partial class MobileNumbers
 {

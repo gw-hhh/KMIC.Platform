@@ -8,7 +8,7 @@ namespace Kmic.Identity.Application.Roles.Create;
 /// <summary>
 /// 创建不含权限点的角色
 /// </summary>
-/// <param name="Name">名称，不区分大小写唯一</param>
+/// <param name="Name">名称，不得重复（不区分大小写）</param>
 /// <param name="Description">说明</param>
 /// <param name="SortOrder">登录时角色下拉里的次序</param>
 /// <param name="DefaultScopeLevel">默认数据范围等级</param>

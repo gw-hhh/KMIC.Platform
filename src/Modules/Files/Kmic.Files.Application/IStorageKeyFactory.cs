@@ -4,7 +4,7 @@ namespace Kmic.Files.Application;
 /// 生成文件的对象存储键
 /// </summary>
 /// <remarks>
-/// 键由环境、年月和文件 ID 组成，与原始文件名无关：防路径穿越、防覆盖、防通过文件名猜测
+/// 键由环境、年月和文件 ID 组成，不使用原始文件名，避免路径穿越、覆盖及按文件名猜测存储位置
 /// </remarks>
 public interface IStorageKeyFactory
 {

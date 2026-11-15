@@ -23,7 +23,7 @@ namespace Kmic.Identity.Application.Users.Get;
 /// <param name="PasswordChangedAt">最近密码修改时间</param>
 /// <param name="LoginLockedUntil">登录等待或锁定的截止时间，无限制时为空；不影响已有会话</param>
 /// <param name="Grants">角色授予</param>
-/// <param name="ActiveSessionCount">仍然有效的会话数，含他发起的模拟会话</param>
+/// <param name="ActiveSessionCount">未作废且未到绝对到期时间的会话数，含相关模拟会话</param>
 /// <param name="AllowedActions">当前用户可对该用户执行的管理动作</param>
 public sealed record UserDetailResponse(
     UserId Id,

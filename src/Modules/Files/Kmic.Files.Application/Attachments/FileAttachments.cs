@@ -25,7 +25,7 @@ public sealed class FileAttachments(
     IOptions<FilesOptions> options) : IFileAttachments
 {
     /// <summary>
-    /// 咨询锁的范围名，清理一方用同样的名字取排他锁
+    /// 文件关联的共享锁与清理的排他锁共用此范围名
     /// </summary>
     public const string LockScope = "Files";
 

@@ -7,7 +7,7 @@ namespace Kmic.Files.Application;
 /// </summary>
 /// <remarks>
 /// 上传与下载没有 Files 自己的权限点：上传由上传配置要求的权限决定，下载由业务对象的授权决定。
-/// 标了敏感的权限点，用到它的命令必须审计。权限点随用到它的用例一起加入
+/// 使用敏感权限点的命令必须记录审计
 /// </remarks>
 [PermissionGroup("Files", "文件")]
 public static class FilesPermissions

@@ -59,8 +59,7 @@ internal static class MergedCursorPaging
         return (items, next);
     }
 
-    // ID 必须按 PostgreSQL 的 uuid 规则排序。
-    // Guid 默认排序与数据库不同，同一时刻的记录可能因此在翻页时遗漏
+    // 按大端字节序比较 UUID，使内存归并与 PostgreSQL 查询使用相同顺序
     private sealed class DatabaseUuidOrder : IComparer<Guid>
     {
         public static DatabaseUuidOrder Instance { get; } = new();

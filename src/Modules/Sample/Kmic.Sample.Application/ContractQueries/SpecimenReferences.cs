@@ -8,10 +8,6 @@ namespace Kmic.Sample.Application.ContractQueries;
 /// <summary>
 /// 为其他模块提供示例引用查询
 /// </summary>
-/// <remarks>
-/// 通过 <see cref="ContractBatch"/> 分批查询引用信息。
-/// 查询失败时抛出异常
-/// </remarks>
 public sealed class SpecimenReferences(IContractQuerySender sender) : ISpecimenReferences
 {
     /// <inheritdoc />

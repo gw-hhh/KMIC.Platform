@@ -1,5 +1,5 @@
-# 禁用 API：业务模块的 src 项目追加（06 第 15.2 节）。BuildingBlocks 与宿主不受限，那里正是这些能力的出处。
-# 每行“符号的文档注释 ID;替代做法”。方法必须逐个重载写全：不带参数列表的方法 ID 不会生效。
+# 业务模块 src 项目的附加禁用 API（06 第 15.2 节）；不用于 BuildingBlocks 和宿主。
+# 每行“符号的文档注释 ID;替代做法”。有参数的方法须逐个重载写全参数列表。
 # 每个符号都要能解析成唯一的符号（架构测试 BannedSymbolsTests 检查），写错一个字符，规则就悄悄失效。修改须框架负责人审核
 # 配置：用 IOptions<T>（05-10）
 T:Microsoft.Extensions.Configuration.IConfiguration;注入 IOptions<T> 读取配置（05-10）

@@ -93,7 +93,7 @@ public static class ConfigurationErrors
     public static readonly Error PreferenceInvalid = Error.BusinessRule("Configuration.PreferenceInvalid", "偏好的值不合法");
 
     /// <summary>
-    /// 给偏好指定的角色不存在
+    /// 指定角色不存在
     /// </summary>
     public static readonly Error PreferenceRoleNotFound = Error.NotFound("Configuration.PreferenceRoleNotFound", "角色不存在");
 

@@ -8,7 +8,7 @@ namespace Kmic.Sample.Domain.Errors;
 public static class SampleErrors
 {
     /// <summary>
-    /// 示例不存在或当前用户无权查看
+    /// 示例不存在或不在当前用户的数据范围内
     /// </summary>
     public static readonly Error NotFound = Error.NotFound("Sample.NotFound", "示例不存在");
 

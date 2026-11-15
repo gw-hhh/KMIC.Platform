@@ -89,13 +89,9 @@ public sealed class SiteMessage : AggregateRoot<SiteMessageId>
     /// <summary>
     /// 创建一条站内消息
     /// </summary>
-    /// <param name="recipient">收件人</param>
-    /// <param name="notificationId">产生它的发送请求</param>
-    /// <param name="title">标题</param>
-    /// <param name="body">正文</param>
-    /// <param name="link">点击跳转的站内地址，只能是站内相对路径</param>
-    /// <param name="category">类别</param>
-    /// <param name="now">现在，作为发出的时间</param>
+    /// <remarks>
+    /// 链接只能是站内相对路径；发送时间取 now
+    /// </remarks>
     public static Result<SiteMessage> Create(UserId recipient, NotificationId? notificationId, string title, string body, string? link, string category, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);

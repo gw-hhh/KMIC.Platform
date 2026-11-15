@@ -64,7 +64,7 @@ internal sealed class PreferenceLayerReader(IQueryScopeFactory queries, HybridCa
             ct);
 
     /// <summary>
-    /// 一层的全部值，进缓存，不可变
+    /// 单层偏好的缓存快照，内容不可变
     /// </summary>
     [ImmutableObject(true)]
     private sealed class LayerSnapshot(Dictionary<string, string> values)

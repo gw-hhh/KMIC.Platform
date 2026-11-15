@@ -26,7 +26,7 @@ if (problems.Count > 0)
     return 1;
 }
 
-// 显式指定解决方案：dotnet sln 默认向上查找，在旧仓库里会改到别的解决方案
+// 显式指定 Kmic.slnx，避免向上查找其他解决方案
 var steps = new (string Name, Func<int> Run)[]
 {
     ("安装并运行模板", () => Template(root, module)),
@@ -62,7 +62,7 @@ static string FindRepositoryRoot()
     return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录里运行。");
 }
 
-// 名称与编号的规则，以及它们在登记表里已经登记、没有被占用
+// 检查模块名称、编号和登记情况，避免与已有模块冲突
 static List<string> Validate(string root, string module, int number)
 {
     var problems = new List<string>();

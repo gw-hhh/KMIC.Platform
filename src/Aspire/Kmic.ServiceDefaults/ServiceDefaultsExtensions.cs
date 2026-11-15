@@ -19,7 +19,7 @@ using Serilog.Formatting.Compact;
 namespace Kmic.ServiceDefaults;
 
 /// <summary>
-/// 宿主的可观测性装配
+/// 宿主的日志、追踪和指标配置
 /// </summary>
 public static class ServiceDefaultsExtensions
 {

@@ -7,8 +7,7 @@ namespace Kmic.Sample.Domain.Specimens;
 /// 示例的附件
 /// </summary>
 /// <remarks>
-/// 保存文件 ID 以及添加附件时的文件名、大小和类型，列表与详情直接使用这些信息。
-/// 文件内容和清理由 Files 模块管理，Files 另行维护文件引用记录
+/// 保存关联时的文件信息，供列表和详情显示；文件内容、引用登记和清理由 Files 模块管理
 /// </remarks>
 public sealed class SpecimenAttachment : Entity<SpecimenAttachmentId>
 {
