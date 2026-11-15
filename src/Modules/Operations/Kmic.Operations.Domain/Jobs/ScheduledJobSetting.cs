@@ -6,7 +6,7 @@ namespace Kmic.Operations.Domain.Jobs;
 /// 定时任务的自定义启用状态和执行计划
 /// </summary>
 /// <remarks>
-/// 空值使用代码默认值；恢复默认或移除任务声明后仍保留记录，便于追溯和版本回滚。
+/// 值为 null 时使用代码默认值；恢复默认或移除任务声明后仍保留记录，便于追溯和版本回滚。
 /// 调度器同步时只读取此表
 /// </remarks>
 public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
@@ -20,17 +20,17 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
     public string JobName { get; private set; }
 
     /// <summary>
-    /// 是否启用；空表示跟着代码里的默认值（启用）
+    /// 是否启用；为 null 时使用默认值（启用）
     /// </summary>
     public bool? Enabled { get; private set; }
 
     /// <summary>
-    /// 执行时间的 Cron 表达式；空表示跟着代码里的默认值
+    /// Cron 表达式；为 null 时使用代码中的默认表达式
     /// </summary>
     public string? Cron { get; private set; }
 
     /// <summary>
-    /// 两项都跟着默认值，也就是等于没有覆盖
+    /// 是否全部使用默认设置
     /// </summary>
     public bool IsDefault => Enabled is null && Cron is null;
 
@@ -47,7 +47,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
     }
 
     /// <summary>
-    /// 替换自定义设置，空值表示使用代码默认值
+    /// 替换自定义设置，null 表示使用代码默认值
     /// </summary>
     public void Apply(bool? enabled, string? cron)
     {

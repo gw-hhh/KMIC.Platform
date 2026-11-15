@@ -16,11 +16,9 @@ public interface IFileAttachments
     /// <summary>
     /// 关联一批文件
     /// </summary>
-    /// <param name="ownerModule">业务模块名</param>
-    /// <param name="ownerType">业务对象的类型，如 Specimen</param>
-    /// <param name="ownerId">业务对象的 ID</param>
-    /// <param name="fileIds">要关联的文件 ID，去重后的数量上限由服务端配置，默认 50 个</param>
-    /// <param name="ct">取消令牌</param>
+    /// <remarks>
+    /// 文件 ID 去重后受数量上限限制，默认最多 50 个（可配置）；空列表不发送关联请求
+    /// </remarks>
     /// <returns>
     /// 成功时返回用于保存业务关联的文件快照。
     /// 文件不可关联时返回 Files.NotAttachable，超过数量上限时返回 Files.TooManyFiles。
@@ -34,10 +32,5 @@ public interface IFileAttachments
     /// <remarks>
     /// 必须与删除业务关联记录在同一个业务事务中完成
     /// </remarks>
-    /// <param name="ownerModule">业务模块名</param>
-    /// <param name="ownerType">业务对象的类型，如 Specimen</param>
-    /// <param name="ownerId">业务对象的 ID</param>
-    /// <param name="fileIds">要解除关联的文件 ID</param>
-    /// <param name="ct">取消令牌</param>
     Task DetachAsync(string ownerModule, string ownerType, Guid ownerId, IReadOnlyCollection<Guid> fileIds, CancellationToken ct);
 }

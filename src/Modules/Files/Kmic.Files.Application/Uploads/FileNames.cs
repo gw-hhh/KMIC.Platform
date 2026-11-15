@@ -13,9 +13,12 @@ internal static class FileNames
     private static readonly char[] _separators = ['/', '\\'];
 
     /// <summary>
-    /// 清理文件名，超长时截断；扩展名不超过 20 个字符时保留，结果为空、"." 或 ".." 时返回 null
+    /// 清理文件名
     /// </summary>
-    /// <param name="fileName">客户端给的文件名</param>
+    /// <remarks>
+    /// 截断超长文件名时，保留长度不超过 20 个字符的扩展名
+    /// </remarks>
+    /// <returns>清理后的文件名；为空、"." 或 ".." 时返回 null</returns>
     public static string? Sanitize(string fileName)
     {
         ArgumentNullException.ThrowIfNull(fileName);

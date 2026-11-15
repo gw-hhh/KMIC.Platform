@@ -11,17 +11,17 @@ namespace Kmic.Configuration.Domain.Preferences;
 public sealed class PreferenceLayer : Enumeration<PreferenceLayer>
 {
     /// <summary>
-    /// 系统层：对所有人生效，不属于任何角色或用户
+    /// 系统层：全局共用，不关联角色或用户
     /// </summary>
     public static readonly PreferenceLayer System = new("System", "系统");
 
     /// <summary>
-    /// 角色层：对这个角色下的所有人生效
+    /// 角色层：同一角色的用户共用
     /// </summary>
     public static readonly PreferenceLayer Role = new("Role", "角色");
 
     /// <summary>
-    /// 用户层：某个用户在某个角色下自己的设置，换了角色是另一份
+    /// 用户层：按用户和角色分别保存
     /// </summary>
     public static readonly PreferenceLayer UserRole = new("UserRole", "本人");
 

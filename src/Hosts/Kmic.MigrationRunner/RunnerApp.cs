@@ -138,7 +138,7 @@ internal static class RunnerApp
             var name = parse.GetValue(table)!;
             var deleted = await AppendOnlyPurge.RunAsync(database, AppendOnlyPurge.Targets[name], before, size, ct);
             await context.Output.WriteLineAsync(deleted is null
-                ? $"{name} 对应的表还不存在（模块尚未建立），没有可清理的数据。"
+                ? $"{name} 对应的表不存在，没有可清理的数据。"
                 : $"{name}：删除了 {deleted} 行（{before:yyyy-MM-dd HH:mm} UTC 之前）。");
             return 0;
         }));

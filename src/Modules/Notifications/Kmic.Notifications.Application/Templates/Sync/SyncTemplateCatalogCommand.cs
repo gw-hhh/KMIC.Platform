@@ -4,10 +4,10 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.Templates.Sync;
 
 /// <summary>
-/// 把代码里声明的通知模板同步进数据库
+/// 同步代码声明的通知模板目录
 /// </summary>
 /// <remarks>
-/// 启动任务，迁移之后、接收请求之前执行。新声明的登记，声明变了的更新，代码里已经删掉的标为退役。
+/// 启动迁移后、接收请求前执行：登记新增模板，更新有变化的声明，将已移除声明的模板标为退役。
 /// 同步锁已被其他实例持有时跳过，不等待
 /// </remarks>
 [SystemOnly]

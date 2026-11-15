@@ -78,11 +78,8 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     }
 
     /// <summary>
-    /// 添加明细
+    /// 为草稿添加明细
     /// </summary>
-    /// <remarks>
-    /// 仅限草稿状态
-    /// </remarks>
     public Result<SpecimenItem> AddItem(string name, int quantity)
     {
         if (Status != SpecimenStatus.Draft)
@@ -108,12 +105,8 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     /// </summary>
     /// <remarks>
     /// 调用前须通过 IFileAttachments 获取文件锁、检查文件并发出关联请求。
-    /// 同一文件不能重复添加
+    /// 同一文件不能重复添加；保存关联时的文件名、大小和类型。
     /// </remarks>
-    /// <param name="fileId">文件 ID</param>
-    /// <param name="fileName">关联时的文件名快照</param>
-    /// <param name="size">关联时的字节数快照</param>
-    /// <param name="fileType">关联时的文件类型编码快照</param>
     public Result<SpecimenAttachment> AddAttachment(StoredFileId fileId, string fileName, long size, string fileType)
     {
         var editable = CanEditAttachments();
@@ -135,7 +128,6 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     /// <summary>
     /// 移除附件
     /// </summary>
-    /// <param name="attachmentId">附件 ID</param>
     /// <returns>成功时返回被移除的附件，供调用方解除文件关联</returns>
     public Result<SpecimenAttachment> RemoveAttachment(SpecimenAttachmentId attachmentId)
     {

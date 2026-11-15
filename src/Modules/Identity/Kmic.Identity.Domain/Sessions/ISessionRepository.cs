@@ -17,8 +17,11 @@ public interface ISessionRepository : IRepository<Session, SessionId>
     Task<Session?> FindByRefreshTokenForUpdateAsync(string tokenHash, CancellationToken ct);
 
     /// <summary>
-    /// 查询状态为有效的用户会话，包括该用户发起的模拟会话；不检查绝对到期时间
+    /// 查询涉及指定用户的未作废会话
     /// </summary>
+    /// <remarks>
+    /// 匹配会话用户或模拟会话的实际操作人，不检查绝对到期时间
+    /// </remarks>
     Task<IReadOnlyList<Session>> ListActiveInvolvingAsync(UserId userId, CancellationToken ct);
 
     /// <summary>

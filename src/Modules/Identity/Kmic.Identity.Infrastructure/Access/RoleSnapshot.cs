@@ -8,8 +8,7 @@ namespace Kmic.Identity.Infrastructure.Access;
 /// 角色授权快照：按版本缓存，内容不可变
 /// </summary>
 /// <remarks>
-/// 标了不可变，HybridCache 在本地缓存里直接共享同一个实例，不做序列化；启用二级缓存（Redis）时才序列化，
-/// 所以写成 JSON 能读回的形状：权限点存成数组，请求里用的集合从数组一次性建好
+/// 本地缓存直接共享不可变实例；二级缓存需要 JSON 序列化，因此权限点以数组保存，运行时集合仅构建一次。
 /// </remarks>
 /// <param name="Version">角色的并发版本号，即授权版本号</param>
 /// <param name="PermissionCodes">拥有的权限点编码；全权限角色是当前目录里的全部</param>

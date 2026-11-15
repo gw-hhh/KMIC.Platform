@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Infrastructure.Persistence;
 
 /// <summary>
-/// Notifications 模块的查询上下文：不跟踪实体，查询处理器通过 INotificationsQueryDb 使用
+/// Notifications 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class NotificationsQueryDbContext(DbContextOptions<NotificationsQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), INotificationsQueryDb

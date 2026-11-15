@@ -11,8 +11,8 @@ internal sealed class RunJobNowEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/scheduled-jobs/{name}/run", HandleAsync)
             .Sends<RunJobNowCommand>()
-            .WithSummary("立即执行一次定时任务")
-            .WithDescription("由运行调度器的实例执行，可在执行记录中查看结果，触发方式为手动并记录操作人。检查到任务正在运行时返回 409 Operations.JobAlreadyRunning，不提交触发请求；停用的任务也可手动执行。必须提供幂等键。");
+            .WithSummary("手动触发一次定时任务")
+            .WithDescription("提交手动触发请求后返回，不等待任务完成；结果见执行记录，其中保留操作人。检查到任务正在运行时返回 409 Operations.JobAlreadyRunning，不提交触发请求；停用的任务也可手动执行。必须提供幂等键。");
 
     private static async Task<IResult> HandleAsync([Description("任务名")] string name, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new RunJobNowCommand(name), ct)).ToNoContent();

@@ -9,13 +9,16 @@ namespace Kmic.Identity.Domain.Users;
 /// </summary>
 /// <remarks>
 /// 大陆手机号统一加 +86，其他号码按国际号码格式校验。
-/// 手机号是登录凭据，也是短信的收件地址，不统一写法会让同一个号码对应多个用户
+/// 统一号码格式以保证唯一性校验，避免同一手机号因写法不同对应多个用户。
 /// </remarks>
 public static partial class MobileNumbers
 {
     /// <summary>
-    /// 允许空白、短横线和括号；大陆号码可带 86、0086 或 +86 前缀
+    /// 校验并规范化手机号
     /// </summary>
+    /// <remarks>
+    /// 允许号码中含空白、短横线和括号；大陆号码可带 86、0086 或 +86 前缀。
+    /// </remarks>
     public static Result<string> Normalize(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))

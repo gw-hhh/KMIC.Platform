@@ -36,7 +36,7 @@ public static class OperationsPermissions
     public const string JobsView = "Operations.Jobs.View";
 
     /// <summary>
-    /// 改定时任务的计划、立即执行、取消后台作业；用到它的命令都记审计
+    /// 修改定时计划、手动触发任务、取消后台作业；使用该权限的命令须审计
     /// </summary>
     [Permission("管理定时任务与后台作业")]
     public const string JobsManage = "Operations.Jobs.Manage";

@@ -16,7 +16,7 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// 处理投递队列，在数据库事务之外调用发送渠道，再按领取令牌记录结果
 /// </summary>
 /// <remarks>
-/// 队列循环由框架提供。发送时查询系统用户的最新联系方式；用户不存在、已禁用或无地址时记为已跳过。
+/// 队列循环由框架提供。发送时查询系统内用户的最新联系方式；用户不存在、已禁用或无地址时记为已跳过。
 /// 含密投递超过创建后的有效期时不再发送；成功、最终失败或跳过时清空正文及短信参数。
 /// 暂时失败退避重试，达到次数上限或永久失败时标记为失败，等待人工处理
 /// </remarks>
@@ -56,7 +56,7 @@ internal sealed class DeliveryWork(
         var secret = definition.CarriesSecret;
         if (secret && time.GetUtcNow() - item.CreatedAt > _secretLifetime)
         {
-            await RecordAsync(store => store.FailedAsync(item, token, "含密通知已经过了有效期，没有发送", clearSecret: true, ct), ct);
+            await RecordAsync(store => store.FailedAsync(item, token, "含密通知已过期，未发送", clearSecret: true, ct), ct);
             return;
         }
 
@@ -71,7 +71,7 @@ internal sealed class DeliveryWork(
         await RecordResultAsync(item, token, result, secret, ct);
     }
 
-    // 系统用户使用 Identity 中的最新地址；外部收件人使用投递记录中的地址
+    // 系统内用户使用 Identity 中的最新地址；外部收件人使用投递记录中的地址
     private async Task<(string? Address, DeliverySkipReason? Skip)> ResolveAddressAsync(DeliveryItem item, CancellationToken ct)
     {
         if (item.RecipientUserId is not { } userId)

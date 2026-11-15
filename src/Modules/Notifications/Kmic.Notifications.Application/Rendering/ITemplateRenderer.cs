@@ -7,7 +7,7 @@ namespace Kmic.Notifications.Application.Rendering;
 /// </summary>
 /// <remarks>
 /// 模板按不可信输入处理，仅可访问数据模型的公开属性，不得读文件或调用任意方法。
-/// 单次渲染限制时间、执行步数和输出大小，超过限制时返回模板错误。
+/// 每次写入时检查渲染用时和输出长度，执行步数另设上限；超限返回模板错误。
 /// HTML 模式默认转义变量值，文本模式原样输出
 /// </remarks>
 public interface ITemplateRenderer

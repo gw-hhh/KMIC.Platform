@@ -87,7 +87,7 @@ public sealed class NotificationProcessor(
         return Result.Success();
     }
 
-    // 内容和收件人无关，每个渠道渲染一次
+    // 本次请求的收件人共用模板数据，每个渠道只渲染一次
     private async Task<Result<RenderedContent>> RenderAsync(NotificationTemplateDefinition definition, object model, CancellationToken ct)
     {
         var published = await templates.GetActiveVersionsAsync(definition.Key, ct);
@@ -185,7 +185,7 @@ public sealed class NotificationProcessor(
     private static string? SmsParametersOf(object model) =>
         model is ISmsTemplateModel sms ? JsonSerializer.Serialize(sms.ToSmsParameters()) : null;
 
-    // 系统用户从联系方式中取地址，外部收件人使用请求中的地址；地址缺失或用户不可用时返回跳过原因
+    // 系统内用户从联系方式中取地址，外部收件人使用请求中的地址；地址缺失或用户不可用时返回跳过原因
     private static (UserId? UserId, string Key, string? Address, DeliverySkipReason? Skip) Resolve(Recipient recipient, DeliveryChannel channel, FanOut context)
     {
         var direct = channel == DeliveryChannel.Email ? recipient.Email : recipient.Phone;

@@ -174,7 +174,8 @@ public sealed class Session : AggregateRoot<SessionId>
     /// 用刷新令牌换新令牌
     /// </summary>
     /// <remarks>
-    /// 旧令牌在宽限期内再次使用时，从当前令牌继续轮换；超出宽限期则作废整个会话。
+    /// 旧令牌在宽限期内再次使用时，从当前令牌继续轮换；超出宽限期则标记会话作废并返回重用结果。
+    /// 若调用事务随后回滚，须在独立事务中调用 <see cref="RevokeIfReused" /> 重新核实并作废。
     /// 新令牌按滑动有效期计算到期时间，且不晚于会话绝对到期时间
     /// </remarks>
     public Rotation Rotate(string presentedHash, string newHash, DateTimeOffset now, TimeSpan refreshLifetime, TimeSpan grace)

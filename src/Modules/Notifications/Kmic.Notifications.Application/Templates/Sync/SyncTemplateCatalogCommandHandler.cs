@@ -43,7 +43,7 @@ public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalo
             }
         }
 
-        // 剩下的是代码里已经没有的
+        // 未匹配到代码声明的活动模板标为退役
         var stale = existing.Values.Where(t => t.Status == TemplateStatus.Active).ToList();
         foreach (var template in stale)
         {

@@ -15,7 +15,7 @@ namespace Kmic.Notifications.Contracts;
 /// <param name="TemplateKey">模板键，必须是含密模板</param>
 /// <param name="To">收件人</param>
 /// <param name="Model">模板数据</param>
-/// <param name="DedupKey">去重键，要包含凭据的标识，同一手机号的两次验证码不能被合并</param>
+/// <param name="DedupKey">去重键须包含本次凭据的标识，避免同一手机号的不同验证码被合并</param>
 [IntegrationMessage("Notifications.SendSecretNotification", CarriesSecret = true, SecretLifetimeSeconds = SendSecretNotification.LifetimeSeconds)]
 public sealed record SendSecretNotification(string TemplateKey, IReadOnlyList<Recipient> To, JsonElement Model, string DedupKey) : IIntegrationRequest
 {

@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Files.Infrastructure.Deletion;
 
 /// <summary>
-/// 直接读写删除队列，领取与结果更新均使用单条 SQL，不经聚合或显式事务
+/// 文件删除队列存储
 /// </summary>
 /// <remarks>
-/// 队列包含 StoredFile 表中删除中的文件，以及已彻底删除但尚未删除对象的文件。
+/// 领取和结果更新使用单条 SQL，不经聚合方法或显式事务。
+/// 队列包含 StoredFile 表中删除中的文件，以及已彻底删除但尚未登记对象删除完成的文件。
 /// 通过 FOR UPDATE SKIP LOCKED 避免多实例重复领取；结果更新须匹配本次领取令牌，防止租约到期接管后被旧实例覆盖
 /// </remarks>
 internal sealed class FilesDeletionStore(FilesDbContext context)
@@ -34,7 +35,7 @@ internal sealed class FilesDeletionStore(FilesDbContext context)
             RETURNING f."Id" AS "Id", f."StorageKey" AS "StorageKey", f."Status" AS "Status"
             """).ToListAsync(ct);
 
-    // 对象删除后，删除中的文件连同引用记录一起移除；已彻底删除的文件保留记录并登记对象删除时间
+    // 对象删除后，删除中的文件连同引用记录一起移除；已彻底删除的文件保留记录并登记删除完成
     public async Task CompleteAsync(DeletionItem item, Guid token, CancellationToken ct)
     {
         if (string.Equals(item.Status, _deleting, StringComparison.Ordinal))

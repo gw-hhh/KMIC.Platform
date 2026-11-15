@@ -9,6 +9,6 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// <remarks>
 /// 不分页，按模块、订阅名和消息类型排序
 /// </remarks>
-/// <param name="Status">状态编码，可以给多个；不给就是全部</param>
+/// <param name="Status">状态编码，可指定多个；为 null 或空列表时不过滤状态</param>
 [RequirePermission(OperationsPermissions.MessagesView)]
 public sealed record ListRoutesQuery(IReadOnlyList<string>? Status) : IQuery<IReadOnlyList<RouteItem>>;

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Operations.Infrastructure.Persistence;
 
 /// <summary>
-/// Operations 模块的查询上下文：不跟踪实体，查询处理器通过 IOperationsQueryDb 使用
+/// Operations 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), IOperationsQueryDb
@@ -25,7 +25,7 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
     /// <inheritdoc />
     public IQueryable<ScheduledJobSetting> ScheduledJobSettings => Set<ScheduledJobSetting>();
 
-    // 执行记录表由框架的调度器写，不进模型；状态与触发方式在查询里就换成编码文字，取值见执行记录的状态约定
+    // 执行记录由框架调度器维护，不纳入模块 EF 模型
     /// <inheritdoc />
     public IQueryable<ScheduledJobRunRow> ScheduledJobRuns => Database.SqlQuery<ScheduledJobRunRow>(
         $"""
@@ -47,7 +47,7 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
         ORDER BY "JobName", "StartedAt" DESC, "Id" DESC
         """);
 
-    // 路由表和心跳表由框架读写，不进模型；路由状态在查询里就换成编码文字，取值见路由状态约定
+    // 路由和心跳由框架维护，不纳入模块 EF 模型
     /// <inheritdoc />
     public IQueryable<MessageRouteRow> MessageRoutes => Database.SqlQuery<MessageRouteRow>(
         $"""

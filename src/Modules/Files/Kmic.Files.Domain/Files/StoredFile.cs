@@ -20,7 +20,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public const int MaxReferences = 100;
 
     /// <summary>
-    /// 生成文件的 Profile 前缀，完整值为 Generated:来源。未关联时也可下载，到期可清理
+    /// 生成文件的 Profile 前缀
     /// </summary>
     public const string GeneratedProfilePrefix = "Generated:";
 
@@ -103,7 +103,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// 清理到期时间
     /// </summary>
     /// <remarks>
-    /// 到期后成为清理候选，实际清理由文件状态、互斥检查和后台任务决定。
+    /// 到期后由后台任务按条件清理，不保证立即删除。
     /// </remarks>
     public DateTimeOffset? ExpiresAt { get; private set; }
 
@@ -152,7 +152,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public IReadOnlyList<FileReference> References => _references;
 
     /// <summary>
-    /// 开始上传：登记一行“上传中”，内容随后流式写入存储
+    /// 创建文件并设为上传中
     /// </summary>
     public static StoredFile Start(StoredFileId id, string storageKey, string originalName, string profile, UserId? uploadedBy, DateTimeOffset now)
     {
@@ -166,8 +166,11 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 登记已写入存储的模块生成文件，初始状态为可用，未关联文件到期后可清理
+    /// 登记已生成的文件
     /// </summary>
+    /// <remarks>
+    /// 文件内容须已写入对象存储；初始状态为可用，未关联时到期可清理。
+    /// </remarks>
     public static StoredFile RegisterGenerated(
         StoredFileId id,
         string storageKey,
@@ -255,7 +258,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 被业务对象关联
+    /// 关联业务对象
     /// </summary>
     /// <remarks>
     /// 可用或已解除关联的文件转为已关联；同一业务对象重复关联不新增引用，其他对象关联会增加引用。
@@ -351,7 +354,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     }
 
     /// <summary>
-    /// 登记运维已经在对象存储里彻底删除了历史版本
+    /// 登记已完成的历史版本清除操作
     /// </summary>
     public Result RecordHistoryPurge(string note, DateTimeOffset now)
     {

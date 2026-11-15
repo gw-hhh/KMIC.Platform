@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.Templates.Publish;
 /// 发布指定渠道的模板新版本
 /// </summary>
 /// <remarks>
-/// 发布前先用示例数据渲染一遍，语法错误、超时、输出过大都在这里拦下。已退役的模板和模板没有的渠道不能发布
+/// 发布前用示例数据渲染，发现语法错误或本次渲染超限时拒绝发布。已退役的模板和未声明的渠道不能发布
 /// </remarks>
 /// <param name="Key">模板键</param>
 /// <param name="Channel">渠道，必须是模板声明过的</param>

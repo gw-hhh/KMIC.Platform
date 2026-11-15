@@ -13,6 +13,6 @@ namespace Kmic.Operations.Application.ClientErrors;
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]
-[NotAudited("前端错误日志")]
+[NotAudited("上报内容已记入错误日志")]
 [NotIdempotent("仅写入错误日志，无需缓存上报响应")]
 public sealed record ReportClientErrorsCommand(IReadOnlyList<ClientErrorReport> Errors) : ICommand;

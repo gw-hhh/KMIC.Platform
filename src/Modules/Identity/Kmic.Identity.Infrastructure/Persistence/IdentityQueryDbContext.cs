@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Identity.Infrastructure.Persistence;
 
 /// <summary>
-/// Identity 模块的查询上下文：不跟踪实体，查询处理器通过 IIdentityQueryDb 使用
+/// Identity 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class IdentityQueryDbContext(DbContextOptions<IdentityQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), IIdentityQueryDb

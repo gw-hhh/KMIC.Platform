@@ -11,8 +11,8 @@ namespace Kmic.Operations.Application.ScheduledJobs.Set;
 /// 事务提交后尝试同步调度器，同步失败不回滚已保存的设置
 /// </remarks>
 /// <param name="JobName">任务名</param>
-/// <param name="Enabled">是否启用；空表示跟着默认值（启用）</param>
-/// <param name="Cron">执行时间的 Cron 表达式；空表示跟着代码里的默认值</param>
+/// <param name="Enabled">是否启用；为 null 时使用默认值（启用）</param>
+/// <param name="Cron">Cron 表达式；为 null 时使用代码中的默认表达式</param>
 /// <param name="ExpectedVersion">自定义设置的预期版本号，尚无设置时不传；不匹配时返回版本冲突</param>
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]

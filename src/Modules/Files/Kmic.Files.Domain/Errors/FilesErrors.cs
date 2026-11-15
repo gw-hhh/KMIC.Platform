@@ -13,12 +13,12 @@ public static class FilesErrors
     /// <summary>
     /// 文件超过上传配置的大小上限
     /// </summary>
-    public static readonly Error TooLarge = Error.PayloadTooLarge("Files.TooLarge", "文件超过大小上限");
+    public static readonly Error TooLarge = Error.PayloadTooLarge("Files.TooLarge", "文件大小超过上传限制");
 
     /// <summary>
     /// 文件类型不允许、扩展名不支持或文件内容与扩展名不符
     /// </summary>
-    public static readonly Error TypeNotAllowed = Error.UnsupportedMediaType("Files.TypeNotAllowed", "文件类型不允许，或文件内容与扩展名不符");
+    public static readonly Error TypeNotAllowed = Error.UnsupportedMediaType("Files.TypeNotAllowed", "不支持该文件类型，或文件内容与扩展名不一致");
 
     /// <summary>
     /// 文件是空的

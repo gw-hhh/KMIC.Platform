@@ -5,9 +5,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Notifications.Infrastructure.Sending;
 
 /// <summary>
-/// 直接读写投递队列，领取与结果更新均使用单条 SQL，不经聚合或显式事务
+/// 投递队列存储
 /// </summary>
 /// <remarks>
+/// 领取和结果更新使用单条 SQL，不经聚合方法或显式事务。
 /// 领取待发送或租约已过期的发送中记录，高优先级优先；通过 FOR UPDATE SKIP LOCKED 避免多实例重复领取。
 /// 结果更新须同时匹配发送中状态和本次领取令牌，防止接管后被旧实例覆盖。含密通知发送成功、最终失败或跳过时清空正文及短信参数
 /// </remarks>

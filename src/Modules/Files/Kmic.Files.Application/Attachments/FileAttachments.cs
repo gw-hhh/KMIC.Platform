@@ -15,9 +15,7 @@ namespace Kmic.Files.Application.Attachments;
 /// 为业务对象关联文件或解除文件关联
 /// </summary>
 /// <remarks>
-/// 获取文件锁后检查是否允许关联，再发送关联请求；文件锁持有到业务事务结束。
-/// 清理任务使用同一文件的排他锁，防止关联期间文件被删除。
-/// 可关联性检查使用系统身份，直接查询已提交的数据，不使用缓存或按到期时间拒绝关联
+/// 关联检查使用独立的系统作用域，仅读取已提交数据
 /// </remarks>
 public sealed class FileAttachments(
     ITransactionLocks locks,
@@ -32,7 +30,7 @@ public sealed class FileAttachments(
     public const string LockScope = "Files";
 
     /// <inheritdoc />
-    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "这里是唯一按互斥协议发出关联请求的地方")]
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "实现 IFileAttachments.AttachAsync，取锁并校验后构造关联请求")]
     public async Task<Result<IReadOnlyList<FileSnapshot>>> AttachAsync(string ownerModule, string ownerType, Guid ownerId, IReadOnlyCollection<Guid> fileIds, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerModule);
@@ -77,7 +75,7 @@ public sealed class FileAttachments(
     }
 
     /// <inheritdoc />
-    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "这里是唯一发出解除关联请求的地方")]
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "实现 IFileAttachments.DetachAsync，需在业务事务中构造解除关联请求")]
     public Task DetachAsync(string ownerModule, string ownerType, Guid ownerId, IReadOnlyCollection<Guid> fileIds, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerModule);

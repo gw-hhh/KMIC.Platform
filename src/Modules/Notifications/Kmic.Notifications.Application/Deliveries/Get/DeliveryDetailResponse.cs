@@ -13,7 +13,7 @@ namespace Kmic.Notifications.Application.Deliveries.Get;
 /// <param name="Role">邮件收件角色</param>
 /// <param name="Status">状态</param>
 /// <param name="SkipReason">跳过的原因，没跳过为空</param>
-/// <param name="RecipientUserId">收件用户，直接给地址的收件人为空</param>
+/// <param name="RecipientUserId">系统内收件人 ID；外部收件人为空</param>
 /// <param name="AddressMasked">脱敏后的收件地址</param>
 /// <param name="Subject">渲染后的主题</param>
 /// <param name="Body">渲染后的正文；含密投递发送成功、最终失败或跳过后为空</param>

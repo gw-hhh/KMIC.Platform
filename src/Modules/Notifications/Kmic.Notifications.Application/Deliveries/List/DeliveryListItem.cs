@@ -10,7 +10,7 @@ namespace Kmic.Notifications.Application.Deliveries.List;
 /// <param name="Channel">渠道</param>
 /// <param name="Status">状态</param>
 /// <param name="SkipReason">跳过的原因，没跳过为空</param>
-/// <param name="RecipientUserId">收件用户，直接给地址的收件人为空</param>
+/// <param name="RecipientUserId">系统内收件人 ID；外部收件人为空</param>
 /// <param name="AddressMasked">脱敏后的收件地址</param>
 /// <param name="TemplateKey">模板键</param>
 /// <param name="TemplateVersion">用的模板版本号，0 表示代码里的默认内容</param>

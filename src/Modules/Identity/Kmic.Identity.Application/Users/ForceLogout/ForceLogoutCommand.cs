@@ -8,11 +8,12 @@ namespace Kmic.Identity.Application.Users.ForceLogout;
 /// 结束用户的指定会话或全部会话，包括相关的模拟会话
 /// </summary>
 /// <remarks>
+/// 仅处理未作废会话，包括以目标用户身份创建或由其发起的模拟会话。
 /// 不能对自己执行此操作，请通过“我的登录设备”管理自己的会话。
 /// 目标用户持有受保护角色时，操作者的当前角色也必须受保护
 /// </remarks>
 /// <param name="Id">用户</param>
-/// <param name="SessionId">要下线的会话；不给就是全部</param>
+/// <param name="SessionId">目标会话 ID；为 null 时处理全部相关会话</param>
 [RequirePermission(IdentityPermissions.UserForceLogout)]
 [Audited]
 [Idempotent]

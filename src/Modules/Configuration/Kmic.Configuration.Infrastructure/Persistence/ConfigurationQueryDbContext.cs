@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Configuration.Infrastructure.Persistence;
 
 /// <summary>
-/// Configuration 模块的查询上下文：不跟踪实体，查询处理器通过 IConfigurationQueryDb 使用
+/// Configuration 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class ConfigurationQueryDbContext(DbContextOptions<ConfigurationQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), IConfigurationQueryDb

@@ -45,7 +45,7 @@ public interface IStoredFileRepository : IRepository<StoredFile, StoredFileId>
     Task<IReadOnlyList<StoredFileId>> FindStaleUploadsAsync(DateTimeOffset startedBefore, int limit, CancellationToken ct);
 
     /// <summary>
-    /// 重置文件删除重试
+    /// 重置文件删除重试状态
     /// </summary>
     /// <remarks>
     /// 清零尝试次数，清除退避时间和领取信息，使文件可重新领取。

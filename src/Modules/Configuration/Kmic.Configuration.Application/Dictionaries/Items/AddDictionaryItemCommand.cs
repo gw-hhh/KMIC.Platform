@@ -12,7 +12,7 @@ namespace Kmic.Configuration.Application.Dictionaries.Items;
 /// <param name="Code">编码，字母、数字、点、短横线、下划线，1 到 50 位，创建后不能改</param>
 /// <param name="Name">显示名</param>
 /// <param name="ParentCode">父项编码；只有层级字典可以给</param>
-/// <param name="SortOrder">次序；不给就排在同级最后</param>
+/// <param name="SortOrder">排序值；未指定时排在同级末尾</param>
 [RequirePermission(ConfigurationPermissions.DictionaryManage)]
 [Audited]
 [Idempotent]

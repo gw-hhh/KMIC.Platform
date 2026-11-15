@@ -7,8 +7,11 @@ using Kmic.Identity.Domain.Users.Events;
 namespace Kmic.Identity.Application.Users.EventHandlers;
 
 /// <summary>
-/// 密码变化：管理员重置时作废该用户全部会话；用户自己修改时作废其他会话，当前会话继续
+/// 密码变更后作废相关会话
 /// </summary>
+/// <remarks>
+/// 管理员重置时全部作废；用户自行修改时保留当前会话。范围包含相关模拟会话
+/// </remarks>
 internal sealed class RevokeSessionsWhenPasswordChanged(ISessionRepository sessions, IExecutionContext execution, TimeProvider time) : IDomainEventHandler<PasswordChanged>
 {
     public async ValueTask<Result> HandleAsync(PasswordChanged domainEvent, CancellationToken ct)

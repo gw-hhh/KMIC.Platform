@@ -6,8 +6,11 @@ using Kmic.Notifications.Domain.Templates;
 namespace Kmic.Notifications.Application.Templates;
 
 /// <summary>
-/// 渲染一个渠道的主题和正文：主题是纯文本，邮件正文是 HTML，短信和站内消息的正文是纯文本
+/// 按渠道渲染通知主题和正文
 /// </summary>
+/// <remarks>
+/// 主题、短信和站内消息正文按纯文本渲染，邮件正文按 HTML 渲染
+/// </remarks>
 internal static class ChannelRendering
 {
     // 严格模式将渲染时遇到的未知变量视为错误

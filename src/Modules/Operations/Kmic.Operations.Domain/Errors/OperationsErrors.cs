@@ -41,12 +41,12 @@ public static class OperationsErrors
     public static readonly Error JobAlreadyRunning = Error.Conflict("Operations.JobAlreadyRunning", "任务正在执行，请等待任务结束后重试");
 
     /// <summary>
-    /// 执行时间不是合法的 Cron 表达式，或者间隔太短
+    /// Cron 校验失败，具体原因见字段错误
     /// </summary>
-    public static readonly Error CronInvalid = Error.Validation("Operations.CronInvalid", "执行时间不合法");
+    public static readonly Error CronInvalid = Error.Validation("Operations.CronInvalid", "Cron 表达式不符合要求");
 
     /// <summary>
-    /// 返回执行时间校验失败及对应字段错误
+    /// 生成含字段原因的 Cron 校验错误
     /// </summary>
     public static Error CronInvalidWith(string path, string message) =>
         Error.Validation(CronInvalid.Code, CronInvalid.Message, [new FieldError(path, "Cron", message)]);

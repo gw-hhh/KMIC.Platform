@@ -709,7 +709,7 @@ namespace Kmic.Configuration.Infrastructure.Persistence.Migrations
                     b.Property<string>("TraceId")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
-                        .HasComment("链路追踪 ID，可以到日志与链路里查这次修改");
+                        .HasComment("链路追踪 ID");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

@@ -8,14 +8,14 @@ namespace Kmic.Identity.Application.Users;
 public sealed class UserAdminAction : Enumeration<UserAdminAction>
 {
     /// <summary>
-    /// 改姓名、工号、邮箱这些不涉及登录凭据的资料
+    /// 编辑用户资料；修改账号或手机号还须额外授权
     /// </summary>
     public static readonly UserAdminAction Edit = new("Edit", "编辑资料");
 
     /// <summary>
-    /// 修改账号和手机号；受保护角色持有人的凭据变更受额外限制
+    /// 修改账号或手机号时的额外授权检查
     /// </summary>
-    public static readonly UserAdminAction ChangeCredentials = new("ChangeCredentials", "修改账号与手机号");
+    public static readonly UserAdminAction ChangeCredentials = new("ChangeCredentials", "修改账号或手机号");
 
     /// <summary>
     /// 禁用

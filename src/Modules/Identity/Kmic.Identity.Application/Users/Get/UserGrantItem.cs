@@ -12,7 +12,7 @@ namespace Kmic.Identity.Application.Users.Get;
 /// <param name="GrantedAt">授予时间</param>
 /// <param name="GrantedBy">授予人 ID</param>
 /// <param name="GrantedByName">授予人的姓名</param>
-/// <param name="Anchors">数据范围的锚点：这个角色的“本组织”从哪些组织单元算起</param>
+/// <param name="Anchors">组织锚点；空列表时以用户所属组织为起点</param>
 public sealed record UserGrantItem(
     RoleId RoleId,
     string? RoleName,

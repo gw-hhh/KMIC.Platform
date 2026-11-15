@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Configuration.Domain.Settings;
 
 /// <summary>
-/// 系统设置变更记录，包含新旧值、原因及操作追踪信息
+/// 系统设置变更记录
 /// </summary>
 /// <remarks>
 /// 运行账号仅可追加，不可修改或删除；操作人和时间使用创建人、创建时间字段。
@@ -48,12 +48,12 @@ public sealed class SystemSettingChange : AggregateRoot<SettingChangeId>
     public string Reason { get; private set; }
 
     /// <summary>
-    /// 链路追踪 ID，可以到日志与链路里查这次修改
+    /// 链路追踪 ID
     /// </summary>
     public string? TraceId { get; private set; }
 
     /// <summary>
-    /// 记一次变更
+    /// 创建设置变更记录
     /// </summary>
     public static SystemSettingChange Record(string key, string? oldValue, string? newValue, string reason, string? traceId)
     {

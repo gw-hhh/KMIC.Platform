@@ -7,9 +7,9 @@ namespace Kmic.Operations.Application.ScheduledJobs.List;
 /// <param name="Module">所属模块；框架自带的任务是 Framework</param>
 /// <param name="DisplayName">显示名</param>
 /// <param name="IsDeclared">任务是否仍在代码中声明；已移除任务保留自定义设置，便于回滚</param>
-/// <param name="DefaultCron">代码里的默认执行时间；已经删除的任务没有</param>
-/// <param name="OverrideEnabled">运维设的开关；空表示没改，跟着默认值（启用）</param>
-/// <param name="OverrideCron">运维设的执行时间；空表示没改，跟着默认值</param>
+/// <param name="DefaultCron">代码默认 Cron 表达式；已移除声明的任务为空</param>
+/// <param name="OverrideEnabled">自定义启用状态；为 null 时使用默认值（启用）</param>
+/// <param name="OverrideCron">自定义 Cron 表达式；为 null 时使用代码默认表达式</param>
 /// <param name="OverrideVersion">自定义设置的版本号，修改时须提交；尚无自定义设置时为空</param>
 /// <param name="Enabled">当前配置的启用状态</param>
 /// <param name="Cron">当前配置的 Cron 表达式</param>

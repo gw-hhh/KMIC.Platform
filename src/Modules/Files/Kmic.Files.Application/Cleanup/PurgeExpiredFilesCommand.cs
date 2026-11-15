@@ -13,5 +13,5 @@ namespace Kmic.Files.Application.Cleanup;
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]
-[NotAudited("定时清理，文件的状态变化记入文件状态历史，结果记入作业运行记录")]
+[NotAudited("状态变更记入文件历史，清理结果记入作业运行记录")]
 public sealed record PurgeExpiredFilesCommand(DateTimeOffset ScheduledFireTime) : ICommand<ScheduledJobOutcome>;

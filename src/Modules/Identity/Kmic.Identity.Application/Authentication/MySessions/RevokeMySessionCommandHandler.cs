@@ -7,9 +7,6 @@ using Kmic.Identity.Domain.Sessions;
 
 namespace Kmic.Identity.Application.Authentication.MySessions;
 
-/// <summary>
-/// 结束当前用户的指定登录会话
-/// </summary>
 public sealed class RevokeMySessionCommandHandler(ISessionRepository sessions, IExecutionContext execution, ISecurityEventWriter securityEvents, TimeProvider time) : ICommandHandler<RevokeMySessionCommand>
 {
     /// <inheritdoc />

@@ -12,7 +12,7 @@ internal sealed class PreviewCronEndpoint : IEndpoint
         group.MapGet("/scheduled-jobs/cron-preview", HandleAsync)
             .Sends<PreviewCronQuery>()
             .WithSummary("校验 Cron 并预览后续触发时间")
-            .WithDescription("使用业务时区和含秒的 Quartz Cron 格式，如 0 0 7 * * ?。格式无效、未来不再触发或执行间隔不足 1 分钟时，返回 cron 字段错误。");
+            .WithDescription("使用业务时区和含秒的 Quartz Cron 格式，如 0 0 7 * * ?。格式无效、未来不再触发或预览中的触发间隔不足 1 分钟时，返回 cron 字段错误。");
 
     private static async Task<IResult> HandleAsync([Description("Cron 表达式")] string cron, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new PreviewCronQuery(cron), ct)).ToOk();

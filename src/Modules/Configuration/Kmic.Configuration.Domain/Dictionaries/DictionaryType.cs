@@ -114,7 +114,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     /// <param name="code">编码，须为 1～50 个字符，仅支持字母、数字、点、短横线和下划线</param>
     /// <param name="name">显示名</param>
     /// <param name="parentCode">父项编码；不分层的字典必须为空</param>
-    /// <param name="sortOrder">次序；不给就排在同级最后</param>
+    /// <param name="sortOrder">排序值；未指定时排在同级末尾</param>
     /// <param name="maxItems">该类型的字典项数量上限</param>
     public Result<DictionaryItem> AddItem(string? code, string? name, string? parentCode, int? sortOrder, int maxItems)
     {
@@ -206,8 +206,11 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     }
 
     /// <summary>
-    /// 按完整且无重复的同级编码列表调整次序，排序值重排为 10、20、30……
+    /// 调整同级字典项的顺序
     /// </summary>
+    /// <remarks>
+    /// 列表须包含全部同级项（含停用项），且不得重复；排序值重排为 10、20、30……
+    /// </remarks>
     public Result ReorderItems(string? parentCode, IReadOnlyList<string> orderedCodes)
     {
         ArgumentNullException.ThrowIfNull(orderedCodes);

@@ -4,8 +4,8 @@ namespace Kmic.Notifications.Contracts;
 /// 通知收件人
 /// </summary>
 /// <remarks>
-/// 系统用户优先使用用户 ID，由 Notifications 向 Identity 查询联系方式；
-/// 仅外部收件人直接指定邮箱或手机号，地址由业务模块提供
+/// 系统内用户通过 UserId 指定，由 Notifications 向 Identity 查询联系方式，忽略 Email 和 Phone。
+/// 外部收件人不指定 UserId，由业务模块提供邮箱或手机号
 /// </remarks>
 /// <param name="UserId">用户 ID</param>
 /// <param name="Email">系统外对象的邮箱</param>

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 namespace Kmic.Identity.Infrastructure.Access;
 
 /// <summary>
-/// 访问上下文加载器：每个请求一次状态查询，角色与组织树的内容按版本缓存
+/// 加载访问上下文
 /// </summary>
 /// <remarks>
 /// 会话、用户、授予和角色状态每次查库，使变更从下一个请求起生效。
@@ -82,7 +82,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
         var roleAvailable = state.GrantId is not null && string.Equals(state.RoleStatus, RoleStatus.Active.Code, StringComparison.Ordinal);
         if (!roleAvailable)
         {
-            // 用户还在、会话也有效，只是这个角色不能再用：只给一个没有任何角色权限的上下文，够查看自己和切换角色
+            // 角色不可用时返回无角色权限的上下文，供已登录用户查看本人信息或切换角色
             return (Create(state, user, session, role, authorizationVersion: 0, permissions: FrozenSet<string>.Empty, _selfOnly, OrgTreeSnapshot.Empty), false);
         }
 

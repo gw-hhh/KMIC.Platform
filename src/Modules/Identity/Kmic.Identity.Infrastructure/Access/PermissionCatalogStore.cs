@@ -76,7 +76,7 @@ internal sealed class PermissionCatalogStore(IdentityDbContext context) : IPermi
         return (added, touched.Count, gone.Count, renames);
     }
 
-    // 声明了改名：数据库里的旧编码原地改成新编码，行的 ID 不变；新编码已经有行就不动，旧行按“代码里没有了”处理
+    // 改名保留记录 ID；新编码已有记录时跳过改名，旧记录由后续目录同步按退役规则处理
     private static Dictionary<string, string> RenameInPlace(CatalogContent content, Dictionary<string, PermissionRow> byCode, HashSet<PermissionRow> touched)
     {
         var renames = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -94,7 +94,7 @@ internal sealed class PermissionCatalogStore(IdentityDbContext context) : IPermi
         return renames;
     }
 
-    // 新增没有的，更新变了的（退役的重新出现时一并恢复）；返回新增的数量
+    // 新增或更新有变化的权限声明，重新出现的退役项恢复启用；返回新增数量
     private int Upsert(CatalogContent content, Dictionary<string, PermissionRow> byCode, HashSet<PermissionRow> touched)
     {
         var added = 0;

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Customer.Infrastructure.Persistence;
 
 /// <summary>
-/// Customer 模块的查询上下文：不跟踪实体，查询处理器通过 ICustomerQueryDb 使用
+/// Customer 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class CustomerQueryDbContext(DbContextOptions<CustomerQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), ICustomerQueryDb

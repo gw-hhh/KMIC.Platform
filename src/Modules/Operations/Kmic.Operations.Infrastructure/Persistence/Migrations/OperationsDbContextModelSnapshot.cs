@@ -600,11 +600,11 @@ namespace Kmic.Operations.Infrastructure.Persistence.Migrations
                     b.Property<string>("Cron")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)")
-                        .HasComment("执行时间的 Cron 表达式；空表示跟着代码里的默认值");
+                        .HasComment("Cron 表达式；为 null 时使用代码中的默认表达式");
 
                     b.Property<bool?>("Enabled")
                         .HasColumnType("boolean")
-                        .HasComment("是否启用；空表示跟着代码里的默认值（启用）");
+                        .HasComment("是否启用；为 null 时使用默认值（启用）");
 
                     b.Property<string>("JobName")
                         .IsRequired()

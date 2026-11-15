@@ -13,7 +13,7 @@ public sealed class JobRunTrigger : Enumeration<JobRunTrigger>
     public static readonly JobRunTrigger Schedule = new("Schedule", "按计划");
 
     /// <summary>
-    /// 通过“立即执行”请求触发
+    /// 通过手动请求触发
     /// </summary>
     public static readonly JobRunTrigger Manual = new("Manual", "手动执行");
 

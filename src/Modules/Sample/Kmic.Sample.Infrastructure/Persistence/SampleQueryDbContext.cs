@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Sample.Infrastructure.Persistence;
 
 /// <summary>
-/// Sample 模块的查询上下文：不跟踪实体，查询处理器通过 ISampleQueryDb 使用
+/// Sample 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class SampleQueryDbContext(DbContextOptions<SampleQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), ISampleQueryDb

@@ -11,6 +11,6 @@ public interface IClientErrorLimiter
     /// 判断是否允许用户本次上报
     /// </summary>
     /// <param name="user">上报的用户</param>
-    /// <returns>允许时返回 null，超限时返回距下次可上报的时长</returns>
+    /// <returns>允许时返回 null；超限时返回建议等待时长</returns>
     TimeSpan? TryAcquire(UserId user);
 }

@@ -121,10 +121,9 @@ public sealed class SiteMessage : AggregateRoot<SiteMessageId>
     /// <summary>
     /// 标为已读，已读消息保留原已读时间
     /// </summary>
-    /// <param name="now">现在</param>
     public void MarkRead(DateTimeOffset now) => ReadAt ??= now;
 
-    // 站内地址：以一个斜杠开头，不能是“//”开头（那是协议相对地址）或带协议，也不能带反斜杠和控制字符
+    // 仅允许以单个 / 开头的站内路径；禁止 // 开头、://、反斜杠和控制字符
     private static bool IsInternalPath(string link) =>
         link.Length <= LinkMaxLength
         && link.StartsWith('/')

@@ -222,8 +222,11 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
     }
 
     /// <summary>
-    /// 重排某个上级下的全部下级；传入的必须恰好是现有的全部下级
+    /// 调整直属下级的顺序
     /// </summary>
+    /// <remarks>
+    /// 列表须包含该上级的全部直属下级（含停用单元），且不得重复
+    /// </remarks>
     public Result Reorder(OrgUnitId parentId, IReadOnlyList<OrgUnitId> orderedChildren)
     {
         ArgumentNullException.ThrowIfNull(orderedChildren);

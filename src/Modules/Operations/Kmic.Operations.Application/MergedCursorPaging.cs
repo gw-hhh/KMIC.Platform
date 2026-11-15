@@ -13,6 +13,13 @@ namespace Kmic.Operations.Application;
 /// </remarks>
 internal static class MergedCursorPaging
 {
+    /// <summary>
+    /// 合并各模块查询结果并生成下一页游标
+    /// </summary>
+    /// <remarks>
+    /// fetch 须按时间、ID 倒序查询，并应用传入的游标和数量限制。
+    /// ID 排序须与 PostgreSQL 的 uuid 排序规则一致。
+    /// </remarks>
     public static async Task<Result<(IReadOnlyList<T> Items, string? NextCursor)>> PageAsync<TStore, T>(
         IEnumerable<TStore> stores,
         CursorRequest request,

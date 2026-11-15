@@ -4,7 +4,7 @@ namespace Kmic.Files.Contracts;
 /// 查询可关联的文件，供 <see cref="IFileAttachments" /> 获取锁后以系统身份调用
 /// </summary>
 /// <remarks>
-/// 从主实例读取，不使用缓存。支持关联人上传的可用文件，以及已解除关联的文件；系统用户还可关联无上传人的可用文件。
+/// 从主实例读取，不使用缓存。支持关联人上传的可用文件，以及已解除关联的文件；关联人为系统账号时，还可关联无上传人的可用文件。
 /// 不按到期时间拒绝关联；尚未进入删除队列的过期文件仍可关联，通过咨询锁避免与清理冲突
 /// </remarks>
 public interface IFileAttachability

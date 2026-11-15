@@ -18,9 +18,9 @@ public sealed class ScheduledJobAction : Enumeration<ScheduledJobAction>
     public static readonly ScheduledJobAction RestoreDefault = new("RestoreDefault", "恢复默认");
 
     /// <summary>
-    /// 立即执行一次
+    /// 手动触发一次
     /// </summary>
-    public static readonly ScheduledJobAction RunNow = new("RunNow", "立即执行");
+    public static readonly ScheduledJobAction RunNow = new("RunNow", "手动触发");
 
     private ScheduledJobAction(string code, string name)
         : base(code, name)

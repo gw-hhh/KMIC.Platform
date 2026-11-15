@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.Files.Infrastructure.Persistence;
 
 /// <summary>
-/// Files 模块的查询上下文：不跟踪实体，查询处理器通过 IFilesQueryDb 使用
+/// Files 模块的查询上下文，不跟踪实体
 /// </summary>
 internal sealed class FilesQueryDbContext(DbContextOptions<FilesQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), IFilesQueryDb

@@ -18,7 +18,7 @@ public static class NotificationsErrors
     /// <summary>
     /// 站内消息的链接不是站内地址
     /// </summary>
-    public static readonly Error SiteMessageLinkInvalid = Error.BusinessRule("Notifications.SiteMessageLinkInvalid", "站内消息的链接只能是站内地址");
+    public static readonly Error SiteMessageLinkInvalid = Error.BusinessRule("Notifications.SiteMessageLinkInvalid", "站内消息链接必须使用站内地址");
 
     /// <summary>
     /// 语法或渲染错误，具体原因见错误消息
@@ -33,7 +33,7 @@ public static class NotificationsErrors
     /// <summary>
     /// 含密模板只能用含密请求发送，普通模板只能用普通请求发送
     /// </summary>
-    public static readonly Error TemplateSecretMismatch = Error.BusinessRule("Notifications.TemplateSecretMismatch", "含密模板只能用含密通知发送，普通模板不能用含密通知发送");
+    public static readonly Error TemplateSecretMismatch = Error.BusinessRule("Notifications.TemplateSecretMismatch", "含密模板只能用含密请求发送，普通模板只能用普通请求发送");
 
     /// <summary>
     /// 模板已从代码中移除，不能修改
@@ -83,8 +83,7 @@ public static class NotificationsErrors
     /// <summary>
     /// 发送数据与模板声明的数据模型不符
     /// </summary>
-    /// <param name="templateKey">模板键</param>
-    public static Error ModelInvalid(string templateKey) => Error.BusinessRule("Notifications.ModelInvalid", $"通知数据和模板 {templateKey} 声明的数据模型不符");
+    public static Error ModelInvalid(string templateKey) => Error.BusinessRule("Notifications.ModelInvalid", $"通知数据不符合模板 {templateKey} 声明的数据模型");
 
     /// <summary>
     /// 发送请求的记录不存在

@@ -11,8 +11,8 @@ namespace Kmic.Identity.Domain.Users;
 /// 用户：能登录系统的人，以及代表“系统”的固定账号
 /// </summary>
 /// <remarks>
-/// 只带身份与通用展示字段，职称、行业这类业务属性由使用它们的业务模块自己保存。
-/// 用户不删除，只禁用：业务数据里到处引用着负责人、创建人，历史上的人必须还能解析出来
+/// 仅保存身份和通用展示信息，业务属性由各业务模块维护。
+/// 用户只禁用、不删除，以保留历史引用的解析能力。
 /// </remarks>
 public sealed class User : AggregateRoot<UserId>
 {

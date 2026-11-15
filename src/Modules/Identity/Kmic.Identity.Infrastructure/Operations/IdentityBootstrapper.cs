@@ -37,7 +37,7 @@ public sealed class IdentityBootstrapper
     /// <param name="account">管理员账号</param>
     /// <param name="displayName">管理员姓名</param>
     /// <param name="password">管理员密码，要满足密码规则；用户首次登录后被要求修改</param>
-    /// <param name="rootUnitName">组织树根单元的名称，不传用“总部”</param>
+    /// <param name="rootUnitName">组织树根单元名称；为 null 或空白时使用“总部”</param>
     /// <param name="now">当前时间</param>
     /// <param name="ct">取消令牌</param>
     public async Task<Result> BootstrapAsync(string connectionString, string account, string displayName, string password, string? rootUnitName, DateTimeOffset now, CancellationToken ct)

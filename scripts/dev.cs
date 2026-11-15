@@ -80,7 +80,7 @@ int Status()
         if (built)
         {
             var users = Psql(Database, "SELECT count(*) FROM \"Identity\".\"User\" WHERE \"Kind\" = 'Normal'").Output.Trim();
-            Console.WriteLine($"用户数：{(users.Length == 0 ? "还没迁移" : users)}");
+            Console.WriteLine($"用户数：{(users.Length == 0 ? "未取得用户数，请检查迁移状态和数据库连接" : users)}");
         }
     }
 
@@ -94,7 +94,7 @@ int Reset()
     var status = Capture("docker", ["ps", "--filter", $"name=^{Container}$", "--format", "{{.Names}}"]).Output.Trim();
     if (status.Length == 0)
     {
-        return Fail("数据库容器没有在运行，没有可删的库。");
+        return Fail("数据库容器未运行，无法删除数据库。请先启动容器。");
     }
 
     var dropped = Psql("postgres", $"DROP DATABASE IF EXISTS {Database} WITH (FORCE)");

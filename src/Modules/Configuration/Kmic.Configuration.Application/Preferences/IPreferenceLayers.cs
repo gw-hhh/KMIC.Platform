@@ -5,9 +5,6 @@ namespace Kmic.Configuration.Application.Preferences;
 /// <summary>
 /// 读取用户的分层偏好，系统层和角色层使用缓存，用户层直接读库
 /// </summary>
-/// <remarks>
-/// 由基础设施实现读取和缓存，应用层通过此接口访问
-/// </remarks>
 public interface IPreferenceLayers
 {
     /// <summary>

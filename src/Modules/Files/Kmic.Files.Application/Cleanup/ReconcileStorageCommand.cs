@@ -14,5 +14,5 @@ namespace Kmic.Files.Application.Cleanup;
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]
-[NotAudited("定时对账，文件的状态变化记入文件状态历史，结果记入作业运行记录")]
+[NotAudited("状态变更记入文件历史，对账结果记入作业运行记录")]
 public sealed record ReconcileStorageCommand(DateTimeOffset ScheduledFireTime) : ICommand<ScheduledJobOutcome>;

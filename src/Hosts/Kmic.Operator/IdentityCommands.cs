@@ -19,7 +19,7 @@ internal static class IdentityCommands
     {
         var account = new Option<string>("--account") { Description = "管理员账号", Required = true };
         var name = new Option<string>("--name") { Description = "管理员姓名", Required = true };
-        var rootUnit = new Option<string?>("--root-unit-name") { Description = "组织树根单元的名称，不传用“总部”" };
+        var rootUnit = new Option<string?>("--root-unit-name") { Description = "组织树根单元名称；未指定或为空白时用“总部”" };
         var command = new Command("bootstrap", "初始化首个管理员，创建内置管理员角色、账号及角色授予和组织树根单元。仅系统尚无普通用户时可执行；密码从标准输入读取")
         {
             account,

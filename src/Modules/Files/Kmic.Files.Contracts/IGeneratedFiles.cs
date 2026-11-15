@@ -13,18 +13,18 @@ namespace Kmic.Files.Contracts;
 public interface IGeneratedFiles
 {
     /// <summary>
-    /// 把内容写进存储，不碰数据库
+    /// 写入文件内容，不写数据库
     /// </summary>
     /// <param name="source">生成方，如 Operations.AuditExport；登记后的 Profile 为 Generated:来源</param>
     /// <param name="fileName">文件名，只用它的扩展名识别类型</param>
     /// <param name="content">文件内容，读到结尾为止</param>
     /// <param name="retention">从开始写入起计算的保留时长；到期且未关联时可清理</param>
     /// <param name="ct">取消令牌</param>
-    /// <returns>写入的文件；内容是空的、类型不认识、超过大小上限时返回对应的错误</returns>
+    /// <returns>写入的文件信息；内容为空、类型无法识别或大小超限时返回对应错误</returns>
     Task<Result<GeneratedFile>> WriteAsync(string source, string fileName, Stream content, TimeSpan retention, CancellationToken ct);
 
     /// <summary>
-    /// 请求登记一个写好的文件，只能在命令里调用
+    /// 在命令事务中请求登记已写入的文件
     /// </summary>
     /// <param name="file">WriteAsync 返回的文件</param>
     void Register(GeneratedFile file);

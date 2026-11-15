@@ -72,7 +72,7 @@ public sealed class GeneratedFiles(
     }
 
     /// <inheritdoc />
-    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "这里是唯一发出登记请求的地方")]
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "实现 IGeneratedFiles.Register，需在此构造登记请求")]
     public void Register(GeneratedFile file)
     {
         ArgumentNullException.ThrowIfNull(file);
