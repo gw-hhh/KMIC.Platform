@@ -46,10 +46,10 @@ public sealed class NotificationProcessingTests(ClassDatabase<ApiTemplate> datab
         (await SendAsync(Submitted(dedup, Recipient.OfUser(user)))).ShouldBeSuccess();
 
         var delivery = await seed.ScalarAsync<string>($"""SELECT "Status" || '|' || "AddressMasked" || '|' || "Subject" || '|' || "Body" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""");
-        delivery.ShouldBe("Captured|a***@example.com|示例标本 SP-<1> 已提交|<p>标本 SP-&lt;1&gt;（第一批 &amp; 样品）已经提交。</p><p><a href=\"/sample/specimens/1\">查看详情</a></p>");
+        delivery.ShouldBe("Captured|a***@example.com|示例 SP-<1> 已提交|<p>示例 SP-&lt;1&gt;（第一批 &amp; 样品）已提交。</p><p><a href=\"/sample/specimens/1\">查看详情</a></p>");
         (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."CapturedMessage" c JOIN "Notifications"."Delivery" d ON d."Id" = c."DeliveryId" WHERE d."DedupKey" = '{dedup}' AND c."Address" = 'alice@example.com'""")).ShouldBe(1);
         var site = await seed.ScalarAsync<string>($"""SELECT "Title" || '|' || "Body" || '|' || "Link" || '|' || "Category" FROM "Notifications"."SiteMessage" WHERE "RecipientUserId" = '{user}'""");
-        site.ShouldBe("示例标本 SP-<1> 已提交|标本 SP-<1>（第一批 & 样品）已经提交。|/sample/specimens/1|Sample");
+        site.ShouldBe("示例 SP-<1> 已提交|示例 SP-<1>（第一批 & 样品）已提交。|/sample/specimens/1|Sample");
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public sealed class NotificationProcessingTests(ClassDatabase<ApiTemplate> datab
         (await SendAsync(message)).ShouldBeSuccess();
 
         var row = await seed.ScalarAsync<string>($"""SELECT "Channel" || '|' || "AddressMasked" || '|' || "Body" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""");
-        row.ShouldBe("Sms|+86*******0000|标本 SP-9 需要处理");
+        row.ShouldBe("Sms|+86*******0000|示例 SP-9 需要处理");
     }
 
     [Fact]

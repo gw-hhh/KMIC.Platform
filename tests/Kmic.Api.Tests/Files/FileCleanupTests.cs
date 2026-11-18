@@ -149,7 +149,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         rejected.ShouldBeGreaterThanOrEqualTo(1);
         (await ColumnAsync<string>(seed, stale, "Status")).ShouldBe("Rejected");
-        (await ColumnAsync<string>(seed, stale, "RejectReason")).ShouldBe("上传中断");
+        (await ColumnAsync<string>(seed, stale, "RejectReason")).ShouldBe("上传超时未完成");
         (await ColumnAsync<string>(seed, recent, "Status")).ShouldBe("Uploading");
     }
 

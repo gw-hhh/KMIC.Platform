@@ -44,6 +44,6 @@ public sealed class PurgeCommandTests(ToolsTemplate template) : IAsyncLifetime
         var (exitCode, output) = await ToolHarness.RunnerAsync(_database.ConnectionString, false, "purge", "--table", "audit-log", "--older-than-days", "30");
 
         exitCode.ShouldBe(0, output);
-        output.ShouldContain("还不存在");
+        output.ShouldContain("对应的表不存在");
     }
 }

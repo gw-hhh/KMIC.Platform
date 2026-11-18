@@ -63,7 +63,7 @@ public sealed class PreferenceTests(ClassDatabase<ApiTemplate> database, ApiTemp
         var items = await MineAsync(user);
 
         var pageSize = Find(items, PageSize).ShouldNotBeNull();
-        pageSize.GetProperty("displayName").GetString().ShouldBe("标本列表每页条数");
+        pageSize.GetProperty("displayName").GetString().ShouldBe("示例列表每页条数");
         pageSize.GetProperty("value").GetProperty("value").GetInt32().ShouldBe(20);
         pageSize.GetProperty("source").GetString().ShouldBe("Default");
         pageSize.GetProperty("isFamily").GetBoolean().ShouldBeFalse();

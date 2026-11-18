@@ -187,10 +187,10 @@ public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> databas
         var preview = await PostActionAsync(admin, $"{Root}/{SubmittedKey}/preview", new { channel = "Email", subject = "主题", body = "<p>{{ Unknown }}</p>" });
 
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
-        (await JsonAsync(response)).GetProperty("title").GetString().ShouldBe("模板有误：用到了没有声明的变量：Absent");
+        (await JsonAsync(response)).GetProperty("title").GetString().ShouldBe("模板有误：未声明的变量：Absent");
         (await seed.CountAsync("SELECT count(*) FROM \"Notifications\".\"TemplateVersion\"")).ShouldBe(before);
         preview.StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await JsonAsync(preview)).GetProperty("error").GetString().ShouldBe("模板有误：用到了没有声明的变量：Unknown");
+        (await JsonAsync(preview)).GetProperty("error").GetString().ShouldBe("模板有误：未声明的变量：Unknown");
     }
 
     [Fact]

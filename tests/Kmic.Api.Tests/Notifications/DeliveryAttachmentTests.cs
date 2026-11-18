@@ -123,7 +123,7 @@ public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<Cl
         await SendAsync(Notice(user, dedup, big, another));
 
         await WaitForAsync(seed, dedup, "Failed", "附件加起来超过上限，投递失败");
-        (await ErrorAsync(seed, dedup)).ShouldBe("附件加起来超过了 1 MB");
+        (await ErrorAsync(seed, dedup)).ShouldBe("附件总大小超过 1 MB");
     }
 
     [Fact]

@@ -92,8 +92,8 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
         var misspelled = await StrictFailureAsync("单据 {{ Absent }}，{{ Address.City }}，{{ Missing }}，{{ Absent }}");
         var inLoop = await StrictFailureAsync("{% for line in Lines %}{{ line.Name }}{{ item.Name }}{% endfor %}");
 
-        misspelled.ShouldBe("模板有误：用到了没有声明的变量：Absent、Missing");
-        inLoop.ShouldBe("模板有误：用到了没有声明的变量：item");
+        misspelled.ShouldBe("模板有误：未声明的变量：Absent、Missing");
+        inLoop.ShouldBe("模板有误：未声明的变量：item");
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
     public async Task StrictRendering_ASyntaxErrorOrALimit_StillFailsTheSameWay_AndLenientRenderingIgnoresUnknownVariables()
     {
         (await StrictFailureAsync("单据 {{ Number ")).ShouldNotBeNull().ShouldStartWith("模板有误：");
-        (await StrictFailureAsync("{% for i in (1..4000) %}{{ Number }}{% endfor %}")).ShouldNotBeNull().ShouldContain("输出超过");
+        (await StrictFailureAsync("{% for i in (1..4000) %}{{ Number }}{% endfor %}")).ShouldNotBeNull().ShouldContain("输出长度超过上限");
 
         (await RenderOkAsync("[{{ Absent }}]")).ShouldBe("[]", "发通知时没有的变量按空处理，不让通知发不出去");
     }
@@ -138,7 +138,7 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
     {
         var message = await RenderFailureAsync("{% for i in (1..4000) %}{{ Number }}{% endfor %}");
 
-        message.ShouldContain("输出超过");
+        message.ShouldContain("输出长度超过上限");
     }
 
     private sealed record Order(string Number, string Customer, Address Address, IReadOnlyList<Line> Lines)
