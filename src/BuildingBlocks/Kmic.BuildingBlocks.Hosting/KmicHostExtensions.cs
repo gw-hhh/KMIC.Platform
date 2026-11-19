@@ -96,6 +96,8 @@ public static class KmicHostExtensions
         var api = composition.Roles.HasFlag(HostRoles.Api);
         if (api)
         {
+            app.UseKmicForwardedHeaders();
+            app.UseKmicSecurityHeaders();
             app.UseKmicErrorHandling();
         }
 

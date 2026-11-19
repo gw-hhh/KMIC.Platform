@@ -10,10 +10,14 @@ namespace Kmic.Identity.Application.Authentication.ChangePassword;
 /// <summary>
 /// 修改当前用户密码
 /// </summary>
+/// <remarks>
+/// 旧密码输错和登录失败共用一份失败计数，猜密码的总次数有上限
+/// </remarks>
 public sealed class ChangePasswordCommandHandler(
     IUserRepository users,
     IExecutionContext execution,
     IPasswordService passwords,
+    ILoginThrottleStore throttles,
     PasswordPolicy policy,
     ISecurityEventWriter securityEvents,
     TimeProvider time) : ICommandHandler<ChangePasswordCommand>
@@ -29,9 +33,28 @@ public sealed class ChangePasswordCommandHandler(
         }
 
         var user = loaded.Value;
-        if (!string.IsNullOrEmpty(user.PasswordHash) && (command.OldPassword is null || passwords.Verify(user, command.OldPassword) == PasswordCheck.Failed))
+        var now = time.GetUtcNow();
+        var key = LoginNames.Hash(user.Account);
+        if (!string.IsNullOrEmpty(user.PasswordHash))
         {
-            return IdentityErrors.OldPasswordWrong;
+            if (LoginThrottlePolicy.Remaining(await throttles.GetAsync(key, cancellationToken), now) is { } wait)
+            {
+                return IdentityErrors.LoginThrottled.WithMetadata(ErrorMetadataKeys.RetryAfterSeconds, (int)Math.Ceiling(wait.TotalSeconds));
+            }
+
+            if (command.OldPassword is null || passwords.Verify(user, command.OldPassword) == PasswordCheck.Failed)
+            {
+                var after = await throttles.RecordFailureAsync(key, now, cancellationToken);
+                securityEvents.Write(new SecurityEvent("PasswordChangeFailed", SecuritySeverity.Warning, "OldPasswordWrong"));
+                if (after.LockedUntil is { } lockedUntil && lockedUntil > now)
+                {
+                    securityEvents.Write(new SecurityEvent("AccountLocked", SecuritySeverity.High, $"Level{after.LockLevel}") { UserId = user.Id.Value });
+                }
+
+                return IdentityErrors.OldPasswordWrong;
+            }
+
+            await throttles.ClearAsync(key, cancellationToken);
         }
 
         var allowed = policy.Validate(command.NewPassword, user.Account, user.Mobile);
@@ -40,7 +63,7 @@ public sealed class ChangePasswordCommandHandler(
             return allowed;
         }
 
-        var set = user.SetPassword(passwords.Hash(user, command.NewPassword), mustChange: false, byAdministrator: false, time.GetUtcNow());
+        var set = user.SetPassword(passwords.Hash(user, command.NewPassword), mustChange: false, byAdministrator: false, now);
         if (set.IsSuccess)
         {
             securityEvents.Write(new SecurityEvent("PasswordChanged", SecuritySeverity.Info, null));

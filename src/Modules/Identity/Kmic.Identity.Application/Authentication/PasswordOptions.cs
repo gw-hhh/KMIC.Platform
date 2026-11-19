@@ -15,8 +15,8 @@ public sealed class PasswordOptions
     /// <summary>
     /// 最短长度
     /// </summary>
-    [Range(8, 64)]
-    public int MinLength { get; init; } = 10;
+    [Range(12, 64)]
+    public int MinLength { get; init; } = 12;
 
     /// <summary>
     /// 最长长度

@@ -44,6 +44,7 @@ public sealed class InternalRequestsTests
     [InlineData("X-Forwarded-For")]
     [InlineData("Forwarded")]
     [InlineData("X-Real-IP")]
+    [InlineData("X-Original-For")]
     public void ForwardingHeader_MakesEvenAPrivateAddressExternal(string header)
     {
         var context = From("10.0.0.1");

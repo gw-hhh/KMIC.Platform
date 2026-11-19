@@ -14,4 +14,8 @@ namespace Kmic.Identity.Application.Authentication.Refresh;
 [AllowAnonymous]
 [NotAudited("仅轮换会话凭据，令牌重用通过安全事件记录")]
 [NotIdempotent("成功刷新会轮换令牌，旧令牌重试受宽限期限制")]
-public sealed record RefreshTokenCommand(string RefreshToken, string? ClientIp) : ICommand<AuthTokens>;
+public sealed record RefreshTokenCommand(string RefreshToken, string? ClientIp) : ICommand<AuthTokens>
+{
+    // 不用编译器生成的：它会把密码、令牌的值也打出来
+    public override string ToString() => nameof(RefreshTokenCommand);
+}

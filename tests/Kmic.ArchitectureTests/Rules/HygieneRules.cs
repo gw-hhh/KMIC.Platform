@@ -25,6 +25,24 @@ internal static class HygieneRules
     ];
 
     /// <summary>
+    /// 带密码、令牌的 record 要自己写 ToString：编译器生成的会把每个属性的值都打出来，一旦被拼进日志或异常消息就泄露了
+    /// </summary>
+    public static IReadOnlyList<string> SecretsInToString(IEnumerable<Type> types)
+    {
+        var secretName = new System.Text.RegularExpressions.Regex("password|refreshtoken|accesstoken|^token$|secret|credential", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
+        return
+        [
+            .. types.Where(t => !IsCompilerGenerated(t) && IsOurs(t) && !t.IsAbstract)
+                .Where(t => t.GetMethod(nameof(ToString), Type.EmptyTypes) is { } toString
+                    && toString.DeclaringType == t
+                    && toString.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>() is not null)
+                .Select(t => (Type: t, Secret: t.GetProperties(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault(p => p.PropertyType == typeof(string) && secretName.IsMatch(p.Name))))
+                .Where(x => x.Secret is not null)
+                .Select(x => $"{x.Type.FullName}.{x.Secret!.Name}：带密码或令牌的 record 要自己写 ToString，不能用编译器生成的（会打出所有属性的值）。"),
+        ];
+    }
+
+    /// <summary>
     /// 模块里不定义异常类型：业务失败用 Result，异常类型只在框架里
     /// </summary>
     public static IReadOnlyList<string> ExceptionTypes(IEnumerable<Type> types) =>

@@ -18,4 +18,8 @@ public sealed record AuthTokens(
     [property: JsonPropertyName("token_type")] string TokenType,
     [property: JsonPropertyName("expires_in")] int ExpiresIn,
     [property: JsonPropertyName("refresh_token")] string? RefreshToken,
-    [property: JsonPropertyName("passwordChangeRequired")] bool PasswordChangeRequired);
+    [property: JsonPropertyName("passwordChangeRequired")] bool PasswordChangeRequired)
+{
+    // 不用编译器生成的：它会把密码、令牌的值也打出来
+    public override string ToString() => nameof(AuthTokens);
+}

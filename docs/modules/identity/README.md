@@ -446,7 +446,7 @@ Notifications 的请求型消息 `SendNotification`（05-11 第 7.2 节）。收
 | 配置（部署选项，05-10） | `Kmic:Auth`（令牌签名密钥、签发者，已实现）；`Identity:Session`（访问令牌 15 分钟；刷新令牌滑动续期，Web 7 天、App 30 天；会话绝对上限 Web 30 天、App 90 天；并发刷新宽限 10 秒；模拟会话 1 小时）、`Identity:LoginThrottle`（05-04 D4 的阶梯）、`Identity:Password`（最短 10 位、最长 128 位）、`Identity:Sms`（6 位、5 分钟、校验 5 次、每号码每分钟 1 次每天 10 次、每 IP 每小时 20 次）、可信来源列表（Cookie 端点的 Origin 校验）。安全类阈值放配置而不是系统设置：改动需要发布并留痕，不在界面上调 |
 | 通知模板（05-11 D4，代码声明） | `Identity.SmsCode`（短信，`High`）、`Identity.AccountLocked`（站内消息与邮件）、`Identity.PasswordChanged`（站内消息与邮件，提示本人） |
 | 人机验证 | `IHumanVerification`（Identity.Application）；非生产环境“总是通过”，生产为阿里云验证码 2.0（05-04 D5，开通见待办 T-08） |
-| 弱密码清单 | 随模块嵌入的资源文件，来源与许可 `待确认`（实现前选定，不选来源不明的清单） |
+| 弱密码清单 | 随模块嵌入的资源文件：SecLists 的 `10k-most-common.txt`（MIT 许可，Copyright (c) 2018 Daniel Miessler），只取 8 位及以上，并入原有清单，约 2 100 条；许可全文放在同目录 `weak-passwords.LICENSE.txt`（2026-11-19 选定） |
 | 编号、字典、附件 | 无。工号手工填写 |
 
 ---
@@ -666,7 +666,7 @@ Notifications 的请求型消息 `SendNotification`（05-11 第 7.2 节）。收
 | 角色的 `Department` 列用途 | 业务方 | 是否迁移 |
 | 旧系统是否仍在线运行；1.2 的登录判断是否需要处理 | 用户 | 与新系统无关，但属于已发现的安全风险 |
 | `AuthorizationAdminCommandHandler` 基类实现的处理器，Mediator 源码生成器能否识别 | 阶段 3 实现时验证（05-05 第 14 节遗留项） | 不支持时改为处理器第一行调用重查 + 架构测试，重查机制不变 |
-| 弱密码清单的来源与许可 | 实现前选定 | 8 节 |
+| 弱密码清单的来源与许可 | 已选定（2026-11-19）：SecLists 10k-most-common，MIT | 8 节 |
 
 ---
 

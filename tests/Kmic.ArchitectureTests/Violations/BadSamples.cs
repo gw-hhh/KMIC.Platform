@@ -34,6 +34,9 @@ namespace Kmic.ArchitectureTests.Violations;
 /// </summary>
 internal static class BadSamples
 {
+    // 带密码的 record 用了编译器生成的 ToString
+    internal sealed record LeakyLogin(string Account, string Password);
+
     // 命令：名字不以 Command 结尾，也不是 record
     internal sealed class SubmitThing : ICommand;
 

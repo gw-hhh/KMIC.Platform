@@ -11,7 +11,8 @@ namespace Kmic.BuildingBlocks.Hosting.Health;
 /// </remarks>
 internal static class InternalRequests
 {
-    private static readonly string[] _forwardingHeaders = ["X-Forwarded-For", "Forwarded", "X-Real-IP"];
+    // X-Original-For 是转发头中间件处理完可信代理的请求后留下的：它会清掉 X-Forwarded-For，所以也要认
+    private static readonly string[] _forwardingHeaders = ["X-Forwarded-For", "Forwarded", "X-Real-IP", "X-Original-For"];
 
     public static bool IsInternal(HttpContext http)
     {

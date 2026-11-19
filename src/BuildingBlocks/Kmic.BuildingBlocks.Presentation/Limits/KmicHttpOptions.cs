@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Kmic.BuildingBlocks.Application.Time;
 
 namespace Kmic.BuildingBlocks.Presentation.Limits;
@@ -9,7 +10,7 @@ namespace Kmic.BuildingBlocks.Presentation.Limits;
 /// <remarks>
 /// 内置限流按实例计数，多实例时总量是实例数 × 限额
 /// </remarks>
-public sealed class KmicHttpOptions
+public sealed class KmicHttpOptions : IValidatableObject
 {
     /// <summary>
     /// 配置节
@@ -39,4 +40,24 @@ public sealed class KmicHttpOptions
     /// </summary>
     [Range(1, 1_000)]
     public int HeavyConcurrency { get; init; } = 4;
+
+    /// <summary>
+    /// 请求体大小上限（字节），要收更大请求体的端点（如上传）自己在请求里放宽
+    /// </summary>
+    [Range(1024, 100_000_000)]
+    public long MaxRequestBodyBytes { get; init; } = 1_048_576;
+
+    /// <summary>
+    /// 可信代理（负载均衡）所在的网段，如 10.0.0.0/16；只有来自这些网段的转发头才被采信，为空表示不处理转发头
+    /// </summary>
+    public IReadOnlyList<string> TrustedProxies { get; init; } = [];
+
+    /// <inheritdoc />
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        foreach (var proxy in TrustedProxies.Where(p => !IPNetwork.TryParse(p, out _)))
+        {
+            yield return new ValidationResult($"{Section}:TrustedProxies 里的“{proxy}”不是 CIDR 网段，应写成 10.0.0.0/16 这样。", [nameof(TrustedProxies)]);
+        }
+    }
 }

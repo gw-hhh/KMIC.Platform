@@ -821,7 +821,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | 05-10 | 无可变静态字段；缓存键第一段为模块名；`HybridCache` 只在 Infrastructure 与查询处理器中使用；缓存值不可变；授权相关代码不依赖 `IPreferences` |
 | 05-11 | 只有 Files 模块与框架使用 `IFileStorage` |
 | 05-13 | 计数表只经 `INumberGenerator` 访问 |
-| 本文 | 子目录不得有 `.editorconfig`（2.3）；`InternalsVisibleTo` 只指向本模块测试项目（5.1）；模块中不定义异常类型（6）；模块中不使用 `System.Threading.Lock` / `Monitor` / `SemaphoreSlim` / `Mutex`（7）；`IServiceCollection` 注册只在 `IModule` 中（8） |
+| 本文 | 子目录不得有 `.editorconfig`（2.3）；`InternalsVisibleTo` 只指向本模块测试项目（5.1）；模块中不定义异常类型（6）；带密码、令牌属性的 record 自己写 `ToString`（避免编译器生成的版本把值打出来）；模块中不使用 `System.Threading.Lock` / `Monitor` / `SemaphoreSlim` / `Mutex`（7）；`IServiceCollection` 注册只在 `IModule` 中（8） |
 
 ---
 
@@ -912,6 +912,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | 2026-11-19 | 编码速查第 18 条、第 6 节：命令、查询处理器的 `command`、`query` 不写 `ThrowIfNull`（现有 139 处已删） | 用户确认（2026-11-19，现有系统梳理） |
 
 | 2026-11-19 | 第 16 节：增加覆盖率报告脚本 `scripts/coverage.cs`，只出报告、不设门槛 | 用户确认（2026-11-19，现有系统梳理） |
+| 2026-11-19 | 第 15.4 节：新增架构测试“带密码、令牌属性的 record 自己写 `ToString`” | 用户确认（2026-11-19，Identity 安全审查） |
 ---
 
 ## 附录 A 注释与排版要点

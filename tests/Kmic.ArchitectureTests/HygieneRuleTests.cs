@@ -21,6 +21,10 @@ public sealed class HygieneRuleTests
         HygieneRules.MutableStatics(ProductAssemblies.All.SelectMany(a => a.Assembly.GetTypes())).ShouldBeEmpty();
 
     [Fact]
+    public void RecordsWithSecrets_DoNotUseTheGeneratedToString() =>
+        HygieneRules.SecretsInToString(ProductAssemblies.All.SelectMany(a => a.Assembly.GetTypes())).ShouldBeEmpty();
+
+    [Fact]
     public void ModulesDefineNoExceptionTypes() => HygieneRules.ExceptionTypes(ModuleTypes).ShouldBeEmpty();
 
     [Fact]
@@ -100,6 +104,10 @@ public sealed class HygieneRuleTests
     [Fact]
     public void Violation_MutableStaticField_IsReported() =>
         HygieneRules.MutableStatics(_bad).ShouldContain(p => p.Contains("SharedState.Counter", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_RecordWithAPasswordAndTheGeneratedToString_IsReported() =>
+        HygieneRules.SecretsInToString(_bad).ShouldContain(p => p.Contains("LeakyLogin.Password", StringComparison.Ordinal));
 
     [Fact]
     public void Violation_ExceptionType_IsReported() =>

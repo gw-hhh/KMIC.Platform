@@ -1,5 +1,6 @@
 using System.Net;
 using Kmic.BuildingBlocks.Testing.Database;
+using Kmic.BuildingBlocks.Testing.Waiting;
 using Kmic.Sample.Application;
 using Shouldly;
 
@@ -277,6 +278,33 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         (await GetAsync(client, "/api/v1/identity/me", other)).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         (await LoginAsync(client, "changer", "a brand new passphrase")).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await LoginAsync(client, "changer", Password)).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithAWrongOldPassword_UsesUpTheSameGuessBudgetAsLogin()
+    {
+        await UserWithRoleAsync("guesser");
+        var client = NewClient();
+        var access = (await JsonAsync(await LoginAsync(client, "guesser"))).GetProperty("access_token").GetString();
+
+        // 前两次免费，第三次失败后开始等待
+        for (var i = 0; i < 3; i++)
+        {
+            var wrong = await PostAsync(client, "/api/v1/identity/auth/change-password", new { oldPassword = "not the old one", newPassword = "a brand new passphrase" }, bearer: access);
+            (await JsonAsync(wrong)).GetProperty("code").GetString().ShouldBe("Identity.OldPasswordWrong");
+        }
+
+        var blocked = await PostAsync(client, "/api/v1/identity/auth/change-password", new { oldPassword = Password, newPassword = "a brand new passphrase" }, bearer: access);
+        var login = await LoginAsync(client, "guesser");
+
+        blocked.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests);
+        (await JsonAsync(blocked)).GetProperty("code").GetString().ShouldBe("Identity.LoginThrottled");
+        login.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests, "改密码时猜旧密码和登录共用同一份失败计数");
+        await Eventually.UntilAsync(
+            async _ => await Seed.CountAsync("""SELECT count(*) FROM "Identity"."SecurityEvent" WHERE "Type" = 'PasswordChangeFailed'"""),
+            count => count >= 3,
+            "旧密码输错的安全事件写入数据库",
+            ct: Ct);
     }
 
     [Fact]

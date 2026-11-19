@@ -92,3 +92,8 @@ targetdir
 reporttypes
 assemblyfilters
 classfilters
+hsts
+validatable
+miessler
+refreshtoken
+accesstoken
