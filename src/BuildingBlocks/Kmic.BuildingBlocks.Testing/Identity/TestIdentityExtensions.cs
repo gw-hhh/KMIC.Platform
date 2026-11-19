@@ -26,4 +26,22 @@ public static class TestIdentityExtensions
         ArgumentNullException.ThrowIfNull(factory);
         return factory.CreateScope(origin, CurrentUser.System());
     }
+
+    /// <summary>
+    /// 在宿主里以测试身份建立作用域，如 <c>Factory.Services.As(Alice)</c>
+    /// </summary>
+    public static AsyncServiceScope As(this IServiceProvider services, TestIdentity identity, CallOrigin origin = CallOrigin.Http)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        return services.GetRequiredService<IExecutionScopeFactory>().CreateScope(identity, origin);
+    }
+
+    /// <summary>
+    /// 在宿主里以系统身份建立作用域
+    /// </summary>
+    public static AsyncServiceScope AsSystem(this IServiceProvider services, CallOrigin origin = CallOrigin.Inbox)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        return services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(origin);
+    }
 }

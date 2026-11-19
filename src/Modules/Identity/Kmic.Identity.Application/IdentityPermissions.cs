@@ -83,4 +83,10 @@ public static class IdentityPermissions
     /// </summary>
     [Permission("查看安全事件", Sensitive = true)]
     public const string SecurityEventView = "Identity.SecurityEvent.View";
+
+    /// <summary>
+    /// 查看用户在某个角色下的权限和数据范围
+    /// </summary>
+    [Permission("授权诊断", Sensitive = true)]
+    public const string AuthorizationExplain = "Identity.Authorization.Explain";
 }

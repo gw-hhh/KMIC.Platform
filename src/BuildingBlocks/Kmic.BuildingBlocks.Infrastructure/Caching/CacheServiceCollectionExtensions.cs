@@ -1,3 +1,4 @@
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +12,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 /// </summary>
 public static class CacheServiceCollectionExtensions
 {
+    private const string InnerCacheKey = "Kmic.Cache.Inner";
+
     /// <summary>
-    /// 注册 HybridCache、提交后失效和跨实例的失效通知
+    /// 注册 HybridCache 及其命中统计、提交后失效和跨实例的失效通知
     /// </summary>
     /// <remarks>
     /// 业务代码只用 HybridCache。没有配置 Redis 时只有本地缓存。失效通知走数据库的监听连接，
@@ -25,6 +28,7 @@ public static class CacheServiceCollectionExtensions
 
         services.AddOptions<CacheOptions>();
         services.AddHybridCache();
+        DecorateWithMetrics(services);
         services.AddOptions<HybridCacheOptions>().Configure<IOptions<CacheOptions>>((hybrid, cache) =>
         {
             hybrid.DefaultEntryOptions = new HybridCacheEntryOptions
@@ -36,5 +40,22 @@ public static class CacheServiceCollectionExtensions
         services.TryAddSingleton<CacheInvalidator>();
         MessagingServiceCollectionExtensions.AddListener(services);
         return services;
+    }
+
+    // 原注册改成带键服务，仍由容器创建和释放，对外的 HybridCache 换成带命中统计的包装；已经包过就不再包
+    private static void DecorateWithMetrics(IServiceCollection services)
+    {
+        if (services.Any(d => d.ServiceType == typeof(HybridCache) && d.IsKeyedService && Equals(d.ServiceKey, InnerCacheKey)))
+        {
+            return;
+        }
+
+        var original = services.Last(d => d.ServiceType == typeof(HybridCache) && !d.IsKeyedService);
+        services.Remove(original);
+        services.Add(original.ImplementationType is { } type
+            ? ServiceDescriptor.KeyedSingleton(typeof(HybridCache), InnerCacheKey, type)
+            : ServiceDescriptor.KeyedSingleton(typeof(HybridCache), InnerCacheKey, (provider, _) => original.ImplementationFactory?.Invoke(provider) ?? original.ImplementationInstance!));
+        services.AddSingleton<HybridCache>(provider => new MeteredHybridCache(
+            provider.GetRequiredKeyedService<HybridCache>(InnerCacheKey), provider.GetRequiredService<FrameworkMetrics>()));
     }
 }

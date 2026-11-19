@@ -35,6 +35,21 @@ public static class CacheKey
         return key.ToString();
     }
 
+    /// <summary>
+    /// 缓存键的类别，即前两段“模块:对象”，不足两段时返回整个键
+    /// </summary>
+    /// <remarks>
+    /// 用作指标维度，所以标识要放在第三段以后，否则维度取值会无限增长
+    /// </remarks>
+    public static string CategoryOf(string key)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        var first = key.IndexOf(Separator, StringComparison.Ordinal);
+        var second = first < 0 ? -1 : key.IndexOf(Separator, first + 1);
+        return second < 0 ? key : key[..second];
+    }
+
     private static void Append(StringBuilder key, string? segment, string parameterName)
     {
         // 段里不能出现分隔符，否则两个不同的键可能拼成同一个字符串

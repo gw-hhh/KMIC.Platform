@@ -43,7 +43,7 @@ public sealed class FileReconciliationGuardTests(ClassDatabase<ApiTemplate> data
             keys.Add(path);
         }
 
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.ScheduledJob);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.ScheduledJob);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ReconcileStorageCommand(TimeProvider.System.GetUtcNow()), Ct);
 
         result.ShouldBeFailure(FilesErrors.ReconcileSuspicious);

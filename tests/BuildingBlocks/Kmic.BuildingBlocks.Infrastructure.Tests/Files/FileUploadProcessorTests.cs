@@ -1,7 +1,11 @@
+using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using System.Text;
 using Kmic.BuildingBlocks.Application.Files;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Files;
+using Kmic.BuildingBlocks.Testing.Metrics;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Files;
@@ -13,18 +17,24 @@ public sealed class FileUploadProcessorTests : IDisposable
 
     private readonly string _root = Path.Combine(Path.GetTempPath(), "kmic-upload-" + Guid.CreateVersion7().ToString("N"));
     private readonly LocalFileStorage _storage;
+    private readonly ServiceProvider _services = new ServiceCollection().AddMetrics().BuildServiceProvider();
+    private readonly MetricRecorder _metrics;
     private readonly FileUploadProcessor _processor;
 
     public FileUploadProcessorTests()
     {
+        var meters = _services.GetRequiredService<IMeterFactory>();
+        _metrics = new MetricRecorder(meters);
         _storage = new LocalFileStorage(_root);
-        _processor = new FileUploadProcessor(_storage);
+        _processor = new FileUploadProcessor(_storage, new FrameworkMetrics(meters));
     }
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     public void Dispose()
     {
+        _metrics.Dispose();
+        _services.Dispose();
         if (Directory.Exists(_root))
         {
             Directory.Delete(_root, recursive: true);
@@ -65,6 +75,11 @@ public sealed class FileUploadProcessorTests : IDisposable
         using var copy = new MemoryStream();
         await stored.CopyToAsync(copy, Ct);
         copy.ToArray().ShouldBe(content);
+        var upload = _metrics.Of("kmic.files.uploads").ShouldHaveSingleItem();
+        upload.Tags["profile"].ShouldBe(_profile.Name);
+        upload.Tags["result"].ShouldBe("stored");
+        _metrics.Of("kmic.files.upload_bytes").ShouldHaveSingleItem().Value.ShouldBe(size);
+        _metrics.Of("kmic.files.rejected").ShouldBeEmpty();
     }
 
     [Fact]
@@ -75,6 +90,9 @@ public sealed class FileUploadProcessorTests : IDisposable
         result.Outcome.ShouldBe(UploadOutcome.TooLarge);
         result.File.ShouldBeNull();
         (await StoredKeysAsync()).ShouldBeEmpty();
+        _metrics.Of("kmic.files.uploads").ShouldHaveSingleItem().Tags["result"].ShouldBe("rejected");
+        _metrics.Of("kmic.files.rejected").ShouldHaveSingleItem().Tags["reason"].ShouldBe("too_large");
+        _metrics.Of("kmic.files.upload_bytes").ShouldBeEmpty();
     }
 
     [Fact]
@@ -100,6 +118,7 @@ public sealed class FileUploadProcessorTests : IDisposable
 
         result.Outcome.ShouldBe(UploadOutcome.TypeNotAllowed);
         (await StoredKeysAsync()).ShouldBeEmpty();
+        _metrics.Of("kmic.files.rejected").ShouldHaveSingleItem().Tags["reason"].ShouldBe("type_not_allowed");
     }
 
     [Fact]
@@ -109,6 +128,7 @@ public sealed class FileUploadProcessorTests : IDisposable
 
         result.Outcome.ShouldBe(UploadOutcome.Empty);
         (await StoredKeysAsync()).ShouldBeEmpty();
+        _metrics.Of("kmic.files.rejected").ShouldHaveSingleItem().Tags["reason"].ShouldBe("empty");
     }
 
     [Fact]
@@ -119,6 +139,8 @@ public sealed class FileUploadProcessorTests : IDisposable
         await Should.ThrowAsync<IOException>(async () => await _processor.StoreAsync(_profile, "a.pdf", broken, "env/broken", Ct));
 
         (await StoredKeysAsync()).ShouldBeEmpty();
+        _metrics.Of("kmic.files.uploads").ShouldHaveSingleItem().Tags["result"].ShouldBe("failed");
+        _metrics.Of("kmic.files.rejected").ShouldBeEmpty();
     }
 
     [Fact]

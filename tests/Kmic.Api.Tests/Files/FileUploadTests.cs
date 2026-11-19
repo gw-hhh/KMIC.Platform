@@ -1,7 +1,9 @@
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Security.Cryptography;
 using Kmic.Api.Tests.Identity;
 using Kmic.BuildingBlocks.Testing.Database;
+using Kmic.BuildingBlocks.Testing.Metrics;
 using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
@@ -89,11 +91,13 @@ public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemp
         using var alice = ClientFor(Alice);
         await using var seed = NewSeed();
         var before = await seed.CountAsync("""SELECT count(*) FROM "Files"."StoredFile" """);
+        using var metrics = new MetricRecorder(Factory.Services.GetRequiredService<IMeterFactory>());
 
         var response = await UploadAsync(alice, "声明太大.pdf", Pdf(), declaredSize: Limit * 2);
 
         response.StatusCode.ShouldBe(HttpStatusCode.RequestEntityTooLarge);
         (await seed.CountAsync("""SELECT count(*) FROM "Files"."StoredFile" """)).ShouldBe(before, "声明就超限的，连登记行都不建");
+        metrics.Of("kmic.files.rejected").ShouldHaveSingleItem().Tags["reason"].ShouldBe("too_large");
     }
 
     [Fact]

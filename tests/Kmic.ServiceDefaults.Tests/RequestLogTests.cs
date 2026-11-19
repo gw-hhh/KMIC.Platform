@@ -20,8 +20,23 @@ public sealed class RequestLogTests
         request.Text("RoutePattern").ShouldBe("/orders/{id}");
         request.Text("StatusCode").ShouldBe("200");
         request.Text("RequestMethod").ShouldBe("GET");
-        request.Text("RequestPath").ShouldBe("/orders/42");
-        request.Properties.Values.Select(LogEventExtensions.Text).ShouldNotContain(v => v.Contains("abc123", StringComparison.Ordinal) || v.Contains("secretquery", StringComparison.Ordinal));
+        request.Properties.ShouldNotContainKey("RequestPath");
+        request.Properties.Values.Select(LogEventExtensions.Text)
+            .ShouldNotContain(v => v.Contains("/orders/42", StringComparison.Ordinal) || v.Contains("abc123", StringComparison.Ordinal) || v.Contains("secretquery", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task LogsWrittenDuringARequest_KeepTheRequestIdButNotTheActualPath()
+    {
+        await using var app = await TestApp.StartAsync();
+
+        (await app.Client.GetAsync(new Uri("/orders/42/note", UriKind.Relative), Ct)).EnsureSuccessStatusCode();
+        await app.WaitForRequestSummariesAsync(1);
+
+        var note = app.Logs.Events.Single(e => e.HasTemplate("Order note written"));
+        note.Properties.ShouldContainKey("RequestId", "请求作用域的其他属性照常保留");
+        note.Properties.ShouldNotContainKey("RequestPath");
+        note.Properties.Values.Select(LogEventExtensions.Text).ShouldNotContain(v => v.Contains("/orders/42", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -29,11 +44,13 @@ public sealed class RequestLogTests
     {
         await using var app = await TestApp.StartAsync();
 
-        var response = await app.Client.GetAsync(new Uri("/nothing-here", UriKind.Relative), Ct);
+        var response = await app.Client.GetAsync(new Uri("/nothing-here/12345", UriKind.Relative), Ct);
         await app.WaitForRequestSummariesAsync(1);
 
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.NotFound);
-        app.Logs.Events.Single(e => e.IsRequestSummary()).Text("RoutePattern").ShouldBe("(unmatched)");
+        var request = app.Logs.Events.Single(e => e.IsRequestSummary());
+        request.Text("RoutePattern").ShouldBe("(unmatched)");
+        request.Properties.Values.Select(LogEventExtensions.Text).ShouldNotContain(v => v.Contains("12345", StringComparison.Ordinal), "未匹配的路径同样不记录");
     }
 
     [Fact]
@@ -68,9 +85,8 @@ public sealed class RequestLogTests
 
         // 之后再发一个普通请求，它的摘要出现时健康检查的摘要（如果有）早已出现
         await app.Client.GetAsync(new Uri("/orders/sentinel", UriKind.Relative), Ct);
-        app.Logs.Events.Where(e => e.IsRequestSummary()).Select(e => e.Text("RequestPath")).ShouldBe(["/orders/sentinel"]);
-
-        app.Logs.Events.Where(e => e.IsRequestSummary()).Select(e => e.Text("RequestPath")).ShouldBe(["/orders/sentinel"]);
+        await app.WaitForRequestSummariesAsync(1);
+        app.Logs.Events.Where(e => e.IsRequestSummary()).Select(e => e.Text("RoutePattern")).ShouldBe(["/orders/{id}"]);
     }
 
     [Fact]

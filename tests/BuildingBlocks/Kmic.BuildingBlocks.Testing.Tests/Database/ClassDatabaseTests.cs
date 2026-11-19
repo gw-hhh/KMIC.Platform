@@ -42,11 +42,43 @@ public sealed class ClassDatabaseTests(ProbeTemplate template)
         (await DatabaseExistsAsync(name, cancellationToken)).ShouldBeFalse();
     }
 
+    [Fact]
+    public async Task Shared_IsCreatedOncePerType_AndDisposedBeforeTheCloneIsDropped()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var database = new ClassDatabase<ProbeTemplate>(template);
+        await database.InitializeAsync();
+        var name = database.Name;
+        var created = 0;
+        SharedProbe Create()
+        {
+            created++;
+            return new SharedProbe(() => DatabaseExistsAsync(name, CancellationToken.None));
+        }
+
+        var first = database.Shared(Create);
+        var second = database.Shared(Create);
+        await database.DisposeAsync();
+
+        second.ShouldBeSameAs(first);
+        created.ShouldBe(1);
+        first.CloneExistedWhenDisposed.ShouldBe(true, "共用对象要在删库之前释放");
+        (await DatabaseExistsAsync(name, cancellationToken)).ShouldBeFalse();
+    }
+
     private async Task<bool> DatabaseExistsAsync(string name, CancellationToken cancellationToken)
     {
         await using var admin = NpgsqlDataSource.Create(template.ConnectionString("postgres", pooling: false));
         await using var command = admin.CreateCommand("SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = $1)");
         command.Parameters.Add(new NpgsqlParameter { Value = name });
         return (bool)(await command.ExecuteScalarAsync(cancellationToken))!;
+    }
+
+    // 释放时记下克隆库还在不在
+    private sealed class SharedProbe(Func<Task<bool>> cloneExists) : IAsyncDisposable
+    {
+        public bool? CloneExistedWhenDisposed { get; private set; }
+
+        public async ValueTask DisposeAsync() => CloneExistedWhenDisposed = await cloneExists();
     }
 }

@@ -204,6 +204,7 @@ stateDiagram-v2
 
 | 用例 | 声明 | 说明 |
 |---|---|---|
+| `NotifyJobFinishedCommand` | `[SystemOnly]`，订阅 `Framework.BackgroundJobFinished` | 用模板 `Notifications.BackgroundJobFinished` 给作业提交人发站内消息，走与发送请求相同的处理流程（同一来源消息只处理一次）；提交人自己取消的作业不发 |
 | `ProcessSendNotificationCommand` | `[SystemOnly]`，订阅 `Notifications.SendNotification`（请求型） | 05-11 第 7.1 节：校验模板启用且模型符合声明（不符合是业务失败，进入死信）；按 `SourceMessageId` 幂等；解析收件人（`IUserContacts`）；对每个渠道渲染（D5）并写 `Delivery` 或 `SiteMessage`；`DedupKey` 冲突的跳过并记 Information；`[NotAudited("通知记录即投递记录")]` |
 | `DeliverNextCommand`（投递工作器内部） | 无外部入口 | `LeasedQueueWorker` 领取 `Pending` 或租约到期的 `Sending`，**事务外**调用渠道，再用带租约令牌与状态条件的更新写结果（05-08 第 4.1 节，05-11 第 8.2 节） |
 
@@ -220,7 +221,7 @@ stateDiagram-v2
 | `RevertTemplateCommand(key, channel, expectedVersion)` | 同上 | 恢复代码默认内容 |
 | `ListDeliveriesQuery` | `Notifications.Delivery.View`（敏感，`[AuditedRead]`） | 按收件人、渠道、状态、模板、时间；显示脱敏地址与状态，**不含正文** |
 | `GetDeliveryQuery` | 同上 | 含渲染后的主题与正文（含密模板投递完成后为空）；查看正文写读审计 |
-| `RetryDeliveryCommand(deliveryId)` | `Notifications.Delivery.Manage`，`[Audited]` | `Failed` → `Pending`，次数清零；含密模板已过期的（验证码有效期已过）拒绝 |
+| `RetryDeliveryCommand(deliveryId)` | `Notifications.Delivery.Manage`，`[Audited]` | `Failed` → `Pending`，次数清零；含密模板的投递一律拒绝（最终失败时正文和短信参数已清空，需要重发时由业务生成新凭据另发） |
 | `AbandonDeliveryCommand(deliveryId, reason)` | 同上 | 失败的投递标记为已放弃（保持 `Failed`，加放弃标记），不再出现在待处理清单；原因必填 |
 | `ListCapturedQuery`、`GetCapturedQuery` | `Notifications.Captured.View`（敏感，`[AuditedRead]`） | 仅非生产环境的端点可用；生产环境返回 404 |
 
@@ -321,7 +322,7 @@ stateDiagram-v2
 
 ### 6.3 事件
 
-不发布集成事件。订阅（请求型消息的接收）：`Notifications.SendNotification`，订阅名 `Notifications.Process`。
+不发布集成事件。订阅：请求型消息 `Notifications.SendNotification`、`Notifications.SendSecretNotification`，订阅名 `Notifications.Process`、`Notifications.ProcessSecret`；框架事件 `Framework.BackgroundJobFinished`，订阅名 `Notifications.NotifyJobFinished`（后台作业结束时给提交人发站内消息，05-08 第 6.8 节）。
 
 ---
 
@@ -388,11 +389,11 @@ Fluid（03 第 4.4 节），只能访问模型中的数据；禁用 `include` �
 
 ### 8.5 错误码（`NotificationsErrors`）
 
-`TemplateNotFound`（404）、`TemplateRetired`（422）、`TemplateChannelNotDeclared`（422）、`TemplateInvalid`（422，语法错误或超限，带位置）、`TemplateVariableUnknown`（422）、`DeliveryNotFound`（404）、`DeliveryNotRetryable`（409）、`SiteMessageNotFound`（404）、`CapturedUnavailable`（404，生产环境）。发送请求处理中的业务失败（模板不存在、模型不符）是死信，不是对用户的错误。
+`TemplateNotFound`（404）、`TemplateRetired`（422）、`TemplateChannelNotDeclared`（422）、`TemplateInvalid`（422，语法错误或超限，带位置）、`TemplateVariableUnknown`（422）、`DeliveryNotFound`（404）、`DeliveryNotRetryable`（409）、`DeliverySecretNotRetryable`（422）、`SiteMessageNotFound`（404）、`CapturedUnavailable`（404，生产环境）。发送请求处理中的业务失败（模板不存在、模型不符）是死信，不是对用户的错误。
 
 ### 8.6 通知模板
 
-Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Identity.PasswordChanged`，Identity 设计第 8 节）是第一批使用者；本模块自己不声明业务模板。
+Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Identity.PasswordChanged`，Identity 设计第 8 节）是第一批使用者；本模块不声明业务模板，只声明框架用的 `Notifications.BackgroundJobFinished`（后台作业结束，仅站内消息；变量为作业显示名称、结果文字“已完成 / 失败 / 已取消”、失败原因）。
 
 ---
 
@@ -591,3 +592,7 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 邮件附件（2026-11-13）：`SendNotification.AttachmentFileIds` 去重后存进 `Delivery.AttachmentFileIds`（jsonb，只有邮件渠道有，迁移 `DeliveryAttachments`），发送时才经 Files 的 `IFileContents` 读内容（`AttachmentLoader`，在系统身份的作用域里），流在发完之后释放。附件总大小超过 `Notifications:Delivery:MaxAttachmentMb`（默认 20）、文件不存在或已彻底删除是永久失败（投递转失败，等人工处理）；文件还没登记完、对象正在恢复是暂时失败，退避之后重试。MailKit 用 `BodyBuilder.Attachments` 加附件。测试：投递带附件 4 个（内容与文件名、文件不存在、超过上限、还没准备好后补发），MailKit 附件 1 个。与设计的差异：捕获的内容（`CapturedMessage`）没有记 `AttachmentNames`，要查附件只能看投递上的文件 ID：记名称和大小得在处理发送请求时就向 Files 取文件，而那一步按设计没有外部调用，捕获只在非生产环境用，不值得为它破这条规则。
 
 未做：阿里云短信网关（已搁置，需要时再做）、纯文本备选正文。
+
+2026-11-18 修正（Codex 复核 CN-05）：原设计允许含密投递在有效期内人工重试，但最终失败时正文和短信参数已经清空，重新排队只会把空参数交给网关。改为：`RetryDeliveryCommand` 对含密模板的投递一律返回 `DeliverySecretNotRetryable`（原 `DeliverySecretExpired` 删除），`IDeliveryRepository.RetryAsync` 去掉创建时间条件；发送前再检查一次，含密投递缺短信参数时直接记为失败（“含密通知内容已清除，未发送”），不调用网关。暂时失败的自动重试不受影响，内容在最终失败前保留。测试：投递管理 1 个（替换原有效期测试）、发送 1 个。**已实现，待用户确认。**
+
+2026-11-18：**后台作业完成通知**。订阅框架事件 `Framework.BackgroundJobFinished`（`NotifyJobFinishedCommand`），模板 `Notifications.BackgroundJobFinished` 只发站内消息，提交人自己取消的不发；没有跳转链接（外壳的作业入口不是页面，F03 第 7.9 节）。测试：审计导出成功与失败后提交人各收到一条（`AuditExportTests`）。

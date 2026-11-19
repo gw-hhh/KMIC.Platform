@@ -353,7 +353,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 |---|---|
 | Cron 最短间隔 | 1 分钟 |
 | 立即执行时任务正在运行 | 拒绝，409 |
-| 死信载荷、审计字段值的显示 | 原样显示给有权限点的人，每次查看写读审计；不做二次脱敏（遮盖已在审计采集时完成，死信载荷按 05-07 第 5.3 节不含敏感字段） |
+| 死信载荷、审计字段值的显示 | 原样显示给有权限点的人，每次查看写读审计；不做二次脱敏（遮盖已在审计采集时完成，死信载荷按 05-07 第 5.3 节不含敏感字段；含密消息和目录里找不到类型的消息不显示载荷） |
 | 审计导出的行数上限 | 配置项，默认 100 万行；超过时要求缩小时间范围 |
 | `RestoreJobDefault` | 保留行、两项置空（便于追溯） |
 
@@ -423,12 +423,12 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 ### 实现时的其他差异：前端错误与后台作业（2026-11-13）
 
 - **前端错误上报**（`ReportClientErrorsCommand`）：登录就能报，叠加 `[AllowWhenPasswordChangeRequired]` 与 `[AllowWhenImpersonationReadOnly]`（出错的页面恰好可能是改密码页或只读的模拟登录会话）；`[NotAudited]`，不要求幂等键（重复上报只是多一条日志）。字段白名单靠框架的严格 JSON 选项（未知字段整个请求被拒），长度上限在校验器里，一次最多条数与每用户每分钟请求数是配置项 `Operations:ClientErrors:MaxPerRequest`、`RequestsPerUserPerMinute`（默认 20、30）。限流用进程内的固定窗口，按用户分区、每个实例各数各的：这是防刷而不是计费，不放进数据库或缓存；超限返回 429 `Operations.ClientErrorsThrottled`，带 Retry-After。日志分类固定为 `Kmic.ClientErrors`，Warning 级，字段原样写进结构化属性（不拼进消息模板）；消息与堆栈是用户页面里产生的文本，没有做正则扫描式的脱敏（05-12 第 2.3 节否决了这种做法），靠“不收请求体、表单值、查询参数”的白名单把风险限在字段里，与前端联调时再核对。校验不过时整个请求被拒，一条也不写。
-- **后台作业汇总**：`ListBackgroundJobsQuery`（模块、类型、状态、提交人筛选）、`ListMyJobsQuery`（登录就能看，只看自己提交的）、`GetMyJobQuery`、`CancelMyJobCommand`（提交人取消自己的作业）、`CancelBackgroundJobCommand`。各模块的作业表各取一批，按“提交时间加 ID”归并、游标分页；归并时同一时间的作业按数据库比较 uuid 的次序（逐字节、大端）排，不能用 .NET 的 Guid 比较，否则跨模块的同时提交的作业翻页时会漏行（有测试覆盖）。响应里状态是智能枚举 `BackgroundJobStatus`，结果摘要是 JSON，看不到作业参数。管理员取消写的是作业所在模块的表，不在 Operations 命令的事务里（框架存储的基础设施写入，和执行器自己改作业状态一样）。
+- **后台作业汇总**：`ListBackgroundJobsQuery`（模块、类型、状态、提交人筛选）、`ListMyJobsQuery`（登录就能看，只看自己提交的）、`GetMyJobQuery`、`CancelMyJobCommand`（提交人取消自己的作业）、`CancelBackgroundJobCommand`。各模块的作业表各取一批，按“提交时间加 ID”归并、游标分页；归并时同一时间的作业按数据库比较 uuid 的次序（逐字节、大端）排，不能用 .NET 的 Guid 比较，否则跨模块的同时提交的作业翻页时会漏行（有测试覆盖）。响应里状态是智能枚举 `BackgroundJobStatus`，`jobName` 是作业声明的显示名称（代码中已没有的作业显示类型名），结果摘要是 JSON，看不到作业参数。管理员取消写的是作业所在模块的表，不在 Operations 命令的事务里（框架存储的基础设施写入，和执行器自己改作业状态一样）；排队中直接取消时同一事务发布作业结束事件，提交人会收到站内消息（05-08 第 6.8 节）。
 - **未做**：各模块路由组下提交人自己查看与取消作业的端点（05-08 第 6.6 节，设计写在框架 Presentation，随 S2-12 余项，Operations 的取消不依赖它）；按作业类型显示名（作业声明里没有显示名，界面自己映射）。
 
 ### 实现时的其他差异：消息管理（2026-11-13，只做了积压、死信、重试、放弃）
 
-- **已实现**：`GetMessageSummaryQuery`、`ListDeadMessagesQuery`（模块、箱、订阅、消息类型筛选，游标分页）、`GetDeadMessageQuery`（`[AuditedRead]`，含载荷与信封，也能看已放弃的）、`ListBlockedKeysQuery`、`RetryMessagesCommand`、`AbandonMessagesCommand`。权限点 `Operations.Messages.View`、`Operations.Messages.Manage`（敏感）。
+- **已实现**：`GetMessageSummaryQuery`、`ListDeadMessagesQuery`（模块、箱、订阅、消息类型筛选，游标分页）、`GetDeadMessageQuery`（`[AuditedRead]`，含载荷与信封，也能看已放弃的；含密消息和找不到类型的消息不返回载荷，2026-11-18 补）、`ListBlockedKeysQuery`、`RetryMessagesCommand`、`AbandonMessagesCommand`。权限点 `Operations.Messages.View`、`Operations.Messages.Manage`（敏感）。
 - **未做（仍在 13.1 的清单里）**：路由与实例列表（要先做  心跳与建表）、补投、订阅终结与重新激活、读模型重建的手动触发与收尾确认（含 D-O2 的放弃）。这些各自要新的框架服务与更细的并发设计，按“每片可测可用”分批做。
 - **死信 ID 是行 ID**：收件箱里一条消息对每个订阅一行，所以重试、放弃用的是收件箱行的 ID（列表里的 ），不是消息 ID；列表同时给出 。
 - **回执**：重试与放弃返回逐条回执（`Module`、`Box`、`Id`、`Status`，放弃还有 `Reason`），一条失败不影响别的；命令响应是 `MessageReceipts`（`{ receipts: [...] }`；架构规则要求命令响应是带属性的收据对象，不能直接返回数组）。每条的状态条件都写在 SQL 里：重试只改死信（状态回到待处理、次数清零、马上可领取），放弃只改收件箱的死信，重复提交同一批不会改到别的行。
@@ -443,7 +443,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 - **提交与下载**：`POST /api/v1/operations/audit/exports`（`ExportAuditCommand`，`Operations.Audit.Export`，敏感，`[Audited]`、`[Idempotent]`）返回 202，`jobId` 是作业 ID，`Location` 指向结果文件；`GET …/audit/exports/{jobId}/file` 下载。筛选条件和审计列表一样，两边共用 `AuditFilters`，导出的就是列表筛出来的全部；时间范围没有 93 天的限制，只要求结束晚于开始，真正的上限是导出的行数。
 - **行数上限**用框架的 `Kmic:Jobs:ExportMaxRows`（默认 100000），不是设计写的 100 万、也不是模块自己的配置：框架的导出入口只认这一个值，超过时作业失败（`Common.ExportTooLarge`）、要缩小时间范围；审计量大的部署把它调高。`Operations:Audit:ExportRetentionDays`（默认 7）是导出文件保留的天数。
 - **作业**：`ExportAuditJob`（`Operations.ExportAudit`，声明可续跑、作业结束写审计）。处理器用 `IExportReader` 流式读、逐行写进临时 CSV（带 BOM 的 UTF-8；表头中文；操作人名字每人只查一次；以 `= + - @` 开头的单元格前面补单引号，防 Excel 当成公式），再用 Files 的 `IGeneratedFiles.WriteAsync` 写进存储，最后发 `RegisterAuditExportFileCommand`（`[Audited]`，因为用了敏感权限点）在命令里 `Register` 登记，登记请求和命令同一个事务进发件箱；作业结果的 `ResultFileId` 是这个文件。临时文件不管成败都删除。
-- **下载的授权**：`GetAuditExportFileQuery`（`[AuditedRead]`，返回 `FileDownload`）只给提交人和有 `Operations.Jobs.Manage` 的人，别人看到的和不存在的一样（404）；作业没做完、文件还没登记完是可重试的 409 `Operations.AuditExportNotReady`，作业失败或被取消是 422 `Operations.AuditExportFailed`。文件是 `Generated:Operations.AuditExport` 档案、不关联任何对象，登记完成就能下载，到期清理（见 Files 文档 13.1）。
+- **下载的授权**：`GetAuditExportFileQuery`（`[AuditedRead]`，返回 `FileDownload`）只给提交人和有 `Operations.Jobs.Manage` 的人，别人看到的和不存在的一样（404）；作业没做完、文件还没登记完是可重试的 409 `Operations.AuditExportNotReady`（2026-11-18 补：作业完成时只发出了登记请求，原实现在 Files 处理完之前会返回 404；现在作业完成 5 分钟内 Files 查不到文件按未登记完处理，超过 5 分钟仍查不到才返回 404），作业失败或被取消是 422 `Operations.AuditExportFailed`。文件是 `Generated:Operations.AuditExport` 档案、不关联任何对象，登记完成就能下载，到期清理（见 Files 文档 13.1）。
 - **顺带发现并修了一个 Identity 的缺陷**：按提交人为后台作业加载访问上下文的 SQL（`AccessContextLoader` 的作业路径）缺少共用行类型需要的会话列，真实加载器下一定报“column k.AbsoluteExpiresAt does not exist”，作业一直停在运行中直到领取过期。之前的作业测试都用测试加载器，所以没发现；现在补了加载器作业路径的测试（`JobAccessLoadingTests`），导出的端到端测试走的也是真实加载器。
 - 测试：导出的 CSV 内容与筛选、公式安全单元格、提交人与管理者能下载而别的导出人不能、没有权限与时间范围不对、超过行数上限作业失败共 4 个；加载器作业路径 2 个。
 

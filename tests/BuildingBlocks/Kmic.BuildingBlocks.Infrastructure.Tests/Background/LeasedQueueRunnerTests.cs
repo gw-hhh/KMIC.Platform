@@ -95,10 +95,9 @@ public sealed class LeasedQueueRunnerTests : IAsyncDisposable
         queue.FailNextClaims(1);
         queue.Enqueue(1);
 
-        // 第一次领取失败后至少退避 1 秒，恢复后领取到
-        var started = TimeProvider.System.GetTimestamp();
+        // 第一次领取失败后至少退避 1 秒，恢复后领取到。间隔在替身里按两次领取的时间计算，不受测试线程调度影响
         await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 1, "数据库恢复后继续", TimeSpan.FromSeconds(10), Ct);
-        TimeProvider.System.GetElapsedTime(started).ShouldBeGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(900));
+        queue.DelayAfterFailure.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(900));
     }
 
     [Fact]

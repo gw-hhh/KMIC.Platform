@@ -143,7 +143,7 @@ public sealed class SiteMessageTests(ClassDatabase<ApiTemplate> database, ApiTem
         await seed.SqlAsync("""UPDATE "Notifications"."SiteMessage" SET "SentAt" = now() - interval '400 days' WHERE "Id" = @id""", ("id", oldUnread));
         await seed.SqlAsync("""UPDATE "Notifications"."SiteMessage" SET "SentAt" = now() - interval '100 days' WHERE "Id" = @id""", ("id", recentUnread));
 
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.ScheduledJob);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.ScheduledJob);
         var outcome = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new PurgeSiteMessagesCommand(TimeProvider.System.GetUtcNow()), Ct);
 
         outcome.ShouldBeSuccess().ItemsProcessed.ShouldBeGreaterThanOrEqualTo(2);

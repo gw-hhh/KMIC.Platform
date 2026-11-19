@@ -229,7 +229,7 @@ public sealed class DictionaryAdministrationTests(ClassDatabase<ApiTemplate> dat
         (await AddAsync(admin, type, "contract.off", "停用")).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await CallAsync(HttpMethod.Post, $"/dictionary-types/{type}/items/contract.off/disable", admin, new { expectedVersion = await VersionAsync(admin, type) })).StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope();
+        await using var scope = Factory.Services.AsSystem();
         var dictionaries = scope.ServiceProvider.GetRequiredService<IDictionaries>();
         var snapshot = await dictionaries.GetAsync(type, Ct);
 
@@ -255,7 +255,7 @@ public sealed class DictionaryAdministrationTests(ClassDatabase<ApiTemplate> dat
             await insert.ExecuteNonQueryAsync(Ct);
         }
 
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Startup);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Startup);
         var sender = scope.ServiceProvider.GetRequiredService<ICommandSender>();
         var first = (await sender.SendAsync(new SyncDictionaryTypesCommand(), Ct)).ShouldBeSuccess();
         var second = (await sender.SendAsync(new SyncDictionaryTypesCommand(), Ct)).ShouldBeSuccess();

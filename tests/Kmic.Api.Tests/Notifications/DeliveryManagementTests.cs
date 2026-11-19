@@ -43,7 +43,7 @@ public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database,
     private async Task SendSubmittedAsync(string dedup, Guid user, string number)
     {
         var message = SendNotification.For(new SpecimenSubmittedNotice(number, "样品", "/sample/specimens/7"), [Recipient.OfUser(user)], dedup);
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendNotificationCommand(message, Guid.CreateVersion7(), "Sample", null), Ct);
         result.ShouldBeSuccess();
     }
@@ -51,14 +51,14 @@ public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database,
     private async Task SendSecretAsync(string dedup, Guid user)
     {
         var message = SendSecretNotification.For(new SpecimenCode("111111"), [Recipient.OfUser(user)], dedup);
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendSecretNotificationCommand(message, Guid.CreateVersion7(), "Sample", null), Ct);
         result.ShouldBeSuccess();
     }
 
     private async Task RunAsync<T>(ICommand<T> command)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.BackgroundJob);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.BackgroundJob);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(command, Ct);
         result.ShouldBeSuccess();
     }
@@ -136,25 +136,21 @@ public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database,
     }
 
     [Fact]
-    public async Task Retry_RefusesASecretNotificationPastItsLifetime_ButAllowsOneStillInIt()
+    public async Task Retry_RefusesASecretNotification_EvenWithinItsLifetime()
     {
         await using var seed = new IdentitySeed(ConnectionString);
         var user = await UserAsync(seed);
-        var expired = $"secret-old-{Guid.CreateVersion7():N}";
-        var fresh = $"secret-new-{Guid.CreateVersion7():N}";
-        await SendSecretAsync(expired, user);
-        await SendSecretAsync(fresh, user);
-        var expiredId = await DeliveryIdAsync(seed, expired);
-        var freshId = await DeliveryIdAsync(seed, fresh);
-        await FailAsync(seed, expiredId, ", \"CreatedAt\" = now() - interval '2 hours'");
-        await FailAsync(seed, freshId);
+        var dedup = $"secret-{Guid.CreateVersion7():N}";
+        await SendSecretAsync(dedup, user);
+        var id = await DeliveryIdAsync(seed, dedup);
+        await FailAsync(seed, id, ", \"Body\" = NULL, \"SmsParameters\" = NULL");
         using var admin = Admin();
 
-        (await PostActionAsync(admin, $"{Root}/{expiredId}/retry", new { })).StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
-        (await PostActionAsync(admin, $"{Root}/{freshId}/retry", new { })).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        var response = await PostActionAsync(admin, $"{Root}/{id}/retry", new { });
 
-        (await RowAsync(seed, expiredId)).ShouldStartWith("Failed|");
-        (await RowAsync(seed, freshId)).ShouldStartWith("Pending|");
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        (await JsonAsync(response)).GetProperty("code").GetString().ShouldBe("Notifications.DeliverySecretNotRetryable");
+        (await RowAsync(seed, id)).ShouldStartWith("Failed|");
     }
 
     [Fact]

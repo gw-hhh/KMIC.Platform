@@ -58,6 +58,14 @@ public sealed class IntegrationMessageCatalog
         return problems.Count > 0 ? throw new DeclarationException("集成消息声明", problems) : new IntegrationMessageCatalog(messages);
     }
 
+    /// <summary>
+    /// 管理界面能否显示这种消息的载荷
+    /// </summary>
+    /// <remarks>
+    /// 含密消息不显示；目录里找不到的也不显示，它可能是已下线的含密消息
+    /// </remarks>
+    public bool CanShowPayload(string name, int version) => Find(name, version) is { CarriesSecret: false };
+
     internal IntegrationMessageType Describe(Type messageType) =>
         _byType.GetValueOrDefault(messageType)
             ?? throw new InvalidOperationException($"{messageType.FullName} 不在集成消息目录中，检查它是否标了 [IntegrationMessage]、所在模块是否已注册。");

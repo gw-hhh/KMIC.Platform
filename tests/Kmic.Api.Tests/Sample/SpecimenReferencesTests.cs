@@ -135,7 +135,7 @@ public sealed class SpecimenReferencesTests(ClassDatabase<ApiTemplate> database,
 
     private CallerScope As(TestIdentity identity)
     {
-        var scope = new CallerScope(Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(identity));
+        var scope = new CallerScope(Factory.Services.As(identity));
         scope.Requests.IdempotencyKey = Guid.CreateVersion7().ToString();
         return scope;
     }

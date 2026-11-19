@@ -35,7 +35,7 @@ public sealed class CapturedMessageTests(ClassDatabase<ApiTemplate> database, Ap
     private async Task SendSubmittedAsync(string dedup, Guid user, string number)
     {
         var message = SendNotification.For(new SpecimenSubmittedNotice(number, "样品", "/sample/specimens/7"), [Recipient.OfUser(user)], dedup);
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendNotificationCommand(message, Guid.CreateVersion7(), "Sample", null), Ct);
         result.ShouldBeSuccess();
     }
@@ -81,7 +81,7 @@ public sealed class CapturedMessageTests(ClassDatabase<ApiTemplate> database, Ap
         await SendSubmittedAsync($"cap-new-{tag}", user, "SP-NEW");
         await seed.SqlAsync($"""UPDATE "Notifications"."CapturedMessage" SET "CapturedAt" = now() - interval '40 days' WHERE "DeliveryId" IN (SELECT "Id" FROM "Notifications"."Delivery" WHERE "DedupKey" = 'cap-old-{tag}')""");
 
-        await using (var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.BackgroundJob))
+        await using (var scope = Factory.Services.AsSystem(CallOrigin.BackgroundJob))
         {
             (await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new PurgeCapturedCommand(TimeProvider.System.GetUtcNow()), Ct)).ShouldBeSuccess();
         }

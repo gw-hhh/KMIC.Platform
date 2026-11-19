@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Kmic.BuildingBlocks.Application.Files;
 using Kmic.BuildingBlocks.Application.Messaging;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
 using Kmic.BuildingBlocks.Presentation.Http;
@@ -42,6 +43,7 @@ internal sealed class UploadFileEndpoint : IEndpoint
         ICommandSender sender,
         UploadProfileCatalog profiles,
         IFileUploadProcessor processor,
+        FrameworkMetrics metrics,
         CancellationToken ct)
     {
         if (profiles.Find(profile) is not { } declared)
@@ -63,6 +65,12 @@ internal sealed class UploadFileEndpoint : IEndpoint
         var started = await sender.SendAsync(new StartUploadCommand(declared.Name, file.FileName, size ?? 0), ct);
         if (started.IsFailure)
         {
+            // 声明大小超限时不读取文件流，须在此补记拒绝数
+            if (string.Equals(started.Error.Code, FilesErrors.TooLarge.Code, StringComparison.Ordinal))
+            {
+                metrics.FileUploaded(declared.Name, UploadOutcome.TooLarge, 0);
+            }
+
             return started.ToOk();
         }
 

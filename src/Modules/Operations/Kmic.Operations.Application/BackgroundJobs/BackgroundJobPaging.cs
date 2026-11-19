@@ -45,6 +45,7 @@ internal static class BackgroundJobPaging
             view.Id,
             view.Module,
             view.JobType,
+            view.JobName,
             BackgroundJobStatus.FromCode(view.State.ToString()),
             view.SubmittedBy,
             view.SubmittedBy is { } by ? names.GetValueOrDefault(by)?.DisplayName : null,

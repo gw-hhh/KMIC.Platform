@@ -4,6 +4,7 @@ using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Contracts.Auditing;
+using Kmic.BuildingBlocks.Contracts.Jobs;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
@@ -57,6 +58,15 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.ExpiresAt.ShouldNotBeNull();
         job.Attempts.ShouldBe(1);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批", "第 2 批", "第 3 批"]);
+
+        var finished = (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem();
+        finished.Result.ShouldBe(BackgroundJobResult.Succeeded);
+        finished.JobType.ShouldBe("BuildingBlocks.RecountTicket");
+        finished.JobName.ShouldBe("重新统计单据");
+        finished.Module.ShouldBe(Module);
+        finished.SubmittedBy.ShouldBe(_user.UserId.Value);
+        finished.FinishedAt.ShouldBe(job.FinishedAt!.Value);
+        finished.ErrorCode.ShouldBeNull();
     }
 
     [Fact]
@@ -126,6 +136,11 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.Status.ShouldBe(JobStatus.Failed);
         job.ErrorCode.ShouldBe(throws ? CommonErrors.JobFailed.Code : TicketErrors.Rejected.Code);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批"]);
+
+        var finished = (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem();
+        finished.Result.ShouldBe(BackgroundJobResult.Failed);
+        finished.ErrorCode.ShouldBe(job.ErrorCode);
+        finished.ErrorMessage.ShouldBe(job.ErrorMessage);
     }
 
     [Fact]
@@ -140,6 +155,10 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.Status.ShouldBe(JobStatus.Cancelled);
         job.CancelRequestedBy.ShouldBe(_user.UserId.Value);
         (await LinesAsync(ticket)).ShouldBeEmpty();
+
+        var finished = (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem("排队中直接取消也算结束");
+        finished.Result.ShouldBe(BackgroundJobResult.Cancelled);
+        finished.CancelRequestedBy.ShouldBe(_user.UserId.Value);
     }
 
     [Fact]
@@ -159,12 +178,14 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
 
         (await JobAsync(jobId)).Status.ShouldBe(JobStatus.Cancelled);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批"]);
+        (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem().Result.ShouldBe(BackgroundJobResult.Cancelled);
     }
 
     [Fact]
     public async Task RunningTooLong_FailedAsTimedOut()
     {
-        await using var harness = NewHarness(o => o.MaxRunTime = TimeSpan.FromMilliseconds(200));
+        // 超时上限留足余量，确保机器忙时第 1 批也能在超时前提交
+        await using var harness = NewHarness(o => o.MaxRunTime = TimeSpan.FromSeconds(2));
         var (ticket, jobId) = await SubmitAsync(batches: 2, harness);
         harness.Hooks.BeforeJobBatch = async (batch, ct) =>
         {
@@ -221,6 +242,7 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.Status.ShouldBe(JobStatus.Running);
         job.LeaseToken.ShouldBe(other);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批"]);
+        (await FinishedEventsAsync(jobId)).ShouldBeEmpty("没写入结果就不发布结束事件");
 
         // 收尾：不让这条运行中的记录过期后被同一个库里后面的测试领走
         await ExecuteAsync("""UPDATE "Probe"."BackgroundJob" SET "Status" = 3, "LeaseToken" = NULL WHERE "Id" = @id""", jobId);
@@ -295,6 +317,29 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         (await JobAsync(jobId)).ErrorCode.ShouldBe(CommonErrors.JobInterrupted.Code);
     }
 
+    [Fact]
+    public async Task Shutdown_CancelRequested_CancelledWithExpiryAndEvent()
+    {
+        var (_, jobId) = await SubmitAsync(batches: 2);
+        using var shutdown = new CancellationTokenSource();
+        _harness.Hooks.BeforeJobBatch = async (_, ct) =>
+        {
+            await Executor.RequestCancelAsync(Module, jobId, _user.UserId, CancellationToken.None);
+            await shutdown.CancelAsync();
+            await UntilCancelledAsync(ct);
+        };
+
+        var token = Guid.CreateVersion7();
+        var claimed = (await Executor.ClaimAsync(Module, 1, token, Ct)).ShouldHaveSingleItem();
+        (await Executor.RunAsync(Module, claimed, token, shutdown.Token)).ShouldBe(JobRunResult.Cancelled);
+
+        var job = await JobAsync(jobId);
+        job.Status.ShouldBe(JobStatus.Cancelled);
+        job.FinishedAt.ShouldNotBeNull();
+        job.ExpiresAt.ShouldNotBeNull("没有过期时间的作业行不会被清理");
+        (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem().Result.ShouldBe(BackgroundJobResult.Cancelled);
+    }
+
 
     [Fact]
     public async Task AuditedJob_OneAuditAtTheEnd_WithStatusAndSummary()
@@ -348,6 +393,13 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
     {
         await using var check = _harness.BeginAsSystem();
         return await check.Db.Set<BackgroundJobRecord>().AsNoTracking().SingleAsync(j => j.Id == id, Ct);
+    }
+
+    private async Task<List<BackgroundJobFinished>> FinishedEventsAsync(Guid jobId)
+    {
+        await using var check = _harness.BeginAsSystem();
+        var rows = await check.Db.Set<OutboxMessage>().AsNoTracking().Where(m => m.MessageType == "Framework.BackgroundJobFinished").ToListAsync(Ct);
+        return [.. rows.Select(r => JsonSerializer.Deserialize<BackgroundJobFinished>(r.Payload, KmicJsonOptions.Stored)!).Where(e => e.JobId == jobId)];
     }
 
     private async Task<string[]> LinesAsync(Ticket ticket)

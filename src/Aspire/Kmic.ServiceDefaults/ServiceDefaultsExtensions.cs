@@ -54,12 +54,10 @@ public static class ServiceDefaultsExtensions
     }
 
     /// <summary>
-    /// 记录请求完成日志
+    /// 记录请求完成日志，只记路由模板，不记实际路径、查询串和请求体
     /// </summary>
     /// <remarks>
-    /// 须在错误处理中间件之前注册，以记录 500 响应。摘要模板使用路由，结构化属性仍含实际 RequestPath，不含查询串。
-    /// 不记录请求体或响应体，User-Agent 最多保留 200 个字符。健康检查使用 Verbose 级别，默认不输出。
-    /// 可通过 Kmic:Observability:RequestLog 关闭
+    /// 须在错误处理中间件之前注册，否则记不到 500 响应
     /// </remarks>
     public static WebApplication UseKmicRequestLogging(this WebApplication app)
     {
@@ -111,7 +109,8 @@ public static class ServiceDefaultsExtensions
                     .Enrich.WithProperty("Roles", identity.Roles)
                     .Enrich.WithProperty("Version", identity.Version)
                     .Destructure.With<ClassifiedDestructuringPolicy>()
-                    .Enrich.With<SensitivePropertyMasker>();
+                    .Enrich.With<SensitivePropertyMasker>()
+                    .Enrich.With<RequestPathRemover>();
 
                 if (development)
                 {

@@ -50,7 +50,7 @@ public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> databas
 
     private async Task<TemplateSyncResult> SyncAsync()
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new SyncTemplateCatalogCommand(), Ct);
         result.ShouldBeSuccess();
         return result.Value;
@@ -59,7 +59,7 @@ public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> databas
     private async Task SendSubmittedAsync(string dedup, Guid user, string number)
     {
         var message = SendNotification.For(new SpecimenSubmittedNotice(number, "样品", "/sample/specimens/7"), [Recipient.OfUser(user)], dedup);
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendNotificationCommand(message, Guid.CreateVersion7(), "Sample", null), Ct);
         result.ShouldBeSuccess();
     }

@@ -6,6 +6,7 @@ using Kmic.BuildingBlocks.Infrastructure.Background;
 using Kmic.BuildingBlocks.Infrastructure.Files;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Files.Application;
 using Kmic.Files.Application.Attachments;
@@ -55,6 +56,8 @@ public sealed class FilesModule : IModule
         services.AddScoped<IFileAttachments, FileAttachments>();
         services.AddScoped<IGeneratedFiles, GeneratedFiles>();
         services.AddScoped<IFileContents, FileContents>();
+        services.AddSingleton<FilesMetrics>();
+        services.AddKmicBacklogGauges<StorageIssueGauges>();
     }
 
     /// <inheritdoc />

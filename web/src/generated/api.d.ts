@@ -609,7 +609,7 @@ export interface paths {
         put?: never;
         /**
          * 重试一条失败的投递
-         * @description 仅可重试失败且未放弃的投递，否则返回 422；含密通知超过投递有效期时也不能重试。重试后重新排队，领取次数清零。成功返回 204。必须提供幂等键。
+         * @description 仅可重试失败且未放弃的投递，否则返回 422；含密通知失败时内容已清除，一律不能重试。重试后重新排队，领取次数清零。成功返回 204。必须提供幂等键。
          */
         post: {
             parameters: {
@@ -2709,7 +2709,7 @@ export interface paths {
         };
         /**
          * 下载审计导出的文件
-         * @description 须有审计导出权限；下载他人的导出还须有管理作业权限。作业不存在、类型不符或无权查看该作业时返回 404。作业未完成返回可重试的 409，失败或取消返回 422。文件未登记或不存在时返回 404。下载会记录读审计。
+         * @description 须有审计导出权限；下载他人的导出还须有管理作业权限。作业不存在、类型不符或无权查看该作业时返回 404。作业未完成、或刚完成而文件还在登记时，返回可重试的 409；失败或取消返回 422。文件不存在时返回 404。下载会记录读审计。
          */
         get: {
             parameters: {
@@ -10041,6 +10041,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/identity/authorization/explain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 授权诊断
+         * @description 说明用户以某个角色登录时有哪些权限点；传了范围对象时，再说明这个对象的数据范围等级来自角色默认还是单独设置、组织起点来自授予锚点还是所属组织、能看到多少组织单元。用户不能以这个角色登录时返回原因。用户或角色不存在返回 404，范围对象不存在返回 400。查询会记录读取审计。
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description 用户 ID；必填 */
+                    UserId: string;
+                    /** @description 角色 ID；必填，可以是用户没有被授予的角色 */
+                    RoleId: string;
+                    /** @description 范围对象编码，如 Sample.Specimen；不传时不返回数据范围 */
+                    ScopeObject?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 成功 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthorizationExplanation"];
+                    };
+                };
+                /** @description 请求格式不正确，或者提交的数据没有通过校验，具体见 errors */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有登录，或者登录已失效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有执行这个操作的权限 */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据不存在，或者当前用户看不到 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据已被他人修改，或者与现有数据冲突，当前版本号见 currentVersion */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 违反了业务规则，原因见 code 和 title */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 请求太频繁，或者系统正忙，按 Retry-After 等待后再试 */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 系统出错了，原因没有写在响应里，报障时提供 traceId */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/identity/impersonation": {
         parameters: {
             query?: never;
@@ -15348,6 +15466,35 @@ export interface components {
              */
             resourceId: string;
         };
+        /** @description 授权诊断结果 */
+        AuthorizationExplanation: {
+            /**
+             * Format: uuid
+             * @description 用户 ID
+             */
+            userId: string;
+            /** @description 用户姓名 */
+            userName: string;
+            /**
+             * Format: uuid
+             * @description 角色 ID
+             */
+            roleId: string;
+            /** @description 角色名称 */
+            roleName: string;
+            /**
+             * Format: int64
+             * @description 角色版本号，改了角色的权限或数据范围就会变
+             */
+            roleVersion: number;
+            /** @description 用户现在能否以这个角色登录 */
+            usable: boolean;
+            /** @description 不能登录的原因，能登录时为空 */
+            unusableReason: null | string;
+            /** @description 权限点编码，按编码排序；不能登录时为空集合 */
+            permissions: string[];
+            dataScope: null | components["schemas"]["DataScopeExplanation"];
+        };
         /** @description 认证令牌响应 */
         AuthTokens: {
             /** @description 访问令牌 */
@@ -15375,6 +15522,8 @@ export interface components {
             module: string;
             /** @description 作业类型名，如 Sample.ExportSpecimens */
             jobType: string;
+            /** @description 作业显示名称；代码中已没有这种作业时为作业类型名 */
+            jobName: string;
             /** @description 状态 */
             status: components["schemas"]["BackgroundJobStatus"];
             /**
@@ -15717,6 +15866,26 @@ export interface components {
             /** @description 下一页的游标，作为 After 传回；最后一页为空 */
             nextCursor: null | string;
         };
+        /** @description 一个范围对象的数据范围及其来源 */
+        DataScopeExplanation: {
+            /** @description 范围对象编码 */
+            scopeObject: string;
+            /** @description 范围对象的显示名 */
+            displayName: string;
+            /** @description 等级 */
+            level: components["schemas"]["RoleScopeLevel"];
+            /** @description 等级是否为角色对这个范围对象单独设置的；为否时用角色的默认等级 */
+            levelOverridden: boolean;
+            /** @description 组织范围的起点；“本人”“全部”不按组织判断，为空集合 */
+            anchors: components["schemas"]["ExplainedOrgUnit"][];
+            /** @description 起点是否用了用户角色授予上设置的组织锚点；为否时用用户所属组织 */
+            anchorsFromGrant: boolean;
+            /**
+             * Format: int32
+             * @description 能看到的组织单元数，包括展开的下级；“本人”“全部”为空
+             */
+            orgUnitCount: null | number;
+        };
         /** @description 数据范围对象目录项 */
         DataScopeObjectItem: {
             /** @description 编码 */
@@ -15732,7 +15901,7 @@ export interface components {
             message: components["schemas"]["DeadMessageItem"];
             /** @description 状态：死信，或者已经被放弃 */
             state: components["schemas"]["MessageState"];
-            /** @description 消息载荷；不得暴露含密内容。当前存储查询尚未按含密类型过滤，此保护仍待补齐 */
+            /** @description 消息载荷；含密消息和目录里找不到的消息不返回，为空 */
             payload: unknown;
             /** @description 信封里的其余字段 */
             headers: unknown;
@@ -16060,6 +16229,16 @@ export interface components {
              * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
              */
             expectedVersion: number;
+        };
+        /** @description 组织单元 */
+        ExplainedOrgUnit: {
+            /**
+             * Format: uuid
+             * @description 组织单元 ID
+             */
+            id: string;
+            /** @description 名称；组织单元已删除时为空 */
+            name: null | string;
         };
         /** @description 提交审计导出的请求 */
         ExportAuditRequest: {

@@ -13,8 +13,6 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
 {
     protected const string Origin = "https://app.test";
 
-    private readonly TokenFactory _tokens = new();
-
     protected static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     internal IdentitySeed Seed { get; private set; } = null!;
@@ -31,7 +29,8 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
             merged[key] = value;
         }
 
-        Factory = new ApiFactory(ConnectionString, _tokens, realIdentity: true, merged);
+        // 宿主随类的数据库一起建、一起关
+        Factory = database.Shared(() => new ApiFactory(ConnectionString, realIdentity: true, merged));
         Seed = new IdentitySeed(ConnectionString);
         return ValueTask.CompletedTask;
     }
@@ -39,8 +38,6 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
     public async ValueTask DisposeAsync()
     {
         await Seed.DisposeAsync();
-        await Factory.DisposeAsync();
-        _tokens.Dispose();
         GC.SuppressFinalize(this);
     }
 

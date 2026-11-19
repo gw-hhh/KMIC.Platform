@@ -10,7 +10,7 @@ namespace Kmic.Operations.Application.Messages.Dead;
 /// <summary>
 /// 查询死信或已放弃消息的详情
 /// </summary>
-public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores) : IQueryHandler<GetDeadMessageQuery, DeadMessageDetailItem>
+public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores, IntegrationMessageCatalog messages) : IQueryHandler<GetDeadMessageQuery, DeadMessageDetailItem>
 {
     /// <inheritdoc />
     public async ValueTask<Result<DeadMessageDetailItem>> Handle(GetDeadMessageQuery query, CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores) : IQ
         return new DeadMessageDetailItem(
             MessageItems.ToItem(detail.Message),
             detail.State == DeadMessageState.Abandoned ? MessageState.Abandoned : MessageState.Dead,
-            MessageItems.ElementOf(detail.Payload),
+            messages.CanShowPayload(detail.Message.MessageType, detail.Message.SchemaVersion) ? MessageItems.ElementOf(detail.Payload) : null,
             MessageItems.ElementOf(detail.Headers));
     }
 }

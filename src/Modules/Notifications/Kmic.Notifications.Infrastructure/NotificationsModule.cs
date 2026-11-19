@@ -2,11 +2,14 @@ using System.Reflection;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Application.Startup;
+using Kmic.BuildingBlocks.Contracts.Jobs;
 using Kmic.BuildingBlocks.Infrastructure.Background;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Notifications.Application;
+using Kmic.Notifications.Application.BackgroundJobs;
 using Kmic.Notifications.Application.Captured.Purge;
 using Kmic.Notifications.Application.Channels;
 using Kmic.Notifications.Application.Deliveries.Purge;
@@ -63,6 +66,8 @@ public sealed class NotificationsModule : IModule
         services.AddKmicOptions<NotificationsEmailOptions>(NotificationsEmailOptions.Section);
         services.AddSingleton<IEmailSender, MailKitEmailSender>();
         services.AddSingleton<ISmsGateway, UnconfiguredSmsGateway>();
+        services.AddSingleton<NotificationsMetrics>();
+        services.AddKmicBacklogGauges<DeliveryBacklogGauges>();
     }
 
     /// <inheritdoc />
@@ -84,6 +89,8 @@ public sealed class NotificationsModule : IModule
             "Notifications.Process", (message, envelope) => new ProcessSendNotificationCommand(message, envelope.MessageId, envelope.SourceModule, envelope.InitiatorUserId));
         messaging.Subscribe<SendSecretNotification, ProcessSendSecretNotificationCommand>(
             "Notifications.ProcessSecret", (message, envelope) => new ProcessSendSecretNotificationCommand(message, envelope.MessageId, envelope.SourceModule, envelope.InitiatorUserId));
+        messaging.Subscribe<BackgroundJobFinished, NotifyJobFinishedCommand>(
+            "Notifications.NotifyJobFinished", (message, envelope) => new NotifyJobFinishedCommand(message, envelope.MessageId, envelope.SourceModule));
     }
 
     /// <inheritdoc />

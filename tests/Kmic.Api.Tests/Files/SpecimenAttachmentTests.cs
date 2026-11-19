@@ -74,6 +74,26 @@ public sealed class SpecimenAttachmentTests(ClassDatabase<ApiTemplate> database,
     }
 
     [Fact]
+    public async Task AddAttachment_UnderWritableImpersonation_AcceptsAFileUploadedInTheSameSession()
+    {
+        var admin = Dave();
+        var erin = TestIdentity.User("戊").InTree(_org).InOrgUnit(_org["华东"]).WithRole(r => r
+            .Permissions(SamplePermissions.View, SamplePermissions.Create, SamplePermissions.Edit)
+            .Scope(ScopeLevel.All));
+        var impersonated = erin.ImpersonatedBy(admin.UserId, allowWrite: true);
+        Factory.Loader.Register(impersonated);
+        using var client = ClientFor(impersonated);
+        var (specimen, version) = await CreateAsync(client);
+        var fileId = await UploadOkAsync(client, "模拟身份上传.pdf", Pdf());
+
+        var added = await AddAttachmentAsync(client, specimen, fileId, version);
+
+        added.StatusCode.ShouldBe(HttpStatusCode.OK, "上传登记与关联检查都按被模拟的用户判断");
+        await using var seed = NewSeed();
+        (await ColumnAsync<Guid>(seed, fileId, "UploadedBy")).ShouldBe(erin.UserId.Value);
+    }
+
+    [Fact]
     public async Task AddAttachment_AFileThatDoesNotExist_IsRefusedAsNotAttachable()
     {
         using var alice = ClientFor(Alice);

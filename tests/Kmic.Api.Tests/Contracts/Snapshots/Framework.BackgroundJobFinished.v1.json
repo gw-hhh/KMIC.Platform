@@ -1,0 +1,68 @@
+{
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "module": {
+      "type": "string"
+    },
+    "jobType": {
+      "type": "string"
+    },
+    "jobName": {
+      "type": "string"
+    },
+    "result": {
+      "enum": [
+        "Succeeded",
+        "Failed",
+        "Cancelled"
+      ]
+    },
+    "errorCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "errorMessage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resultFileId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "submittedBy": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "cancelRequestedBy": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "finishedAt": true
+  },
+  "required": [
+    "jobId",
+    "module",
+    "jobType",
+    "jobName",
+    "result",
+    "submittedBy",
+    "finishedAt"
+  ]
+}

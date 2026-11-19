@@ -19,7 +19,7 @@ public sealed class FrameworkMetricsTests : IClassFixture<ClassDatabase<ProbeTem
     // 框架指标允许的维度：全是取值有限的名字，不能有用户、资源、追踪 ID
     private static readonly HashSet<string> _allowedTags = new(StringComparer.Ordinal)
     {
-        "module", "message", "result", "reason", "type", "severity", "entry", "subscription", "task", "readmodel",
+        "module", "message", "result", "reason", "type", "severity", "entry", "subscription", "task", "readmodel", "category", "profile", "channel",
     };
 
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

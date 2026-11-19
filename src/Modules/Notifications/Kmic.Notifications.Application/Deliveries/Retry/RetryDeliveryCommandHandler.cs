@@ -1,7 +1,6 @@
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Notifications;
 using Kmic.BuildingBlocks.Domain.Results;
-using Kmic.Notifications.Contracts;
 using Kmic.Notifications.Domain.Deliveries;
 using Kmic.Notifications.Domain.Errors;
 
@@ -10,7 +9,7 @@ namespace Kmic.Notifications.Application.Deliveries.Retry;
 /// <summary>
 /// 将失败的投递重新加入发送队列
 /// </summary>
-public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, NotificationTemplateCatalog catalog, TimeProvider time) : ICommandHandler<RetryDeliveryCommand>
+public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, NotificationTemplateCatalog catalog) : ICommandHandler<RetryDeliveryCommand>
 {
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RetryDeliveryCommand command, CancellationToken cancellationToken)
@@ -28,15 +27,12 @@ public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, 
             return NotificationsErrors.DeliveryNotRetryable;
         }
 
-        // 含密通知过期后禁止重发
-        DateTimeOffset? createdNotBefore = catalog.Find(loaded.Value.TemplateKey)?.CarriesSecret == true
-            ? time.GetUtcNow() - TimeSpan.FromSeconds(SendSecretNotification.LifetimeSeconds)
-            : null;
-        if (await deliveries.RetryAsync(command.Id, createdNotBefore, cancellationToken))
+        // 含密通知最终失败时正文和短信参数已经清空，重新排队也发不出正确内容；需要重发时由业务生成新凭据另发
+        if (catalog.Find(loaded.Value.TemplateKey)?.CarriesSecret == true)
         {
-            return Result.Success();
+            return NotificationsErrors.DeliverySecretNotRetryable;
         }
 
-        return createdNotBefore is null ? NotificationsErrors.DeliveryNotRetryable : NotificationsErrors.DeliverySecretExpired;
+        return await deliveries.RetryAsync(command.Id, cancellationToken) ? Result.Success() : NotificationsErrors.DeliveryNotRetryable;
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using Kmic.Api.Tests.Identity;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Locking;
@@ -6,6 +7,7 @@ using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Testing.Assertions;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
+using Kmic.BuildingBlocks.Testing.Metrics;
 using Kmic.BuildingBlocks.Testing.Waiting;
 using Kmic.Files.Application.Cleanup;
 using Kmic.Files.Application.Uploads.Start;
@@ -24,7 +26,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
     private async Task<int> RunAsync<TCommand>(TCommand command)
         where TCommand : ICommand<ScheduledJobOutcome>
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.ScheduledJob);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.ScheduledJob);
         var outcome = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(command, Ct);
         return outcome.ShouldBeSuccess().ItemsProcessed;
     }
@@ -78,6 +80,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
     {
         await using var seed = NewSeed();
         var (id, _) = await ExpiredTemporaryFileAsync(seed);
+        using var metrics = new MetricRecorder(Factory.Services.GetRequiredService<IMeterFactory>());
 
         // 业务命令正在关联这个文件：持有它的共享锁，清理取不到排他锁，这次跳过
         await using var data = NpgsqlDataSource.Create(ConnectionString);
@@ -92,6 +95,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
 
             await RunAsync(Purge());
             (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "共享锁还在，清理跳过");
+            metrics.Of("kmic.files.purge_skipped").ShouldContain(m => m.Tags["reason"] == "locked");
             await transaction.RollbackAsync(Ct);
         }
 
@@ -114,8 +118,10 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
             """,
             ("message", message), ("file", id));
 
+        using var metrics = new MetricRecorder(Factory.Services.GetRequiredService<IMeterFactory>());
         await RunAsync(Purge());
         (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "有未完成的关联请求，不能清理");
+        metrics.Of("kmic.files.purge_skipped").ShouldContain(m => m.Tags["reason"] == "attaching");
 
         await seed.SqlAsync("""UPDATE "Sample"."OutboxMessage" SET "Status" = 2 WHERE "Id" = @message""", ("message", message));
         await RunAsync(Purge());
@@ -186,7 +192,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
 
     private async Task<Guid> StartUploadAsync()
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(Alice);
+        await using var scope = Factory.Services.As(Alice);
         var started = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new StartUploadCommand(Profile, "没传完.pdf", 100), Ct);
         return started.ShouldBeSuccess().FileId;
     }

@@ -6,6 +6,7 @@ using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Scheduling;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Files;
+using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Testing.Assertions;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
@@ -63,7 +64,7 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
 
     private async Task<Result<ScheduledJobOutcome>> RunAsync()
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.ScheduledJob);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.ScheduledJob);
         return await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ReconcileStorageCommand(TimeProvider.System.GetUtcNow()), Ct);
     }
 
@@ -147,6 +148,10 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
         (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "等运维还原，文件不动");
         (await seed.ScalarAsync<string>($"""SELECT "Kind" FROM "Files"."StorageIssue" WHERE "FileId" = '{id}'""")).ShouldBe("RestorableMissing");
         (await IssuesOfAsync(seed, id)).ShouldBe(1, "已经有待处理的问题，不重复记");
+
+        var gauges = Factory.Services.GetServices<IBacklogGauges>().Single(g => string.Equals(g.MeterName, FilesMetrics.MeterName, StringComparison.Ordinal));
+        var open = await seed.CountAsync("""SELECT count(*) FROM "Files"."StorageIssue" WHERE "Kind" = 'RestorableMissing' AND "Status" = 'Open'""");
+        (await gauges.ReadAsync(Ct)).ShouldHaveSingleItem().Value.ShouldBe(open);
     }
 
     [Fact]

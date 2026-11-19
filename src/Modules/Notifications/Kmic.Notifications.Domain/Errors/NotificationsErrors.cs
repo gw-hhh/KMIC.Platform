@@ -63,9 +63,9 @@ public static class NotificationsErrors
     public static readonly Error DeliveryNotRetryable = Error.BusinessRule("Notifications.DeliveryNotRetryable", "仅失败且未放弃的投递可重试");
 
     /// <summary>
-    /// 含密通知已过期，不能重试
+    /// 含密通知不能重试
     /// </summary>
-    public static readonly Error DeliverySecretExpired = Error.BusinessRule("Notifications.DeliverySecretExpired", "含密通知已过期，不能重试");
+    public static readonly Error DeliverySecretNotRetryable = Error.BusinessRule("Notifications.DeliverySecretNotRetryable", "含密通知失败时已清除内容，不能重试");
 
     /// <summary>
     /// 仅失败且未放弃的投递可放弃

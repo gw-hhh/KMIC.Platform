@@ -6,6 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// <param name="Id">作业 ID</param>
 /// <param name="Module">作业所在的模块</param>
 /// <param name="JobType">作业类型名，如 Sample.ExportSpecimens</param>
+/// <param name="JobName">作业显示名称；代码中已没有这种作业时为作业类型名</param>
 /// <param name="State">状态</param>
 /// <param name="SubmittedBy">提交人；系统提交的没有</param>
 /// <param name="ActualUserId">模拟登录时真正动手的人</param>
@@ -26,6 +27,7 @@ public sealed record JobView(
     Guid Id,
     string Module,
     string JobType,
+    string JobName,
     BackgroundJobState State,
     Guid? SubmittedBy,
     Guid? ActualUserId,

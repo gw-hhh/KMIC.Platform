@@ -13,7 +13,8 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 /// <remarks>
 /// 只选状态相关的列，不读作业参数与检查点。查询走读池：管理视图允许几百毫秒的复制延迟，不占事务池
 /// </remarks>
-internal sealed class ModuleJobStore(string module, ModuleFrameworkTables tables, DataSources dataSources, JobExecutor executor) : IModuleJobStore
+internal sealed class ModuleJobStore(string module, ModuleFrameworkTables tables, DataSources dataSources, JobExecutor executor, BackgroundJobCatalog catalog)
+    : IModuleJobStore
 {
     private const string Columns = """
         "Id", "JobType", "Status", "SubmittedBy", "ActualUserId", "SubmittedAt", "StartedAt", "FinishedAt", "ProgressDone", "ProgressTotal",
@@ -72,6 +73,7 @@ internal sealed class ModuleJobStore(string module, ModuleFrameworkTables tables
             reader.GetGuid(0),
             module,
             reader.GetString(1),
+            catalog.DisplayNameOf(reader.GetString(1)),
             (BackgroundJobState)reader.GetInt16(2),
             reader.IsDBNull(3) ? null : reader.GetGuid(3),
             reader.IsDBNull(4) ? null : reader.GetGuid(4),

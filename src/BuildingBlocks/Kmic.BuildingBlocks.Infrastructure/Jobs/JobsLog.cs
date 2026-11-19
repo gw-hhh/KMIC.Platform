@@ -18,4 +18,7 @@ internal static partial class JobsLog
 
     [LoggerMessage(EventId = 2304, Level = LogLevel.Error, Message = "Writing the audit event of background job {JobId} ({JobType}) failed")]
     public static partial void AuditFailed(ILogger logger, Exception exception, Guid jobId, string jobType);
+
+    [LoggerMessage(EventId = 2305, Level = LogLevel.Error, Message = "Commit outcome of the result of background job {JobId} ({JobType}) is unknown, leaving it to the claim process after the lease expires")]
+    public static partial void FinishOutcomeUnknown(ILogger logger, Guid jobId, string jobType);
 }

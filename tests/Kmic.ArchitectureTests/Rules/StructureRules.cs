@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using FluentValidation;
 using Kmic.ArchitectureTests.Support;
 using Kmic.BuildingBlocks.Application.Authorization;
+using Kmic.BuildingBlocks.Application.Caching;
 using Kmic.BuildingBlocks.Application.Events;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Querying;
@@ -13,6 +14,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Repositories;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.Identity.Application.Authorization;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -192,6 +194,51 @@ internal static class StructureRules
                 if (_sensitiveNames.Any(prefix => action.StartsWith(prefix, StringComparison.Ordinal)))
                 {
                     problems.Add($"{group.FullName}.{field.Name}（{code}）：物理删除、模拟身份、导出全部数据的权限点必须标 Sensitive = true。");
+                }
+            }
+        }
+
+        return problems;
+    }
+
+    /// <summary>
+    /// Identity 中声明 [RequirePermission] 的命令，处理器须继承 AuthorizationAdminCommandHandler，提交前在同一事务中重查操作者
+    /// </summary>
+    /// <param name="types">Identity Application 中的类型</param>
+    public static IReadOnlyList<string> AuthorizationAdminHandlers(IEnumerable<Type> types) =>
+    [
+        .. types.Where(t => t is { IsClass: true, IsAbstract: false })
+            .Where(t => HandledCommands(t).Any(c => c.IsDefined(typeof(RequirePermissionAttribute), inherit: false)))
+            .Where(t => !DerivesFromGeneric(t, typeof(AuthorizationAdminCommandHandler<,>)))
+            .Select(t => $"{t.FullName}：Identity 中需要权限点的命令，处理器须继承 AuthorizationAdminCommandHandler，提交前重查操作者。"),
+    ];
+
+    /// <summary>
+    /// 缓存键只在本模块的 {模块}CacheKeys 类中生成，且第一段是本模块名
+    /// </summary>
+    /// <remarks>
+    /// 先读方法体，找出调用 CacheKey.Of 的类型；再逐个取 CacheKeys 类的常量、静态属性，并用样例参数调用静态方法，检查生成的键
+    /// </remarks>
+    public static IReadOnlyList<string> CacheKeys(IEnumerable<ProductAssembly> assemblies)
+    {
+        var problems = new List<string>();
+        foreach (var assembly in assemblies.Where(a => a.IsModule))
+        {
+            var owner = assembly.Module + "CacheKeys";
+            foreach (var type in assembly.Assembly.GetTypes().Where(t => t.GetCustomAttribute<CompilerGeneratedAttribute>() is null))
+            {
+                var callsOf = IlCalls.CalledBy(type).Any(m => m.DeclaringType == typeof(CacheKey) && string.Equals(m.Name, nameof(CacheKey.Of), StringComparison.Ordinal));
+                if (callsOf && !string.Equals(type.Name, owner, StringComparison.Ordinal))
+                {
+                    problems.Add($"{type.FullName}：缓存键只能在 {owner} 中生成。");
+                }
+
+                if (string.Equals(type.Name, owner, StringComparison.Ordinal))
+                {
+                    problems.AddRange(KeysOf(type).Where(k => k.Key?.StartsWith(assembly.Module + ":", StringComparison.Ordinal) != true)
+                        .Select(k => k.Key is null
+                            ? $"{type.FullName}.{k.Member}：无法构造参数的样例值，检查不了生成的缓存键。"
+                            : $"{type.FullName}.{k.Member}：缓存键“{k.Key}”的第一段须为模块名 {assembly.Module}。"));
                 }
             }
         }
@@ -396,11 +443,46 @@ internal static class StructureRules
         type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(Guid) || type == typeof(decimal) || type == typeof(DateTimeOffset) || type == typeof(DateOnly) || type == typeof(TimeSpan)
         || typeof(IStronglyTypedId).IsAssignableFrom(type) || typeof(IEnumeration).IsAssignableFrom(type);
 
-    private static bool IsAggregateRoot(Type type)
+    private static bool IsAggregateRoot(Type type) => DerivesFromGeneric(type, typeof(AggregateRoot<>));
+
+    // CacheKeys 类生成的键：常量、静态属性，以及用样例参数调用静态方法的结果；参数无法构造时键为空
+    private static IEnumerable<(string Member, string? Key)> KeysOf(Type type)
+    {
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Where(f => f is { IsLiteral: true } && f.FieldType == typeof(string)))
+        {
+            yield return (field.Name, (string)field.GetRawConstantValue()!);
+        }
+
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Where(p => p.PropertyType == typeof(string)))
+        {
+            yield return (property.Name, (string)property.GetValue(null)!);
+        }
+
+        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(m => m.ReturnType == typeof(string) && !m.IsSpecialName && m.GetCustomAttribute<CompilerGeneratedAttribute>() is null))
+        {
+            var arguments = method.GetParameters().Select(p => SampleOf(p.ParameterType)).ToArray();
+            yield return arguments.Any(a => a is null)
+                ? (method.Name, null)
+                : (method.Name, (string)method.Invoke(null, arguments)!);
+        }
+    }
+
+    private static object? SampleOf(Type type) => type switch
+    {
+        _ when type == typeof(string) => "sample",
+        _ when type == typeof(Guid) => Guid.CreateVersion7(),
+        _ when type == typeof(int) => 1,
+        _ when type == typeof(long) => 1L,
+        _ when typeof(IStronglyTypedId).IsAssignableFrom(type) => type.GetMethod("From", [typeof(Guid)])?.Invoke(null, [Guid.CreateVersion7()]),
+        _ => null,
+    };
+
+    private static bool DerivesFromGeneric(Type type, Type definition)
     {
         for (var current = type.BaseType; current is not null; current = current.BaseType)
         {
-            if (current.IsGenericType && current.GetGenericTypeDefinition() == typeof(AggregateRoot<>))
+            if (current.IsGenericType && current.GetGenericTypeDefinition() == definition)
             {
                 return true;
             }
@@ -408,6 +490,12 @@ internal static class StructureRules
 
         return false;
     }
+
+    // 处理器实现的命令处理接口对应的命令类型
+    private static IEnumerable<Type> HandledCommands(Type type) =>
+        type.GetInterfaces()
+            .Where(i => i.IsGenericType && (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) || i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)))
+            .Select(i => i.GetGenericArguments()[0]);
 
     private static bool IsMessageHandler(Type type) =>
         type is { IsClass: true, IsAbstract: false }

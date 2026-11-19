@@ -2,6 +2,7 @@ using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -18,6 +19,10 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
 {
     private const string Owned = """
         "Id" = @id AND "LeaseToken" = @token AND "Status" IN (1, 4)
+        """;
+
+    private const string Updated = """
+        "Status", "JobType", "SubmittedBy", "CancelRequestedBy", "ErrorCode", "ErrorMessage", "ResultFileId", "FinishedAt"
         """;
 
     private NpgsqlDataSource Database => dataSources.Transactions(CallOrigin.BackgroundJob);
@@ -117,48 +122,56 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
             ct) == 1;
     }
 
-    public async Task<bool> FinishAsync(
-        string module, Guid id, Guid token, short status, Error? error, Guid? resultFileId, string? summary, TimeSpan retention, CancellationToken ct)
-    {
-        await using var command = Database.CreateCommand(
+    /// <summary>
+    /// 写入结果；占用已被接管时返回空
+    /// </summary>
+    public Task<UpdatedJob?> FinishAsync(
+        ModuleDbContext db, string module, Guid id, Guid token, short status, Error? error, Guid? resultFileId, string? summary, TimeSpan retention, CancellationToken ct) =>
+        UpdateAsync(
+            db,
             $"""
             UPDATE {tables.For(module).Jobs}
             SET "Status" = @status, "ErrorCode" = @code, "ErrorMessage" = @message, "ResultFileId" = @file, "ResultSummary" = @summary,
                 "FinishedAt" = clock_timestamp(), "ExpiresAt" = clock_timestamp() + @retention, "LeaseUntil" = NULL
             WHERE {Owned}
-            """);
-        command.Parameters.AddWithValue("status", status);
-        command.Parameters.Add(new NpgsqlParameter("code", NpgsqlDbType.Varchar) { Value = (object?)error?.Code ?? DBNull.Value });
-        command.Parameters.Add(new NpgsqlParameter("message", NpgsqlDbType.Varchar) { Value = (object?)Truncate(error?.Message, 2000) ?? DBNull.Value });
-        command.Parameters.Add(new NpgsqlParameter("file", NpgsqlDbType.Uuid) { Value = (object?)resultFileId ?? DBNull.Value });
-        command.Parameters.Add(new NpgsqlParameter("summary", NpgsqlDbType.Jsonb) { Value = (object?)summary ?? DBNull.Value });
-        command.Parameters.AddWithValue("retention", retention);
-        AddOwner(command, id, token);
-        return await command.ExecuteNonQueryAsync(ct) == 1;
-    }
+            RETURNING {Updated}
+            """,
+            [
+                new NpgsqlParameter("status", status),
+                new NpgsqlParameter("code", NpgsqlDbType.Varchar) { Value = (object?)error?.Code ?? DBNull.Value },
+                new NpgsqlParameter("message", NpgsqlDbType.Varchar) { Value = (object?)Truncate(error?.Message, 2000) ?? DBNull.Value },
+                new NpgsqlParameter("file", NpgsqlDbType.Uuid) { Value = (object?)resultFileId ?? DBNull.Value },
+                new NpgsqlParameter("summary", NpgsqlDbType.Jsonb) { Value = (object?)summary ?? DBNull.Value },
+                new NpgsqlParameter("retention", retention),
+                new NpgsqlParameter("id", id),
+                new NpgsqlParameter("token", token),
+            ],
+            ct);
 
     /// <summary>
-    /// 停机时把可续跑的作业放回队列；这期间用户要求了取消的，直接标为已取消
+    /// 停机时把可续跑的作业放回队列，期间已请求取消的直接标为已取消；占用已被接管时返回空
     /// </summary>
-    public async Task<bool> ReleaseAsync(string module, Guid id, Guid token, CancellationToken ct)
-    {
-        await using var command = Database.CreateCommand(
+    public Task<UpdatedJob?> ReleaseAsync(ModuleDbContext db, string module, Guid id, Guid token, TimeSpan retention, CancellationToken ct) =>
+        UpdateAsync(
+            db,
             $"""
             UPDATE {tables.For(module).Jobs}
             SET "Status" = CASE WHEN "Status" = {JobStatus.Cancelling} THEN {JobStatus.Cancelled} ELSE {JobStatus.Queued} END,
+                "FinishedAt" = CASE WHEN "Status" = {JobStatus.Cancelling} THEN clock_timestamp() END,
+                "ExpiresAt" = CASE WHEN "Status" = {JobStatus.Cancelling} THEN clock_timestamp() + @retention END,
                 "LeaseToken" = NULL, "LeaseUntil" = NULL
             WHERE {Owned}
-            """);
-        AddOwner(command, id, token);
-        return await command.ExecuteNonQueryAsync(ct) == 1;
-    }
+            RETURNING {Updated}
+            """,
+            [new NpgsqlParameter("retention", retention), new NpgsqlParameter("id", id), new NpgsqlParameter("token", token)],
+            ct);
 
     /// <summary>
-    /// 请求取消：排队中的直接取消，运行中的改为取消中，执行器在下次续期时停下
+    /// 请求取消：排队中的直接取消，运行中的改为取消中，执行器在下次续期时停下；作业已结束时返回空
     /// </summary>
-    public async Task<bool> RequestCancelAsync(string module, Guid id, Guid? by, TimeSpan retention, CancellationToken ct)
-    {
-        await using var command = Database.CreateCommand(
+    public Task<UpdatedJob?> RequestCancelAsync(ModuleDbContext db, string module, Guid id, Guid? by, TimeSpan retention, CancellationToken ct) =>
+        UpdateAsync(
+            db,
             $"""
             UPDATE {tables.For(module).Jobs}
             SET "Status" = CASE WHEN "Status" = {JobStatus.Queued} THEN {JobStatus.Cancelled} ELSE {JobStatus.Cancelling} END,
@@ -166,11 +179,39 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
                 "FinishedAt" = CASE WHEN "Status" = {JobStatus.Queued} THEN clock_timestamp() END,
                 "ExpiresAt" = CASE WHEN "Status" = {JobStatus.Queued} THEN clock_timestamp() + @retention END
             WHERE "Id" = @id AND "Status" IN ({JobStatus.Queued}, {JobStatus.Running})
-            """);
-        command.Parameters.AddWithValue("id", id);
-        command.Parameters.Add(new NpgsqlParameter("by", NpgsqlDbType.Uuid) { Value = (object?)by ?? DBNull.Value });
-        command.Parameters.AddWithValue("retention", retention);
-        return await command.ExecuteNonQueryAsync(ct) == 1;
+            RETURNING {Updated}
+            """,
+            [
+                new NpgsqlParameter("id", id),
+                new NpgsqlParameter("by", NpgsqlDbType.Uuid) { Value = (object?)by ?? DBNull.Value },
+                new NpgsqlParameter("retention", retention),
+            ],
+            ct);
+
+    // 用调用方已开始的事务执行，调用方再按返回的行决定要不要在同一事务里发结束事件
+    private static async Task<UpdatedJob?> UpdateAsync(ModuleDbContext db, string sql, NpgsqlParameter[] parameters, CancellationToken ct)
+    {
+        var transaction = db.Database.CurrentTransaction?.GetDbTransaction()
+            ?? throw new InvalidOperationException("修改作业行前须先开始事务。");
+        await using var command = transaction.Connection!.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = sql;
+        command.Parameters.AddRange(parameters);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        if (!await reader.ReadAsync(ct))
+        {
+            return null;
+        }
+
+        return new UpdatedJob(
+            reader.GetInt16(0),
+            reader.GetString(1),
+            await reader.GetFieldValueAsync<Guid?>(2, ct),
+            await reader.GetFieldValueAsync<Guid?>(3, ct),
+            await reader.IsDBNullAsync(4, ct) ? null : reader.GetString(4),
+            await reader.IsDBNullAsync(5, ct) ? null : reader.GetString(5),
+            await reader.GetFieldValueAsync<Guid?>(6, ct),
+            await reader.GetFieldValueAsync<DateTimeOffset?>(7, ct));
     }
 
     private static void AddOwner(NpgsqlCommand command, Guid id, Guid token)

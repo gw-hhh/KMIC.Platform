@@ -20,13 +20,13 @@ public sealed class NotificationProcessingTests(ClassDatabase<ApiTemplate> datab
 {
     private async Task<Result> SendAsync(SendNotification message, Guid? sourceMessageId = null)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         return await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendNotificationCommand(message, sourceMessageId ?? Guid.CreateVersion7(), "Sample", null), Ct);
     }
 
     private async Task<Result> SendSecretAsync(SendSecretNotification message)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         return await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendSecretNotificationCommand(message, Guid.CreateVersion7(), "Sample", null), Ct);
     }
 

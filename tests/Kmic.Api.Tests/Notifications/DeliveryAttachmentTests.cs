@@ -50,7 +50,7 @@ public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<Cl
 
     private async Task SendAsync(SendNotification message)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         var result = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ProcessSendNotificationCommand(message, Guid.CreateVersion7(), "Sample", null), Ct);
         result.ShouldBeSuccess();
     }

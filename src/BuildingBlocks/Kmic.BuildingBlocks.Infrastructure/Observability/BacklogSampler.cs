@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Observability;
@@ -14,7 +15,7 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 
 /// <summary>
-/// 定期统计消息、作业、定时任务的积压，供积压量表读取
+/// 定期统计消息、作业、定时任务的积压，并读取模块登记的积压量表
 /// </summary>
 /// <remarks>
 /// 每个实例都采样，Api 和 Worker 一样：没有任何实例在跑 Worker 时，积压变老的数字要靠 Api 实例报出来。
@@ -32,6 +33,7 @@ internal sealed class BacklogSampler : BackgroundService
     private readonly TimeProvider _time;
     private readonly IOptions<DatabaseDiagnosticsOptions> _options;
     private readonly ILogger<BacklogSampler> _logger;
+    private readonly ModuleGauges[] _modules;
     private volatile Sample? _latest;
 
     public BacklogSampler(
@@ -41,10 +43,14 @@ internal sealed class BacklogSampler : BackgroundService
         StartupState startup,
         TimeProvider time,
         FrameworkMetrics metrics,
+        IEnumerable<IBacklogGauges> moduleGauges,
+        IMeterFactory meters,
         IOptions<DatabaseDiagnosticsOptions> options,
         ILogger<BacklogSampler> logger)
     {
         ArgumentNullException.ThrowIfNull(metrics);
+        ArgumentNullException.ThrowIfNull(moduleGauges);
+        ArgumentNullException.ThrowIfNull(meters);
 
         _tables = tables;
         _dataSources = dataSources;
@@ -54,13 +60,21 @@ internal sealed class BacklogSampler : BackgroundService
         _options = options;
         _logger = logger;
         metrics.ObserveBacklog(() => Latest);
+        _modules = [.. moduleGauges.Select(source => new ModuleGauges(source))];
+        foreach (var module in _modules)
+        {
+            var meter = meters.Create(module.Source.MeterName);
+            foreach (var gauge in module.Source.Gauges)
+            {
+                meter.CreateObservableGauge(gauge.Name, () => ReadingsOf(module, gauge.Name), gauge.Unit, gauge.Description);
+            }
+        }
     }
 
     /// <summary>
     /// 最近一次采样，超过三个采样间隔没有更新就当作没有
     /// </summary>
-    public BacklogSnapshot? Latest =>
-        _latest is { } latest && _time.GetUtcNow() - latest.At <= _options.Value.BacklogSampleInterval * FreshIntervals ? latest.Snapshot : null;
+    public BacklogSnapshot? Latest => _latest is { } latest && IsFresh(latest.At) ? latest.Snapshot : null;
 
     /// <summary>
     /// 采样一次并保存结果
@@ -69,6 +83,24 @@ internal sealed class BacklogSampler : BackgroundService
     {
         var snapshot = await ReadAsync(ct);
         _latest = new Sample(snapshot, _time.GetUtcNow());
+    }
+
+    /// <summary>
+    /// 读取一次各模块登记的量表，读取失败的模块保留上次读数
+    /// </summary>
+    public async Task SampleModulesAsync(CancellationToken ct)
+    {
+        foreach (var module in _modules)
+        {
+            try
+            {
+                module.Latest = new ModuleSample(await module.Source.ReadAsync(ct), _time.GetUtcNow());
+            }
+            catch (Exception exception) when (exception is NpgsqlException or InvalidOperationException)
+            {
+                ObservabilityLog.ModuleBacklogSampleFailed(_logger, exception, module.Source.MeterName);
+            }
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -83,6 +115,7 @@ internal sealed class BacklogSampler : BackgroundService
             do
             {
                 await TrySampleAsync(stoppingToken);
+                await SampleModulesAsync(stoppingToken);
             }
             while (await timer.WaitForNextTickAsync(stoppingToken));
         }
@@ -104,7 +137,29 @@ internal sealed class BacklogSampler : BackgroundService
         }
     }
 
+    private IEnumerable<Measurement<double>> ReadingsOf(ModuleGauges module, string gauge) =>
+        module.Latest is { } latest && IsFresh(latest.At)
+            ? [.. latest.Readings.Where(r => string.Equals(r.Gauge, gauge, StringComparison.Ordinal)).Select(r => new Measurement<double>(r.Value, r.Tags))]
+            : [];
+
+    private bool IsFresh(DateTimeOffset at) => _time.GetUtcNow() - at <= _options.Value.BacklogSampleInterval * FreshIntervals;
+
     private sealed record Sample(BacklogSnapshot Snapshot, DateTimeOffset At);
+
+    private sealed record ModuleSample(IReadOnlyList<BacklogReading> Readings, DateTimeOffset At);
+
+    private sealed class ModuleGauges(IBacklogGauges source)
+    {
+        private volatile ModuleSample? _latest;
+
+        public IBacklogGauges Source { get; } = source;
+
+        public ModuleSample? Latest
+        {
+            get => _latest;
+            set => _latest = value;
+        }
+    }
 
     private async Task<BacklogSnapshot> ReadAsync(CancellationToken ct)
     {

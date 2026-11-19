@@ -32,7 +32,7 @@ public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiT
 
     private async Task<(Result<GeneratedFile> Result, List<IIntegrationRequest> Sent)> WriteAsync(string fileName, byte[] content, TimeSpan? retention = null)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope();
+        await using var scope = Factory.Services.AsSystem();
         var services = scope.ServiceProvider;
         var sent = new List<IIntegrationRequest>();
         var generated = new GeneratedFiles(
@@ -56,13 +56,13 @@ public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiT
 
     private async Task RegisterAsync(RegisterGeneratedFile message)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope();
+        await using var scope = Factory.Services.AsSystem();
         (await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new RegisterGeneratedFileCommand(message), Ct)).ShouldBeSuccess();
     }
 
     private async Task<Result<FileContent>> OpenAsync(Guid fileId)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope();
+        await using var scope = Factory.Services.AsSystem();
         return await scope.ServiceProvider.GetRequiredService<IFileContents>().OpenReadAsync(fileId, Ct);
     }
 
@@ -157,7 +157,7 @@ public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiT
         await RegisterAsync((RegisterGeneratedFile)sent.Single());
         using var alice = ClientFor(Alice);
         var ordinary = await UploadOkAsync(alice, "普通上传.pdf", Pdf());
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(CallOrigin.ModuleCall, CurrentUser.From(Alice), Alice);
+        await using var scope = Factory.Services.As(Alice, CallOrigin.ModuleCall);
         var downloads = scope.ServiceProvider.GetRequiredService<IFileDownloads>();
 
         var generated = await downloads.GetAsync(result.ShouldBeSuccess().FileId, Ct);
@@ -172,7 +172,7 @@ public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiT
     {
         var (result, sent) = await WriteAsync("别人的.pdf", Pdf());
         await RegisterAsync((RegisterGeneratedFile)sent.Single());
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(CallOrigin.ModuleCall, CurrentUser.From(Alice), Alice);
+        await using var scope = Factory.Services.As(Alice, CallOrigin.ModuleCall);
 
         var opened = await scope.ServiceProvider.GetRequiredService<IFileContents>().OpenReadAsync(result.ShouldBeSuccess().FileId, Ct);
 

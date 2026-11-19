@@ -21,12 +21,9 @@ internal sealed class DeliveryRepository(NotificationsDbContext context)
         return rows.Select(r => $"{r.RecipientKey}|{r.Channel.Code}").ToHashSet(StringComparer.Ordinal);
     }
 
-    public async Task<bool> RetryAsync(DeliveryId id, DateTimeOffset? createdNotBefore, CancellationToken ct) =>
+    public async Task<bool> RetryAsync(DeliveryId id, CancellationToken ct) =>
         await UpdateWhereAsync(
-            d => d.Id == id
-                && d.Status == DeliveryStatus.Failed
-                && EF.Property<DateTimeOffset?>(d, DeliveryColumns.AbandonedAt) == null
-                && (createdNotBefore == null || EF.Property<DateTimeOffset>(d, AuditColumns.CreatedAt) >= createdNotBefore),
+            d => d.Id == id && d.Status == DeliveryStatus.Failed && EF.Property<DateTimeOffset?>(d, DeliveryColumns.AbandonedAt) == null,
             setters => setters
                 .SetProperty(d => d.Status, DeliveryStatus.Pending)
                 .SetProperty(d => EF.Property<int>(d, DeliveryColumns.Attempts), 0)

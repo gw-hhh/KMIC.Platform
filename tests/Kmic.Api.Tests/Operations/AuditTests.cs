@@ -44,7 +44,7 @@ public sealed class AuditTests(ClassDatabase<ApiTemplate> database, ApiTemplate 
 
     private async Task RecordAsync(AuditRecorded message)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         (await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new RecordAuditCommand(message), Ct)).ShouldBeSuccess();
     }
 

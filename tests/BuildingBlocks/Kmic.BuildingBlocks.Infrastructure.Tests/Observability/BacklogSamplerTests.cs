@@ -33,6 +33,7 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
         services: s =>
         {
             s.AddKmicBacklogSampling();
+            s.AddKmicBacklogGauges<QueueGauges>();
             s.AddLogging(logging => logging.AddFakeLogging());
         });
 
@@ -41,6 +42,8 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     private BacklogSampler Sampler => _harness.Services.GetRequiredService<BacklogSampler>();
+
+    private QueueGauges Queue => _harness.Services.GetServices<IBacklogGauges>().OfType<QueueGauges>().Single();
 
     public async ValueTask InitializeAsync()
     {
@@ -228,6 +231,33 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
     }
 
     [Fact]
+    public async Task ModuleGauges_ReportTheirLatestReadings()
+    {
+        Queue.Next = 4;
+
+        await Sampler.SampleModulesAsync(Ct);
+
+        Of(Collect(), QueueGauges.Name, "channel", "Email").ShouldBe(4);
+    }
+
+    [Fact]
+    public async Task ModuleGauges_FailedRead_KeepsThePreviousReadingUntilItExpires()
+    {
+        Queue.Next = 2;
+        await Sampler.SampleModulesAsync(Ct);
+
+        Queue.Next = null;
+        _harness.Time.Advance(TimeSpan.FromSeconds(60));
+        await Sampler.SampleModulesAsync(Ct);
+
+        _harness.Services.GetFakeLogCollector().GetSnapshot().ShouldContain(r => r.Id.Id == 2804);
+        Of(Collect(), QueueGauges.Name, "channel", "Email").ShouldBe(2);
+
+        _harness.Time.Advance(TimeSpan.FromSeconds(31));
+        Collect().Where(m => string.Equals(m.Instrument, QueueGauges.Name, StringComparison.Ordinal)).ShouldBeEmpty();
+    }
+
+    [Fact]
     public void GaugeRegistration_OnlyOnce()
     {
         _ = Sampler;
@@ -287,5 +317,22 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
     {
         await using var command = database.DataSource.CreateCommand(sql);
         await command.ExecuteNonQueryAsync(Ct);
+    }
+
+    // 模块量表的替身：Next 为空时读取失败
+    private sealed class QueueGauges : IBacklogGauges
+    {
+        public const string Name = "kmic.test.queue";
+
+        public double? Next { get; set; }
+
+        public string MeterName => "Kmic.Test";
+
+        public IReadOnlyList<BacklogGauge> Gauges { get; } = [new(Name, "{item}", "测试队列的积压")];
+
+        public Task<IReadOnlyList<BacklogReading>> ReadAsync(CancellationToken ct) =>
+            Next is { } value
+                ? Task.FromResult<IReadOnlyList<BacklogReading>>([new BacklogReading(Name, value, [new("channel", "Email")])])
+                : throw new InvalidOperationException("读取失败");
     }
 }

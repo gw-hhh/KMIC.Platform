@@ -1,4 +1,3 @@
-using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Contracts.References;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
@@ -14,9 +13,9 @@ public sealed class IdentityContractsTests(ClassDatabase<ApiTemplate> database, 
     : IdentityApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
 {
-    private AsyncServiceScope AsUser() => Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(TestIdentity.User("调用方"));
+    private AsyncServiceScope AsUser() => Factory.Services.As(TestIdentity.User("调用方"));
 
-    private AsyncServiceScope AsSystem() => Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope();
+    private AsyncServiceScope AsSystem() => Factory.Services.AsSystem();
 
     [Fact]
     public async Task UserReferences_ShowNameAndEmployeeNo_AndADisabledUserIsStillResolved()

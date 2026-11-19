@@ -12,4 +12,7 @@ internal static partial class ObservabilityLog
 
     [LoggerMessage(EventId = 2803, Level = LogLevel.Information, Message = "Backlog sampling started, every {IntervalSeconds:0} s for {Modules} modules")]
     public static partial void BacklogSamplingStarted(ILogger logger, double intervalSeconds, int modules);
+
+    [LoggerMessage(EventId = 2804, Level = LogLevel.Warning, Message = "Sampling the backlog gauges of {Meter} failed, the previous readings are kept until they expire")]
+    public static partial void ModuleBacklogSampleFailed(ILogger logger, Exception exception, string meter);
 }

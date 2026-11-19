@@ -10,7 +10,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 /// 每天删除过了保留期的后台作业记录
 /// </summary>
 /// <remarks>
-/// 带结果文件的先不删：删除文件要经 Files 模块，它就绪之前删了记录，文件就再也找不到了
+/// 只删作业行；结果文件由 Files 按登记时的保留期清理
 /// </remarks>
 internal sealed class PurgeJobsTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {
@@ -28,7 +28,7 @@ internal sealed class PurgeJobsTask(ModuleFrameworkTables tables, DataSources da
             total += await BatchDelete.RunAsync(
                 dataSources.Transactions(CallOrigin.ScheduledJob),
                 tables.For(module).Jobs,
-                """t."ExpiresAt" < clock_timestamp() AND t."ResultFileId" IS NULL""",
+                """t."ExpiresAt" < clock_timestamp()""",
                 new Dictionary<string, object>(StringComparer.Ordinal),
                 options.Value.BatchSize,
                 ct);

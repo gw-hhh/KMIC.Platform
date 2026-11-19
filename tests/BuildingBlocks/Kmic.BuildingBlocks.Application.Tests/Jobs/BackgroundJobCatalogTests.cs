@@ -20,6 +20,16 @@ public sealed class BackgroundJobCatalogTests
         job.HandlerInterface.ShouldBe(typeof(IJobHandler<Export>));
         catalog.PermissionReferences.ShouldHaveSingleItem().Permission.ShouldBe("BuildingBlocks.Thing.Export");
         catalog.Find("BuildingBlocks.Export", 1).ShouldBe(job);
+        catalog.DisplayNameOf("BuildingBlocks.Export").ShouldBe("导出");
+        catalog.DisplayNameOf("BuildingBlocks.Retired").ShouldBe("BuildingBlocks.Retired", "代码里已没有的作业显示作业类型名");
+    }
+
+    [Fact]
+    public void Build_BlankDisplayName_Rejected()
+    {
+        var thrown = Should.Throw<DeclarationException>(() => BackgroundJobCatalog.Build([typeof(Unlabelled), typeof(UnlabelledHandler)]));
+
+        thrown.Problems.ShouldHaveSingleItem().ShouldContain("显示名称");
     }
 
     [Fact]
@@ -56,11 +66,11 @@ public sealed class BackgroundJobCatalogTests
         thrown.Problems.Count.ShouldBe(6);
     }
 
-    [BackgroundJob("BuildingBlocks.Export", Permission = "BuildingBlocks.Thing.Export", Audited = true)]
+    [BackgroundJob("BuildingBlocks.Export", "导出", Permission = "BuildingBlocks.Thing.Export", Audited = true)]
     private sealed record Export : IBackgroundJob;
 
 
-    [BackgroundJob("BuildingBlocks.ExportAll", Permission = "BuildingBlocks.Thing.Export")]
+    [BackgroundJob("BuildingBlocks.ExportAll", "全部导出", Permission = "BuildingBlocks.Thing.Export")]
     private sealed record UnauditedExport : IBackgroundJob;
 
     private sealed class UnauditedExportHandler : IJobHandler<UnauditedExport>
@@ -69,19 +79,27 @@ public sealed class BackgroundJobCatalogTests
     }
     private sealed record Unnamed : IBackgroundJob;
 
-    [BackgroundJob("Sales.WrongPrefix", SystemOnly = true)]
+    [BackgroundJob("BuildingBlocks.Unlabelled", " ", SystemOnly = true)]
+    private sealed record Unlabelled : IBackgroundJob;
+
+    private sealed class UnlabelledHandler : IJobHandler<Unlabelled>
+    {
+        public Task<Result<JobOutcome>> ExecuteAsync(Unlabelled job, IJobContext context, CancellationToken ct) => Task.FromResult<Result<JobOutcome>>(new JobOutcome());
+    }
+
+    [BackgroundJob("Sales.WrongPrefix", "前缀不对", SystemOnly = true)]
     private sealed record WrongPrefix : IBackgroundJob;
 
-    [BackgroundJob("BuildingBlocks.Neither")]
+    [BackgroundJob("BuildingBlocks.Neither", "两个都没写")]
     private sealed record NeitherPermissionNorSystem : IBackgroundJob;
 
-    [BackgroundJob("BuildingBlocks.Both", Permission = "BuildingBlocks.Thing.Export", SystemOnly = true)]
+    [BackgroundJob("BuildingBlocks.Both", "两个都写", Permission = "BuildingBlocks.Thing.Export", SystemOnly = true)]
     private sealed record BothPermissionAndSystem : IBackgroundJob;
 
-    [BackgroundJob("BuildingBlocks.NoHandler", SystemOnly = true)]
+    [BackgroundJob("BuildingBlocks.NoHandler", "没有处理器", SystemOnly = true)]
     private sealed record NoHandler : IBackgroundJob;
 
-    [BackgroundJob("BuildingBlocks.TwoHandlers", SystemOnly = true)]
+    [BackgroundJob("BuildingBlocks.TwoHandlers", "两个处理器", SystemOnly = true)]
     private sealed record TwoHandlers : IBackgroundJob;
 
     private sealed class ExportHandler : IJobHandler<Export>

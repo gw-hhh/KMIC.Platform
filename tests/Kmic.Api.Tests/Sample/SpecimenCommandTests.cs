@@ -107,7 +107,7 @@ public sealed class SpecimenCommandTests(ClassDatabase<ApiTemplate> database, Ap
     // 每个作用域带一个新的幂等键：带 [Idempotent] 的命令要求有键，没有这个属性的命令不看它
     private HandlerScope As(TestIdentity identity)
     {
-        var scope = new HandlerScope(Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(identity));
+        var scope = new HandlerScope(Factory.Services.As(identity));
         scope.Requests.IdempotencyKey = Guid.CreateVersion7().ToString();
         return scope;
     }

@@ -31,7 +31,7 @@ internal enum JobRunResult
     TakenOver,
 
     /// <summary>
-    /// 某一批的提交结果未知，本地停止，等占用到期后由领取流程处理
+    /// 某一批或最终结果的提交结果未知，本地停止，等占用到期后由领取流程处理
     /// </summary>
     OutcomeUnknown,
 }

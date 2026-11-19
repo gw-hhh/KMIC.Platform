@@ -26,10 +26,13 @@ internal sealed class DeliveryWork(
     IEmailSender email,
     ISmsGateway sms,
     IOptions<NotificationsDeliveryOptions> options,
+    NotificationsMetrics metrics,
     TimeProvider time,
     ILogger<DeliveryWork> logger)
     : ILeasedWork<DeliveryItem>
 {
+    private const string Failed = "failed";
+
     private static readonly TimeSpan _secretLifetime = TimeSpan.FromSeconds(SendSecretNotification.LifetimeSeconds);
 
     public string Name => "Notifications.Delivery";
@@ -49,21 +52,28 @@ internal sealed class DeliveryWork(
         var definition = catalog.Find(item.TemplateKey);
         if (definition is null)
         {
-            await RecordAsync(store => store.FailedAsync(item, token, "模板已经不存在", clearSecret: true, ct), ct);
+            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "模板已经不存在", clearSecret: true, ct), ct);
             return;
         }
 
         var secret = definition.CarriesSecret;
         if (secret && time.GetUtcNow() - item.CreatedAt > _secretLifetime)
         {
-            await RecordAsync(store => store.FailedAsync(item, token, "含密通知已过期，未发送", clearSecret: true, ct), ct);
+            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "含密通知已过期，未发送", clearSecret: true, ct), ct);
+            return;
+        }
+
+        // 含密通知只走短信，参数已清除时不交给网关，避免发出没有验证码的短信
+        if (secret && item.SmsParameters is null)
+        {
+            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "含密通知内容已清除，未发送", clearSecret: true, ct), ct);
             return;
         }
 
         var target = await ResolveAddressAsync(item, ct);
         if (target.Skip is not null)
         {
-            await RecordAsync(store => store.SkippedAsync(item, token, target.Skip, secret, ct), ct);
+            await RecordAsync(item, "skipped", store => store.SkippedAsync(item, token, target.Skip, secret, ct), ct);
             return;
         }
 
@@ -150,21 +160,25 @@ internal sealed class DeliveryWork(
         switch (result.Outcome)
         {
             case SendOutcome.Sent:
-                await RecordAsync(store => store.SentAsync(item, token, result.ProviderMessageId, secret, ct), ct);
+                await RecordAsync(item, "sent", store => store.SentAsync(item, token, result.ProviderMessageId, secret, ct), ct);
                 break;
             case SendOutcome.Transient when item.Attempts < options.Value.MaxAttempts:
-                await RecordAsync(store => store.RetryLaterAsync(item, token, result.Error ?? "暂时失败", ct), ct);
+                await RecordAsync(item, "retry", store => store.RetryLaterAsync(item, token, result.Error ?? "暂时失败", ct), ct);
                 break;
             default:
-                await RecordAsync(store => store.FailedAsync(item, token, result.Error ?? "发送失败", secret, ct), ct);
+                await RecordAsync(item, Failed, store => store.FailedAsync(item, token, result.Error ?? "发送失败", secret, ct), ct);
                 break;
         }
     }
 
-    private async Task RecordAsync(Func<DeliveryStore, Task> write, CancellationToken ct)
+    private async Task RecordAsync(DeliveryItem item, string result, Func<DeliveryStore, Task> write, CancellationToken ct)
     {
-        await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, CurrentUser.System());
-        ct.ThrowIfCancellationRequested();
-        await write(ActivatorUtilities.CreateInstance<DeliveryStore>(scope.ServiceProvider));
+        await using (var scope = scopes.CreateScope(CallOrigin.BackgroundJob, CurrentUser.System()))
+        {
+            ct.ThrowIfCancellationRequested();
+            await write(ActivatorUtilities.CreateInstance<DeliveryStore>(scope.ServiceProvider));
+        }
+
+        metrics.Delivered(item.Channel, result);
     }
 }

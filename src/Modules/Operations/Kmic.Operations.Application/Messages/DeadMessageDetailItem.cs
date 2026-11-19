@@ -8,6 +8,6 @@ namespace Kmic.Operations.Application.Messages;
 /// </summary>
 /// <param name="Message">概要</param>
 /// <param name="State">状态：死信，或者已经被放弃</param>
-/// <param name="Payload">消息载荷；不得暴露含密内容。当前存储查询尚未按含密类型过滤，此保护仍待补齐</param>
+/// <param name="Payload">消息载荷；含密消息和目录里找不到的消息不返回，为空</param>
 /// <param name="Headers">信封里的其余字段</param>
-public sealed record DeadMessageDetailItem(DeadMessageItem Message, MessageState State, JsonElement Payload, JsonElement Headers);
+public sealed record DeadMessageDetailItem(DeadMessageItem Message, MessageState State, JsonElement? Payload, JsonElement Headers);

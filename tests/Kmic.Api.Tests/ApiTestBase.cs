@@ -23,8 +23,6 @@ public abstract class ApiTestBase(
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部", hq => hq.Unit("华东").Unit("华南")));
 
-    private readonly TokenFactory _tokens = new();
-
     protected static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     protected TestIdentity Alice { get; } = TestIdentity.User("甲").InTree(_org).InOrgUnit(_org["华东"]).WithRole(r => r
@@ -48,7 +46,8 @@ public abstract class ApiTestBase(
 
     public ValueTask InitializeAsync()
     {
-        Factory = new ApiFactory(ConnectionString, _tokens, extraSettings: extraSettings, configureServices: configureServices);
+        // 宿主随类的数据库一起建、一起关；每个测试的三个身份 ID 不同，登记进同一个加载器互不影响
+        Factory = database.Shared(() => new ApiFactory(ConnectionString, extraSettings: extraSettings, configureServices: configureServices));
         foreach (var identity in new[] { Alice, Bob, Carol })
         {
             Factory.Loader.Register(identity);
@@ -57,11 +56,10 @@ public abstract class ApiTestBase(
         return ValueTask.CompletedTask;
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await Factory.DisposeAsync();
-        _tokens.Dispose();
         GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -72,7 +70,7 @@ public abstract class ApiTestBase(
         var client = Factory.CreateClient();
         if (identity is not null)
         {
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _tokens.Create(identity));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Factory.Tokens.Create(identity));
         }
 
         return client;

@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Kmic.Api.Tests.Identity;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Messaging;
@@ -32,6 +34,7 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
     IClassFixture<ClassDatabase<ApiTemplate>>
 {
     private const string Root = "/api/v1/operations/audit/exports";
+    private const string EmptyArgs = "{}";
 
     private static readonly string _storageRoot = Path.Combine(Path.GetTempPath(), "kmic-audit-export-tests-" + Guid.CreateVersion7().ToString("N"));
     private static readonly string[] _export = [OperationsPermissions.AuditExport];
@@ -57,7 +60,7 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
 
     private async Task RecordAsync(AuditRecorded message)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.Inbox);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.Inbox);
         (await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new RecordAuditCommand(message), Ct)).ShouldBeSuccess();
     }
 
@@ -105,6 +108,28 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         }
     }
 
+    // 结束事件经发件箱、路由、收件箱交给 Notifications 后才生成站内消息
+    private async Task<JsonElement> SiteMessageWhenSentAsync(string token, string title)
+    {
+        var deadline = TimeProvider.System.GetUtcNow().AddSeconds(40);
+        while (true)
+        {
+            var list = await JsonAsync(await SendAsync(HttpMethod.Get, "/api/v1/notifications/site-messages?pageSize=100", token));
+            var found = list.GetProperty("items").EnumerateArray().Where(i => string.Equals(i.GetProperty("title").GetString(), title, StringComparison.Ordinal)).ToList();
+            if (found.Count > 0)
+            {
+                return found.ShouldHaveSingleItem();
+            }
+
+            if (TimeProvider.System.GetUtcNow() > deadline)
+            {
+                throw new TimeoutException($"40 秒内没有收到站内消息“{title}”。");
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(500), TimeProvider.System, Ct);
+        }
+    }
+
     private static async Task<string[]> LinesOfAsync(HttpResponseMessage response)
     {
         var bytes = await response.Content.ReadAsByteArrayAsync(Ct);
@@ -135,6 +160,9 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         lines[1].ShouldContain("Test.First");
         lines[1].ShouldContain("导出里的操作人");
         lines[2].ShouldContain("\"'=SUM(1,1)\"", Case.Sensitive, "以等号开头的单元格前面补单引号，不会被当成公式");
+
+        var notice = await SiteMessageWhenSentAsync(token, "审计导出已完成");
+        notice.GetProperty("body").GetString().ShouldBe("后台作业“审计导出”已完成。");
     }
 
     [Fact]
@@ -159,6 +187,36 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         managerResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
         plainResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task AFinishedExportWhoseFileIsNotRegisteredYet_IsRetryable_ButNotForever()
+    {
+        var manager = await LoginAsOperatorAsync("export-pending-manager", _exportAndManage);
+        var justFinished = await InsertFinishedAsync(_now.AddSeconds(-5));
+        var longAgo = await InsertFinishedAsync(_now.AddHours(-1));
+
+        var pending = await SendAsync(HttpMethod.Get, $"{Root}/{justFinished}/file", manager);
+        var missing = await SendAsync(HttpMethod.Get, $"{Root}/{longAgo}/file", manager);
+
+        pending.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        (await JsonAsync(pending)).GetProperty("code").GetString().ShouldBe("Operations.AuditExportNotReady");
+        missing.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await JsonAsync(missing)).GetProperty("code").GetString().ShouldBe("Files.NotFound");
+    }
+
+    // 已成功、带着结果文件 ID，但 Files 里还没有这个文件
+    private async Task<Guid> InsertFinishedAsync(DateTimeOffset finished)
+    {
+        var job = Guid.CreateVersion7();
+        await Seed.SqlAsync(
+            string.Create(
+                CultureInfo.InvariantCulture,
+                $"""
+                INSERT INTO "Operations"."BackgroundJob" ("Id", "JobType", "SchemaVersion", "Args", "SubmittedAt", "Status", "ProgressDone", "Attempts", "StartedAt", "FinishedAt", "ResultFileId")
+                VALUES ('{job}', 'Operations.ExportAudit', 1, '{EmptyArgs}', '{finished.AddMinutes(-1):O}', 2, 0, 1, '{finished.AddMinutes(-1):O}', '{finished:O}', '{Guid.CreateVersion7()}')
+                """));
+        return job;
     }
 
     [Fact]
@@ -189,5 +247,8 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         (await JsonAsync(response)).GetProperty("code").GetString().ShouldBe("Operations.AuditExportFailed");
+
+        var notice = await SiteMessageWhenSentAsync(token, "审计导出失败");
+        notice.GetProperty("body").GetString()!.ShouldStartWith("后台作业“审计导出”失败。原因：");
     }
 }

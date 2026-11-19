@@ -21,7 +21,7 @@ public sealed class PermissionCatalogSyncTests(ClassDatabase<ApiTemplate> databa
 
     private async Task<TResult> SendAsync<TResult>(ICommand<TResult> command, CallOrigin origin = CallOrigin.Startup)
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(origin);
+        await using var scope = Factory.Services.AsSystem(origin);
         return (await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(command, Ct)).ShouldBeSuccess();
     }
 

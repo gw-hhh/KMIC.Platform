@@ -32,6 +32,9 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
     private const short Dead = 3;
     private const short Abandoned = 4;
 
+    // 目录里的普通消息，载荷可以显示
+    private const string PlainType = "Sample.SpecimenSubmitted";
+
     private static readonly string[] _view = [OperationsPermissions.MessagesView];
     private static readonly string[] _manage = [OperationsPermissions.MessagesView, OperationsPermissions.MessagesManage];
 
@@ -162,10 +165,10 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
         var viewer = await LoginAsync("msg-get-viewer", _view);
         var plain = await LoginAsync("msg-get-plain", []);
         var type = "Test.Get" + _unique;
-        var dead = await InsertInboxAsync("Sample", "Sample.GetSub" + _unique, Dead, type, _base, error: "载荷里有问题", payload: """{"quantity":3,"name":"样品"}""");
-        var abandoned = await InsertInboxAsync("Sample", "Sample.GetSub" + _unique, Abandoned, type, _base);
+        var dead = await InsertInboxAsync("Sample", "Sample.GetSub" + _unique, Dead, PlainType, _base, error: "载荷里有问题", payload: """{"quantity":3,"name":"样品"}""");
+        var abandoned = await InsertInboxAsync("Sample", "Sample.GetSub" + _unique, Abandoned, PlainType, _base);
         var pending = await InsertInboxAsync("Sample", "Sample.GetSub" + _unique, Pending, type, _base);
-        var outbox = await InsertOutboxAsync("Configuration", Dead, type, _base, payload: """{"outbox":true}""");
+        var outbox = await InsertOutboxAsync("Configuration", Dead, PlainType, _base, payload: """{"outbox":true}""");
 
         var deadResponse = await GetAsync(viewer, $"/dead/Sample/Inbox/{dead}");
         var abandonedResponse = await GetAsync(viewer, $"/dead/Sample/Inbox/{abandoned}");
@@ -193,6 +196,25 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
 
         badBox.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         forbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task TheDeadMessage_HidesThePayload_OfASecretMessageAndOfATypeNotInTheCatalog()
+    {
+        var viewer = await LoginAsync("msg-secret-viewer", _view);
+        var secret = await InsertInboxAsync("Notifications", "Notifications.SecretSub" + _unique, Dead, "Notifications.SendSecretNotification", _base, payload: """{"code":"123456"}""");
+        var unknown = await InsertInboxAsync("Sample", "Sample.SecretSub" + _unique, Abandoned, "Test.Gone" + _unique, _base, payload: """{"code":"654321"}""");
+
+        foreach (var path in new[] { $"/dead/Notifications/Inbox/{secret}", $"/dead/Sample/Inbox/{unknown}" })
+        {
+            var response = await GetAsync(viewer, path);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK);
+            var detail = await JsonAsync(response);
+            detail.GetProperty("payload").ValueKind.ShouldBe(JsonValueKind.Null);
+            detail.GetProperty("headers").ValueKind.ShouldBe(JsonValueKind.Object);
+            detail.GetRawText().ShouldNotContain("123456");
+            detail.GetRawText().ShouldNotContain("654321");
+        }
     }
 
     [Fact]

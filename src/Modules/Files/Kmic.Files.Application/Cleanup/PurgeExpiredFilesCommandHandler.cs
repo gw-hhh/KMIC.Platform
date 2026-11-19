@@ -19,6 +19,7 @@ public sealed class PurgeExpiredFilesCommandHandler(
     ITransactionLocks locks,
     IUnfinishedMessageProbe probe,
     IOptions<FilesOptions> options,
+    FilesMetrics metrics,
     TimeProvider time)
     : ICommandHandler<PurgeExpiredFilesCommand, ScheduledJobOutcome>
 {
@@ -57,12 +58,14 @@ public sealed class PurgeExpiredFilesCommandHandler(
         }
 
         var locked = await locks.TryAcquireExclusiveAsync(FileAttachments.LockScope, [.. candidates.Select(c => c.Value)], ct);
+        metrics.PurgeSkipped("locked", candidates.Count - locked.Count);
         if (locked.Count == 0)
         {
             return 0;
         }
 
         var pending = await probe.FindSubjectsAsync(AttachFiles.MessageName, [.. locked], ct);
+        metrics.PurgeSkipped("attaching", pending.Count);
         return await ExpireAsync([.. candidates.Where(c => locked.Contains(c.Value) && !pending.Contains(c.Value))], reason, ct);
     }
 

@@ -11,11 +11,14 @@ public sealed class BackgroundJobCatalog
 {
     private readonly FrozenDictionary<Type, BackgroundJobType> _byType;
     private readonly FrozenDictionary<(string Name, int Version), BackgroundJobType> _byName;
+    private readonly FrozenDictionary<string, string> _displayNames;
 
     private BackgroundJobCatalog(IReadOnlyCollection<BackgroundJobType> jobs)
     {
         _byType = jobs.ToFrozenDictionary(j => j.ClrType);
         _byName = jobs.ToFrozenDictionary(j => (j.Name, j.Version));
+        _displayNames = jobs.GroupBy(j => j.Name, StringComparer.Ordinal)
+            .ToFrozenDictionary(g => g.Key, g => g.MaxBy(j => j.Version)!.Attribute.DisplayName, StringComparer.Ordinal);
     }
 
     /// <summary>
@@ -70,6 +73,15 @@ public sealed class BackgroundJobCatalog
 
     internal BackgroundJobType? Find(string name, int version) => _byName.GetValueOrDefault((name, version));
 
+    /// <summary>
+    /// 按作业类型名取显示名称，代码里已没有这种作业时原样返回类型名
+    /// </summary>
+    public string DisplayNameOf(string jobType)
+    {
+        ArgumentNullException.ThrowIfNull(jobType);
+        return _displayNames.GetValueOrDefault(jobType) ?? jobType;
+    }
+
     private static BackgroundJobType? Read(Type type, List<Type> handlers, List<string> problems)
     {
         if (type.GetCustomAttribute<BackgroundJobAttribute>() is not { } attribute)
@@ -83,6 +95,11 @@ public sealed class BackgroundJobCatalog
         if (!name.StartsWith(module + ".", StringComparison.Ordinal) || name.Length == module.Length + 1)
         {
             problems.Add($"{type.Name} 的作业名称“{name}”要以“{module}.”开头。");
+        }
+
+        if (string.IsNullOrWhiteSpace(attribute.DisplayName))
+        {
+            problems.Add($"作业 {name} 要写显示名称。");
         }
 
         if (!attribute.Audited && name.Contains("Export", StringComparison.Ordinal))

@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using Kmic.Api.Tests.Identity;
-using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
@@ -39,7 +38,7 @@ public sealed class SettingAdministrationTests(ClassDatabase<ApiTemplate> databa
 
     private async Task<SampleSubmissionSetting> EffectiveAsync()
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope();
+        await using var scope = Factory.Services.AsSystem();
         return await scope.ServiceProvider.GetRequiredService<ISettings>().GetAsync<SampleSubmissionSetting>(Ct);
     }
 

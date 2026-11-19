@@ -100,6 +100,7 @@ public sealed class ModuleJobStoreTests : IClassFixture<ClassDatabase<ProbeTempl
         var job = (await Store.FindAsync(id, Ct)).ShouldNotBeNull();
 
         job.Module.ShouldBe(Module);
+        job.JobName.ShouldBe("重新统计单据");
         job.State.ShouldBe(BackgroundJobState.Succeeded);
         job.ProgressDone.ShouldBe(3);
         job.SubmittedBy.ShouldBe(_alice.UserId.Value);

@@ -38,4 +38,21 @@ public static class ObservabilityServiceCollectionExtensions
         services.AddHostedService(provider => provider.GetRequiredService<BacklogSampler>());
         return services;
     }
+
+    /// <summary>
+    /// 登记模块的积压量表，由积压采样器定期读取
+    /// </summary>
+    /// <remarks>
+    /// 实现按单例注册；所在宿主未启用积压采样时不会被读取
+    /// </remarks>
+    /// <param name="services">服务集合</param>
+    /// <typeparam name="T">量表的实现</typeparam>
+    public static IServiceCollection AddKmicBacklogGauges<T>(this IServiceCollection services)
+        where T : class, IBacklogGauges
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IBacklogGauges, T>());
+        return services;
+    }
 }

@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using Kmic.Api.Tests.Identity;
-using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Testing.Database;
@@ -111,8 +110,8 @@ public sealed class PreferenceResolutionTests(ClassDatabase<ApiTemplate> databas
         async Task<int> ReadAsync(TestIdentity? who)
         {
             await using var scope = who is null
-                ? Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope()
-                : Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateScope(who);
+                ? Factory.Services.AsSystem()
+                : Factory.Services.As(who);
             return (await scope.ServiceProvider.GetRequiredService<IPreferences>().GetAsync<SampleListPageSize>(Ct)).Value;
         }
 

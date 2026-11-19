@@ -105,7 +105,7 @@ public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFi
     }
 
     [Fact]
-    public async Task Jobs_ExpiredWithoutResultFileDeleted()
+    public async Task Jobs_ExpiredDeleted_EvenWithResultFile()
     {
         var expired = await FinishedJobAsync("clock_timestamp() - interval '1 minute'", resultFile: false);
         var withFile = await FinishedJobAsync("clock_timestamp() - interval '1 minute'", resultFile: true);
@@ -114,7 +114,7 @@ public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFi
         await _harness.Services.FireAsync("Framework.PurgeJobs", _at, Ct);
 
         (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", expired))).ShouldBe(0);
-        (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", withFile))).ShouldBe(1);
+        (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", withFile))).ShouldBe(0, "结果文件由 Files 按自己的保留期清理");
         (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", alive))).ShouldBe(1);
     }
 

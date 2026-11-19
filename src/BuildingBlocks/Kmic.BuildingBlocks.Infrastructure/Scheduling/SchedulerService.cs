@@ -13,23 +13,21 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// </remarks>
 internal sealed class SchedulerService(ISchedulerFactory schedulers, StartupState startup) : BackgroundService
 {
-    private int _stopped;
+    private readonly Lock _gate = new();
+    private Task? _shutdown;
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
 
-        // 停机可能被调用两次（测试宿主释放时会再停一次）：调度器关过之后就取不到了，第二次直接返回
-        if (Interlocked.Exchange(ref _stopped, 1) == 1)
+        // 两次停机等同一个关闭任务，避免 Quartz 关到一半时容器已被另一次停机释放（测试宿主释放时会同时停两次）
+        Task shutdown;
+        lock (_gate)
         {
-            return;
+            shutdown = _shutdown ??= ShutdownAsync(cancellationToken);
         }
 
-        var scheduler = await schedulers.GetScheduler(cancellationToken);
-        if (scheduler.Status is SchedulerStatus.Running or SchedulerStatus.Standby)
-        {
-            await scheduler.Shutdown(waitForJobsToComplete: true, cancellationToken);
-        }
+        await shutdown.WaitAsync(cancellationToken);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,5 +35,14 @@ internal sealed class SchedulerService(ISchedulerFactory schedulers, StartupStat
         await startup.WaitAsync(stoppingToken);
         var scheduler = await schedulers.GetScheduler(stoppingToken);
         await scheduler.Start(stoppingToken);
+    }
+
+    private async Task ShutdownAsync(CancellationToken cancellationToken)
+    {
+        var scheduler = await schedulers.GetScheduler(cancellationToken);
+        if (scheduler.Status is SchedulerStatus.Running or SchedulerStatus.Standby)
+        {
+            await scheduler.Shutdown(waitForJobsToComplete: true, cancellationToken);
+        }
     }
 }

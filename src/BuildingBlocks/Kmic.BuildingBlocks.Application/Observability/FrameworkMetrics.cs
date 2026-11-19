@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Kmic.BuildingBlocks.Application.Files;
 
 namespace Kmic.BuildingBlocks.Application.Observability;
 
@@ -8,7 +9,7 @@ namespace Kmic.BuildingBlocks.Application.Observability;
 /// </summary>
 /// <remarks>
 /// 通过 IMeterFactory 创建，名称 kmic.{领域}.{名称}，时长用秒。维度只能是有限取值（模块、消息名、订阅名、任务名、
-/// 结果、错误码、渠道），不能放用户 ID、资源 ID、追踪 ID 这类取值无限的内容，否则指标的序列数会失控
+/// 结果、错误码、渠道、上传档案、缓存类别），不能放用户 ID、资源 ID、追踪 ID 这类取值无限的内容，否则指标的序列数会失控
 /// </remarks>
 public sealed class FrameworkMetrics
 {
@@ -28,8 +29,12 @@ public sealed class FrameworkMetrics
     private readonly Counter<long> _backgroundJobFailures;
     private readonly Histogram<double> _scheduledJobDuration;
     private readonly Counter<long> _scheduledJobFailures;
+    private readonly Counter<long> _cacheRequests;
     private readonly Counter<long> _cacheBroadcasts;
     private readonly Counter<long> _listenerReconnects;
+    private readonly Counter<long> _uploads;
+    private readonly Histogram<long> _uploadBytes;
+    private readonly Counter<long> _uploadsRejected;
     private readonly Counter<long> _rebuildPaused;
     private readonly Counter<long> _terminalConflicts;
     private readonly Counter<long> _readAuditFailures;
@@ -56,8 +61,12 @@ public sealed class FrameworkMetrics
         _backgroundJobFailures = meter.CreateCounter<long>("kmic.background_job.failures", "{job}", "失败的后台作业数");
         _scheduledJobDuration = meter.CreateHistogram<double>("kmic.scheduled_job.duration", "s", "定时任务一次执行的时长");
         _scheduledJobFailures = meter.CreateCounter<long>("kmic.scheduled_job.failures", "{run}", "失败的定时任务执行次数");
+        _cacheRequests = meter.CreateCounter<long>("kmic.cache.requests", "{request}", "缓存读取次数");
         _cacheBroadcasts = meter.CreateCounter<long>("kmic.cache.invalidation_broadcasts", "{broadcast}", "发出的缓存失效广播数");
         _listenerReconnects = meter.CreateCounter<long>("kmic.cache.listen_reconnects", "{reconnect}", "监听连接断开重连的次数");
+        _uploads = meter.CreateCounter<long>("kmic.files.uploads", "{upload}", "文件上传次数");
+        _uploadBytes = meter.CreateHistogram<long>("kmic.files.upload_bytes", "By", "写入存储的文件大小");
+        _uploadsRejected = meter.CreateCounter<long>("kmic.files.rejected", "{upload}", "被拒绝的上传次数");
         _rebuildPaused = meter.CreateCounter<long>("kmic.readmodel.rebuild_paused", "{run}", "因为找不到的行太多而暂停的重建轮次");
         _terminalConflicts = meter.CreateCounter<long>("kmic.readmodel.terminal_conflicts", "{row}", "已是终态、源端却还返回存在的行数");
         _readAuditFailures = meter.CreateCounter<long>("kmic.audit.read_write_failures", "{failure}", "读审计写不进去的次数");
@@ -126,6 +135,38 @@ public sealed class FrameworkMetrics
     }
 
     /// <summary>
+    /// 读取了一次缓存
+    /// </summary>
+    /// <param name="category">缓存键的前两段，即“模块:对象”</param>
+    /// <param name="hit">是否命中，即没有调用加载方法</param>
+    public void CacheRequest(string category, bool hit) =>
+        _cacheRequests.Add(1, new TagList { { "category", category }, { "result", hit ? "hit" : "miss" } });
+
+    /// <summary>
+    /// 上传的文件流处理结束
+    /// </summary>
+    /// <param name="profile">上传档案名称</param>
+    /// <param name="outcome">处理结果</param>
+    /// <param name="bytes">写入存储的字节数，仅在已写入时记录</param>
+    public void FileUploaded(string profile, UploadOutcome outcome, long bytes)
+    {
+        if (outcome == UploadOutcome.Stored)
+        {
+            _uploads.Add(1, new TagList { { "profile", profile }, { "result", "stored" } });
+            _uploadBytes.Record(bytes, new TagList { { "profile", profile } });
+            return;
+        }
+
+        _uploads.Add(1, new TagList { { "profile", profile }, { "result", "rejected" } });
+        _uploadsRejected.Add(1, new TagList { { "profile", profile }, { "reason", ReasonOf(outcome) } });
+    }
+
+    /// <summary>
+    /// 上传的文件流处理中断，如客户端断开、超时或存储写入失败
+    /// </summary>
+    public void FileUploadFailed(string profile) => _uploads.Add(1, new TagList { { "profile", profile }, { "result", "failed" } });
+
+    /// <summary>
     /// 发出了一条缓存失效广播
     /// </summary>
     public void CacheInvalidationBroadcast() => _cacheBroadcasts.Add(1);
@@ -184,6 +225,14 @@ public sealed class FrameworkMetrics
         Gauge("kmic.background_job.oldest_queued", "s", "最老的排队作业已等待的时间", s => s.Jobs.Select(j => Measure(j.OldestQueued.TotalSeconds, ("module", j.Module), ("type", j.Type))));
         Gauge("kmic.scheduled_job.last_success_age", "s", "定时任务距上次成功的时间", s => s.ScheduledJobs.Select(t => Measure(t.LastSuccessAge.TotalSeconds, ("task", t.Task))));
     }
+
+    private static string ReasonOf(UploadOutcome outcome) => outcome switch
+    {
+        UploadOutcome.TooLarge => "too_large",
+        UploadOutcome.Empty => "empty",
+        UploadOutcome.TypeNotAllowed => "type_not_allowed",
+        _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, "只有被拒绝的上传才有拒绝原因。"),
+    };
 
     private static IEnumerable<InboxBacklog> Active(BacklogSnapshot snapshot) => snapshot.Inbox.Where(i => !i.Retiring);
 

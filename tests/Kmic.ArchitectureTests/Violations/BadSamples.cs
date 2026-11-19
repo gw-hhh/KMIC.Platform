@@ -2,7 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Authorization;
+using Kmic.BuildingBlocks.Application.Caching;
 using Kmic.BuildingBlocks.Application.Events;
+using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Application.Querying;
@@ -17,6 +19,7 @@ using Kmic.BuildingBlocks.Domain.Repositories;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Files;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
+using Kmic.Identity.Application.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
@@ -144,6 +147,40 @@ internal static class BadSamples
     internal sealed class CachingService(HybridCache cache)
     {
         public HybridCache Cache { get; } = cache;
+    }
+
+    // 缓存键的第一段不是本模块名
+    internal static class OrdersCacheKeys
+    {
+        public const string Prices = "Orders:Prices";
+
+        public static string Customer(Guid id) => CacheKey.Of("Customer", "Profile", id);
+    }
+
+    // 在 CacheKeys 类之外拼缓存键
+    internal sealed class KeyBuildingService
+    {
+        public static string Key(Guid id) => CacheKey.Of("Orders", "Thing", id);
+    }
+
+    // Identity 中需要权限点的命令，处理器没有继承授权管理命令基类
+    [RequirePermission("Identity.Bad.Grant")]
+    internal sealed record GrantEverythingCommand : ICommand;
+
+    public sealed class GrantEverythingCommandHandler : ICommandHandler<GrantEverythingCommand>
+    {
+        public ValueTask<Result> Handle(GrantEverythingCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    // 合格：继承授权管理命令基类
+    [RequirePermission("Identity.Bad.Rename")]
+    internal sealed record RenameRoleSampleCommand(string Name) : ICommand<Guid>;
+
+    public sealed class RenameRoleSampleCommandHandler(IOperatorRecheck recheck, IExecutionContext execution)
+        : AuthorizationAdminCommandHandler<RenameRoleSampleCommand, Guid>(recheck, execution)
+    {
+        protected override ValueTask<Result<Guid>> ExecuteAsync(RenameRoleSampleCommand command, IAccessContext access, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<Result<Guid>>(Guid.Empty);
     }
 
     // 匿名用例出现在 Identity 之外

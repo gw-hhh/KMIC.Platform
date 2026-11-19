@@ -17,7 +17,7 @@ namespace Kmic.Operations.Application.Audit.Export;
 /// <param name="Action">操作名</param>
 /// <param name="ResourceType">操作对象的类型</param>
 /// <param name="ResourceId">操作对象的 ID</param>
-[BackgroundJob(Name, Permission = OperationsPermissions.AuditExport, Audited = true, Resumable = true)]
+[BackgroundJob(Name, "审计导出", Permission = OperationsPermissions.AuditExport, Audited = true, Resumable = true)]
 public sealed record ExportAuditJob(
     DateTimeOffset From,
     DateTimeOffset To,

@@ -19,7 +19,7 @@ public sealed class IdentityMaintenanceTests(ClassDatabase<ApiTemplate> database
     private async Task<int> RunAsync<TCommand>(TCommand command)
         where TCommand : ICommand<Kmic.BuildingBlocks.Application.Scheduling.ScheduledJobOutcome>
     {
-        await using var scope = Factory.Services.GetRequiredService<IExecutionScopeFactory>().CreateSystemScope(CallOrigin.ScheduledJob);
+        await using var scope = Factory.Services.AsSystem(CallOrigin.ScheduledJob);
         var outcome = await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(command, Ct);
         return outcome.ShouldBeSuccess().ItemsProcessed;
     }

@@ -12,3 +12,5 @@ docs/
 spikes/
 tests/
 *.md
+# 本机运行生成的密码和签名密钥，不能进构建上下文
+.local/

@@ -7,5 +7,5 @@ namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 /// </summary>
 /// <param name="TicketId">单据</param>
 /// <param name="Batches">批数</param>
-[BackgroundJob("BuildingBlocks.RecountTicket", Permission = ProbePermissions.Recount, Resumable = true, MaxConcurrentPerUser = 2)]
+[BackgroundJob("BuildingBlocks.RecountTicket", "重新统计单据", Permission = ProbePermissions.Recount, Resumable = true, MaxConcurrentPerUser = 2)]
 internal sealed record RecountTicketJob(Guid TicketId, int Batches) : IBackgroundJob;

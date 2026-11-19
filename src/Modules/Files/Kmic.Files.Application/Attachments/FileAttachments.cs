@@ -54,7 +54,8 @@ public sealed class FileAttachments(
             return locked.Error;
         }
 
-        var uploader = execution.User.ActualUserId ?? execution.User.UserId ?? UserId.System;
+        // 按有效业务身份判断上传人，与上传登记一致；模拟身份时实际操作人只用于审计
+        var uploader = execution.User.UserId ?? UserId.System;
         var attachable = await CheckAsSystemAsync(ids, uploader, ct);
         if (attachable.Count != ids.Count)
         {

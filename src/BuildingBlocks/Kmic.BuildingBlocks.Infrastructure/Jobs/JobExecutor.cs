@@ -4,13 +4,18 @@ using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Behaviors;
 using Kmic.BuildingBlocks.Application.Execution;
+using Kmic.BuildingBlocks.Application.Integration;
 using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Serialization;
+using Kmic.BuildingBlocks.Contracts.Jobs;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
+using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -27,6 +32,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 internal sealed class JobExecutor(
     JobStore store,
     BackgroundJobCatalog catalog,
+    IntegrationMessageCatalog messages,
     FrameworkMetrics metrics,
     IExecutionScopeFactory scopes,
     IEnumerable<IAccessContextLoader> loaders,
@@ -98,8 +104,12 @@ internal sealed class JobExecutor(
         return await ExecuteAsync(module, job, token, type, args, identity.Value, shutdown);
     }
 
-    public Task<bool> RequestCancelAsync(string module, Guid jobId, UserId? by, CancellationToken ct) =>
-        store.RequestCancelAsync(module, jobId, by?.Value, Options.ResultRetention, ct);
+    /// <summary>
+    /// 请求取消，作业已结束时返回 false
+    /// </summary>
+    /// <exception cref="CommitOutcomeUnknownException">提交没有得到确认</exception>
+    public async Task<bool> RequestCancelAsync(string module, Guid jobId, UserId? by, CancellationToken ct) =>
+        await UpdateAsync(module, jobId, db => store.RequestCancelAsync(db, module, jobId, by?.Value, Options.ResultRetention, ct)) is not null;
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "处理器的任何异常都只让这个作业失败，执行器继续处理别的作业，详细信息在日志里")]
     private async Task<JobRunResult> ExecuteAsync(
@@ -132,7 +142,7 @@ internal sealed class JobExecutor(
                 return await FailAsync(module, job, token, CommonErrors.JobInterrupted);
             }
 
-            return await store.ReleaseAsync(module, job.Id, token, CancellationToken.None) ? JobRunResult.Released : JobRunResult.TakenOver;
+            return await ReleaseAsync(module, job, token);
         }
 
         var finished = context.CancellationReason switch
@@ -289,17 +299,90 @@ internal sealed class JobExecutor(
     private async Task<JobRunResult> FinishAsync(string module, ClaimedJob job, Guid token, short status, Error? error, JobOutcome? outcome)
     {
         var summary = outcome?.Summary is { } value ? JsonSerializer.Serialize(value, value.GetType(), KmicJsonOptions.Stored) : null;
-        var written = await store.FinishAsync(module, job.Id, token, status, error, outcome?.ResultFileId, summary, Options.ResultRetention, CancellationToken.None);
-        if (!written)
+        try
         {
-            return JobRunResult.TakenOver;
+            var finished = await UpdateAsync(
+                module,
+                job.Id,
+                db => store.FinishAsync(db, module, job.Id, token, status, error, outcome?.ResultFileId, summary, Options.ResultRetention, CancellationToken.None));
+            return finished?.Status switch
+            {
+                null => JobRunResult.TakenOver,
+                JobStatus.Succeeded => JobRunResult.Succeeded,
+                JobStatus.Cancelled => JobRunResult.Cancelled,
+                _ => JobRunResult.Failed,
+            };
+        }
+        catch (CommitOutcomeUnknownException)
+        {
+            JobsLog.FinishOutcomeUnknown(logger, job.Id, job.JobType);
+            return JobRunResult.OutcomeUnknown;
+        }
+    }
+
+    private async Task<JobRunResult> ReleaseAsync(string module, ClaimedJob job, Guid token)
+    {
+        try
+        {
+            var released = await UpdateAsync(module, job.Id, db => store.ReleaseAsync(db, module, job.Id, token, Options.ResultRetention, CancellationToken.None));
+            return released?.Status switch
+            {
+                null => JobRunResult.TakenOver,
+                JobStatus.Cancelled => JobRunResult.Cancelled,
+                _ => JobRunResult.Released,
+            };
+        }
+        catch (CommitOutcomeUnknownException)
+        {
+            JobsLog.FinishOutcomeUnknown(logger, job.Id, job.JobType);
+            return JobRunResult.OutcomeUnknown;
+        }
+    }
+
+    // 作业行和结束事件在同一个事务里写：结果没写进去就不会发通知，同一个结果也只通知一次
+    private async Task<UpdatedJob?> UpdateAsync(string module, Guid jobId, Func<ModuleDbContext, Task<UpdatedJob?>> update)
+    {
+        await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, CurrentUser.System(), null);
+        var db = scope.ServiceProvider.GetRequiredService<ModuleWriteContexts>().Get(module);
+        await using var transaction = await db.Database.BeginTransactionAsync(CancellationToken.None);
+        var job = await update(db);
+        if (job is null)
+        {
+            return null;
         }
 
-        return status switch
+        if (job is { SubmittedBy: { } submittedBy, FinishedAt: { } finishedAt } && ResultOf(job.Status) is { } result)
         {
-            JobStatus.Succeeded => JobRunResult.Succeeded,
-            JobStatus.Cancelled => JobRunResult.Cancelled,
-            _ => JobRunResult.Failed,
-        };
+            var finished = new BackgroundJobFinished
+            {
+                JobId = jobId,
+                Module = module,
+                JobType = job.JobType,
+                JobName = catalog.DisplayNameOf(job.JobType),
+                Result = result,
+                ErrorCode = job.ErrorCode,
+                ErrorMessage = job.ErrorMessage,
+                ResultFileId = job.ResultFileId,
+                SubmittedBy = submittedBy,
+                CancelRequestedBy = job.CancelRequestedBy,
+                FinishedAt = finishedAt,
+            };
+            using (db.Services.SaveGate.Open())
+            {
+                await scope.ServiceProvider.GetRequiredService<OutboxWriter>().WriteAsync(
+                    db, module, [new PendingMessage(finished, messages.Describe(typeof(BackgroundJobFinished)))], CancellationToken.None);
+            }
+        }
+
+        await CommandCommit.CommitAsync(transaction);
+        return job;
     }
+
+    private static BackgroundJobResult? ResultOf(short status) => status switch
+    {
+        JobStatus.Succeeded => BackgroundJobResult.Succeeded,
+        JobStatus.Failed => BackgroundJobResult.Failed,
+        JobStatus.Cancelled => BackgroundJobResult.Cancelled,
+        _ => null,
+    };
 }

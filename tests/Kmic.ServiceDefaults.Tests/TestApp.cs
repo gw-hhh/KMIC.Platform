@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog.Core;
@@ -16,6 +17,9 @@ namespace Kmic.ServiceDefaults.Tests;
 /// </summary>
 internal sealed class TestApp : IAsyncDisposable
 {
+    private static readonly Action<ILogger, Exception?> _noteWritten =
+        LoggerMessage.Define(LogLevel.Warning, new EventId(9001, "NoteWritten"), "Order note written");
+
     private readonly WebApplication _app;
 
     private TestApp(WebApplication app, CollectingSink logs, List<System.Diagnostics.Activity> spans, List<Metric> metrics)
@@ -58,6 +62,11 @@ internal sealed class TestApp : IAsyncDisposable
         var app = builder.Build();
         app.UseKmicRequestLogging();
         app.MapGet("/orders/{id}", (string id) => Results.Ok(new { id }));
+        app.MapGet("/orders/{id}/note", (string id, ILoggerFactory loggers) =>
+        {
+            _noteWritten(loggers.CreateLogger("Orders"), null);
+            return Results.Ok(new { id });
+        });
         app.MapGet("/boom", () => Results.StatusCode(StatusCodes.Status503ServiceUnavailable));
         app.MapGet("/crash", void () => throw new InvalidOperationException("crash"));
         app.MapGet("/health/live", () => Results.Ok());

@@ -83,6 +83,34 @@ public sealed class StructureRuleTests
     }
 
     [Fact]
+    public void CacheKeys_AreBuiltInTheModulesCacheKeysClass_AndStartWithTheModuleName() =>
+        StructureRules.CacheKeys(ProductAssemblies.Modules).ShouldBeEmpty();
+
+    [Fact]
+    public void Violation_CacheKeyOfAnotherModuleOrBuiltElsewhere_IsReported()
+    {
+        var problems = StructureRules.CacheKeys([new(typeof(BadSamples).Assembly, "Orders", Layer.Infrastructure)]);
+
+        problems.ShouldContain(p => p.Contains("OrdersCacheKeys.Customer", StringComparison.Ordinal));
+        problems.ShouldContain(p => p.Contains("KeyBuildingService", StringComparison.Ordinal));
+        problems.ShouldNotContain(p => p.Contains("OrdersCacheKeys.Prices", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void IdentityPermissionCommands_RecheckTheOperator() =>
+        StructureRules.AuthorizationAdminHandlers(ProductAssemblies.Of(Layer.Application).Where(a => string.Equals(a.Module, "Identity", StringComparison.Ordinal)).SelectMany(a => a.Assembly.GetTypes()))
+            .ShouldBeEmpty();
+
+    [Fact]
+    public void Violation_IdentityPermissionCommandWithoutTheAdminBase_IsReported()
+    {
+        var problems = StructureRules.AuthorizationAdminHandlers(_bad);
+
+        problems.ShouldContain(p => p.Contains("GrantEverythingCommandHandler", StringComparison.Ordinal));
+        problems.ShouldNotContain(p => p.Contains("RenameRoleSampleCommandHandler", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Violation_ReadModelThatIsAnAggregateRoot_IsReported() =>
         StructureRules.ReadModels(_bad).ShouldContain(p => p.Contains("BadReadModel", StringComparison.Ordinal));
 

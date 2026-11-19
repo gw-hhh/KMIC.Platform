@@ -1,6 +1,5 @@
 using Kmic.BuildingBlocks.Application.Access;
 using Kmic.BuildingBlocks.Application.Execution;
-using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
@@ -41,26 +40,13 @@ internal sealed class DataScope(IExecutionContext execution) : IDataScope
             return _nothing;
         }
 
-        var grant = access.DataScopeGrant;
-        var level = grant.Overrides.TryGetValue(scopeObject, out var overridden) ? overridden : grant.DefaultLevel;
+        var level = DataScopeRules.LevelOf(access.DataScopeGrant, scopeObject);
         return level switch
         {
             ScopeLevel.All => EffectiveScope.Unrestricted,
             ScopeLevel.Self => new(false, access.UserId, []),
-            ScopeLevel.OrgUnit => new(false, access.UserId, [.. Anchors(access)]),
-            ScopeLevel.OrgUnitAndBelow => new(false, access.UserId, [.. Anchors(access).SelectMany(access.OrgHierarchy.SelfAndDescendants).Distinct()]),
+            ScopeLevel.OrgUnit or ScopeLevel.OrgUnitAndBelow => new(false, access.UserId, [.. DataScopeRules.OrgUnitsOf(access, level)]),
             _ => throw new InvalidOperationException($"未知的范围等级 {level}。"),
         };
-    }
-
-    // 配置了起点组织就从起点算，不用用户所属组织
-    private static IReadOnlyList<OrgUnitId> Anchors(IAccessContext access)
-    {
-        if (access.DataScopeGrant.Anchors.Count > 0)
-        {
-            return access.DataScopeGrant.Anchors;
-        }
-
-        return access.OrgUnitId is { } own ? [own] : [];
     }
 }

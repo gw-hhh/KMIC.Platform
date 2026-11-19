@@ -17,11 +17,10 @@ public interface IDeliveryRepository : IRepository<Delivery, DeliveryId>
     /// 将失败的投递重新加入队列，领取次数清零
     /// </summary>
     /// <remarks>
-    /// 仅允许尚未放弃的失败投递；条件检查和更新在同一条语句中完成。
-    /// 指定 createdNotBefore 时，创建时间不得早于该值；为空时不限制创建时间
+    /// 仅允许尚未放弃的失败投递；条件检查和更新在同一条语句中完成
     /// </remarks>
     /// <returns>成功加入队列返回 true；条件不满足返回 false</returns>
-    Task<bool> RetryAsync(DeliveryId id, DateTimeOffset? createdNotBefore, CancellationToken ct);
+    Task<bool> RetryAsync(DeliveryId id, CancellationToken ct);
 
     /// <summary>
     /// 放弃失败的投递，保留失败状态并记录原因和时间

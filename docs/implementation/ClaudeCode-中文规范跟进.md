@@ -364,3 +364,130 @@
 | 2026-11-14 09:48 | `docs/framework/05-infrastructure/（05-02、05-05、05-08、05-10）、docs/framework/00-README.md、docs/modules/（operations、notifications、configuration）、docs/implementation/（S0-04、S2-18-规则核对、S3-平台模块）` | 本批新增或改写的段落与修订记录 | 部分 | 其余未检查 |
 | 2026-11-14 10:56 | `docs/framework/00-README.md` | 待决事项表新增三行（作业端点位置、功能开关关闭时后台入口的处理、功能开关包名） | 部分 | 其余未检查 |
 | 2026-11-14 11:03 | `docs/implementation/协作交接记录.md` | 新文件，全部 | 整份完成 | 协作交接用 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/IntegrationMessageCatalog.cs` | CanShowPayload | 部分 | 新增方法的说明 |
+| 2026-11-18 | `src/Modules/Operations/Kmic.Operations.Application/Messages/Dead/GetDeadMessageQuery.cs`、`Messages/DeadMessageDetailItem.cs` | 类说明的 remarks、Payload 参数 | 部分 | 删去“保护仍待补齐”，改写为实际行为 |
+| 2026-11-18 | `src/Modules/Files/Kmic.Files.Application/ContractQueries/GetReadableFileQuery.cs` | 类说明的 remarks | 部分 | 补回可读状态范围 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Domain/Errors/NotificationsErrors.cs` | DeliverySecretNotRetryable（取代 DeliverySecretExpired） | 部分 | 新错误码与提示 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Application/Deliveries/Retry/RetryDeliveryCommandHandler.cs` | 整份 | 整份完成 | 重写 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Domain/Deliveries/IDeliveryRepository.cs` | RetryAsync | 部分 | 去掉创建时间条件的说明 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryWork.cs` | ProcessAsync 新增的参数检查 | 部分 | 新注释与失败原因 |
+| 2026-11-18 | `docs/modules/notifications/README.md`、`docs/modules/operations/README.md`、`docs/framework/05-infrastructure/05-07-模块间通信.md`、`docs/implementation/S3-平台模块.md`、`docs/implementation/开发交接.md` | CN-01、CN-05 相关的行与修订记录 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Scheduling/SchedulerService.cs` | 整份 | 整份完成 | 停机注释重写 |
+| 2026-11-18 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/GetAuditExportFileQueryHandler.cs` | 整份 | 整份完成 | 新增登记等待时间的注释 |
+| 2026-11-18 | `src/Modules/Operations/Kmic.Operations.Presentation/Audit/DownloadAuditExportEndpoint.cs` | WithDescription | 部分 | 409 与 404 的说明 |
+| 2026-11-18 | `tests/Kmic.Api.Tests/Operations/AuditExportTests.cs`、`tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Jobs/JobExecutionTests.cs` | 新增测试与注释 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/modules/operations/README.md`、`docs/implementation/S3-平台模块.md` | 审计导出下载、偶发失败的进展记录 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Authorization/DataScopeRules.cs` | 新文件，全部 | 整份完成 | 数据范围规则 |
+| 2026-11-18 | `src/Modules/Identity/Kmic.Identity.Application/Authorization/Explain/`（ExplainAuthorizationQuery、Handler、AuthorizationExplanation、DataScopeExplanation、ExplainedOrgUnit） | 新文件，全部 | 整份完成 | 授权诊断 |
+| 2026-11-18 | `src/Modules/Identity/Kmic.Identity.Presentation/Authorization/`（ExplainAuthorizationEndpoint、ExplainAuthorizationRequest） | 新文件，全部 | 整份完成 | 授权诊断端点 |
+| 2026-11-18 | `src/Modules/Identity/Kmic.Identity.Application/IdentityPermissions.cs` | AuthorizationExplain | 部分 | 新权限点 |
+| 2026-11-18 | `tests/Kmic.Api.Tests/Identity/AuthorizationExplainTests.cs` | 新文件，全部 | 整份完成 | 授权诊断测试 |
+| 2026-11-18 | `docs/modules/identity/README.md`、`docs/framework/05-infrastructure/05-05-授权.md`、`docs/framework/00-README.md` | 授权诊断的实现记录、修订记录、延后事项一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Identity/TestIdentityExtensions.cs` | As、AsSystem | 部分 | 新增方法的说明 |
+| 2026-11-18 | `docs/implementation/S2-框架骨架.md`、`docs/framework/05-infrastructure/05-05-授权.md` | S2-05 一行、第 12.1 节 app.As 一句 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/00-README.md` | T-26 一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Caching/MeteredHybridCache.cs` | 新文件 | 整份完成 | 缓存命中统计的包装 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/IBacklogGauges.cs` | 新文件 | 整份完成 | 模块量表接口 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/BacklogGauge.cs` | 新文件 | 整份完成 | 量表定义 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/BacklogReading.cs` | 新文件 | 整份完成 | 量表读数 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/NotificationsMetrics.cs` | 新文件 | 整份完成 | 投递结果指标 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryBacklogGauges.cs` | 新文件 | 整份完成 | 投递积压量表 |
+| 2026-11-18 | `src/Modules/Files/Kmic.Files.Application/FilesMetrics.cs` | 新文件 | 整份完成 | 清理跳过指标 |
+| 2026-11-18 | `src/Modules/Files/Kmic.Files.Infrastructure/Storage/StorageIssueGauges.cs` | 新文件 | 整份完成 | 待还原文件数量表 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Observability/FrameworkMetrics.cs` | 类说明的维度一句；CacheRequest、FileUploaded、FileUploadFailed、ReasonOf；三个上传指标与缓存读取指标的说明 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Caching/CacheKey.cs` | CategoryOf | 部分 | 新增方法 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Caching/CacheServiceCollectionExtensions.cs` | AddKmicCache 的说明、DecorateWithMetrics | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/BacklogSampler.cs` | 类说明、SampleModulesAsync、ReadingsOf、ModuleGauges | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/ObservabilityServiceCollectionExtensions.cs` | AddKmicBacklogGauges | 部分 | 新增方法 |
+| 2026-11-18 | `src/Modules/Files/Kmic.Files.Presentation/Uploads/UploadFileEndpoint.cs` | HandleAsync 中声明大小超限的一处注释 | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Observability/BacklogSamplerTests.cs` | ModuleGauges_ 两个测试、QueueGauges | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.Api.Tests/Notifications/DeliveryTests.cs` | 两个测试中新增的指标断言与注释 | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.ArchitectureTests/Rules/StructureRules.cs` | AuthorizationAdminHandlers、CacheKeys、KeysOf、HandledCommands | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.ArchitectureTests/Violations/BadSamples.cs` | OrdersCacheKeys、KeyBuildingService、GrantEverythingCommand、RenameRoleSampleCommand 及其处理器 | 部分 | 新增样例 |
+| 2026-11-18 | `docs/framework/05-infrastructure/05-12-可观测性.md` | 第 4.1 节维度一格、2026-11-18 修订记录 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/framework/00-README.md` | 延后事项“外部调用待办”一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/00-README.md` | T-28 一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/S2-框架骨架.md` | S2-10、S2-11、S2-12 三行的新增内容 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/S2-18-规则核对.md` | 15.4 汇总一格、两条规则的机制、第 5 节说明与小结 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/S3-平台模块.md` | S3-00、S3-02、第 3 节 B 与 C 两行的状态、2026-11-18 进展一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/Aspire/Kmic.ServiceDefaults/RequestPathRemover.cs` | 新文件，全部 | 整份完成 | 移除日志中的请求实际路径 |
+| 2026-11-18 | `src/Aspire/Kmic.ServiceDefaults/ServiceDefaultsExtensions.cs` | `UseKmicRequestLogging` 的 remarks | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.ServiceDefaults.Tests/RequestLogTests.cs` | 新增与改动的三个测试 | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.ServiceDefaults.Tests/TestApp.cs` | 新增的日志定义与 `/orders/{id}/note` 端点 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/Modules/Files/Kmic.Files.Application/Attachments/FileAttachments.cs` | `AttachAsync` 判断上传人的一行注释 | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.Api.Tests/Files/SpecimenAttachmentTests.cs` | 新增测试 `AddAttachment_UnderWritableImpersonation_AcceptsAFileUploadedInTheSameSession` | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Contracts/Jobs/BackgroundJobFinished.cs` | 新文件，全部 | 整份完成 | 后台作业结束事件 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Contracts/Jobs/BackgroundJobResult.cs` | 新文件，全部 | 整份完成 | 后台作业结果 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/UpdatedJob.cs` | 新文件，全部 | 整份完成 | 修改后的作业行 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Jobs/BackgroundJobAttribute.cs` | `displayName` 参数与 `DisplayName` | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Jobs/BackgroundJobCatalog.cs` | `DisplayNameOf`、显示名称校验 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Jobs/JobView.cs` | `JobName` 参数说明 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Jobs/ReadModelRebuildJob.cs` | 显示名称“重建读模型” | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/JobStore.cs` | `FinishAsync`、`ReleaseAsync`、`RequestCancelAsync`、`UpdateAsync` | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/JobExecutor.cs` | `RequestCancelAsync`、`FinishAsync`、`ReleaseAsync`、`UpdateAsync`、`ResultOf` | 部分 | 其余未检查 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/JobsLog.cs` | 日志 2305 | 部分 | 英文日志消息 |
+| 2026-11-18 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Maintenance/PurgeJobsTask.cs` | 类的 remarks | 部分 | 其余未检查 |
+| 2026-11-18 | `src/Modules/Operations/Kmic.Operations.Application/Audit/Export/ExportAuditJob.cs` | 显示名称“审计导出” | 部分 | 其余未检查 |
+| 2026-11-18 | `src/Modules/Operations/Kmic.Operations.Application/BackgroundJobs/BackgroundJobItem.cs` | `JobName` 参数说明 | 部分 | 其余未检查 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Application/BackgroundJobs/BackgroundJobFinishedNotice.cs` | 新文件，全部 | 整份完成 | 作业结束通知模板 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Application/BackgroundJobs/NotifyJobFinishedCommand.cs` | 新文件，全部 | 整份完成 | 作业结束通知命令 |
+| 2026-11-18 | `src/Modules/Notifications/Kmic.Notifications.Application/BackgroundJobs/NotifyJobFinishedCommandHandler.cs` | 新文件，全部 | 整份完成 | 作业结束通知处理器 |
+| 2026-11-18 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Jobs/JobExecutionTests.cs` | 结束事件的断言、`Shutdown_CancelRequested_CancelledWithExpiryAndEvent`、`FinishedEventsAsync` | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Application.Tests/Jobs/BackgroundJobCatalogTests.cs` | 样例的显示名称、`Build_BlankDisplayName_Rejected` | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Maintenance/PurgeTests.cs` | `Jobs_ExpiredDeleted_EvenWithResultFile` | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/Kmic.Api.Tests/Operations/AuditExportTests.cs` | `SiteMessageWhenSentAsync` 与两处站内消息断言 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/framework/05-infrastructure/05-08-后台处理.md` | 第 6.4、6.8 节相关句、5.7 节清理表一行、示例声明、接口表一行、2026-11-18 修订记录 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/framework/00-README.md` | 待决事项“后台作业结束通知”一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/modules/notifications/README.md` | 4.1 用例一行、6.3、8.6、第 15 节 2026-11-18 一段 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/modules/operations/README.md` | 后台作业汇总一段的新增句 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/开发交接.md` | CN-02、CN-04 的状态行与处理结果 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/S3-平台模块.md` | 进展记录“后台作业结束通知与 Codex 复核的两项 P2”一行 | 部分 | 其余未检查 |
+| 2026-11-18 | `docs/implementation/S2-框架骨架.md` | S2-08 第三部分“未做”里的完成通知一句 | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Background/FakeWork.cs` | `DelayAfterFailure` 与两处时间记录 | 部分 | 其余未检查 |
+| 2026-11-18 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Background/LeasedQueueRunnerTests.cs` | `WhenTheDatabaseIsUnavailable_ItBacksOffAndPicksUpAgain` 的注释与断言 | 部分 | 其余未检查 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Database/ClassDatabase.cs` | 类说明、`Shared<T>`、`DisposeAsync` 的释放顺序注释 | 部分 | 其余未检查 |
+| 2026-11-19 | `tests/Kmic.Api.Tests/ApiFactory.cs` | 类说明（去掉“Identity 模块还没有”的过时说法）、`Tokens`、匿名限流放宽的注释 | 部分 | 其余未检查 |
+| 2026-11-19 | `tests/Kmic.Api.Tests/ApiTestBase.cs` | `InitializeAsync` 的注释 | 部分 | 其余未检查 |
+| 2026-11-19 | `tests/Kmic.Api.Tests/Identity/IdentityApiTestBase.cs` | `InitializeAsync` 的注释 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/S3-平台模块.md` | 进展记录“Api 测试改为每个测试类一个宿主”一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Testing.Tests/Database/ClassDatabaseTests.cs` | `Shared_IsCreatedOncePerType_AndDisposedBeforeTheCloneIsDropped`、`SharedProbe` | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/换机器继续开发.md` | 第 3 节完整检查的耗时 | 部分 | 其余未检查 |
+| 2026-11-19 | `scripts/check.cs` | 文件头注释、格式与依赖漏洞两个步骤、步骤用时与总用时的输出、`WhenProjectsExist`、`CheckVulnerabilities`、`LastPassedScan`、`LockFilesFingerprint`、`Items`、`Capture` | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/framework/adr/0021-工程结构与质量门禁.md` | 第 4 节“格式”“依赖漏洞”两行、修订记录 2026-11-19 一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/framework/06-coding-standards.md` | 第 16 节“格式与编码”一行、修订记录 2026-11-19 一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/S3-平台模块.md` | 进展记录“检查脚本提速”一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/00-README.md` | 待办 T-29 一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/framework/06-coding-standards.md` | 编码速查第 26 条、A.3 的 `summary` 与 `remarks` 写法和“其他”两条、修订记录 2026-11-19 第二行 | 部分 | 其余未检查 |
+| 2026-11-19 | `CLAUDE.md` | 开发规则第 4 条新增的注释写法一句 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/00-README.md` | 已完成待办 T-05 的说明 | 部分 | 其余未检查 |
+| 2026-11-19 | `.dockerignore` | 新增 `.local/` 及其注释 | 整份完成 | 只有一行注释 |
+| 2026-11-19 | `src/Aspire/Kmic.ServiceDefaults/ServiceDefaultsExtensions.cs` | `UseKmicRequestLogging` 的 summary 与 remarks | 部分 | 合并后复核：实际路径已统一移除，删掉 User-Agent 长度、健康检查级别等细节，开关已在 `ObservabilityOptions` 说明 |
+| 2026-11-19 | `src/Aspire/Kmic.ServiceDefaults/RequestPathRemover.cs` | 类说明 | 整份完成 | summary 一句说清，删掉作用域继承的实现细节 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Caching/CacheKey.cs` | `CategoryOf` 的 remarks | 部分 | 改成调用方要遵守的约束 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Integration/IntegrationMessageCatalog.cs` | `CanShowPayload` | 部分 | remarks 合成一句，删掉无信息的参数说明 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Jobs/BackgroundJobCatalog.cs` | `DisplayNameOf` | 部分 | 并进 summary，删掉多版本取名的细节 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/JobExecutor.cs` | `UpdateAsync` 上方注释 | 部分 | 合成一句 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/JobRunResult.cs` | `OutcomeUnknown` | 整份完成 | 合并后过时：写最终结果和放回队列时提交结果未知也返回它 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Jobs/JobStore.cs` | `ReleaseAsync` 的 summary、`UpdateAsync` 上方注释 | 部分 | 理顺语句 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Observability/FrameworkMetrics.cs` | `CacheRequest` 的 `hit` 参数 | 部分 | 去掉双重否定 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Caching/CacheServiceCollectionExtensions.cs` | `DecorateWithMetrics` 上方注释 | 部分 | 理顺语句 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/BacklogSampler.cs` | 类说明 | 部分 | summary 理顺，remarks 去掉与 `SampleModulesAsync` 重复的一句 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Scheduling/SchedulerService.cs` | `StopAsync` 注释 | 部分 | 两行合成一句，先说做法再说原因 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Testing/Database/ClassDatabase.cs` | `Shared` | 部分 | 按新原则：remarks 只留容易用错的一条 |
+| 2026-11-19 | `src/Modules/Identity/Kmic.Identity.Application/IdentityPermissions.cs` | `AuthorizationExplain` 的 summary | 部分 | 改成短语 |
+| 2026-11-19 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryWork.cs` | `ProcessAsync` 中含密短信的注释 | 部分 | 改成“做法 + 目的” |
+| 2026-11-19 | `src/Modules/Notifications/Kmic.Notifications.Presentation/Deliveries/RetryDeliveryEndpoint.cs` | 接口说明 | 整份完成 | 合并后过时：含密通知现在一律不能重试，不再按有效期判断 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Authorization/DataScopeRules.cs` | 类说明、`AnchorsOf`、`OrgUnitsOf` | 整份完成 | remarks 并进 summary |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Contracts/Jobs/BackgroundJobFinished.cs` | 类说明 | 整份完成 | remarks 只留订阅方要知道的一句 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Caching/MeteredHybridCache.cs` | 类说明 | 整份完成 | 规则并进 summary，remarks 只留容易误解的一条 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Observability/IBacklogGauges.cs` | 接口说明、`ReadAsync` | 整份完成 | remarks 只留实现方要遵守的约束，删掉“取消令牌”参数说明 |
+| 2026-11-19 | `src/Modules/Files/Kmic.Files.Application/FilesMetrics.cs` | 构造函数 | 整份完成 | 删掉“创建指标”套话 |
+| 2026-11-19 | `src/Modules/Files/Kmic.Files.Infrastructure/Storage/StorageIssueGauges.cs` | 量表说明 | 整份完成 | 理顺语句 |
+| 2026-11-19 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryBacklogGauges.cs` | 类说明 | 整份完成 | 统计口径并进 summary，remarks 只留容易误读的一条 |
+| 2026-11-19 | `src/Modules/Identity/Kmic.Identity.Application/Authorization/Explain/DataScopeExplanation.cs` | 字段说明 | 整份完成 | 布尔字段写成“是否……”，去掉“授予上设置的”这类绕口说法 |
+| 2026-11-19 | `src/Modules/Identity/Kmic.Identity.Application/Authorization/Explain/ExplainAuthorizationQuery.cs` | 类说明 | 整份完成 | summary 改短 |
+| 2026-11-19 | `src/Modules/Notifications/Kmic.Notifications.Application/BackgroundJobs/NotifyJobFinishedCommand.cs` | 类说明 | 整份完成 | 业务规则并进 summary，删掉 `[SystemOnly]` 和收件箱已经表达的内容 |
+| 2026-11-19 | `BacklogGauge.cs`、`BacklogReading.cs`、`UpdatedJob.cs`、`BackgroundJobResult.cs`、`AuthorizationExplanation.cs`、`ExplainAuthorizationQueryHandler.cs`、`ExplainedOrgUnit.cs`、`ExplainAuthorizationEndpoint.cs`、`ExplainAuthorizationRequest.cs`、`BackgroundJobFinishedNotice.cs`、`NotifyJobFinishedCommandHandler.cs`、`NotificationsMetrics.cs` | 全部 | 整份完成 | 合并后新增的文件，按新原则核对过，无需修改 |
+| 2026-11-19 | `tests/Kmic.Api.Tests/ApiFactory.cs` | 类说明、限流设置的注释 | 部分 | 理顺语句，去掉句末句号 |
+| 2026-11-19 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Jobs/JobExecutionTests.cs` | 超时上限的注释 | 部分 | 改成“做法 + 目的” |
+| 2026-11-19 | `tests/Kmic.Api.Tests/Identity/AuthorizationExplainTests.cs` | 类说明 | 部分 | 测试类只写前提，删掉“授权诊断，端到端” |

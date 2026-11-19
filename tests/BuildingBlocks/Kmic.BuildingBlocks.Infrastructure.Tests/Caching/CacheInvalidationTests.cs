@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
@@ -5,6 +6,7 @@ using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 using Kmic.BuildingBlocks.Testing.Assertions;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
+using Kmic.BuildingBlocks.Testing.Metrics;
 using Kmic.BuildingBlocks.Testing.Waiting;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +43,20 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
         (await SendAsync(harness, new InvalidateCacheCommand([Tag, Tag]))).ShouldBeSuccess();
 
         (await GetAsync(harness)).ShouldBeGreaterThan(first);
+    }
+
+    [Fact]
+    public async Task Reads_CountedAsHitOrMissByKeyCategory()
+    {
+        var harness = NewHarness();
+        using var metrics = new MetricRecorder(harness.Services.GetRequiredService<IMeterFactory>());
+
+        await GetAsync(harness);
+        await GetAsync(harness);
+
+        var requests = metrics.Of("kmic.cache.requests");
+        requests.Select(r => r.Tags["result"]).ShouldBe(["miss", "hit"]);
+        requests.ShouldAllBe(r => r.Tags["category"] == "Test:Key");
     }
 
     [Fact]

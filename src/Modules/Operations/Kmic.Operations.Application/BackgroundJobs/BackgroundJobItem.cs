@@ -9,6 +9,7 @@ namespace Kmic.Operations.Application.BackgroundJobs;
 /// <param name="Id">作业 ID</param>
 /// <param name="Module">作业所在的模块</param>
 /// <param name="JobType">作业类型名，如 Sample.ExportSpecimens</param>
+/// <param name="JobName">作业显示名称；代码中已没有这种作业时为作业类型名</param>
 /// <param name="Status">状态</param>
 /// <param name="SubmittedBy">提交人 ID，系统提交时为空</param>
 /// <param name="SubmittedByName">提交人的名称；用户已经不存在时为空</param>
@@ -30,6 +31,7 @@ public sealed record BackgroundJobItem(
     Guid Id,
     string Module,
     string JobType,
+    string JobName,
     BackgroundJobStatus Status,
     Guid? SubmittedBy,
     string? SubmittedByName,

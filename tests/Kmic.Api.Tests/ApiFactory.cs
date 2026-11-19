@@ -11,20 +11,30 @@ namespace Kmic.Api.Tests;
 /// 真实宿主（Kmic.Api）+ 每个测试类自己的数据库 + 测试用的访问上下文加载器
 /// </summary>
 /// <remarks>
-/// 角色只有 Api：投递、作业、调度这些后台处理另有测试。Identity 模块还没有，
-/// 身份由测试登记在 <see cref="Loader"/> 里，令牌用测试自己的密钥签发
+/// 默认只有 Api 角色，要后台处理的测试另配 Worker；身份默认用 <see cref="Loader"/> 里登记的测试身份，realIdentity 为 true 时用 Identity 模块的真实登录。
+/// 同一个测试类共用一个实例
 /// </remarks>
 public sealed class ApiFactory(
     string connectionString,
-    TokenFactory tokens,
     bool realIdentity = false,
     IReadOnlyDictionary<string, string>? extraSettings = null,
     Action<IServiceCollection>? configureServices = null) : WebApplicationFactory<Program>
 {
     /// <summary>
+    /// 签发令牌用的密钥，宿主用它验证令牌
+    /// </summary>
+    public TokenFactory Tokens { get; } = new();
+
+    /// <summary>
     /// 登记身份用的加载器
     /// </summary>
     public TestAccessContextLoader Loader => Services.GetRequiredService<TestAccessContextLoader>();
+
+    public override async ValueTask DisposeAsync()
+    {
+        await base.DisposeAsync();
+        Tokens.Dispose();
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -34,7 +44,11 @@ public sealed class ApiFactory(
         builder.UseSetting("Kmic:Roles", "Api");
         builder.UseSetting("Kmic:Database:ConnectionString", connectionString);
         builder.UseSetting("Kmic:Database:CheckQueryVisibility", "true");
-        foreach (var (key, value) in tokens.Settings())
+
+        // 放宽未登录请求的限额，避免同一个类里前面测试的登录让后面的被限流（测试客户端没有来源地址，都落在同一个分区）
+        // 限流本身由 Presentation 的测试覆盖
+        builder.UseSetting("Kmic:Http:AnonymousRequestsPerMinute", "100000");
+        foreach (var (key, value) in Tokens.Settings())
         {
             builder.UseSetting(key, value);
         }
