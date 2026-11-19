@@ -3,10 +3,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 登录失败的等待与锁定算法
+/// 登录失败的等待与锁定算法，只计算状态，读写由存储负责
 /// </summary>
 /// <remarks>
-/// 仅计算状态，原子读写由存储层负责。按规范化登录名计数，不存在的账号使用相同规则，避免泄露账号是否存在
+/// 不存在的账号也按同样规则计数，避免泄露账号是否存在
 /// </remarks>
 /// <param name="settings">规则</param>
 public sealed class LoginThrottlePolicy(IOptions<LoginThrottleOptions> settings)

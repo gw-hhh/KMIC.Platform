@@ -9,8 +9,7 @@ namespace Kmic.Operations.Application.Audit.List;
 /// 查询审计记录
 /// </summary>
 /// <remarks>
-/// 时间范围必填且不超过 93 天；按发生时间倒序，使用游标分页，不返回总数。
-/// 按审计查看权限控制访问，不限制数据范围；查询本身也记录读取审计
+/// 时间范围必填，最长 93 天；按发生时间倒序游标分页，不返回总数，不限数据范围
 /// </remarks>
 /// <param name="From">起始时间，含</param>
 /// <param name="To">结束时间，不含</param>

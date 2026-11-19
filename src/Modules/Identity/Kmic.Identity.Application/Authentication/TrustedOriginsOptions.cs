@@ -1,11 +1,8 @@
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 允许携带刷新 Cookie 访问认证端点的来源
+/// 允许携带刷新 Cookie 访问认证端点的来源，配置节 Identity:Cookie
 /// </summary>
-/// <remarks>
-/// 配置节为 Identity:Cookie。携带刷新 Cookie 的刷新请求须同时满足可信 Origin 和 X-Requested-With: kmic；退出及切换角色使用 Bearer 认证
-/// </remarks>
 public sealed class TrustedOriginsOptions
 {
     /// <summary>

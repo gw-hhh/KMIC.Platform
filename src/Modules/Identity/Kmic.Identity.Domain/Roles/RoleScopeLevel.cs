@@ -26,10 +26,10 @@ public sealed class RoleScopeLevel : Enumeration<RoleScopeLevel>
     public static readonly RoleScopeLevel OrgUnitAndBelow = new("OrgUnitAndBelow", "本组织及下级");
 
     /// <summary>
-    /// 全部
+    /// 全部数据
     /// </summary>
     /// <remarks>
-    /// 此成员表示“全部数据”，隐藏了基类同名属性；遍历等级用 Enumeration&lt;RoleScopeLevel&gt;.All
+    /// 隐藏了基类的同名属性，要遍历所有等级用 Enumeration&lt;RoleScopeLevel&gt;.All
     /// </remarks>
     public static new readonly RoleScopeLevel All = new("All", "全部");
 

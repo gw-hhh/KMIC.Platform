@@ -4,11 +4,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 生成管理员重置密码时使用的临时密码
+/// 生成管理员重置密码用的临时密码，不含 0、O、1、l、I 这类易混淆字符
 /// </summary>
 /// <remarks>
-/// 排除易混淆字符（0、O、1、l、I），便于人工传递。
-/// 临时密码仅在重置响应中返回，不写日志或审计，不通过短信或邮件发送；登录后必须修改密码
+/// 临时密码只在重置响应里返回，不写日志和审计，也不经短信或邮件发送
 /// </remarks>
 public sealed class TemporaryPasswordGenerator(IOptions<PasswordOptions> settings)
 {

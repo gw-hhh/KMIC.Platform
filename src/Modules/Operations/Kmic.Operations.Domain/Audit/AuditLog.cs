@@ -8,8 +8,7 @@ namespace Kmic.Operations.Domain.Audit;
 /// 审计记录
 /// </summary>
 /// <remarks>
-/// 仅追加，运行账号无权修改或删除；超过保留期后由迁移程序的维护命令清理。
-/// 创建时间是汇总写入时间，与操作发生时间 <see cref="OccurredAt" /> 不同
+/// 只追加，运行账号不能改也不能删，过了保留期由迁移程序的维护命令清理；创建时间是写入汇总表的时间，和操作发生时间 <see cref="OccurredAt" /> 不同
 /// </remarks>
 public sealed class AuditLog : AggregateRoot<AuditLogId>
 {

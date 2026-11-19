@@ -9,9 +9,6 @@ namespace Kmic.Identity.Presentation.Authentication;
 /// <summary>
 /// 刷新 Cookie 的 CSRF 防护：校验可信 Origin 和自定义请求头
 /// </summary>
-/// <remarks>
-/// 携带刷新 Cookie 时，Origin 须在可信列表中，且 X-Requested-With 须为 kmic；Cookie 使用 SameSite=Strict
-/// </remarks>
 internal sealed class CookieEndpointGuard(IOptions<TrustedOriginsOptions> options) : IEndpointFilter
 {
     public const string RequiredHeader = "X-Requested-With";

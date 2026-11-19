@@ -8,8 +8,7 @@ namespace Kmic.Identity.Application.Organization.AssignUser;
 /// 设置用户所属的组织单元
 /// </summary>
 /// <remarks>
-/// 组织归属影响以用户所属组织为锚点的数据范围，因此单独授权和执行。
-/// 调整用户归属不修改已有业务数据的所属组织
+/// 已有业务数据的所属组织不跟着改
 /// </remarks>
 /// <param name="Id">用户 ID</param>
 /// <param name="ExpectedVersion">用户的预期版本号，不匹配时返回版本冲突</param>

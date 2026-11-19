@@ -10,7 +10,7 @@ namespace Kmic.Identity.Application.ContractQueries;
 /// 批量查询角色引用信息
 /// </summary>
 /// <remarks>
-/// 停用角色仍返回名称及停用状态，供历史记录显示；角色编码为 null
+/// 角色没有编码，引用信息里的编码为空
 /// </remarks>
 public sealed class GetRoleReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetRoleReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {

@@ -570,7 +570,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.Property<string>("CatalogFingerprint")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
-                        .HasComment("全权限角色最近一次同步的权限点目录指纹；目录变化时同步任务更新它，让授权版本跟着递增");
+                        .HasComment("全权限角色最近一次同步的权限点目录指纹");
 
                     b.Property<long>("ConcurrencyVersion")
                         .IsConcurrencyToken()
@@ -966,7 +966,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
-                        .HasComment("登录名")
+                        .HasComment("登录名，唯一，不区分大小写")
                         .UseCollation("CaseInsensitive");
 
                     b.Property<long>("ConcurrencyVersion")
@@ -1018,7 +1018,7 @@ namespace Kmic.Identity.Infrastructure.Persistence.Migrations
                     b.Property<string>("Mobile")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
-                        .HasComment("手机号")
+                        .HasComment("手机号，国际格式，填写时唯一")
                         .HasAnnotation("Kmic:AuditMode", "Masked:Personal");
 
                     b.Property<Guid?>("OrgUnitId")

@@ -17,8 +17,7 @@ namespace Kmic.Identity.Infrastructure.Operations;
 /// 运维命令的实现：首个管理员初始化、应急重置管理员密码
 /// </summary>
 /// <remarks>
-/// 使用运维连接直接执行首次初始化或应急恢复，不经过命令管道。
-/// 操作成功后记录安全事件，实际操作人记为系统账号
+/// 用运维连接直接执行，不经过命令管道；成功后记安全事件，操作人记为系统账号
 /// </remarks>
 public sealed class IdentityBootstrapper
 {
@@ -31,8 +30,7 @@ public sealed class IdentityBootstrapper
     /// 初始化首个管理员、系统管理员角色、角色授予及组织树根单元
     /// </summary>
     /// <remarks>
-    /// 仅限尚无普通用户的系统，否则返回 <see cref="IdentityErrors.AlreadyBootstrapped" />。
-    /// 密码按默认规则校验，首次登录后须修改；根单元名称为空或空白时使用“总部”
+    /// 只能在还没有普通用户时执行，否则返回 <see cref="IdentityErrors.AlreadyBootstrapped" />；根单元名称为空时用“总部”
     /// </remarks>
     public async Task<Result> BootstrapAsync(string connectionString, string account, string displayName, string password, string? rootUnitName, DateTimeOffset now, CancellationToken ct)
     {
@@ -79,8 +77,7 @@ public sealed class IdentityBootstrapper
     /// 应急重置：为持有受保护角色的账号设置新密码，作废它的全部会话，清零登录限制
     /// </summary>
     /// <remarks>
-    /// 用于管理员无法登录时的应急恢复，依赖运维数据库权限，并记录安全事件。
-    /// 新密码按默认规则校验，登录后须修改密码；重置不会启用已禁用账号
+    /// 不会启用已禁用的账号
     /// </remarks>
     public async Task<Result> ResetAdministratorPasswordAsync(string connectionString, string account, string password, DateTimeOffset now, CancellationToken ct)
     {

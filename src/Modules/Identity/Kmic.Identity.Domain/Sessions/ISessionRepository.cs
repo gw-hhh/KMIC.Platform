@@ -12,7 +12,7 @@ public interface ISessionRepository : IRepository<Session, SessionId>
     /// 按刷新令牌哈希查找并锁定会话
     /// </summary>
     /// <remarks>
-    /// 须在事务中调用，锁持有至事务结束；取得会话锁后再读取令牌状态，避免并发刷新读到旧状态。找不到时返回 null
+    /// 须在事务中调用，先锁会话再读令牌状态，避免并发刷新读到旧状态
     /// </remarks>
     Task<Session?> FindByRefreshTokenForUpdateAsync(string tokenHash, CancellationToken ct);
 

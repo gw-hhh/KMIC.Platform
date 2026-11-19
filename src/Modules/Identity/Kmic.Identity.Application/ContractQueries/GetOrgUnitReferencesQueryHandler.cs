@@ -9,9 +9,6 @@ namespace Kmic.Identity.Application.ContractQueries;
 /// <summary>
 /// 批量查询组织单元引用信息
 /// </summary>
-/// <remarks>
-/// 停用的组织单元仍返回名称、单元编码及停用状态，供历史记录显示
-/// </remarks>
 public sealed class GetOrgUnitReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetOrgUnitReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
     /// <inheritdoc />

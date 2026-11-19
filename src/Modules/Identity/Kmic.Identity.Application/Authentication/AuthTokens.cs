@@ -6,7 +6,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// 认证令牌响应
 /// </summary>
 /// <remarks>
-/// 字段名沿用 OAuth2。网页端通过 Cookie 接收刷新令牌，响应体中的 refresh_token 为 null
+/// 网页端的刷新令牌放在 Cookie 里，响应体里的 refresh_token 为空
 /// </remarks>
 /// <param name="AccessToken">访问令牌</param>
 /// <param name="TokenType">固定为 Bearer</param>

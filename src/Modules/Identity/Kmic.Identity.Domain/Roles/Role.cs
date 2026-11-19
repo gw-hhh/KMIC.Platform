@@ -10,8 +10,7 @@ namespace Kmic.Identity.Domain.Roles;
 /// 角色：一组权限点加数据范围配置
 /// </summary>
 /// <remarks>
-/// 并发版本号同时用于授权校验和角色快照缓存；权限点、数据范围或状态变更时递增。
-/// 内置系统管理员角色不保存权限点明细，由加载器按当前目录赋予全部权限
+/// 并发版本号也是授权版本，改权限点、数据范围或状态时递增；内置系统管理员角色不存权限点明细，加载时按当前目录给全部权限
 /// </remarks>
 public sealed class Role : AggregateRoot<RoleId>
 {
@@ -71,8 +70,11 @@ public sealed class Role : AggregateRoot<RoleId>
     public int SortOrder { get; private set; }
 
     /// <summary>
-    /// 全权限角色最近一次同步的权限点目录指纹；目录变化时同步任务更新它，让授权版本跟着递增
+    /// 全权限角色最近一次同步的权限点目录指纹
     /// </summary>
+    /// <remarks>
+    /// 目录变化时同步任务更新它，授权版本随之递增
+    /// </remarks>
     public string? CatalogFingerprint { get; private set; }
 
     /// <summary>

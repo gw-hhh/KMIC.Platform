@@ -10,8 +10,7 @@ namespace Kmic.Identity.Application.ContractQueries;
 /// 批量查询用户引用信息
 /// </summary>
 /// <remarks>
-/// 禁用用户仍返回姓名、工号及停用状态，供历史记录显示。
-/// Identity 不按数据范围过滤，无需声明绕过过滤
+/// Identity 的数据不按数据范围过滤，所以不用声明绕过
 /// </remarks>
 public sealed class GetUserReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetUserReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {

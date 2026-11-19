@@ -3,11 +3,8 @@ using Kmic.Identity.Domain.Users;
 namespace Kmic.Identity.Application.Users;
 
 /// <summary>
-/// 用户管理策略的目标
+/// 用户管理策略的目标，保护状态和持有人信息由调用方查好传入
 /// </summary>
-/// <remarks>
-/// 调用方先查询角色保护状态和持有人信息，策略不查库
-/// </remarks>
 /// <param name="User">被管理的用户</param>
 /// <param name="OperatorIsProtected">操作者当前角色是否受保护</param>
 /// <param name="HoldsProtectedRole">被管理的用户是否持有受保护角色</param>

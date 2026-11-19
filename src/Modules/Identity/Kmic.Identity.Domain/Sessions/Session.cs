@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Domain.Sessions;
 
 /// <summary>
-/// 会话：一次登录的服务端记录
+/// 会话：一次登录的服务端记录；作废后请求立即被拒，不用等令牌过期
 /// </summary>
-/// <remarks>
-/// 访问令牌携带会话标识，每次请求都会检查会话状态；会话作废后，后续请求被拒绝，无需等待令牌过期
-/// </remarks>
 public sealed class Session : AggregateRoot<SessionId>
 {
     private readonly List<RefreshToken> _refreshTokens = [];
@@ -72,7 +69,7 @@ public sealed class Session : AggregateRoot<SessionId>
     /// 刷新令牌或模拟会话到期时间
     /// </summary>
     /// <remarks>
-    /// 普通会话随刷新令牌续期；模拟会话不签发刷新令牌，此值为会话到期时间。
+    /// 普通会话随刷新令牌续期；模拟会话没有刷新令牌，这里是会话到期时间
     /// </remarks>
     public DateTimeOffset RefreshExpiresAt { get; private set; }
 
@@ -174,9 +171,7 @@ public sealed class Session : AggregateRoot<SessionId>
     /// 用刷新令牌换新令牌
     /// </summary>
     /// <remarks>
-    /// 过期令牌返回无效。未过期的旧令牌在宽限期内再次使用时，从当前令牌继续轮换；超出宽限期则标记会话作废并返回重用结果。
-    /// 若调用事务随后回滚，须在独立事务中调用 <see cref="RevokeIfReused" /> 重新核实并作废。
-    /// 新令牌按滑动有效期计算到期时间，且不晚于会话绝对到期时间
+    /// 宽限期内再次使用旧令牌按并发刷新处理；超出宽限期标记作废并返回重用，调用事务随后回滚时，要在独立事务里调 <see cref="RevokeIfReused" /> 重新核实
     /// </remarks>
     public Rotation Rotate(string presentedHash, string newHash, DateTimeOffset now, TimeSpan refreshLifetime, TimeSpan grace)
     {
@@ -215,11 +210,10 @@ public sealed class Session : AggregateRoot<SessionId>
     }
 
     /// <summary>
-    /// 核实刷新令牌重用并作废会话
+    /// 核实刷新令牌被重用后作废会话，在刷新命令回滚后的独立事务里调用
     /// </summary>
     /// <remarks>
-    /// 仅在会话仍可用、旧令牌已使用且超过宽限期时作废。
-    /// 刷新命令失败会回滚，须在独立事务中重新核实并作废
+    /// 只在会话仍可用、旧令牌已使用且超过宽限期时作废
     /// </remarks>
     /// <returns>本次作废会话时返回 true，否则返回 false</returns>
     public bool RevokeIfReused(string presentedHash, DateTimeOffset now, TimeSpan grace)

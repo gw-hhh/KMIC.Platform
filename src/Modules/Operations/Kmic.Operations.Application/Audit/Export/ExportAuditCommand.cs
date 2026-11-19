@@ -9,7 +9,7 @@ namespace Kmic.Operations.Application.Audit.Export;
 /// 提交审计 CSV 导出作业
 /// </summary>
 /// <remarks>
-/// 使用与审计列表相同的筛选条件。行数超过 <c>Kmic:Jobs:ExportMaxRows</c> 时作业失败，须缩小时间范围
+/// 筛选条件和审计列表一样；行数超过 <c>Kmic:Jobs:ExportMaxRows</c> 时作业失败，要缩小时间范围
 /// </remarks>
 /// <param name="From">起始时间，含</param>
 /// <param name="To">结束时间，不含</param>

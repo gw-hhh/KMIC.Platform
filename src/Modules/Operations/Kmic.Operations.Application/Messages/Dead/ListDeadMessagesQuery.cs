@@ -5,11 +5,8 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Operations.Application.Messages.Dead;
 
 /// <summary>
-/// 查询各模块的死信
+/// 查询各模块的死信，发件箱和收件箱归并后按发生时间倒序游标分页，不含载荷
 /// </summary>
-/// <remarks>
-/// 跨模块归并发件箱和收件箱死信，按发生时间倒序进行游标分页，不返回载荷
-/// </remarks>
 /// <param name="Module">模块筛选，未指定时查询全部模块</param>
 /// <param name="Box">Outbox 或 Inbox</param>
 /// <param name="Subscription">订阅名，指定后仅查询收件箱</param>

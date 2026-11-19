@@ -10,7 +10,7 @@ namespace Kmic.Identity.Application.Users.EventHandlers;
 /// 密码变更后作废相关会话
 /// </summary>
 /// <remarks>
-/// 管理员重置时全部作废；用户自行修改时保留当前会话。范围包含相关模拟会话
+/// 管理员重置时全部作废，用户自己改密码时保留当前会话；包括相关的模拟会话
 /// </remarks>
 internal sealed class RevokeSessionsWhenPasswordChanged(ISessionRepository sessions, IExecutionContext execution, TimeProvider time) : IDomainEventHandler<PasswordChanged>
 {

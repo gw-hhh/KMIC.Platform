@@ -6,11 +6,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Authorization;
 
 /// <summary>
-/// 授权管理命令基类，在执行前重新校验操作者
+/// 授权管理命令的基类，执行前在同一事务里重新校验操作者
 /// </summary>
 /// <remarks>
-/// 角色、授予、组织、用户管理及模拟身份命令通过此基类复查操作者，复查与修改共用事务。
-/// 模块不能增减管道行为，因此由基类统一执行复查
+/// 模块不能增减管道行为，所以用基类统一复查
 /// </remarks>
 /// <typeparam name="TCommand">命令</typeparam>
 /// <typeparam name="TResponse">响应</typeparam>

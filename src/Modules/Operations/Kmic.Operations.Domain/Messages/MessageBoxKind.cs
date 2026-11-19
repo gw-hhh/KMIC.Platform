@@ -6,7 +6,7 @@ namespace Kmic.Operations.Domain.Messages;
 /// 收发件箱类型
 /// </summary>
 /// <remarks>
-/// 编码就是框架里消息箱枚举的成员名；领域层不引用应用层，所以单独定义，由应用层转换
+/// 编码就是框架消息箱枚举的成员名，由应用层转换
 /// </remarks>
 public sealed class MessageBoxKind : Enumeration<MessageBoxKind>
 {

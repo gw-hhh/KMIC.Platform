@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Domain.Organization;
 
 /// <summary>
-/// 组织单元：组织树上的节点
+/// 组织单元，组织树上的节点，只能经 OrgTree 创建和修改
 /// </summary>
-/// <remarks>
-/// 组织树内的子实体，只能通过 OrgTree 创建和修改；表示组织层级，为数据范围计算提供依据
-/// </remarks>
 public sealed class OrgUnit : Entity<OrgUnitId>
 {
     private OrgUnit(OrgUnitId id, OrgUnitId? parentId, string name, string? code, int sortOrder)

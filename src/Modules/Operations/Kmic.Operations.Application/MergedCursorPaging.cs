@@ -6,19 +6,15 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Operations.Application;
 
 /// <summary>
-/// 跨模块游标分页
+/// 跨模块游标分页，各模块结果和合并结果都按时间、ID 倒序
 /// </summary>
-/// <remarks>
-/// 各模块查询和合并结果均按时间、ID 倒序排列
-/// </remarks>
 internal static class MergedCursorPaging
 {
     /// <summary>
     /// 合并各模块查询结果并生成下一页游标
     /// </summary>
     /// <remarks>
-    /// fetch 须按时间、ID 倒序查询，并应用传入的游标和数量限制。
-    /// ID 排序须与 PostgreSQL 的 uuid 排序规则一致。
+    /// fetch 要按时间、ID 倒序查询并应用传入的游标和数量；ID 的排序要和 PostgreSQL 的 uuid 排序一致
     /// </remarks>
     public static async Task<Result<(IReadOnlyList<T> Items, string? NextCursor)>> PageAsync<TStore, T>(
         IEnumerable<TStore> stores,

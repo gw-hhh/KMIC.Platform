@@ -7,11 +7,10 @@ using Kmic.Operations.Domain.Jobs;
 namespace Kmic.Operations.Application;
 
 /// <summary>
-/// Operations 模块的查询入口
+/// Operations 模块的查询入口，不跟踪实体，只读已提交的数据
 /// </summary>
 /// <remarks>
-/// 查询处理器通过此接口读取，不跟踪实体，也不读取命令中尚未保存的修改。
-/// 运维数据不声明数据范围，访问由用例的权限要求决定
+/// 运维数据不声明数据范围，能看什么由用例的权限点决定
 /// </remarks>
 public interface IOperationsQueryDb
 {
@@ -49,7 +48,7 @@ public interface IOperationsQueryDb
     /// 按操作对象筛选审计记录
     /// </summary>
     /// <remarks>
-    /// 按 JSON 包含关系匹配，使用 GIN 索引；数据库函数留在实现层，避免 Application 依赖数据库驱动
+    /// 按 JSON 包含匹配，走 GIN 索引；数据库函数放在实现层，Application 不依赖数据库驱动
     /// </remarks>
     /// <param name="audits">要筛选的审计记录</param>
     /// <param name="targetsJson">操作对象的 JSON 匹配条件，如 [{"resourceType":"User","resourceId":"…"}]；可只提供要匹配的属性</param>

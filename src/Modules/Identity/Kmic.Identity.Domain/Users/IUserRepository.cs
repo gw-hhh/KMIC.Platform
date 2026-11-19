@@ -27,7 +27,7 @@ public interface IUserRepository : IRepository<User, UserId>
     /// 获取受保护角色持有人检查的事务锁
     /// </summary>
     /// <remarks>
-    /// 必须在事务中调用，锁持有至事务结束，使并发检查依次执行，防止同时操作后失去最后一位可登录的持有人
+    /// 须在事务中调用，锁到事务结束，避免并发操作后一个可登录的持有人都不剩
     /// </remarks>
     Task LockProtectedHolderChecksAsync(CancellationToken ct);
 }

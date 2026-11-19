@@ -9,9 +9,7 @@ namespace Kmic.Identity.Application.Users;
 /// 用户管理的操作限制
 /// </summary>
 /// <remarks>
-/// 系统账号不可修改，不能禁用自己或强制自己下线。
-/// 目标用户持有受保护角色时，重置密码、修改账号或手机号、强制下线均要求操作者的当前角色受保护。
-/// 不能禁用最后一位可登录且持有已启用受保护角色的用户
+/// 不能禁用最后一位可登录、持有已启用受保护角色的用户
 /// </remarks>
 public sealed class UserPolicy : IResourcePolicy<UserTarget, UserAdminAction>
 {

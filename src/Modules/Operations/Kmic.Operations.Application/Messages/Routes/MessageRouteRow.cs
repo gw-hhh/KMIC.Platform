@@ -3,9 +3,6 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// <summary>
 /// 框架订阅路由的只读查询结果
 /// </summary>
-/// <remarks>
-/// 查询将状态转换为 <c>MessageRouteStatus</c> 编码
-/// </remarks>
 public sealed record MessageRouteRow
 {
     /// <summary>

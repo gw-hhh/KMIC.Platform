@@ -3,10 +3,10 @@ using Kmic.BuildingBlocks.Application.Time;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 会话与刷新令牌的有效期
+/// 会话与刷新令牌的有效期，配置节 Identity:Session
 /// </summary>
 /// <remarks>
-/// 部署配置，节名 Identity:Session。访问令牌的有效期在 Kmic:Auth:AccessTokenLifetime
+/// 访问令牌的有效期不在这里，在 Kmic:Auth:AccessTokenLifetime
 /// </remarks>
 public sealed class SessionLifetimeOptions
 {

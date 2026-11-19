@@ -4,8 +4,7 @@ namespace Kmic.Identity.Contracts;
 /// 供通知模块查询收件人联系方式
 /// </summary>
 /// <remarks>
-/// 联系方式由 Identity 维护，调用方不得另行维护联系人副本。
-/// 仅允许系统身份调用，普通用户请求会被拒绝
+/// 只允许系统身份调用；调用方不要自己保存联系方式副本
 /// </remarks>
 public interface IUserContacts
 {

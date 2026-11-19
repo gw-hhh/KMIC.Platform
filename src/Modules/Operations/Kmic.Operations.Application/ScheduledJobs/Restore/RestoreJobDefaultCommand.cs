@@ -8,7 +8,7 @@ namespace Kmic.Operations.Application.ScheduledJobs.Restore;
 /// 恢复定时任务的默认设置
 /// </summary>
 /// <remarks>
-/// 清空自定义启用状态和执行计划，保留设置记录；之后使用代码默认值
+/// 清空自定义的启用状态和执行计划，保留设置记录，之后用代码默认值
 /// </remarks>
 /// <param name="JobName">任务名</param>
 /// <param name="ExpectedVersion">调用方看到的版本号</param>

@@ -1,10 +1,10 @@
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 登录失败后的等待与锁定规则
+/// 登录失败后的等待与锁定规则，配置节 Identity:LoginThrottle
 /// </summary>
 /// <remarks>
-/// 部署配置，节名 Identity:LoginThrottle。安全类阈值放在配置里而不是系统设置：改动要发布并留痕，不在界面上调
+/// 放在部署配置而不是系统设置：安全阈值的改动要随发布留痕
 /// </remarks>
 public sealed class LoginThrottleOptions
 {

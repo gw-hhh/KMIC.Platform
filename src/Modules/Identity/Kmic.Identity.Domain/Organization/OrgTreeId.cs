@@ -4,11 +4,8 @@ using Vogen;
 namespace Kmic.Identity.Domain.Organization;
 
 /// <summary>
-/// 组织树 ID
+/// 组织树 ID，系统里只有一棵树，ID 固定
 /// </summary>
-/// <remarks>
-/// 系统里只有一棵组织树，ID 固定
-/// </remarks>
 [ValueObject<Guid>(conversions: Conversions.SystemTextJson | Conversions.TypeConverter, parsableForPrimitives: ParsableForPrimitives.HoistMethodsAndInterfaces, toPrimitiveCasting: CastOperator.None, fromPrimitiveCasting: CastOperator.None)]
 public readonly partial struct OrgTreeId : IStronglyTypedId
 {

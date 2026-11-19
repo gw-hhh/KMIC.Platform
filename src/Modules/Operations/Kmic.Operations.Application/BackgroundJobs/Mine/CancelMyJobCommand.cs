@@ -7,8 +7,7 @@ namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 /// 请求取消当前用户提交的后台作业
 /// </summary>
 /// <remarks>
-/// 运行中的作业须响应取消信号才会停止；已提交的批次不回滚。
-/// 作业不存在或由他人提交时，均返回作业不存在错误；取消他人的作业使用 <c>CancelBackgroundJobCommand</c>
+/// 运行中的作业要响应取消信号才会停，已提交的批次不回滚；作业不存在或不是自己提交的都返回作业不存在
 /// </remarks>
 /// <param name="Module">作业所在的模块</param>
 /// <param name="JobId">作业 ID</param>

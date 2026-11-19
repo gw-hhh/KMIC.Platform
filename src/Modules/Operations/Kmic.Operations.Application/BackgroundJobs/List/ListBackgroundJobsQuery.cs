@@ -5,11 +5,8 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Operations.Application.BackgroundJobs.List;
 
 /// <summary>
-/// 查询各模块的后台作业
+/// 查询各模块的后台作业，按提交时间倒序游标分页，不含作业参数
 /// </summary>
-/// <remarks>
-/// 跨模块按提交时间倒序归并，使用游标分页，不返回作业参数
-/// </remarks>
 /// <param name="Module">模块筛选，未指定时查询全部模块</param>
 /// <param name="JobType">作业类型名</param>
 /// <param name="Status">状态编码：Queued、Running、Succeeded、Failed、Cancelling、Cancelled</param>

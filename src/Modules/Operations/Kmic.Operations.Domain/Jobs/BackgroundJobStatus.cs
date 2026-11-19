@@ -6,7 +6,7 @@ namespace Kmic.Operations.Domain.Jobs;
 /// 后台作业的状态
 /// </summary>
 /// <remarks>
-/// 编码就是框架里作业状态枚举的成员名；领域层不引用应用层，所以单独定义，由应用层转换
+/// 编码就是框架作业状态枚举的成员名，由应用层转换
 /// </remarks>
 public sealed class BackgroundJobStatus : Enumeration<BackgroundJobStatus>
 {

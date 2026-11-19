@@ -23,9 +23,6 @@ namespace Kmic.Operations.Infrastructure;
 /// <summary>
 /// Operations 模块的服务端注册类
 /// </summary>
-/// <remarks>
-/// 处理器和校验器自动发现，此处补充模块服务注册
-/// </remarks>
 public sealed class OperationsModule : IModule
 {
     /// <inheritdoc />

@@ -3,9 +3,6 @@ namespace Kmic.Operations.Application.ScheduledJobs;
 /// <summary>
 /// 框架定时任务执行记录的只读查询结果
 /// </summary>
-/// <remarks>
-/// 查询将状态和触发方式转换为 <c>JobRunStatus</c>、<c>JobRunTrigger</c> 编码
-/// </remarks>
 public sealed record ScheduledJobRunRow
 {
     /// <summary>

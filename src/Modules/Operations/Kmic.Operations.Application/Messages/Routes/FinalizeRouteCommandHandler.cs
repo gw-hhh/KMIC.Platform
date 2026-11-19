@@ -12,7 +12,7 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// 终结消息订阅路由
 /// </summary>
 /// <remarks>
-/// 路由表和订阅方收件箱由框架在同一事务中更新，不参与 Operations 命令事务
+/// 路由表和订阅方收件箱由框架在同一事务里更新，不在 Operations 的命令事务里
 /// </remarks>
 public sealed class FinalizeRouteCommandHandler(IMessageRouteAdmin routes, IExecutionContext execution)
     : ICommandHandler<FinalizeRouteCommand, FinalizeRouteResponse>

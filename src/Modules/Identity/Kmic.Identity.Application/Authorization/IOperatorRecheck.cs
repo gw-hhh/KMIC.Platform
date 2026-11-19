@@ -4,11 +4,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Authorization;
 
 /// <summary>
-/// 授权管理命令执行前重新校验操作者
+/// 授权管理命令执行前重新校验操作者，防止已被撤权的人继续授权
 /// </summary>
 /// <remarks>
-/// 授权管理会产生持续生效的新授权，须防止操作者被撤权后仍扩大权限。
-/// 在命令事务内按固定顺序对会话、用户、授予和角色加共享锁，再检查授权；撤权写入与共享锁互斥，使并发结果符合串行执行顺序
+/// 须在命令事务里加共享锁再检查，与撤权写入互斥
 /// </remarks>
 public interface IOperatorRecheck
 {

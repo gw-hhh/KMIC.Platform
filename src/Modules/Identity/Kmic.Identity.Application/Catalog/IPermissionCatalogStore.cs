@@ -4,12 +4,12 @@ namespace Kmic.Identity.Application.Catalog;
 /// 权限点与范围对象的目录存储，仅供同步与清理更新
 /// </summary>
 /// <remarks>
-/// 与命令共用事务；目录表不是聚合，没有审计列或版本号，按次整体同步
+/// 与命令共用事务；目录表不是聚合，每次整体同步
 /// </remarks>
 public interface IPermissionCatalogStore
 {
     /// <summary>
-    /// 同步前取得事务级咨询锁并持有至事务结束，使多实例同步串行执行，后续实例读取已提交结果
+    /// 同步前取事务级咨询锁，让多个实例的同步依次执行，后到的读到前一个提交的结果
     /// </summary>
     Task LockSyncAsync(CancellationToken ct);
 

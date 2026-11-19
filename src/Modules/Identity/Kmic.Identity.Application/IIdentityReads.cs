@@ -7,10 +7,6 @@ namespace Kmic.Identity.Application;
 /// <summary>
 /// 查询与命令共用的身份数据读取接口
 /// </summary>
-/// <remarks>
-/// 不跟踪实体。<see cref="IIdentityQueryDb" /> 读取已提交数据；
-/// <see cref="IIdentityCommandReads" /> 与仓储共用事务
-/// </remarks>
 public interface IIdentityReads
 {
     /// <summary>

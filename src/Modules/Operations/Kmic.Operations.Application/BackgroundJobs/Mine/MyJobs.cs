@@ -9,10 +9,10 @@ namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 internal static class MyJobs
 {
     /// <summary>
-    /// 取当前用户提交的作业；模块不存在、作业不存在、不是自己提交的都返回空，调用方无法区分
+    /// 取当前用户提交的作业；模块或作业不存在、不是自己提交的都返回空
     /// </summary>
     /// <remarks>
-    /// 模拟登录时当前用户是被模拟的人，和“我的作业”列表一致
+    /// 模拟登录时按被模拟的人算，和“我的作业”列表一致
     /// </remarks>
     public static async Task<JobView?> FindAsync(IExecutionContext execution, IModuleJobStores stores, string module, Guid jobId, CancellationToken ct)
     {

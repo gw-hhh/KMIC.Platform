@@ -5,10 +5,6 @@ namespace Kmic.Identity.Application;
 /// <summary>
 /// Identity 模块的权限点
 /// </summary>
-/// <remarks>
-/// 使用敏感权限点的命令须记录审计，查询须记录读审计。
-/// 未被用例或资源动作使用的权限点会导致启动失败
-/// </remarks>
 [PermissionGroup("Identity", "身份与授权")]
 public static class IdentityPermissions
 {

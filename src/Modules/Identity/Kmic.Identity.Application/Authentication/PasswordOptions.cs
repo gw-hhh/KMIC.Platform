@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 namespace Kmic.Identity.Application.Authentication;
 
 /// <summary>
-/// 密码规则
+/// 密码长度规则，配置节 Identity:Password
 /// </summary>
 /// <remarks>
-/// 配置节为 Identity:Password，设置密码长度范围。密码策略另行检查常见弱密码及与账号、手机号重复的情况，不强制字符组合或定期改密
+/// 弱密码和与账号、手机号相同的检查在密码策略里；不要求字符组合，也不要求定期改密
 /// </remarks>
 public sealed class PasswordOptions
 {

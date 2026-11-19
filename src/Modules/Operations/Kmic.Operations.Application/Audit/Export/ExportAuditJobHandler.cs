@@ -11,10 +11,10 @@ using Microsoft.Extensions.Options;
 namespace Kmic.Operations.Application.Audit.Export;
 
 /// <summary>
-/// 将审计记录导出为 CSV 文件
+/// 把审计记录流式导出为 CSV 文件
 /// </summary>
 /// <remarks>
-/// 流式导出；文件登记请求与检查点在最后一批事务中提交，临时文件在 finally 中清理
+/// 文件登记请求和检查点在最后一批的事务里提交
 /// </remarks>
 public sealed class ExportAuditJobHandler(
     IExportReader<IOperationsQueryDb> reader,

@@ -6,11 +6,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Authorization;
 
 /// <summary>
-/// 授权配置变更的安全事件
+/// 授权配置变更的安全事件，角色、授予和组织树的变更除审计外都写一条
 /// </summary>
-/// <remarks>
-/// 角色权限、数据范围、启停状态、用户授予及组织树变更除记录审计外，还统一写入授权配置变更安全事件，便于追溯授权来源
-/// </remarks>
 internal static class AuthorizationChangeEvents
 {
     /// <summary>

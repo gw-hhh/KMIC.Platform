@@ -8,8 +8,7 @@ namespace Kmic.Identity.Application.Users.ResetPassword;
 /// 重置用户密码并返回临时密码，作废全部会话，下次登录须修改密码
 /// </summary>
 /// <remarks>
-/// 临时密码仅在本次响应返回，不写入幂等记录；重复提交会生成新密码，旧临时密码随即失效。
-/// 目标用户持有受保护角色时，操作者的当前角色也必须受保护
+/// 临时密码不写入幂等记录，重复提交会生成新密码，旧的随即失效
 /// </remarks>
 [RequirePermission(IdentityPermissions.UserResetPassword)]
 [Audited]

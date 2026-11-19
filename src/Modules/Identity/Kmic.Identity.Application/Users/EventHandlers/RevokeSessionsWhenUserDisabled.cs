@@ -6,11 +6,8 @@ using Kmic.Identity.Domain.Users.Events;
 namespace Kmic.Identity.Application.Users.EventHandlers;
 
 /// <summary>
-/// 用户被禁用：作废他的全部会话，含他作为实际操作人发起的模拟会话
+/// 用户被禁用时作废该用户的全部会话，包括其作为实际操作人发起的模拟会话
 /// </summary>
-/// <remarks>
-/// 与禁用命令共用事务；请求还会检查用户状态，禁用期间拒绝访问
-/// </remarks>
 internal sealed class RevokeSessionsWhenUserDisabled(ISessionRepository sessions, TimeProvider time) : IDomainEventHandler<UserDisabled>
 {
     public async ValueTask<Result> HandleAsync(UserDisabled domainEvent, CancellationToken ct)

@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Domain.Users;
 
 /// <summary>
-/// 用户拥有某个角色
+/// 用户的角色授予，只能经 User 创建和修改，同一角色只有一条
 /// </summary>
-/// <remarks>
-/// 聚合内的子实体：只能通过 User 创建和修改。同一用户同一角色只能有一条
-/// </remarks>
 public sealed class UserRoleGrant : Entity<GrantId>
 {
     private readonly List<GrantAnchor> _anchors = [];

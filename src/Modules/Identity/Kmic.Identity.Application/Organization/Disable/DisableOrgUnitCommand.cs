@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Organization.Disable;
 /// 停用组织单元
 /// </summary>
 /// <remarks>
-/// 还有启用的下级、或有启用的用户归属于它时拒绝；根单元不能停用。停用的单元仍然在树上，历史数据还引用着它
+/// 还有启用的下级、或有启用的用户归属于它时拒绝；根单元不能停用
 /// </remarks>
 /// <param name="ExpectedVersion">组织树的预期版本号，不匹配时返回版本冲突</param>
 /// <param name="Id">组织单元 ID</param>

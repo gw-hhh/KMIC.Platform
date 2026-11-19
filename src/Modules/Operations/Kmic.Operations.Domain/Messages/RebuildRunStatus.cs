@@ -6,7 +6,7 @@ namespace Kmic.Operations.Domain.Messages;
 /// 读模型重建状态
 /// </summary>
 /// <remarks>
-/// 编码和框架里重建轮次的状态一一对应，领域层不引用应用层，所以单独定义，由应用层转换
+/// 编码和框架重建轮次的状态一一对应，由应用层转换
 /// </remarks>
 public sealed class RebuildRunStatus : Enumeration<RebuildRunStatus>
 {

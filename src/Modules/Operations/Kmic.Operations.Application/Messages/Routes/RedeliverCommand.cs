@@ -7,8 +7,7 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// 按来源序号区间补投消息
 /// </summary>
 /// <remarks>
-/// 仅补投来源发件箱中已投递的消息，已接收的消息不重复写入。
-/// 已终结的订阅须先重新激活；来源序号的边界均包含在区间内
+/// 只补投来源发件箱里已投递的消息，已接收的不重复写入；已终结的订阅要先重新激活；区间两端都包含
 /// </remarks>
 /// <param name="SourceModule">发布消息的模块</param>
 /// <param name="MessageType">消息名称</param>

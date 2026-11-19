@@ -8,11 +8,8 @@ namespace Kmic.Identity.Domain.Users;
 public static class ProtectedHolders
 {
     /// <summary>
-    /// 查询持有已启用受保护角色的启用普通用户
+    /// 持有已启用受保护角色的启用普通用户，读写两侧共用这个判定
     /// </summary>
-    /// <remarks>
-    /// 读写侧共用此判定，停用角色的授予不计入
-    /// </remarks>
     public static IQueryable<User> EnabledHolders(IQueryable<User> users, IQueryable<Role> roles)
     {
         ArgumentNullException.ThrowIfNull(users);

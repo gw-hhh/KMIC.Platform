@@ -11,8 +11,7 @@ namespace Kmic.Identity.Domain.Users;
 /// 用户：能登录系统的人，以及代表“系统”的固定账号
 /// </summary>
 /// <remarks>
-/// 仅保存身份和通用展示信息，业务属性由各业务模块维护。
-/// 用户只禁用、不删除，以保留历史引用的解析能力。
+/// 只存身份和通用展示信息，业务属性由各业务模块维护；用户只禁用不删除，历史引用才能解析
 /// </remarks>
 public sealed class User : AggregateRoot<UserId>
 {
@@ -34,11 +33,8 @@ public sealed class User : AggregateRoot<UserId>
     }
 
     /// <summary>
-    /// 登录名
+    /// 登录名，唯一，不区分大小写
     /// </summary>
-    /// <remarks>
-    /// 唯一，不区分大小写。
-    /// </remarks>
     public string Account { get; private set; }
 
     /// <summary>
@@ -57,11 +53,8 @@ public sealed class User : AggregateRoot<UserId>
     public string? EmployeeNo { get; private set; }
 
     /// <summary>
-    /// 手机号
+    /// 手机号，国际格式，填写时唯一
     /// </summary>
-    /// <remarks>
-    /// 规范化为国际格式，填写时唯一。
-    /// </remarks>
     public string? Mobile { get; private set; }
 
     /// <summary>
@@ -73,7 +66,7 @@ public sealed class User : AggregateRoot<UserId>
     /// 所属组织单元
     /// </summary>
     /// <remarks>
-    /// 未指定角色授予锚点时，作为“本组织”范围的起点。
+    /// 角色授予没设锚点时，作为“本组织”范围的起点
     /// </remarks>
     public OrgUnitId? OrgUnitId { get; private set; }
 

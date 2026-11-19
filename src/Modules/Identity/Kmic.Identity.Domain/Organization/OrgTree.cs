@@ -6,11 +6,10 @@ using Kmic.Identity.Domain.Errors;
 namespace Kmic.Identity.Domain.Organization;
 
 /// <summary>
-/// 组织树
+/// 组织树，整棵树是一个聚合，保证无环、同级不重名、停用单元下没有启用下级
 /// </summary>
 /// <remarks>
-/// 整棵树作为一个聚合，统一保证无环、同级不重名，以及停用单元下没有启用下级等约束。
-/// 访问上下文按并发版本号缓存树快照，规模按不超过几千个单元设计
+/// 按不超过几千个单元设计：访问上下文按版本缓存整棵树
 /// </remarks>
 public sealed class OrgTree : AggregateRoot<OrgTreeId>
 {

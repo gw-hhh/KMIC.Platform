@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Organization.Move;
 /// 移动组织单元及其下级
 /// </summary>
 /// <remarks>
-/// 不能移到自身或自身下级中，根单元不能移动。移动组织单元不会修改已有业务数据的所属组织
+/// 不能移到自身或下级里，根单元不能移动；已有业务数据的所属组织不跟着改
 /// </remarks>
 /// <param name="ExpectedVersion">组织树的预期版本号，不匹配时返回版本冲突</param>
 /// <param name="Id">要移动的组织单元</param>
