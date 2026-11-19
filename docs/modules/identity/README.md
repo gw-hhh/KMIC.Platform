@@ -710,4 +710,4 @@ Notifications 的请求型消息 `SendNotification`（05-11 第 7.2 节）。收
 - **算法不另写一份**：用户能以这个角色登录时，按后台作业的方式（`IAccessContextLoader.LoadForJobAsync`，不需要会话）加载访问上下文，再用框架新增的 `DataScopeRules`（等级、起点组织、能看到的组织单元）解释；框架的数据过滤也改用 `DataScopeRules`，诊断的结论与过滤实际执行的一致。
 - **不能登录时给出原因，不加载访问上下文**：系统账号、用户已禁用、没有这个角色的授予、角色已停用，判断与加载器一致；这时权限点为空集合、数据范围为空。
 - 与 05-05 第 9 节示例的差异：①等级来源用 `levelOverridden`（布尔），锚点来源用 `anchorsFromGrant`（布尔），不用中文描述字符串；②增加 `usable`、`unusableReason`；③“本人”“全部”不按组织判断，`anchors` 为空集合、`orgUnitCount` 为空；④`relationVisibility`、`restrictedVisibility` 暂不返回：关系可见与资源可见性还没实现（延后事项），随第一个用到它们的业务模块一起补。
-- 测试：5 个端到端（单独设置的等级加授予锚点、默认等级从所属组织算起、本人与全部、三种不能登录的原因、未知范围对象／用户／角色与无权限）。前端页面 `identity.authorizationExplain` 未做（前端暂停）。**已实现，待用户确认。**
+- 测试：5 个端到端（单独设置的等级加授予锚点、默认等级从所属组织算起、本人与全部、三种不能登录的原因、未知范围对象／用户／角色与无权限）。前端页面 `identity.authorizationExplain` 未做（前端暂停）。**已实现，用户已确认（2026-11-19）。**

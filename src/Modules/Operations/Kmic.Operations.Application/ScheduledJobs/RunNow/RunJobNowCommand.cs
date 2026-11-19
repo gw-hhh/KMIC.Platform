@@ -8,7 +8,7 @@ namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 /// </summary>
 /// <remarks>
 /// 提交触发请求后即返回，不等待任务完成；执行记录标记为“手动”，并记录操作人。
-/// 检查到任务正在运行时拒绝触发。停用的任务也可以手动执行
+/// 任务正在执行、即将按计划执行或已有手动触发在排队时拒绝。停用的任务也可以手动执行
 /// </remarks>
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]

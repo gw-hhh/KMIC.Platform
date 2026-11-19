@@ -16,7 +16,7 @@ public enum ScheduledJobTriggerOutcome
     NotFound = 1,
 
     /// <summary>
-    /// 这个任务正在某个实例上执行
+    /// 这个任务正在执行、即将按计划执行，或已有手动触发在排队
     /// </summary>
     AlreadyRunning = 2,
 }

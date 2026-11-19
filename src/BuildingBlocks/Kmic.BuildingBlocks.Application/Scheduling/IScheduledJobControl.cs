@@ -31,7 +31,7 @@ public interface IScheduledJobControl
     Task SyncAsync(CancellationToken ct);
 
     /// <summary>
-    /// 马上执行一次，由运行着调度器的实例执行；执行记录里的触发方式是手动
+    /// 马上执行一次，由运行着调度器的实例执行；任务忙或已有手动触发在排队时拒绝，执行记录里的触发方式是手动
     /// </summary>
     /// <param name="name">任务名</param>
     /// <param name="by">谁点的</param>

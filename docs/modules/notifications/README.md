@@ -593,6 +593,6 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 
 未做：阿里云短信网关（已搁置，需要时再做）、纯文本备选正文。
 
-2026-11-18 修正（Codex 复核 CN-05）：原设计允许含密投递在有效期内人工重试，但最终失败时正文和短信参数已经清空，重新排队只会把空参数交给网关。改为：`RetryDeliveryCommand` 对含密模板的投递一律返回 `DeliverySecretNotRetryable`（原 `DeliverySecretExpired` 删除），`IDeliveryRepository.RetryAsync` 去掉创建时间条件；发送前再检查一次，含密投递缺短信参数时直接记为失败（“含密通知内容已清除，未发送”），不调用网关。暂时失败的自动重试不受影响，内容在最终失败前保留。测试：投递管理 1 个（替换原有效期测试）、发送 1 个。**已实现，待用户确认。**
+2026-11-18 修正（Codex 复核 CN-05）：原设计允许含密投递在有效期内人工重试，但最终失败时正文和短信参数已经清空，重新排队只会把空参数交给网关。改为：`RetryDeliveryCommand` 对含密模板的投递一律返回 `DeliverySecretNotRetryable`（原 `DeliverySecretExpired` 删除），`IDeliveryRepository.RetryAsync` 去掉创建时间条件；发送前再检查一次，含密投递缺短信参数时直接记为失败（“含密通知内容已清除，未发送”），不调用网关。暂时失败的自动重试不受影响，内容在最终失败前保留。测试：投递管理 1 个（替换原有效期测试）、发送 1 个。**已实现，用户已确认（2026-11-19）。**
 
 2026-11-18：**后台作业完成通知**。订阅框架事件 `Framework.BackgroundJobFinished`（`NotifyJobFinishedCommand`），模板 `Notifications.BackgroundJobFinished` 只发站内消息，提交人自己取消的不发；没有跳转链接（外壳的作业入口不是页面，F03 第 7.9 节）。测试：审计导出成功与失败后提交人各收到一条（`AuditExportTests`）。

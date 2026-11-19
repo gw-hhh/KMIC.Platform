@@ -3,7 +3,7 @@
 // 创建模块骨架：dotnet run scripts/new-module.cs -- <模块名> <编号>
 // 先在 docs/modules/README.md 登记模块名和编号。
 // 脚本会更新项目引用和模块注册、编译解决方案，并生成含 schema 初始化的初始迁移。
-// 完成后按已确认的模块设计实现用例，再运行 dotnet run scripts/check.cs -- --fix。
+// 完成后按已确认的模块设计实现用例，再运行 dotnet run scripts/check.cs -- --fix
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;

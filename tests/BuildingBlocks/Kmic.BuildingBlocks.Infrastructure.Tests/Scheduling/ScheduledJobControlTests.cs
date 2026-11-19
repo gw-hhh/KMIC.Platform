@@ -5,6 +5,7 @@ using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
 using Kmic.BuildingBlocks.Testing.Waiting;
 using Microsoft.Extensions.DependencyInjection;
+using Quartz;
 using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Scheduling;
@@ -157,6 +158,49 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
     }
 
     [Fact]
+    public async Task Trigger_WhileAnEarlierManualTriggerIsQueued_IsRefused()
+    {
+        await ClearSettingsAsync();
+        await Control.SyncAsync(Ct);
+        await RemoveManualTriggersAsync();
+        try
+        {
+            // 这个宿主没有启动调度器，触发会一直排在队里
+            (await Control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBe(ScheduledJobTriggerOutcome.Triggered);
+
+            (await Control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBe(ScheduledJobTriggerOutcome.AlreadyRunning);
+        }
+        finally
+        {
+            await RemoveManualTriggersAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Trigger_ConcurrentRequests_OnlyOneIsAccepted()
+    {
+        await ClearSettingsAsync();
+        await Control.SyncAsync(Ct);
+        await RemoveManualTriggersAsync();
+        await using var second = new ProbeHarness(database.ConnectionString);
+        var controls = new[] { Control, second.Services.GetRequiredService<IScheduledJobControl>() };
+        try
+        {
+            // 两个实例各发四个请求，模拟不同管理员同时点“立即执行”
+            var outcomes = await Task.WhenAll(Enumerable.Range(0, 8)
+                .Select(i => Task.Run(() => controls[i % 2].TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct), Ct)));
+
+            outcomes.Count(o => o == ScheduledJobTriggerOutcome.Triggered).ShouldBe(1);
+            outcomes.Count(o => o == ScheduledJobTriggerOutcome.AlreadyRunning).ShouldBe(7);
+            (await ManualTriggerCountAsync()).ShouldBe(1);
+        }
+        finally
+        {
+            await RemoveManualTriggersAsync();
+        }
+    }
+
+    [Fact]
     public async Task StoppingTheSchedulerServiceTwice_IsHarmless()
     {
         await using var worker = new ProbeHarness(database.ConnectionString, services: s =>
@@ -178,6 +222,26 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
     {
         await using var command = database.DataSource.CreateCommand($"""SELECT count(*) FROM {SchedulingTables.Runs} WHERE "Status" = 0""");
         return (long)(await command.ExecuteScalarAsync(ct))!;
+    }
+
+    // 手动触发是 Quartz 为任务另建的一次性触发器，任务自己的 Cron 触发器与任务同名
+    private async Task<IReadOnlyList<TriggerKey>> ManualTriggersAsync()
+    {
+        var scheduler = await _harness.Services.GetRequiredService<ISchedulerFactory>().GetScheduler(Ct);
+        var cron = new TriggerKey(ProbeHarness.DailyStamp, CommandJob.Group);
+        var triggers = await scheduler.GetTriggersOfJob(new JobKey(ProbeHarness.DailyStamp, CommandJob.Group), Ct);
+        return [.. triggers.Select(t => t.Key).Where(k => !k.Equals(cron))];
+    }
+
+    private async Task<int> ManualTriggerCountAsync() => (await ManualTriggersAsync()).Count;
+
+    private async Task RemoveManualTriggersAsync()
+    {
+        var scheduler = await _harness.Services.GetRequiredService<ISchedulerFactory>().GetScheduler(Ct);
+        foreach (var key in await ManualTriggersAsync())
+        {
+            await scheduler.UnscheduleJob(key, Ct);
+        }
     }
 
     private async Task ClearSettingsAsync()

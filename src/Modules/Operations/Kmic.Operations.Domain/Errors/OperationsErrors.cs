@@ -33,9 +33,9 @@ public static class OperationsErrors
     public static readonly Error JobNotFound = Error.NotFound("Operations.JobNotFound", "定时任务不存在");
 
     /// <summary>
-    /// 定时任务正在执行
+    /// 定时任务正在执行或已在排队
     /// </summary>
-    public static readonly Error JobAlreadyRunning = Error.Conflict("Operations.JobAlreadyRunning", "任务正在执行，请等待任务结束后重试");
+    public static readonly Error JobAlreadyRunning = Error.Conflict("Operations.JobAlreadyRunning", "任务正在执行或已在排队，请等任务结束后再试");
 
     /// <summary>
     /// Cron 校验失败，具体原因见字段错误

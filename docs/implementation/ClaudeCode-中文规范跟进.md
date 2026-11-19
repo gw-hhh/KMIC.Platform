@@ -491,3 +491,19 @@
 | 2026-11-19 | `tests/Kmic.Api.Tests/ApiFactory.cs` | 类说明、限流设置的注释 | 部分 | 理顺语句，去掉句末句号 |
 | 2026-11-19 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Jobs/JobExecutionTests.cs` | 超时上限的注释 | 部分 | 改成“做法 + 目的” |
 | 2026-11-19 | `tests/Kmic.Api.Tests/Identity/AuthorizationExplainTests.cs` | 类说明 | 部分 | 测试类只写前提，删掉“授权诊断，端到端” |
+| 2026-11-19 | `scripts/check.cs` | 顶部说明、步骤名、`CheckWording`、`CheckCommentStyle`、`HasInlineSummaryTag` 及其注释，`Run`、`CheckEncoding`、`ListFiles` 里的注释 | 部分 | 恢复两道检查；句号不再检查；去掉一句话注释末尾的句号 |
+| 2026-11-19 | `scripts/new-module.cs` | 顶部说明最后一行 | 部分 | 去掉句末句号 |
+| 2026-11-19 | `src/Modules/Files/Kmic.Files.Infrastructure/Deletion/FilesDeletionStore.cs` | 类的 remarks | 部分 | “租约到期”改为“领取过期” |
+| 2026-11-19 | `src/Modules/Notifications/Kmic.Notifications.Infrastructure/Sending/DeliveryStore.cs` | 类的 remarks | 部分 | “租约已过期”改为“领取已过期” |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Scheduling/ScheduledJobControl.cs` | `TriggerAsync` 注释、`IsBusyAsync` | 部分 | CN-03 新写 |
+| 2026-11-19 | `src/BuildingBlocks/Kmic.BuildingBlocks.Application/Scheduling/ScheduledJobTriggerOutcome.cs`、`IScheduledJobControl.cs` | `AlreadyRunning`、`TriggerAsync` 的说明 | 部分 | 拒绝条件补上“已在排队” |
+| 2026-11-19 | `src/Modules/Operations/Kmic.Operations.Application/ScheduledJobs/RunNow/RunJobNowCommand.cs`、`Kmic.Operations.Domain/Errors/OperationsErrors.cs`、`Kmic.Operations.Presentation/ScheduledJobs/RunJobNowEndpoint.cs` | remarks、`JobAlreadyRunning` 的说明与提示、接口说明 | 部分 | 同上 |
+| 2026-11-19 | `tests/BuildingBlocks/Kmic.BuildingBlocks.Infrastructure.Tests/Scheduling/ScheduledJobControlTests.cs` | 新增两个测试及辅助方法的注释 | 部分 | 新写 |
+| 2026-11-19 | `docs/framework/06-coding-standards.md` | 第 10.3 节规则表与“引用”“工具边界”、A.3 格式、A.5、编码速查第 26 条、修订记录 | 部分 | 恢复检查后的写法；句号改为“一句话时尽量不加，不强制” |
+| 2026-11-19 | `docs/framework/00-README.md` | 待决事项、延后事项新增一行、修订记录 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/framework/05-infrastructure/05-05-授权.md`、`05-07-模块间通信.md`、`05-08-后台处理.md`、`05-10-配置与缓存.md` | 修订记录新增行；05-10 第 8.1 节“后台入口的后果” | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/modules/operations/README.md` | `RunJobNowCommand` 行、错误表一行、“立即执行”一段 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/modules/identity/README.md`、`docs/modules/notifications/README.md` | “已实现，待用户确认”改为已确认 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/S3-平台模块.md` | 进展记录新增一行、Codex 的 36 行并成一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/00-README.md` | 清单表“协作交接”一行 | 部分 | 其余未检查 |
+| 2026-11-19 | `docs/implementation/协作交接记录.md` | 末尾说明一句 | 部分 | Codex 的记录已删除 |

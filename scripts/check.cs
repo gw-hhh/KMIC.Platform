@@ -1,10 +1,10 @@
 #:property RestorePackagesWithLockFile=false
 
 // 本地和 CI 共用的质量检查：dotnet run scripts/check.cs
-// 按下方顺序执行，任一步失败即停止，并返回该步骤的退出码。
-// 数据库测试和密钥扫描需要 Docker。
-// 本地可加 -- --fix 移除 BOM，并将 CRLF 换行改为 LF；CI 只检查，不修复。
-// 依赖漏洞扫描在本地依赖锁文件未变时 24 小时内只扫一次，CI 每次都扫。
+// 按下方顺序执行，任一步失败即停止，并返回该步骤的退出码
+// 数据库测试和密钥扫描需要 Docker
+// 本地可加 -- --fix 移除 BOM，并将 CRLF 换行改为 LF；CI 只检查，不修复
+// 依赖漏洞扫描在本地依赖锁文件未变时 24 小时内只扫一次，CI 每次都扫
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -17,14 +17,15 @@ var fix = args.Contains("--fix", StringComparer.Ordinal);
 var steps = new (string Name, Func<int> Run)[]
 {
     ("编码与换行（UTF-8 无 BOM、LF）", () => CheckEncoding(root, fix)),
-    ("临时引用标记", () => CheckTemporaryReferences(root)),
+    ("注释格式（summary 三行）", () => CheckCommentStyle(root)),
+    ("用词（设计文档编号、不用的说法）", () => CheckWording(root)),
     // 代码风格与分析器规则由编译检查（EnforceCodeStyleInBuild、警告即错误），这里只查编译不管的空白、文件末尾换行与 using 顺序
     ("格式（空白与 using 顺序）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes --diagnostics IMPORTS")),
     ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
     ("依赖漏洞（含传递依赖）", () => WhenProjectsExist(root, () => CheckVulnerabilities(root))),
-    // pnpm 版本与 web/package.json 保持一致。
-    // 接口类型比对依赖后端测试导出的 OpenAPI 文档，须在后端测试后执行。
+    // pnpm 版本与 web/package.json 保持一致
+    // 接口类型比对依赖后端测试导出的 OpenAPI 文档，须在后端测试后执行
     ("前端依赖（pnpm install --frozen-lockfile）", () => RunWeb(root, "install --frozen-lockfile")),
     ("前端接口类型比对", () => RunWeb(root, "run generate:api -- --check")),
     ("前端类型检查", () => RunWeb(root, "run typecheck")),
@@ -32,7 +33,7 @@ var steps = new (string Name, Func<int> Run)[]
     ("前端格式（prettier --check）", () => RunWeb(root, "run format:check")),
     ("前端测试", () => RunWeb(root, "run test")),
     ("前端构建", () => RunWeb(root, "run build")),
-    // 密钥扫描包含提交历史，CI 必须检出完整历史。
+    // 密钥扫描包含提交历史，CI 必须检出完整历史
     ("密钥扫描（Gitleaks）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
     ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
@@ -205,7 +206,7 @@ static int RunWeb(string root, string pnpmArguments)
 
 static int Run(string root, string fileName, string arguments)
 {
-    // Windows 上的 npx 是批处理命令，需要通过 cmd.exe 执行。
+    // Windows 上的 npx 是批处理命令，需要通过 cmd.exe 执行
     var startInfo = OperatingSystem.IsWindows() && string.Equals(fileName, "npx", StringComparison.Ordinal)
         ? new ProcessStartInfo("cmd.exe", $"/c npx {arguments}")
         : new ProcessStartInfo(fileName, arguments);
@@ -230,7 +231,7 @@ static int CheckEncoding(string root, bool fix)
             continue;
         }
 
-        // Windows 上的 NuGet 锁文件使用 CRLF，由 Git 入库时转为 LF。
+        // Windows 上的 NuGet 锁文件使用 CRLF，由 Git 入库时转为 LF
         if (string.Equals(Path.GetFileName(file), "packages.lock.json", StringComparison.OrdinalIgnoreCase))
         {
             continue;
@@ -278,7 +279,7 @@ static int CheckEncoding(string root, bool fix)
     return problems == 0 ? 0 : 1;
 }
 
-// 列出已跟踪文件和未被忽略的新文件；返回以 / 分隔的仓库相对路径。
+// 列出已跟踪文件和未被忽略的新文件，返回以 / 分隔的仓库相对路径
 static string[] ListFiles(string root)
 {
     var startInfo = new ProcessStartInfo("git", "-c core.quotepath=off ls-files -z --cached --others --exclude-standard")
@@ -294,13 +295,14 @@ static string[] ListFiles(string root)
     return files;
 }
 
-static int CheckTemporaryReferences(string root)
+// 设计文档的节号、编号不写进代码：读代码的人不一定读过文档，文档改版后编号也会失效
+static int CheckWording(string root)
 {
     string[] extensions = [".cs", ".ts", ".vue"];
     var problems = 0;
     foreach (var file in ListFiles(root))
     {
-        // 脚本中包含旧标记的示例，跳过自身。
+        // 本脚本里的词表和正则就是规则本身，不检查
         if (!extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)
             || string.Equals(file, "scripts/check.cs", StringComparison.Ordinal))
         {
@@ -316,24 +318,79 @@ static int CheckTemporaryReferences(string root)
         var lines = File.ReadAllLines(path);
         for (var i = 0; i < lines.Length; i++)
         {
-            if (Kmic.Scripts.Patterns.TemporaryReference().IsMatch(lines[i]))
+            if (Kmic.Scripts.Patterns.DesignReference().Match(lines[i]) is { Success: true } reference)
             {
-                Console.WriteLine($"   {file}:{i + 1} 请移除旧引用标记，直接写明用途或原因");
+                Console.WriteLine($"   {file}:{i + 1} 写了设计文档编号“{reference.Value}”，直接说明原因");
+                problems++;
+            }
+
+            if (lines[i].Contains("【引用", StringComparison.Ordinal))
+            {
+                Console.WriteLine($"   {file}:{i + 1} 不再使用临时【引用】，直接说明原因");
+                problems++;
+            }
+
+            if (Kmic.Scripts.Patterns.AvoidedWording().Match(lines[i]) is { Success: true } wording)
+            {
+                Console.WriteLine($"   {file}:{i + 1} “{wording.Value}”是设计文档里的说法或空话，换成直接的描述");
                 problems++;
             }
         }
     }
 
-    Console.WriteLine($"   发现 {problems} 处旧引用标记");
+    Console.WriteLine($"   问题 {problems} 处");
     return problems == 0 ? 0 : 1;
+}
+
+// 只检查整行的 XML 注释：summary 的开始、结束标签各占一行。句号不检查
+static int CheckCommentStyle(string root)
+{
+    var problems = 0;
+    foreach (var file in ListFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
+    {
+        var path = Path.Combine(root, file);
+        if (!File.Exists(path))
+        {
+            continue;
+        }
+
+        var lines = File.ReadAllLines(path);
+        for (var i = 0; i < lines.Length; i++)
+        {
+            if (HasInlineSummaryTag(lines[i].Trim()))
+            {
+                Console.WriteLine($"   {file}:{i + 1} summary 的开始、结束标签要各占一行");
+                problems++;
+            }
+        }
+    }
+
+    Console.WriteLine($"   注释格式问题 {problems} 处");
+    return problems == 0 ? 0 : 1;
+}
+
+static bool HasInlineSummaryTag(string line)
+{
+    if (!line.StartsWith("///", StringComparison.Ordinal))
+    {
+        return false;
+    }
+
+    var text = line[3..].Trim();
+    return (text.StartsWith("<summary>", StringComparison.Ordinal) && text.Length > "<summary>".Length)
+        || (text.EndsWith("</summary>", StringComparison.Ordinal) && text.Length > "</summary>".Length);
 }
 
 namespace Kmic.Scripts
 {
     internal static partial class Patterns
     {
-        // 只匹配“【引用：”或“【引用:”，允许冒号前有空白。
-        [GeneratedRegex(@"【引用\s*[:：]", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
-        public static partial Regex TemporaryReference();
+        // 节号（第 5.3 节）、带文档号的决定（05-02 D5）、括号里的文档号（05-03 …）、原型编号、实施任务号
+        [GeneratedRegex(@"第 ?\d+(\.\d+)* ?节|\b[FR]?\d{2}(-\d{2})? ?D\d+\b|（[FR]?\d{2}-\d{2}[ ）]|原型 ?#\d+|\bS\d-\d{2}\b|实施待办", RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
+        public static partial Regex DesignReference();
+
+        // 只收没有正当用法的说法：设计文档里的说法、自造词、空话。评审发现新的同类说法再加
+        [GeneratedRegex("定稿|挂接|租约|管道第|落地|收口|闭环|赋能|抓手|进行统一处理|高效管理|完整、灵活|完整性与可靠性", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
+        public static partial Regex AvoidedWording();
     }
 }

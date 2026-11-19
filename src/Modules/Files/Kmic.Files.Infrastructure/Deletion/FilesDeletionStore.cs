@@ -10,7 +10,7 @@ namespace Kmic.Files.Infrastructure.Deletion;
 /// <remarks>
 /// 领取和结果更新使用单条 SQL，不经聚合方法或显式事务。
 /// 队列包含 StoredFile 表中删除中的文件，以及已彻底删除但尚未登记对象删除完成的文件。
-/// 通过 FOR UPDATE SKIP LOCKED 避免多实例重复领取；结果更新须匹配本次领取令牌，防止租约到期接管后被旧实例覆盖
+/// 通过 FOR UPDATE SKIP LOCKED 避免多实例重复领取；结果更新须匹配本次领取令牌，防止领取过期、被别的实例接管后又被旧实例覆盖
 /// </remarks>
 internal sealed class FilesDeletionStore(FilesDbContext context)
 {

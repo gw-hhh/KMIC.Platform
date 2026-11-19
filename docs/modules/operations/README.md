@@ -145,7 +145,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 | `PreviewCronQuery` | `Operations.Jobs.View` | 校验 Cron 并返回接下来 5 次触发时间（05-08 第 5.3 节） |
 | `SetJobOverrideCommand` | `Operations.Jobs.Manage` | 停用 / 启用、改 Cron；保存后同步到 Quartz 触发器，整个集群即时生效 |
 | `RestoreJobDefaultCommand` | `Operations.Jobs.Manage` | 恢复默认 |
-| `RunJobNowCommand` | `Operations.Jobs.Manage` | 立即执行一次，执行记录的 `Trigger = Manual`、`TriggeredBy` 为操作人；该任务正在运行时拒绝（`Operations.JobAlreadyRunning`，409） |
+| `RunJobNowCommand` | `Operations.Jobs.Manage` | 立即执行一次，执行记录的 `Trigger = Manual`、`TriggeredBy` 为操作人；任务正在执行、即将按计划执行或已有手动触发在排队时拒绝（`Operations.JobAlreadyRunning`，409） |
 
 ### 4.3 后台作业
 
@@ -352,7 +352,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 | 事项 | 默认 |
 |---|---|
 | Cron 最短间隔 | 1 分钟 |
-| 立即执行时任务正在运行 | 拒绝，409 |
+| 立即执行时任务正在执行、即将执行或已在排队 | 拒绝，409 |
 | 死信载荷、审计字段值的显示 | 原样显示给有权限点的人，每次查看写读审计；不做二次脱敏（遮盖已在审计采集时完成，死信载荷按 05-07 第 5.3 节不含敏感字段；含密消息和目录里找不到类型的消息不显示载荷） |
 | 审计导出的行数上限 | 配置项，默认 100 万行；超过时要求缩小时间范围 |
 | `RestoreJobDefault` | 保留行、两项置空（便于追溯） |
@@ -415,7 +415,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 - 版本号规则与系统设置一致：从来没改过的任务没有设置行，调用方不带版本；已经有行（含恢复默认后留着的）就要带列表里的 `overrideVersion`，否则 409。
 - 保存后的同步放在提交之后执行，失败只记警告、不影响保存；列表每项带 `inSync`（调度器里的状态与按设置应有的状态是否一致），改了设置却没同步上时界面能看出来。
 - Cron 的最短间隔用预览出的相邻触发时间判断（秒位只有一个取值才不会一分钟内触发多次，头几次触发里就能看出来）；预览、保存都走同一条规则，错误都是 `Operations.CronInvalid` 加 `cron` 字段错误。
-- 立即执行：任务正在任何实例上运行时返回 409 `Operations.JobAlreadyRunning`（查 Quartz 集群共享的“正在触发”表，不看本实例）；触发写进调度库，由运行着调度器的实例执行，执行记录里触发方式是手动、触发人是操作人（模拟登录时是真正动手的人）。触发不在命令的事务里：事务之后才失败时任务已经交给调度器，任务本来就要求可以重复执行，这一点接受。
+- 立即执行：同一任务的手动触发先按任务名取数据库咨询锁，锁内查 Quartz 集群共享的表，不看本实例：任务已被领取或正在执行（`qrtz_fired_triggers`，含即将按计划执行的），或者还有没执行的手动触发（`qrtz_triggers` 里该任务 Cron 触发器以外的触发器），就返回 409 `Operations.JobAlreadyRunning`；否则提交触发，提交完才放锁，后来的请求能看到前一个排队的触发（2026-11-19，CN-03）。与定时触发在领取前的毫秒级空隙交错时仍可能多排一次，Quartz 的执行互斥保证不会同时执行；触发写进调度库，由运行着调度器的实例执行，执行记录里触发方式是手动、触发人是操作人（模拟登录时是真正动手的人）。触发不在命令的事务里：事务之后才失败时任务已经交给调度器，任务本来就要求可以重复执行，这一点接受。
 - 执行记录用原生 SQL 映射到只读行类型（表由框架的调度器写），状态与触发方式在查询里换成编码文字，响应里是智能枚举 `JobRunStatus`、`JobRunTrigger`；翻页用游标（开始时间加 ID，行 ID 是 Guid 的重载）。
 - 动作目录 `ScheduledJobActions`：`Edit`、`RestoreDefault`（有覆盖才有）、`RunNow`，都要 `Operations.Jobs.Manage`；资源策略是一条全部允许的空策略（动作目录要求每类资源有一个策略，权限点就是授权的全部）。
 - 权限点 `Operations.Jobs.View`、`Operations.Jobs.Manage` 随用例加入（非敏感，沿用 05-08 第 7.1 节）。
