@@ -7,7 +7,7 @@ namespace Kmic.Notifications.Domain.Templates;
 /// 模板在某个渠道发布过的一个版本
 /// </summary>
 /// <remarks>
-/// 只增不改：恢复默认内容也不删除历史版本
+/// 只增不改
 /// </remarks>
 public sealed class TemplateVersion : Entity<TemplateVersionId>
 {

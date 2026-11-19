@@ -8,8 +8,7 @@ namespace Kmic.Notifications.Domain.Deliveries;
 /// 一次投递：把一条通知用某个渠道发给一个收件人
 /// </summary>
 /// <remarks>
-/// 渲染结果随投递保存，重试不受模板修改影响。
-/// 后续领取、发送结果、失败退避和人工重试由工作器或管理用例按条件更新，不经聚合方法
+/// 渲染结果随投递保存，重试不受模板修改影响
 /// </remarks>
 public sealed class Delivery : AggregateRoot<DeliveryId>
 {

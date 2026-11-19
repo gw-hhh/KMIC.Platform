@@ -21,8 +21,6 @@ public static class MigrationBuilderExtensions
     /// <remarks>
     /// 写在模块初始迁移的最前面。之后建的表运行账号自动可读写，但不能改表结构；迁移历史表只可读
     /// </remarks>
-    /// <param name="migrationBuilder">迁移</param>
-    /// <param name="schema">模块名</param>
     public static void InitializeModuleSchema(this MigrationBuilder migrationBuilder, string schema)
     {
         ArgumentNullException.ThrowIfNull(migrationBuilder);

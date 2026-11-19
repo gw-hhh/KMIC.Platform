@@ -89,20 +89,12 @@ internal static class ModelValidator
         }
     }
 
-    // 列注释是数据字典的来源，所以必须有。存成 jsonb 的值对象集合只有一列，成员没有列注释
+    // 表注释是数据字典的入口，必须有；列注释不强制，属性写了 summary 会自动生成
     private static void ValidateComments(IReadOnlyEntityType entityType, string name, List<string> problems)
     {
         if (entityType.GetComment() is null)
         {
-            problems.Add($"{name}：表缺少注释，在实体配置中写 ToTable(t => t.HasComment(\"…\"))：中文名称、所属模块、一行代表什么、生命周期。");
-        }
-
-        foreach (var (path, property, inJson) in AllProperties(entityType, name, inJson: false))
-        {
-            if (!inJson && property.GetComment() is null)
-            {
-                problems.Add($"{path}：列缺少注释，给属性写 XML 注释（summary），说法需要不同时在配置中写 HasComment。");
-            }
+            problems.Add($"{name}：表缺少注释，在实体配置中写 ToTable(t => t.HasComment(\"…\"))，一句话说明一行代表什么。");
         }
     }
 

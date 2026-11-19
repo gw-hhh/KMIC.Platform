@@ -8,7 +8,7 @@ namespace Kmic.Sample.Application.Specimens.EventHandlers;
 /// 示例提交后通知其他模块：领域事件转成集成事件
 /// </summary>
 /// <remarks>
-/// 和提交命令在同一个事务里，集成事件随业务数据一起写入 Outbox，提交之后才会投递
+/// 提交之后才投递
 /// </remarks>
 internal sealed class PublishSpecimenSubmitted(IIntegrationEventPublisher publisher) : IDomainEventHandler<SpecimenSubmitted>
 {

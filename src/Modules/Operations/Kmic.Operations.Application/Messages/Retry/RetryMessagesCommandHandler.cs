@@ -9,7 +9,7 @@ namespace Kmic.Operations.Application.Messages.Retry;
 /// 重试死信并逐条返回结果
 /// </summary>
 /// <remarks>
-/// 直接改各模块的消息存储，不在 Operations 的命令事务里
+/// 不在 Operations 的命令事务里
 /// </remarks>
 public sealed class RetryMessagesCommandHandler(IModuleMessageStores stores) : ICommandHandler<RetryMessagesCommand, MessageReceipts>
 {

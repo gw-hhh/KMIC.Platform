@@ -6,11 +6,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Authorization;
 
 /// <summary>
-/// 授权管理命令的基类，执行前在同一事务里重新校验操作者
+/// 授权管理命令的基类，执行前重新校验操作者
 /// </summary>
-/// <remarks>
-/// 模块不能增减管道行为，所以用基类统一复查
-/// </remarks>
 /// <typeparam name="TCommand">命令</typeparam>
 /// <typeparam name="TResponse">响应</typeparam>
 public abstract class AuthorizationAdminCommandHandler<TCommand, TResponse>(IOperatorRecheck recheck, IExecutionContext execution) : ICommandHandler<TCommand, TResponse>

@@ -16,9 +16,6 @@ public static class HttpClientServiceCollectionExtensions
     /// </remarks>
     /// <typeparam name="TClient">客户端接口</typeparam>
     /// <typeparam name="TImplementation">客户端实现，构造函数接收 HttpClient</typeparam>
-    /// <param name="services">服务集合</param>
-    /// <param name="name">客户端名称</param>
-    /// <param name="configure">超时与重试</param>
     public static IHttpClientBuilder AddKmicHttpClient<TClient, TImplementation>(
         this IServiceCollection services, string name, Action<ExternalClientOptions>? configure = null)
         where TClient : class

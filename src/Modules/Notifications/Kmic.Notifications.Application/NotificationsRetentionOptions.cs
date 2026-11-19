@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Kmic.Notifications.Application;
 
 /// <summary>
-/// 通知相关数据的保留期
+/// 通知相关数据的保留期，配置节 Notifications:Retention
 /// </summary>
-/// <remarks>
-/// 配置节为 Notifications:Retention；各类记录按各自保留期由每日任务清理
-/// </remarks>
 public sealed class NotificationsRetentionOptions
 {
     /// <summary>

@@ -6,7 +6,7 @@ namespace Kmic.Operations.Domain.Messages;
 /// 订阅路由的状态
 /// </summary>
 /// <remarks>
-/// 编码和框架路由表里的状态一一对应
+/// 编码与框架路由表的状态一一对应
 /// </remarks>
 public sealed class MessageRouteStatus : Enumeration<MessageRouteStatus>
 {

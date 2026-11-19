@@ -9,9 +9,6 @@ namespace Kmic.Identity.Application.ContractQueries;
 /// <summary>
 /// 批量查询角色引用信息
 /// </summary>
-/// <remarks>
-/// 角色没有编码，引用信息里的编码为空
-/// </remarks>
 public sealed class GetRoleReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetRoleReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
     /// <inheritdoc />

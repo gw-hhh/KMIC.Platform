@@ -7,11 +7,8 @@ namespace Kmic.Notifications.Application.Processing;
 /// <summary>
 /// 处理普通通知发送请求，生成投递记录或站内消息
 /// </summary>
-/// <remarks>
-/// 订阅 Notifications.SendNotification，以系统身份在 Worker 上执行；模板不存在或模型不符等业务失败转入死信
-/// </remarks>
 /// <param name="Message">请求</param>
-/// <param name="SourceMessageId">来源消息的 ID，同一条只处理一次</param>
+/// <param name="SourceMessageId">来源消息的 ID</param>
 /// <param name="SourceModule">发出请求的模块</param>
 /// <param name="InitiatorUserId">通知发起用户 ID</param>
 [SystemOnly]

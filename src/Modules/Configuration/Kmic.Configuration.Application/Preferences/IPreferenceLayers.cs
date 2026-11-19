@@ -12,6 +12,5 @@ public interface IPreferenceLayers
     /// </summary>
     /// <param name="userId">用户 ID，为空时不读取用户层</param>
     /// <param name="roleId">当前角色 ID，为空时仅读取系统层</param>
-    /// <param name="ct">取消令牌</param>
     Task<LayeredPreferences> GetAsync(UserId? userId, RoleId? roleId, CancellationToken ct);
 }

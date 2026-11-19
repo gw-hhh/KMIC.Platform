@@ -44,8 +44,6 @@ public sealed class TestOrgTree : IOrgHierarchy
     /// <summary>
     /// 建树，同一棵树里名称不能重复
     /// </summary>
-    /// <param name="build">从第一级开始声明组织</param>
-    /// <param name="version">树版本号</param>
     public static TestOrgTree Create(Action<TestOrgTreeBuilder> build, long version = 1)
     {
         ArgumentNullException.ThrowIfNull(build);

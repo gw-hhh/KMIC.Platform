@@ -6,9 +6,7 @@ namespace Kmic.Files.Contracts;
 /// 读取文件内容，只给系统身份用
 /// </summary>
 /// <remarks>
-/// 用于系统读取邮件附件；用户下载须经业务对象授权并使用 IFileDownloads。
-/// 可读取已关联、可用或已解除关联的文件；上传中、扫描中返回可重试的 Files.NotReady，已彻底删除返回 Files.Purged，其余按不存在处理。
-/// 存储对象缺失返回 Common.FileContentMissing
+/// 用户下载走 IFileDownloads
 /// </remarks>
 public interface IFileContents
 {

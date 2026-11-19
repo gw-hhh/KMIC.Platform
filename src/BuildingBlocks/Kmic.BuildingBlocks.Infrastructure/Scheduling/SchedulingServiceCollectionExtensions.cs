@@ -23,7 +23,6 @@ public static class SchedulingServiceCollectionExtensions
     /// 调度器使用 Operations 里的 Quartz 表，集群模式，多个实例同一次触发只执行一次。
     /// 只调用这个方法的实例不执行任务，只能手动执行和改时间；要执行再调用 <see cref="AddKmicSchedulerWorker"/>
     /// </remarks>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicScheduler(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -65,7 +64,6 @@ public static class SchedulingServiceCollectionExtensions
     /// <summary>
     /// 在本实例上执行定时任务，Worker 角色调用
     /// </summary>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicSchedulerWorker(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

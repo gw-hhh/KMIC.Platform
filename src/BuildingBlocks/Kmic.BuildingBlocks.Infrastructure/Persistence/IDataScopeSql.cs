@@ -17,7 +17,6 @@ public interface IDataScopeSql
     /// 不受限（系统身份、范围等级是全部）时条件是 <c>TRUE</c>；没有任何可见范围（匿名、没有所有者也没有组织）时是 <c>FALSE</c>。
     /// 范围值都是参数，不拼进 SQL 文本
     /// </remarks>
-    /// <param name="scopeObject">范围对象编码，和聚合声明数据范围时用的一致</param>
     /// <param name="ownerColumn">所有者列，如 <c>s."OwnerId"</c>；表里没有所有者就传空</param>
     /// <param name="orgUnitColumn">所属组织列，如 <c>s."OrgUnitId"</c>；表里没有所属组织就传空</param>
     /// <exception cref="ArgumentException">列写法不是“列”或“别名.列”（可以带双引号）</exception>

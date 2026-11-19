@@ -12,6 +12,5 @@ public sealed record RenderedContent(IReadOnlyDictionary<TemplateChannel, Channe
     /// <summary>
     /// 某个渠道的内容
     /// </summary>
-    /// <param name="channel">渠道，必须是模板声明过的</param>
     public ChannelContent For(TemplateChannel channel) => Channels[channel];
 }

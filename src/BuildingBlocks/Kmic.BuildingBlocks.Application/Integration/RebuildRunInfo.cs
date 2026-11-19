@@ -10,7 +10,7 @@ namespace Kmic.BuildingBlocks.Application.Integration;
 /// <param name="JobId">执行这一轮的后台作业</param>
 /// <param name="State">状态</param>
 /// <param name="Scanned">已扫描的行数</param>
-/// <param name="Missing">源端确认不存在的行数，暂停等确认时是已发现的数量</param>
+/// <param name="Missing">源端确认不存在的行数</param>
 /// <param name="StartedAt">开始时间</param>
 /// <param name="FinishedAt">结束时间</param>
 public sealed record RebuildRunInfo(

@@ -14,9 +14,6 @@ namespace Kmic.Identity.Application.Authentication.Login;
 /// <summary>
 /// 校验账号密码并创建登录会话
 /// </summary>
-/// <remarks>
-/// 等待或锁定期间不校验密码，也不增加失败次数
-/// </remarks>
 public sealed class LoginCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,

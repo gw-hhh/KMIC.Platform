@@ -19,7 +19,7 @@ public interface IDictionaryTypeRepository : IRepository<DictionaryType, Diction
     Task<IReadOnlyList<DictionaryType>> ListWithoutItemsAsync(CancellationToken ct);
 
     /// <summary>
-    /// 同步前取得事务级咨询锁并持有至事务结束，使多实例同步串行执行，后续实例读取已提交的同步结果
+    /// 同步前取事务级咨询锁，让多个实例的同步依次执行，后到的读到前一个提交的结果
     /// </summary>
     Task LockCatalogSyncAsync(CancellationToken ct);
 }

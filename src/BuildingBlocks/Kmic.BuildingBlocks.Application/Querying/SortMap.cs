@@ -46,8 +46,6 @@ public sealed class SortMap<T>
     /// <summary>
     /// 开始声明：登记第一个可排序的字段
     /// </summary>
-    /// <param name="name">请求里使用的字段名，小驼峰</param>
-    /// <param name="selector">列表项上的排序依据</param>
     public static SortMapBuilder<T> Field<TKey>(string name, Expression<Func<T, TKey>> selector) =>
         new SortMapBuilder<T>().Field(name, selector);
 

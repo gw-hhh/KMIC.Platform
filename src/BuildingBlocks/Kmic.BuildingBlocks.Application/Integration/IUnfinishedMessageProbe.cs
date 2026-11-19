@@ -14,9 +14,6 @@ public interface IUnfinishedMessageProbe
     /// <summary>
     /// 找出被某类未完成的消息提到的对象
     /// </summary>
-    /// <param name="messageType">消息类型名，如 Files.AttachFiles</param>
-    /// <param name="subjectIds">要探查的对象 ID；消息要用 [MessageSubjects] 声明了主体才查得到</param>
-    /// <param name="ct">取消令牌</param>
     /// <returns>有未完成消息提到的那些 ID</returns>
     Task<IReadOnlySet<Guid>> FindSubjectsAsync(string messageType, IReadOnlyCollection<Guid> subjectIds, CancellationToken ct);
 }

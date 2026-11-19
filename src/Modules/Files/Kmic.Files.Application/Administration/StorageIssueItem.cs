@@ -8,9 +8,9 @@ namespace Kmic.Files.Application.Administration;
 /// </summary>
 /// <param name="Id">存储问题 ID</param>
 /// <param name="FileId">文件 ID</param>
-/// <param name="FileName">文件名；文件记录不存在时为空</param>
+/// <param name="FileName">文件名，文件记录不存在时为空</param>
 /// <param name="Kind">问题类型</param>
-/// <param name="ObjectVersionId">发现时记录的对象版本，用于还原</param>
+/// <param name="ObjectVersionId">发现时记录的对象版本</param>
 /// <param name="FoundAt">发现时间</param>
 /// <param name="Status">状态</param>
 /// <param name="ResolvedAt">标记已解决的时间</param>

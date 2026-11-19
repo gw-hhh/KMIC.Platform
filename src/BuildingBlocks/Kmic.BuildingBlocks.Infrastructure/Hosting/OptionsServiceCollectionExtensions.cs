@@ -16,8 +16,6 @@ public static class OptionsServiceCollectionExtensions
     /// 要在运行中调整的参数做成系统设置，不放在这里
     /// </remarks>
     /// <typeparam name="TOptions">配置类，用 sealed class，属性 init</typeparam>
-    /// <param name="services">服务集合</param>
-    /// <param name="section">配置节，框架用 Kmic:{能力}，模块用 Modules:{模块}:{用途}</param>
     public static OptionsBuilder<TOptions> AddKmicOptions<TOptions>(this IServiceCollection services, string section)
         where TOptions : class
     {

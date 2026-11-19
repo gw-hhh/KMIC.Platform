@@ -7,13 +7,13 @@ namespace Kmic.Identity.Application.Authentication.Login;
 /// 账号密码登录
 /// </summary>
 /// <remarks>
-/// 账号不存在、密码错误或账号禁用统一返回登录失败，避免泄露账号是否存在
+/// 各种失败统一返回登录失败，不泄露账号是否存在
 /// </remarks>
 /// <param name="Account">登录名</param>
 /// <param name="Password">密码</param>
-/// <param name="ClientType">客户端类型：web 或 app</param>
-/// <param name="ClientIp">客户端 IP，由接口层取得</param>
-/// <param name="UserAgent">客户端 User-Agent，由接口层取得</param>
+/// <param name="ClientType">客户端类型</param>
+/// <param name="ClientIp">客户端 IP</param>
+/// <param name="UserAgent">客户端 User-Agent</param>
 [AllowAnonymous]
 [NotAudited("登录结果记入安全事件")]
 [NotIdempotent("每次成功登录都会创建新会话，令牌不写入幂等记录")]

@@ -8,7 +8,7 @@ namespace Kmic.Identity.Application.Users.Grants.RevokeRole;
 /// 收回用户的一个角色
 /// </summary>
 /// <param name="Id">用户 ID</param>
-/// <param name="ExpectedVersion">用户的预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">用户的预期版本号</param>
 /// <param name="RoleId">角色 ID</param>
 [RequirePermission(IdentityPermissions.UserGrant)]
 [Audited]

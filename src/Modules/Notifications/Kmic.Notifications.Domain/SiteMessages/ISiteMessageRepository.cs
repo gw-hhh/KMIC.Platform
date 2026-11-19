@@ -17,9 +17,6 @@ public interface ISiteMessageRepository : IRepository<SiteMessage, SiteMessageId
     /// <summary>
     /// 按已读和未读各自的截止时间删除站内消息
     /// </summary>
-    /// <remarks>
-    /// 已读消息的已读时间须早于 readBefore；未读消息的发送时间须早于 unreadCreatedBefore
-    /// </remarks>
     /// <returns>删除的消息数</returns>
     Task<int> PurgeAsync(DateTimeOffset readBefore, DateTimeOffset unreadCreatedBefore, CancellationToken ct);
 }

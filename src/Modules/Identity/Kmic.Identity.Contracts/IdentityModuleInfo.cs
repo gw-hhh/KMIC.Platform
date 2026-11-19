@@ -4,7 +4,7 @@ namespace Kmic.Identity.Contracts;
 /// Identity 模块的基本信息
 /// </summary>
 /// <remarks>
-/// 模块名不能改：它是数据库 schema 名，也是权限点、错误码、消息名和路由的前缀
+/// 模块名不能改，它是 schema 名和各类编码的前缀
 /// </remarks>
 public static class IdentityModuleInfo
 {

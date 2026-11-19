@@ -13,7 +13,6 @@ public static class ObservabilityServiceCollectionExtensions
     /// <summary>
     /// 注册配置与慢查询拦截器，数据库上下文创建时挂上，由 AddKmicPersistence 调用
     /// </summary>
-    /// <param name="services">服务集合</param>
     internal static IServiceCollection AddKmicSlowQueryLog(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -29,7 +28,6 @@ public static class ObservabilityServiceCollectionExtensions
     /// <summary>
     /// 注册积压采样：每个实例定期统计消息、作业与定时任务的积压，积压量表读取采样结果
     /// </summary>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicBacklogSampling(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -45,7 +43,6 @@ public static class ObservabilityServiceCollectionExtensions
     /// <remarks>
     /// 实现按单例注册；所在宿主未启用积压采样时不会被读取
     /// </remarks>
-    /// <param name="services">服务集合</param>
     /// <typeparam name="T">量表的实现</typeparam>
     public static IServiceCollection AddKmicBacklogGauges<T>(this IServiceCollection services)
         where T : class, IBacklogGauges

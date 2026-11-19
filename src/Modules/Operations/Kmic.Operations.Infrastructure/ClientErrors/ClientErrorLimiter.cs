@@ -8,9 +8,6 @@ namespace Kmic.Operations.Infrastructure.ClientErrors;
 /// <summary>
 /// 按用户的固定窗口限流，窗口一分钟；每个实例各自计数
 /// </summary>
-/// <remarks>
-/// 空闲分区由限流器回收，不会随用户数一直增长；计数只用于防滥用，不写数据库或缓存
-/// </remarks>
 internal sealed class ClientErrorLimiter : IClientErrorLimiter, IDisposable
 {
     private readonly PartitionedRateLimiter<Guid> _limiter;

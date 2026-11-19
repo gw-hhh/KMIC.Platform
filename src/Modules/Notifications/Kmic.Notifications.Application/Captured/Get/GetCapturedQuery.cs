@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Application.Captured.Get;
 /// 查询捕获内容及正文
 /// </summary>
 /// <remarks>
-/// 未开启捕获时返回 NotFound；内容可能含验证码，查询须记录读审计
+/// 未开启捕获时返回 NotFound
 /// </remarks>
 [RequirePermission(NotificationsPermissions.CapturedView)]
 [AuditedRead]

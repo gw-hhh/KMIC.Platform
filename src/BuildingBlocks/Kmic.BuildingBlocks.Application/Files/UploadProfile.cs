@@ -14,6 +14,5 @@ public sealed record UploadProfile(string Name, string DisplayName, string Modul
     /// <summary>
     /// 这种类型这个档案允许不允许
     /// </summary>
-    /// <param name="code">类型编码</param>
     public bool Allows(string code) => AllowedTypes.Contains(code, StringComparer.Ordinal);
 }

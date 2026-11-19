@@ -32,16 +32,10 @@ public interface ILeasedWork<TItem>
     /// <summary>
     /// 领取最多 <paramref name="max" /> 条，没有就返回空列表
     /// </summary>
-    /// <param name="max">最多领几条，等于现在空闲的槽位数</param>
-    /// <param name="token">本次领取的令牌，写进领取记录，之后的写入要带它</param>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlyList<TItem>> ClaimAsync(int max, Guid token, CancellationToken ct);
 
     /// <summary>
     /// 处理一条；失败要自己记录结果（退避、转人工），抛出来的异常只会被记成错误日志
     /// </summary>
-    /// <param name="item">领取到的一条</param>
-    /// <param name="token">领取时的令牌</param>
-    /// <param name="ct">取消令牌，停机时取消</param>
     Task ProcessAsync(TItem item, Guid token, CancellationToken ct);
 }

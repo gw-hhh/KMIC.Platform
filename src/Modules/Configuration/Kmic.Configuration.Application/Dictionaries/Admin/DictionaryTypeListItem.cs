@@ -10,10 +10,10 @@ namespace Kmic.Configuration.Application.Dictionaries.Admin;
 /// <param name="DisplayName">显示名</param>
 /// <param name="OwnerModule">声明字典类型的模块</param>
 /// <param name="IsHierarchical">是否层级字典</param>
-/// <param name="Status">状态：使用中、已退役</param>
-/// <param name="ItemCount">字典项总数，包含已停用项</param>
+/// <param name="Status">状态</param>
+/// <param name="ItemCount">字典项总数</param>
 /// <param name="ActiveItemCount">启用的字典项数</param>
-/// <param name="ConcurrencyVersion">版本号，输出为 version</param>
+/// <param name="ConcurrencyVersion">版本号</param>
 public sealed record DictionaryTypeListItem(
     string Code,
     string DisplayName,

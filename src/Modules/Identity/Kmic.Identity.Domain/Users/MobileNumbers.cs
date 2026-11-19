@@ -13,7 +13,7 @@ public static partial class MobileNumbers
     /// 校验并规范化手机号
     /// </summary>
     /// <remarks>
-    /// 号码里可以有空白、短横线和括号；大陆号码可带 86、0086 或 +86 前缀
+    /// 大陆号码可带 86、0086 或 +86 前缀
     /// </remarks>
     public static Result<string> Normalize(string? input)
     {

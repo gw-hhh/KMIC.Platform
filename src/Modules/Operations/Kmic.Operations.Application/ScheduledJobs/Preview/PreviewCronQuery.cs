@@ -7,8 +7,8 @@ namespace Kmic.Operations.Application.ScheduledJobs.Preview;
 /// 校验 Cron 并预览后续触发时间
 /// </summary>
 /// <remarks>
-/// 按业务时区解释；语法无效、没有后续触发时间，或触发间隔短于 1 分钟时返回字段错误
+/// 按业务时区解释
 /// </remarks>
-/// <param name="Cron">Cron 表达式，Quartz 写法，带秒，如 0 0 7 * * ?</param>
+/// <param name="Cron">Cron 表达式</param>
 [RequirePermission(OperationsPermissions.JobsView)]
 public sealed record PreviewCronQuery(string Cron) : IQuery<CronPreviewResponse>;

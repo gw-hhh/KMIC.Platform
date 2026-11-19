@@ -6,11 +6,8 @@ namespace Kmic.Operations.Application.Audit.Export;
 /// <summary>
 /// 审计导出作业的参数：和 <see cref="ExportAuditCommand"/> 一样的筛选条件
 /// </summary>
-/// <remarks>
-/// 不改审计数据，中断后从头重做；重做可能多写一个存储对象，没登记的由对账清理
-/// </remarks>
-/// <param name="From">起始时间，含</param>
-/// <param name="To">结束时间，不含</param>
+/// <param name="From">起始时间</param>
+/// <param name="To">结束时间</param>
 /// <param name="ActorUserId">操作人</param>
 /// <param name="ActualUserId">实际操作人</param>
 /// <param name="Module">产生审计的模块</param>

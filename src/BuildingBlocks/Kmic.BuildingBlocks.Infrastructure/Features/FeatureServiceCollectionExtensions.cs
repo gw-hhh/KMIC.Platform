@@ -19,8 +19,6 @@ public static class FeatureServiceCollectionExtensions
     /// <summary>
     /// 注册功能开关：值来自配置，改了要重启生效
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="configuration">配置根</param>
     public static IServiceCollection AddKmicFeatures(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);

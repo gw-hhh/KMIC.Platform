@@ -9,7 +9,7 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// 按序号范围重新投递消息
 /// </summary>
 /// <remarks>
-/// 由框架在独立事务里写订阅方收件箱，不在 Operations 的命令事务里
+/// 不在 Operations 的命令事务里
 /// </remarks>
 public sealed class RedeliverCommandHandler(IMessageRouteAdmin routes) : ICommandHandler<RedeliverCommand, RedeliverResponse>
 {

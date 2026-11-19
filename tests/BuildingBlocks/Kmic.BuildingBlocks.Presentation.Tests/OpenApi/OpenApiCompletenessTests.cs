@@ -32,28 +32,14 @@ public sealed class OpenApiCompletenessTests
     public void CompleteDocument_HasNoProblems() => Check(Complete).ShouldBeEmpty();
 
     [Fact]
-    public void NullableObjectReference_CanCarryItsDescriptionOnTheReferenceBranch()
-    {
-        var withReference = Complete.Replace(
-            "\"name\": { \"type\": \"string\", \"description\": \"名称\" }",
-            "\"name\": { \"type\": \"string\", \"description\": \"名称\" }, \"owner\": { \"oneOf\": [ { \"type\": \"null\" }, { \"description\": \"负责人\", \"$ref\": \"#/components/schemas/ThingDto\" } ] }",
-            StringComparison.Ordinal);
-
-        Check(withReference).ShouldBeEmpty();
-        Check(withReference.Replace("\"description\": \"负责人\", ", "", StringComparison.Ordinal)).ShouldHaveSingleItem().ShouldBe("架构 ThingDto 的字段 owner 没有说明。");
-    }
-
-    [Fact]
     public void OperationWithoutSummary_IsReported() =>
         Check(Complete.Replace("\"summary\": \"列表\",", "", StringComparison.Ordinal)).ShouldHaveSingleItem().ShouldBe("操作 GET /api/v1/samples/things 没有摘要（summary）。");
 
     [Fact]
-    public void ParameterWithoutDescription_IsReported() =>
-        Check(Complete.Replace(", \"description\": \"关键字\"", "", StringComparison.Ordinal)).ShouldHaveSingleItem().ShouldBe("操作 GET /api/v1/samples/things 的参数 q 没有说明。");
-
-    [Fact]
-    public void PropertyWithoutDescription_IsReported() =>
-        Check(Complete.Replace(", \"description\": \"名称\"", "", StringComparison.Ordinal)).ShouldHaveSingleItem().ShouldBe("架构 ThingDto 的字段 name 没有说明。");
+    public void ParametersAndFieldsWithoutDescriptions_AreFine() =>
+        Check(Complete
+            .Replace(", \"description\": \"关键字\"", "", StringComparison.Ordinal)
+            .Replace(", \"description\": \"名称\"", "", StringComparison.Ordinal)).ShouldBeEmpty();
 
     [Fact]
     public void EnumValueWithoutADisplayName_IsReported() =>
@@ -72,7 +58,7 @@ public sealed class OpenApiCompletenessTests
     {
         var broken = Complete
             .Replace("\"summary\": \"列表\",", "", StringComparison.Ordinal)
-            .Replace(", \"description\": \"名称\"", "", StringComparison.Ordinal);
+            .Replace("\"name\": \"已完成\"", "\"name\": \"\"", StringComparison.Ordinal);
 
         Check(broken).Count.ShouldBe(2);
     }

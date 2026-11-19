@@ -24,8 +24,6 @@ public sealed class FilesMetrics
     /// <summary>
     /// 清理到期文件时跳过了一批候选
     /// </summary>
-    /// <param name="reason">locked：关联锁被占用；attaching：有未完成的关联请求</param>
-    /// <param name="count">跳过的文件数</param>
     public void PurgeSkipped(string reason, int count)
     {
         if (count > 0)

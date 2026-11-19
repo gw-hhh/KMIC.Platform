@@ -9,7 +9,7 @@ namespace Kmic.Operations.Application.Messages.Abandon;
 /// 检查并放弃收件箱死信
 /// </summary>
 /// <remarks>
-/// 直接改各模块的收件箱，不在 Operations 的命令事务里
+/// 不在 Operations 的命令事务里
 /// </remarks>
 public sealed class AbandonMessagesCommandHandler(IModuleMessageStores stores, IAbandonGuard guard) : ICommandHandler<AbandonMessagesCommand, MessageReceipts>
 {

@@ -8,7 +8,7 @@ namespace Kmic.Sample.Application;
 /// 示例：声明并校验提交设置
 /// </summary>
 /// <remarks>
-/// 当前创建和提交命令未读取这些设置，不据此限制明细数量或要求提交说明
+/// 创建和提交命令还没读这些设置
 /// </remarks>
 /// <param name="MaxItems">明细数量上限</param>
 /// <param name="ReasonRequired">提交时是否必须写说明</param>

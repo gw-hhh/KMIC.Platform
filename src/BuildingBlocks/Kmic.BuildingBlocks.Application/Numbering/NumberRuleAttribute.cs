@@ -6,7 +6,6 @@ namespace Kmic.BuildingBlocks.Application.Numbering;
 /// <remarks>
 /// 占位符：{yyyy} {yy} {MM} {dd} 是取号日期，{seq:N} 是至少 N 位的序号，{partition} 是分组键，其他字符原样输出
 /// </remarks>
-/// <param name="format">编号格式，如 "SP-{yyyy}{MM}-{seq:4}"</param>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class NumberRuleAttribute(string format) : Attribute
 {

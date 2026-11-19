@@ -7,7 +7,7 @@ namespace Kmic.Identity.Application.Organization.Get;
 /// 查询整棵组织树，含已停用的单元
 /// </summary>
 /// <remarks>
-/// 业务页面也要用，登录即可查，不需要组织管理权限
+/// 登录即可查
 /// </remarks>
 [AllowAuthenticated]
 public sealed record GetOrgTreeQuery : IQuery<OrgTreeResponse>;

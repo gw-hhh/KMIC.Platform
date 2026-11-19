@@ -3,8 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Time;
 /// <summary>
 /// 业务日历
 /// </summary>
-/// <param name="time">时间来源</param>
-/// <param name="zone">业务时区</param>
 public sealed class BusinessCalendar(TimeProvider time, TimeZoneInfo zone) : IBusinessCalendar
 {
     /// <inheritdoc />

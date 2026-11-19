@@ -6,7 +6,7 @@ namespace Kmic.Identity.Domain.Roles;
 /// 角色上配置的数据范围等级
 /// </summary>
 /// <remarks>
-/// 编码与框架的 ScopeLevel 成员名一致，由基础设施层转换
+/// 编码与框架的 ScopeLevel 成员名一致
 /// </remarks>
 public sealed class RoleScopeLevel : Enumeration<RoleScopeLevel>
 {
@@ -29,7 +29,7 @@ public sealed class RoleScopeLevel : Enumeration<RoleScopeLevel>
     /// 全部数据
     /// </summary>
     /// <remarks>
-    /// 隐藏了基类的同名属性，要遍历所有等级用 Enumeration&lt;RoleScopeLevel&gt;.All
+    /// 隐藏了基类的 All，遍历用 Enumeration&lt;RoleScopeLevel&gt;.All
     /// </remarks>
     public static new readonly RoleScopeLevel All = new("All", "全部");
 

@@ -42,11 +42,7 @@ public static class AppendOnlyPurge
     /// <summary>
     /// 分批删除发生时间早于截止时间的行，每批单独提交
     /// </summary>
-    /// <param name="database">迁移账号的数据源</param>
     /// <param name="table">表名，必须是 <see cref="Tables"/> 里的一个</param>
-    /// <param name="before">截止时间，早于它的行被删除</param>
-    /// <param name="batchSize">每批行数</param>
-    /// <param name="ct">取消令牌</param>
     /// <returns>删除的行数；表还不存在（对应模块尚未建立）时为 null</returns>
     public static async Task<long?> RunAsync(NpgsqlDataSource database, string table, DateTimeOffset before, int batchSize, CancellationToken ct)
     {

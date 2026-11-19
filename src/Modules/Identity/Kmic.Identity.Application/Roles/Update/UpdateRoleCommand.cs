@@ -8,7 +8,7 @@ namespace Kmic.Identity.Application.Roles.Update;
 /// 修改角色的名称、说明和次序
 /// </summary>
 /// <param name="Id">角色 ID</param>
-/// <param name="ExpectedVersion">预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="Name">名称</param>
 /// <param name="Description">说明</param>
 /// <param name="SortOrder">次序</param>

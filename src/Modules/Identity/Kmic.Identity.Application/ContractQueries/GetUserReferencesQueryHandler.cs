@@ -9,9 +9,6 @@ namespace Kmic.Identity.Application.ContractQueries;
 /// <summary>
 /// 批量查询用户引用信息
 /// </summary>
-/// <remarks>
-/// Identity 的数据不按数据范围过滤，所以不用声明绕过
-/// </remarks>
 public sealed class GetUserReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetUserReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
     /// <inheritdoc />

@@ -8,10 +8,6 @@ namespace Kmic.Configuration.Domain.Dictionaries;
 /// <summary>
 /// 字典类型和它的全部字典项
 /// </summary>
-/// <remarks>
-/// 字典类型由代码声明并在启动时同步，字典项由管理员维护。每个类型作为一个聚合，统一保证编码唯一、父项有效、层级无环及停用前无启用子项。
-/// 字典项变更递增所属类型的版本号，并使用该版本进行并发校验
-/// </remarks>
 public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
 {
     private const int SortStep = 10;
@@ -111,11 +107,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     /// <summary>
     /// 添加字典项
     /// </summary>
-    /// <param name="code">编码，须为 1～50 个字符，仅支持字母、数字、点、短横线和下划线</param>
-    /// <param name="name">显示名</param>
     /// <param name="parentCode">父项编码；不分层的字典必须为空</param>
-    /// <param name="sortOrder">排序值；未指定时排在同级末尾</param>
-    /// <param name="maxItems">该类型的字典项数量上限</param>
     public Result<DictionaryItem> AddItem(string? code, string? name, string? parentCode, int? sortOrder, int maxItems)
     {
         var active = EnsureActive();
@@ -209,7 +201,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     /// 调整同级字典项的顺序
     /// </summary>
     /// <remarks>
-    /// 列表须包含全部同级项（含停用项），且不得重复；排序值重排为 10、20、30……
+    /// 列表要包含全部同级项，不能重复
     /// </remarks>
     public Result ReorderItems(string? parentCode, IReadOnlyList<string> orderedCodes)
     {

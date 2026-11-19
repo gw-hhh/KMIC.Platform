@@ -6,16 +6,16 @@ namespace Kmic.Operations.Presentation.Audit;
 /// <summary>
 /// 查询审计记录的参数
 /// </summary>
-/// <param name="From">起始时间，含；必填</param>
-/// <param name="To">结束时间，不含；必填，和起始时间相隔不超过 93 天</param>
+/// <param name="From">起始时间</param>
+/// <param name="To">结束时间</param>
 /// <param name="ActorUserId">操作人 ID</param>
 /// <param name="ActualUserId">模拟身份时的实际操作人 ID</param>
-/// <param name="Module">产生审计的模块，如 Identity</param>
-/// <param name="Action">操作名，如 Identity.CreateUser</param>
-/// <param name="ResourceType">操作对象的类型，如 User</param>
+/// <param name="Module">产生审计的模块</param>
+/// <param name="Action">操作名</param>
+/// <param name="ResourceType">操作对象的类型</param>
 /// <param name="ResourceId">操作对象的 ID</param>
 /// <param name="After">上一页返回的游标，首页不传</param>
-/// <param name="Limit">每页数量，1 到 200，默认 50</param>
+/// <param name="Limit">每页数量</param>
 public sealed record ListAuditRequest(
     DateTimeOffset From,
     DateTimeOffset To,

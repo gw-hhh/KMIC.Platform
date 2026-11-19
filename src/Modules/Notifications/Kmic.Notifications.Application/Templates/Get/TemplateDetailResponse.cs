@@ -9,14 +9,14 @@ namespace Kmic.Notifications.Application.Templates.Get;
 /// <param name="Key">模板键</param>
 /// <param name="DisplayName">显示名</param>
 /// <param name="Module">声明它的模块</param>
-/// <param name="SenderProfile">发件账号名，只对邮件渠道有意义</param>
+/// <param name="SenderProfile">发件账号名</param>
 /// <param name="CarriesSecret">内容含一次性短时凭据</param>
 /// <param name="Status">状态编码：Active、Retired</param>
-/// <param name="ConcurrencyVersion">并发版本号，以 version 输出；发布或恢复默认时用作预期版本号</param>
+/// <param name="ConcurrencyVersion">并发版本号</param>
 /// <param name="Channels">各渠道当前的内容</param>
 /// <param name="Variables">模板里能用的变量名</param>
-/// <param name="Example">预览默认使用的示例数据；声明已移除时为空</param>
-/// <param name="Versions">已发布版本，按版本号倒序</param>
+/// <param name="Example">预览默认使用的示例数据，声明已移除时为空</param>
+/// <param name="Versions">已发布版本</param>
 public sealed record TemplateDetailResponse(
     string Key,
     string DisplayName,

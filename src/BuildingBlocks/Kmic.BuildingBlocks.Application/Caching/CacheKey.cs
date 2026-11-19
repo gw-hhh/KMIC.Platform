@@ -16,9 +16,6 @@ public static class CacheKey
     /// <summary>
     /// 生成缓存键或标签
     /// </summary>
-    /// <param name="module">模块名，框架自己用 "Kmic"</param>
-    /// <param name="item">对象，如 "RoleSnapshot"</param>
-    /// <param name="identifiers">标识</param>
     public static string Of(string module, string item, params ReadOnlySpan<object> identifiers)
     {
         var key = new StringBuilder();

@@ -15,7 +15,6 @@ public static class EndpointConventionExtensions
     /// 一个端点发送且只发送一个消息
     /// </remarks>
     /// <typeparam name="TMessage">命令或查询的类型</typeparam>
-    /// <param name="builder">端点</param>
     public static RouteHandlerBuilder Sends<TMessage>(this RouteHandlerBuilder builder)
         where TMessage : IMessage
     {

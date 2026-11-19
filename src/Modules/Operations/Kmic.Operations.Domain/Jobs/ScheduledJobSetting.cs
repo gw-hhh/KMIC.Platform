@@ -6,7 +6,7 @@ namespace Kmic.Operations.Domain.Jobs;
 /// 定时任务的自定义启用状态和执行计划
 /// </summary>
 /// <remarks>
-/// 值为空时用代码默认值；恢复默认或移除任务声明后仍保留记录，便于追溯和回滚版本
+/// 值为空时用代码默认值
 /// </remarks>
 public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
 {

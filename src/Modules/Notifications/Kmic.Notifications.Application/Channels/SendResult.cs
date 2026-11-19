@@ -5,7 +5,7 @@ namespace Kmic.Notifications.Application.Channels;
 /// </summary>
 /// <param name="Outcome">结果类别</param>
 /// <param name="ProviderMessageId">发送成功时记录的渠道消息标识</param>
-/// <param name="Error">失败原因，写入投递记录，不得包含收件人联系方式</param>
+/// <param name="Error">失败原因</param>
 public sealed record SendResult(SendOutcome Outcome, string? ProviderMessageId = null, string? Error = null)
 {
     /// <summary>

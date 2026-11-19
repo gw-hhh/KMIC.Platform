@@ -14,9 +14,6 @@ namespace Kmic.Files.Application.Attachments;
 /// <summary>
 /// 为业务对象关联文件或解除文件关联
 /// </summary>
-/// <remarks>
-/// 关联检查使用独立的系统作用域，仅读取已提交数据
-/// </remarks>
 public sealed class FileAttachments(
     ITransactionLocks locks,
     IExecutionScopeFactory scopes,

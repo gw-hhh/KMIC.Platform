@@ -10,11 +10,11 @@ namespace Kmic.Configuration.Application.Settings.Get;
 /// <param name="DisplayName">显示名</param>
 /// <param name="Module">声明它的模块</param>
 /// <param name="Group">分组</param>
-/// <param name="Fields">值里的成员清单，管理页据此生成编辑控件</param>
+/// <param name="Fields">值里的成员清单</param>
 /// <param name="DefaultValue">代码里的默认值</param>
-/// <param name="CurrentValue">管理页当前值，有保存值时返回保存内容，否则返回代码默认值</param>
+/// <param name="CurrentValue">管理页当前值</param>
 /// <param name="IsModified">是否已保存自定义值</param>
-/// <param name="ConcurrencyVersion">保存记录的版本号，输出为 version；未保存值时为空</param>
+/// <param name="ConcurrencyVersion">保存记录的版本号，未保存值时为空</param>
 /// <param name="EditPermission">修改它需要的权限点</param>
 /// <param name="AllowedActions">当前用户可执行的动作</param>
 public sealed record SettingItem(

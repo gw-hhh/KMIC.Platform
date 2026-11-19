@@ -18,7 +18,6 @@ public static class MessagingServiceCollectionExtensions
     /// <remarks>
     /// 循环等启动任务全部完成才开始，宿主要先调用 AddKmicStartupTasks
     /// </remarks>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicMessagingWorker(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -34,7 +33,6 @@ public static class MessagingServiceCollectionExtensions
     /// <remarks>
     /// 执行器等启动任务全部完成才开始领取，宿主要先调用 AddKmicStartupTasks
     /// </remarks>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicJobWorker(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

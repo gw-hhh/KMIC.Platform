@@ -10,6 +10,5 @@ public sealed record UploadResult(UploadOutcome Outcome, StoredFileInfo? File)
     /// <summary>
     /// 没有写入存储的结果
     /// </summary>
-    /// <param name="outcome">原因</param>
     public static UploadResult Refused(UploadOutcome outcome) => new(outcome, null);
 }

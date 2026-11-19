@@ -19,7 +19,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <remarks>
 /// 不存在、已删除或没有权限时都返回 NotFound；没有权限的情况另外记安全事件
 /// </remarks>
-/// <param name="context">写入上下文</param>
 public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) : IRepository<TAggregate, TId>
     where TContext : ModuleDbContext
     where TAggregate : AggregateRoot<TId>
@@ -117,9 +116,6 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
     /// 用于计数、扣减额度这类单表操作，返回更新的行数。不经过变更跟踪，修改人、修改时间和版本号照常更新，过滤器照常生效。
     /// 同一个命令里不要再通过仓储读取并修改同一条数据，否则跟踪的实体是旧值
     /// </remarks>
-    /// <param name="condition">更新条件，如 q => q.Id == id &amp;&amp; q.Remaining &gt;= amount</param>
-    /// <param name="setters">要更新的列，如 s => s.SetProperty(q => q.Remaining, q => q.Remaining - amount)</param>
-    /// <param name="ct">取消令牌</param>
     /// <exception cref="InvalidOperationException">不在事务里</exception>
     protected async Task<int> UpdateWhereAsync(
         Expression<Func<TAggregate, bool>> condition,

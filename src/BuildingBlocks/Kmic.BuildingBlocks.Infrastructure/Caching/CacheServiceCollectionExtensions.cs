@@ -21,7 +21,6 @@ public static class CacheServiceCollectionExtensions
     /// 业务代码只用 HybridCache。没有配置 Redis 时只有本地缓存。失效通知走数据库的监听连接，
     /// 只做 Api 的实例也要监听，所以这里也注册监听
     /// </remarks>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicCache(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

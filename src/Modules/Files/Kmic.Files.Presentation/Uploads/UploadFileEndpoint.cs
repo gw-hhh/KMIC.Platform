@@ -19,8 +19,7 @@ namespace Kmic.Files.Presentation.Uploads;
 /// 以 multipart/form-data 流式上传单个文件，不将完整内容读入内存
 /// </summary>
 /// <remarks>
-/// 先用 StartUpload 登记上传，再流式写入存储，最后用 CompleteUpload 或 RejectUpload 登记结果。
-/// 两次登记各用短事务，写存储期间不持有数据库事务；写入时检查类型和大小，失败后的残留对象由清理与对账处理
+/// 写存储期间不持有数据库事务
 /// </remarks>
 internal sealed class UploadFileEndpoint : IEndpoint
 {

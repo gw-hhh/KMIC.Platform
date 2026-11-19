@@ -8,8 +8,6 @@ public interface ICursorProtector
     /// <summary>
     /// 把一行的排序键和 ID 编成游标
     /// </summary>
-    /// <param name="key">排序键的文本形式</param>
-    /// <param name="id">行的 ID，排序键相同时用它定先后</param>
     string Protect(string key, Guid id);
 
     /// <summary>

@@ -12,6 +12,5 @@ public interface IEndpoint
     /// <summary>
     /// 把本端点映射到路由组上
     /// </summary>
-    /// <param name="group">本模块的路由组，已经设置好认证、标签和框架过滤器</param>
     void Map(IEndpointRouteBuilder group);
 }

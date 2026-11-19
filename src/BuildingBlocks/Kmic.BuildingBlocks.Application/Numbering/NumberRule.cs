@@ -76,7 +76,6 @@ public sealed partial class NumberRule
     /// <summary>
     /// 周期键
     /// </summary>
-    /// <param name="businessDate">取号日期（业务时区）</param>
     public string PeriodKey(DateOnly businessDate) => Reset switch
     {
         NumberReset.Never => "-",
@@ -105,9 +104,6 @@ public sealed partial class NumberRule
     /// <summary>
     /// 生成编号
     /// </summary>
-    /// <param name="businessDate">取号日期（业务时区）</param>
-    /// <param name="sequence">序号，从 1 开始</param>
-    /// <param name="partition">分组键</param>
     public string Render(DateOnly businessDate, long sequence, string? partition)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(sequence, 1);

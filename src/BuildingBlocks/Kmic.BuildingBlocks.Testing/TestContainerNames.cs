@@ -21,6 +21,5 @@ internal static class TestContainerNames
     /// <summary>
     /// 为某种用途生成容器名，如 kmic-test-postgres-3f9a1c2e
     /// </summary>
-    /// <param name="purpose">用途，如 postgres、minio</param>
     public static string For(string purpose) => $"{Group}-{purpose}-{Guid.CreateVersion7().ToString("N")[^8..]}";
 }

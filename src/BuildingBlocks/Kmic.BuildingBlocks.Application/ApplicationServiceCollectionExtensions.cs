@@ -36,8 +36,6 @@ public static class ApplicationServiceCollectionExtensions
     /// <summary>
     /// 注册应用层服务
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="applicationAssemblies">各模块的 Application 程序集</param>
     public static IServiceCollection AddKmicApplication(this IServiceCollection services, IReadOnlyCollection<Assembly> applicationAssemblies)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -81,9 +79,6 @@ public static class ApplicationServiceCollectionExtensions
     /// <remarks>
     /// 校验在第一次取订阅目录时统一做，宿主启动时要取一次
     /// </remarks>
-    /// <param name="services">服务集合</param>
-    /// <param name="module">订阅方模块名</param>
-    /// <param name="configure">订阅声明</param>
     public static IServiceCollection AddKmicSubscriptions(this IServiceCollection services, string module, Action<IMessagingBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -102,9 +97,6 @@ public static class ApplicationServiceCollectionExtensions
     /// <remarks>
     /// 校验在第一次取定时任务目录时统一做，启动时同步到调度器那一步会取
     /// </remarks>
-    /// <param name="services">服务集合</param>
-    /// <param name="module">模块名</param>
-    /// <param name="configure">定时任务声明</param>
     public static IServiceCollection AddKmicScheduling(this IServiceCollection services, string module, Action<ISchedulingBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(services);

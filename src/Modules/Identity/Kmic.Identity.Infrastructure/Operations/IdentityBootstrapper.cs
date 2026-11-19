@@ -17,7 +17,7 @@ namespace Kmic.Identity.Infrastructure.Operations;
 /// 运维命令的实现：首个管理员初始化、应急重置管理员密码
 /// </summary>
 /// <remarks>
-/// 用运维连接直接执行，不经过命令管道；成功后记安全事件，操作人记为系统账号
+/// 直接用运维连接执行，不经过命令管道
 /// </remarks>
 public sealed class IdentityBootstrapper
 {
@@ -30,7 +30,7 @@ public sealed class IdentityBootstrapper
     /// 初始化首个管理员、系统管理员角色、角色授予及组织树根单元
     /// </summary>
     /// <remarks>
-    /// 只能在还没有普通用户时执行，否则返回 <see cref="IdentityErrors.AlreadyBootstrapped" />；根单元名称为空时用“总部”
+    /// 只能在没有普通用户时执行
     /// </remarks>
     public async Task<Result> BootstrapAsync(string connectionString, string account, string displayName, string password, string? rootUnitName, DateTimeOffset now, CancellationToken ct)
     {

@@ -131,11 +131,11 @@ export interface paths {
                 query?: {
                     /** @description 按渠道筛选：Email、Sms */
                     Channel?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -capturedAt：字段名前加 - 表示倒序，默认按捕获时间倒序 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -494,11 +494,11 @@ export interface paths {
                     From?: string;
                     /** @description 创建时间上限（不含） */
                     To?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -createdAt：逗号分隔，字段名前加 - 表示倒序，默认按创建时间倒序 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -838,15 +838,15 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 是否未读：true 为未读，false 为已读；不传时返回全部 */
+                    /** @description 是否未读，不传时返回全部 */
                     Unread?: boolean;
                     /** @description 消息类别筛选 */
                     Category?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 isRead,-sentAt：逗号分隔，字段名前加 - 表示倒序，默认未读在前，再按发送时间倒序 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -1884,9 +1884,9 @@ export interface paths {
                 query?: {
                     /** @description 文件名搜索关键字 */
                     Q?: string;
-                    /** @description 状态编码，多个值须重复参数名，如 status=Available&amp;status=Attached */
+                    /** @description 状态编码 */
                     Status?: string[];
-                    /** @description 上传配置标识；生成文件为 Generated:来源 */
+                    /** @description 上传配置标识 */
                     Profile?: string;
                     /** @description 上传人或生成请求人 ID */
                     UploadedBy?: string;
@@ -1894,17 +1894,17 @@ export interface paths {
                     From?: string;
                     /** @description 文件登记时间上限（不含） */
                     To?: string;
-                    /** @description 按引用文件的业务模块筛选；未指定时忽略 ownerType 和 ownerId */
+                    /** @description 按引用文件的业务模块筛选 */
                     OwnerModule?: string;
                     /** @description 业务对象类型 */
                     OwnerType?: string;
                     /** @description 业务对象 ID */
                     OwnerId?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -uploadedAt,name：逗号分隔，字段名前加 - 表示倒序，最多 3 个字段 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -2122,13 +2122,13 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 状态编码，重复参数名可以给多个，如 status=Open */
+                    /** @description 状态编码 */
                     Status?: string[];
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -foundAt */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -3062,25 +3062,25 @@ export interface paths {
         get: {
             parameters: {
                 query: {
-                    /** @description 起始时间，含；必填 */
+                    /** @description 起始时间 */
                     From: string;
-                    /** @description 结束时间，不含；必填，和起始时间相隔不超过 93 天 */
+                    /** @description 结束时间 */
                     To: string;
                     /** @description 操作人 ID */
                     ActorUserId?: string;
                     /** @description 模拟身份时的实际操作人 ID */
                     ActualUserId?: string;
-                    /** @description 产生审计的模块，如 Identity */
+                    /** @description 产生审计的模块 */
                     Module?: string;
-                    /** @description 操作名，如 Identity.CreateUser */
+                    /** @description 操作名 */
                     Action?: string;
-                    /** @description 操作对象的类型，如 User */
+                    /** @description 操作对象的类型 */
                     ResourceType?: string;
                     /** @description 操作对象的 ID */
                     ResourceId?: string;
                     /** @description 上一页返回的游标，首页不传 */
                     After?: string;
-                    /** @description 每页数量，1 到 200，默认 50 */
+                    /** @description 每页数量 */
                     Limit?: number;
                 };
                 header?: never;
@@ -3544,9 +3544,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 模块筛选，未指定时查询全部模块 */
+                    /** @description 模块筛选 */
                     Module?: string;
-                    /** @description 作业类型名，如 Sample.ExportSpecimens */
+                    /** @description 作业类型名 */
                     JobType?: string;
                     /** @description 状态编码：Queued、Running、Succeeded、Failed、Cancelling、Cancelled */
                     Status?: string;
@@ -3554,7 +3554,7 @@ export interface paths {
                     SubmittedBy?: string;
                     /** @description 上一页返回的游标，首页不传 */
                     After?: string;
-                    /** @description 每页数量，1 到 200，默认 50 */
+                    /** @description 每页数量 */
                     Limit?: number;
                 };
                 header?: never;
@@ -3672,7 +3672,7 @@ export interface paths {
                     Status?: string;
                     /** @description 上一页返回的游标，首页不传 */
                     After?: string;
-                    /** @description 每页数量，1 到 200，默认 50 */
+                    /** @description 每页数量 */
                     Limit?: number;
                 };
                 header?: never;
@@ -4710,17 +4710,17 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 模块筛选，未指定时查询全部模块 */
+                    /** @description 模块筛选 */
                     Module?: string;
                     /** @description Outbox 或 Inbox */
                     Box?: string;
-                    /** @description 订阅名，指定后仅查询收件箱 */
+                    /** @description 订阅名 */
                     Subscription?: string;
                     /** @description 消息名称 */
                     MessageType?: string;
                     /** @description 上一页返回的游标，首页不传 */
                     After?: string;
-                    /** @description 每页数量，1 到 200，默认 50 */
+                    /** @description 每页数量 */
                     Limit?: number;
                 };
                 header?: never;
@@ -5640,7 +5640,7 @@ export interface paths {
                 query?: {
                     /** @description 上一页返回的游标，首页不传 */
                     After?: string;
-                    /** @description 每页数量，1 到 200，默认 50 */
+                    /** @description 每页数量 */
                     Limit?: number;
                 };
                 header?: never;
@@ -8677,17 +8677,17 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 设置键筛选，未指定时查询全部设置 */
+                    /** @description 设置键筛选 */
                     Key?: string;
-                    /** @description 起始时间，含 */
+                    /** @description 起始时间 */
                     From?: string;
-                    /** @description 结束时间，不含 */
+                    /** @description 结束时间 */
                     To?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -changedAt,key：逗号分隔，字段名前加 - 表示倒序，最多 3 个字段 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -10055,11 +10055,11 @@ export interface paths {
         get: {
             parameters: {
                 query: {
-                    /** @description 用户 ID；必填 */
+                    /** @description 用户 ID */
                     UserId: string;
-                    /** @description 角色 ID；必填，可以是用户没有被授予的角色 */
+                    /** @description 角色 ID */
                     RoleId: string;
-                    /** @description 范围对象编码，如 Sample.Specimen；不传时不返回数据范围 */
+                    /** @description 范围对象编码，不传时不返回数据范围 */
                     ScopeObject?: string;
                 };
                 header?: never;
@@ -11354,15 +11354,15 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 关键字，在名称和说明里模糊匹配 */
+                    /** @description 关键字 */
                     Q?: string;
-                    /** @description 状态编码，多个值须重复参数名，如 status=Active&amp;status=Disabled */
+                    /** @description 状态编码 */
                     Status?: string[];
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 sortOrder,-holderCount：逗号分隔，字段名前加 - 表示倒序，最多 3 个字段 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -12502,11 +12502,11 @@ export interface paths {
         get: {
             parameters: {
                 query: {
-                    /** @description 起始时间，含；必填 */
+                    /** @description 起始时间 */
                     From: string;
-                    /** @description 结束时间，不含；必填，与起始时间相隔最长 31 天 */
+                    /** @description 结束时间 */
                     To: string;
-                    /** @description 按类型筛选，如 LoginFailed、AuthorizationDenied、AuthorizationConfigChanged */
+                    /** @description 按类型筛选 */
                     Type?: string;
                     /** @description 按用户筛选 */
                     UserId?: string;
@@ -12514,11 +12514,11 @@ export interface paths {
                     ClientIp?: string;
                     /** @description 按事件关联的账号筛选 */
                     Account?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -occurredAt,type：逗号分隔，字段名前加 - 表示倒序，最多 3 个字段 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -12632,19 +12632,19 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 关键字，在账号、姓名、英文名、工号、手机号里模糊匹配 */
+                    /** @description 关键字 */
                     Q?: string;
-                    /** @description 状态编码，多个值须重复参数名，如 status=Active&amp;status=Disabled */
+                    /** @description 状态编码 */
                     Status?: string[];
                     /** @description 只看拥有这个角色的用户 */
                     RoleId?: string;
                     /** @description 只看直接属于这个组织单元的用户 */
                     OrgUnitId?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 displayName,-account：逗号分隔，字段名前加 - 表示倒序，最多 3 个字段 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -13913,11 +13913,11 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 关键字，在姓名、英文名、工号、账号里模糊匹配 */
+                    /** @description 关键字 */
                     Q?: string;
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
                 };
                 header?: never;
@@ -14507,15 +14507,15 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description 关键字，在编号和标题里模糊匹配 */
+                    /** @description 关键字 */
                     Q?: string;
-                    /** @description 状态编码，重复参数名可以给多个，如 status=Draft&amp;status=Submitted */
+                    /** @description 状态编码 */
                     Status?: string[];
-                    /** @description 页码，从 1 开始 */
+                    /** @description 页码 */
                     Page?: number;
-                    /** @description 每页数量，1 到 200，默认 20 */
+                    /** @description 每页数量 */
                     PageSize?: number;
-                    /** @description 排序，如 -createdAt,number：逗号分隔，字段名前加 - 表示倒序，最多 3 个字段 */
+                    /** @description 排序 */
                     Sort?: string;
                 };
                 header?: never;
@@ -15299,32 +15299,32 @@ export interface components {
     schemas: {
         /** @description 放弃一条失败投递的请求 */
         AbandonDeliveryRequest: {
-            /** @description 放弃的原因，必填，最多 500 个字符 */
+            /** @description 放弃的原因 */
             reason: string;
         };
         /** @description 放弃死信的请求 */
         AbandonMessagesRequest: {
-            /** @description 要放弃的消息，最多 200 条，都在收件箱 */
+            /** @description 要放弃的消息 */
             messages: components["schemas"]["MessageRef"][];
-            /** @description 原因，必填，最多 500 个字符 */
+            /** @description 原因 */
             reason: string;
         };
         /** @description 添加字典项的请求 */
         AddDictionaryItemRequest: {
             /**
              * Format: int64
-             * @description 字典类型的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 字典类型的预期版本号
              */
             expectedVersion: number;
-            /** @description 编码，字母、数字、点、短横线、下划线，1 到 50 位，创建后不能改 */
+            /** @description 编码 */
             code: string;
-            /** @description 显示名，最多 200 个字符 */
+            /** @description 显示名 */
             name: string;
-            /** @description 父项编码；仅层级字典可指定 */
+            /** @description 父项编码 */
             parentCode: null | string;
             /**
              * Format: int32
-             * @description 排序值；未指定时排在同级末尾
+             * @description 排序值
              */
             sortOrder: null | number;
         };
@@ -15337,7 +15337,7 @@ export interface components {
             fileId: string;
             /**
              * Format: int64
-             * @description 读取时的版本号，与当前版本不一致时返回 409 Common.VersionConflict
+             * @description 读取时的版本号
              */
             expectedVersion: number;
         };
@@ -15345,12 +15345,12 @@ export interface components {
         AssignUserOrgUnitRequest: {
             /**
              * Format: int64
-             * @description 用户的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 用户的预期版本号
              */
             expectedVersion: number;
             /**
              * Format: uuid
-             * @description 组织单元，须启用；未指定时清空所属组织
+             * @description 组织单元
              */
             orgUnitId: string;
         };
@@ -15375,14 +15375,14 @@ export interface components {
             module: string;
             /** @description 操作名 */
             action: string;
-            /** @description 请求来源，如 Http、ScheduledJob */
+            /** @description 请求来源 */
             origin: string;
             /**
              * Format: uuid
              * @description 操作人 ID
              */
             actorUserId: null | string;
-            /** @description 操作人的名称；用户已经不存在时为空 */
+            /** @description 操作人的名称，用户已经不存在时为空 */
             actorName: null | string;
             /**
              * Format: uuid
@@ -15396,7 +15396,7 @@ export interface components {
              * @description 操作时使用的角色 ID
              */
             roleId: null | string;
-            /** @description 角色名称；角色已经不存在时为空 */
+            /** @description 角色名称，角色已经不存在时为空 */
             roleName: null | string;
             /**
              * Format: uuid
@@ -15410,13 +15410,13 @@ export interface components {
             onBehalfOfUserId: null | string;
             /** @description 客户端 IP */
             clientIp: null | string;
-            /** @description 链路追踪 ID，用于关联日志和调用链 */
+            /** @description 链路追踪 ID */
             traceId: string;
             /** @description 操作对象 */
             targets: components["schemas"]["AuditTargetItem"][];
-            /** @description 字段变更：实体、变更类型、各字段新旧值，敏感字段已脱敏 */
+            /** @description 字段变更 */
             changes: unknown;
-            /** @description 补充说明，如导出的筛选条件 */
+            /** @description 补充说明 */
             details: unknown;
         };
         /** @description 审计记录列表项 */
@@ -15435,14 +15435,14 @@ export interface components {
             module: string;
             /** @description 操作名 */
             action: string;
-            /** @description 请求来源，如 Http、ScheduledJob */
+            /** @description 请求来源 */
             origin: string;
             /**
              * Format: uuid
              * @description 操作人 ID
              */
             actorUserId: null | string;
-            /** @description 操作人的名称；用户已经不存在时为空 */
+            /** @description 操作人的名称，用户已经不存在时为空 */
             actorName: null | string;
             /**
              * Format: uuid
@@ -15451,14 +15451,14 @@ export interface components {
             actualUserId: null | string;
             /** @description 实际操作人的名称 */
             actualName: null | string;
-            /** @description 链路追踪 ID，用于关联日志和调用链 */
+            /** @description 链路追踪 ID */
             traceId: string;
             /** @description 操作对象 */
             targets: components["schemas"]["AuditTargetItem"][];
         };
         /** @description 审计记录中的操作对象 */
         AuditTargetItem: {
-            /** @description 资源类型，如 User */
+            /** @description 资源类型 */
             resourceType: string;
             /**
              * Format: uuid
@@ -15484,14 +15484,14 @@ export interface components {
             roleName: string;
             /**
              * Format: int64
-             * @description 角色版本号，改了角色的权限或数据范围就会变
+             * @description 角色版本号
              */
             roleVersion: number;
             /** @description 用户现在能否以这个角色登录 */
             usable: boolean;
             /** @description 不能登录的原因，能登录时为空 */
             unusableReason: null | string;
-            /** @description 权限点编码，按编码排序；不能登录时为空集合 */
+            /** @description 权限点编码，不能登录时为空集合 */
             permissions: string[];
             dataScope: null | components["schemas"]["DataScopeExplanation"];
         };
@@ -15506,7 +15506,7 @@ export interface components {
              * @description 访问令牌有效期（秒）
              */
             expires_in: number;
-            /** @description 刷新令牌；没有新签发时为空 */
+            /** @description 刷新令牌，没有新签发时为空 */
             refresh_token: null | string;
             /** @description 是否必须先修改密码 */
             passwordChangeRequired: boolean;
@@ -15520,9 +15520,9 @@ export interface components {
             id: string;
             /** @description 作业所在的模块 */
             module: string;
-            /** @description 作业类型名，如 Sample.ExportSpecimens */
+            /** @description 作业类型名 */
             jobType: string;
-            /** @description 作业显示名称；代码中已没有这种作业时为作业类型名 */
+            /** @description 作业显示名称 */
             jobName: string;
             /** @description 状态 */
             status: components["schemas"]["BackgroundJobStatus"];
@@ -15531,7 +15531,7 @@ export interface components {
              * @description 提交人 ID，系统提交时为空
              */
             submittedBy: null | string;
-            /** @description 提交人的名称；用户已经不存在时为空 */
+            /** @description 提交人的名称，用户已经不存在时为空 */
             submittedByName: null | string;
             /**
              * Format: date-time
@@ -15573,7 +15573,7 @@ export interface components {
             errorMessage: null | string;
             /**
              * Format: int32
-             * @description 执行尝试次数，每次领取时加一
+             * @description 执行尝试次数
              */
             attempts: number;
             /**
@@ -15600,7 +15600,7 @@ export interface components {
             module: string;
             /** @description 有序订阅的名称 */
             subscription: string;
-            /** @description 顺序键，通常是聚合 ID */
+            /** @description 顺序键 */
             orderingKey: string;
             /**
              * Format: int64
@@ -15614,7 +15614,7 @@ export interface components {
             waiting: number;
             /**
              * Format: uuid
-             * @description 最早死信的记录 ID，用于重试或放弃；处理后可推进该顺序键
+             * @description 最早死信的记录 ID
              */
             firstDeadId: string;
             /** @description 最早死信的最近错误 */
@@ -15636,7 +15636,7 @@ export interface components {
             channel: components["schemas"]["DeliveryChannel"];
             /** @description 收件地址（未脱敏） */
             address: string;
-            /** @description 邮件收件方式：To、Cc 或 Bcc */
+            /** @description 邮件收件方式 */
             role: components["schemas"]["DeliveryRole"];
             /** @description 主题 */
             subject: string;
@@ -15664,7 +15664,7 @@ export interface components {
             channel: components["schemas"]["DeliveryChannel"];
             /** @description 收件地址（未脱敏） */
             address: string;
-            /** @description 邮件收件方式：To、Cc 或 Bcc */
+            /** @description 邮件收件方式 */
             role: components["schemas"]["DeliveryRole"];
             /** @description 主题 */
             subject: string;
@@ -15676,24 +15676,24 @@ export interface components {
         };
         /** @description 修改密码的请求 */
         ChangePasswordRequest: {
-            /** @description 旧密码；还没有设置过密码时不用给 */
+            /** @description 旧密码 */
             oldPassword: null | string;
             /** @description 新密码 */
             newPassword: string;
         };
         /** @description 前端上报的一条错误 */
         ClientErrorReport: {
-            /** @description 错误类型，如 TypeError、ApiError，最多 100 个字符 */
+            /** @description 错误类型 */
             type: string;
-            /** @description 错误消息，最多 1000 个字符 */
+            /** @description 错误消息 */
             message: string;
-            /** @description 堆栈，生产环境是压缩后的位置，最多 8000 个字符 */
+            /** @description 堆栈 */
             stack: null | string;
-            /** @description 出错时的路由名，不是带参数的地址，最多 200 个字符 */
+            /** @description 出错时的路由名 */
             routeName: null | string;
-            /** @description 前端版本，最多 50 个字符 */
+            /** @description 前端版本 */
             appVersion: null | string;
-            /** @description 相关接口响应的追踪 ID，用于关联后端调用链，须为 32 位小写十六进制 */
+            /** @description 相关接口响应的追踪 ID */
             traceId: null | string;
             /**
              * Format: date-time
@@ -15710,7 +15710,7 @@ export interface components {
         CloseSpecimenRequest: {
             /**
              * Format: int64
-             * @description 读取时的版本号，与当前版本不一致时返回 409 Common.VersionConflict
+             * @description 读取时的版本号
              */
             expectedVersion: number;
         };
@@ -15723,7 +15723,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -15737,7 +15737,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -15751,7 +15751,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -15765,7 +15765,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -15774,28 +15774,28 @@ export interface components {
         CreateOrgUnitRequest: {
             /**
              * Format: int64
-             * @description 组织树的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 组织树的预期版本号
              */
             expectedVersion: number;
             /**
              * Format: uuid
-             * @description 上级组织单元，必须启用
+             * @description 上级组织单元
              */
             parentId: string;
-            /** @description 名称，最多 100 个字符；同级不得重名（含停用单元，不区分大小写） */
+            /** @description 名称 */
             name: string;
-            /** @description 编码，最多 50 个字符，可以不填 */
+            /** @description 编码 */
             code: null | string;
         };
         /** @description 新建角色的请求 */
         CreateRoleRequest: {
-            /** @description 名称，最多 100 个字符；不得重复（不区分大小写） */
+            /** @description 名称 */
             name: string;
-            /** @description 说明，最多 500 个字符 */
+            /** @description 说明 */
             description: null | string;
             /**
              * Format: int32
-             * @description 登录时角色下拉里的次序，0 到 10000
+             * @description 登录时角色下拉里的次序
              */
             sortOrder: number;
             /** @description 默认数据范围等级：Self、OrgUnit、OrgUnitAndBelow、All */
@@ -15803,67 +15803,67 @@ export interface components {
         };
         /** @description 创建示例时的一项明细 */
         CreateSpecimenItemRequest: {
-            /** @description 名称，最多 50 个字符 */
+            /** @description 名称 */
             name: string;
             /**
              * Format: int32
-             * @description 数量，1 到 9999
+             * @description 数量
              */
             quantity: number;
         };
         /** @description 创建示例的请求 */
         CreateSpecimenRequest: {
-            /** @description 标题，最多 100 个字符 */
+            /** @description 标题 */
             title: string;
-            /** @description 明细，至少一项，最多 50 项 */
+            /** @description 明细 */
             items: components["schemas"]["CreateSpecimenItemRequest"][];
         };
         /** @description 新建用户的请求 */
         CreateUserRequest: {
-            /** @description 登录名，最多 100 个字符；不得重复（不区分大小写） */
+            /** @description 登录名 */
             account: string;
-            /** @description 姓名，最多 100 个字符 */
+            /** @description 姓名 */
             displayName: string;
-            /** @description 英文名，最多 100 个字符 */
+            /** @description 英文名 */
             englishName: null | string;
-            /** @description 工号，最多 50 个字符，填写时唯一 */
+            /** @description 工号 */
             employeeNo: null | string;
-            /** @description 手机号，填写时唯一；大陆号码可省略 +86 */
+            /** @description 手机号 */
             mobile: null | string;
-            /** @description 邮箱，最多 200 个字符 */
+            /** @description 邮箱 */
             email: null | string;
         };
         /** @description Cron 触发时间预览 */
         CronPreviewResponse: {
-            /** @description 后续触发时间，最多 5 次，按时间升序 */
+            /** @description 后续触发时间 */
             nextFireTimes: unknown[];
         };
         /** @description 游标分页的一页 */
         CursorPageOfAuditListItem: {
             /** @description 这一页的列表项 */
             items: components["schemas"]["AuditListItem"][];
-            /** @description 下一页的游标，作为 After 传回；最后一页为空 */
+            /** @description 下一页的游标，最后一页为空 */
             nextCursor: null | string;
         };
         /** @description 游标分页的一页 */
         CursorPageOfBackgroundJobItem: {
             /** @description 这一页的列表项 */
             items: components["schemas"]["BackgroundJobItem"][];
-            /** @description 下一页的游标，作为 After 传回；最后一页为空 */
+            /** @description 下一页的游标，最后一页为空 */
             nextCursor: null | string;
         };
         /** @description 游标分页的一页 */
         CursorPageOfDeadMessageItem: {
             /** @description 这一页的列表项 */
             items: components["schemas"]["DeadMessageItem"][];
-            /** @description 下一页的游标，作为 After 传回；最后一页为空 */
+            /** @description 下一页的游标，最后一页为空 */
             nextCursor: null | string;
         };
         /** @description 游标分页的一页 */
         CursorPageOfScheduledJobRunItem: {
             /** @description 这一页的列表项 */
             items: components["schemas"]["ScheduledJobRunItem"][];
-            /** @description 下一页的游标，作为 After 传回；最后一页为空 */
+            /** @description 下一页的游标，最后一页为空 */
             nextCursor: null | string;
         };
         /** @description 一个范围对象的数据范围及其来源 */
@@ -15874,15 +15874,15 @@ export interface components {
             displayName: string;
             /** @description 等级 */
             level: components["schemas"]["RoleScopeLevel"];
-            /** @description 等级是否为角色对这个范围对象单独设置的；为否时用角色的默认等级 */
+            /** @description 等级是否为角色对这个范围对象单独设置的 */
             levelOverridden: boolean;
-            /** @description 组织范围的起点；“本人”“全部”不按组织判断，为空集合 */
+            /** @description 组织范围的起点，为空集合 */
             anchors: components["schemas"]["ExplainedOrgUnit"][];
-            /** @description 起点是否用了用户角色授予上设置的组织锚点；为否时用用户所属组织 */
+            /** @description 起点是否用了用户角色授予上设置的组织锚点 */
             anchorsFromGrant: boolean;
             /**
              * Format: int32
-             * @description 能看到的组织单元数，包括展开的下级；“本人”“全部”为空
+             * @description 能看到的组织单元数，“本人”“全部”为空
              */
             orgUnitCount: null | number;
         };
@@ -15899,9 +15899,9 @@ export interface components {
         DeadMessageDetailItem: {
             /** @description 概要 */
             message: components["schemas"]["DeadMessageItem"];
-            /** @description 状态：死信，或者已经被放弃 */
+            /** @description 状态 */
             state: components["schemas"]["MessageState"];
-            /** @description 消息载荷；含密消息和目录里找不到的消息不返回，为空 */
+            /** @description 消息载荷，为空 */
             payload: unknown;
             /** @description 信封里的其余字段 */
             headers: unknown;
@@ -15910,14 +15910,14 @@ export interface components {
         DeadMessageItem: {
             /**
              * Format: uuid
-             * @description 行 ID；重试、放弃、查看内容都用它。收件箱里是收件箱行的 ID，不是消息 ID
+             * @description 行 ID
              */
             id: string;
             /** @description 在发件箱还是收件箱 */
             box: components["schemas"]["MessageBoxKind"];
             /** @description 所在模块 */
             module: string;
-            /** @description 订阅名；发件箱里没有 */
+            /** @description 订阅名 */
             subscription: null | string;
             /**
              * Format: uuid
@@ -15948,7 +15948,7 @@ export interface components {
         DeleteSpecimenRequest: {
             /**
              * Format: int64
-             * @description 读取时的版本号，与当前版本不一致时返回 409 Common.VersionConflict
+             * @description 读取时的版本号
              */
             expectedVersion: number;
         };
@@ -15971,34 +15971,34 @@ export interface components {
             notificationId: string;
             /** @description 渠道 */
             channel: components["schemas"]["DeliveryChannel"];
-            /** @description 邮件收件方式：To、Cc 或 Bcc */
+            /** @description 邮件收件方式 */
             role: components["schemas"]["DeliveryRole"];
             /** @description 状态 */
             status: components["schemas"]["DeliveryStatus"];
             skipReason: null | components["schemas"]["DeliverySkipReason"];
             /**
              * Format: uuid
-             * @description 系统内收件人 ID；外部收件人为空
+             * @description 系统内收件人 ID，外部收件人为空
              */
             recipientUserId: string;
             /** @description 脱敏后的收件地址 */
             addressMasked: string;
             /** @description 渲染后的主题 */
             subject: string;
-            /** @description 渲染后的正文；含密投递发送成功、最终失败或跳过后为空 */
+            /** @description 渲染后的正文，含密投递发送成功、最终失败或跳过后为空 */
             body: null | string;
             /** @description 模板键 */
             templateKey: string;
             /**
              * Format: int32
-             * @description 用的模板版本号，0 表示代码里的默认内容
+             * @description 用的模板版本号
              */
             templateVersion: number;
             /** @description 优先级 */
             priority: components["schemas"]["DeliveryPriority"];
             /**
              * Format: int32
-             * @description 领取次数，人工重试时清零
+             * @description 领取次数
              */
             attempts: number;
             /**
@@ -16042,7 +16042,7 @@ export interface components {
             skipReason: null | components["schemas"]["DeliverySkipReason"];
             /**
              * Format: uuid
-             * @description 系统内收件人 ID；外部收件人为空
+             * @description 系统内收件人 ID，外部收件人为空
              */
             recipientUserId: string;
             /** @description 脱敏后的收件地址 */
@@ -16051,12 +16051,12 @@ export interface components {
             templateKey: string;
             /**
              * Format: int32
-             * @description 用的模板版本号，0 表示代码里的默认内容
+             * @description 用的模板版本号
              */
             templateVersion: number;
             /**
              * Format: int32
-             * @description 领取次数，人工重试时清零
+             * @description 领取次数
              */
             attempts: number;
             /** @description 最近一次失败的原因 */
@@ -16096,32 +16096,32 @@ export interface components {
         DeliveryStatus: "Pending" | "Sending" | "Sent" | "Failed" | "Skipped" | "Captured";
         /** @description 批量字典查询结果 */
         DictionariesResponse: {
-            /** @description 字典快照，按请求中的类型顺序排列 */
+            /** @description 字典快照 */
             dictionaries: components["schemas"]["DictionarySnapshot"][];
-            /** @description 字典版本标识，用于条件请求；与 If-None-Match 匹配时返回 304 */
+            /** @description 字典版本标识 */
             eTag: string;
         };
         /** @description 字典项 */
         DictionaryEntry: {
-            /** @description 字典项编码，供业务数据保存 */
+            /** @description 字典项编码 */
             code: string;
             /** @description 显示名 */
             name: string;
-            /** @description 层级字典里父项的编码；顶层为空 */
+            /** @description 层级字典里父项的编码，顶层为空 */
             parentCode: null | string;
             /**
              * Format: int32
              * @description 在同一父项下的次序
              */
             sortOrder: number;
-            /** @description 是否启用；已停用项仍用于历史数据显示，不可用于新选择 */
+            /** @description 是否启用 */
             isActive: boolean;
         };
         /** @description 停用、启用字典项的请求 */
         DictionaryItemVersionRequest: {
             /**
              * Format: int64
-             * @description 字典类型的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 字典类型的预期版本号
              */
             expectedVersion: number;
         };
@@ -16135,10 +16135,10 @@ export interface components {
             isHierarchical: boolean;
             /**
              * Format: int64
-             * @description 类型的版本号，任何字典项的变化都会递增它
+             * @description 类型的版本号
              */
             version: number;
-            /** @description 全部字典项，按父项和排序值排列 */
+            /** @description 全部字典项 */
             items: components["schemas"]["DictionaryEntry"][];
         };
         /** @description 字典类型详情 */
@@ -16151,14 +16151,14 @@ export interface components {
             ownerModule: string;
             /** @description 是否层级字典 */
             isHierarchical: boolean;
-            /** @description 状态：使用中、已退役 */
+            /** @description 状态 */
             status: components["schemas"]["DictionaryTypeStatus"];
             /**
              * Format: int64
-             * @description 字典类型版本号，输出为 version，修改字典项时用于并发校验
+             * @description 字典类型版本号
              */
             version: number;
-            /** @description 全部字典项，按父项和排序值排列 */
+            /** @description 全部字典项 */
             items: components["schemas"]["DictionaryEntry"][];
         };
         /** @description 字典类型列表项 */
@@ -16171,11 +16171,11 @@ export interface components {
             ownerModule: string;
             /** @description 是否层级字典 */
             isHierarchical: boolean;
-            /** @description 状态：使用中、已退役 */
+            /** @description 状态 */
             status: components["schemas"]["DictionaryTypeStatus"];
             /**
              * Format: int32
-             * @description 字典项总数，包含已停用项
+             * @description 字典项总数
              */
             itemCount: number;
             /**
@@ -16185,7 +16185,7 @@ export interface components {
             activeItemCount: number;
             /**
              * Format: int64
-             * @description 版本号，输出为 version
+             * @description 版本号
              */
             version: number;
         };
@@ -16198,27 +16198,27 @@ export interface components {
         DisableRoleRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
-            /** @description 原因，记入状态历史 */
+            /** @description 原因 */
             reason: null | string;
         };
         /** @description 禁用用户的请求 */
         DisableUserRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
-            /** @description 原因，记入状态历史 */
+            /** @description 原因 */
             reason: null | string;
         };
         /** @description 启用角色的请求 */
         EnableRoleRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
@@ -16226,7 +16226,7 @@ export interface components {
         EnableUserRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
@@ -16237,19 +16237,19 @@ export interface components {
              * @description 组织单元 ID
              */
             id: string;
-            /** @description 名称；组织单元已删除时为空 */
+            /** @description 名称，组织单元已删除时为空 */
             name: null | string;
         };
         /** @description 提交审计导出的请求 */
         ExportAuditRequest: {
             /**
              * Format: date-time
-             * @description 起始时间，含；必填
+             * @description 起始时间
              */
             from: string;
             /**
              * Format: date-time
-             * @description 结束时间，不含；必填
+             * @description 结束时间
              */
             to: string;
             /**
@@ -16262,11 +16262,11 @@ export interface components {
              * @description 模拟身份时的实际操作人
              */
             actualUserId?: string;
-            /** @description 产生审计的模块，如 Identity */
+            /** @description 产生审计的模块 */
             module?: null | string;
-            /** @description 操作名，如 Identity.CreateUser */
+            /** @description 操作名 */
             action?: null | string;
-            /** @description 操作对象的类型，如 User */
+            /** @description 操作对象的类型 */
             resourceType?: null | string;
             /**
              * Format: uuid
@@ -16276,7 +16276,7 @@ export interface components {
         };
         /** @description 当前已开启的功能开关 */
         FeaturesResponse: {
-            /** @description 开启的开关名，按名称排序；没有配置的开关按关闭处理，不在列表里 */
+            /** @description 开启的开关名 */
             enabled: string[];
         };
         /** @description 文件详情，不含内容或存储键 */
@@ -16288,7 +16288,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 并发版本号，修改时通过 expectedVersion 提交
+             * @description 并发版本号
              */
             version: number;
             /** @description 显示文件名 */
@@ -16304,7 +16304,7 @@ export interface components {
             size: null | number;
             /** @description 内容的 SHA-256 */
             sha256: null | string;
-            /** @description 上传配置标识；生成文件为 Generated:来源 */
+            /** @description 上传配置标识 */
             profile: string;
             /**
              * Format: uuid
@@ -16351,7 +16351,7 @@ export interface components {
             historyPurgeNote: null | string;
             /** @description 引用它的业务对象 */
             references: components["schemas"]["FileReferenceItem"][];
-            /** @description 状态流转记录，按时间从早到晚 */
+            /** @description 状态流转记录 */
             history: components["schemas"]["StateHistoryItem"][];
         };
         /** @description 一次文件下载：业务的下载查询授权、确认关联之后组装出来，端点用 FileResults.Stream 把它写成响应 */
@@ -16372,9 +16372,9 @@ export interface components {
              * @description 字节数
              */
             size: number;
-            /** @description 内容的 SHA-256，响应的 ETag */
+            /** @description 内容的 SHA-256 */
             sha256: string;
-            /** @description 文件类型编码，决定能不能在浏览器里直接打开 */
+            /** @description 文件类型编码 */
             fileType: string;
         };
         /** @description 文件列表项，不含存储键 */
@@ -16393,7 +16393,7 @@ export interface components {
              * @description 文件大小（字节），未登记写入结果时为空
              */
             size: null | number;
-            /** @description 上传配置标识；生成文件为 Generated:来源 */
+            /** @description 上传配置标识 */
             profile: string;
             /**
              * Format: uuid
@@ -16441,10 +16441,10 @@ export interface components {
             messageType: string;
             /** @description 订阅名 */
             subscription: string;
-            /** @description 原因，必填 */
+            /** @description 原因 */
             reason: string;
             /**
-             * @description 是否放弃未完成的消息，默认为 false；未选择放弃且有未完成消息时拒绝终结
+             * @description 是否放弃未完成的消息
              * @default false
              */
             abandonUnfinished: boolean;
@@ -16461,7 +16461,7 @@ export interface components {
         ForceLogoutRequest: {
             /**
              * Format: uuid
-             * @description 目标会话 ID；未指定时结束该用户的全部未作废会话，包括以其身份创建或由其发起的模拟会话
+             * @description 目标会话 ID
              */
             sessionId: string;
         };
@@ -16469,15 +16469,15 @@ export interface components {
         GrantRoleRequest: {
             /**
              * Format: int64
-             * @description 用户的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 用户的预期版本号
              */
             expectedVersion: number;
             /**
              * Format: uuid
-             * @description 角色，必须启用
+             * @description 角色
              */
             roleId: string;
-            /** @description 组织锚点，须启用；未指定或为空列表时以用户所属组织为起点 */
+            /** @description 组织锚点，未指定或为空列表时以用户所属组织为起点 */
             anchors: null | unknown[];
         };
         /** Format: binary */
@@ -16491,7 +16491,7 @@ export interface components {
             id: string;
             /** @description 机器名 */
             host: string;
-            /** @description 运行角色，如 Api、Worker */
+            /** @description 运行角色 */
             roles: string;
             /** @description 构建号 */
             build: string;
@@ -16523,7 +16523,7 @@ export interface components {
         JobAccepted: {
             /**
              * Format: uuid
-             * @description 作业 ID，用它查询进度和结果
+             * @description 作业 ID
              */
             jobId: string;
         };
@@ -16579,7 +16579,7 @@ export interface components {
             account: string;
             /** @description 密码 */
             password: string;
-            /** @description 客户端类型：web 或 app */
+            /** @description 客户端类型 */
             clientType: string;
         };
         /** @description 标为已读的结果 */
@@ -16612,16 +16612,16 @@ export interface components {
             currentRole: components["schemas"]["MeRole"];
             /** @description 已获授且启用的角色 */
             roles: components["schemas"]["MeRole"][];
-            /** @description 当前角色的权限点，按编码排序 */
+            /** @description 当前角色的权限点 */
             permissions: string[];
             /**
              * Format: int64
-             * @description 授权版本号，变化时前端重新查询用户信息
+             * @description 授权版本号
              */
             authorizationVersion: number;
             /** @description 是否必须先修改密码 */
             passwordChangeRequired: boolean;
-            /** @description 是否已经设置过密码：没有时修改密码不要求旧密码 */
+            /** @description 是否已经设置过密码 */
             hasPassword: boolean;
             /** @description 是否正在模拟身份 */
             impersonating: boolean;
@@ -16632,7 +16632,7 @@ export interface components {
             impersonatorUserId: null | string;
             /** @description 模拟会话是否允许修改数据 */
             impersonationAllowsWrite: boolean;
-            /** @description 业务时区（IANA ID），前端统一按它显示时刻 */
+            /** @description 业务时区（IANA ID） */
             businessTimeZone: string;
         };
         /** @description 用户角色信息 */
@@ -16663,12 +16663,12 @@ export interface components {
             id: string;
             /** @description 结果 */
             status: components["schemas"]["MessageReceiptStatus"];
-            /** @description 未成功原因，放弃检查拒绝时返回接收方提供的说明 */
+            /** @description 未成功原因 */
             reason: null | string;
         };
         /** @description 重试或放弃一批消息的回执 */
         MessageReceipts: {
-            /** @description 每条一个回执，顺序与请求一致 */
+            /** @description 每条一个回执 */
             receipts: components["schemas"]["MessageReceipt"][];
         };
         /**
@@ -16680,11 +16680,11 @@ export interface components {
         MessageRef: {
             /** @description 所在模块 */
             module: string;
-            /** @description 在发件箱还是收件箱：Outbox 或 Inbox */
+            /** @description 在发件箱还是收件箱 */
             box: components["schemas"]["MessageBoxKind"];
             /**
              * Format: uuid
-             * @description 行 ID，来自死信列表
+             * @description 行 ID
              */
             id: string;
         };
@@ -16716,22 +16716,22 @@ export interface components {
         MoveDictionaryItemRequest: {
             /**
              * Format: int64
-             * @description 字典类型的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 字典类型的预期版本号
              */
             expectedVersion: number;
-            /** @description 新父项编码；为 null 或空白时移至顶层，不能指定自身或后代 */
+            /** @description 新父项编码 */
             newParentCode: null | string;
         };
         /** @description 移动组织单元的请求 */
         MoveOrgUnitRequest: {
             /**
              * Format: int64
-             * @description 组织树的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 组织树的预期版本号
              */
             expectedVersion: number;
             /**
              * Format: uuid
-             * @description 新的上级，必须启用，不能是自己或自己的下级
+             * @description 新的上级
              */
             newParentId: string;
         };
@@ -16741,11 +16741,11 @@ export interface components {
             key: string;
             /** @description 显示名称 */
             displayName: string;
-            /** @description 是否偏好族键；后端仅校验 JSON 对象格式和大小，前端按版本化格式读取 */
+            /** @description 是否偏好族键 */
             isFamily: boolean;
-            /** @description 生效的值，JSON 对象 */
+            /** @description 生效的值 */
             value: unknown;
-            /** @description 生效值的来源；所有允许层均无可用值时为默认 */
+            /** @description 生效值的来源 */
             source: components["schemas"]["PreferenceSource"];
             /** @description 当前用户是否可设置个人层的值 */
             canSet: boolean;
@@ -16764,7 +16764,7 @@ export interface components {
             id: string;
             /** @description 客户端类型 */
             clientType: components["schemas"]["ClientType"];
-            /** @description 设备名，取自登录时的 User-Agent */
+            /** @description 设备名 */
             deviceName: null | string;
             /** @description 登录时的 IP */
             loginIp: null | string;
@@ -16789,7 +16789,7 @@ export interface components {
             value: unknown;
             /**
              * Format: int64
-             * @description 版本号，输出为 version，清除时须提交
+             * @description 版本号
              */
             version: number;
         };
@@ -16797,10 +16797,10 @@ export interface components {
         OrgTreeResponse: {
             /**
              * Format: int64
-             * @description 组织树版本号，输出为 version；修改组织树的命令用它做并发检查
+             * @description 组织树版本号
              */
             version: number;
-            /** @description 全部组织单元的平铺列表，按上级和排序值排列，前端通过 parentId 构建树 */
+            /** @description 全部组织单元的平铺列表 */
             units: components["schemas"]["OrgUnitItem"][];
         };
         /** @description 组织单元列表项 */
@@ -16836,7 +16836,7 @@ export interface components {
         OrgUnitVersionRequest: {
             /**
              * Format: int64
-             * @description 组织树的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 组织树的预期版本号
              */
             expectedVersion: number;
         };
@@ -16844,12 +16844,12 @@ export interface components {
         OutboxBacklogItem: {
             /**
              * Format: int64
-             * @description 待投递和投递中的消息数，不含死信
+             * @description 待投递和投递中的消息数
              */
             pending: number;
             /**
              * Format: int64
-             * @description 最早积压消息距发生时间的秒数，无积压时为 0
+             * @description 最早积压消息距发生时间的秒数
              */
             oldestAgeSeconds: number;
             /**
@@ -16874,10 +16874,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -16896,10 +16896,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -16918,10 +16918,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -16940,10 +16940,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -16962,10 +16962,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -16984,10 +16984,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -17006,10 +17006,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -17028,10 +17028,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -17050,10 +17050,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -17072,10 +17072,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
@@ -17094,10 +17094,10 @@ export interface components {
             pageSize: number;
             /**
              * Format: int64
-             * @description 总数；上限计数且超过上限时等于上限
+             * @description 总数
              */
             totalCount: number;
-            /** @description 总数是否精确；false 表示实际数量超过 TotalCount，前端显示“10,000+” */
+            /** @description 总数是否精确 */
             totalCountExact: boolean;
         };
         /** @description 权限点目录项 */
@@ -17110,7 +17110,7 @@ export interface components {
             group: string;
             /** @description 显示名 */
             displayName: string;
-            /** @description 是否敏感：用到它的命令必须审计，界面单独提示 */
+            /** @description 是否敏感 */
             sensitive: boolean;
         };
         /** @description 偏好管理列表项 */
@@ -17119,13 +17119,13 @@ export interface components {
             key: string;
             /** @description 显示名称 */
             displayName: string;
-            /** @description 所属模块；偏好族键的模块为 null */
+            /** @description 所属模块 */
             module: null | string;
             /** @description 是否偏好族里的键 */
             isFamily: boolean;
-            /** @description 允许设置的层，优先级由高到低 */
+            /** @description 允许设置的层 */
             layers: unknown[];
-            /** @description 代码里的默认值；偏好族里的键没有 */
+            /** @description 代码里的默认值 */
             defaultValue: unknown;
             systemLayer: null | components["schemas"]["PreferenceLayerValue"];
             /** @description 各角色层现有的值 */
@@ -17133,24 +17133,24 @@ export interface components {
         };
         /** @description 偏好清单 */
         PreferenceDefinitionsResponse: {
-            /** @description 普通偏好在前、偏好族在后，各组按模块和键排序 */
+            /** @description 普通偏好在前、偏好族在后 */
             preferences: components["schemas"]["PreferenceDefinitionItem"][];
         };
         /** @description 偏好在系统层或某个角色层上的值 */
         PreferenceLayerValue: {
-            /** @description 值，JSON 对象 */
+            /** @description 值 */
             value: unknown;
             /**
              * Format: int64
-             * @description 版本号，修改或删除时须提交
+             * @description 版本号
              */
             version: number;
             /**
              * Format: uuid
-             * @description 角色层所属的角色；系统层为空
+             * @description 角色层所属的角色，系统层为空
              */
             roleId: null | string;
-            /** @description 角色名称；系统层或角色已不存在时为空 */
+            /** @description 角色名称，系统层或角色已不存在时为空 */
             roleName: null | string;
         };
         /**
@@ -17160,38 +17160,38 @@ export interface components {
         PreferenceSource: "Default" | "System" | "Role" | "UserRole";
         /** @description 预览模板内容的请求 */
         PreviewTemplateRequest: {
-            /** @description 渠道：Email、Sms、InApp，必须是模板声明过的 */
+            /** @description 渠道：Email、Sms、InApp */
             channel: components["schemas"]["TemplateChannel"];
             /** @description 主题 */
             subject: string;
             /** @description 正文 */
             body: string;
-            /** @description 渲染数据；未指定时使用模板示例数据，含密模板不得指定 */
+            /** @description 渲染数据 */
             model?: unknown;
         };
         /** @description 发布模板新版本的请求 */
         PublishTemplateRequest: {
-            /** @description 渠道：Email、Sms、InApp，必须是模板声明过的 */
+            /** @description 渠道：Email、Sms、InApp */
             channel: components["schemas"]["TemplateChannel"];
-            /** @description 主题；站内消息里是标题，最多 200 个字符 */
+            /** @description 主题 */
             subject: string;
-            /** @description 正文，最多 20000 个字符 */
+            /** @description 正文 */
             body: string;
-            /** @description 备注，最多 500 个字符 */
+            /** @description 备注 */
             remark?: null | string;
             /**
              * Format: int64
-             * @description 模板记录的预期并发版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 模板记录的预期并发版本号
              */
             expectedVersion?: null | number;
         };
         /** @description 彻底删除文件的请求 */
         PurgeFileRequest: {
-            /** @description 原因，必填 */
+            /** @description 原因 */
             reason: string;
             /**
              * Format: int64
-             * @description 预期版本号，与当前版本不符时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
@@ -17229,7 +17229,7 @@ export interface components {
             scanned: number;
             /**
              * Format: int64
-             * @description 源端不存在的行数；等待确认时为当前已发现的数量
+             * @description 源端不存在的行数
              */
             missing: number;
             /**
@@ -17255,11 +17255,11 @@ export interface components {
         RebuildRunStatus: "Active" | "AwaitingConfirmation" | "Completed" | "Abandoned" | "Failed";
         /** @description 登记文件历史版本清除记录的请求 */
         RecordHistoryPurgeRequest: {
-            /** @description 执行记录，如工单号，必填 */
+            /** @description 执行记录 */
             note: string;
             /**
              * Format: int64
-             * @description 预期版本号，与当前版本不符时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
@@ -17273,12 +17273,12 @@ export interface components {
             subscription: string;
             /**
              * Format: int64
-             * @description 起始序号，含，是来源模块发件箱里的序号
+             * @description 起始序号
              */
             fromSeq: number;
             /**
              * Format: int64
-             * @description 结束序号，含
+             * @description 结束序号
              */
             toSeq: number;
         };
@@ -17291,7 +17291,7 @@ export interface components {
             candidates: number;
             /**
              * Format: int64
-             * @description 实际写入收件箱的消息数，不含重复消息
+             * @description 实际写入收件箱的消息数
              */
             written: number;
         };
@@ -17323,7 +17323,7 @@ export interface components {
         RemoveSpecimenAttachmentRequest: {
             /**
              * Format: int64
-             * @description 读取时的版本号，与当前版本不一致时返回 409 Common.VersionConflict
+             * @description 读取时的版本号
              */
             expectedVersion: number;
         };
@@ -17331,44 +17331,44 @@ export interface components {
         RenameDictionaryItemRequest: {
             /**
              * Format: int64
-             * @description 字典类型的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 字典类型的预期版本号
              */
             expectedVersion: number;
-            /** @description 新的显示名，最多 200 个字符 */
+            /** @description 新的显示名 */
             name: string;
         };
         /** @description 调整字典项次序的请求 */
         ReorderDictionaryItemsRequest: {
             /**
              * Format: int64
-             * @description 字典类型的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 字典类型的预期版本号
              */
             expectedVersion: number;
-            /** @description 父项编码；未指定时调整顶层字典项 */
+            /** @description 父项编码 */
             parentCode: null | string;
-            /** @description 按新顺序排列的全部同级字典项编码（含停用项），不得重复 */
+            /** @description 按新顺序排列的全部同级字典项编码（含停用项） */
             orderedCodes: string[];
         };
         /** @description 调整同级次序的请求 */
         ReorderOrgUnitsRequest: {
             /**
              * Format: int64
-             * @description 组织树的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 组织树的预期版本号
              */
             expectedVersion: number;
-            /** @description 按新顺序排列的全部直属下级 ID（含停用单元），不得重复 */
+            /** @description 按新顺序排列的全部直属下级 ID（含停用单元） */
             orderedChildren: unknown[];
         };
         /** @description 前端批量上报错误的请求 */
         ReportClientErrorsRequest: {
-            /** @description 本批错误，默认每次最多 20 条，实际以配置为准；超出时须分批上报。仅接受已声明字段，未知字段会导致整次请求被拒绝 */
+            /** @description 本批错误 */
             errors: components["schemas"]["ClientErrorReport"][];
         };
         /** @description 删除偏好在系统层或角色层的值 */
         ResetPreferenceLayerRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，记录已变更或删除时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
@@ -17379,16 +17379,16 @@ export interface components {
              * @description 用户 ID
              */
             id: string;
-            /** @description 临时密码，仅本次响应返回，不写入日志或审计 */
+            /** @description 临时密码 */
             temporaryPassword: string;
         };
         /** @description 标记存储问题已解决的请求 */
         ResolveStorageIssueRequest: {
-            /** @description 处理说明，必填，如还原的工单号 */
+            /** @description 处理说明 */
             note: string;
             /**
              * Format: int64
-             * @description 预期版本号，与当前版本不符时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
@@ -17396,22 +17396,22 @@ export interface components {
         RestoreJobDefaultRequest: {
             /**
              * Format: int64
-             * @description 自定义设置的预期版本号（列表中的 overrideVersion），不匹配时返回 409 Common.VersionConflict
+             * @description 自定义设置的预期版本号（列表中的 overrideVersion）
              */
             expectedVersion: number;
         };
         /** @description 重试死信的请求 */
         RetryMessagesRequest: {
-            /** @description 要重试的消息，最多 200 条 */
+            /** @description 要重试的消息 */
             messages: components["schemas"]["MessageRef"][];
         };
         /** @description 恢复模板默认内容的请求 */
         RevertTemplateRequest: {
-            /** @description 渠道：Email、Sms、InApp，必须是模板声明过的 */
+            /** @description 渠道：Email、Sms、InApp */
             channel: components["schemas"]["TemplateChannel"];
             /**
              * Format: int64
-             * @description 模板记录的预期并发版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 模板记录的预期并发版本号
              */
             expectedVersion?: null | number;
         };
@@ -17419,7 +17419,7 @@ export interface components {
         RevokeRoleRequest: {
             /**
              * Format: int64
-             * @description 用户的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 用户的预期版本号
              */
             expectedVersion: number;
         };
@@ -17427,7 +17427,7 @@ export interface components {
         RoleDataScopeItem: {
             /** @description 范围对象编码 */
             scopeObject: string;
-            /** @description 显示名；对象已退役时为空 */
+            /** @description 显示名，对象已退役时为空 */
             displayName: null | string;
             /** @description 等级 */
             level: components["schemas"]["RoleScopeLevel"];
@@ -17441,7 +17441,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 版本号，输出为 version，也是授权版本号
+             * @description 版本号
              */
             version: number;
             /** @description 名称 */
@@ -17452,7 +17452,7 @@ export interface components {
             status: components["schemas"]["RoleStatus"];
             /** @description 是否受保护角色 */
             isProtected: boolean;
-            /** @description 是否内置（拥有全部权限点，权限点与数据范围不能手工改） */
+            /** @description 是否内置（拥有全部权限点 */
             isBuiltIn: boolean;
             /**
              * Format: int32
@@ -17461,7 +17461,7 @@ export interface components {
             sortOrder: number;
             /** @description 默认数据范围等级 */
             defaultScopeLevel: components["schemas"]["RoleScopeLevel"];
-            /** @description 拥有的权限点；内置角色拥有目录里的全部，这里为空 */
+            /** @description 拥有的权限点，这里为空 */
             permissions: components["schemas"]["RolePermissionItem"][];
             /** @description 按范围对象单独设置的等级 */
             dataScopes: components["schemas"]["RoleDataScopeItem"][];
@@ -17502,7 +17502,7 @@ export interface components {
             holderCount: number;
             /**
              * Format: int64
-             * @description 版本号，输出为 version
+             * @description 版本号
              */
             version: number;
         };
@@ -17512,7 +17512,7 @@ export interface components {
             code: string;
             /** @description 显示名称，代码目录中已不存在的权限点为空 */
             displayName: null | string;
-            /** @description 是否已从代码目录移除；替换权限点时不能提交此编码 */
+            /** @description 是否已从代码目录移除 */
             retired: boolean;
         };
         /**
@@ -17556,7 +17556,7 @@ export interface components {
             needsInitialization: boolean;
             /** @description 显示名 */
             displayName: null | string;
-            /** @description 退役原因，待终结和已终结的才有 */
+            /** @description 退役原因 */
             retiredReason: null | string;
             /**
              * Format: date-time
@@ -17568,28 +17568,28 @@ export interface components {
              * @description 终结的人
              */
             finalizedBy: null | string;
-            /** @description 存活实例中声明该订阅的构建及实例数，供终结前检查 */
+            /** @description 存活实例中声明该订阅的构建及实例数 */
             declaredByBuilds: components["schemas"]["RouteBuild"][];
         };
         /** @description 定时任务及其默认计划、自定义设置、实际调度状态和最近执行记录 */
         ScheduledJobItem: {
             /** @description 稳定名称 */
             name: string;
-            /** @description 所属模块；框架自带的任务是 Framework */
+            /** @description 所属模块 */
             module: string;
             /** @description 显示名 */
             displayName: string;
-            /** @description 任务是否仍在代码中声明；已移除任务保留自定义设置，便于回滚 */
+            /** @description 任务是否仍在代码中声明 */
             isDeclared: boolean;
-            /** @description 代码默认 Cron 表达式；已移除声明的任务为空 */
+            /** @description 代码默认 Cron 表达式，已移除声明的任务为空 */
             defaultCron: null | string;
-            /** @description 自定义启用状态；为 null 时使用默认值（启用） */
+            /** @description 自定义启用状态 */
             overrideEnabled: null | boolean;
-            /** @description 自定义 Cron 表达式；为 null 时使用代码默认表达式 */
+            /** @description 自定义 Cron 表达式 */
             overrideCron: null | string;
             /**
              * Format: int64
-             * @description 自定义设置的版本号，修改时须提交；尚无自定义设置时为空
+             * @description 自定义设置的版本号，尚无自定义设置时为空
              */
             overrideVersion: null | number;
             /** @description 当前配置的启用状态 */
@@ -17600,7 +17600,7 @@ export interface components {
             activeCron: null | string;
             /**
              * Format: date-time
-             * @description 下次计划触发时间；无后续触发或无触发器时为空
+             * @description 下次计划触发时间，无后续触发或无触发器时为空
              */
             nextFireTime: string;
             /** @description 实际调度状态是否与当前配置一致 */
@@ -17630,15 +17630,15 @@ export interface components {
             startedAt: string;
             /**
              * Format: date-time
-             * @description 结束时间；执行中为空
+             * @description 结束时间，执行中为空
              */
             finishedAt: string;
             /**
              * Format: int64
-             * @description 耗时，毫秒
+             * @description 耗时
              */
             durationMs: null | number;
-            /** @description 触发方式：按计划、手动或补执行 */
+            /** @description 触发方式 */
             trigger: components["schemas"]["JobRunTrigger"];
             /**
              * Format: uuid
@@ -17718,7 +17718,7 @@ export interface components {
             details: null | {
                 [key: string]: string;
             };
-            /** @description 链路追踪 ID，用于关联请求日志和调用链 */
+            /** @description 链路追踪 ID */
             traceId: string;
         };
         /**
@@ -17730,36 +17730,36 @@ export interface components {
         SetGrantAnchorsRequest: {
             /**
              * Format: int64
-             * @description 用户的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 用户的预期版本号
              */
             expectedVersion: number;
-            /** @description 新的组织锚点，须启用；空列表表示清空锚点，改用用户所属组织 */
+            /** @description 新的组织锚点 */
             anchors: unknown[];
         };
         /** @description 整体替换定时任务自定义设置，null 表示使用默认值 */
         SetJobOverrideRequest: {
-            /** @description 是否启用，null 表示使用默认值（启用） */
+            /** @description 是否启用 */
             enabled: null | boolean;
-            /** @description Cron 表达式，Quartz 写法（带秒），按业务时区解释；预览中的触发间隔至少 1 分钟，为 null 时使用代码默认表达式 */
+            /** @description Cron 表达式 */
             cron: null | string;
             /**
              * Format: int64
-             * @description 自定义设置的预期版本号（列表中的 overrideVersion），尚无设置时不传；不匹配时返回 409 Common.VersionConflict
+             * @description 自定义设置的预期版本号（列表中的 overrideVersion）
              */
             expectedVersion: null | number;
         };
         /** @description 保存本人偏好的请求 */
         SetMyPreferenceRequest: {
-            /** @description 偏好值，须为 JSON 对象；已声明偏好按值类型解析并校验，偏好族仅保存 JSON 内容 */
+            /** @description 偏好值 */
             value: unknown;
         };
         /** @description 设置偏好在系统层或角色层的值 */
         SetPreferenceLayerRequest: {
-            /** @description 偏好值，须为 JSON 对象；已声明偏好按值类型解析并校验，偏好族仅保存 JSON 内容 */
+            /** @description 偏好值 */
             value: unknown;
             /**
              * Format: int64
-             * @description 预期版本号，当前层级尚无值时不传；不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号，还没有值时不传
              */
             expectedVersion: null | number;
         };
@@ -17767,33 +17767,33 @@ export interface components {
         SetRoleDataScopesRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
             /** @description 默认等级 */
             defaultLevel: components["schemas"]["RoleScopeLevel"];
-            /** @description 按范围对象单独设置的等级，键是范围对象编码 */
+            /** @description 按范围对象单独设置的等级 */
             overrides: Record<string, never>;
         };
         /** @description 替换角色权限点的请求 */
         SetRolePermissionsRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
-            /** @description 新的权限点集合，只接受目录里存在的编码 */
+            /** @description 新的权限点集合 */
             permissions: string[];
         };
         /** @description 修改系统设置的请求 */
         SetSettingRequest: {
-            /** @description 新的设置值，须为 JSON 对象；字段及校验要求见设置定义 */
+            /** @description 新的设置值 */
             value: unknown;
-            /** @description 原因，必填，最多 500 个字符，记入变更历史 */
+            /** @description 原因 */
             reason: string;
             /**
              * Format: int64
-             * @description 预期版本号，尚无保存值时不传；不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号，还没有值时不传
              */
             expectedVersion: null | number;
         };
@@ -17808,7 +17808,7 @@ export interface components {
             key: string;
             /** @description 修改前保存的值，原无保存记录时为空 */
             oldValue: unknown;
-            /** @description 修改后保存的值；恢复默认或清除时为空 */
+            /** @description 修改后保存的值，恢复默认或清除时为空 */
             newValue: unknown;
             /** @description 原因 */
             reason: string;
@@ -17833,7 +17833,7 @@ export interface components {
             name: string;
             /** @description 类型：bool、int、long、decimal、double、string、guid、date、time、dateTime、timeSpan */
             type: string;
-            /** @description 显示名；没有声明时是成员名 */
+            /** @description 显示名 */
             displayName: string;
             /** @description 单位 */
             unit: null | string;
@@ -17852,17 +17852,17 @@ export interface components {
             module: string;
             /** @description 分组 */
             group: null | string;
-            /** @description 值里的成员清单，管理页据此生成编辑控件 */
+            /** @description 值里的成员清单 */
             fields: components["schemas"]["SettingFieldInfo"][];
             /** @description 代码里的默认值 */
             defaultValue: unknown;
-            /** @description 管理页当前值，有保存值时返回保存内容，否则返回代码默认值 */
+            /** @description 管理页当前值 */
             currentValue: unknown;
             /** @description 是否已保存自定义值 */
             isModified: boolean;
             /**
              * Format: int64
-             * @description 保存记录的版本号，输出为 version；未保存值时为空
+             * @description 保存记录的版本号，未保存值时为空
              */
             version: null | number;
             /** @description 修改它需要的权限点 */
@@ -17872,17 +17872,17 @@ export interface components {
         };
         /** @description 恢复默认、清除设置值的请求 */
         SettingReasonRequest: {
-            /** @description 原因，必填，最多 500 个字符，记入变更历史 */
+            /** @description 原因 */
             reason: string;
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
         };
         /** @description 全部系统设置 */
         SettingsResponse: {
-            /** @description 代码里声明的设置，按模块、分组、键排好 */
+            /** @description 代码里声明的设置 */
             settings: components["schemas"]["SettingItem"][];
             /** @description 代码中已移除但仍有保存值的设置 */
             obsolete: components["schemas"]["ObsoleteSettingItem"][];
@@ -17896,7 +17896,7 @@ export interface components {
             id: string;
             /** @description 标题 */
             title: string;
-            /** @description 正文，前端显示时转义 */
+            /** @description 正文 */
             body: string;
             /** @description 点击跳转的站内地址 */
             link: null | string;
@@ -17941,7 +17941,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 并发版本号，修改时作为 expectedVersion 带回
+             * @description 并发版本号
              */
             version: number;
             /** @description 编号 */
@@ -17954,7 +17954,7 @@ export interface components {
             items: components["schemas"]["SpecimenItemResponse"][];
             /** @description 附件 */
             attachments: components["schemas"]["SpecimenAttachmentResponse"][];
-            /** @description 当前用户可执行的操作，如 Submit、Close */
+            /** @description 当前用户可执行的操作 */
             allowedActions: string[];
         };
         /** @description 示例明细 */
@@ -17995,10 +17995,10 @@ export interface components {
         StartImpersonationRequest: {
             /**
              * Format: uuid
-             * @description 目标用户的角色 ID；未指定时优先使用上次角色，不可用时选择排序最前的启用角色
+             * @description 目标用户的角色 ID
              */
             roleId: string;
-            /** @description 原因，必填，最多 500 个字符，写入安全事件 */
+            /** @description 原因 */
             reason: string;
         };
         /** @description 业务历史记录 */
@@ -18040,11 +18040,11 @@ export interface components {
              * @description 文件 ID
              */
             fileId: string;
-            /** @description 文件名；文件记录不存在时为空 */
+            /** @description 文件名，文件记录不存在时为空 */
             fileName: null | string;
             /** @description 问题类型 */
             kind: components["schemas"]["StorageIssueKind"];
-            /** @description 发现时记录的对象版本，用于还原 */
+            /** @description 发现时记录的对象版本 */
             objectVersionId: null | string;
             /**
              * Format: date-time
@@ -18090,7 +18090,7 @@ export interface components {
         SubmitSpecimenRequest: {
             /**
              * Format: int64
-             * @description 读取时的版本号，与当前版本不一致时返回 409 Common.VersionConflict
+             * @description 读取时的版本号
              */
             expectedVersion: number;
         };
@@ -18100,12 +18100,12 @@ export interface components {
             subscription: string;
             /**
              * Format: int64
-             * @description 待处理和处理中的消息数，不含死信
+             * @description 待处理和处理中的消息数
              */
             pending: number;
             /**
              * Format: int64
-             * @description 最早积压消息距接收时间的秒数，无积压时为 0
+             * @description 最早积压消息距接收时间的秒数
              */
             oldestAgeSeconds: number;
             /**
@@ -18120,10 +18120,10 @@ export interface components {
             abandoned: number;
             /**
              * Format: int64
-             * @description 被死信挡住的顺序键个数，只有有序订阅才有
+             * @description 被死信挡住的顺序键个数
              */
             blockedKeys: number;
-            /** @description 是否待终结；此类积压应单独告警 */
+            /** @description 是否待终结 */
             isRetiring: boolean;
         };
         /** @description 切换角色的请求 */
@@ -18145,16 +18145,16 @@ export interface components {
             channel: string;
             /**
              * Format: int32
-             * @description 当前选用的发布版本号；未选用时为空
+             * @description 当前选用的发布版本号，未选用时为空
              */
             activeVersion: null | number;
-            /** @description 当前的主题；站内消息里是标题 */
+            /** @description 当前的主题 */
             subject: string;
             /** @description 当前的正文 */
             body: string;
-            /** @description 代码默认主题；声明已移除时为空 */
+            /** @description 代码默认主题，声明已移除时为空 */
             defaultSubject: null | string;
-            /** @description 代码默认正文；声明已移除时为空 */
+            /** @description 代码默认正文，声明已移除时为空 */
             defaultBody: null | string;
         };
         /** @description 通知模板详情 */
@@ -18165,7 +18165,7 @@ export interface components {
             displayName: string;
             /** @description 声明它的模块 */
             module: string;
-            /** @description 发件账号名，只对邮件渠道有意义 */
+            /** @description 发件账号名 */
             senderProfile: string;
             /** @description 内容含一次性短时凭据 */
             carriesSecret: boolean;
@@ -18173,16 +18173,16 @@ export interface components {
             status: string;
             /**
              * Format: int64
-             * @description 并发版本号，以 version 输出；发布或恢复默认时用作预期版本号
+             * @description 并发版本号
              */
             version: number;
             /** @description 各渠道当前的内容 */
             channels: components["schemas"]["TemplateChannelInfo"][];
             /** @description 模板里能用的变量名 */
             variables: string[];
-            /** @description 预览默认使用的示例数据；声明已移除时为空 */
+            /** @description 预览默认使用的示例数据，声明已移除时为空 */
             example: unknown;
-            /** @description 已发布版本，按版本号倒序 */
+            /** @description 已发布版本 */
             versions: components["schemas"]["TemplateVersionInfo"][];
         };
         /** @description 通知模板列表项 */
@@ -18199,7 +18199,7 @@ export interface components {
             carriesSecret: boolean;
             /** @description 状态编码：Active、Retired */
             status: string;
-            /** @description 各渠道选用的发布版本号；活动模板未选用版本时使用代码默认内容 */
+            /** @description 各渠道选用的发布版本号 */
             activeVersions: {
                 [key: string]: number;
             };
@@ -18216,11 +18216,11 @@ export interface components {
         };
         /** @description 模板预览结果 */
         TemplatePreviewResponse: {
-            /** @description 渲染后的主题；渲染失败时为空 */
+            /** @description 渲染后的主题，渲染失败时为空 */
             subject: null | string;
-            /** @description 渲染后的正文；渲染失败时为空 */
+            /** @description 渲染后的正文，渲染失败时为空 */
             body: null | string;
-            /** @description 渲染失败原因；成功时为空 */
+            /** @description 渲染失败原因，成功时为空 */
             error: null | string;
         };
         /** @description 模板发布版本 */
@@ -18261,19 +18261,19 @@ export interface components {
         UpdateOrgUnitRequest: {
             /**
              * Format: int64
-             * @description 组织树的预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 组织树的预期版本号
              */
             expectedVersion: number;
-            /** @description 名称，最多 100 个字符；同级不得重名（含停用单元，不区分大小写） */
+            /** @description 名称 */
             name: string;
-            /** @description 编码，最多 50 个字符；不填表示清空 */
+            /** @description 编码 */
             code: null | string;
         };
         /** @description 修改角色的请求 */
         UpdateRoleRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，不匹配时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
             /** @description 名称 */
@@ -18290,7 +18290,7 @@ export interface components {
         UpdateUserProfileRequest: {
             /**
              * Format: int64
-             * @description 预期版本号，与当前版本不符时返回 409 Common.VersionConflict
+             * @description 预期版本号
              */
             expectedVersion: number;
             /** @description 登录名 */
@@ -18337,7 +18337,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 版本号，输出为 version
+             * @description 版本号
              */
             version: number;
             /** @description 登录名 */
@@ -18372,14 +18372,14 @@ export interface components {
             passwordChangedAt: string;
             /**
              * Format: date-time
-             * @description 登录等待或锁定的截止时间，无限制时为空；不影响已有会话
+             * @description 登录等待或锁定的截止时间，无限制时为空
              */
             loginLockedUntil: string;
             /** @description 角色授予 */
             grants: components["schemas"]["UserGrantItem"][];
             /**
              * Format: int32
-             * @description 未作废且未到绝对到期时间的会话数，含相关模拟会话
+             * @description 未作废且未到绝对到期时间的会话数
              */
             activeSessionCount: number;
             /** @description 当前用户可对该用户执行的管理动作 */
@@ -18394,7 +18394,7 @@ export interface components {
             roleId: string;
             /** @description 角色名称 */
             roleName: null | string;
-            /** @description 角色是否启用，已停用角色不可用于登录或切换 */
+            /** @description 角色是否启用 */
             roleIsActive: boolean;
             /** @description 是否受保护角色 */
             roleIsProtected: boolean;
@@ -18410,7 +18410,7 @@ export interface components {
             grantedBy: string;
             /** @description 授予人的姓名 */
             grantedByName: null | string;
-            /** @description 组织锚点；空列表时以用户所属组织为起点 */
+            /** @description 组织锚点 */
             anchors: components["schemas"]["UserAnchorItem"][];
         };
         /** @description 用户列表项 */
@@ -18441,7 +18441,7 @@ export interface components {
             roles: components["schemas"]["UserRoleBrief"][];
             /**
              * Format: int64
-             * @description 版本号，输出为 version
+             * @description 版本号
              */
             version: number;
         };
@@ -18458,7 +18458,7 @@ export interface components {
             employeeNo: null | string;
             /** @description 所属组织单元的名称 */
             orgUnitName: null | string;
-            /** @description 用户状态，供界面标记已禁用用户 */
+            /** @description 用户状态 */
             status: components["schemas"]["UserStatus"];
         };
         /** @description 用户列表中的角色摘要 */
@@ -18470,7 +18470,7 @@ export interface components {
             id: string;
             /** @description 名称 */
             name: string;
-            /** @description 角色是否启用，已停用角色不可用于登录或切换 */
+            /** @description 角色是否启用 */
             isActive: boolean;
         };
         /** @description 用户的一个有效会话 */
@@ -18482,7 +18482,7 @@ export interface components {
             id: string;
             /**
              * Format: uuid
-             * @description 会话所属用户 ID，模拟会话为被模拟用户
+             * @description 会话所属用户 ID
              */
             userId: string;
             /**
@@ -18492,7 +18492,7 @@ export interface components {
             impersonatorUserId: string;
             /** @description 客户端类型 */
             clientType: components["schemas"]["ClientType"];
-            /** @description 设备名，取自登录时的 User-Agent */
+            /** @description 设备名 */
             deviceName: null | string;
             /** @description 登录时的 IP */
             loginIp: null | string;
@@ -18508,7 +18508,7 @@ export interface components {
             lastRefreshedAt: string;
             /**
              * Format: date-time
-             * @description 刷新令牌到期时间；模拟会话为会话到期时间，不签发刷新令牌
+             * @description 刷新令牌到期时间
              */
             refreshExpiresAt: string;
         };
@@ -18526,7 +18526,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18540,7 +18540,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18554,7 +18554,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18568,7 +18568,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18582,7 +18582,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18596,7 +18596,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18610,7 +18610,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18624,7 +18624,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18638,7 +18638,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18652,7 +18652,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;
@@ -18666,7 +18666,7 @@ export interface components {
             id: string;
             /**
              * Format: int64
-             * @description 保存后的版本号，输出为 version
+             * @description 保存后的版本号
              * @default 0
              */
             version: number;

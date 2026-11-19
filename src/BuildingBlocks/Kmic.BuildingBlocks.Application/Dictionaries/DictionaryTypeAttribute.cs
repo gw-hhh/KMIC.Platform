@@ -3,7 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Dictionaries;
 /// <summary>
 /// 字典类型
 /// </summary>
-/// <param name="displayName">显示名称，如“行业”</param>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class DictionaryTypeAttribute(string displayName) : Attribute
 {

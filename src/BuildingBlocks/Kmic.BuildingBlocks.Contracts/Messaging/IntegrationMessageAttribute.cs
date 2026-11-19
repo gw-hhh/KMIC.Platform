@@ -6,7 +6,6 @@ namespace Kmic.BuildingBlocks.Contracts.Messaging;
 /// <remarks>
 /// 名称格式为“模块.类名”，全系统唯一。有不兼容的改动时，新建一个 Version = 2 的类，名称不变
 /// </remarks>
-/// <param name="name">消息名称，如 Customer.CustomerChanged</param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class IntegrationMessageAttribute(string name) : Attribute
 {

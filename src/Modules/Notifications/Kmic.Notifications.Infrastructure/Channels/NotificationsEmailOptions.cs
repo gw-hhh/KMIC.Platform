@@ -6,7 +6,7 @@ namespace Kmic.Notifications.Infrastructure.Channels;
 /// 邮件渠道部署配置，默认发件账号名为 Default
 /// </summary>
 /// <remarks>
-/// 节名 Notifications:Email。模板声明用哪个发件账号，没声明就用 Default。密码来自密钥源，不写在配置文件里
+/// 密码来自密钥源，不写进配置文件
 /// </remarks>
 public sealed class NotificationsEmailOptions
 {

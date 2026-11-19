@@ -21,9 +21,7 @@ namespace Kmic.Notifications.Application.Processing;
 /// 处理通知发送请求，按收件人和渠道生成投递记录或站内消息
 /// </summary>
 /// <remarks>
-/// 在 Notifications 的事务中保存渲染结果和投递记录，不调用外部发送渠道；实际发送由投递工作器完成。
-/// 各渠道优先使用已发布版本，否则使用代码默认内容。同一来源消息只处理一次，已存在相同模板、收件人、去重键和渠道的投递时跳过。
-/// 模板不存在或模型不符等业务失败返回错误，由消息管道转入死信
+/// 不调外部渠道，只生成投递记录
 /// </remarks>
 public sealed class NotificationProcessor(
     NotificationTemplateCatalog catalog,

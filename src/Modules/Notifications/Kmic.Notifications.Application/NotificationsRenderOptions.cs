@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace Kmic.Notifications.Application;
 
 /// <summary>
-/// 模板渲染限制
+/// 模板渲染限制，配置节 Notifications:Template
 /// </summary>
-/// <remarks>
-/// 部署配置，节名 Notifications:Template
-/// </remarks>
 public sealed class NotificationsRenderOptions
 {
     /// <summary>

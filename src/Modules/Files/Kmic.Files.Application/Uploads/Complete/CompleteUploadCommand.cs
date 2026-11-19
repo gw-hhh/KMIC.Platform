@@ -7,13 +7,13 @@ namespace Kmic.Files.Application.Uploads.Complete;
 /// 登记已写入存储的文件信息，将上传标记为完成
 /// </summary>
 /// <remarks>
-/// 仅上传人可登记，文件须处于上传中。完成后文件暂存为可用，保留期内未关联业务对象则可被清理
+/// 只有上传人能登记
 /// </remarks>
 /// <param name="FileId">文件 ID</param>
 /// <param name="FileType">识别出的文件类型编码</param>
 /// <param name="ContentType">识别出的内容类型</param>
 /// <param name="Size">实际字节数</param>
-/// <param name="Sha256">内容的 SHA-256，小写十六进制</param>
+/// <param name="Sha256">内容的 SHA-256</param>
 /// <param name="ObjectVersionId">存储里对象的版本 ID，没有开启版本控制时为空</param>
 [AllowAuthenticated]
 [NotAudited("上传状态变化记入文件历史")]

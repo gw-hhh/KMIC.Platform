@@ -5,10 +5,6 @@ namespace Kmic.Files.Domain.Files;
 /// <summary>
 /// 一个业务对象对文件的引用
 /// </summary>
-/// <remarks>
-/// 引用记录通过关联和解除关联消息更新，可能晚于业务模块中的实际关联。
-/// 用于判断文件是否可以清理：有引用时保留文件，全部解除后进入保留期
-/// </remarks>
 public sealed class FileReference : Entity<FileReferenceId>
 {
     private FileReference(FileReferenceId id, string ownerModule, string ownerType, Guid ownerId, DateTimeOffset attachedAt)

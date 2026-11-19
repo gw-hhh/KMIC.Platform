@@ -32,8 +32,6 @@ public static class PersistenceServiceCollectionExtensions
     /// <summary>
     /// 注册数据访问服务
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="configure">配置连接串和连接池</param>
     public static IServiceCollection AddKmicPersistence(this IServiceCollection services, Action<DatabaseOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(services);

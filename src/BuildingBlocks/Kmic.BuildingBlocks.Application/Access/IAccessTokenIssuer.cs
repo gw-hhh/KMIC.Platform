@@ -14,11 +14,6 @@ public interface IAccessTokenIssuer
     /// <summary>
     /// 签发一个访问令牌
     /// </summary>
-    /// <param name="user">用户；模拟会话里是被模拟的人</param>
-    /// <param name="session">会话</param>
-    /// <param name="role">当前角色</param>
-    /// <param name="clientType">客户端类型，web 或 app</param>
-    /// <param name="now">当前时间</param>
     /// <param name="lifetime">有效期，不传时用配置的默认值</param>
     AccessToken Issue(UserId user, SessionId session, RoleId role, string clientType, DateTimeOffset now, TimeSpan? lifetime = null);
 }

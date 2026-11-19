@@ -8,8 +8,8 @@ namespace Kmic.Files.Application.Administration;
 /// 把存储问题标为已解决
 /// </summary>
 /// <param name="Id">存储问题</param>
-/// <param name="Note">处理说明，必填，如还原的工单号</param>
-/// <param name="ExpectedVersion">预期版本号，与当前版本不符时返回版本冲突</param>
+/// <param name="Note">处理说明</param>
+/// <param name="ExpectedVersion">预期版本号</param>
 [RequirePermission(FilesPermissions.FileManage)]
 [Audited]
 [Idempotent]

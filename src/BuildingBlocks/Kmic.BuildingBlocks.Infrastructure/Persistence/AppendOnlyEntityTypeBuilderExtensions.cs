@@ -14,7 +14,6 @@ public static class AppendOnlyEntityTypeBuilderExtensions
     /// <remarks>
     /// 用在“事后不能改”的记录上，如设置的变更历史。过期数据由迁移程序的维护命令删除，不放在应用的定时任务里
     /// </remarks>
-    /// <param name="builder">实体的配置</param>
     /// <typeparam name="TEntity">实体类型</typeparam>
     public static void IsAppendOnly<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class

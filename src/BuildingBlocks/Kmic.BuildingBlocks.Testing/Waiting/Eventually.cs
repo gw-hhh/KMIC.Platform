@@ -18,11 +18,6 @@ public static class Eventually
     /// <summary>
     /// 反复读取，直到结果满足条件，返回那次的结果
     /// </summary>
-    /// <param name="probe">读取当前状态</param>
-    /// <param name="done">是否已完成</param>
-    /// <param name="because">在等什么，超时时显示</param>
-    /// <param name="timeout">超时时间，默认 10 秒</param>
-    /// <param name="ct">取消令牌</param>
     /// <exception cref="TimeoutException">超时仍未满足</exception>
     public static async Task<T> UntilAsync<T>(
         Func<CancellationToken, Task<T>> probe,

@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Users;
 /// 用户管理的操作限制
 /// </summary>
 /// <remarks>
-/// 不能禁用最后一位可登录、持有已启用受保护角色的用户
+/// 不能禁用最后一个能登录的受保护角色持有人
 /// </remarks>
 public sealed class UserPolicy : IResourcePolicy<UserTarget, UserAdminAction>
 {

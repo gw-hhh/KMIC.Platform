@@ -26,7 +26,6 @@ public static class FrameworkOptionsServiceCollectionExtensions
     /// 各个 AddKmic… 只注册默认值，不读配置：它们也要在没有配置系统的测试里使用。
     /// 宿主调用这个方法之后，部署时才能用配置文件或环境变量改这些值
     /// </remarks>
-    /// <param name="services">服务集合，要求已经有 IConfiguration</param>
     public static IServiceCollection AddKmicFrameworkOptions(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

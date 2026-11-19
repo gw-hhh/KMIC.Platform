@@ -19,7 +19,7 @@ namespace Kmic.Identity.Application.SecurityEvents;
 /// <param name="ResourceType">资源类型</param>
 /// <param name="ResourceId">资源 ID</param>
 /// <param name="Details">补充说明</param>
-/// <param name="TraceId">链路追踪 ID，用于关联请求日志和调用链</param>
+/// <param name="TraceId">链路追踪 ID</param>
 public sealed record SecurityEventItem(
     Guid Id,
     DateTimeOffset OccurredAt,

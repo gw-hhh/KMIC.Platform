@@ -10,12 +10,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <remarks>
 /// 合成一个参数，模块上下文的构造函数就不用逐个列出
 /// </remarks>
-/// <param name="execution">执行上下文</param>
-/// <param name="dataScope">数据权限</param>
-/// <param name="scopeObjects">范围对象目录</param>
-/// <param name="time">时间来源</param>
-/// <param name="saveGate">保存入口控制</param>
-/// <param name="securityEvents">安全事件</param>
 public sealed class ModuleDbContextServices(
     IExecutionContext execution,
     IDataScope dataScope,

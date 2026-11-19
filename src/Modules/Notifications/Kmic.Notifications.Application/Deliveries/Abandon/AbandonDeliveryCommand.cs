@@ -7,9 +7,6 @@ namespace Kmic.Notifications.Application.Deliveries.Abandon;
 /// <summary>
 /// 放弃失败的投递
 /// </summary>
-/// <remarks>
-/// 须填写放弃原因；放弃记录在保留期满后可由清理任务删除
-/// </remarks>
 [RequirePermission(NotificationsPermissions.DeliveryManage)]
 [Audited]
 [Idempotent]

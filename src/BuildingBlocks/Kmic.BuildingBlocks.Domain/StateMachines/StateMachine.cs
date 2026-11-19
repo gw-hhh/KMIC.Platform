@@ -14,8 +14,6 @@ public static class StateMachine
     /// <summary>
     /// 声明状态机
     /// </summary>
-    /// <param name="state">状态属性，如 s =&gt; s.Status</param>
-    /// <param name="setState">写入状态属性，如 (s, v) =&gt; s.Status = v</param>
     public static StateMachineBuilder<TAggregate, TState, TAction> Define<TAggregate, TState, TAction>(
         Expression<Func<TAggregate, TState>> state,
         Action<TAggregate, TState> setState)

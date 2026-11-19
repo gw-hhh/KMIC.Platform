@@ -26,9 +26,6 @@ public sealed class ScheduledJobCatalog
     /// </summary>
     public ScheduledJobDefinition? Find(string name) => _byName.GetValueOrDefault(name);
 
-    /// <param name="modules">各模块的声明</param>
-    /// <param name="useCases">用例目录，用来核对命令</param>
-    /// <param name="checkCron">检查 Cron 写法，有问题时返回说明。Application 不引用 Quartz，由基础设施传入</param>
     internal static ScheduledJobCatalog Build(IEnumerable<ModuleSchedules> modules, UseCaseCatalog useCases, Func<string, string?> checkCron)
     {
         ArgumentNullException.ThrowIfNull(modules);

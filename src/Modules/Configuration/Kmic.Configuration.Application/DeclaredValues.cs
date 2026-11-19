@@ -13,13 +13,6 @@ internal static class DeclaredValues
     /// <summary>
     /// 按声明的值类型解析 JSON 并校验
     /// </summary>
-    /// <remarks>
-    /// 调用值类型声明的静态校验函数，原样返回字段错误，供界面定位输入项
-    /// </remarks>
-    /// <param name="definition">设置或偏好的定义</param>
-    /// <param name="json">调用方给的值</param>
-    /// <param name="invalid">值不合法时的错误</param>
-    /// <param name="invalidWith">将字段校验信息转换为返回错误</param>
     public static Result<object> Parse(DeclaredValueDefinition definition, JsonElement json, Error invalid, Func<IReadOnlyList<FieldError>, Error> invalidWith)
     {
         ArgumentNullException.ThrowIfNull(definition);

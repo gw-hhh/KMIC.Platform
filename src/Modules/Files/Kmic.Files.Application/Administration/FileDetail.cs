@@ -8,13 +8,13 @@ namespace Kmic.Files.Application.Administration;
 /// 文件详情，不含内容或存储键
 /// </summary>
 /// <param name="Id">文件 ID</param>
-/// <param name="Version">并发版本号，修改时通过 expectedVersion 提交</param>
+/// <param name="Version">并发版本号</param>
 /// <param name="Name">显示文件名</param>
 /// <param name="FileType">文件类型编码</param>
 /// <param name="ContentType">内容类型</param>
 /// <param name="Size">字节数</param>
 /// <param name="Sha256">内容的 SHA-256</param>
-/// <param name="Profile">上传配置标识；生成文件为 Generated:来源</param>
+/// <param name="Profile">上传配置标识</param>
 /// <param name="UploadedBy">上传人或生成请求人 ID，可为空</param>
 /// <param name="UploadedAt">文件登记时间</param>
 /// <param name="Status">状态</param>
@@ -27,7 +27,7 @@ namespace Kmic.Files.Application.Administration;
 /// <param name="HistoryPurgedAt">历史版本清除登记时间</param>
 /// <param name="HistoryPurgeNote">历史版本清除记录</param>
 /// <param name="References">引用它的业务对象</param>
-/// <param name="History">状态流转记录，按时间从早到晚</param>
+/// <param name="History">状态流转记录</param>
 public sealed record FileDetail(
     StoredFileId Id,
     long Version,

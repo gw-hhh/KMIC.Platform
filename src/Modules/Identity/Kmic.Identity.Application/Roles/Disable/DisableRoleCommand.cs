@@ -8,8 +8,8 @@ namespace Kmic.Identity.Application.Roles.Disable;
 /// 停用角色
 /// </summary>
 /// <param name="Id">角色 ID</param>
-/// <param name="ExpectedVersion">预期版本号，不匹配时返回版本冲突</param>
-/// <param name="Reason">原因，记入状态历史</param>
+/// <param name="ExpectedVersion">预期版本号</param>
+/// <param name="Reason">原因</param>
 [RequirePermission(IdentityPermissions.RoleManage)]
 [Audited]
 [Idempotent]

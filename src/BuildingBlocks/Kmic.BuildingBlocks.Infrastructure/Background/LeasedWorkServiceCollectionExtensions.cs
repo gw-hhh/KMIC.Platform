@@ -16,7 +16,6 @@ public static class LeasedWorkServiceCollectionExtensions
     /// </remarks>
     /// <typeparam name="TWork">队列的实现</typeparam>
     /// <typeparam name="TItem">领取到的一条</typeparam>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicLeasedWork<TWork, TItem>(this IServiceCollection services)
         where TWork : class, ILeasedWork<TItem>
     {

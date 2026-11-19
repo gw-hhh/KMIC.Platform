@@ -5,5 +5,5 @@ namespace Kmic.BuildingBlocks.Application.Integration;
 /// </summary>
 /// <param name="Module">模块名</param>
 /// <param name="Outbox">发件箱</param>
-/// <param name="Subscriptions">收件箱里有积压、死信，或者本实例声明了的订阅</param>
+/// <param name="Subscriptions">各订阅的积压</param>
 public sealed record ModuleMessageBacklog(string Module, OutboxBacklogInfo Outbox, IReadOnlyList<SubscriptionBacklogInfo> Subscriptions);

@@ -7,7 +7,7 @@ namespace Kmic.Notifications.Application.SiteMessages.List;
 /// </summary>
 /// <param name="Id">消息 ID</param>
 /// <param name="Title">标题</param>
-/// <param name="Body">正文，前端显示时转义</param>
+/// <param name="Body">正文</param>
 /// <param name="Link">点击跳转的站内地址</param>
 /// <param name="Category">类别</param>
 /// <param name="SentAt">发送时间</param>

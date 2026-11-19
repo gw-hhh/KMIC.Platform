@@ -9,9 +9,6 @@ namespace Kmic.Notifications.Domain.SiteMessages;
 /// <summary>
 /// 用户的站内消息
 /// </summary>
-/// <remarks>
-/// 仅更新已读状态；按收件人控制访问，不另设权限点或组织范围限制
-/// </remarks>
 public sealed class SiteMessage : AggregateRoot<SiteMessageId>
 {
     /// <summary>
@@ -90,7 +87,7 @@ public sealed class SiteMessage : AggregateRoot<SiteMessageId>
     /// 创建一条站内消息
     /// </summary>
     /// <remarks>
-    /// 链接只能是站内相对路径；发送时间取 now
+    /// 链接只能是站内相对路径
     /// </remarks>
     public static Result<SiteMessage> Create(UserId recipient, NotificationId? notificationId, string title, string body, string? link, string category, DateTimeOffset now)
     {

@@ -3,8 +3,8 @@ namespace Kmic.BuildingBlocks.Application.Scheduling;
 /// <summary>
 /// 检查 Cron 表达式的结果
 /// </summary>
-/// <param name="Problem">写得不对时的说明；合法时为空</param>
-/// <param name="NextFireTimes">接下来的触发时刻，按时间顺序；表达式合法但以后不会再触发时为空</param>
+/// <param name="Problem">写得不对时的说明，合法时为空</param>
+/// <param name="NextFireTimes">接下来的触发时刻，表达式合法但以后不会再触发时为空</param>
 public sealed record CronPreview(string? Problem, IReadOnlyList<DateTimeOffset> NextFireTimes)
 {
     /// <summary>

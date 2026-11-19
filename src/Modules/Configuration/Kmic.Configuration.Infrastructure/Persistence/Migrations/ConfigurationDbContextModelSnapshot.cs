@@ -694,11 +694,11 @@ namespace Kmic.Configuration.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("NewValue")
                         .HasColumnType("jsonb")
-                        .HasComment("修改后保存的值");
+                        .HasComment("修改后保存的值，恢复默认或清除设置时为空");
 
                     b.Property<string>("OldValue")
                         .HasColumnType("jsonb")
-                        .HasComment("修改前保存的值");
+                        .HasComment("修改前保存的值，原来没有保存记录时为空");
 
                     b.Property<string>("Reason")
                         .IsRequired()

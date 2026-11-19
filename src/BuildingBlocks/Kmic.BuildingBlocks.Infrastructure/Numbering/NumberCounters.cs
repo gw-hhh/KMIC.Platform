@@ -20,14 +20,6 @@ public static partial class NumberCounters
     /// <remarks>
     /// 计数不存在就创建，已经更大就保持不变，只增不减：重复执行、或者和正在取号的应用同时执行都是安全的
     /// </remarks>
-    /// <param name="database">有计数表写权限的账号的数据源</param>
-    /// <param name="schema">计数表所在的 schema，即规则所属模块的名称</param>
-    /// <param name="rule">编号规则</param>
-    /// <param name="businessDate">旧编号所在的日期，用来确定周期；不重置的规则可以传任意日期</param>
-    /// <param name="partition">分组键，不分组的规则传 null</param>
-    /// <param name="value">要保证的最小序号，旧数据里这个周期与分组下的最大序号</param>
-    /// <param name="time">时间</param>
-    /// <param name="ct">取消令牌</param>
     /// <returns>执行之后的计数值</returns>
     /// <exception cref="ArgumentException">分组键不符合规则、序号不是正数、schema 不是合法的模块名</exception>
     public static async Task<long> EnsureAtLeastAsync(

@@ -116,8 +116,6 @@ public sealed record TestIdentity : IAccessContext
     /// <summary>
     /// 模拟登录
     /// </summary>
-    /// <param name="impersonator">实际操作人</param>
-    /// <param name="allowWrite">是否允许修改数据</param>
     public TestIdentity ImpersonatedBy(UserId impersonator, bool allowWrite = false) =>
         this with { ImpersonatorUserId = impersonator, ImpersonationAllowsWrite = allowWrite };
 

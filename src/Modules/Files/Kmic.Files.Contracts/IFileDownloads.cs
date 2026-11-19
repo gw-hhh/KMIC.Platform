@@ -7,8 +7,7 @@ namespace Kmic.Files.Contracts;
 /// 按文件 ID 取下载信息
 /// </summary>
 /// <remarks>
-/// 调用方须先校验业务对象或作业的访问权限，并确认文件归属。
-/// 文件状态由本接口检查，允许下载已关联文件，以及已登记且可用的模块生成文件
+/// 调用方要先校验访问权限和文件归属
 /// </remarks>
 public interface IFileDownloads
 {

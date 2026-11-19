@@ -9,10 +9,10 @@ namespace Kmic.Operations.Application.Audit.Export;
 /// 提交审计 CSV 导出作业
 /// </summary>
 /// <remarks>
-/// 筛选条件和审计列表一样；行数超过 <c>Kmic:Jobs:ExportMaxRows</c> 时作业失败，要缩小时间范围
+/// 行数超过上限时作业失败
 /// </remarks>
-/// <param name="From">起始时间，含</param>
-/// <param name="To">结束时间，不含</param>
+/// <param name="From">起始时间</param>
+/// <param name="To">结束时间</param>
 /// <param name="ActorUserId">操作人</param>
 /// <param name="ActualUserId">模拟身份时的实际操作人</param>
 /// <param name="Module">产生审计的模块</param>

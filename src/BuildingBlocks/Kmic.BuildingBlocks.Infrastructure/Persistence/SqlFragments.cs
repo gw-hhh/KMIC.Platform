@@ -15,7 +15,6 @@ public static class SqlFragments
     /// <summary>
     /// 按顺序拼接，各段的占位符编号顺延，参数按原样保留
     /// </summary>
-    /// <param name="parts">要拼接的各段，空格要自己写在段里</param>
     public static FormattableString Concat(params FormattableString[] parts)
     {
         ArgumentNullException.ThrowIfNull(parts);

@@ -9,9 +9,6 @@ namespace Kmic.Notifications.Domain.Templates;
 /// <summary>
 /// 通知模板及各渠道的发布版本
 /// </summary>
-/// <remarks>
-/// 名称、渠道和发件账号在启动时同步；活动模板按渠道选用发布版本，未选用时使用代码默认内容
-/// </remarks>
 public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
 {
     /// <summary>
@@ -170,7 +167,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     /// 发布新版本并设为该渠道的生效版本
     /// </summary>
     /// <remarks>
-    /// 渠道须已声明；主题在站内消息中用作标题
+    /// 站内消息里主题就是标题
     /// </remarks>
     public Result<TemplateVersion> Publish(TemplateChannel channel, string subject, string body, UserId publishedBy, string? remark, DateTimeOffset now)
     {
@@ -219,7 +216,6 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     /// <summary>
     /// 解析各渠道选用的发布版本号
     /// </summary>
-    /// <param name="json">ActiveVersions 的内容</param>
     public static IReadOnlyDictionary<string, int> ParseActiveVersions(string json) =>
         JsonSerializer.Deserialize<Dictionary<string, int>>(json) ?? [];
 

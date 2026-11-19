@@ -8,7 +8,7 @@ namespace Kmic.Operations.Application.Messages.Rebuilds;
 /// 启动读模型重建
 /// </summary>
 /// <remarks>
-/// 重建轮次和作业由框架写在订阅方模块的事务里，不在 Operations 的命令事务里
+/// 不在 Operations 的命令事务里
 /// </remarks>
 public sealed class TriggerRebuildCommandHandler(IReadModelRebuildAdmin rebuilds) : ICommandHandler<TriggerRebuildCommand>
 {

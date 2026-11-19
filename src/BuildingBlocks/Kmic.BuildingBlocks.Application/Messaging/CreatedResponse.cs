@@ -11,8 +11,8 @@ namespace Kmic.BuildingBlocks.Application.Messaging;
 /// （比如组织树里的一个单元）时，版本号要取它所属的聚合根的，用 <paramref name="OwnerId" /> 指明
 /// </remarks>
 /// <param name="Id">新数据的 ID</param>
-/// <param name="ConcurrencyVersion">保存后的版本号，输出为 version</param>
-/// <param name="OwnerId">新数据所属的聚合根的 ID；新数据自己就是聚合根时不给</param>
+/// <param name="ConcurrencyVersion">保存后的版本号</param>
+/// <param name="OwnerId">新数据所属的聚合根的 ID</param>
 public sealed record CreatedResponse<TId>(TId Id, [property: JsonPropertyName("version")] long ConcurrencyVersion = 0, [property: JsonIgnore] Guid? OwnerId = null) : IHasConcurrencyVersion
     where TId : struct, IStronglyTypedId
 {

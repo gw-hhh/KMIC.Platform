@@ -11,7 +11,7 @@ namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 /// 立即触发定时任务
 /// </summary>
 /// <remarks>
-/// 触发请求不在命令事务里，事务失败撤不回已提交的触发，所以任务要能重复执行
+/// 触发不在命令事务里，任务要能重复执行
 /// </remarks>
 public sealed class RunJobNowCommandHandler(IScheduledJobControl control, IExecutionContext execution) : ICommandHandler<RunJobNowCommand>
 {

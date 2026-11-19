@@ -8,10 +8,10 @@ namespace Kmic.Notifications.Application.Processing;
 /// 处理含一次性凭据的通知发送请求，使用高优先级且不带附件
 /// </summary>
 /// <remarks>
-/// 订阅 Notifications.SendSecretNotification。请求的载荷里有一次性凭据，不写日志
+/// 载荷不写日志
 /// </remarks>
 /// <param name="Message">请求</param>
-/// <param name="SourceMessageId">来源消息的 ID，同一条只处理一次</param>
+/// <param name="SourceMessageId">来源消息的 ID</param>
 /// <param name="SourceModule">发出请求的模块</param>
 /// <param name="InitiatorUserId">通知发起用户 ID</param>
 [SystemOnly]

@@ -17,8 +17,6 @@ public static class EnumerationFilter
     /// 把编码换成枚举值；没有给编码时得到空列表，表示不按这个字段筛选
     /// </summary>
     /// <typeparam name="TEnumeration">枚举类型</typeparam>
-    /// <param name="codes">请求里的编码</param>
-    /// <param name="field">请求里的字段名，错误里用它定位</param>
     public static Result<IReadOnlyList<TEnumeration>> Parse<TEnumeration>(IReadOnlyList<string>? codes, string field)
         where TEnumeration : Enumeration<TEnumeration>
     {

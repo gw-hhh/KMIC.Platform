@@ -4,13 +4,12 @@ namespace Kmic.Notifications.Contracts;
 /// 通知收件人
 /// </summary>
 /// <remarks>
-/// 系统内用户通过 UserId 指定，由 Notifications 向 Identity 查询联系方式，忽略 Email 和 Phone。
-/// 外部收件人不指定 UserId，由业务模块提供邮箱或手机号
+/// 系统内用户只填 UserId，联系方式向 Identity 查
 /// </remarks>
 /// <param name="UserId">用户 ID</param>
 /// <param name="Email">系统外对象的邮箱</param>
 /// <param name="Phone">系统外对象的手机号</param>
-/// <param name="Role">邮件收件方式，仅邮件渠道使用</param>
+/// <param name="Role">邮件收件方式</param>
 public sealed record Recipient(Guid? UserId, string? Email = null, string? Phone = null, RecipientRole Role = RecipientRole.To)
 {
     /// <summary>

@@ -13,9 +13,6 @@ namespace Kmic.Operations.Application.Audit.Export;
 /// <summary>
 /// 把审计记录流式导出为 CSV 文件
 /// </summary>
-/// <remarks>
-/// 文件登记请求和检查点在最后一批的事务里提交
-/// </remarks>
 public sealed class ExportAuditJobHandler(
     IExportReader<IOperationsQueryDb> reader,
     IGeneratedFiles generatedFiles,

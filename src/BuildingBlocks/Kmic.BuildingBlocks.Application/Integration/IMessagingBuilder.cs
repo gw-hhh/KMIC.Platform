@@ -14,9 +14,6 @@ public interface IMessagingBuilder
     /// <remarks>
     /// 订阅名存进 Inbox，发布后不能改。命令要标 [SystemOnly] 或 [AllowSystem]
     /// </remarks>
-    /// <param name="name">订阅名，以本模块名开头，如 Quotation.SyncCustomerSummary</param>
-    /// <param name="map">把消息转成命令</param>
-    /// <param name="configure">有序处理、读模型的重建方式</param>
     void Subscribe<TMessage, TCommand>(string name, Func<TMessage, MessageEnvelope, TCommand> map, Action<SubscriptionOptions>? configure = null)
         where TMessage : class, IIntegrationMessage
         where TCommand : ICommand;

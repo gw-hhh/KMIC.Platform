@@ -6,10 +6,7 @@ namespace Kmic.Files.Contracts;
 /// 为业务对象关联文件或解除文件关联
 /// </summary>
 /// <remarks>
-/// 必须在业务命令的事务中调用，关联和解除关联均通过本接口完成。
-/// 关联时先按文件 ID 获取共享咨询锁，再检查文件是否允许关联，最后发送 <see cref="AttachFiles" />。
-/// 文件锁持有到业务事务结束，防止清理任务在关联期间删除文件。
-/// 重新关联、关联系统生成的文件也必须通过本接口，业务代码不得直接发送 AttachFiles
+/// 必须在业务命令的事务里调用
 /// </remarks>
 public interface IFileAttachments
 {
@@ -17,7 +14,7 @@ public interface IFileAttachments
     /// 关联一批文件
     /// </summary>
     /// <remarks>
-    /// 文件 ID 去重后受数量上限限制，默认最多 50 个（可配置）；空列表不发送关联请求
+    /// 最多 50 个文件（可配置）
     /// </remarks>
     /// <returns>
     /// 成功时返回用于保存业务关联的文件快照。
@@ -30,7 +27,7 @@ public interface IFileAttachments
     /// 解除一批文件的关联
     /// </summary>
     /// <remarks>
-    /// 必须与删除业务关联记录在同一个业务事务中完成
+    /// 要和删除业务关联记录在同一事务里
     /// </remarks>
     Task DetachAsync(string ownerModule, string ownerType, Guid ownerId, IReadOnlyCollection<Guid> fileIds, CancellationToken ct);
 }

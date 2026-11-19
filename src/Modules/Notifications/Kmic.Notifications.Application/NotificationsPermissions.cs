@@ -5,9 +5,6 @@ namespace Kmic.Notifications.Application;
 /// <summary>
 /// Notifications 模块的权限点
 /// </summary>
-/// <remarks>
-/// 站内消息按收件人控制访问，不另设权限点
-/// </remarks>
 [PermissionGroup("Notifications", "通知")]
 public static class NotificationsPermissions
 {
@@ -36,11 +33,8 @@ public static class NotificationsPermissions
     public const string DeliveryManage = "Notifications.Delivery.Manage";
 
     /// <summary>
-    /// 查看捕获的通知内容
+    /// 查看捕获的通知内容，只在开启捕获时可用
     /// </summary>
-    /// <remarks>
-    /// 仅开启捕获时可用，内容可能含验证码
-    /// </remarks>
     [Permission("查看捕获的通知内容", Sensitive = true)]
     public const string CapturedView = "Notifications.Captured.View";
 }

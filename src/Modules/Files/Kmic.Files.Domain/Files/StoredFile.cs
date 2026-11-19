@@ -7,11 +7,8 @@ using Kmic.Files.Domain.Errors;
 namespace Kmic.Files.Domain.Files;
 
 /// <summary>
-/// 存储文件
+/// 存储文件，内容在对象存储里，状态变更记入业务历史
 /// </summary>
-/// <remarks>
-/// 内容保存在对象存储中，状态变更记入业务历史
-/// </remarks>
 public sealed class StoredFile : AggregateRoot<StoredFileId>
 {
     /// <summary>
@@ -74,11 +71,8 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public string? ObjectVersionId { get; private set; }
 
     /// <summary>
-    /// 上传配置名称
+    /// 上传配置名称，生成文件为 Generated:来源
     /// </summary>
-    /// <remarks>
-    /// 保存上传配置的 Name；生成文件使用 Generated:来源。
-    /// </remarks>
     public string Profile { get; private set; }
 
     /// <summary>
@@ -87,11 +81,8 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public UserId? UploadedBy { get; private set; }
 
     /// <summary>
-    /// 文件登记时间
+    /// 文件登记时间：上传文件是开始上传时，生成文件是处理登记消息时
     /// </summary>
-    /// <remarks>
-    /// 上传文件在开始上传时记录；生成文件在处理登记消息时记录。
-    /// </remarks>
     public DateTimeOffset UploadedAt { get; private set; }
 
     /// <summary>
@@ -100,11 +91,8 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     public StoredFileStatus Status { get; private set; } = null!;
 
     /// <summary>
-    /// 清理到期时间
+    /// 清理到期时间，到期后由后台任务清理，不保证立即删除
     /// </summary>
-    /// <remarks>
-    /// 到期后由后台任务按条件清理，不保证立即删除。
-    /// </remarks>
     public DateTimeOffset? ExpiresAt { get; private set; }
 
     /// <summary>
@@ -141,8 +129,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// 对象删除登记时间
     /// </summary>
     /// <remarks>
-    /// 删除工作器确认删除成功后登记，包含对象已不存在的情况；为空不代表对象仍在。
-    /// 到期清理会删除整条记录；历史版本另行处理。
+    /// 为空不代表对象还在
     /// </remarks>
     public DateTimeOffset? ObjectDeletedAt { get; private set; }
 
@@ -168,9 +155,6 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// <summary>
     /// 登记已生成的文件
     /// </summary>
-    /// <remarks>
-    /// 文件内容须已写入对象存储；初始状态为可用，未关联时到期可清理。
-    /// </remarks>
     public static StoredFile RegisterGenerated(
         StoredFileId id,
         string storageKey,
@@ -261,8 +245,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// 关联业务对象
     /// </summary>
     /// <remarks>
-    /// 可用或已解除关联的文件转为已关联；同一业务对象重复关联不新增引用，其他对象关联会增加引用。
-    /// 删除中或已彻底删除时禁止关联，调用方须在锁内检查文件是否允许关联
+    /// 调用方要在锁内先检查能否关联
     /// </remarks>
     public Result Attach(string ownerModule, string ownerType, Guid ownerId, DateTimeOffset now)
     {
@@ -326,9 +309,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// 将到期文件转为删除中
     /// </summary>
     /// <remarks>
-    /// 仅允许可用、已解除关联或被拒绝状态，到期条件由调用方检查。
-    /// 清理可用或已解除关联的文件前，调用方须取得文件关联的排他锁、探查未完成的关联消息，再重读文件并核对到期时间。
-    /// 本方法只校验状态，不获取锁或探查消息
+    /// 不取锁，调用方要先取排他锁并重读
     /// </remarks>
     public Result Expire(string reason) => _machine.Fire(this, StoredFileAction.Expire, reason);
 
@@ -336,7 +317,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// 标记文件为已彻底删除
     /// </summary>
     /// <remarks>
-    /// 保留引用，禁止再次关联或恢复；引用方显示“文件已删除”。删除中或已彻底删除时拒绝
+    /// 之后不能再关联或恢复
     /// </remarks>
     public Result Purge(string reason, UserId by, DateTimeOffset now)
     {

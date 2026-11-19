@@ -67,7 +67,6 @@ public static class FileTypes
     /// <summary>
     /// 扩展名对应的类型，不认识时返回空
     /// </summary>
-    /// <param name="fileName">文件名，只看最后一个扩展名，不分大小写</param>
     public static FileTypeDefinition? ByFileName(string fileName)
     {
         ArgumentNullException.ThrowIfNull(fileName);
@@ -79,7 +78,6 @@ public static class FileTypes
     /// <summary>
     /// 识别一个文件：扩展名对应的类型，加上文件头符合这种类型
     /// </summary>
-    /// <param name="fileName">文件名</param>
     /// <param name="header">文件开头的字节，最多 <see cref="HeaderLength" /> 个；空文件没有类型</param>
     /// <returns>识别出的类型；扩展名不认识、文件头不符、空文件时返回空</returns>
     public static FileTypeDefinition? Identify(string fileName, ReadOnlySpan<byte> header) =>

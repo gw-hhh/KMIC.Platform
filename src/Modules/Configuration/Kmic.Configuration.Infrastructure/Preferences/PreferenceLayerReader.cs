@@ -14,9 +14,6 @@ namespace Kmic.Configuration.Infrastructure.Preferences;
 /// <summary>
 /// 读取分层偏好：系统层和各角色层分别缓存并按标签失效，用户层直接读库
 /// </summary>
-/// <remarks>
-/// 用户层按用户和角色分别读取，不维护逐用户缓存及其失效标签
-/// </remarks>
 internal sealed class PreferenceLayerReader(IQueryScopeFactory queries, HybridCache cache) : IPreferenceLayers
 {
     // 定期过期，避免失效通知丢失后一直读取旧值

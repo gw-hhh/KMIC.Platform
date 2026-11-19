@@ -7,8 +7,8 @@ namespace Kmic.Identity.Application.Roles.List;
 /// <summary>
 /// 查询角色列表
 /// </summary>
-/// <param name="Q">关键字，在名称和说明里模糊匹配</param>
-/// <param name="Status">状态编码，支持多个</param>
+/// <param name="Q">关键字</param>
+/// <param name="Status">状态编码</param>
 /// <param name="Page">分页</param>
 /// <param name="Sort">排序</param>
 [RequirePermission(IdentityPermissions.RoleView)]

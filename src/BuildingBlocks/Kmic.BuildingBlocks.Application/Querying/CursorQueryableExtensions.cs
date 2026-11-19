@@ -21,13 +21,6 @@ public static class CursorQueryableExtensions
     /// <summary>
     /// 取一页
     /// </summary>
-    /// <param name="source">查询，已经带了数据范围过滤和业务筛选，并投影成了列表项</param>
-    /// <param name="request">请求参数</param>
-    /// <param name="protector">游标编码</param>
-    /// <param name="key">排序键</param>
-    /// <param name="id">行的 ID，用来在排序键相同时定先后</param>
-    /// <param name="descending">是否倒序</param>
-    /// <param name="ct">取消令牌</param>
     /// <typeparam name="T">列表项</typeparam>
     /// <typeparam name="TKey">排序键类型</typeparam>
     /// <typeparam name="TId">强类型 ID</typeparam>
@@ -46,13 +39,6 @@ public static class CursorQueryableExtensions
     /// <summary>
     /// 取一页，行的 ID 是 Guid：给原生 SQL 映射的只读行类型用，它们不走强类型 ID 的值转换
     /// </summary>
-    /// <param name="source">查询，已经带了业务筛选</param>
-    /// <param name="request">请求参数</param>
-    /// <param name="protector">游标编码</param>
-    /// <param name="key">排序键</param>
-    /// <param name="id">行的 ID，用来在排序键相同时定先后</param>
-    /// <param name="descending">是否倒序</param>
-    /// <param name="ct">取消令牌</param>
     /// <typeparam name="T">列表项</typeparam>
     /// <typeparam name="TKey">排序键类型</typeparam>
     public static Task<Result<CursorPage<T>>> ToCursorPageAsync<T, TKey>(

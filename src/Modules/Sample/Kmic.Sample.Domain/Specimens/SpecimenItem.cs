@@ -3,11 +3,8 @@ using Kmic.BuildingBlocks.Domain.Entities;
 namespace Kmic.Sample.Domain.Specimens;
 
 /// <summary>
-/// 示例的明细
+/// 示例的明细，由示例创建、随示例一起保存
 /// </summary>
-/// <remarks>
-/// 明细由示例创建，并随示例一起保存
-/// </remarks>
 public sealed class SpecimenItem : Entity<SpecimenItemId>
 {
     private SpecimenItem(SpecimenItemId id, string name, int quantity)

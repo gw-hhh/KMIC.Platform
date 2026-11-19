@@ -31,9 +31,6 @@ public static class ResultHttpExtensions
     /// 给“变化很少、很多人反复读”的数据用，如字典：前端带着上次的 ETag 再问，没变就不用再传一遍。
     /// 响应同时带 <c>Cache-Control: private, no-cache</c>：浏览器可以保存，但每次使用前必须带 ETag 向服务器确认
     /// </remarks>
-    /// <param name="result">查询的结果</param>
-    /// <param name="http">当前请求</param>
-    /// <param name="etagOf">从值算出 ETag 的内容，不用带引号；值不变它就不变</param>
     public static IResult ToOkWithETag<T>(this Result<T> result, HttpContext http, Func<T, string> etagOf)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -67,8 +64,6 @@ public static class ResultHttpExtensions
     /// <summary>
     /// 成功返回 201，Location 指向新数据，响应体是新数据的 ID 和版本号
     /// </summary>
-    /// <param name="result">创建命令的结果</param>
-    /// <param name="location">用新 ID 拼出新数据的地址</param>
     public static IResult ToCreated<TId>(this Result<CreatedResponse<TId>> result, Func<TId, string> location)
         where TId : struct, IStronglyTypedId
     {
@@ -81,8 +76,6 @@ public static class ResultHttpExtensions
     /// <summary>
     /// 成功返回 202，Location 指向后台作业，响应体是作业 ID
     /// </summary>
-    /// <param name="result">提交后台作业的命令的结果</param>
-    /// <param name="location">用作业 ID 拼出作业资源的地址</param>
     public static IResult ToAccepted(this Result<JobAccepted> result, Func<Guid, string> location)
     {
         ArgumentNullException.ThrowIfNull(result);

@@ -7,9 +7,6 @@ namespace Kmic.Identity.Application.Catalog;
 /// <summary>
 /// 清理退役超过保留期的权限点、范围对象及其角色配置
 /// </summary>
-/// <remarks>
-/// 保留期内留着角色配置，回滚版本后权限能恢复
-/// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]
 [NotAudited("定时清理，结果记入作业运行记录")]

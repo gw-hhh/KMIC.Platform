@@ -40,13 +40,11 @@ public sealed class UploadProfileCatalog
     /// <summary>
     /// 按名称取，不存在时返回空
     /// </summary>
-    /// <param name="name">档案名</param>
     public UploadProfile? Find(string name) => _byName.GetValueOrDefault(name);
 
     /// <summary>
     /// 从各模块的 Application 程序集中读取档案声明
     /// </summary>
-    /// <param name="assemblies">各模块的 Application 程序集</param>
     public static UploadProfileCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);

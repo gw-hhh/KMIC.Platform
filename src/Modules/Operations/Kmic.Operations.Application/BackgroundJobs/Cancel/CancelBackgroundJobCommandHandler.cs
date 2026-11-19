@@ -11,7 +11,7 @@ namespace Kmic.Operations.Application.BackgroundJobs.Cancel;
 /// 请求取消后台作业
 /// </summary>
 /// <remarks>
-/// 直接改作业所属模块的存储，不在 Operations 的命令事务里
+/// 不在 Operations 的命令事务里
 /// </remarks>
 public sealed class CancelBackgroundJobCommandHandler(IModuleJobStores stores, IExecutionContext execution) : ICommandHandler<CancelBackgroundJobCommand>
 {

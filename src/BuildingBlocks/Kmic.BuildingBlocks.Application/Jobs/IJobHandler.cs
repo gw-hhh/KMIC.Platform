@@ -15,8 +15,5 @@ public interface IJobHandler<in TJob>
     /// <summary>
     /// 执行作业
     /// </summary>
-    /// <param name="job">作业参数</param>
-    /// <param name="context">进度、检查点与批次提交</param>
-    /// <param name="ct">用户取消、停机或超时时触发</param>
     Task<Result<JobOutcome>> ExecuteAsync(TJob job, IJobContext context, CancellationToken ct);
 }

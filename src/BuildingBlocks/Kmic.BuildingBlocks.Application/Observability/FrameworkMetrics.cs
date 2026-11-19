@@ -137,17 +137,12 @@ public sealed class FrameworkMetrics
     /// <summary>
     /// 读取了一次缓存
     /// </summary>
-    /// <param name="category">缓存键的前两段，即“模块:对象”</param>
-    /// <param name="hit">是否命中，即没有调用加载方法</param>
     public void CacheRequest(string category, bool hit) =>
         _cacheRequests.Add(1, new TagList { { "category", category }, { "result", hit ? "hit" : "miss" } });
 
     /// <summary>
     /// 上传的文件流处理结束
     /// </summary>
-    /// <param name="profile">上传档案名称</param>
-    /// <param name="outcome">处理结果</param>
-    /// <param name="bytes">写入存储的字节数，仅在已写入时记录</param>
     public void FileUploaded(string profile, UploadOutcome outcome, long bytes)
     {
         if (outcome == UploadOutcome.Stored)
@@ -205,7 +200,6 @@ public sealed class FrameworkMetrics
     /// 返回 null 表示还没有可信的数据（刚启动，或采样连续失败后数据已经过期），这时不输出任何数值，
     /// 比输出过期的数字更不容易误导告警
     /// </remarks>
-    /// <param name="read">取最新一次采样</param>
     public void ObserveBacklog(Func<BacklogSnapshot?> read)
     {
         ArgumentNullException.ThrowIfNull(read);

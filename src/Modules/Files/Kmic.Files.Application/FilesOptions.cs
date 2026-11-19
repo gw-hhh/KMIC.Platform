@@ -67,8 +67,7 @@ public sealed class FilesOptions
     public int ReconcileBatchSize { get; init; } = 500;
 
     /// <summary>
-    /// 单次对账的差异数上限，多余对象和缺失对象分别计数。
-    /// 任一类超过上限则放弃本次对账，避免在存储配置错误或数据库还原后大批处理文件
+    /// 单次对账的差异数上限，多余对象和缺失对象分别计数
     /// </summary>
     [Range(1, 100000)]
     public int ReconcileMaxChanges { get; init; } = 200;

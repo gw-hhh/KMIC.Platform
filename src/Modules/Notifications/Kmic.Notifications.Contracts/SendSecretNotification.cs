@@ -9,13 +9,12 @@ namespace Kmic.Notifications.Contracts;
 /// 请求发送一条含一次性短时凭据的通知，如短信验证码
 /// </summary>
 /// <remarks>
-/// 仅允许携带一次性短时凭据：验证端只保存哈希，凭据用后失效，有效期不超过 5 分钟。
-/// 消息载荷不写日志、不带附件；Notifications 在投递成功、最终失败或跳过时清空正文及短信参数
+/// 只能带用后即失效、5 分钟内有效的凭据
 /// </remarks>
-/// <param name="TemplateKey">模板键，必须是含密模板</param>
+/// <param name="TemplateKey">模板键</param>
 /// <param name="To">收件人</param>
 /// <param name="Model">模板数据</param>
-/// <param name="DedupKey">去重键须包含本次凭据的标识，避免同一手机号的不同验证码被合并</param>
+/// <param name="DedupKey">去重键须包含本次凭据的标识</param>
 [IntegrationMessage("Notifications.SendSecretNotification", CarriesSecret = true, SecretLifetimeSeconds = SendSecretNotification.LifetimeSeconds)]
 public sealed record SendSecretNotification(string TemplateKey, IReadOnlyList<Recipient> To, JsonElement Model, string DedupKey) : IIntegrationRequest
 {

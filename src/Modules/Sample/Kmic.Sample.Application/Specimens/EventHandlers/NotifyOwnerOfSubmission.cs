@@ -10,7 +10,7 @@ namespace Kmic.Sample.Application.Specimens.EventHandlers;
 /// 示例提交后通知负责人，演示业务模块发送通知
 /// </summary>
 /// <remarks>
-/// 发送请求随提交命令在同一事务中写入 Outbox，事务回滚时不发送。
+/// 事务回滚就不发
 /// </remarks>
 internal sealed class NotifyOwnerOfSubmission(IIntegrationEventPublisher publisher) : IDomainEventHandler<SpecimenSubmitted>
 {

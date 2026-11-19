@@ -6,7 +6,7 @@ namespace Kmic.Identity.Contracts;
 /// 供其他模块批量解析角色引用
 /// </summary>
 /// <remarks>
-/// 找不到的 ID 不返回，由调用方显示占位文字；停用的角色也能解析并带上状态。允许重复 ID，批次大小不限，实现自动分批
+/// 找不到的 ID 不返回，停用的也能查到
 /// </remarks>
 public interface IRoleReferences
 {

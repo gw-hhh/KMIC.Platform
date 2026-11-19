@@ -13,9 +13,6 @@ public static class FileStorageKeys
     /// <remarks>
     /// 不含原始文件名：防路径穿越、防覆盖、防通过文件名猜测
     /// </remarks>
-    /// <param name="environment">环境名，如 prod、test</param>
-    /// <param name="fileId">文件 ID</param>
-    /// <param name="at">上传时间</param>
     public static string For(string environment, Guid fileId, DateTimeOffset at)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(environment);
@@ -31,9 +28,6 @@ public static class FileStorageKeys
     /// <summary>
     /// 从存储键取出文件 ID，不是这个写法的键（别的程序放进来的对象）返回 false
     /// </summary>
-    /// <param name="key">存储键</param>
-    /// <param name="environment">环境名，键必须以它开头</param>
-    /// <param name="fileId">文件 ID</param>
     public static bool TryGetFileId(string key, string environment, out Guid fileId)
     {
         fileId = Guid.Empty;
@@ -48,7 +42,6 @@ public static class FileStorageKeys
     /// <summary>
     /// 文件 ID 里的创建时间：文件 ID 是 UUID v7，前 48 位是毫秒时间戳。不是 v7 的 ID 返回空
     /// </summary>
-    /// <param name="fileId">文件 ID</param>
     public static DateTimeOffset? CreatedAt(Guid fileId)
     {
         if (fileId.Version != 7)

@@ -16,6 +16,5 @@ public interface IAfterCommit
     /// <summary>
     /// 提交后清除这些标签的缓存
     /// </summary>
-    /// <param name="tags">缓存标签</param>
     void InvalidateTags(params IEnumerable<string> tags);
 }

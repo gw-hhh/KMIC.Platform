@@ -12,8 +12,7 @@ namespace Kmic.Notifications.Infrastructure.Channels;
 /// 通过 MailKit 和 SMTP 发送邮件
 /// </summary>
 /// <remarks>
-/// 每封邮件单独建立连接；Message-ID 由投递 ID 生成，重试时保持不变，供收件端去重。
-/// SMTP 4xx、网络、超时及认证异常归为暂时失败；5xx、地址解析失败及缺少发件账号归为永久失败
+/// Message-ID 由投递 ID 生成，重试时不变
 /// </remarks>
 internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> options) : IEmailSender
 {

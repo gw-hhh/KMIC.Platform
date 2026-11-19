@@ -15,11 +15,6 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// <summary>
 /// 处理投递队列，在数据库事务之外调用发送渠道，再按领取令牌记录结果
 /// </summary>
-/// <remarks>
-/// 发送时查询系统内用户的最新联系方式；用户不存在、已禁用或无地址时记为已跳过。
-/// 含密投递超过创建后的有效期时不再发送；成功、最终失败或跳过时清空正文及短信参数。
-/// 暂时失败退避重试，达到次数上限或永久失败时标记为失败，等待人工处理
-/// </remarks>
 internal sealed class DeliveryWork(
     IExecutionScopeFactory scopes,
     NotificationTemplateCatalog catalog,

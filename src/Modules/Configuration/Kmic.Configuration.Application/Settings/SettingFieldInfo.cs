@@ -5,7 +5,7 @@ namespace Kmic.Configuration.Application.Settings;
 /// </summary>
 /// <param name="Name">属性名转为 camelCase 后的名称</param>
 /// <param name="Type">类型：bool、int、long、decimal、double、string、guid、date、time、dateTime、timeSpan</param>
-/// <param name="DisplayName">显示名；没有声明时是成员名</param>
+/// <param name="DisplayName">显示名</param>
 /// <param name="Unit">单位</param>
 /// <param name="IsNullable">是否可空</param>
 /// <param name="IsArray">是否数组</param>

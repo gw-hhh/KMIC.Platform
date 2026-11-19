@@ -9,5 +9,5 @@ namespace Kmic.Operations.Application.Messages;
 /// <param name="Box">在发件箱还是收件箱</param>
 /// <param name="Id">行 ID</param>
 /// <param name="Status">结果</param>
-/// <param name="Reason">未成功原因，放弃检查拒绝时返回接收方提供的说明</param>
+/// <param name="Reason">未成功原因</param>
 public sealed record MessageReceipt(string Module, MessageBoxKind Box, Guid Id, MessageReceiptStatus Status, string? Reason);

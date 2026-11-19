@@ -5,7 +5,7 @@ namespace Kmic.Operations.Application.Messages.Instances;
 /// </summary>
 /// <param name="Id">实例 ID</param>
 /// <param name="Host">机器名</param>
-/// <param name="Roles">运行角色，如 Api、Worker</param>
+/// <param name="Roles">运行角色</param>
 /// <param name="Build">构建号</param>
 /// <param name="StartedAt">启动时间</param>
 /// <param name="HeartbeatAt">最近一次心跳</param>

@@ -9,9 +9,9 @@ namespace Kmic.Operations.Application.ScheduledJobs;
 /// <param name="JobName">任务名</param>
 /// <param name="ScheduledFireTime">计划触发时间</param>
 /// <param name="StartedAt">开始时间</param>
-/// <param name="FinishedAt">结束时间；执行中为空</param>
-/// <param name="DurationMs">耗时，毫秒</param>
-/// <param name="Trigger">触发方式：按计划、手动或补执行</param>
+/// <param name="FinishedAt">结束时间，执行中为空</param>
+/// <param name="DurationMs">耗时</param>
+/// <param name="Trigger">触发方式</param>
 /// <param name="TriggeredBy">手动触发用户 ID</param>
 /// <param name="TriggeredByName">手动触发用户名称，用户不存在时为空</param>
 /// <param name="Status">状态</param>

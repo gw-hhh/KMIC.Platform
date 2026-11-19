@@ -11,7 +11,7 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// 投递队列的积压量表，按渠道统计，没有积压的渠道也输出 0
 /// </summary>
 /// <remarks>
-/// 最老积压从投递创建时算起，包含退避等待的时间
+/// 最老积压包含退避等待的时间
 /// </remarks>
 internal sealed class DeliveryBacklogGauges(IQueryScopeFactory queries) : IBacklogGauges
 {

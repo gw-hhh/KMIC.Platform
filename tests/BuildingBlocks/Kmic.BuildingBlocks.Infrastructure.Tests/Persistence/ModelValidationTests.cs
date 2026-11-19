@@ -30,7 +30,7 @@ public sealed class ModelValidationTests
             p => p.ShouldContain(m => m.StartsWith("Gadget：有所属人或所属组织，要调用 HasDataScope 或 HasNoDataScope", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：唯一索引（Name）没有指定 MapsToError", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget：表缺少注释", StringComparison.Ordinal)),
-            p => p.ShouldContain(m => m.StartsWith("Gadget.Ratio：列缺少注释", StringComparison.Ordinal)),
+            p => p.ShouldNotContain(m => m.Contains("列缺少注释", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("Gadget.Widget：聚合之间只存 ID", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("GadgetPart.Gadget：导航只能从父实体指向子实体", StringComparison.Ordinal)),
             p => p.ShouldContain(m => m.StartsWith("GadgetPart：只有聚合根能实现 ISoftDeletable", StringComparison.Ordinal)),

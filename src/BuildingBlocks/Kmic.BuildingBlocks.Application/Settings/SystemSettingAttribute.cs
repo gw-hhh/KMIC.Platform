@@ -3,8 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Settings;
 /// <summary>
 /// 系统设置声明
 /// </summary>
-/// <param name="key">键，如 "Sample.Approval.Threshold"</param>
-/// <param name="displayName">显示名称</param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class SystemSettingAttribute(string key, string displayName) : Attribute
 {

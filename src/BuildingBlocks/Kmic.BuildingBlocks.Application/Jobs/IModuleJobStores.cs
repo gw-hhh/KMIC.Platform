@@ -13,6 +13,5 @@ public interface IModuleJobStores
     /// <summary>
     /// 按模块名取，没有这个模块时返回空
     /// </summary>
-    /// <param name="module">模块名</param>
     IModuleJobStore? Find(string module);
 }

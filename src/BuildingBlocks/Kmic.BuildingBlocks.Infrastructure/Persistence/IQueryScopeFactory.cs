@@ -14,9 +14,6 @@ public interface IQueryScopeFactory
     /// <summary>
     /// 在新的作用域里取模块的查询上下文并执行
     /// </summary>
-    /// <param name="origin">入口来源，决定用前台读池还是后台读池</param>
-    /// <param name="work">要执行的查询，上下文只在它执行期间有效</param>
-    /// <param name="ct">取消令牌</param>
     /// <typeparam name="TContext">模块的查询上下文类型</typeparam>
     /// <typeparam name="TResult">结果类型，不能把上下文或延迟执行的查询带出去</typeparam>
     Task<TResult> RunAsync<TContext, TResult>(CallOrigin origin, Func<TContext, CancellationToken, Task<TResult>> work, CancellationToken ct)

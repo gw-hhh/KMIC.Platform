@@ -91,7 +91,6 @@ public static class OperationsErrors
     /// <summary>
     /// 订阅仍有未完成消息，且未选择放弃
     /// </summary>
-    /// <param name="count">没处理完的条数</param>
     public static Error RouteHasUnfinished(long count) =>
         Error.Conflict("Operations.RouteHasUnfinished", $"订阅还有 {count} 条未完成消息，请先处理完成，或选择放弃后再终结");
 
@@ -108,7 +107,6 @@ public static class OperationsErrors
     /// <summary>
     /// 补投消息数量超过单次上限
     /// </summary>
-    /// <param name="max">一次最多补多少条</param>
     public static Error RedeliverTooMany(int max) =>
         Error.BusinessRule("Operations.RedeliverTooMany", $"所选区间内的消息超过单次补投上限（{max} 条），请缩小区间后分批补投");
 
@@ -130,7 +128,6 @@ public static class OperationsErrors
     /// <summary>
     /// 错误上报超限；丢弃本批数据，等待后再上报新数据
     /// </summary>
-    /// <param name="retryAfter">多久以后可以再报</param>
     public static Error ClientErrorsThrottled(TimeSpan retryAfter) =>
         Error.TooManyRequests("Operations.ClientErrorsThrottled", "错误上报过于频繁，请勿重试本批数据", retryAfter);
 }

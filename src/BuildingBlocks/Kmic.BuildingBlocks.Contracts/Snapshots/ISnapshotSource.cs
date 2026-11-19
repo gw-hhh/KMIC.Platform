@@ -12,8 +12,6 @@ public interface ISnapshotSource<TSnapshot>
     /// 按 ID 分页读取
     /// </summary>
     /// <param name="after">上一页最后一条的 ID，从头读时为空</param>
-    /// <param name="size">每页条数</param>
-    /// <param name="ct">取消令牌</param>
     Task<SnapshotPage<TSnapshot>> GetPageAsync(Guid? after, int size, CancellationToken ct);
 
     /// <summary>

@@ -36,7 +36,6 @@ public sealed class SubscriptionOptions
     /// <typeparam name="TSource">源模块提供的快照来源接口</typeparam>
     /// <typeparam name="TSnapshot">快照类型</typeparam>
     /// <typeparam name="TRow">本模块的读模型</typeparam>
-    /// <param name="toRow">把快照转成读模型的一行</param>
     public SubscriptionOptions RebuildWith<TSource, TSnapshot, TRow>(Func<SnapshotItem<TSnapshot>, TRow> toRow)
         where TSource : class, ISnapshotSource<TSnapshot>
         where TRow : class, IReadModel

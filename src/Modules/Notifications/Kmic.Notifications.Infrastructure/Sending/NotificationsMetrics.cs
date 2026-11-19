@@ -24,8 +24,6 @@ internal sealed class NotificationsMetrics
     /// <summary>
     /// 一次领取的投递处理结束
     /// </summary>
-    /// <param name="channel">渠道编码</param>
-    /// <param name="result">sent、retry、failed 或 skipped</param>
     public void Delivered(string channel, string result) =>
         _deliveries.Add(1, new TagList { { "channel", channel }, { "result", result } });
 }

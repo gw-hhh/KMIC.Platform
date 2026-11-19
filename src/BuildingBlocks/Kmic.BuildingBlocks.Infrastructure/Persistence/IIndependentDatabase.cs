@@ -15,7 +15,5 @@ public interface IIndependentDatabase
     /// <summary>
     /// 开一个新连接和事务，执行完提交；出异常回滚
     /// </summary>
-    /// <param name="work">要做的事，参数是已开启事务的连接与事务</param>
-    /// <param name="ct">取消令牌</param>
     Task<TResult> InTransactionAsync<TResult>(Func<DbConnection, DbTransaction, CancellationToken, Task<TResult>> work, CancellationToken ct);
 }

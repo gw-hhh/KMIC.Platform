@@ -43,9 +43,6 @@ public static class ModuleMigrator
     /// <remarks>
     /// 迁移程序和测试用的模板库不需要认识每个模块的 DbContext 类型：模块注册服务时已经登记了它
     /// </remarks>
-    /// <param name="services">已经由各模块的 AddServices 注册过的服务容器</param>
-    /// <param name="connectionString">迁移账号的连接串</param>
-    /// <param name="ct">取消令牌</param>
     public static async Task MigrateAllAsync(IServiceProvider services, string connectionString, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -64,9 +61,6 @@ public static class ModuleMigrator
     /// <remarks>
     /// 启动时用运行账号检查：只读迁移历史表，不改库。模块的 schema 还不存在时，它的全部迁移都算未执行
     /// </remarks>
-    /// <param name="services">已经由各模块的 AddServices 注册过的服务容器</param>
-    /// <param name="connectionString">连接串</param>
-    /// <param name="ct">取消令牌</param>
     /// <returns>形如 Sample/20261112002136_InitializeModuleSchema 的迁移标识</returns>
     public static async Task<IReadOnlyList<string>> PendingAsync(IServiceProvider services, string connectionString, CancellationToken ct)
     {
@@ -89,8 +83,6 @@ public static class ModuleMigrator
     /// <remarks>
     /// 只比较代码里的模型和迁移的模型快照，不查数据库，连接串只是为了构建上下文
     /// </remarks>
-    /// <param name="services">已经由各模块的 AddServices 注册过的服务容器</param>
-    /// <param name="connectionString">连接串</param>
     /// <returns>有差异的模块名，按名称排序</returns>
     public static IReadOnlyList<string> ModulesWithPendingModelChanges(IServiceProvider services, string connectionString)
     {

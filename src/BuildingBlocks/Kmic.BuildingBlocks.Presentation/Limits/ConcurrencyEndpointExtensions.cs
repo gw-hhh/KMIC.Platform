@@ -14,7 +14,6 @@ public static class ConcurrencyEndpointExtensions
     /// 统计、大范围查询、同步预览这类占用大量数据库或内存的端点必须声明。
     /// 并发许可覆盖整个请求处理过程，流式响应写完才释放
     /// </remarks>
-    /// <param name="builder">端点</param>
     /// <param name="policies">策略名，见 <see cref="ConcurrencyPolicies"/>，可以同时用多个</param>
     public static TBuilder RequireConcurrency<TBuilder>(this TBuilder builder, params string[] policies)
         where TBuilder : IEndpointConventionBuilder

@@ -22,8 +22,6 @@ internal static class CronRules
     /// <summary>
     /// 校验 Cron 格式、后续触发时间和最小触发间隔
     /// </summary>
-    /// <param name="preview">对表达式的预览</param>
-    /// <param name="path">出错时指向的字段</param>
     public static Result Check(CronPreview preview, string path)
     {
         ArgumentNullException.ThrowIfNull(preview);

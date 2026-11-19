@@ -6,9 +6,7 @@ namespace Kmic.Sample.Contracts;
 /// 供其他模块查询示例引用信息
 /// </summary>
 /// <remarks>
-/// 只返回 ID、编号、名称和状态。
-/// 不存在或已删除的示例不出现在结果中，调用方应显示“已删除”等占位文字。
-/// 参数可包含重复 ID，不限制传入数量；实现会自动去重并分批查询
+/// 不存在或已删除的不返回
 /// </remarks>
 public interface ISpecimenReferences
 {

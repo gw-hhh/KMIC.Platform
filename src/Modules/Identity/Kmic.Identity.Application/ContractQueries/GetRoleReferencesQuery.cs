@@ -8,6 +8,6 @@ namespace Kmic.Identity.Application.ContractQueries;
 /// <summary>
 /// 批量查询角色引用，供 <see cref="Kmic.Identity.Contracts.IRoleReferences"/> 调用
 /// </summary>
-/// <param name="Ids">角色 ID，一次最多 1000 个</param>
+/// <param name="Ids">角色 ID</param>
 [ContractQuery(ContractAccess.Reference)]
 public sealed record GetRoleReferencesQuery(IReadOnlyCollection<RoleId> Ids) : IQuery<IReadOnlyDictionary<Guid, ReferenceInfo>>;

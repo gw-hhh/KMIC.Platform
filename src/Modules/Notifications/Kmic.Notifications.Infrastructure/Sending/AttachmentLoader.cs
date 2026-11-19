@@ -8,8 +8,7 @@ namespace Kmic.Notifications.Infrastructure.Sending;
 /// 发送邮件时读取附件
 /// </summary>
 /// <remarks>
-/// 文件不存在、已彻底删除或附件总大小超限时，判为永久失败；其他读取错误按暂时失败重试。
-/// 成功时由调用方释放流，失败时由本方法清理已打开的流
+/// 失败时这里负责清理已打开的流
 /// </remarks>
 internal sealed class AttachmentLoader(IFileContents files)
 {

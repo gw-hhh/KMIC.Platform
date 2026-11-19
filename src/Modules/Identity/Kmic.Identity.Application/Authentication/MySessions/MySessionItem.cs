@@ -8,7 +8,7 @@ namespace Kmic.Identity.Application.Authentication.MySessions;
 /// </summary>
 /// <param name="Id">会话 ID</param>
 /// <param name="ClientType">客户端类型</param>
-/// <param name="DeviceName">设备名，取自登录时的 User-Agent</param>
+/// <param name="DeviceName">设备名</param>
 /// <param name="LoginIp">登录时的 IP</param>
 /// <param name="CreatedAt">登录时间</param>
 /// <param name="LastRefreshedAt">最近刷新时间</param>

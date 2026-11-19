@@ -6,7 +6,7 @@ namespace Kmic.Identity.Domain.Users;
 /// 用户的状态
 /// </summary>
 /// <remarks>
-/// 登录失败过多造成的锁定不是用户状态，只影响新的登录尝试，见 LoginThrottle
+/// 登录失败造成的锁定不算用户状态
 /// </remarks>
 public sealed class UserStatus : Enumeration<UserStatus>
 {

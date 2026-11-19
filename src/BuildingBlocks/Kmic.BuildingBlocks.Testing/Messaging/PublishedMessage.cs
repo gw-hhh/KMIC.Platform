@@ -7,5 +7,5 @@ namespace Kmic.BuildingBlocks.Testing.Messaging;
 /// </summary>
 /// <param name="Message">消息</param>
 /// <param name="Envelope">信封</param>
-/// <param name="CausationId">引发它的消息 ID，在处理别的消息时发布才有</param>
+/// <param name="CausationId">引发它的消息 ID</param>
 public sealed record PublishedMessage<T>(T Message, MessageEnvelope Envelope, Guid? CausationId);

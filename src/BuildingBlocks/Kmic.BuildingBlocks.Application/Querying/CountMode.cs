@@ -34,7 +34,6 @@ public readonly record struct CountMode
     /// <summary>
     /// 上限计数
     /// </summary>
-    /// <param name="cap">最多精确数到多少</param>
     public static CountMode CappedAt(int cap = DefaultCap)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(cap, 1);

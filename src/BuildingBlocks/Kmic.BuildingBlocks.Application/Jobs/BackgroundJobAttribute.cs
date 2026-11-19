@@ -6,8 +6,6 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// <remarks>
 /// Permission 和 SystemOnly 必须写一个：用户提交的作业提交与执行时都检查权限点，系统专用的只能由系统身份提交
 /// </remarks>
-/// <param name="name">作业名称，以本模块名开头，如 Sample.ImportSamples</param>
-/// <param name="displayName">作业列表和完成通知里显示的名称，如“导入示例”</param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class BackgroundJobAttribute(string name, string displayName) : Attribute
 {

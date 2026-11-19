@@ -44,8 +44,6 @@ public static class BackgroundProcessingServiceCollectionExtensions
     /// 两种角色都执行启动任务、注册调度器（只有 Worker 真正触发）；投递、处理、作业执行和定时任务只在 Worker 上运行。
     /// 只做 Api 的实例不建流式池
     /// </remarks>
-    /// <param name="services">服务集合</param>
-    /// <param name="roles">本实例的角色</param>
     public static IServiceCollection AddKmicBackgroundProcessing(this IServiceCollection services, HostRoles roles)
     {
         ArgumentNullException.ThrowIfNull(services);

@@ -5,7 +5,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// </summary>
 /// <param name="FailureCount">连续失败次数</param>
 /// <param name="LockLevel">累计锁定次数</param>
-/// <param name="NextAllowedAt">在此之前不能再试；没有等待时为空</param>
-/// <param name="LockedUntil">锁定到何时；没有锁定时为空</param>
+/// <param name="NextAllowedAt">在此之前不能再试，没有等待时为空</param>
+/// <param name="LockedUntil">锁定到何时，没有锁定时为空</param>
 /// <param name="LastFailedAt">最近失败时间</param>
 public sealed record LoginThrottleState(int FailureCount, int LockLevel, DateTimeOffset? NextAllowedAt, DateTimeOffset? LockedUntil, DateTimeOffset LastFailedAt);

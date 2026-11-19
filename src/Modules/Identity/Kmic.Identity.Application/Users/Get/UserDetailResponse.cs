@@ -8,7 +8,7 @@ namespace Kmic.Identity.Application.Users.Get;
 /// 用户详情
 /// </summary>
 /// <param name="Id">用户 ID</param>
-/// <param name="ConcurrencyVersion">版本号，输出为 version</param>
+/// <param name="ConcurrencyVersion">版本号</param>
 /// <param name="Account">登录名</param>
 /// <param name="DisplayName">姓名</param>
 /// <param name="EnglishName">英文名</param>
@@ -21,9 +21,9 @@ namespace Kmic.Identity.Application.Users.Get;
 /// <param name="HasPassword">是否已设置密码</param>
 /// <param name="PasswordChangeRequired">下次登录是否必须先改密码</param>
 /// <param name="PasswordChangedAt">最近密码修改时间</param>
-/// <param name="LoginLockedUntil">登录等待或锁定的截止时间，无限制时为空；不影响已有会话</param>
+/// <param name="LoginLockedUntil">登录等待或锁定的截止时间，无限制时为空</param>
 /// <param name="Grants">角色授予</param>
-/// <param name="ActiveSessionCount">未作废且未到绝对到期时间的会话数，含相关模拟会话</param>
+/// <param name="ActiveSessionCount">未作废且未到绝对到期时间的会话数</param>
 /// <param name="AllowedActions">当前用户可对该用户执行的管理动作</param>
 public sealed record UserDetailResponse(
     UserId Id,

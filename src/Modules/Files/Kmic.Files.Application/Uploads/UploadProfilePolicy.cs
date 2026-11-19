@@ -7,9 +7,6 @@ namespace Kmic.Files.Application.Uploads;
 /// <summary>
 /// 按上传配置检查当前角色的上传权限
 /// </summary>
-/// <remarks>
-/// 只检查访问上下文，不查库
-/// </remarks>
 public sealed class UploadProfilePolicy : IResourcePolicy<UploadProfileTarget, UploadAction>
 {
     /// <inheritdoc />

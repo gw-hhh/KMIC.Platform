@@ -7,10 +7,10 @@ namespace Kmic.Identity.Application.Organization.Create;
 /// <summary>
 /// 在某个启用的组织单元下添加下级
 /// </summary>
-/// <param name="ExpectedVersion">组织树的预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">组织树的预期版本号</param>
 /// <param name="ParentId">上级组织单元</param>
-/// <param name="Name">名称，同级不得重名（含停用单元，不区分大小写）</param>
-/// <param name="Code">编码，业务上用来对应其他系统的部门编号，可以不填</param>
+/// <param name="Name">名称</param>
+/// <param name="Code">编码</param>
 [RequirePermission(IdentityPermissions.OrgUnitManage)]
 [Audited]
 [Idempotent]

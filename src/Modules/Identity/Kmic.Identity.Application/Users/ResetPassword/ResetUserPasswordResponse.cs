@@ -6,7 +6,7 @@ namespace Kmic.Identity.Application.Users.ResetPassword;
 /// 重置密码的结果
 /// </summary>
 /// <param name="Id">用户 ID</param>
-/// <param name="TemporaryPassword">临时密码，仅本次响应返回，不写入日志或审计</param>
+/// <param name="TemporaryPassword">临时密码</param>
 public sealed record ResetUserPasswordResponse(UserId Id, string TemporaryPassword)
 {
     /// <summary>

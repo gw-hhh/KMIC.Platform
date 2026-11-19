@@ -13,9 +13,6 @@ public static class DeprecationExtensions
     /// <remarks>
     /// 破坏性变化只升级发生变化的那个端点：新版本的端点放在新的版本路由组里，旧端点标上废弃并保留到下线日期
     /// </remarks>
-    /// <param name="builder">端点</param>
-    /// <param name="since">从哪天起废弃，写入 Deprecation 头</param>
-    /// <param name="sunset">从哪天起不再提供，写入 Sunset 头，不能早于废弃日期</param>
     public static TBuilder Deprecated<TBuilder>(this TBuilder builder, DateOnly since, DateOnly sunset)
         where TBuilder : IEndpointConventionBuilder
     {

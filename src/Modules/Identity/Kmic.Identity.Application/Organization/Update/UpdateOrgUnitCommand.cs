@@ -8,10 +8,10 @@ namespace Kmic.Identity.Application.Organization.Update;
 /// <summary>
 /// 修改组织单元的名称和编码
 /// </summary>
-/// <param name="ExpectedVersion">组织树的预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">组织树的预期版本号</param>
 /// <param name="Id">组织单元 ID</param>
-/// <param name="Name">名称，同级不得重名（含停用单元，不区分大小写）</param>
-/// <param name="Code">编码，可以不填</param>
+/// <param name="Name">名称</param>
+/// <param name="Code">编码</param>
 [RequirePermission(IdentityPermissions.OrgUnitManage)]
 [Audited]
 [Idempotent]

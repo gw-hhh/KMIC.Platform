@@ -19,8 +19,6 @@ public interface IAbandonPolicy<in TMessage>
     /// <summary>
     /// 这条消息现在能不能放弃
     /// </summary>
-    /// <param name="message">载荷还原出的消息</param>
-    /// <param name="ct">取消令牌</param>
     /// <returns>成功表示可以放弃；失败的错误说明就是不能放弃的原因</returns>
     ValueTask<Result> CheckAsync(TMessage message, CancellationToken ct);
 }

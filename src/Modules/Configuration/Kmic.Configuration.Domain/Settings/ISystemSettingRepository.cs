@@ -12,7 +12,7 @@ public interface ISystemSettingRepository : IRepository<SystemSettingValue, Syst
     /// 按设置键读取待修改的值
     /// </summary>
     /// <remarks>
-    /// 未指定 expectedVersion 时要求尚无保存值，并返回 null；指定版本时要求记录存在且版本一致，否则返回版本冲突
+    /// 不指定版本时要求还没有保存值
     /// </remarks>
     Task<Result<SystemSettingValue?>> GetByKeyForUpdateAsync(string key, long? expectedVersion, CancellationToken ct);
 

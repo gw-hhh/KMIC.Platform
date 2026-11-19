@@ -4,7 +4,7 @@ namespace Kmic.Identity.Presentation.Authentication;
 /// 网页客户端的刷新令牌 Cookie
 /// </summary>
 /// <remarks>
-/// __Host- 前缀要求 Secure、Path=/、不设 Domain，改了这几项浏览器会拒收 Cookie
+/// __Host- 前缀要求 Secure、Path=/、不设 Domain
 /// </remarks>
 internal static class RefreshCookie
 {

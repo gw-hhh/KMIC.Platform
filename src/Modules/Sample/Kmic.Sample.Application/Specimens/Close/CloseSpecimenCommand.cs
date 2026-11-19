@@ -8,7 +8,7 @@ namespace Kmic.Sample.Application.Specimens.Close;
 /// 关闭示例
 /// </summary>
 /// <param name="Id">示例 ID</param>
-/// <param name="ExpectedVersion">读取时的版本号，与当前版本不一致时返回版本冲突</param>
+/// <param name="ExpectedVersion">读取时的版本号</param>
 [RequirePermission(SamplePermissions.Close)]
 [Audited]
 public sealed record CloseSpecimenCommand(SpecimenId Id, long ExpectedVersion) : ICommand<VersionedResponse<SpecimenId>>;

@@ -17,8 +17,6 @@ public sealed class SortMapBuilder<T>
     /// <summary>
     /// 登记一个可排序的字段
     /// </summary>
-    /// <param name="name">请求里使用的字段名，小驼峰</param>
-    /// <param name="selector">列表项上的排序依据</param>
     public SortMapBuilder<T> Field<TKey>(string name, Expression<Func<T, TKey>> selector)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -37,7 +35,6 @@ public sealed class SortMapBuilder<T>
     /// <summary>
     /// 给出默认排序并完成登记
     /// </summary>
-    /// <param name="sort">写法与请求相同，如 -createdAt</param>
     public SortMap<T> Default(string sort)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sort);

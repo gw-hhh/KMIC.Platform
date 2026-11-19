@@ -6,9 +6,7 @@ namespace Kmic.Notifications.Application.Rendering;
 /// 根据模板和数据模型渲染通知内容
 /// </summary>
 /// <remarks>
-/// 模板按不可信输入处理，仅可访问数据模型的公开属性，不得读文件或调用任意方法。
-/// 每次写入时检查渲染用时和输出长度，执行步数另设上限；超限返回模板错误。
-/// HTML 模式默认转义变量值，文本模式原样输出
+/// 模板按不可信输入处理
 /// </remarks>
 public interface ITemplateRenderer
 {
@@ -26,7 +24,7 @@ public interface ITemplateRenderer
     /// 渲染通知内容，遇到未定义变量时返回模板错误
     /// </summary>
     /// <remarks>
-    /// 错误说明包含未定义变量名；只检查实际执行到的变量，未进入的条件分支无法检查
+    /// 没执行到的分支查不出
     /// </remarks>
     ValueTask<Result<string>> RenderStrictAsync(string template, object model, RenderFormat format, CancellationToken ct);
 }

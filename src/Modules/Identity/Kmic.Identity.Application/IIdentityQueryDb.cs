@@ -4,11 +4,8 @@ using Kmic.Identity.Domain.Sessions;
 namespace Kmic.Identity.Application;
 
 /// <summary>
-/// Identity 模块的查询入口，不跟踪实体，只读已提交的数据
+/// Identity 模块的查询入口
 /// </summary>
-/// <remarks>
-/// Identity 数据不声明数据范围，能看什么由用例的权限点决定
-/// </remarks>
 public interface IIdentityQueryDb : IIdentityReads
 {
     /// <summary>

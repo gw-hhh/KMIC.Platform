@@ -4,7 +4,7 @@ namespace Kmic.Identity.Application.Authentication;
 /// 登录失败计数的存储
 /// </summary>
 /// <remarks>
-/// 实现要用独立事务提交，登录命令回滚后计数仍要保留；键是规范化登录名的 SHA-256，不存登录名明文
+/// 要用独立事务提交，不随登录回滚
 /// </remarks>
 public interface ILoginThrottleStore
 {

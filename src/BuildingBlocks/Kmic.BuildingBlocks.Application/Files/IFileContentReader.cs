@@ -12,8 +12,6 @@ public interface IFileContentReader
     /// <summary>
     /// 打开对象读取，由调用方释放
     /// </summary>
-    /// <param name="storageKey">存储键</param>
-    /// <param name="ct">取消令牌</param>
     /// <exception cref="FileNotFoundException">对象不在存储里（被删除标记覆盖或丢失）</exception>
     Task<Stream> OpenReadAsync(string storageKey, CancellationToken ct);
 }

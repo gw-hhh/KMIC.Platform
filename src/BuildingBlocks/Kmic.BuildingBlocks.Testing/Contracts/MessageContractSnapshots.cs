@@ -60,17 +60,12 @@ public static class MessageContractSnapshots
     /// <summary>
     /// 把契约程序集里每个消息的 Schema 与快照目录对照，返回全部问题；没有问题时返回空列表
     /// </summary>
-    /// <param name="contractAssemblies">契约程序集</param>
-    /// <param name="directory">快照目录，每个消息一个文件，如 Sample.SpecimenSubmitted.v1.json</param>
     public static IReadOnlyList<string> Check(IEnumerable<Assembly> contractAssemblies, string directory) =>
         Check(contractAssemblies, directory, string.Equals(Environment.GetEnvironmentVariable(UpdateVariable), "1", StringComparison.Ordinal));
 
     /// <summary>
     /// 同 <see cref="Check(IEnumerable{Assembly}, string)" />，明确指定是更新快照还是对照
     /// </summary>
-    /// <param name="contractAssemblies">契约程序集</param>
-    /// <param name="directory">快照目录</param>
-    /// <param name="update">为真时把快照改成当前契约，没有问题可报</param>
     public static IReadOnlyList<string> Check(IEnumerable<Assembly> contractAssemblies, string directory, bool update)
     {
         ArgumentNullException.ThrowIfNull(contractAssemblies);

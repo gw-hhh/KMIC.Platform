@@ -19,10 +19,6 @@ public static class FrameworkSchema
     /// <summary>
     /// 建 Operations、Identity 两个 schema 里框架要用的表
     /// </summary>
-    /// <param name="connectionString">模板库的连接串</param>
-    /// <param name="ct">取消令牌</param>
-    /// <param name="identityHasMigrations">Identity 模块的迁移会建自己的 schema 与安全事件表时为真，这里就不再建</param>
-    /// <param name="operationsHasMigrations">Operations 模块的迁移会建自己的 schema、消息路由表、调度表与 Quartz 表时为真，这里就不再建</param>
     public static async Task CreateAsync(string connectionString, CancellationToken ct, bool identityHasMigrations = false, bool operationsHasMigrations = false)
     {
         await using var connection = new NpgsqlConnection(connectionString);

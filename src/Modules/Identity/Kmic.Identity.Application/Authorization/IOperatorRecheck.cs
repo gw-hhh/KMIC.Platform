@@ -4,10 +4,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.Identity.Application.Authorization;
 
 /// <summary>
-/// 授权管理命令执行前重新校验操作者，防止已被撤权的人继续授权
+/// 授权管理命令执行前重新校验操作者
 /// </summary>
 /// <remarks>
-/// 须在命令事务里加共享锁再检查，与撤权写入互斥
+/// 须在命令事务里调用
 /// </remarks>
 public interface IOperatorRecheck
 {

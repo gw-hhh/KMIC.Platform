@@ -3,7 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Authorization;
 /// <summary>
 /// 权限点
 /// </summary>
-/// <param name="displayName">显示名称</param>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class PermissionAttribute(string displayName) : Attribute
 {

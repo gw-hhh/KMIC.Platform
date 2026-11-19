@@ -16,7 +16,7 @@ namespace Kmic.Identity.Application.Users.List;
 /// <param name="OrgUnitId">所属组织单元 ID</param>
 /// <param name="OrgUnitName">所属组织单元的名称</param>
 /// <param name="Roles">拥有的角色</param>
-/// <param name="ConcurrencyVersion">版本号，输出为 version</param>
+/// <param name="ConcurrencyVersion">版本号</param>
 public sealed record UserListItem(
     UserId Id,
     string Account,

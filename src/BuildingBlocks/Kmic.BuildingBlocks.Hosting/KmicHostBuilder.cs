@@ -18,7 +18,6 @@ public sealed class KmicHostBuilder
     /// <remarks>
     /// 两个类的模块名必须一致，启动时校验。每个模块在宿主里显式注册一次
     /// </remarks>
-    /// <param name="onlyIn">模块在哪些环境里注册，默认所有环境</param>
     /// <typeparam name="TModule">服务端注册类</typeparam>
     /// <typeparam name="TEndpoints">端点注册类</typeparam>
     public KmicHostBuilder AddModule<TModule, TEndpoints>(KmicEnvironments onlyIn = KmicEnvironments.Any)

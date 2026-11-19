@@ -11,8 +11,7 @@ namespace Kmic.Configuration.Infrastructure.Settings;
 /// 已保存系统设置值的缓存快照
 /// </summary>
 /// <remarks>
-/// JSON 值在构造时固定，解析结果按类型缓存并复用，调用方须保持返回值不可变。
-/// 并发首次读取可能重复解析，类型缓存仅在内存中使用，不参与 JSON 序列化
+/// 调用方不能修改返回值
 /// </remarks>
 [ImmutableObject(true)]
 internal sealed class SettingsSnapshot(IReadOnlyDictionary<string, string> values)

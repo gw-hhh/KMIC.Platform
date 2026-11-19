@@ -6,7 +6,6 @@ namespace Kmic.BuildingBlocks.Application.Settings;
 /// <remarks>
 /// 可以不写，不写时界面显示成员名。成员的类型决定控件，所以这里不再声明类型
 /// </remarks>
-/// <param name="displayName">显示名</param>
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 public sealed class SettingFieldAttribute(string displayName) : Attribute
 {

@@ -23,8 +23,6 @@ public sealed class TestOrgTreeBuilder
     /// <summary>
     /// 添加组织
     /// </summary>
-    /// <param name="name">名称</param>
-    /// <param name="children">下级组织</param>
     public TestOrgTreeBuilder Unit(string name, Action<TestOrgTreeBuilder>? children = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

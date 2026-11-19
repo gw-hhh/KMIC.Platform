@@ -3,9 +3,6 @@ namespace Kmic.Identity.Application.Catalog;
 /// <summary>
 /// 权限点与范围对象的目录存储，仅供同步与清理更新
 /// </summary>
-/// <remarks>
-/// 与命令共用事务；目录表不是聚合，每次整体同步
-/// </remarks>
 public interface IPermissionCatalogStore
 {
     /// <summary>

@@ -29,13 +29,11 @@ public sealed class NotificationTemplateCatalog
     /// <summary>
     /// 按键取模板，不存在返回空
     /// </summary>
-    /// <param name="key">模板键</param>
     public NotificationTemplateDefinition? Find(string key) => _byKey.GetValueOrDefault(key);
 
     /// <summary>
     /// 从程序集里读取
     /// </summary>
-    /// <param name="assemblies">各模块的 Application 程序集</param>
     /// <exception cref="DeclarationException">声明有误</exception>
     public static NotificationTemplateCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
@@ -46,7 +44,6 @@ public sealed class NotificationTemplateCatalog
     /// <summary>
     /// 从声明了模板的模型类型里读取
     /// </summary>
-    /// <param name="modelTypes">标了 NotificationTemplate 的模型类型</param>
     /// <exception cref="DeclarationException">声明有误</exception>
     public static NotificationTemplateCatalog Build(IEnumerable<Type> modelTypes)
     {

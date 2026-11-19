@@ -5,10 +5,10 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.Identity.Application.Users.ResetPassword;
 
 /// <summary>
-/// 重置用户密码并返回临时密码，作废全部会话，下次登录须修改密码
+/// 重置密码并返回临时密码
 /// </summary>
 /// <remarks>
-/// 临时密码不写入幂等记录，重复提交会生成新密码，旧的随即失效
+/// 重复提交会生成新密码
 /// </remarks>
 [RequirePermission(IdentityPermissions.UserResetPassword)]
 [Audited]

@@ -6,7 +6,7 @@ namespace Kmic.Configuration.Application.Preferences;
 /// 用户在当前角色下的三层偏好，按键保存 JSON 值
 /// </summary>
 /// <remarks>
-/// 按“本人 → 角色 → 系统”的顺序取值。偏好声明里不允许的层，即使库里有值也不取
+/// 按本人、角色、系统的顺序取值
 /// </remarks>
 public sealed class LayeredPreferences(
     IReadOnlyDictionary<string, string> system,

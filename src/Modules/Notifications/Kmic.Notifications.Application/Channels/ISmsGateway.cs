@@ -4,7 +4,7 @@ namespace Kmic.Notifications.Application.Channels;
 /// 短信发送渠道
 /// </summary>
 /// <remarks>
-/// 仅发送已审核的模板编码和参数，不支持自由文本；仅由投递工作器在数据库事务之外调用
+/// 只发已审核的模板，不支持自由文本
 /// </remarks>
 public interface ISmsGateway
 {

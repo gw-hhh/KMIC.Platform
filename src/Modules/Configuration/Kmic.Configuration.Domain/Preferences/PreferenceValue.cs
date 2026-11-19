@@ -6,10 +6,6 @@ namespace Kmic.Configuration.Domain.Preferences;
 /// <summary>
 /// 分层保存的偏好值
 /// </summary>
-/// <remarks>
-/// 同一键、层级、角色和用户组合只有一条记录；工厂方法与数据库约束保证层级和归属一致。
-/// 值须由调用方校验后再写入
-/// </remarks>
 public sealed class PreferenceValue : AggregateRoot<PreferenceValueId>
 {
     /// <summary>

@@ -6,7 +6,7 @@ namespace Kmic.Sample.Application.Notifications;
 /// 示例：含一次性凭据的短信
 /// </summary>
 /// <remarks>
-/// 通过 SendSecretNotification 发送，不带附件；凭据有效期由业务端校验
+/// 经 SendSecretNotification 发送
 /// </remarks>
 /// <param name="Code">验证码</param>
 [NotificationTemplate("Sample.SpecimenCode", "示例确认码", Channels = NotificationChannels.Sms, CarriesSecret = true)]

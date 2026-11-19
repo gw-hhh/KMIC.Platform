@@ -13,7 +13,7 @@ namespace Kmic.Configuration.Application.Preferences;
 /// <param name="Key">键</param>
 /// <param name="DisplayName">显示名称</param>
 /// <param name="Layers">允许设置的层</param>
-/// <param name="Definition">目录里的定义；偏好族里的键没有</param>
+/// <param name="Definition">目录里的定义</param>
 internal sealed record PreferenceSubject(string Key, string DisplayName, PreferenceLayers Layers, PreferenceDefinition? Definition)
 {
     /// <summary>

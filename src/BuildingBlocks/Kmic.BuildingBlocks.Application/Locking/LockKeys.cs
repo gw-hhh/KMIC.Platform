@@ -15,8 +15,6 @@ public static class LockKeys
     /// <summary>
     /// <c>SHA-256("Kmic." + 范围 + ":" + ID)</c> 的前 8 个字节，按大端读成有符号 64 位整数
     /// </summary>
-    /// <param name="scope">范围名，如 Files</param>
-    /// <param name="id">对象 ID</param>
     public static long Of(string scope, Guid id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(scope);

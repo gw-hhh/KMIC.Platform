@@ -21,7 +21,6 @@ public sealed class TimeSpanRangeAttribute : ValidationAttribute
     /// 声明范围，两端都包含
     /// </summary>
     /// <param name="minimum">下限，如 <c>00:01:00</c> 或 <c>90.00:00:00</c></param>
-    /// <param name="maximum">上限，写法同下限</param>
     public TimeSpanRangeAttribute(string minimum, string maximum)
     {
         _minimum = TimeSpan.Parse(minimum, CultureInfo.InvariantCulture);

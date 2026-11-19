@@ -7,7 +7,7 @@ namespace Kmic.Identity.Application.Authentication.GetMe;
 /// 查询当前用户及授权信息
 /// </summary>
 /// <remarks>
-/// 必须先改密码的用户也能调用，界面据此引导去改密码
+/// 必须先改密码的用户也能调用
 /// </remarks>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]

@@ -90,8 +90,6 @@ public sealed partial class PermissionCatalog
     /// <remarks>
     /// 引用的权限点都要存在，每个权限点都要有人用，用到敏感权限点的命令都要审计
     /// </remarks>
-    /// <param name="useCases">用例目录</param>
-    /// <param name="references">用例以外的引用，如资源动作</param>
     public void Verify(UseCaseCatalog useCases, IEnumerable<PermissionReference> references)
     {
         ArgumentNullException.ThrowIfNull(useCases);

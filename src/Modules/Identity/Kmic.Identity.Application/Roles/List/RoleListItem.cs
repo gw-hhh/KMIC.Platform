@@ -15,7 +15,7 @@ namespace Kmic.Identity.Application.Roles.List;
 /// <param name="IsBuiltIn">是否内置（拥有全部权限点）</param>
 /// <param name="SortOrder">次序</param>
 /// <param name="HolderCount">持有人数</param>
-/// <param name="ConcurrencyVersion">版本号，输出为 version</param>
+/// <param name="ConcurrencyVersion">版本号</param>
 public sealed record RoleListItem(
     RoleId Id,
     string Name,

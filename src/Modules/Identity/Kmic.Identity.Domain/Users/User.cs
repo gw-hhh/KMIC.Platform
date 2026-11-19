@@ -11,7 +11,7 @@ namespace Kmic.Identity.Domain.Users;
 /// 用户：能登录系统的人，以及代表“系统”的固定账号
 /// </summary>
 /// <remarks>
-/// 只存身份和通用展示信息，业务属性由各业务模块维护；用户只禁用不删除，历史引用才能解析
+/// 用户只禁用不删除
 /// </remarks>
 public sealed class User : AggregateRoot<UserId>
 {
@@ -66,7 +66,7 @@ public sealed class User : AggregateRoot<UserId>
     /// 所属组织单元
     /// </summary>
     /// <remarks>
-    /// 角色授予没设锚点时，作为“本组织”范围的起点
+    /// 授予没设锚点时，作为“本组织”的起点
     /// </remarks>
     public OrgUnitId? OrgUnitId { get; private set; }
 
@@ -151,9 +151,6 @@ public sealed class User : AggregateRoot<UserId>
     /// <summary>
     /// 账号或手机号是否变化
     /// </summary>
-    /// <remarks>
-    /// 仅比较校验通过的字段；校验失败的字段由后续修改操作报错
-    /// </remarks>
     public bool WouldChangeCredentials(string? account, string? mobile)
     {
         var newAccount = UserFields.Account(account);
@@ -209,10 +206,6 @@ public sealed class User : AggregateRoot<UserId>
     /// <summary>
     /// 设置密码哈希
     /// </summary>
-    /// <param name="passwordHash">哈希器的输出</param>
-    /// <param name="mustChange">登录后是否必须再改一次，管理员重置时为真</param>
-    /// <param name="byAdministrator">是否由管理员重置，决定作废哪些会话</param>
-    /// <param name="now">当前时间</param>
     public Result SetPassword(string passwordHash, bool mustChange, bool byAdministrator, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);

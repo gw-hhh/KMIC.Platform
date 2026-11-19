@@ -3,9 +3,9 @@ namespace Kmic.BuildingBlocks.Application.Security;
 /// <summary>
 /// 安全事件
 /// </summary>
-/// <param name="Type">事件类型，如 AuthorizationDenied、LoginFailed</param>
+/// <param name="Type">事件类型</param>
 /// <param name="Severity">严重程度</param>
-/// <param name="Reason">原因编码，如 MissingPermission</param>
+/// <param name="Reason">原因编码</param>
 public sealed record SecurityEvent(string Type, SecuritySeverity Severity, string? Reason)
 {
     /// <summary>

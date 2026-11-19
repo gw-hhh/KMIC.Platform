@@ -5,9 +5,6 @@ namespace Kmic.Configuration.Domain.Settings;
 /// <summary>
 /// 已保存的系统设置值，未保存时使用代码默认值
 /// </summary>
-/// <remarks>
-/// 值须由调用方按设置目录校验后再写入
-/// </remarks>
 public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
 {
     private SystemSettingValue(SystemSettingValueId id, string key, string value)

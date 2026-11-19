@@ -15,10 +15,6 @@ namespace Kmic.Notifications.Infrastructure.Rendering;
 /// <summary>
 /// 使用 Fluid 渲染 Liquid 通知模板
 /// </summary>
-/// <remarks>
-/// 仅注册模型及其公开属性可达的类型，不配置文件提供器。
-/// 执行步数受限，用时和输出长度在写入时检查；HTML 变量值默认转义
-/// </remarks>
 internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions> options, TimeProvider time) : ITemplateRenderer
 {
     private static readonly FluidParser _parser = new();

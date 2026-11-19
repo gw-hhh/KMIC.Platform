@@ -6,8 +6,8 @@ namespace Kmic.Notifications.Application.BackgroundJobs;
 /// 后台作业结束时发给提交人的站内消息模板
 /// </summary>
 /// <param name="JobName">作业显示名称</param>
-/// <param name="Result">结果：已完成、失败或已取消</param>
-/// <param name="ErrorMessage">失败原因；未失败时为空字符串</param>
+/// <param name="Result">结果</param>
+/// <param name="ErrorMessage">失败原因，未失败时为空字符串</param>
 [NotificationTemplate(TemplateKey, "后台作业结束", Channels = NotificationChannels.InApp)]
 public sealed record BackgroundJobFinishedNotice(string JobName, string Result, string ErrorMessage) : INotificationModel<BackgroundJobFinishedNotice>
 {

@@ -8,9 +8,9 @@ namespace Kmic.Identity.Application.Organization.Reorder;
 /// <summary>
 /// 调整直属下级的顺序
 /// </summary>
-/// <param name="ExpectedVersion">组织树的预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">组织树的预期版本号</param>
 /// <param name="ParentId">上级组织单元</param>
-/// <param name="OrderedChildren">按新顺序排列的全部直属下级（含停用单元），不得重复</param>
+/// <param name="OrderedChildren">按新顺序排列的全部直属下级（含停用单元）</param>
 [RequirePermission(IdentityPermissions.OrgUnitManage)]
 [Audited]
 [Idempotent]

@@ -11,10 +11,6 @@ namespace Kmic.Files.Infrastructure.Deletion;
 /// <summary>
 /// 处理文件删除队列，在数据库事务之外先删除存储对象，再更新数据库记录
 /// </summary>
-/// <remarks>
-/// 中途失败时保留队列记录，供后续重试对象删除和数据库操作。
-/// 删除失败按尝试次数退避，达到上限后等待人工重试。已彻底删除的文件仅删除对象并保留记录；对象不存在也视为删除成功。
-/// </remarks>
 internal sealed class StoredFileDeletionWork(
     IExecutionScopeFactory scopes,
     IFileStorage storage,

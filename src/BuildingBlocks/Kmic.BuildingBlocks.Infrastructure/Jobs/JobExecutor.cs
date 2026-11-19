@@ -62,10 +62,6 @@ internal sealed class JobExecutor(
         return claimed.Count;
     }
 
-    /// <param name="module">作业所在模块</param>
-    /// <param name="job">领取到的作业</param>
-    /// <param name="token">本次领取的令牌</param>
-    /// <param name="shutdown">停机时触发：可续跑的作业放回队列，其余标记中断</param>
     public async Task<JobRunResult> RunAsync(string module, ClaimedJob job, Guid token, CancellationToken shutdown)
     {
         if (job.Previous == JobStatus.Cancelling)

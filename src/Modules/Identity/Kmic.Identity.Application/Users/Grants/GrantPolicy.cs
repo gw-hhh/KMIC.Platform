@@ -9,7 +9,7 @@ namespace Kmic.Identity.Application.Users.Grants;
 /// 角色授予的操作限制
 /// </summary>
 /// <remarks>
-/// 收回授予后，系统里必须仍有可登录、持有已启用受保护角色的用户
+/// 收回后必须还有能登录的受保护角色持有人
 /// </remarks>
 public sealed class GrantPolicy : IResourcePolicy<GrantTarget, GrantAction>
 {

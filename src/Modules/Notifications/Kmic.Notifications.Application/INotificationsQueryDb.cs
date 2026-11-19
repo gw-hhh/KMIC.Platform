@@ -9,8 +9,7 @@ namespace Kmic.Notifications.Application;
 /// Notifications 模块的查询入口
 /// </summary>
 /// <remarks>
-/// 查询处理器通过此接口读取，不跟踪实体，也不读取命令中尚未保存的修改。
-/// 通知管理按权限点控制；站内消息须由处理器限定收件人
+/// 站内消息要由处理器限定收件人
 /// </remarks>
 public interface INotificationsQueryDb
 {
@@ -33,7 +32,7 @@ public interface INotificationsQueryDb
     /// 投递记录
     /// </summary>
     /// <remarks>
-    /// 领取次数、失败原因等影子属性通过 EF.Property 读取，名称见 DeliveryColumns
+    /// 影子属性用 EF.Property 读，列名见 DeliveryColumns
     /// </remarks>
     IQueryable<Delivery> Deliveries { get; }
 

@@ -11,8 +11,8 @@ namespace Kmic.Identity.Application.Organization.AssignUser;
 /// 已有业务数据的所属组织不跟着改
 /// </remarks>
 /// <param name="Id">用户 ID</param>
-/// <param name="ExpectedVersion">用户的预期版本号，不匹配时返回版本冲突</param>
-/// <param name="OrgUnitId">组织单元 ID，须启用；未指定时清空所属组织，依赖该组织的数据范围随之变化</param>
+/// <param name="ExpectedVersion">用户的预期版本号</param>
+/// <param name="OrgUnitId">组织单元 ID</param>
 [RequirePermission(IdentityPermissions.OrgUnitManage)]
 [Audited]
 [Idempotent]

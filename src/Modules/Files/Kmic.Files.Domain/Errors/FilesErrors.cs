@@ -5,9 +5,6 @@ namespace Kmic.Files.Domain.Errors;
 /// <summary>
 /// Files 模块的错误目录
 /// </summary>
-/// <remarks>
-/// 错误码写成“Files.错误名”
-/// </remarks>
 public static class FilesErrors
 {
     /// <summary>

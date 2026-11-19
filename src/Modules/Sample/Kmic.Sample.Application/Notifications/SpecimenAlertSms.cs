@@ -5,9 +5,6 @@ namespace Kmic.Sample.Application.Notifications;
 /// <summary>
 /// 示例处理提醒的短信模板
 /// </summary>
-/// <remarks>
-/// 短信仅接受已审核的模板编码和参数，模型通过 ISmsTemplateModel 提供参数映射
-/// </remarks>
 /// <param name="Number">示例编号</param>
 [NotificationTemplate("Sample.SpecimenAlert", "示例处理提醒", Channels = NotificationChannels.Sms)]
 public sealed record SpecimenAlertSms(string Number) : INotificationModel<SpecimenAlertSms>, ISmsTemplateModel

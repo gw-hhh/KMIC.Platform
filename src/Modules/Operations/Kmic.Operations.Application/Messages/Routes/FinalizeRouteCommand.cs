@@ -7,11 +7,11 @@ namespace Kmic.Operations.Application.Messages.Routes;
 /// 终结消息订阅路由
 /// </summary>
 /// <remarks>
-/// 须在维护窗口执行；终结后停止投递，旧构建不能自动恢复订阅
+/// 须在维护窗口执行
 /// </remarks>
 /// <param name="MessageType">消息名称</param>
 /// <param name="Subscription">订阅名</param>
-/// <param name="Reason">原因，必填</param>
+/// <param name="Reason">原因</param>
 /// <param name="AbandonUnfinished">是否放弃未完成的消息</param>
 [RequirePermission(OperationsPermissions.MessagesManage)]
 [Audited]

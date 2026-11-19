@@ -6,9 +6,6 @@ namespace Kmic.Notifications.Domain.Notifications;
 /// <summary>
 /// 通知发送请求记录，创建后不再修改
 /// </summary>
-/// <remarks>
-/// 通过来源消息 ID 去重，并关联本次产生的投递和站内消息
-/// </remarks>
 public sealed class Notification : AggregateRoot<NotificationId>
 {
     private Notification(NotificationId id, string templateKey, string templateVersions, string dedupKey, Guid sourceMessageId, string sourceModule, UserId? initiatorUserId)

@@ -14,7 +14,7 @@ internal static class MergedCursorPaging
     /// 合并各模块查询结果并生成下一页游标
     /// </summary>
     /// <remarks>
-    /// fetch 要按时间、ID 倒序查询并应用传入的游标和数量；ID 的排序要和 PostgreSQL 的 uuid 排序一致
+    /// fetch 要按时间、ID 倒序查询
     /// </remarks>
     public static async Task<Result<(IReadOnlyList<T> Items, string? NextCursor)>> PageAsync<TStore, T>(
         IEnumerable<TStore> stores,

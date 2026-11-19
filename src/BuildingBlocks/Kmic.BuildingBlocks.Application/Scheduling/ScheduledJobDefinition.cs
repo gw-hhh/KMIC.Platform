@@ -11,7 +11,7 @@ namespace Kmic.BuildingBlocks.Application.Scheduling;
 /// <param name="Cron">代码里的默认执行时间</param>
 /// <param name="Create">按触发构造命令</param>
 /// <param name="Misfire">错过触发时怎么办</param>
-/// <param name="DisplayName">显示名，没写时用名称</param>
+/// <param name="DisplayName">显示名</param>
 public sealed record ScheduledJobDefinition(
     string Name,
     string Module,

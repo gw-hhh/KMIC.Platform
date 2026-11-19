@@ -17,7 +17,6 @@ public static class StartupServiceCollectionExtensions
     /// <remarks>
     /// 要在后台组件之前调用：宿主按注册顺序启动
     /// </remarks>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicStartupTasks(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

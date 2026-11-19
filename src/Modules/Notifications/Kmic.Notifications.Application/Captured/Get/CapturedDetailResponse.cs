@@ -10,7 +10,7 @@ namespace Kmic.Notifications.Application.Captured.Get;
 /// <param name="DeliveryId">投递 ID</param>
 /// <param name="Channel">渠道</param>
 /// <param name="Address">收件地址（未脱敏）</param>
-/// <param name="Role">邮件收件方式：To、Cc 或 Bcc</param>
+/// <param name="Role">邮件收件方式</param>
 /// <param name="Subject">主题</param>
 /// <param name="Body">正文</param>
 /// <param name="CapturedAt">捕获时间</param>

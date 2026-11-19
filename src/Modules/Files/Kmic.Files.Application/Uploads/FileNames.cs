@@ -15,9 +15,6 @@ internal static class FileNames
     /// <summary>
     /// 清理文件名
     /// </summary>
-    /// <remarks>
-    /// 截断超长文件名时，保留长度不超过 20 个字符的扩展名
-    /// </remarks>
     /// <returns>清理后的文件名；为空、"." 或 ".." 时返回 null</returns>
     public static string? Sanitize(string fileName)
     {

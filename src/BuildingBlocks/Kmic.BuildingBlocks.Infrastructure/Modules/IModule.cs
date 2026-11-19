@@ -50,7 +50,6 @@ public interface IModule
     /// <remarks>
     /// 宿主在本实例带 Worker 角色时才调用；只跑 Api 的实例不会有这些循环
     /// </remarks>
-    /// <param name="services">服务集合</param>
     void AddWorkerServices(IServiceCollection services)
     {
     }

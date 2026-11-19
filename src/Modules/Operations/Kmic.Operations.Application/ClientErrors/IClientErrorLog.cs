@@ -10,7 +10,5 @@ public interface IClientErrorLog
     /// <summary>
     /// 写一条前端上报的错误
     /// </summary>
-    /// <param name="user">上报的用户，日志里只记 ID</param>
-    /// <param name="report">错误</param>
     void Write(UserId user, ClientErrorReport report);
 }

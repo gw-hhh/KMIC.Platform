@@ -8,7 +8,7 @@ namespace Kmic.Configuration.Application.Dictionaries.Items;
 /// 修改字典项的显示名；编码不能改，业务数据里存的是编码
 /// </summary>
 /// <param name="TypeCode">字典类型编码</param>
-/// <param name="ExpectedVersion">字典类型的预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">字典类型的预期版本号</param>
 /// <param name="Code">字典项编码</param>
 /// <param name="Name">新的显示名</param>
 [RequirePermission(ConfigurationPermissions.DictionaryManage)]

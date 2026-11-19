@@ -93,9 +93,6 @@ internal sealed class JobContext(
     /// <remarks>
     /// 结果和 SendBatchAsync 一样处理：被接管或提交结果未知时本地停下，由领取流程收尾
     /// </remarks>
-    /// <param name="write">在这一页的事务里执行的写入，参数是这一页的作用域</param>
-    /// <param name="checkpoint">这一页写完后的检查点</param>
-    /// <param name="done">这一页写完后累计完成的数量</param>
     public async ValueTask<Result> WritePageAsync(Func<IServiceProvider, CancellationToken, Task> write, object checkpoint, long done)
     {
         ArgumentNullException.ThrowIfNull(write);

@@ -3,9 +3,6 @@ namespace Kmic.Notifications.Domain.Deliveries;
 /// <summary>
 /// 投递表影子属性的列名
 /// </summary>
-/// <remarks>
-/// 仅由投递工作器或管理用例按条件更新，查询时通过 EF.Property 读取
-/// </remarks>
 public static class DeliveryColumns
 {
     /// <summary>

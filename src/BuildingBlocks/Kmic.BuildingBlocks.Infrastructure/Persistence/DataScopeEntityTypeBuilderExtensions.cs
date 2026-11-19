@@ -13,8 +13,6 @@ public static class DataScopeEntityTypeBuilderExtensions
     /// <summary>
     /// 按数据权限过滤
     /// </summary>
-    /// <param name="builder">聚合根的配置</param>
-    /// <param name="scopeObject">范围对象编码，如 SampleScopes.Sample</param>
     public static void HasDataScope<TEntity>(this EntityTypeBuilder<TEntity> builder, string scopeObject)
         where TEntity : class
     {
@@ -26,8 +24,6 @@ public static class DataScopeEntityTypeBuilderExtensions
     /// <summary>
     /// 不按数据权限过滤
     /// </summary>
-    /// <param name="builder">聚合根的配置</param>
-    /// <param name="reason">原因，如“产品目录对所有人可见”</param>
     public static void HasNoDataScope<TEntity>(this EntityTypeBuilder<TEntity> builder, string reason)
         where TEntity : class
     {

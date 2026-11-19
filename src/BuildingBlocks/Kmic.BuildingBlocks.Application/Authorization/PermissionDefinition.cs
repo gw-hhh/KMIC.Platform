@@ -3,7 +3,7 @@ namespace Kmic.BuildingBlocks.Application.Authorization;
 /// <summary>
 /// 权限点定义
 /// </summary>
-/// <param name="Code">编码，如 Sales.Quotation.Approve</param>
+/// <param name="Code">编码</param>
 /// <param name="Module">所属模块</param>
 /// <param name="Group">分组名称</param>
 /// <param name="DisplayName">显示名称</param>

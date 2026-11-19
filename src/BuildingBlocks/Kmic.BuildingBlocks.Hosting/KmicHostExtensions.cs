@@ -28,8 +28,6 @@ public static class KmicHostExtensions
     /// 管道行为要由宿主在 AddMediator 里按顺序声明，源码生成器要求这样写，这里不替宿主注册。
     /// 校验失败（模块配对、依赖、角色、数据库连接串）都拒绝启动，问题一次报全
     /// </remarks>
-    /// <param name="builder">宿主构建器</param>
-    /// <param name="configure">登记模块</param>
     public static WebApplicationBuilder AddKmicHost(this WebApplicationBuilder builder, Action<KmicHostBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(builder);

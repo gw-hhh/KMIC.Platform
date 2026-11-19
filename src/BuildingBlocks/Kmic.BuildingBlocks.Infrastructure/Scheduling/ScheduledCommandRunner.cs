@@ -21,12 +21,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 internal sealed class ScheduledCommandRunner(
     ScheduledTasks tasks, ScheduledJobRuns runs, IExecutionScopeFactory scopes, FrameworkMetrics metrics, ILogger<ScheduledCommandRunner> logger)
 {
-    /// <param name="name">任务名</param>
-    /// <param name="run">这次触发</param>
-    /// <param name="actualFireTime">实际触发时刻</param>
-    /// <param name="triggeredBy">手动执行的人</param>
-    /// <param name="instance">执行它的调度器实例</param>
-    /// <param name="ct">停机时取消</param>
     public async Task<Result<ScheduledJobOutcome>> RunAsync(
         string name, ScheduledRun run, DateTimeOffset actualFireTime, UserId? triggeredBy, string instance, CancellationToken ct)
     {

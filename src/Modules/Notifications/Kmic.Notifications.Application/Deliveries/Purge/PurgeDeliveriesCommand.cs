@@ -8,8 +8,7 @@ namespace Kmic.Notifications.Application.Deliveries.Purge;
 /// 清理超过保留期的投递记录和发送请求记录
 /// </summary>
 /// <remarks>
-/// 保留期见 Notifications:Retention。仅清理已发送、已跳过、已捕获及已放弃的失败投递，未放弃的失败投递保留。
-/// 发送请求须超过保留期且已无投递记录才会删除
+/// 没放弃的失败投递不清
 /// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]

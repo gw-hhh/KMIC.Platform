@@ -13,7 +13,6 @@ public interface IModuleMessageStores
     /// <summary>
     /// 按模块名取，没有这个模块时返回空
     /// </summary>
-    /// <param name="module">模块名</param>
     IModuleMessageStore? Find(string module);
 
     /// <summary>
@@ -22,6 +21,5 @@ public interface IModuleMessageStores
     /// <remarks>
     /// 它们的积压是预期内的，不计入通用的积压告警，管理视图单独列出
     /// </remarks>
-    /// <param name="ct">取消令牌</param>
     Task<IReadOnlySet<string>> GetRetiringSubscriptionsAsync(CancellationToken ct);
 }

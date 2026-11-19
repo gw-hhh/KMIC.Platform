@@ -6,10 +6,10 @@ using Kmic.Identity.Domain.Errors;
 namespace Kmic.Identity.Domain.Organization;
 
 /// <summary>
-/// 组织树，整棵树是一个聚合，保证无环、同级不重名、停用单元下没有启用下级
+/// 组织树，整棵树是一个聚合
 /// </summary>
 /// <remarks>
-/// 按不超过几千个单元设计：访问上下文按版本缓存整棵树
+/// 按不超过几千个单元设计
 /// </remarks>
 public sealed class OrgTree : AggregateRoot<OrgTreeId>
 {
@@ -224,7 +224,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
     /// 调整直属下级的顺序
     /// </summary>
     /// <remarks>
-    /// 列表须包含该上级的全部直属下级（含停用单元），且不得重复
+    /// 列表要包含全部直属下级，不能重复
     /// </remarks>
     public Result Reorder(OrgUnitId parentId, IReadOnlyList<OrgUnitId> orderedChildren)
     {
@@ -252,8 +252,6 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
     /// <summary>
     /// 停用；下面有启用的下级或启用的用户时拒绝，根不能停用
     /// </summary>
-    /// <param name="id">单元</param>
-    /// <param name="hasEnabledUsers">是否还有启用的用户归属于它，用户在别的聚合里，由调用方查好传入</param>
     public Result Disable(OrgUnitId id, bool hasEnabledUsers)
     {
         var unit = Find(id);

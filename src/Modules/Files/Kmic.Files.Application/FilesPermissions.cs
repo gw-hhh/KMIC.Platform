@@ -6,8 +6,7 @@ namespace Kmic.Files.Application;
 /// Files 模块的权限点
 /// </summary>
 /// <remarks>
-/// 上传与下载没有 Files 自己的权限点：上传由上传配置要求的权限决定，下载由业务对象的授权决定。
-/// 使用敏感权限点的命令必须记录审计
+/// 上传和下载不用 Files 的权限点
 /// </remarks>
 [PermissionGroup("Files", "文件")]
 public static class FilesPermissions
@@ -19,11 +18,8 @@ public static class FilesPermissions
     public const string FileView = "Files.File.View";
 
     /// <summary>
-    /// 管理文件
+    /// 管理文件：重试文件删除、把存储问题标为已解决
     /// </summary>
-    /// <remarks>
-    /// 允许重试文件删除、将存储问题标为已解决
-    /// </remarks>
     [Permission("管理文件")]
     public const string FileManage = "Files.File.Manage";
 

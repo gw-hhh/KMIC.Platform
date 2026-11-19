@@ -9,9 +9,9 @@ namespace Kmic.Identity.Application.Roles.SetDataScopes;
 /// 整体替换角色的数据范围：默认等级和各范围对象单独设置的等级
 /// </summary>
 /// <param name="Id">角色 ID</param>
-/// <param name="ExpectedVersion">预期版本号，不匹配时返回版本冲突</param>
+/// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="DefaultLevel">默认等级</param>
-/// <param name="Overrides">按范围对象单独设置的等级，键是范围对象编码</param>
+/// <param name="Overrides">按范围对象单独设置的等级</param>
 [RequirePermission(IdentityPermissions.RoleManage)]
 [Audited]
 [Idempotent]

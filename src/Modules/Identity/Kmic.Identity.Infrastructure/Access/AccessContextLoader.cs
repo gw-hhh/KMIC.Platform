@@ -14,11 +14,8 @@ using Microsoft.Extensions.Caching.Hybrid;
 namespace Kmic.Identity.Infrastructure.Access;
 
 /// <summary>
-/// 加载访问上下文：会话、用户、授予和角色状态每次查库，变更从下一个请求起生效
+/// 加载访问上下文，会话和用户状态每次查库
 /// </summary>
-/// <remarks>
-/// 角色和组织树按版本缓存；结果与缓存键的版本不符时移除该项，本次用快照自己的版本
-/// </remarks>
 internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCache cache, PermissionCatalog permissions, TimeProvider time) : IAccessContextLoader
 {
     // 后台作业没有会话，访问上下文里的会话用这个固定值

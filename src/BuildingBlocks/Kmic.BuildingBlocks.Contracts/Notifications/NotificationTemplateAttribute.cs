@@ -7,8 +7,6 @@ namespace Kmic.BuildingBlocks.Contracts.Notifications;
 /// 模板由代码声明，管理员只能修改内容；模板键以声明它的模块名开头，全系统唯一。
 /// 数据模型要实现 <see cref="INotificationModel{TSelf}" />
 /// </remarks>
-/// <param name="key">模板键，如 Identity.SmsCode</param>
-/// <param name="displayName">管理页里显示的名称</param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class NotificationTemplateAttribute(string key, string displayName) : Attribute
 {

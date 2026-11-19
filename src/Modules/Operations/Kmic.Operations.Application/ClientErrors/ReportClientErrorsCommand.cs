@@ -7,9 +7,9 @@ namespace Kmic.Operations.Application.ClientErrors;
 /// 批量上报前端错误
 /// </summary>
 /// <remarks>
-/// 必须改密码的账号和只读模拟会话也能上报；超限返回 429，前端丢弃这一批，不重试
+/// 超限返回 429，前端不要重试
 /// </remarks>
-/// <param name="Errors">一批错误，条数上限见配置</param>
+/// <param name="Errors">一批错误</param>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]

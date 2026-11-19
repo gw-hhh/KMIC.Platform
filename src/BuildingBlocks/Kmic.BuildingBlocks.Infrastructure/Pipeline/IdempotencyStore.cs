@@ -11,8 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// <remarks>
 /// 每条改写都带上状态和令牌条件。否则提交其实成功了、只是确认没传回来，失败处理会把已完成的记录删掉，客户端一重试就会再执行一遍
 /// </remarks>
-/// <param name="dataSource">事务连接池</param>
-/// <param name="table">带引号的完整表名，如 "Sample"."IdempotencyRecord"</param>
 internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table)
 {
     public const string Processing = "Processing";

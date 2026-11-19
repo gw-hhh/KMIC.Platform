@@ -5,11 +5,8 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.Notifications.Application.Captured.Purge;
 
 /// <summary>
-/// 清理超过保留期的捕获内容
+/// 清理超过保留期的捕获内容，保留期见 Notifications:Retention
 /// </summary>
-/// <remarks>
-/// 每天按 Notifications:Retention 中的保留期清理捕获内容
-/// </remarks>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]
 [NotAudited("定时清理，结果记入作业运行记录")]

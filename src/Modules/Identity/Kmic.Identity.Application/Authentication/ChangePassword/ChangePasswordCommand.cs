@@ -6,7 +6,7 @@ namespace Kmic.Identity.Application.Authentication.ChangePassword;
 /// <summary>
 /// 修改当前用户密码
 /// </summary>
-/// <param name="OldPassword">旧密码；还没有设置过密码时为空</param>
+/// <param name="OldPassword">旧密码，还没有设置过密码时为空</param>
 /// <param name="NewPassword">新密码</param>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]

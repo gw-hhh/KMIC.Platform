@@ -15,7 +15,6 @@ public static class SecurityEventServiceCollectionExtensions
     /// <remarks>
     /// 写入器用 TryAdd，测试先注册了记录用的写入器就不会被覆盖。事件在哪个进程里产生，就在哪个进程里写库
     /// </remarks>
-    /// <param name="services">服务集合</param>
     public static IServiceCollection AddKmicSecurityEvents(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

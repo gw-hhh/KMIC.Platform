@@ -629,7 +629,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("清理到期时间");
+                        .HasComment("清理到期时间，到期后由后台任务清理，不保证立即删除");
 
                     b.Property<string>("FileType")
                         .HasMaxLength(50)
@@ -677,7 +677,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
-                        .HasComment("上传配置名称");
+                        .HasComment("上传配置名称，生成文件为 Generated:来源");
 
                     b.Property<string>("PurgeReason")
                         .HasMaxLength(500)
@@ -728,7 +728,7 @@ namespace Kmic.Files.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasComment("文件登记时间");
+                        .HasComment("文件登记时间：上传文件是开始上传时，生成文件是处理登记消息时");
 
                     b.Property<Guid?>("UploadedBy")
                         .HasColumnType("uuid")

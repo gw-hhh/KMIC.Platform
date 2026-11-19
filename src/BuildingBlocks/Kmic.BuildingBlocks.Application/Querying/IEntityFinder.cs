@@ -20,10 +20,6 @@ public interface IEntityFinder
     /// 只有取不到时才多查一次是否被数据范围挡住，正常路径没有额外开销。
     /// 查询里的 Include 等写法照常生效，补查不受影响
     /// </remarks>
-    /// <param name="query">从模块查询入口出发的查询</param>
-    /// <param name="id">要找的 ID</param>
-    /// <param name="notFound">取不到时返回的错误，如 SampleErrors.NotFound</param>
-    /// <param name="cancellationToken">取消令牌</param>
     Task<Result<TEntity>> FindByIdOrNotFoundAsync<TEntity, TId>(
         IQueryable<TEntity> query, TId id, Error notFound, CancellationToken cancellationToken)
         where TEntity : Entity<TId>

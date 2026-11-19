@@ -93,19 +93,15 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     }
 
     /// <summary>
-    /// 是否允许增删附件
+    /// 是否允许增删附件，关闭后不允许
     /// </summary>
-    /// <remarks>
-    /// 关闭后不允许增删附件
-    /// </remarks>
     public Result CanEditAttachments() => Status == SpecimenStatus.Closed ? SampleErrors.InvalidState : Result.Success();
 
     /// <summary>
     /// 添加附件
     /// </summary>
     /// <remarks>
-    /// 调用前须通过 IFileAttachments 获取文件锁、检查文件并发出关联请求。
-    /// 同一文件不能重复添加；保存关联时的文件名、大小和类型。
+    /// 调用前要先经 IFileAttachments 检查
     /// </remarks>
     public Result<SpecimenAttachment> AddAttachment(StoredFileId fileId, string fileName, long size, string fileType)
     {
@@ -148,11 +144,8 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     }
 
     /// <summary>
-    /// 提交示例
+    /// 提交示例，至少要有一项明细
     /// </summary>
-    /// <remarks>
-    /// 至少需要一项明细，提交成功后发布“已提交”事件
-    /// </remarks>
     public Result Submit(string? reason = null)
     {
         if (_items.Count == 0)

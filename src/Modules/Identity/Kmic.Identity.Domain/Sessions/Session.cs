@@ -69,7 +69,7 @@ public sealed class Session : AggregateRoot<SessionId>
     /// 刷新令牌或模拟会话到期时间
     /// </summary>
     /// <remarks>
-    /// 普通会话随刷新令牌续期；模拟会话没有刷新令牌，这里是会话到期时间
+    /// 模拟会话里是会话到期时间
     /// </remarks>
     public DateTimeOffset RefreshExpiresAt { get; private set; }
 
@@ -171,7 +171,7 @@ public sealed class Session : AggregateRoot<SessionId>
     /// 用刷新令牌换新令牌
     /// </summary>
     /// <remarks>
-    /// 宽限期内再次使用旧令牌按并发刷新处理；超出宽限期标记作废并返回重用，调用事务随后回滚时，要在独立事务里调 <see cref="RevokeIfReused" /> 重新核实
+    /// 超出宽限期重用旧令牌会作废会话
     /// </remarks>
     public Rotation Rotate(string presentedHash, string newHash, DateTimeOffset now, TimeSpan refreshLifetime, TimeSpan grace)
     {
@@ -210,11 +210,8 @@ public sealed class Session : AggregateRoot<SessionId>
     }
 
     /// <summary>
-    /// 核实刷新令牌被重用后作废会话，在刷新命令回滚后的独立事务里调用
+    /// 核实刷新令牌被重用后作废会话
     /// </summary>
-    /// <remarks>
-    /// 只在会话仍可用、旧令牌已使用且超过宽限期时作废
-    /// </remarks>
     /// <returns>本次作废会话时返回 true，否则返回 false</returns>
     public bool RevokeIfReused(string presentedHash, DateTimeOffset now, TimeSpan grace)
     {
