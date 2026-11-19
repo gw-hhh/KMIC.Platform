@@ -5,9 +5,6 @@ namespace Kmic.BuildingBlocks.Analyzers.Common;
 /// <summary>
 /// 框架类型的元数据名
 /// </summary>
-/// <remarks>
-/// 分析器按名称识别框架类型，不引用框架程序集
-/// </remarks>
 internal static class KnownTypes
 {
     public const string Error = "Kmic.BuildingBlocks.Domain.Results.Error";

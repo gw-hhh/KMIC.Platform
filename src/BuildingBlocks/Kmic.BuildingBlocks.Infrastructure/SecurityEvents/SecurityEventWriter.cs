@@ -12,9 +12,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 /// <summary>
 /// 写安全事件：补全身份和时间，放进队列就返回
 /// </summary>
-/// <remarks>
-/// 不等待、不抛异常：写不进去只记日志，不能因为记录安全事件让原来的请求失败
-/// </remarks>
 internal sealed class SecurityEventWriter(
     IExecutionContext execution, TimeProvider time, SecurityEventQueue queue, FrameworkMetrics metrics, ILogger<SecurityEventWriter> logger) : ISecurityEventWriter
 {

@@ -3,11 +3,8 @@ using Kmic.BuildingBlocks.Contracts.References;
 namespace Kmic.BuildingBlocks.Application.Auditing;
 
 /// <summary>
-/// 解析业务历史里的操作人和角色
+/// 解析业务历史里的操作人和角色，由 Identity 实现
 /// </summary>
-/// <remarks>
-/// 由 Identity 实现。框架不能引用模块的契约，所以用这个接口取显示名
-/// </remarks>
 public interface IActorReferences
 {
     /// <summary>

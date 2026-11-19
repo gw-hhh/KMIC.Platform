@@ -6,9 +6,6 @@ namespace Kmic.BuildingBlocks.Presentation.Limits;
 /// <summary>
 /// 按端点声明的并发限制放行请求
 /// </summary>
-/// <remarks>
-/// 要放在路由和认证之后：按端点的元数据判断，重型接口按用户限制时要知道用户是谁
-/// </remarks>
 internal sealed class ConcurrencyLimitMiddleware(RequestDelegate next, ConcurrencyLimiters limiters)
 {
     public async Task InvokeAsync(HttpContext context)

@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 唤醒一个等待中的循环
 /// </summary>
 /// <remarks>
-/// 等待开始前就收到的唤醒不会丢：那次等待会立刻返回
+/// 等待开始前收到的唤醒不会丢
 /// </remarks>
 internal sealed class AsyncSignal
 {

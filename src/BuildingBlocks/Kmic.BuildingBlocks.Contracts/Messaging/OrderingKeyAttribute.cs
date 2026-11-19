@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Contracts.Messaging;
 /// 业务事实事件的顺序键
 /// </summary>
 /// <remarks>
-/// 声明了有序处理的订阅，同一个键的消息按发布顺序处理。快照事件不用标，默认按 SourceId
+/// 快照事件不用标，默认按 SourceId
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class OrderingKeyAttribute(string propertyName) : Attribute

@@ -17,7 +17,7 @@ public static class MessagingHarness
     /// 反复投递、处理，直到所有模块都没有可领取的消息
     /// </summary>
     /// <remarks>
-    /// 正在退避等待重试的消息不算，要测重试时自己把下次时间改到现在。先登记本宿主声明的路由
+    /// 退避等待中的消息不算，测重试时要自己把下次时间改到现在
     /// </remarks>
     /// <exception cref="InvalidOperationException">跑了很多轮还有新消息，订阅之间可能在互相触发</exception>
     public static async Task DrainAsync(this IServiceProvider services, CancellationToken ct = default)

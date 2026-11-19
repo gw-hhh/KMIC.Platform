@@ -40,9 +40,6 @@ public static class ObservabilityServiceCollectionExtensions
     /// <summary>
     /// 登记模块的积压量表，由积压采样器定期读取
     /// </summary>
-    /// <remarks>
-    /// 实现按单例注册；所在宿主未启用积压采样时不会被读取
-    /// </remarks>
     /// <typeparam name="T">量表的实现</typeparam>
     public static IServiceCollection AddKmicBacklogGauges<T>(this IServiceCollection services)
         where T : class, IBacklogGauges

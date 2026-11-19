@@ -3,13 +3,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Jobs;
 
 /// <summary>
-/// 一个模块的后台作业存储：只读汇总和请求取消，给 Operations 的管理视图用
+/// 一个模块的后台作业存储，给 Operations 的管理视图用
 /// </summary>
-/// <remarks>
-/// 作业行在各自模块的框架表里（和业务数据同一个事务提交），Operations 通过每个模块的这个存储遍历。
-/// 这与投递程序一样是框架基础设施的例外，不是 Operations 读取别的模块的业务数据：存储只暴露作业的状态，
-/// 看不到作业参数与检查点（参数里可能带筛选条件之类的业务内容）
-/// </remarks>
 public interface IModuleJobStore
 {
     /// <summary>

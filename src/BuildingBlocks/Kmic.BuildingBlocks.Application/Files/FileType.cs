@@ -3,10 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Files;
 /// <summary>
 /// 框架认识的文件类型编码：上传档案的白名单、文件元数据里的类型都用这些编码
 /// </summary>
-/// <remarks>
-/// 编码是常量，才能写进 <see cref="UploadProfileAttribute" /> 的参数。每种类型的扩展名、文件头签名与内容类型由框架维护
-/// （见 <see cref="FileTypes" />），业务不能自定义
-/// </remarks>
 public static class FileType
 {
     /// <summary>

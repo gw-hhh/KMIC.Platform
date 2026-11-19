@@ -5,10 +5,6 @@ namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 /// <summary>
 /// 模块路由组上的框架过滤器
 /// </summary>
-/// <remarks>
-/// 请求头 Idempotency-Key 交给管道里的幂等行为；幂等重放时在响应上加 Idempotent-Replayed。
-/// 状态码与首次相同，由命令的结果自然带出，这里只管头
-/// </remarks>
 internal sealed class ModuleEndpointFilter : IEndpointFilter
 {
     public const string IdempotencyKeyHeader = "Idempotency-Key";

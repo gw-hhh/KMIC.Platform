@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Files;
 /// 文件存储
 /// </summary>
 /// <remarks>
-/// 只有 Files 模块和框架基础设施能用。存储键和原始文件名无关，由文件 ID 生成，从不覆盖
+/// 只有 Files 模块和框架基础设施能用
 /// </remarks>
 public interface IFileStorage
 {
@@ -22,7 +22,7 @@ public interface IFileStorage
     /// 删除，对象不存在时不报错
     /// </summary>
     /// <remarks>
-    /// 开启版本控制的桶里只产生删除标记，旧版本保留到生命周期规则到期
+    /// 开启版本控制的桶里只产生删除标记
     /// </remarks>
     Task DeleteAsync(string key, CancellationToken ct);
 
@@ -30,8 +30,7 @@ public interface IFileStorage
     /// 对象是否存在
     /// </summary>
     /// <remarks>
-    /// 不给版本号时看当前对象，被删除标记覆盖的算不存在；给了版本号就看那个版本是否还在，
-    /// 对账用它区分“只是被删除标记覆盖、可以还原”和“版本也没了”。本地存储没有版本，忽略版本号
+    /// 给了版本号看那个版本，不给时被删除标记覆盖的算不存在
     /// </remarks>
     Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct);
 

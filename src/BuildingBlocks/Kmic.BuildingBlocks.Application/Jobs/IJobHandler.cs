@@ -6,8 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// 后台作业的处理器
 /// </summary>
 /// <remarks>
-/// 不在事务里执行，只编排：通过 ISender 发送查询和命令，每个命令照常经过完整管道、各自一个事务。
-/// 不注入 DbContext 和仓储。取消或失败时已经提交的批次保留
+/// 不在事务里执行，只通过 ISender 发查询和命令
 /// </remarks>
 public interface IJobHandler<in TJob>
     where TJob : IBackgroundJob

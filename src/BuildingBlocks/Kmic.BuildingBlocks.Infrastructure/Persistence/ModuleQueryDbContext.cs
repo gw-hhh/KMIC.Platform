@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模块查询上下文基类
+/// 模块查询上下文基类，不跟踪、不能保存
 /// </summary>
 /// <remarks>
-/// 默认不跟踪，不能保存。用读池的连接，查不到当前命令还没提交的修改，所以命令处理器不能注入它
+/// 查不到当前命令还没提交的修改，命令处理器不能注入它
 /// </remarks>
 public abstract class ModuleQueryDbContext : ModuleDbContext
 {

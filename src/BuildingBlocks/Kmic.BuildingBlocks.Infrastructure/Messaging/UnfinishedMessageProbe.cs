@@ -13,8 +13,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <see cref="IUnfinishedMessageProbe" /> 的实现：在当前命令的事务连接上查各模块的发件箱与收件箱
 /// </summary>
 /// <remarks>
-/// 同一个数据库里的不同 schema 可以用一个连接查，所以不另借连接，也就不会在连接池紧张时和自己的事务互相等。
-/// 先查全部发件箱再查全部收件箱，顺序见接口说明，不能打乱
+/// 先查全部发件箱再查全部收件箱，顺序不能打乱
 /// </remarks>
 internal sealed class UnfinishedMessageProbe(IExecutionContext execution, CommandTransaction transaction, ModuleWriteContexts contexts, ModuleFrameworkTables tables) : IUnfinishedMessageProbe
 {

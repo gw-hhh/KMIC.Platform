@@ -13,10 +13,6 @@ namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 /// <summary>
 /// 文档级的内容：Bearer 认证、错误响应的架构、匿名端点清单，以及给前端生成代码用的各种目录
 /// </summary>
-/// <remarks>
-/// 权限点、错误码、字典类型、智能枚举显示名、上传档案都作为文档级扩展输出，前端需要的后端契约
-/// 来自同一个构建产物。某个目录没有注册时输出空的，扩展的形状不随模块组成变化
-/// </remarks>
 internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
 {
     public const string BearerScheme = "Bearer";

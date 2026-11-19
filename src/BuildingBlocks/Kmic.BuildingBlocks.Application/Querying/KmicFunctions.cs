@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// 文本匹配函数
 /// </summary>
 /// <remarks>
-/// 模糊查询都用这里的函数，不用 Contains、StartsWith、ToLower。不区分英文大小写，term 里的 % _ \ 按普通字符处理，只能在数据库查询里用
+/// 只能在数据库查询里用，不区分英文大小写
 /// </remarks>
 public static class KmicFunctions
 {

@@ -9,8 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Modules;
 /// 模块的服务端注册类
 /// </summary>
 /// <remarks>
-/// 每个模块在 Infrastructure 里有一个，负责服务、数据、依赖、订阅和定时任务；端点由 Presentation 里的
-/// ModuleEndpoints 负责，宿主用 AddModule 把两者配对。处理器、校验器、EF 配置等自动发现，
 /// AddServices 里只写自动发现做不到的注册
 /// </remarks>
 public interface IModule
@@ -47,9 +45,6 @@ public interface IModule
     /// <summary>
     /// 注册只在 Worker 角色上运行的后台组件，如领取队列的循环
     /// </summary>
-    /// <remarks>
-    /// 宿主在本实例带 Worker 角色时才调用；只跑 Api 的实例不会有这些循环
-    /// </remarks>
     void AddWorkerServices(IServiceCollection services)
     {
     }

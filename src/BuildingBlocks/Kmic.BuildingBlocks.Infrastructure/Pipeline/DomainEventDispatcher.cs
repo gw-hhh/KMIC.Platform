@@ -10,9 +10,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// <summary>
 /// 领域事件分发
 /// </summary>
-/// <remarks>
-/// 依次执行事件的全部处理器，有一个失败就停止。领域事件不经过 Mediator，多个处理器之间不保证顺序
-/// </remarks>
 internal sealed class DomainEventDispatcher(IServiceProvider services)
 {
     private static readonly ConcurrentDictionary<Type, Func<IServiceProvider, IDomainEvent, CancellationToken, ValueTask<Result>>> _dispatchers = new();

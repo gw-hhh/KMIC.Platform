@@ -9,10 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// <see cref="IModuleMessageStore" /> 的实现：直接读写一个模块的发件箱与收件箱表
 /// </summary>
-/// <remarks>
-/// 读走读池，管理视图允许几百毫秒的复制延迟；写走事务池。所有写入都带“状态是死信”的条件，
-/// 与领取、处理的状态条件互不覆盖：处理完成要求处理中且令牌匹配，这里只改死信
-/// </remarks>
 internal sealed class ModuleMessageStore(string module, ModuleFrameworkTables tables, DataSources dataSources, SubscriptionCatalog catalog) : IModuleMessageStore
 {
     private const int MaxBlockedKeys = 500;

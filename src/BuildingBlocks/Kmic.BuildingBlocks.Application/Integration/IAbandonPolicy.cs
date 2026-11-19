@@ -4,13 +4,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Integration;
 
 /// <summary>
-/// 放弃一条死信之前的检查：由接收方模块为自己的消息注册
+/// 放弃死信前的检查，由接收方模块注册
 /// </summary>
 /// <remarks>
-/// 放弃意味着这条消息永远不会被处理。有些消息放弃了会留下半截状态：比如 Files 的 AttachFiles，
-/// 引用的文件还处于“可用”或“已解除”就放弃，文件会永远停在没有归属的状态，所以这时只能重试。
-/// 检查在接收方模块的作用域里执行（系统身份），可以查接收方自己的数据；返回失败就不改状态、把原因告诉运维。
-/// 没有注册检查的消息可以直接放弃
+/// 放弃后会留下半截状态的消息要注册
 /// </remarks>
 /// <typeparam name="TMessage">被放弃的消息类型，通常是请求型消息</typeparam>
 public interface IAbandonPolicy<in TMessage>

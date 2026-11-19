@@ -12,8 +12,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 监听数据库通知，唤醒投递和处理循环
 /// </summary>
 /// <remarks>
-/// 每个进程一个监听连接，跑在专用线程上，用同步的 Wait(超时)：Windows 上 Npgsql 的 WaitAsync 不响应超时，
-/// 兜底轮询会失效，本机行为就和生产不一样了。升级 Npgsql 时复查，修好后可以改回异步写法
+/// 用同步 Wait：Windows 上 Npgsql 的 WaitAsync 不响应超时，升级 Npgsql 时复查
 /// </remarks>
 internal sealed class MessagingListener(
     IOptions<DatabaseOptions> database,

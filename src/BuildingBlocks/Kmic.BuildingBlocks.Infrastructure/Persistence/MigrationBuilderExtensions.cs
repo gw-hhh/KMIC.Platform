@@ -8,18 +8,15 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 public static class MigrationBuilderExtensions
 {
     /// <summary>
-    /// 运行账号的组角色
+    /// 运行账号的组角色，实际登录的账号是它的成员
     /// </summary>
-    /// <remarks>
-    /// 实际登录的账号是它的成员，迁移脚本里就不会出现和环境有关的账号名
-    /// </remarks>
     public const string RuntimeRole = "kmic_runtime";
 
     /// <summary>
     /// 建立模块 schema 并授权给运行账号
     /// </summary>
     /// <remarks>
-    /// 写在模块初始迁移的最前面。之后建的表运行账号自动可读写，但不能改表结构；迁移历史表只可读
+    /// 写在模块初始迁移的最前面
     /// </remarks>
     public static void InitializeModuleSchema(this MigrationBuilder migrationBuilder, string schema)
     {

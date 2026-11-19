@@ -10,9 +10,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 /// <summary>
 /// 宿主启动时按顺序执行全部启动任务
 /// </summary>
-/// <remarks>
-/// 在宿主启动阶段执行，失败时抛出，宿主启动失败、进程退出，不会出现“初始化一半就接收请求”
-/// </remarks>
 internal sealed class StartupTaskRunner(
     IExecutionScopeFactory scopes,
     StartupState state,

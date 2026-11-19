@@ -11,9 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 框架的模型约定
 /// </summary>
-/// <remarks>
-/// 在模块配置之后统一加上：审计列、软删除、并发版本号、删除规则、值对象列名、编码列的检查约束
-/// </remarks>
 internal static class ModelConventions
 {
     private static readonly string _notDeleted = $"\"{SoftDeleteColumns.IsDeleted}\" = false";

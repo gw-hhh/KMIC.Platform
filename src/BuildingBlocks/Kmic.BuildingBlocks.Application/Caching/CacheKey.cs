@@ -4,10 +4,10 @@ using System.Text;
 namespace Kmic.BuildingBlocks.Application.Caching;
 
 /// <summary>
-/// 缓存键
+/// 缓存键，格式是“模块:对象:标识”
 /// </summary>
 /// <remarks>
-/// 格式为“模块:对象:标识”，只在各模块的 XxxCacheKeys 类里调用
+/// 只在各模块的 XxxCacheKeys 类里调用
 /// </remarks>
 public static class CacheKey
 {
@@ -33,10 +33,10 @@ public static class CacheKey
     }
 
     /// <summary>
-    /// 缓存键的类别，即前两段“模块:对象”，不足两段时返回整个键
+    /// 缓存键的类别，即前两段“模块:对象”
     /// </summary>
     /// <remarks>
-    /// 用作指标维度，所以标识要放在第三段以后，否则维度取值会无限增长
+    /// 标识放在第三段以后，否则指标维度会失控
     /// </remarks>
     public static string CategoryOf(string key)
     {

@@ -33,8 +33,7 @@ public static class ServiceDefaultsExtensions
     /// 配置日志、追踪与指标
     /// </summary>
     /// <remarks>
-    /// 默认输出控制台日志，按数据分类和敏感属性名脱敏；日志级别可通过 Serilog 配置覆盖。
-    /// 追踪遵循父级采样决定，无父级时全量采样。配置 OTEL_EXPORTER_OTLP_ENDPOINT 后导出日志、追踪和指标
+    /// 配了 OTEL_EXPORTER_OTLP_ENDPOINT 才导出
     /// </remarks>
     public static WebApplicationBuilder AddKmicServiceDefaults(this WebApplicationBuilder builder)
     {
@@ -54,10 +53,10 @@ public static class ServiceDefaultsExtensions
     }
 
     /// <summary>
-    /// 记录请求完成日志，只记路由模板，不记实际路径、查询串和请求体
+    /// 记录请求完成日志，只记路由模板
     /// </summary>
     /// <remarks>
-    /// 须在错误处理中间件之前注册，否则记不到 500 响应
+    /// 要在错误处理中间件之前注册
     /// </remarks>
     public static WebApplication UseKmicRequestLogging(this WebApplication app)
     {

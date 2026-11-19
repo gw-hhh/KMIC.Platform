@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 /// 安全事件表
 /// </summary>
 /// <remarks>
-/// 表属于 Identity 模块，由它的迁移执行这里的建表语句；框架的写入器直接插入。只追加：运行账号改不了、删不了
+/// 表属于 Identity 模块，由它的迁移执行这里的建表语句
 /// </remarks>
 public static class SecurityEventTable
 {

@@ -72,7 +72,7 @@ public static class PresentationServiceCollectionExtensions
     /// 限流、并发限制和请求超时
     /// </summary>
     /// <remarks>
-    /// 放在路由和认证之后、授权之前：限流和并发限制要按端点的声明和登录的用户判断，授权失败的请求也要计数
+    /// 放在路由和认证之后、授权之前
     /// </remarks>
     public static IApplicationBuilder UseKmicLimits(this IApplicationBuilder app)
     {

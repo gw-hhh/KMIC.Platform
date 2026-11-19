@@ -3,12 +3,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
 /// <summary>
-/// 依赖状态端点：数据库、监听连接、调度器、文件存储等全部依赖的详细状态
+/// 依赖状态端点，只接受直接来自内网的请求
 /// </summary>
-/// <remarks>
-/// 给运维和监控用，只接受直接来自内网的请求，其他来源一律 404，不暴露这个端点存在。
-/// 响应里只有检查自己写的说明，异常内容（可能带地址、账号）不输出；整体不可用返回 503，降级仍是 200
-/// </remarks>
 internal static class DependencyEndpoint
 {
     public const string Path = "/health/dependencies";

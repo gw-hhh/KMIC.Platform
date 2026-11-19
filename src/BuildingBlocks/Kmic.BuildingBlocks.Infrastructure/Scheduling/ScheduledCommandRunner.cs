@@ -15,9 +15,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// <summary>
 /// 执行一次定时任务，前后写执行记录
 /// </summary>
-/// <remarks>
-/// 模块的任务以系统身份发送命令；框架任务直接执行
-/// </remarks>
 internal sealed class ScheduledCommandRunner(
     ScheduledTasks tasks, ScheduledJobRuns runs, IExecutionScopeFactory scopes, FrameworkMetrics metrics, ILogger<ScheduledCommandRunner> logger)
 {

@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 幂等记录
 /// </summary>
-/// <remarks>
-/// 只用来建表，读写都是框架里的 SQL
-/// </remarks>
 internal sealed class IdempotencyRecord
 {
     /// <summary>

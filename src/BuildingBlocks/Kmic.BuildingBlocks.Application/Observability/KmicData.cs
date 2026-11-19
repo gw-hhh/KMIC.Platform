@@ -3,11 +3,10 @@ using Microsoft.Extensions.Compliance.Classification;
 namespace Kmic.BuildingBlocks.Application.Observability;
 
 /// <summary>
-/// 数据分类：同一个字段在日志与审计里按同一套规则处理
+/// 数据分类：日志与审计按同一套规则处理
 /// </summary>
 /// <remarks>
-/// 脱敏的依据是“数据是什么”的声明，不是对文本内容的猜测。没有声明的数据按 Internal 处理，原样输出，
-/// 所以手机号、令牌这类数据必须声明
+/// 没声明的按 Internal 原样输出，手机号、令牌这类必须声明
 /// </remarks>
 public static class KmicData
 {

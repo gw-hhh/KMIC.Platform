@@ -13,11 +13,8 @@ public sealed class KmicHostBuilder
     internal IReadOnlyList<HostModule> Modules => _modules;
 
     /// <summary>
-    /// 注册一个模块：Infrastructure 里的服务端注册类，和 Presentation 里的端点注册类
+    /// 注册一个模块：服务端注册类和端点注册类
     /// </summary>
-    /// <remarks>
-    /// 两个类的模块名必须一致，启动时校验。每个模块在宿主里显式注册一次
-    /// </remarks>
     /// <typeparam name="TModule">服务端注册类</typeparam>
     /// <typeparam name="TEndpoints">端点注册类</typeparam>
     public KmicHostBuilder AddModule<TModule, TEndpoints>(KmicEnvironments onlyIn = KmicEnvironments.Any)

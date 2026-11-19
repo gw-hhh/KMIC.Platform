@@ -7,11 +7,8 @@ using Kmic.BuildingBlocks.Contracts.Files;
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
 /// <summary>
-/// 用例目录
+/// 用例目录，声明缺失或冲突时拒绝启动
 /// </summary>
-/// <remarks>
-/// 声明缺失或冲突时拒绝启动，不会因为漏写授权就默认放行
-/// </remarks>
 public sealed class UseCaseCatalog
 {
     private readonly FrozenDictionary<Type, UseCase> _byType;

@@ -9,9 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// <summary>
 /// 写执行记录
 /// </summary>
-/// <remarks>
-/// 开始和结束各用一个独立的短事务，不放进命令的事务：命令回滚了，失败的记录也要留下
-/// </remarks>
 internal sealed class ScheduledJobRuns(DataSources dataSources)
 {
     private NpgsqlDataSource Database => dataSources.Transactions(CallOrigin.ScheduledJob);

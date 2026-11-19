@@ -9,13 +9,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.BuildingBlocks.Application.Querying;
 
 /// <summary>
-/// 游标分页：按“排序键 + ID”的键集往后翻，不数总数，翻页不受并发插入影响
+/// 游标分页：按“排序键 + ID”往后翻，不数总数
 /// </summary>
-/// <remarks>
-/// 每个游标列表固定一种排序，不接受调用方指定。排序键支持时间（DateTimeOffset、DateTime）与整数（int、long），
-/// 排序键相同时按 ID 排，所以结果稳定。游标无效或被改过、数量超出范围返回校验错误。
-/// 列表项的 ID 用强类型 ID（Vogen 生成的，带 From(Guid) 与 CompareTo）；原生 SQL 映射的只读行没有强类型 ID，直接用 Guid
-/// </remarks>
 public static class CursorQueryableExtensions
 {
     /// <summary>

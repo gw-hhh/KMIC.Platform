@@ -8,8 +8,7 @@ namespace Kmic.BuildingBlocks.Application.Observability;
 /// 框架指标
 /// </summary>
 /// <remarks>
-/// 通过 IMeterFactory 创建，名称 kmic.{领域}.{名称}，时长用秒。维度只能是有限取值（模块、消息名、订阅名、任务名、
-/// 结果、错误码、渠道、上传档案、缓存类别），不能放用户 ID、资源 ID、追踪 ID 这类取值无限的内容，否则指标的序列数会失控
+/// 维度只能是有限取值，不能放用户 ID、资源 ID 这类
 /// </remarks>
 public sealed class FrameworkMetrics
 {
@@ -196,9 +195,7 @@ public sealed class FrameworkMetrics
     /// 登记积压量表的数据来源，只能登记一次
     /// </summary>
     /// <remarks>
-    /// 量表的回调在指标读取线程上执行，不能查库，所以由后台采样器把结果放在内存里，这里只读。
-    /// 返回 null 表示还没有可信的数据（刚启动，或采样连续失败后数据已经过期），这时不输出任何数值，
-    /// 比输出过期的数字更不容易误导告警
+    /// 回调返回 null 表示还没有可信数据，这时不输出数值
     /// </remarks>
     public void ObserveBacklog(Func<BacklogSnapshot?> read)
     {

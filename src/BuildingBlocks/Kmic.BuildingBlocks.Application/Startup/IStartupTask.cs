@@ -3,11 +3,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Startup;
 
 /// <summary>
-/// 启动任务
+/// 启动任务，每个实例启动时按顺序执行
 /// </summary>
 /// <remarks>
-/// 每个实例启动时按顺序执行，全部成功后才接收请求、开始后台处理；任一失败进程就退出。
-/// 多个实例会同时执行，任务自己要幂等，并用 pg_advisory_xact_lock 保证只有一个实例真正写入
+/// 多个实例会同时执行，任务要幂等
 /// </remarks>
 public interface IStartupTask
 {

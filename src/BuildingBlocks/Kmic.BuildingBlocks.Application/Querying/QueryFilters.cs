@@ -9,7 +9,7 @@ public static class QueryFilters
     /// 软删除
     /// </summary>
     /// <remarks>
-    /// 回收站用 IgnoreQueryFilters([QueryFilters.SoftDelete]) 只关掉它，数据权限仍然生效
+    /// 回收站用 IgnoreQueryFilters([QueryFilters.SoftDelete]) 只关掉它
     /// </remarks>
     public const string SoftDelete = nameof(SoftDelete);
 

@@ -3,13 +3,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
 /// <summary>
-/// 定时任务的运行控制：看调度库里的状态、把运维改过的开关与时间同步到触发器、马上执行一次
+/// 定时任务的运行控制，给 Operations 的管理命令用
 /// </summary>
-/// <remarks>
-/// 给 Operations 模块的管理命令用，其他模块不需要。Api 角色的调度器处于待机，也能用：
-/// 改动写进共享的调度表，由运行着 Worker 的实例执行。运维改的开关与时间存在 Operations 的设置表里，
-/// 这里只负责读它并同步，不负责写
-/// </remarks>
 public interface IScheduledJobControl
 {
     /// <summary>

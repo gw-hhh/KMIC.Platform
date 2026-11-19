@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// 定时任务用到的表
 /// </summary>
 /// <remarks>
-/// 表都属于 Operations 模块，由它的迁移建立；调度器、同步和执行记录直接读写
+/// 表属于 Operations 模块，由它的迁移建立
 /// </remarks>
 public static class SchedulingTables
 {
@@ -69,8 +69,7 @@ public static class SchedulingTables
     /// Quartz 自带的 PostgreSQL 建表语句，换上本系统的表名前缀
     /// </summary>
     /// <remarks>
-    /// 语句都是 IF NOT EXISTS，重复执行没有影响。做 Operations 模块的迁移时要把这段 SQL 原样写进去，
-    /// 不在迁移里读程序集资源：迁移必须固定不变，升级 Quartz 时另写迁移补列
+    /// Operations 的迁移里原样写这段 SQL，不在迁移里读程序集资源
     /// </remarks>
     public static string QuartzCreateSql()
     {

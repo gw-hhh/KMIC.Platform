@@ -9,8 +9,7 @@ public static class NoStoreExtensions
     /// 响应带 <c>Cache-Control: no-store</c>，成功和失败都带
     /// </summary>
     /// <remarks>
-    /// 用在响应体里有令牌、一次性临时密码这类凭据的端点上（登录、刷新、切换角色、重置密码）。
-    /// 访问令牌的规范（RFC 6749）要求这样做；浏览器的“后退”和共享代理也不应该留下这些响应
+    /// 响应体里有令牌、临时密码这类凭据的端点要用
     /// </remarks>
     public static TBuilder NoStore<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder

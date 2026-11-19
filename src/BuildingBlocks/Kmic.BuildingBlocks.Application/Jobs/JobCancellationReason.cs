@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// <summary>
 /// 作业被取消的原因
 /// </summary>
-/// <remarks>
-/// 停机时可续跑的作业可以先保存检查点；其余原因直接结束即可
-/// </remarks>
 public enum JobCancellationReason
 {
     /// <summary>

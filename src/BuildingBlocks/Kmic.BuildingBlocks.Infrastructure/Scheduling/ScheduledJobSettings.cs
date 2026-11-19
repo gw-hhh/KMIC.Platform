@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
 /// <summary>
-/// 读定时任务的覆盖值
+/// 读定时任务的覆盖值，写入由 Operations 负责
 /// </summary>
-/// <remarks>
-/// 写入由 Operations 模块的管理命令负责，框架只读
-/// </remarks>
 internal sealed class ScheduledJobSettings(DataSources dataSources)
 {
     public async Task<IReadOnlyDictionary<string, ScheduledJobSetting>> ReadAsync(CancellationToken ct)

@@ -6,8 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// 提交后台作业
 /// </summary>
 /// <remarks>
-/// 只能在命令里调用，作业要属于命令所在的模块。作业和业务数据在同一个事务里提交，命令失败就没有这个作业。
-/// 提交人、当前角色取自执行上下文
+/// 只能在命令里调用，和业务数据同一个事务提交
 /// </remarks>
 public interface IBackgroundJobs
 {

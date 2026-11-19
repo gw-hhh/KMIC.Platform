@@ -1,11 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
 /// <summary>
-/// 一个模块的消息存储：读写本模块的发件箱与收件箱，给 Operations 的管理视图用
+/// 一个模块的发件箱和收件箱，给 Operations 的管理视图用
 /// </summary>
 /// <remarks>
-/// 发件箱与收件箱表在各自模块的 schema 里，Operations 通过每个模块的这个存储遍历。这与投递程序一样是框架基础设施的例外，
-/// 不是 Operations 读取别的模块的业务数据。所有写入都带状态条件：只改死信，已经处理完、正在处理的行不会被碰
+/// 写入都要带状态条件，只改死信
 /// </remarks>
 public interface IModuleMessageStore
 {

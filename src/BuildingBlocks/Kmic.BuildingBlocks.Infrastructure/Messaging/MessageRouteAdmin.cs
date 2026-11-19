@@ -11,10 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// <see cref="IMessageRouteAdmin"/> 的实现
 /// </summary>
-/// <remarks>
-/// 一个事务里先取登记路由用的同一把咨询锁（和实例启动时的登记、别的运维操作排队），再锁住路由行，
-/// 检查之后才改。路由表和订阅方的收件箱在同一个数据库里，所以能放进同一个事务
-/// </remarks>
 internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFrameworkTables tables, TimeProvider time) : IMessageRouteAdmin
 {
     private static readonly JsonSerializerOptions _probeOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };

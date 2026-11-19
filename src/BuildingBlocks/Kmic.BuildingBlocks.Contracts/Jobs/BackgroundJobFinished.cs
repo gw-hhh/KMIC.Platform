@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Contracts.Jobs;
 /// 用户提交的后台作业已结束
 /// </summary>
 /// <remarks>
-/// 和作业结果在同一个事务里发布；系统提交的作业不发布
+/// 系统提交的作业不发布
 /// </remarks>
 [IntegrationMessage("Framework.BackgroundJobFinished")]
 public sealed record BackgroundJobFinished : IIntegrationEvent

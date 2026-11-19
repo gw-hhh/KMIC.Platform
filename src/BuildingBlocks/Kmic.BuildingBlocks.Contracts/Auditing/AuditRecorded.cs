@@ -5,9 +5,6 @@ namespace Kmic.BuildingBlocks.Contracts.Auditing;
 /// <summary>
 /// 审计记录
 /// </summary>
-/// <remarks>
-/// 框架不能引用 Operations 模块，所以定义在这里
-/// </remarks>
 [IntegrationMessage("Framework.AuditRecorded")]
 public sealed record AuditRecorded : IIntegrationEvent
 {

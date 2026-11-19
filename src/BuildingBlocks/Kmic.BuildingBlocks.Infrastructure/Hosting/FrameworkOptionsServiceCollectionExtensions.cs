@@ -20,11 +20,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 public static class FrameworkOptionsServiceCollectionExtensions
 {
     /// <summary>
-    /// 框架自己的配置类逐个绑定到各自的配置节（Kmic:Jobs、Kmic:Messaging 等），由宿主调用
+    /// 把框架的配置类绑定到各自的配置节，由宿主调用
     /// </summary>
     /// <remarks>
-    /// 各个 AddKmic… 只注册默认值，不读配置：它们也要在没有配置系统的测试里使用。
-    /// 宿主调用这个方法之后，部署时才能用配置文件或环境变量改这些值
+    /// 不调用它，部署配置就改不了框架参数
     /// </remarks>
     public static IServiceCollection AddKmicFrameworkOptions(this IServiceCollection services)
     {

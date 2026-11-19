@@ -5,11 +5,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
 /// <summary>
-/// 资源动作目录
+/// 资源动作目录，只返回当前用户能执行的动作
 /// </summary>
-/// <remarks>
-/// 有权限点、资源策略允许、状态检查通过，三项都满足的动作才会返回
-/// </remarks>
 public abstract class ResourceActionCatalog<TResource, TAction> : IResourceActionCatalog
     where TAction : notnull
 {

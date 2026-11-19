@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
 /// <summary>
-/// 后台作业
+/// 后台作业表的实体，只用来建表和提交
 /// </summary>
-/// <remarks>
-/// 只用来建表和提交，领取、执行、结果写入都是框架里的 SQL
-/// </remarks>
 internal sealed class BackgroundJobRecord
 {
     /// <summary>

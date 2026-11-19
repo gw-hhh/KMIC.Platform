@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 保存入口控制
+/// 保存入口控制，只有命令事务打开后才能保存
 /// </summary>
-/// <remarks>
-/// 只有命令事务打开它之后才能保存，处理器自己调用 SaveChangesAsync 会抛异常
-/// </remarks>
 public sealed class SaveChangesGate
 {
     private int _openCount;

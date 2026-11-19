@@ -3,12 +3,8 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
 /// <summary>
-/// 只追加表的过期数据清理
+/// 只追加表的过期数据清理，由迁移账号执行
 /// </summary>
-/// <remarks>
-/// 审计日志、安全事件对运行账号只有 INSERT 和 SELECT，过期数据只能由迁移账号的维护命令删除。
-/// 保留期由运维在命令里给出，这里没有默认值
-/// </remarks>
 public static class AppendOnlyPurge
 {
     /// <summary>

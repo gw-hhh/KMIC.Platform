@@ -12,11 +12,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 /// <summary>
 /// 把队列里的安全事件批量写进数据库
 /// </summary>
-/// <remarks>
-/// 用后台数据源的独立连接，不占请求的事务连接，也不随业务事务回滚。每秒或攒够一批就写一次；
-/// 停机只打断等待，已经从队列里取出的一批要写完，队列里剩下的也在退出前写完。
-/// 数据库暂时写不进去就重试几次，仍然失败的丢弃并记错误日志
-/// </remarks>
 internal sealed class SecurityEventFlusher(
     SecurityEventQueue queue,
     DataSources dataSources,

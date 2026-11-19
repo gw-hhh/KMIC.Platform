@@ -16,7 +16,7 @@ public static class OpenApiOptionsExtensions
     /// 加入框架的文档约定：强类型 ID、智能枚举、错误响应、用例声明、目录导出
     /// </summary>
     /// <remarks>
-    /// 由宿主在 AddOpenApi 里调用：XML 注释要在调用 AddOpenApi 的项目里才会被读取，所以框架不替宿主调用它
+    /// 要由宿主在 AddOpenApi 里调用，否则读不到 XML 注释
     /// </remarks>
     public static OpenApiOptions AddKmicConventions(this OpenApiOptions options)
     {

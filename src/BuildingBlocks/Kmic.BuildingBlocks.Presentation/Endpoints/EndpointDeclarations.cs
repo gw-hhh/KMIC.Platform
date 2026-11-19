@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 /// <summary>
 /// 端点声明的启动校验
 /// </summary>
-/// <remarks>
-/// 问题汇总后一次报出，任何一条都拒绝启动：漏写的声明不会变成运行时才发现的“接口不存在”或“授权不一致”
-/// </remarks>
 internal static partial class EndpointDeclarations
 {
     // 允许匿名的消息和端点只能在认证模块里

@@ -9,11 +9,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Kmic.BuildingBlocks.Analyzers.Generators;
 
 /// <summary>
-/// 实体列注释生成器
+/// 实体列注释生成器：把属性的 summary 编译进程序集
 /// </summary>
-/// <remarks>
-/// 把实体属性的 summary 编译进程序集，建模时写成数据库列注释。不在运行时读 .xml 文件，部署漏了它，模型就会和迁移快照对不上
-/// </remarks>
 [Generator(LanguageNames.CSharp)]
 public sealed class EntityCommentGenerator : IIncrementalGenerator
 {

@@ -9,10 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Files;
 /// <summary>
 /// S3 兼容的对象存储，生产是阿里云 OSS，开发和测试是 MinIO
 /// </summary>
-/// <remarks>
-/// 完整性校验只在 SDK 认为必需时才做：兼容存储不支持新版 SDK 默认附带的校验头。
-/// 写入按分段上传，不把整个文件读进内存；桶开启版本控制时，写入返回对象的版本号
-/// </remarks>
 public sealed class S3FileStorage : IFileStorage, IDisposable
 {
     private readonly AmazonS3Client _client;

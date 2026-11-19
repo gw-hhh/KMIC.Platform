@@ -13,10 +13,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// 定期登记本实例的心跳：构建号、角色、声明的订阅
 /// </summary>
-/// <remarks>
-/// Api 和 Worker 都登记，都会声明订阅。数据库暂时连不上时记一条警告，下一个间隔再试；
-/// 等启动任务做完才开始，Operations 的表才一定存在
-/// </remarks>
 internal sealed class InstanceHeartbeat(
     SubscriptionCatalog subscriptions,
     DataSources dataSources,

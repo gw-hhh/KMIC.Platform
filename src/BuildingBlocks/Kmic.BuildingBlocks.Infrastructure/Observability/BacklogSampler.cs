@@ -17,11 +17,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 /// <summary>
 /// 定期统计消息、作业、定时任务的积压，并读取模块登记的积压量表
 /// </summary>
-/// <remarks>
-/// 每个实例都采样，Api 和 Worker 一样：没有任何实例在跑 Worker 时，积压变老的数字要靠 Api 实例报出来。
-/// 查询走后台池，每个模块几条带过滤条件的聚合，只读还没完成的行。
-/// 没有积压的订阅也输出 0，看板上才分得清“没有积压”和“没在采样”；作业类型只在有排队时才有数据
-/// </remarks>
 internal sealed class BacklogSampler : BackgroundService
 {
     private const int FreshIntervals = 3;

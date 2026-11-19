@@ -16,9 +16,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 仓储基类
 /// </summary>
-/// <remarks>
-/// 不存在、已删除或没有权限时都返回 NotFound；没有权限的情况另外记安全事件
-/// </remarks>
 public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) : IRepository<TAggregate, TId>
     where TContext : ModuleDbContext
     where TAggregate : AggregateRoot<TId>
@@ -75,7 +72,7 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
     /// 恢复已删除的数据
     /// </summary>
     /// <remarks>
-    /// 数据权限照常生效。模块仓储接口要恢复功能时，声明同名方法即可
+    /// 模块仓储接口要恢复功能时声明同名方法即可
     /// </remarks>
     /// <exception cref="InvalidOperationException">不支持软删除</exception>
     public async Task<Result<TAggregate>> RestoreAsync(TId id, long? expectedVersion, CancellationToken ct)
@@ -110,11 +107,10 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
     protected virtual IQueryable<TAggregate> Aggregate(IQueryable<TAggregate> set) => set;
 
     /// <summary>
-    /// 按条件直接更新
+    /// 按条件直接更新，返回更新的行数
     /// </summary>
     /// <remarks>
-    /// 用于计数、扣减额度这类单表操作，返回更新的行数。不经过变更跟踪，修改人、修改时间和版本号照常更新，过滤器照常生效。
-    /// 同一个命令里不要再通过仓储读取并修改同一条数据，否则跟踪的实体是旧值
+    /// 同一个命令里不要再经仓储读取并修改同一条数据，跟踪的实体是旧值
     /// </remarks>
     /// <exception cref="InvalidOperationException">不在事务里</exception>
     protected async Task<int> UpdateWhereAsync(

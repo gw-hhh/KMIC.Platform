@@ -16,10 +16,7 @@ public interface IModuleMessageStores
     IModuleMessageStore? Find(string module);
 
     /// <summary>
-    /// 处于“待终结”的订阅：订阅已经从代码里去掉，消息照常投递并积压，等运维确认终结
+    /// 待终结的订阅
     /// </summary>
-    /// <remarks>
-    /// 它们的积压是预期内的，不计入通用的积压告警，管理视图单独列出
-    /// </remarks>
     Task<IReadOnlySet<string>> GetRetiringSubscriptionsAsync(CancellationToken ct);
 }

@@ -8,9 +8,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 单值值对象转换器
 /// </summary>
-/// <remarks>
-/// 读取时调用私有构造函数，不走工厂方法的校验：规则收紧后，旧数据仍然能读出来再修正
-/// </remarks>
 internal sealed class SingleValueConverter<TObject, TValue>() : ValueConverter<TObject, TValue>(_toProvider, _fromProvider)
     where TObject : class, ISingleValueObject<TValue>
 {

@@ -9,8 +9,7 @@ namespace Kmic.BuildingBlocks.Testing.Storage;
 /// 测试用的 MinIO 容器，S3 存储的测试共用
 /// </summary>
 /// <remarks>
-/// 以 root 运行：镜像默认的非 root 用户写不了容器里的数据目录。镜像默认用 kmic/minio:RELEASE.2025-10-15T17-29-55Z，换镜像（如内部仓库的地址）设环境变量 KMIC_TEST_MINIO_IMAGE。
-/// 每个测试类建自己的桶，互不影响。容器随这个固定装置创建和销毁
+/// 换镜像设环境变量 KMIC_TEST_MINIO_IMAGE
 /// </remarks>
 public sealed class MinioFixture : IAsyncLifetime
 {

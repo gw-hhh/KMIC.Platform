@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 模块上下文依赖的框架服务
 /// </summary>
-/// <remarks>
-/// 合成一个参数，模块上下文的构造函数就不用逐个列出
-/// </remarks>
 public sealed class ModuleDbContextServices(
     IExecutionContext execution,
     IDataScope dataScope,

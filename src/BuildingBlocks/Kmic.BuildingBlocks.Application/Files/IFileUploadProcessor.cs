@@ -4,9 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Files;
 /// 处理上传的文件流
 /// </summary>
 /// <remarks>
-/// 识别文件类型、校验大小并计算 SHA-256，文件内容流式写入对象存储。
-/// 不将整个文件读入内存，也不保存到本地临时文件。
-/// 写入存储期间不持有数据库事务，调用方在写入前后分别用短事务登记文件状态
+/// 不持有数据库事务，调用方前后各用短事务登记文件状态
 /// </remarks>
 public interface IFileUploadProcessor
 {

@@ -11,10 +11,6 @@ namespace Kmic.ServiceDefaults;
 /// <summary>
 /// 按数据分类脱敏日志属性
 /// </summary>
-/// <remarks>
-/// 禁止通过 {@对象} 记录整个对象；此策略对已标注属性补充脱敏。
-/// 未标注类型交由 Serilog 默认解构，不追加属性转换
-/// </remarks>
 internal sealed class ClassifiedDestructuringPolicy : IDestructuringPolicy
 {
     private static readonly ConcurrentDictionary<Type, ClassifiedType?> _types = new();

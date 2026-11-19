@@ -9,7 +9,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// 幂等记录读写
 /// </summary>
 /// <remarks>
-/// 每条改写都带上状态和令牌条件。否则提交其实成功了、只是确认没传回来，失败处理会把已完成的记录删掉，客户端一重试就会再执行一遍
+/// 每条改写都要带状态和令牌条件
 /// </remarks>
 internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table)
 {

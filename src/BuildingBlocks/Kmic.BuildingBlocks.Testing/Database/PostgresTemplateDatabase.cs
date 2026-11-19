@@ -5,11 +5,10 @@ using Xunit;
 namespace Kmic.BuildingBlocks.Testing.Database;
 
 /// <summary>
-/// 模板数据库
+/// 模板数据库：程序集级夹具，启动容器并建好模板库
 /// </summary>
 /// <remarks>
-/// 程序集级夹具：启动 PostgreSQL 容器并建好模板库。测试项目派生一个类实现 InitializeTemplateAsync，用 [assembly: AssemblyFixture(typeof(派生类))] 注册，
-/// 测试类再通过 IClassFixture&lt;ClassDatabase&lt;派生类&gt;&gt; 拿到克隆库
+/// 派生类用 [assembly: AssemblyFixture(typeof(派生类))] 注册
 /// </remarks>
 public abstract class PostgresTemplateDatabase : IAsyncLifetime
 {
@@ -58,11 +57,8 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
     }
 
     /// <summary>
-    /// 建一个没有任何结构的空库，返回库名
+    /// 建一个空库并返回库名，用来测试迁移本身
     /// </summary>
-    /// <remarks>
-    /// 用来测试迁移本身。角色属于整个实例，空库里同样能用
-    /// </remarks>
     public async Task<string> CreateEmptyAsync(CancellationToken ct)
     {
         var database = $"test_{Guid.CreateVersion7():N}";

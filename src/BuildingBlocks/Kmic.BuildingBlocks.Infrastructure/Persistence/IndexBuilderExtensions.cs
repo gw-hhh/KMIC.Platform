@@ -9,10 +9,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 public static class IndexBuilderExtensions
 {
     /// <summary>
-    /// 重复时返回的错误
+    /// 唯一索引重复时返回的错误
     /// </summary>
     /// <remarks>
-    /// 业务表的唯一索引都要指定，否则模型校验不通过
+    /// 业务表的唯一索引都要指定
     /// </remarks>
     /// <exception cref="InvalidOperationException">不是唯一索引</exception>
     public static IndexBuilder<TEntity> MapsToError<TEntity>(this IndexBuilder<TEntity> builder, Error error)

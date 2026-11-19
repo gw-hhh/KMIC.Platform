@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Application.Observability;
 /// <summary>
 /// 部分遮盖：保留能认出来的头尾，中间换成星号
 /// </summary>
-/// <remarks>
-/// 审计记录和日志用同一套规则，同一个手机号在两处看到的一样
-/// </remarks>
 public static class PartialMask
 {
     /// <summary>

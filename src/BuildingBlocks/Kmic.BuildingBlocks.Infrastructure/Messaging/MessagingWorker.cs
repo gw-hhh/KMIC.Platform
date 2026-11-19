@@ -11,9 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// Worker 角色里的投递与处理
 /// </summary>
-/// <remarks>
-/// 每个模块一个投递循环，有订阅的模块另有几个处理循环。没有可领取的消息时等数据库通知或兜底轮询
-/// </remarks>
 internal sealed class MessagingWorker(
     MessagingSignals signals,
     OutboxDispatcher dispatcher,

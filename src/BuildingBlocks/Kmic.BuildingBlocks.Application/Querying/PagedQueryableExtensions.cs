@@ -12,9 +12,6 @@ public static class PagedQueryableExtensions
     /// <summary>
     /// 排序、计数、分页，精确计数
     /// </summary>
-    /// <remarks>
-    /// 调用时查询已经带了数据范围过滤和业务筛选，并投影成了列表项。参数不合法返回校验错误，页码超过末页返回空列表
-    /// </remarks>
     public static Task<Result<PagedResult<T>>> ToPagedAsync<T>(
         this IQueryable<T> query, PageRequest page, SortRequest sort, SortMap<T> sortMap, CancellationToken ct) =>
         query.ToPagedAsync(page, sort, sortMap, CountMode.Exact, ct);
@@ -22,9 +19,6 @@ public static class PagedQueryableExtensions
     /// <summary>
     /// 排序、计数、分页
     /// </summary>
-    /// <remarks>
-    /// 上限计数时最多数到上限加一行；超过上限就不再精确，此时请求超出上限范围的页返回 Common.PageOutOfRange
-    /// </remarks>
     public static async Task<Result<PagedResult<T>>> ToPagedAsync<T>(
         this IQueryable<T> query, PageRequest page, SortRequest sort, SortMap<T> sortMap, CountMode count, CancellationToken ct)
     {

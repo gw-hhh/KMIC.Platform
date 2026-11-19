@@ -4,8 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Files;
 /// 本地磁盘存储，开发和测试用
 /// </summary>
 /// <remarks>
-/// 根目录来自配置，不能放在站点目录里。存储键只允许由字母、数字、短横线、下划线和斜线组成的相对路径，
-/// 防止写到根目录之外。先写临时文件再改名，读的人不会看到写了一半的文件
+/// 根目录不能放在站点目录里
 /// </remarks>
 public sealed class LocalFileStorage(string root) : IFileStorage
 {

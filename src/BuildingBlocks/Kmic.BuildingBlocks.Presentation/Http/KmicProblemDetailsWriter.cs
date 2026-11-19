@@ -6,10 +6,6 @@ namespace Kmic.BuildingBlocks.Presentation.Http;
 /// <summary>
 /// ProblemDetails 的唯一写出方
 /// </summary>
-/// <remarks>
-/// 不看请求的 Accept：这是纯 JSON 接口，任何错误都用 application/problem+json 写出。
-/// 业务错误已经带齐扩展字段；中间件只设了状态码的，这里按状态码补成统一格式
-/// </remarks>
 internal sealed class KmicProblemDetailsWriter(IOptions<HttpJsonOptions> json) : IProblemDetailsWriter
 {
     private const string ContentType = "application/problem+json";

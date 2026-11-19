@@ -8,18 +8,13 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// 查询处理器按 ID 取单个对象
 /// </summary>
 /// <remarks>
-/// 不存在、已删除、在数据范围之外，对外都是同一个 NotFound，不让调用方探测别人的数据是否存在。
-/// 区别只在内部：因数据范围看不到时，另外记一条安全事件
+/// 不存在、已删除、在数据范围外都返回同一个 NotFound
 /// </remarks>
 public interface IEntityFinder
 {
     /// <summary>
     /// 取出 ID 对应的对象，取不到时返回 <paramref name="notFound" />
     /// </summary>
-    /// <remarks>
-    /// 只有取不到时才多查一次是否被数据范围挡住，正常路径没有额外开销。
-    /// 查询里的 Include 等写法照常生效，补查不受影响
-    /// </remarks>
     Task<Result<TEntity>> FindByIdOrNotFoundAsync<TEntity, TId>(
         IQueryable<TEntity> query, TId id, Error notFound, CancellationToken cancellationToken)
         where TEntity : Entity<TId>

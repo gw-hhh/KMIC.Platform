@@ -5,10 +5,6 @@ namespace Kmic.BuildingBlocks.Application.Files;
 /// <summary>
 /// 框架维护的文件类型白名单与文件头识别
 /// </summary>
-/// <remarks>
-/// 一个文件要同时满足两条才算某种类型：扩展名对应这种类型，文件头也符合这种类型的签名。
-/// 只改扩展名骗不过去，只改内容也骗不过去。业务不能自定义类型或签名，只能在上传档案里从这里选
-/// </remarks>
 public static class FileTypes
 {
     /// <summary>

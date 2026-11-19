@@ -12,9 +12,6 @@ public static class EntityPredicates
     /// <summary>
     /// ID 等于给定值
     /// </summary>
-    /// <remarks>
-    /// 泛型参数没有 == 运算符，所以手写表达式树；ID 放在闭包对象的属性上，EF 会把它当参数，不同 ID 共用同一份编译结果
-    /// </remarks>
     public static Expression<Func<TEntity, bool>> HasId<TEntity, TId>(TId id)
         where TEntity : Entity<TId>
         where TId : struct, IStronglyTypedId

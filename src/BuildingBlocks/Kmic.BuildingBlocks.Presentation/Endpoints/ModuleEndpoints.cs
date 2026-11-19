@@ -4,8 +4,7 @@ namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 /// 模块的端点注册类
 /// </summary>
 /// <remarks>
-/// 每个模块的 Presentation 项目里一个子类，通常只写 <see cref="Module"/>。框架扫描子类所在程序集里的全部
-/// <see cref="IEndpoint"/>，映射到 /api/v1/{模块名小写，多个单词用连字符}
+/// 路由前缀是 /api/v1/{模块名小写，多个单词用连字符}
 /// </remarks>
 public abstract class ModuleEndpoints
 {
@@ -25,7 +24,7 @@ public abstract class ModuleEndpoints
     /// 本模块的端点类型，默认是子类所在程序集里的全部 <see cref="IEndpoint"/> 实现
     /// </summary>
     /// <remarks>
-    /// 框架测试要在同一个测试程序集里准备多组互不相干的端点，才重写它
+    /// 只有框架测试需要重写
     /// </remarks>
     protected virtual IEnumerable<Type> FindEndpointTypes() =>
         GetType().Assembly.GetTypes().Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IEndpoint).IsAssignableFrom(t));

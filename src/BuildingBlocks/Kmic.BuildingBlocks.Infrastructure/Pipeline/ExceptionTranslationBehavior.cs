@@ -15,10 +15,10 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 异常转换
+/// 把并发冲突、唯一约束冲突这类数据库异常转成错误结果
 /// </summary>
 /// <remarks>
-/// 把并发冲突、唯一约束冲突这类数据库异常转成错误结果，其他异常照常抛出。放在事务外层，提交时抛出的异常也能转换
+/// 要放在事务外层，提交时的异常才能转换
 /// </remarks>
 public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,

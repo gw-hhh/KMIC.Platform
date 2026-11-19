@@ -9,10 +9,6 @@ namespace Kmic.BuildingBlocks.Presentation.Http;
 /// <summary>
 /// Result 转 HTTP 响应
 /// </summary>
-/// <remarks>
-/// 端点里只用这几个方法把 Result 变成响应，不手写 Results.Problem 或 Results.StatusCode：
-/// 错误只能来自 Result，状态码和格式才统一
-/// </remarks>
 public static class ResultHttpExtensions
 {
     /// <summary>
@@ -25,11 +21,10 @@ public static class ResultHttpExtensions
     }
 
     /// <summary>
-    /// 成功返回 200 和值，并带上 ETag；请求的 If-None-Match 与它一致时返回 304、没有响应体
+    /// 成功返回 200 和值并带 ETag，If-None-Match 一致时返回 304
     /// </summary>
     /// <remarks>
-    /// 给“变化很少、很多人反复读”的数据用，如字典：前端带着上次的 ETag 再问，没变就不用再传一遍。
-    /// 响应同时带 <c>Cache-Control: private, no-cache</c>：浏览器可以保存，但每次使用前必须带 ETag 向服务器确认
+    /// 给变化少、反复读的数据用，如字典
     /// </remarks>
     public static IResult ToOkWithETag<T>(this Result<T> result, HttpContext http, Func<T, string> etagOf)
     {

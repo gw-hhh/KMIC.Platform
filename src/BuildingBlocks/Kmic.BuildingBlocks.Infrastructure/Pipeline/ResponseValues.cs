@@ -6,9 +6,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// <summary>
 /// 读取和构造结果里的值
 /// </summary>
-/// <remarks>
-/// 管道不知道具体的值类型，幂等重放和版本号回填要用它
-/// </remarks>
 internal static class ResponseValues<TResponse>
     where TResponse : Result
 {

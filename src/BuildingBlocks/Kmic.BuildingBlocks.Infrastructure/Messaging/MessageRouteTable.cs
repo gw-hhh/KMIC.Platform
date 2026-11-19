@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 订阅路由表
 /// </summary>
 /// <remarks>
-/// 表属于 Operations 模块，由它的迁移执行这里的建表语句；投递程序和启动登记直接读写
+/// 表属于 Operations 模块，由它的迁移执行这里的建表语句
 /// </remarks>
 public static class MessageRouteTable
 {

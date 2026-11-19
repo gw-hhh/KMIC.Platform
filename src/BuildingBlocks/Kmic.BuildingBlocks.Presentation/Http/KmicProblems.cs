@@ -8,8 +8,7 @@ namespace Kmic.BuildingBlocks.Presentation.Http;
 /// 生成 ProblemDetails
 /// </summary>
 /// <remarks>
-/// 扩展字段只输出白名单：code、traceId、retryable、errors、currentVersion。
-/// Error.Metadata 里的其他键不输出，业务错误不能借附加数据把内部信息带给调用方
+/// 扩展字段只输出白名单，Error.Metadata 里的其他键不输出
 /// </remarks>
 internal static class KmicProblems
 {
@@ -31,9 +30,6 @@ internal static class KmicProblems
     /// <summary>
     /// 链路追踪 ID，和响应头 X-Trace-Id 相同
     /// </summary>
-    /// <remarks>
-    /// 没有活动（没有追踪监听器）时退回到请求自己的标识，保证每个响应都有可供报障的编号
-    /// </remarks>
     public static string TraceIdOf(HttpContext http) =>
         Activity.Current is { IdFormat: ActivityIdFormat.W3C } activity ? activity.TraceId.ToString() : http.TraceIdentifier;
 

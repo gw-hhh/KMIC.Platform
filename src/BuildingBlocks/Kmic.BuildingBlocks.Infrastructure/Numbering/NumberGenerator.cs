@@ -12,10 +12,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Numbering;
 /// <summary>
 /// 业务编号生成
 /// </summary>
-/// <remarks>
-/// 一条语句完成“没有就创建、有就加一”，并把计数行锁到事务结束：同一个规则的并发取号排队，编号不会重复。
-/// 周期键和日期段用同一个时刻算，跨午夜的请求里两者不会不一致
-/// </remarks>
 internal sealed class NumberGenerator(
     NumberRuleCatalog rules,
     IBusinessCalendar calendar,

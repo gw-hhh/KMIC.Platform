@@ -4,8 +4,7 @@ namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 /// 一个接口一个端点类
 /// </summary>
 /// <remarks>
-/// 端点只做三件事：绑定请求、构造消息并发送、把 Result 转成 HTTP。写成 internal sealed 类，类名以 Endpoint 结尾，
-/// 启动时由所在模块的 <see cref="ModuleEndpoints"/> 扫描并调用 <see cref="Map"/>
+/// 端点只绑定请求、发送消息、把 Result 转成 HTTP
 /// </remarks>
 public interface IEndpoint
 {

@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Execution;
 /// 执行上下文
 /// </summary>
 /// <remarks>
-/// 模块代码只注入 IExecutionContext，Initialize 只给框架入口调用
+/// Initialize 只给框架入口调用
 /// </remarks>
 public sealed class ExecutionScope : IExecutionContext
 {
@@ -23,7 +23,7 @@ public sealed class ExecutionScope : IExecutionContext
     /// 入口的来源
     /// </summary>
     /// <remarks>
-    /// Contracts 调用期间 Origin 会变成 ModuleCall，这里仍是入口的来源，用来选数据源
+    /// Contracts 调用期间也不变，Origin 会变成 ModuleCall
     /// </remarks>
     public CallOrigin EntryOrigin =>
         _origin ?? throw new InvalidOperationException("执行上下文尚未初始化，入口应先调用 ExecutionScope.Initialize。");
@@ -40,9 +40,6 @@ public sealed class ExecutionScope : IExecutionContext
     /// <summary>
     /// 当前这条异步调用链是否正在执行命令
     /// </summary>
-    /// <remarks>
-    /// 不依赖具体的作用域，类型化 HTTP 客户端的处理器不在请求的作用域里，要用它判断
-    /// </remarks>
     public static bool CurrentlyInCommand => _commandDepth.Value > 0;
 
     /// <summary>

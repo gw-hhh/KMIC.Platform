@@ -25,10 +25,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 /// <summary>
 /// 执行后台作业
 /// </summary>
-/// <remarks>
-/// 以提交人在提交时角色下的身份执行（重新加载访问上下文），每一批各自一个事务。中断后按声明处理：
-/// 可续跑的从检查点继续，其余标记失败，不会把已提交的批次再做一遍
-/// </remarks>
 internal sealed class JobExecutor(
     JobStore store,
     BackgroundJobCatalog catalog,

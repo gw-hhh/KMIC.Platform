@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Domain.Errors;
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
 /// <summary>
-/// 框架层的 HTTP 错误目录
+/// 框架层的 HTTP 错误目录：认证、请求解析、限流和未处理的异常
 /// </summary>
-/// <remarks>
-/// 业务错误只来自 Result；这里的错误来自认证、请求解析、限流和未处理的异常，前端同样按 code 处理
-/// </remarks>
 public static class FrameworkProblems
 {
     /// <summary>
@@ -20,7 +17,7 @@ public static class FrameworkProblems
     /// 用户的当前角色已被收回或停用，只有 me 和 switch-role 可用
     /// </summary>
     /// <remarks>
-    /// 错误码属于 Identity，由框架的访问上下文中间件返回，Identity 模块不要再声明同一个错误码
+    /// Identity 模块不要再声明同一个错误码
     /// </remarks>
     public static readonly FrameworkProblem CurrentRoleUnavailable = new("Identity.CurrentRoleUnavailable", StatusCodes.Status403Forbidden, "当前角色已不可用，请重新选择角色");
 
@@ -50,19 +47,13 @@ public static class FrameworkProblems
     public static readonly FrameworkProblem TooBusy = new("Common.TooBusy", StatusCodes.Status429TooManyRequests, "系统正忙，请稍后再试", Retryable: true);
 
     /// <summary>
-    /// 未处理的异常
+    /// 未处理的异常，不可重试
     /// </summary>
-    /// <remarks>
-    /// 不可重试：未知错误下无法判断是否已经生效
-    /// </remarks>
     public static readonly FrameworkProblem InternalError = new("Common.InternalError", StatusCodes.Status500InternalServerError, "系统出错了，请稍后再试");
 
     /// <summary>
-    /// 请求处理超过了请求超时
+    /// 请求处理超过了请求超时，不可重试
     /// </summary>
-    /// <remarks>
-    /// 不可重试：无法判断操作是否已经生效。要处理这么久的操作应该做成后台作业
-    /// </remarks>
     public static readonly FrameworkProblem RequestTimeout = new("Common.RequestTimeout", StatusCodes.Status504GatewayTimeout, "处理时间太长，请缩小范围后再试");
 
     /// <summary>

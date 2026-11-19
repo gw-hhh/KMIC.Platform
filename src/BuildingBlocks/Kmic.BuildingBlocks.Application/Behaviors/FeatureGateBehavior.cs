@@ -10,10 +10,6 @@ namespace Kmic.BuildingBlocks.Application.Behaviors;
 /// <summary>
 /// 功能开关检查
 /// </summary>
-/// <remarks>
-/// 放在校验和授权之前：功能关闭时对所有人都是“不存在”，不泄露它有没有、谁能用。
-/// 没有声明 <see cref="FeatureGateAttribute"/> 的用例只多一次目录查找
-/// </remarks>
 public sealed partial class FeatureGateBehavior<TMessage, TResponse>(UseCaseCatalog catalog, IFeatureFlags features, ILogger<FeatureGateBehavior<TMessage, TResponse>> logger)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage

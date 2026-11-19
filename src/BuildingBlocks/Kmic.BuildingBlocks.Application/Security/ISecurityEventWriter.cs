@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Security;
 /// 安全事件写入
 /// </summary>
 /// <remarks>
-/// 不在业务事务里，业务回滚后安全事件仍然保留
+/// 不在业务事务里，业务回滚后仍然保留
 /// </remarks>
 public interface ISecurityEventWriter
 {

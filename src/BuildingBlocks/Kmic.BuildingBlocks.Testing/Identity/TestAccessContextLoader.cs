@@ -8,8 +8,7 @@ namespace Kmic.BuildingBlocks.Testing.Identity;
 /// 测试用的访问上下文加载器
 /// </summary>
 /// <remarks>
-/// 先登记身份，请求和作业执行时按用户、会话和角色取回；没登记或已移除的当作用户已禁用或会话失效。
-/// 登记过但角色被标记为已收回的，请求得到“当前角色不可用”，作业不执行
+/// 没登记或已移除的身份当作用户已禁用或会话失效
 /// </remarks>
 public sealed class TestAccessContextLoader : IAccessContextLoader
 {

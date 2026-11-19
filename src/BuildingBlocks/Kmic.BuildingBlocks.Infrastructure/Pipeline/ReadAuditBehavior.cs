@@ -13,7 +13,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// 标了 [AuditedRead] 的查询成功之后，写一条审计事件
 /// </summary>
 /// <remarks>
-/// 查询失败不记。写审计出错时查询结果照常返回，只记错误日志：已经读出来的数据不能因为记录失败而收回
+/// 写审计出错时查询照常返回，只记错误日志
 /// </remarks>
 public sealed class ReadAuditBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,

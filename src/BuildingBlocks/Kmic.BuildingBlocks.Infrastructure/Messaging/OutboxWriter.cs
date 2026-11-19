@@ -17,7 +17,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 把本次命令发布的消息写进本模块的 Outbox
 /// </summary>
 /// <remarks>
-/// 在业务数据保存之后、提交之前调用：快照事件要带上版本号加一之后的值
+/// 在业务数据保存之后、提交之前调用
 /// </remarks>
 internal sealed class OutboxWriter(
     IntegrationEventPublisher publisher,

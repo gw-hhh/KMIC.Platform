@@ -6,9 +6,6 @@ namespace Kmic.BuildingBlocks.Domain.StateMachines;
 /// <summary>
 /// 状态机
 /// </summary>
-/// <remarks>
-/// 泛型方法放在非泛型类上，避开 CA1000
-/// </remarks>
 public static class StateMachine
 {
     /// <summary>

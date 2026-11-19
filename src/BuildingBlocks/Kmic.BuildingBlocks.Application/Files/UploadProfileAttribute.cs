@@ -1,11 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.Files;
 
 /// <summary>
-/// 声明一个上传档案：这一类附件最大多大、允许哪些类型、要什么权限才能上传
+/// 声明上传档案：大小上限、允许的类型和上传权限
 /// </summary>
 /// <remarks>
-/// 写在模块 Application 里的一个静态类上，一个类可以声明几个档案。上传本身就要求有编辑该类业务对象的能力，
-/// 所以权限点用业务的“编辑”类权限，避免任何登录用户都能往存储里塞文件
+/// 权限点用业务的“编辑”类权限
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 public sealed class UploadProfileAttribute(string name, string displayName) : Attribute

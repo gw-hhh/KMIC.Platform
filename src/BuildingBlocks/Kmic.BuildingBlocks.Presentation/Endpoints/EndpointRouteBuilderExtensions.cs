@@ -16,10 +16,6 @@ public static class EndpointRouteBuilderExtensions
     /// <summary>
     /// 为每个注册的模块建路由组并映射它的全部端点
     /// </summary>
-    /// <remarks>
-    /// 路由是 /api/v1/{模块名小写，多个单词用连字符}/{资源}。路由组统一要求登录、打上模块标签、加框架过滤器。
-    /// 声明的校验在宿主启动时做，见 <see cref="EndpointValidationFilter"/>
-    /// </remarks>
     /// <returns>版本路由组，宿主可以在上面追加全局设置</returns>
     public static RouteGroupBuilder MapKmicEndpoints(this IEndpointRouteBuilder app)
     {

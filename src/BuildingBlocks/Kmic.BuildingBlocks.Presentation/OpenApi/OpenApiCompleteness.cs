@@ -3,11 +3,8 @@ using System.Text.Json;
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
 /// <summary>
-/// 生成出来的 OpenAPI 文档的完整性检查：每个接口要有摘要，智能枚举的每个值要有显示名
+/// OpenAPI 文档的完整性检查：接口摘要和智能枚举显示名
 /// </summary>
-/// <remarks>
-/// 参数和字段的说明不强制，名字说不清的才写
-/// </remarks>
 public static class OpenApiCompleteness
 {
     private static readonly string[] _methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"];

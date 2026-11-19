@@ -14,12 +14,8 @@ using Microsoft.Extensions.Options;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 幂等处理
+/// 幂等处理：同一个幂等键只执行一次，重复请求返回第一次的结果
 /// </summary>
-/// <remarks>
-/// 只处理标了 [Idempotent] 的 HTTP 命令：同一个幂等键只执行一次，重复请求返回第一次的结果。
-/// 完成标记和业务数据在同一个事务里提交，否则两次提交之间崩溃，就会出现业务已生效、记录却还是处理中
-/// </remarks>
 public sealed class IdempotencyBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     // 从容器取框架服务：宿主要直接引用行为类型，所以行为只能是 public，构造函数里就放不了 internal 的服务

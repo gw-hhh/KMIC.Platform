@@ -6,8 +6,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 在单例服务里使用模块查询上下文的入口
 /// </summary>
 /// <remarks>
-/// 查询上下文是作用域服务，单例（如访问上下文加载器）不能直接注入。每次调用新开一个系统身份的作用域，
-/// 用完即释放。模块代码不能自己从 IServiceProvider 取服务（禁用 API），所以由框架提供
+/// 每次调用新开一个系统身份的作用域
 /// </remarks>
 public interface IQueryScopeFactory
 {

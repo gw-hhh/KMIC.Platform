@@ -5,9 +5,6 @@ namespace Kmic.BuildingBlocks.Application.Messaging;
 /// <summary>
 /// Contracts 查询发送
 /// </summary>
-/// <remarks>
-/// 发送期间请求来源是 ModuleCall，身份沿用调用方，授权按查询上的 [ContractQuery]
-/// </remarks>
 public interface IContractQuerySender
 {
     /// <summary>

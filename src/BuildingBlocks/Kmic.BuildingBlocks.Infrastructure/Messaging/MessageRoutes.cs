@@ -7,7 +7,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 订阅路由的读写
 /// </summary>
 /// <remarks>
-/// 路由只增不删：滚动发布、回滚时新旧构建同时运行，谁先启动结果都一样。停止投递只能由运维终结
+/// 路由只增不删，停止投递只能由运维终结
 /// </remarks>
 internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
 {

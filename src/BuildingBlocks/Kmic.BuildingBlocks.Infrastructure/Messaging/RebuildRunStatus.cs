@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// 重建轮次的状态取值
 /// </summary>
 /// <remarks>
-/// 存为 smallint，唯一索引和 SQL 直接按数字写条件，取值不能改
+/// 存为 smallint，SQL 直接按数字写，取值不能改
 /// </remarks>
 internal static class RebuildRunStatus
 {

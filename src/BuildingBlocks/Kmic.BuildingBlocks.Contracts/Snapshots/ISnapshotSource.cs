@@ -1,10 +1,10 @@
 namespace Kmic.BuildingBlocks.Contracts.Snapshots;
 
 /// <summary>
-/// 全量快照来源
+/// 全量快照来源，包含已删除、已停用的数据
 /// </summary>
 /// <remarks>
-/// 包含已删除、已停用的数据，只允许系统身份调用
+/// 只允许系统身份调用
 /// </remarks>
 public interface ISnapshotSource<TSnapshot>
 {

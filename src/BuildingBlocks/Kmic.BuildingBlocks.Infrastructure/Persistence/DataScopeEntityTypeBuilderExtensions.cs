@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 数据权限声明
 /// </summary>
 /// <remarks>
-/// 实现了 IHasOwner 或 IHasOrgUnit 的聚合根，必须调用 HasDataScope 或 HasNoDataScope 之一
+/// 实现了 IHasOwner 或 IHasOrgUnit 的聚合根，必须调用 HasDataScope 或 HasNoDataScope
 /// </remarks>
 public static class DataScopeEntityTypeBuilderExtensions
 {

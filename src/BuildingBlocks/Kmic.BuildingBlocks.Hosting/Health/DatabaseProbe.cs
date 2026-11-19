@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Hosting.Health;
 /// <summary>
 /// 健康检查用的数据库探测，就绪检查和依赖检查共用
 /// </summary>
-/// <remarks>
-/// 自己有一个很小的连接池，不占业务的连接池：业务池被占满时，探测仍然能区分“数据库挂了”和“业务把池用光了”
-/// </remarks>
 internal sealed class DatabaseProbe(IOptions<DatabaseOptions> database) : IDisposable
 {
     /// <summary>

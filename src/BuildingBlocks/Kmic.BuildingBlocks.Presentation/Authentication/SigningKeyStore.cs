@@ -9,8 +9,7 @@ namespace Kmic.BuildingBlocks.Presentation.Authentication;
 /// 加载好的签名密钥
 /// </summary>
 /// <remarks>
-/// 验证令牌用全部密钥，签发令牌（Identity 模块）用 <see cref="ActiveCredentials"/>。
-/// 算法固定 RS256，密钥长度不得小于 <see cref="MinimumKeySize"/>；启动时加载，有问题拒绝启动
+/// 验证用全部密钥，签发用 <see cref="ActiveCredentials"/>
 /// </remarks>
 public sealed class SigningKeyStore : IDisposable
 {

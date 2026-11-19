@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// Outbox 中的一条消息
 /// </summary>
-/// <remarks>
-/// 只用来建表和写入，领取、投递都是框架里的 SQL
-/// </remarks>
 internal sealed class OutboxMessage
 {
     /// <summary>

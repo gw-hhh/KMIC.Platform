@@ -3,11 +3,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 namespace Kmic.BuildingBlocks.Application.Exports;
 
 /// <summary>
-/// 导出作业读取数据的入口
+/// 导出作业读取数据的入口，逐行流式读取
 /// </summary>
 /// <remarks>
-/// 在 Worker 专用的流式连接上逐行读取，不把全部数据装进内存，照常套用提交人的数据范围。
-/// 导出期间查字典等辅助查询照常用查询上下文，不占这条连接。只能在后台作业里用
+/// 只能在后台作业里用
 /// </remarks>
 /// <typeparam name="TQueryDb">模块的查询接口</typeparam>
 public interface IExportReader<TQueryDb>

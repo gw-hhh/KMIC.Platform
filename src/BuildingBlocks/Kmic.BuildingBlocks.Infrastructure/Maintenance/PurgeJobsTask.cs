@@ -9,9 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 /// <summary>
 /// 每天删除过了保留期的后台作业记录
 /// </summary>
-/// <remarks>
-/// 只删作业行；结果文件由 Files 按登记时的保留期清理
-/// </remarks>
 internal sealed class PurgeJobsTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {
     public string Name => "Framework.PurgeJobs";

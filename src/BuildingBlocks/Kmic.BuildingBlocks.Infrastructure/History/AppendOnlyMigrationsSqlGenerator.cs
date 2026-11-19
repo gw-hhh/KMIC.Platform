@@ -12,9 +12,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.History;
 /// <summary>
 /// 建只追加的表之后，收回运行账号的修改和删除权限
 /// </summary>
-/// <remarks>
-/// 表默认会把增删改查都授权给运行账号，所以要在建表后立刻撤销。过期数据由迁移账号清理
-/// </remarks>
 [SuppressMessage("Usage", "EF1001:Internal EF Core API usage", Justification = "Npgsql 的 SQL 生成器构造函数要这个内部类型，替换它没有公开的写法")]
 internal sealed class AppendOnlyMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions options)
     : NpgsqlMigrationsSqlGenerator(dependencies, options)

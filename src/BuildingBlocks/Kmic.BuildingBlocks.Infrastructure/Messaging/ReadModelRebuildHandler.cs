@@ -13,10 +13,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// 重建读模型：先扫描源端的全部快照，再向源端确认本地多出来的行
 /// </summary>
-/// <remarks>
-/// 实时同步照常进行，两边写同一行时留下版本高的。每一页一个事务，和检查点一起提交，
-/// 中断后从检查点接着做。收尾阶段每次都从头开始，已经确认过的行不再是候选，重做不会出错
-/// </remarks>
 internal sealed class ReadModelRebuildHandler(
     SubscriptionCatalog subscriptions,
     RebuildRunStore runs,

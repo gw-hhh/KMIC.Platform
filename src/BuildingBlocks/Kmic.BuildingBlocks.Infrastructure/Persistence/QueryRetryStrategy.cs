@@ -7,10 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 查询重试策略
 /// </summary>
-/// <remarks>
-/// 连接断开、主备切换这类暂时故障最多重试 2 次。连接池耗尽时不重试：重试只会让排队更长，应尽快返回 503。
-/// 命令不重试，由客户端带同一个幂等键重试
-/// </remarks>
 internal sealed class QueryRetryStrategy(ExecutionStrategyDependencies dependencies)
     : NpgsqlRetryingExecutionStrategy(dependencies, maxRetryCount: 2, maxRetryDelay: TimeSpan.FromSeconds(1), errorCodesToAdd: null)
 {

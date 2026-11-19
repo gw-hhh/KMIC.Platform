@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// 读模型的一轮重建
 /// </summary>
-/// <remarks>
-/// 只用来建表，读写都是框架里的 SQL。扫描位置在作业的检查点里，这里不重复存
-/// </remarks>
 internal sealed class ReadModelRebuildRun
 {
     /// <summary>

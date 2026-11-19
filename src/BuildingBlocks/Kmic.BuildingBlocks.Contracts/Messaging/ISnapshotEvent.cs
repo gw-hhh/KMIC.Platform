@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Contracts.Messaging;
 /// 快照事件
 /// </summary>
 /// <remarks>
-/// 来源版本号不在事件里，在消息信封上
+/// 来源版本号在消息信封上，不在事件里
 /// </remarks>
 public interface ISnapshotEvent : IIntegrationEvent
 {

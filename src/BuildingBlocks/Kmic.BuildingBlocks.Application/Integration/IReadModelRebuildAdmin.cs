@@ -1,12 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
 /// <summary>
-/// 读模型重建的运维操作：看各轮的状态、手动触发、确认收尾、放弃
+/// 读模型重建的运维操作
 /// </summary>
-/// <remarks>
-/// 给 Operations 的管理命令用。轮次和作业在订阅方模块的框架表里，由框架在自己的事务里读写，
-/// 和重试、放弃死信一样是基础设施的写入，不在命令的事务里。订阅要在本实例的代码里声明了重建方式才能操作
-/// </remarks>
 public interface IReadModelRebuildAdmin
 {
     /// <summary>

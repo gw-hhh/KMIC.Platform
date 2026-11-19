@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Dictionaries;
 
 /// <summary>
-/// 字典字段
+/// 字典字段，标在存字典编码的属性上
 /// </summary>
-/// <remarks>
-/// 标在存字典编码的请求、响应属性上，前端按它显示字典名称
-/// </remarks>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
 public sealed class DictionaryAttribute(string type) : Attribute
 {

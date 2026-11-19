@@ -21,12 +21,10 @@ public static class KmicHostExtensions
     private const string ReadyTag = "ready";
 
     /// <summary>
-    /// 按配置的角色装配框架服务，并注册要运行的模块
+    /// 按配置的角色装配框架服务并注册模块
     /// </summary>
     /// <remarks>
-    /// 角色在 Kmic:Roles：Api 接 HTTP 请求，Worker 处理消息、执行作业与定时任务，可以同时有。
-    /// 管道行为要由宿主在 AddMediator 里按顺序声明，源码生成器要求这样写，这里不替宿主注册。
-    /// 校验失败（模块配对、依赖、角色、数据库连接串）都拒绝启动，问题一次报全
+    /// 管道行为由宿主在 AddMediator 里声明，这里不注册
     /// </remarks>
     public static WebApplicationBuilder AddKmicHost(this WebApplicationBuilder builder, Action<KmicHostBuilder> configure)
     {
@@ -90,10 +88,6 @@ public static class KmicHostExtensions
     /// <summary>
     /// 搭建请求管道并映射端点与健康检查
     /// </summary>
-    /// <remarks>
-    /// Api 角色的顺序：错误处理 → 路由 → 认证 → 访问上下文 → 限流与并发限制 → 授权 → 端点。
-    /// 只跑 Worker 的实例也暴露健康检查，供编排平台判断存活，但不接业务流量
-    /// </remarks>
     public static WebApplication UseKmicHost(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);

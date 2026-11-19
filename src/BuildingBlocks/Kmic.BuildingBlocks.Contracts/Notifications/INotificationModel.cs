@@ -4,8 +4,7 @@ namespace Kmic.BuildingBlocks.Contracts.Notifications;
 /// 通知模板的数据模型
 /// </summary>
 /// <remarks>
-/// 用不可变 record 实现，同时标 <see cref="NotificationTemplateAttribute" />。
-/// 模型里的属性就是模板里能用的变量，值都要在发送时准备好，渲染时不再查任何数据
+/// 值要在发送时准备好，渲染时不再查数据
 /// </remarks>
 /// <typeparam name="TSelf">模型自身</typeparam>
 public interface INotificationModel<TSelf>

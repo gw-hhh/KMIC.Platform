@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
 /// <summary>
-/// 本作用域正在处理的 Inbox 消息
+/// 本作用域正在处理的 Inbox 消息，用作新消息的 CausationId
 /// </summary>
-/// <remarks>
-/// 处理中再发布的消息记下它的 ID 作为 CausationId
-/// </remarks>
 internal sealed class CurrentInboxMessage
 {
     public Guid? MessageId { get; set; }

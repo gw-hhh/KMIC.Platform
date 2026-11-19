@@ -10,11 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.BuildingBlocks.Infrastructure.History;
 
 /// <summary>
-/// 业务历史：有状态机的聚合，每次状态流转写一行
+/// 业务历史：有状态机的聚合每次流转写一行
 /// </summary>
-/// <remarks>
-/// 流转在聚合里先记在内存，保存前写进历史表，和业务数据一起提交。不受 [Audited] 影响，只要流转了就写
-/// </remarks>
 internal static class StateHistory
 {
     /// <summary>

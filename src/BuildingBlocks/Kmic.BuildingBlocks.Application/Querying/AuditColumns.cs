@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Querying;
 
 /// <summary>
-/// 审计列名
+/// 审计列名，查询里用 EF.Property 读取
 /// </summary>
-/// <remarks>
-/// 查询里用 EF.Property 读取，如 EF.Property&lt;DateTimeOffset&gt;(x, AuditColumns.CreatedAt)
-/// </remarks>
 public static class AuditColumns
 {
     /// <summary>

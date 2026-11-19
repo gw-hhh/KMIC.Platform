@@ -66,11 +66,8 @@ public sealed partial class NumberRule
     public int SequenceDigits { get; }
 
     /// <summary>
-    /// 序号告警值
+    /// 序号告警值：到这里再往后编号会变长
     /// </summary>
-    /// <remarks>
-    /// 序号到这个值时记警告，再往后编号就会变长
-    /// </remarks>
     public long WarningThreshold => 9 * (long)Math.Pow(10, SequenceDigits - 1);
 
     /// <summary>

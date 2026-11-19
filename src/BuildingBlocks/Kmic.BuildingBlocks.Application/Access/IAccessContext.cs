@@ -3,11 +3,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Application.Access;
 
 /// <summary>
-/// 访问上下文
+/// 访问上下文，每个请求一份
 /// </summary>
-/// <remarks>
-/// 由 Identity 模块加载，每个请求一份。授权和数据权限只读它，不再查库
-/// </remarks>
 public interface IAccessContext
 {
     /// <summary>

@@ -16354,7 +16354,7 @@ export interface components {
             /** @description 状态流转记录 */
             history: components["schemas"]["StateHistoryItem"][];
         };
-        /** @description 一次文件下载：业务的下载查询授权、确认关联之后组装出来，端点用 FileResults.Stream 把它写成响应 */
+        /** @description 一次文件下载 */
         FileDownload: {
             /**
              * Format: uuid

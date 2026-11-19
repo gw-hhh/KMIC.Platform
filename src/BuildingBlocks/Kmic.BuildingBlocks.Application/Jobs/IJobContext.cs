@@ -28,7 +28,7 @@ public interface IJobContext
     /// 报告进度，最多每秒写一次
     /// </summary>
     /// <remarks>
-    /// 不和业务数据一起提交，只读的作业（如导出）用它
+    /// 不和业务数据一起提交，给只读的作业用
     /// </remarks>
     ValueTask ReportProgressAsync(long done, long? total = null, string? message = null);
 
@@ -36,7 +36,7 @@ public interface IJobContext
     /// 发送一批命令，命令的业务数据、新检查点和进度在同一个事务里提交
     /// </summary>
     /// <remarks>
-    /// 提交结果未知时不要重试这一批，直接返回错误：作业会停下，按是否可续跑处理
+    /// 提交结果未知时不要重试这一批，直接返回错误
     /// </remarks>
     ValueTask<Result<TResponse>> SendBatchAsync<TResponse>(ICommand<TResponse> command, object checkpoint, long done);
 

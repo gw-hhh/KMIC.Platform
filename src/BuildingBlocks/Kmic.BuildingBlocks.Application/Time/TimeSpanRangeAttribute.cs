@@ -7,9 +7,7 @@ namespace Kmic.BuildingBlocks.Application.Time;
 /// 配置里的时间长度必须在某个范围内
 /// </summary>
 /// <remarks>
-/// 用它代替 <c>[Range(typeof(TimeSpan), "…", "…")]</c>：后者第一次校验时才把字符串边界转成 TimeSpan，
-/// 同一个特性实例被几个宿主同时校验（集成测试里多个宿主并行启动）会撞上 .NET 里的竞态而抛 InvalidCastException。
-/// 这里在构造时就解析好边界，之后只读，没有这个问题
+/// 用它代替 <c>[Range(typeof(TimeSpan), …)]</c>，后者在多个宿主并行校验时会出错
 /// </remarks>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
 public sealed class TimeSpanRangeAttribute : ValidationAttribute

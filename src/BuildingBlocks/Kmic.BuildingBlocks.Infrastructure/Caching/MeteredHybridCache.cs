@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 /// <summary>
 /// 按缓存键的类别记录命中次数的 HybridCache，本次调用执行了加载方法才算未命中
 /// </summary>
-/// <remarks>
-/// 并发等待同一次加载的调用也算命中
-/// </remarks>
 internal sealed class MeteredHybridCache(HybridCache inner, FrameworkMetrics metrics) : HybridCache
 {
     public override async ValueTask<T> GetOrCreateAsync<TState, T>(

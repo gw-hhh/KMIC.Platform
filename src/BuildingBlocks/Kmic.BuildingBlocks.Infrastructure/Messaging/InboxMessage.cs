@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
 /// <summary>
-/// Inbox 中的一条消息
+/// Inbox 中的一条消息，一行是一条消息对一个订阅
 /// </summary>
-/// <remarks>
-/// 一行是一条消息对一个订阅。只用来建表，读写都是框架里的 SQL
-/// </remarks>
 internal sealed class InboxMessage
 {
     /// <summary>

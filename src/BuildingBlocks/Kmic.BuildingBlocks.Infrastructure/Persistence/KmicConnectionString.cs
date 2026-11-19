@@ -13,10 +13,7 @@ public static class KmicConnectionString
     /// 默认关闭 GSS 加密协商，连接串里明确写了的不动
     /// </summary>
     /// <remarks>
-    /// Npgsql 默认会尝试加载 Kerberos 的库（libgssapi_krb5）协商 GSS 加密，镜像里没有这个库，
-    /// 每次连接都在输出里打一行加载失败。本系统不用 Kerberos，传输加密靠 TLS。
-    /// 打开了 Include Error Detail 的连接串直接拒绝（Npgsql 默认关闭）：违反唯一约束这类错误的详情里有那一行的数据，
-    /// 异常一旦被记进日志，业务数据也就进了日志
+    /// 打开了 Include Error Detail 的连接串直接拒绝：错误详情里有业务数据
     /// </remarks>
     /// <param name="connectionString">配置里的连接串，可以为空</param>
     /// <exception cref="InvalidOperationException">连接串打开了 Include Error Detail</exception>

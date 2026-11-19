@@ -9,11 +9,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 public static class OptionsServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册一个部署配置类：从配置节绑定，用 DataAnnotations 校验，启动时就校验
+    /// 注册部署配置类：绑定配置节，启动时校验
     /// </summary>
     /// <remarks>
-    /// 任何一项不合法就拒绝启动，错误里列出全部问题。配置在启动时读一次，运行中不变，
-    /// 要在运行中调整的参数做成系统设置，不放在这里
+    /// 要在运行中调整的参数做成系统设置
     /// </remarks>
     /// <typeparam name="TOptions">配置类，用 sealed class，属性 init</typeparam>
     public static OptionsBuilder<TOptions> AddKmicOptions<TOptions>(this IServiceCollection services, string section)

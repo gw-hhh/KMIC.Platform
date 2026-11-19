@@ -5,9 +5,6 @@ namespace Kmic.BuildingBlocks.Domain.Errors;
 /// <summary>
 /// 框架通用错误
 /// </summary>
-/// <remarks>
-/// Error.Unavailable 只能在这里使用（KM0101）
-/// </remarks>
 public static class CommonErrors
 {
     /// <summary>
@@ -86,7 +83,7 @@ public static class CommonErrors
     /// 依赖的数据还没同步过来，稍后自动重试
     /// </summary>
     /// <remarks>
-    /// 给集成事件的处理器用：返回它会按退避重试，返回其他业务错误会直接进入死信
+    /// 给集成事件的处理器用，返回其他业务错误会直接进死信
     /// </remarks>
     public static readonly Error NotReadyYet =
         Error.Unavailable("Common.NotReadyYet", "依赖的数据还没准备好，稍后自动重试");

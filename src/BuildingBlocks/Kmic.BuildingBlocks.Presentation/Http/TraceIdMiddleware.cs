@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Presentation.Http;
 /// 所有响应都带 X-Trace-Id，用户报障时提供它
 /// </summary>
 /// <remarks>
-/// 放在最外层。用响应开始时的回调写头：异常处理会清掉已设置的响应头，401、404、500 也要带
+/// 要放在最外层
 /// </remarks>
 internal sealed class TraceIdMiddleware(RequestDelegate next)
 {

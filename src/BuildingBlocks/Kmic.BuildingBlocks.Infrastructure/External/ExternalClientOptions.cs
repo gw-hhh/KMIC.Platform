@@ -16,10 +16,7 @@ public sealed class ExternalClientOptions
     public TimeSpan AttemptTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
     /// <summary>
-    /// 读请求（GET、HEAD）失败时是否重试
+    /// 读请求（GET、HEAD）失败时是否重试，写请求从不重试
     /// </summary>
-    /// <remarks>
-    /// 写请求不重试：对方不支持幂等键时，重试可能让同一个操作生效两次
-    /// </remarks>
     public bool RetryReads { get; set; } = true;
 }

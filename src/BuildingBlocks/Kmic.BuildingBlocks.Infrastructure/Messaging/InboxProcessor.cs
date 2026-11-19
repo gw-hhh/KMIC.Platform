@@ -24,10 +24,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// 处理一个模块 Inbox 里的消息
 /// </summary>
-/// <remarks>
-/// 每条消息转成订阅声明的命令，以系统身份经完整的管道执行。“已处理”和业务数据在同一个事务里提交，
-/// 占用被别的处理者接管时整个命令回滚，所以业务效果只有一次
-/// </remarks>
 internal sealed class InboxProcessor(
     ModuleFrameworkTables tables,
     DataSources dataSources,

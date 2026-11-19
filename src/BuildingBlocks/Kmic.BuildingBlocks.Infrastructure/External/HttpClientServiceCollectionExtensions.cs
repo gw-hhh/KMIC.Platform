@@ -8,11 +8,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.External;
 public static class HttpClientServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册一个外部系统的类型化客户端：命令里不能调用、总超时与单次超时、读请求重试、熔断
+    /// 注册一个外部系统的类型化客户端：超时、读请求重试、熔断
     /// </summary>
     /// <remarks>
-    /// 每个外部系统一个客户端，接口在 Application，实现在 Infrastructure。写请求不自动重试，
-    /// 对方支持幂等键时由调用方带上键后再自己重试
+    /// 命令里不能调用；写请求不自动重试
     /// </remarks>
     /// <typeparam name="TClient">客户端接口</typeparam>
     /// <typeparam name="TImplementation">客户端实现，构造函数接收 HttpClient</typeparam>

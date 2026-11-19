@@ -10,9 +10,6 @@ public static class DeprecationExtensions
     /// <summary>
     /// 标记端点已废弃：响应带 Deprecation 和 Sunset 头，OpenAPI 文档里标为废弃
     /// </summary>
-    /// <remarks>
-    /// 破坏性变化只升级发生变化的那个端点：新版本的端点放在新的版本路由组里，旧端点标上废弃并保留到下线日期
-    /// </remarks>
     public static TBuilder Deprecated<TBuilder>(this TBuilder builder, DateOnly since, DateOnly sunset)
         where TBuilder : IEndpointConventionBuilder
     {

@@ -13,9 +13,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// 重建轮次的读写
 /// </summary>
-/// <remarks>
-/// 轮次和它的作业行在订阅方模块的 schema 里，排队时同一个事务写入
-/// </remarks>
 internal sealed class RebuildRunStore(ModuleFrameworkTables tables, DataSources dataSources, BackgroundJobCatalog jobs)
 {
     /// <summary>

@@ -8,10 +8,10 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 public static class QueryableExtensions
 {
     /// <summary>
-    /// 不按数据权限过滤
+    /// 不按数据权限过滤，软删除过滤仍然生效
     /// </summary>
     /// <remarks>
-    /// 软删除过滤仍然生效。处理器要标 [BypassesDataScope] 写明原因，如编号要在全部数据中判断是否重复
+    /// 处理器要标 [BypassesDataScope] 写明原因
     /// </remarks>
     public static IQueryable<T> WithoutDataScope<T>(this IQueryable<T> query)
         where T : class

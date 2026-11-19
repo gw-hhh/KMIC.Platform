@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Domain.Results;
 /// <summary>
 /// 操作结果
 /// </summary>
-/// <remarks>
-/// 用类而不是结构体，default 才不会被当成成功
-/// </remarks>
 public class Result : IResultFactory<Result>
 {
     private static readonly Result _success = new(null);

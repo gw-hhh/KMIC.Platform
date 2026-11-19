@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Application.Integration;
 /// <summary>
 /// 本次命令发布的消息
 /// </summary>
-/// <remarks>
-/// 命令事务保存时把它们写进 Outbox，命令失败时丢弃
-/// </remarks>
 internal sealed class IntegrationEventPublisher(IExecutionContext execution, IntegrationMessageCatalog catalog) : IIntegrationEventPublisher
 {
     private readonly List<PendingMessage> _pending = [];

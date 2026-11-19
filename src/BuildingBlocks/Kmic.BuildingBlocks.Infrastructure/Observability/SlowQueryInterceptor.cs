@@ -10,11 +10,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 /// <summary>
 /// 慢查询日志
 /// </summary>
-/// <remarks>
-/// 单条 SQL 到达阈值就记一条警告并计数。日志里只有参数化的 SQL，参数值不记：EF 生成的命令文本里是占位符，
-/// 参数值在命令的参数集合里，这里不去碰它。发起请求的接口、用户、追踪 ID 由日志作用域和当前追踪带上。
-/// 读取结果集的时间不在内：EF 报告的是命令开始执行到结果集可读之间的时长，行数很大的流式读取要看数据库侧的统计
-/// </remarks>
 internal sealed class SlowQueryInterceptor(IOptions<DatabaseDiagnosticsOptions> options, FrameworkMetrics metrics, ILogger<SlowQueryInterceptor> logger)
     : DbCommandInterceptor
 {

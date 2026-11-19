@@ -6,10 +6,6 @@ namespace Kmic.BuildingBlocks.Application.UseCases;
 /// <summary>
 /// 引用解析查询的返回类型规则
 /// </summary>
-/// <remarks>
-/// Reference 查询不检查权限点、不套数据范围，所以只能返回 ReferenceInfo（ID、显示名、编码、状态）或它的集合、字典，
-/// 不然它会变成读取别的模块数据的通道。确有例外的在特性上用 ResultExemption 写明原因
-/// </remarks>
 internal static class ReferenceResultRule
 {
     private static readonly HashSet<Type> _containers =

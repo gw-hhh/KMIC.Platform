@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Events;
 /// 提交后执行的动作
 /// </summary>
 /// <remarks>
-/// 只用于失败了也没关系的动作，比如清缓存。必须送达的走 Outbox
+/// 只用于失败了也没关系的动作，必须送达的走 Outbox
 /// </remarks>
 public interface IAfterCommit
 {

@@ -14,7 +14,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 模块 DbContext 基类
 /// </summary>
 /// <remarks>
-/// 写入上下文直接继承它，查询上下文继承 ModuleQueryDbContext，两者共用同一个模型。
 /// 只有命令事务能保存，处理器自己调用 SaveChangesAsync 会抛异常
 /// </remarks>
 public abstract class ModuleDbContext : DbContext
@@ -72,11 +71,10 @@ public abstract class ModuleDbContext : DbContext
     }
 
     /// <summary>
-    /// 在命令管道之外保存，运维程序和初始化命令用
+    /// 在命令管道之外保存，给运维程序和初始化命令用
     /// </summary>
     /// <remarks>
-    /// 平时只有命令事务能保存，处理器自己调用 SaveChangesAsync 会抛异常。运维程序没有命令管道，用这个打开保存的开关；
-    /// 审计列、版本号照常处理，身份是创建上下文时的系统身份。业务代码不能用
+    /// 业务代码不能用
     /// </remarks>
     public async Task<int> SaveForToolAsync(CancellationToken ct)
     {
@@ -133,7 +131,7 @@ public abstract class ModuleDbContext : DbContext
     /// 注册本模块强类型 ID 的转换器
     /// </summary>
     /// <remarks>
-    /// 调用 Vogen 按 [EfCoreConverter&lt;T&gt;] 生成的 RegisterAllIn{标记类}()
+    /// 调用 Vogen 生成的 RegisterAllIn{标记类}()
     /// </remarks>
     protected abstract void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder);
 

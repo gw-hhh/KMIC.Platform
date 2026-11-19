@@ -8,9 +8,6 @@ namespace Kmic.BuildingBlocks.Application.Serialization;
 /// <summary>
 /// 全系统共用的 JSON 选项
 /// </summary>
-/// <remarks>
-/// HTTP、幂等记录、集成消息用同一套。接口层不能替换 ASP.NET Core 的选项实例，要用 Configure 把同样的设置写进去
-/// </remarks>
 public static class KmicJsonOptions
 {
     private const int MaxDepth = 32;
@@ -26,9 +23,6 @@ public static class KmicJsonOptions
     /// <summary>
     /// 读写已落库数据（集成消息、幂等记录里的响应）用的只读实例
     /// </summary>
-    /// <remarks>
-    /// 允许未知字段：新版本删掉字段后，还要能读出旧版本写进去的数据
-    /// </remarks>
     public static JsonSerializerOptions Stored { get; } = ReadOnly(CreateForStored());
 
     /// <summary>
@@ -45,9 +39,6 @@ public static class KmicJsonOptions
     /// <summary>
     /// 把同样的设置写进已有的选项
     /// </summary>
-    /// <remarks>
-    /// 给 ASP.NET Core 用：它的默认值比这里宽松，要逐项覆盖
-    /// </remarks>
     public static void Configure(JsonSerializerOptions target)
     {
         ArgumentNullException.ThrowIfNull(target);

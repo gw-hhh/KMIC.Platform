@@ -7,18 +7,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 在依赖注入之外创建模块上下文
+/// 在依赖注入之外创建模块上下文，身份是系统身份
 /// </summary>
-/// <remarks>
-/// 给 dotnet ef、迁移程序和运维命令用，身份是系统身份
-/// </remarks>
 public static class StandaloneContexts
 {
     /// <summary>
     /// 用连接串直接创建模块的写入上下文
     /// </summary>
     /// <remarks>
-    /// 不走依赖注入，也不走命令管道：保存要用 <see cref="ModuleDbContext.SaveForToolAsync" />。只给运维程序和设计时工具用，业务代码不能用
+    /// 保存要用 <see cref="ModuleDbContext.SaveForToolAsync" />，业务代码不能用
     /// </remarks>
     public static TContext Create<TContext>(string connectionString)
         where TContext : ModuleDbContext

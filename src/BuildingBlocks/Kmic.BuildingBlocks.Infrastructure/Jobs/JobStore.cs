@@ -12,8 +12,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 /// 作业行的读写
 /// </summary>
 /// <remarks>
-/// 凡是记录结果的写入（完成、失败、放回队列、进度、检查点）都带“运行中或取消中、令牌是本次的”条件：
-/// 占用被接管的旧执行者恢复后，改不了新执行者正在跑的作业，也不会重复写结果
+/// 记录结果的写入都要带令牌条件
 /// </remarks>
 internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSources)
 {
@@ -76,9 +75,6 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
     /// <summary>
     /// 续期，返回续期后的状态和已经运行的时长；占用已被接管时返回空
     /// </summary>
-    /// <remarks>
-    /// 运行时长按数据库时钟从第一次开始算起，续跑也不重新计时
-    /// </remarks>
     public async Task<(short Status, TimeSpan Elapsed)?> RenewAsync(string module, Guid id, Guid token, TimeSpan lease, CancellationToken ct)
     {
         await using var command = Database.CreateCommand(

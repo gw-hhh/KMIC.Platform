@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.History;
 /// <summary>
 /// 一次状态流转的记录
 /// </summary>
-/// <remarks>
-/// 每个有状态的聚合一张表（{聚合}StateHistory），共用这个类。只追加，运行账号改不了
-/// </remarks>
 internal sealed class StateHistoryRecord
 {
     /// <summary>

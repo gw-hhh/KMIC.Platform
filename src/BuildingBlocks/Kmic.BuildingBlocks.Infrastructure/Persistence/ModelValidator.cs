@@ -10,9 +10,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 模型校验
 /// </summary>
-/// <remarks>
-/// 有任何问题都拒绝启动，并列出全部问题。架构测试跑的是同一套校验
-/// </remarks>
 internal static class ModelValidator
 {
     private static readonly string[] _secretWords = ["Password", "Token", "Secret", "Hash"];

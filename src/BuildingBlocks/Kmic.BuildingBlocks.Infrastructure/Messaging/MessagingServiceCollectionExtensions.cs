@@ -16,7 +16,7 @@ public static class MessagingServiceCollectionExtensions
     /// 注册投递与处理的后台循环，只在 Worker 角色调用
     /// </summary>
     /// <remarks>
-    /// 循环等启动任务全部完成才开始，宿主要先调用 AddKmicStartupTasks
+    /// 宿主要先调用 AddKmicStartupTasks
     /// </remarks>
     public static IServiceCollection AddKmicMessagingWorker(this IServiceCollection services)
     {
@@ -31,7 +31,7 @@ public static class MessagingServiceCollectionExtensions
     /// 注册后台作业的执行器，只在 Worker 角色调用
     /// </summary>
     /// <remarks>
-    /// 执行器等启动任务全部完成才开始领取，宿主要先调用 AddKmicStartupTasks
+    /// 宿主要先调用 AddKmicStartupTasks
     /// </remarks>
     public static IServiceCollection AddKmicJobWorker(this IServiceCollection services)
     {

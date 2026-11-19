@@ -1,12 +1,8 @@
 namespace Kmic.BuildingBlocks.Contracts.Notifications;
 
 /// <summary>
-/// 声明一种通知：标在模板的数据模型上
+/// 声明一种通知，标在模板的数据模型上
 /// </summary>
-/// <remarks>
-/// 模板由代码声明，管理员只能修改内容；模板键以声明它的模块名开头，全系统唯一。
-/// 数据模型要实现 <see cref="INotificationModel{TSelf}" />
-/// </remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class NotificationTemplateAttribute(string key, string displayName) : Attribute
 {
@@ -39,7 +35,7 @@ public sealed class NotificationTemplateAttribute(string key, string displayName
     /// 内容含一次性短时凭据（验证码）
     /// </summary>
     /// <remarks>
-    /// 含密模板只能用 <c>SendSecretNotification</c> 发送：投递完成后正文清空，渲染结果不写日志，不带附件
+    /// 只能用 <c>SendSecretNotification</c> 发送
     /// </remarks>
     public bool CarriesSecret { get; init; }
 }

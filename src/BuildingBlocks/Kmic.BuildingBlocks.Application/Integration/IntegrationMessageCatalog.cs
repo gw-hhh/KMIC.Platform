@@ -62,7 +62,7 @@ public sealed class IntegrationMessageCatalog
     /// 管理界面能否显示这种消息的载荷
     /// </summary>
     /// <remarks>
-    /// 含密消息不显示；目录里找不到的也不显示，它可能是已下线的含密消息
+    /// 含密的和找不到类型的都不显示
     /// </remarks>
     public bool CanShowPayload(string name, int version) => Find(name, version) is { CarriesSecret: false };
 

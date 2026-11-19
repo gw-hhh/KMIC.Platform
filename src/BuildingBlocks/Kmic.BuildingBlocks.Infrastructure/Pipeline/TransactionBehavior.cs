@@ -17,11 +17,8 @@ using Microsoft.Extensions.Logging;
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 /// <summary>
-/// 命令事务
+/// 命令事务：处理器、领域事件处理器和保存在同一个事务里
 /// </summary>
-/// <remarks>
-/// 处理器、领域事件处理器和保存在同一个事务里，任何一步失败都整体回滚。提交本身不能取消，提交发出后再取消只会让结果变成未知
-/// </remarks>
 public sealed class TransactionBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     // 从容器取框架服务：宿主要直接引用行为类型，所以行为只能是 public，构造函数里就放不了 internal 的服务

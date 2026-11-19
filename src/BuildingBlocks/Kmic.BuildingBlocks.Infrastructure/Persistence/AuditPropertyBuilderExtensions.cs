@@ -9,7 +9,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 审计记录里怎样处理这个字段
 /// </summary>
 /// <remarks>
-/// 默认完整记录修改前后的值。敏感字段在实体配置里标出来，审计和日志共用这些标注
+/// 默认完整记录修改前后的值，敏感字段要在实体配置里标出来
 /// </remarks>
 public static class AuditPropertyBuilderExtensions
 {
@@ -70,9 +70,6 @@ public static class AuditPropertyBuilderExtensions
     /// <summary>
     /// 声明字段的数据分类，审计记录和日志按同一套规则处理
     /// </summary>
-    /// <remarks>
-    /// Secret 在审计里只记“已修改”，Personal 部分遮盖，Internal 完整记录。等价于对应的 AuditHidden、AuditMasked
-    /// </remarks>
     public static PropertyBuilder<TProperty> Classified<TProperty>(this PropertyBuilder<TProperty> builder, DataClassification classification)
     {
         ArgumentNullException.ThrowIfNull(builder);

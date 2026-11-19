@@ -16,7 +16,7 @@ public sealed class RebuildOptions
     public int MaxMissingCount { get; set; } = 100;
 
     /// <summary>
-    /// 收尾时源端找不到的行数不超过读模型总行数乘以这个比例，也直接置为终态
+    /// 收尾时源端找不到的行数比例上限，不超过就直接置为终态
     /// </summary>
     /// <remarks>
     /// 和 MaxMissingCount 取大的那个，超过就暂停等运维确认

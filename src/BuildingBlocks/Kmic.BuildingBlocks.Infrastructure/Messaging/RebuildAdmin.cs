@@ -6,9 +6,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// <see cref="IReadModelRebuildAdmin"/> 的实现
 /// </summary>
-/// <remarks>
-/// 订阅属于哪个模块、读模型叫什么，取自本实例声明的订阅目录：Operations 的实例也是同一份代码，声明的订阅是一样的
-/// </remarks>
 internal sealed class RebuildAdmin(SubscriptionCatalog subscriptions, RebuildRunStore runs) : IReadModelRebuildAdmin
 {
     private const int RunsPerModule = 20;

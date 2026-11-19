@@ -7,10 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// <summary>
 /// Worker 角色里运行调度器
 /// </summary>
-/// <remarks>
-/// 启动任务全部完成后才开始触发。停机时等正在执行的命令结束，宿主的停机超时兜底；
-/// 没注册它的实例上调度器一直处于待机，只用来手动执行和改时间
-/// </remarks>
 internal sealed class SchedulerService(ISchedulerFactory schedulers, StartupState startup) : BackgroundService
 {
     private readonly Lock _gate = new();

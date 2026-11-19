@@ -11,9 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Background;
 /// <summary>
 /// 一个 <see cref="ILeasedWork{TItem}" /> 的领取循环，只在 Worker 角色上运行
 /// </summary>
-/// <remarks>
-/// 启动任务全部完成之前不领取。同时处理的条数不超过队列声明的并行度，一次领取最多领空闲的槽位数
-/// </remarks>
 internal sealed class LeasedQueueRunner<TItem>(ILeasedWork<TItem> queue, StartupState startup, ILogger<LeasedQueueRunner<TItem>> logger) : BackgroundService
 {
     private static readonly TimeSpan _maxDatabaseDelay = TimeSpan.FromSeconds(60);

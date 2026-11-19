@@ -8,10 +8,6 @@ namespace Kmic.BuildingBlocks.Hosting;
 /// <summary>
 /// 从登记的模块里选出本次要运行的，并校验它们
 /// </summary>
-/// <remarks>
-/// 问题汇总后一次报出，任何一条都拒绝启动：模块名配对、程序集归属、模块名不重复、依赖已注册且已启用、
-/// 配置里关掉的模块被别的已启用模块依赖
-/// </remarks>
 internal static class ModuleSelection
 {
     // checkAssemblyNames 只给测试用：测试里的模块没法放进名为 Kmic.{模块}.Application 的程序集

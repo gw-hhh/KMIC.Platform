@@ -10,9 +10,6 @@ namespace Kmic.BuildingBlocks.Application.Behaviors;
 /// <summary>
 /// 请求校验
 /// </summary>
-/// <remarks>
-/// 校验器只检查格式和取值范围，不读数据库或其他模块
-/// </remarks>
 public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>

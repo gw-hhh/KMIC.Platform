@@ -7,7 +7,7 @@ namespace Kmic.BuildingBlocks.Presentation.Limits;
 /// 接口层的部署配置
 /// </summary>
 /// <remarks>
-/// 内置限流按实例计数，多实例时总量是“实例数 × 限额”
+/// 内置限流按实例计数，多实例时总量是实例数 × 限额
 /// </remarks>
 public sealed class KmicHttpOptions
 {

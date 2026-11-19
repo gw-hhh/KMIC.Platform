@@ -6,10 +6,10 @@ using Npgsql;
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 /// <summary>
-/// 模块迁移
+/// 模块迁移，用迁移账号执行
 /// </summary>
 /// <remarks>
-/// 用迁移账号执行，只给迁移程序和测试模板库用。应用启动时只检查有没有未执行的迁移
+/// 只给迁移程序和测试模板库用
 /// </remarks>
 public static class ModuleMigrator
 {
@@ -40,9 +40,6 @@ public static class ModuleMigrator
     /// <summary>
     /// 执行服务容器里登记的全部模块的迁移，先做数据库级的准备，模块按名称顺序
     /// </summary>
-    /// <remarks>
-    /// 迁移程序和测试用的模板库不需要认识每个模块的 DbContext 类型：模块注册服务时已经登记了它
-    /// </remarks>
     public static async Task MigrateAllAsync(IServiceProvider services, string connectionString, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -58,9 +55,6 @@ public static class ModuleMigrator
     /// <summary>
     /// 列出服务容器里登记的全部模块还没有执行的迁移，按模块名称排序
     /// </summary>
-    /// <remarks>
-    /// 启动时用运行账号检查：只读迁移历史表，不改库。模块的 schema 还不存在时，它的全部迁移都算未执行
-    /// </remarks>
     /// <returns>形如 Sample/20261112002136_InitializeModuleSchema 的迁移标识</returns>
     public static async Task<IReadOnlyList<string>> PendingAsync(IServiceProvider services, string connectionString, CancellationToken ct)
     {
@@ -80,9 +74,6 @@ public static class ModuleMigrator
     /// <summary>
     /// 列出实体模型和最新迁移不一致的模块，即改了模型却没有生成迁移
     /// </summary>
-    /// <remarks>
-    /// 只比较代码里的模型和迁移的模型快照，不查数据库，连接串只是为了构建上下文
-    /// </remarks>
     /// <returns>有差异的模块名，按名称排序</returns>
     public static IReadOnlyList<string> ModulesWithPendingModelChanges(IServiceProvider services, string connectionString)
     {

@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Domain.Entities;
 /// 领域不变量被破坏
 /// </summary>
 /// <remarks>
-/// 只用于程序缺陷，业务失败要返回 Result
+/// 只用于程序缺陷，业务失败返回 Result
 /// </remarks>
 public sealed class DomainInvariantException : Exception
 {

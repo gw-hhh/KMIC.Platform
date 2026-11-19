@@ -10,10 +10,6 @@ namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 /// <summary>
 /// 强类型 ID 和智能枚举在文档里按它们实际的 JSON 形式描述
 /// </summary>
-/// <remarks>
-/// 强类型 ID 是 UUID 字符串；智能枚举是字符串，取值是全部编码，前端得到字面量联合类型。
-/// 智能枚举的显示名先放在架构上，文档级转换器再汇总到 x-kmic-enums
-/// </remarks>
 internal sealed class KmicSchemaTransformer : IOpenApiSchemaTransformer
 {
     public const string EnumLabelsKey = "x-kmic-enum";

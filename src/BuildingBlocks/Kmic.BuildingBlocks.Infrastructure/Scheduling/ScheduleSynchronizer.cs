@@ -11,10 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// <summary>
 /// 把代码里的默认值和运维改过的覆盖值同步到 Quartz
 /// </summary>
-/// <remarks>
-/// 启动时同步全部，运维改了开关或时间后再同步一次。每个任务在 Quartz 里是一个持久的作业加一个 Cron 触发器，
-/// 停用就是去掉触发器，作业保留，仍可手动执行
-/// </remarks>
 internal sealed class ScheduleSynchronizer(
     ISchedulerFactory schedulers,
     ScheduledTasks tasks,

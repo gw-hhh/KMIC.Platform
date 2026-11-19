@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Auditing;
 /// 业务历史查询
 /// </summary>
 /// <remarks>
-/// 这里不检查权限，处理器要先确认当前用户能看到这条数据
+/// 不检查权限，处理器要先确认能看这条数据
 /// </remarks>
 public interface IStateHistoryQuery
 {

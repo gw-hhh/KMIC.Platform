@@ -11,9 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// KmicFunctions 翻译器
 /// </summary>
-/// <remarks>
-/// 翻译为 ("列" COLLATE "C") ILIKE 模式 ESCAPE '\'
-/// </remarks>
 internal sealed class KmicFunctionsTranslator(NpgsqlSqlExpressionFactory sql) : IMethodCallTranslator
 {
     private static readonly MethodInfo _containsText = typeof(KmicFunctions).GetMethod(nameof(KmicFunctions.ContainsText))!;

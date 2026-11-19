@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Application.UseCases;
 /// <summary>
 /// 用例
 /// </summary>
-/// <remarks>
-/// 一个消息的全部声明，管道运行时只查它，不再反射
-/// </remarks>
 public sealed record UseCase
 {
     /// <summary>

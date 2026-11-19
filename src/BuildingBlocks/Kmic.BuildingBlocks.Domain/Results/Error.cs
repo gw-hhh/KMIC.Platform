@@ -7,7 +7,7 @@ namespace Kmic.BuildingBlocks.Domain.Results;
 /// 业务错误
 /// </summary>
 /// <remarks>
-/// 只在各模块的 *Errors 类里创建。实例不可变，可以放在静态字段里共享
+/// 只在各模块的 *Errors 类里创建
 /// </remarks>
 public sealed partial record Error
 {

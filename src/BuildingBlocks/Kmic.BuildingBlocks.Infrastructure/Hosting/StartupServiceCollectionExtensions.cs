@@ -15,7 +15,7 @@ public static class StartupServiceCollectionExtensions
     /// 注册启动任务的运行器和框架自带的启动任务，Api、Worker 两种角色都要调用
     /// </summary>
     /// <remarks>
-    /// 要在后台组件之前调用：宿主按注册顺序启动
+    /// 要在后台组件之前调用
     /// </remarks>
     public static IServiceCollection AddKmicStartupTasks(this IServiceCollection services)
     {

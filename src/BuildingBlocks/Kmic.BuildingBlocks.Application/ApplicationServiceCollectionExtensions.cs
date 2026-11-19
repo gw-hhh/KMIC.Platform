@@ -28,9 +28,6 @@ namespace Kmic.BuildingBlocks.Application;
 /// <summary>
 /// 应用层服务注册
 /// </summary>
-/// <remarks>
-/// 管道行为在宿主的 AddMediator 里按顺序声明，Mediator 源码生成器要求这样写。这里只注册它们依赖的服务
-/// </remarks>
 public static class ApplicationServiceCollectionExtensions
 {
     /// <summary>
@@ -76,9 +73,6 @@ public static class ApplicationServiceCollectionExtensions
     /// <summary>
     /// 登记一个模块的订阅
     /// </summary>
-    /// <remarks>
-    /// 校验在第一次取订阅目录时统一做，宿主启动时要取一次
-    /// </remarks>
     public static IServiceCollection AddKmicSubscriptions(this IServiceCollection services, string module, Action<IMessagingBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -94,9 +88,6 @@ public static class ApplicationServiceCollectionExtensions
     /// <summary>
     /// 登记一个模块的定时任务
     /// </summary>
-    /// <remarks>
-    /// 校验在第一次取定时任务目录时统一做，启动时同步到调度器那一步会取
-    /// </remarks>
     public static IServiceCollection AddKmicScheduling(this IServiceCollection services, string module, Action<ISchedulingBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(services);

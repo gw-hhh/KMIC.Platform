@@ -11,8 +11,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// 列表允许排序的字段
 /// </summary>
 /// <remarks>
-/// 在列表的静态字段里声明一次，请求里的排序字段只能是这里登记的名字，不会拼进 SQL。
-/// 框架在最后追加 Id 作为排序键，保证同值的记录在分页之间不漂移，所以列表项类型要有 Id 属性
+/// 列表项类型要有 Id 属性
 /// </remarks>
 /// <typeparam name="T">列表项类型，排序在投影之后的列表项上做</typeparam>
 [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "声明写法是 SortMap<列表项>.Field(...)，类型参数写在左边，调用处不用再写一遍")]

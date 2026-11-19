@@ -4,11 +4,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
 /// <summary>
-/// 消息与缓存失效的监听连接
+/// 消息与缓存失效的监听连接，断开算降级
 /// </summary>
-/// <remarks>
-/// 断开时消息和作业靠兜底轮询继续处理，缓存失效要等重连后整体清空，所以断开算降级，不算不可用
-/// </remarks>
 internal sealed class ListenerDependencyCheck(MessagingListener listener) : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)

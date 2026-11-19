@@ -13,9 +13,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 各模块的框架表名
 /// </summary>
-/// <remarks>
-/// 投递程序要写别的模块的 Inbox，这是框架基础设施的例外，模块代码不能这样做
-/// </remarks>
 internal sealed class ModuleFrameworkTables(IEnumerable<ModuleWriteContext> registrations, IExecutionScopeFactory scopes)
 {
     private readonly Lazy<FrozenDictionary<string, FrameworkTableNames>> _byModule = new(() => Load(registrations, scopes));

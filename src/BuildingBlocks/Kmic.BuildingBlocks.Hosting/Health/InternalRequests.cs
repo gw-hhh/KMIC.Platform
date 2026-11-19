@@ -4,11 +4,10 @@ using System.Net.Sockets;
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
 /// <summary>
-/// 判断请求是不是直接来自内网，用来保护只给运维和监控看的端点
+/// 判断请求是不是直接来自内网
 /// </summary>
 /// <remarks>
-/// 反向代理不对外开放这类端点，这里再加一层：来源必须是本机或私有地址，并且没有经过代理转发。
-/// 经反向代理进来的请求都带转发头，一律不算内网，即使代理本身在内网
+/// 经反向代理转发的请求一律不算内网
 /// </remarks>
 internal static class InternalRequests
 {

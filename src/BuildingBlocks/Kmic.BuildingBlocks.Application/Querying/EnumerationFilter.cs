@@ -8,8 +8,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// 列表按枚举编码筛选：把请求里的编码换成枚举值
 /// </summary>
 /// <remarks>
-/// 枚举在库里存的是编码，EF 只能拿枚举值和列比较，翻译不了 <c>Status.Code</c> 这样的属性访问，
-/// 所以先在这里换成枚举值，查询里写 <c>values.Contains(x.Status)</c>。编码不认识时按字段错误返回，不当作“没有匹配”
+/// 查询里写 <c>values.Contains(x.Status)</c>
 /// </remarks>
 public static class EnumerationFilter
 {

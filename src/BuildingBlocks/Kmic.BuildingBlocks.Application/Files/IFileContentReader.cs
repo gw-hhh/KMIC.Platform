@@ -1,11 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.Files;
 
 /// <summary>
-/// 读取文件内容：下载响应用它打开存储里的对象
+/// 读取文件内容，给下载响应用
 /// </summary>
 /// <remarks>
-/// 存储本身（IFileStorage）只有 Files 模块和框架基础设施能用，这是给下载响应的窄接口，只读、只认存储键。
-/// 业务代码拿到存储键的唯一来源是业务的下载查询，那里已经完成了授权
+/// 不检查权限，存储键要来自已授权的下载查询
 /// </remarks>
 public interface IFileContentReader
 {

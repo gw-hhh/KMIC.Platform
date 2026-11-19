@@ -10,9 +10,6 @@ public static class FileStorageKeys
     /// <summary>
     /// 按环境、年月和文件 ID 生成存储键：{环境}/{yyyy}/{MM}/{fileId}
     /// </summary>
-    /// <remarks>
-    /// 不含原始文件名：防路径穿越、防覆盖、防通过文件名猜测
-    /// </remarks>
     public static string For(string environment, Guid fileId, DateTimeOffset at)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(environment);

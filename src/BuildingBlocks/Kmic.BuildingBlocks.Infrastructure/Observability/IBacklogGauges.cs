@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 /// 模块自己的积压量表
 /// </summary>
 /// <remarks>
-/// 每个采样间隔读一次，Api 和 Worker 实例都会读，所以查询要走后台池、只读未完成的行
+/// 查询要走后台池、只读未完成的行
 /// </remarks>
 public interface IBacklogGauges
 {

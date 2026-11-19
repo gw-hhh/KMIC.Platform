@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Events;
 /// 集成事件发布
 /// </summary>
 /// <remarks>
-/// 只能在命令处理器和领域事件处理器里调用。消息和业务数据在同一个事务里写入 Outbox，命令失败就不会发出
+/// 只能在命令处理器和领域事件处理器里调用
 /// </remarks>
 public interface IIntegrationEventPublisher
 {

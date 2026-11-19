@@ -8,9 +8,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 不区分大小写的排序规则
 /// </summary>
-/// <remarks>
-/// 列在建表时就绑定到具体的排序规则对象。只靠 IF NOT EXISTS 的话，库里已有一个区分大小写的同名对象时会直接沿用，唯一约束就不再忽略大小写，所以创建之后还要核对
-/// </remarks>
 public static class CaseInsensitiveCollation
 {
     private const string Locale = "und-u-ks-level2";

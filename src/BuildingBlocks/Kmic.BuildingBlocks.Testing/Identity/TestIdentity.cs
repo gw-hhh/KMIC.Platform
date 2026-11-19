@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
 /// <summary>
-/// 测试身份
+/// 测试身份，直接构造访问上下文
 /// </summary>
-/// <remarks>
-/// 直接构造访问上下文，不经过登录。每个方法都返回新实例
-/// </remarks>
 /// <example>
 /// <code>
 /// var actor = TestIdentity.User("销售甲")

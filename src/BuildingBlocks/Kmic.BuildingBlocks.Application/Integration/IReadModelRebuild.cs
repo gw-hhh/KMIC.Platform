@@ -3,11 +3,8 @@ using Kmic.BuildingBlocks.Application.ReadModels;
 namespace Kmic.BuildingBlocks.Application.Integration;
 
 /// <summary>
-/// 订阅声明的读模型重建方式，把快照类型、来源接口和读模型的泛型参数藏在里面，重建作业用不着知道它们
+/// 订阅声明的读模型重建方式
 /// </summary>
-/// <remarks>
-/// 方法里的 services 是重建作业当前的作用域
-/// </remarks>
 internal interface IReadModelRebuild
 {
     /// <summary>

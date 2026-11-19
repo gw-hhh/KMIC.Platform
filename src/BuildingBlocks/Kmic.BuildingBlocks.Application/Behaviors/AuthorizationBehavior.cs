@@ -12,7 +12,7 @@ namespace Kmic.BuildingBlocks.Application.Behaviors;
 /// 权限点检查
 /// </summary>
 /// <remarks>
-/// 数据权限、资源策略和状态检查在处理器里做
+/// 只查权限点，数据权限和资源策略在处理器里查
 /// </remarks>
 public sealed class AuthorizationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,

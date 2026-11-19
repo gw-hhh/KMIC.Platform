@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// 页码分页参数
 /// </summary>
 /// <remarks>
-/// 页码从 1 开始；每页数量 1 到 <see cref="MaxPageSize"/>，超出范围由 ToPagedAsync 返回校验错误
+/// 页码从 1 开始，每页数量 1 到 <see cref="MaxPageSize"/>
 /// </remarks>
 /// <param name="Page">页码</param>
 /// <param name="PageSize">每页数量</param>

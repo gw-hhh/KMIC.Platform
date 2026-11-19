@@ -6,9 +6,6 @@ namespace Kmic.BuildingBlocks.Testing.Metrics;
 /// <summary>
 /// 记录一个指标工厂创建的所有指标，供测试断言
 /// </summary>
-/// <remarks>
-/// 按工厂过滤：同一个进程里并行的其他测试用自己的工厂，互不干扰
-/// </remarks>
 public sealed class MetricRecorder : IDisposable
 {
     private readonly MeterListener _listener = new();

@@ -15,12 +15,8 @@ public static class CacheServiceCollectionExtensions
     private const string InnerCacheKey = "Kmic.Cache.Inner";
 
     /// <summary>
-    /// 注册 HybridCache 及其命中统计、提交后失效和跨实例的失效通知
+    /// 注册 HybridCache 及其命中统计和失效通知
     /// </summary>
-    /// <remarks>
-    /// 业务代码只用 HybridCache。没有配置 Redis 时只有本地缓存。失效通知走数据库的监听连接，
-    /// 只做 Api 的实例也要监听，所以这里也注册监听
-    /// </remarks>
     public static IServiceCollection AddKmicCache(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

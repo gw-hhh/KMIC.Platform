@@ -18,9 +18,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 /// <summary>
 /// 一次作业执行的进度、检查点与批次提交
 /// </summary>
-/// <remarks>
-/// 每一批在新的作用域里以提交人的身份发送，照常经过完整管道；检查点作为提交前的步骤带令牌写入，和业务数据一起提交
-/// </remarks>
 internal sealed class JobContext(
     JobStore store,
     IExecutionScopeFactory scopes,
@@ -88,11 +85,8 @@ internal sealed class JobContext(
     }
 
     /// <summary>
-    /// 框架自己的作业写一页：不经过命令管道，写入和检查点在同一个事务里提交
+    /// 框架自己的作业写一页，写入和检查点同一个事务提交
     /// </summary>
-    /// <remarks>
-    /// 结果和 SendBatchAsync 一样处理：被接管或提交结果未知时本地停下，由领取流程收尾
-    /// </remarks>
     public async ValueTask<Result> WritePageAsync(Func<IServiceProvider, CancellationToken, Task> write, object checkpoint, long done)
     {
         ArgumentNullException.ThrowIfNull(write);

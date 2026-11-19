@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Application.Errors;
 /// <summary>
 /// 错误目录：全部命名为 *Errors 的静态类里声明的错误
 /// </summary>
-/// <remarks>
-/// 前端据此生成错误码常量。两个不同的错误用了同一个错误码时拒绝启动
-/// </remarks>
 public sealed class ErrorCatalog
 {
     private readonly FrozenDictionary<string, ErrorDefinition> _byCode;

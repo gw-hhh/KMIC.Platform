@@ -9,10 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 查询可见性检查
 /// </summary>
-/// <remarks>
-/// 查询上下文用的是另一个连接，查不到本命令还没提交的修改。开发和测试环境下，命令改了数据之后再查本模块就抛异常，
-/// 提醒改为从仓储读取。先查后改不受影响，Contracts 查询不检查
-/// </remarks>
 internal sealed class QueryVisibilityGuard(ExecutionScope execution, ModuleWriteContexts writeContexts) : DbCommandInterceptor
 {
     public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)

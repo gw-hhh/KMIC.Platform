@@ -6,8 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Access;
 /// 签发访问令牌
 /// </summary>
 /// <remarks>
-/// 令牌里只有用户、会话、当前角色和客户端类型，不放权限和数据范围：它们每个请求从服务端加载，变化立即生效。
-/// 实现在接口层，和验证用同一套配置
+/// 令牌里不放权限和数据范围
 /// </remarks>
 public interface IAccessTokenIssuer
 {

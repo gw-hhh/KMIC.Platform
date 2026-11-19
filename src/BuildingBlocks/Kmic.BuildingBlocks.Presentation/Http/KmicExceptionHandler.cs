@@ -7,9 +7,6 @@ namespace Kmic.BuildingBlocks.Presentation.Http;
 /// <summary>
 /// 把请求本身的问题转成 4xx：请求体无法解析、请求体太大等
 /// </summary>
-/// <remarks>
-/// 其他异常不处理，交给异常处理中间件按未处理异常写成 500
-/// </remarks>
 internal sealed class KmicExceptionHandler(IProblemDetailsService problems) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)

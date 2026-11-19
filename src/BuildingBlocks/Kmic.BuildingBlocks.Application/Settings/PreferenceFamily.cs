@@ -3,11 +3,10 @@ using System.Text.RegularExpressions;
 namespace Kmic.BuildingBlocks.Application.Settings;
 
 /// <summary>
-/// 偏好族：一组键带后缀的偏好，后端只管键的格式和值的大小，不理解内容
+/// 偏好族：一组键带后缀的偏好，后端不理解内容
 /// </summary>
 /// <remarks>
-/// 纯前端的展示偏好（外壳设置、表格列设置）用它：每加一个表格就多一个键，不可能逐个在后端声明。
-/// 内容由前端按带版本号的格式容错读取
+/// 给纯前端的展示偏好用，如表格列设置
 /// </remarks>
 public sealed partial class PreferenceFamily
 {

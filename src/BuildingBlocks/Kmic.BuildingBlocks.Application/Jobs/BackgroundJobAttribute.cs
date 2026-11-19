@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 /// 后台作业的声明
 /// </summary>
 /// <remarks>
-/// Permission 和 SystemOnly 必须写一个：用户提交的作业提交与执行时都检查权限点，系统专用的只能由系统身份提交
+/// Permission 和 SystemOnly 必须写一个
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class BackgroundJobAttribute(string name, string displayName) : Attribute
@@ -38,7 +38,7 @@ public sealed class BackgroundJobAttribute(string name, string displayName) : At
     /// 中断后是否从检查点续跑
     /// </summary>
     /// <remarks>
-    /// 不声明的作业中断后标记失败，要用户重新提交。只有处理器正确使用了检查点、或重做没有副作用时才能声明
+    /// 只有正确用了检查点或重做没有副作用才能声明
     /// </remarks>
     public bool Resumable { get; init; }
 
@@ -48,10 +48,10 @@ public sealed class BackgroundJobAttribute(string name, string displayName) : At
     public int MaxConcurrentPerUser { get; init; } = 3;
 
     /// <summary>
-    /// 作业结束时是否写一条审计事件
+    /// 作业结束时是否写审计事件
     /// </summary>
     /// <remarks>
-    /// 名称里有 Export 的作业必须审计。作业里每一批发送的命令按各自的 [Audited] 另行审计
+    /// 名称里有 Export 的作业必须审计
     /// </remarks>
     public bool Audited { get; init; }
 }

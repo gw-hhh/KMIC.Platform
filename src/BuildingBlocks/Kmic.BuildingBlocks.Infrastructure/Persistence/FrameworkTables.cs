@@ -9,9 +9,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 框架表
 /// </summary>
-/// <remarks>
-/// 每个模块的 schema 里都有，和业务数据在同一个事务里写入
-/// </remarks>
 internal static class FrameworkTables
 {
     public const string Idempotency = nameof(IdempotencyRecord);

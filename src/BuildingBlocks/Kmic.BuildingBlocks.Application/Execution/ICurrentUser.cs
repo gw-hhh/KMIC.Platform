@@ -38,10 +38,10 @@ public interface ICurrentUser
     SessionId? SessionId { get; }
 
     /// <summary>
-    /// 原始操作人
+    /// 原始操作人：系统身份处理事件时，引发事件的用户
     /// </summary>
     /// <remarks>
-    /// 系统身份处理事件时，引发事件的用户。只用于审计
+    /// 只用于审计
     /// </remarks>
     UserId? OnBehalfOf { get; }
 }

@@ -9,7 +9,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 值类型映射约定
 /// </summary>
 /// <remarks>
-/// 智能枚举和枚举存为编码，单值值对象存为原始值。必须在建模之前登记，否则 EF 会把这些引用类型当成实体
+/// 必须在建模之前登记
 /// </remarks>
 internal static class ValueTypeConventions
 {

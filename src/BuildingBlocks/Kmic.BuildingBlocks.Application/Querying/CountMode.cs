@@ -4,8 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// 列表总数的计数方式
 /// </summary>
 /// <remarks>
-/// 数据量会持续增长的列表用 <see cref="CappedAt"/>：最多数到上限加一行，超过上限时不再精确计数，
-/// 也不能翻到上限之后的页（要缩小筛选范围或改用导出）
+/// 持续增长的列表用 <see cref="CappedAt"/>
 /// </remarks>
 public readonly record struct CountMode
 {

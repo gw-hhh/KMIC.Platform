@@ -6,8 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Observability;
 /// 按数据分类处理一个值
 /// </summary>
 /// <remarks>
-/// 脱敏器（<see cref="SecretRedactor" />、<see cref="PersonalRedactor" />、<see cref="InternalRedactor" />）由宿主注册进
-/// Compliance 的脱敏器提供者；不经依赖注入、直接处理字符串的地方（日志的解构策略）用这里的方法
+/// 给不经依赖注入的地方用，如日志的解构策略
 /// </remarks>
 public static class KmicRedactors
 {

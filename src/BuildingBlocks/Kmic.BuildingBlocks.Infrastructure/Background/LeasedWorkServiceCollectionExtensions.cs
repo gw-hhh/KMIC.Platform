@@ -8,11 +8,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Background;
 public static class LeasedWorkServiceCollectionExtensions
 {
     /// <summary>
-    /// 登记一个队列并让框架为它运行领取循环
+    /// 登记一个队列，由框架运行领取循环
     /// </summary>
     /// <remarks>
-    /// 在模块的 AddWorkerServices 里调用，所以只有带 Worker 角色的实例才有这个循环。队列类型登记为单例，
-    /// 要读写数据库就用 IExecutionScopeFactory 建作用域；同一个条目类型只能登记一个队列
+    /// 队列是单例，读写数据库要用 IExecutionScopeFactory 建作用域
     /// </remarks>
     /// <typeparam name="TWork">队列的实现</typeparam>
     /// <typeparam name="TItem">领取到的一条</typeparam>

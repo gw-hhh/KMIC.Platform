@@ -6,10 +6,6 @@ namespace Kmic.ServiceDefaults;
 /// <summary>
 /// 按属性名兜底脱敏
 /// </summary>
-/// <remarks>
-/// 以数据分类标注为主要脱敏依据；此处补充遮盖名称含 Password、Token、Secret 等敏感词的属性。
-/// 属性值统一替换为 ***，嵌套对象、字典和集合也递归处理
-/// </remarks>
 internal sealed class SensitivePropertyMasker : ILogEventEnricher
 {
     private const string Mask = "***";

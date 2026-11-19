@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Numbering;
 /// 业务编号生成
 /// </summary>
 /// <remarks>
-/// 取号会锁住计数到事务结束，所以放在处理器最后一步，取号后不要再做耗时操作
+/// 取号会锁住计数到事务结束，放在处理器最后一步
 /// </remarks>
 public interface INumberGenerator
 {

@@ -4,10 +4,10 @@ using Xunit;
 namespace Kmic.BuildingBlocks.Testing.Database;
 
 /// <summary>
-/// 测试类的数据库
+/// 测试类的数据库：从模板库克隆，类结束时删除
 /// </summary>
 /// <remarks>
-/// 每个测试类一个，从模板库克隆，类结束时删除。同一个类里的测试共用它和 <see cref="Shared{T}"/> 里的对象，各自只断言自己的数据；需要空库的测试放进单独的类
+/// 同一个类的测试共用它，各自只断言自己的数据
 /// </remarks>
 /// <typeparam name="TTemplate">模板库</typeparam>
 public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetime
@@ -44,7 +44,7 @@ public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetim
     /// 取同一个测试类共用的对象（如测试宿主），第一次取时创建
     /// </summary>
     /// <remarks>
-    /// 同一类型只创建一次，之后传入的 create 不再调用，所以同一个类里它用到的参数要一致
+    /// 同一类型只创建一次，之后传入的 create 不再调用
     /// </remarks>
     public T Shared<T>(Func<T> create)
         where T : class, IAsyncDisposable

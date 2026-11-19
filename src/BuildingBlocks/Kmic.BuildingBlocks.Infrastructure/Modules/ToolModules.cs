@@ -3,10 +3,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Modules;
 /// <summary>
 /// 运维程序（迁移程序、运维命令）认识的模块
 /// </summary>
-/// <remarks>
-/// 运维程序不接请求，只需要模块的服务端注册类。它们和宿主各写一份模块清单，新建模块的脚本会一并登记；
-/// 架构测试核对两份清单没有漏掉模块
-/// </remarks>
 public sealed class ToolModules
 {
     private readonly List<(IModule Module, bool NonProductionOnly)> _modules = [];
@@ -26,7 +22,7 @@ public sealed class ToolModules
     /// 当前环境要处理的模块，按名称排序
     /// </summary>
     /// <remarks>
-    /// 配置里关闭的模块仍然处理：模块在某个环境暂时关闭，不影响它的数据库结构要保持最新
+    /// 配置里关闭的模块仍然处理
     /// </remarks>
     public IReadOnlyList<IModule> For(bool production) =>
     [

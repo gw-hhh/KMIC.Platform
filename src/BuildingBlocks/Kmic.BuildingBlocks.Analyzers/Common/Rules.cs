@@ -3,11 +3,8 @@ using Microsoft.CodeAnalysis;
 namespace Kmic.BuildingBlocks.Analyzers.Common;
 
 /// <summary>
-/// 诊断规则
+/// 诊断规则，一律是错误级别
 /// </summary>
-/// <remarks>
-/// 框架规则一律是错误级别
-/// </remarks>
 internal static class Rules
 {
     public const string DomainCategory = "Kmic.Domain";
@@ -18,7 +15,7 @@ internal static class Rules
     /// 创建诊断规则
     /// </summary>
     /// <remarks>
-    /// message 写哪里错、怎么改，末尾不加句号。description 写规则的原因，IDE 悬停时显示
+    /// message 写哪里错、怎么改，description 写原因
     /// </remarks>
     public static DiagnosticDescriptor Create(string id, string category, string title, string message, string description, params string[] customTags) =>
         new(id, title, message, category, DiagnosticSeverity.Error, isEnabledByDefault: true, description, customTags: customTags);

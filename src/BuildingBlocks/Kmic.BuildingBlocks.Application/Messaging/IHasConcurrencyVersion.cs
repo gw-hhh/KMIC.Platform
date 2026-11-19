@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Messaging;
 /// 带版本号的命令结果
 /// </summary>
 /// <remarks>
-/// 保存后会换成新版本号，处理器按当前值填写即可
+/// 保存后会换成新版本号，处理器按当前值填即可
 /// </remarks>
 public interface IHasConcurrencyVersion
 {

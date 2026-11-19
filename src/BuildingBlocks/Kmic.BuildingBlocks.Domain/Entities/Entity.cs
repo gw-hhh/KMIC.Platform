@@ -1,11 +1,8 @@
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
 /// <summary>
-/// 实体基类
+/// 实体基类，类型和 ID 都相同即相等
 /// </summary>
-/// <remarks>
-/// 类型和 ID 都相同即相等
-/// </remarks>
 public abstract class Entity<TId> : IEquatable<Entity<TId>>
     where TId : notnull
 {

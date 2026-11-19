@@ -8,10 +8,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 一条读模型写入语句要用的表名、列名和参数
 /// </summary>
-/// <remarks>
-/// 表名、列名和值的转换都取自 EF 模型，参数按列的类型映射创建。
-/// 不带行时只用来按列名查询或批量更新，带行时写入这一行的数据列
-/// </remarks>
 internal sealed class ReadModelStatement(IEntityType entity, DbCommand factory) : IAsyncDisposable
 {
     // 这几列由框架维护，不取行上的值

@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Messaging;
 /// 查询发送
 /// </summary>
 /// <remarks>
-/// 命令处理器可以注入它，但查不到本命令还没保存的修改
+/// 查不到本命令还没保存的修改
 /// </remarks>
 public interface IQuerySender
 {

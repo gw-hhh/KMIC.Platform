@@ -6,11 +6,6 @@ namespace Kmic.BuildingBlocks.Application.Querying;
 /// <summary>
 /// 把排序放到投影之前执行
 /// </summary>
-/// <remarks>
-/// 列表先投影成列表项再分页，排序字段却是按列表项声明的。EF 翻译不了“对构造函数投影出来的对象取成员再排序”，
-/// 所以查询的最后一步是投影时，把排序键里的列表项成员换回投影里对应的表达式，先排序再投影。
-/// 不是投影结尾的查询（本来就是实体，或者内存里的数据）直接排序
-/// </remarks>
 internal static class ProjectionOrdering
 {
     private static readonly MethodInfo _select = Queryable("Select", lambdaParameters: 1);

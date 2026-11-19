@@ -12,9 +12,6 @@ public static class JobHarness
     /// <summary>
     /// 依次执行所有模块里排队的作业，直到没有可领取的，返回执行的个数
     /// </summary>
-    /// <remarks>
-    /// 作业执行中提交的新作业也会接着执行
-    /// </remarks>
     public static async Task<int> RunJobsAsync(this IServiceProvider services, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(services);

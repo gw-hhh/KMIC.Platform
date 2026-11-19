@@ -14,10 +14,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 /// <summary>
 /// 按标签让缓存失效
 /// </summary>
-/// <remarks>
-/// 提交之后先清本实例，再用数据库通知告诉其他实例清它们的本地缓存，不依赖 Redis。通知只在连接着的实例上有效，
-/// 监听连接断开重连后，本实例清空全部本地缓存：宁可多查一次库，也不读到旧值
-/// </remarks>
 internal sealed class CacheInvalidator(
     HybridCache cache, DataSources dataSources, IOptions<CacheOptions> options, FrameworkMetrics metrics, ILogger<CacheInvalidator> logger)
 {

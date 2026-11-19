@@ -11,10 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 /// <summary>
 /// 把一个模块 Outbox 里的消息复制到各订阅方模块的 Inbox
 /// </summary>
-/// <remarks>
-/// 每个订阅方模块单独一个事务写入。写 Inbox 前在同一事务里锁住并复核来源行，
-/// 这样已经被别人接管、标记或清理的消息，任何迟到的投递者都写不进 Inbox
-/// </remarks>
 internal sealed class OutboxDispatcher(
     ModuleFrameworkTables tables,
     DataSources dataSources,

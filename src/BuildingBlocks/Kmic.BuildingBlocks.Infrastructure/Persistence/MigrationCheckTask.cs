@@ -11,10 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 启动时核对数据库结构
 /// </summary>
-/// <remarks>
-/// 开发环境自动执行全部迁移；其他环境只检查，发现有未执行的迁移就拒绝启动，避免新代码跑在旧表结构上。
-/// 排在所有启动任务之前：后面的任务都要读写表
-/// </remarks>
 internal sealed class MigrationCheckTask(
     IServiceProvider services,
     IOptions<DatabaseOptions> options,

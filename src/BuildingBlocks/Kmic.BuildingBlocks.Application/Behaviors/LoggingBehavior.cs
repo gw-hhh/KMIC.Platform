@@ -9,11 +9,8 @@ using Microsoft.Extensions.Options;
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
 /// <summary>
-/// 请求日志
+/// 请求日志，不记录消息内容
 /// </summary>
-/// <remarks>
-/// 不记录消息内容，里面可能有敏感字段。排查时按追踪 ID 找请求日志
-/// </remarks>
 public sealed class LoggingBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     IExecutionContext context,

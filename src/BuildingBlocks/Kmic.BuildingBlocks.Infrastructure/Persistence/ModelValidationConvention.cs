@@ -7,10 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 模型校验约定
 /// </summary>
-/// <remarks>
-/// 不在 OnModelCreating 里校验：那时值对象这类类型还被 EF 临时当成实体，要到 ModelFinalizing 才清理掉。
-/// 这个约定最后加入，在 EF 清理之后运行
-/// </remarks>
 internal sealed class ModelValidationConvention(string module, DataScopeObjectCatalog scopeObjects) : IModelFinalizingConvention
 {
     public void ProcessModelFinalizing(IConventionModelBuilder modelBuilder, IConventionContext<IConventionModelBuilder> context)

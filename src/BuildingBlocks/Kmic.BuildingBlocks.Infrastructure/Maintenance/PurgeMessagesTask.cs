@@ -11,9 +11,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 /// 每天按保留规则清理 Outbox 与 Inbox
 /// </summary>
 /// <remarks>
-/// Outbox 已投递的消息过了补投窗口才删；Inbox 已处理的行是去重凭证，要等来源的 Outbox 行删掉之后才能删。
-/// 两边各按天数删会出问题：某个订阅方一直失败、来源行进了死信，其他订阅方的凭证先被删了，
-/// 运维重试死信时消息会再写进它们的 Inbox 又执行一遍。未投递、死信、放弃的消息都不自动删
+/// Inbox 的去重凭证要等来源 Outbox 行删了才能删
 /// </remarks>
 internal sealed class PurgeMessagesTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {

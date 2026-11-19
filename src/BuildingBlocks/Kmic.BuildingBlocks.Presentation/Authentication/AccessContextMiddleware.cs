@@ -11,11 +11,6 @@ namespace Kmic.BuildingBlocks.Presentation.Authentication;
 /// <summary>
 /// 令牌验证通过之后，为每个请求加载访问上下文并设置当前身份
 /// </summary>
-/// <remarks>
-/// 令牌里只有用户、会话和当前角色，权限和数据范围每个请求从服务端加载，变更立即生效。
-/// 会话已失效的令牌按没有登录处理，不是出错：匿名端点（登录、刷新）照常可用，受保护的端点由授权返回 401。
-/// 要放在认证之后、授权之前，并且在路由之后：当前角色不可用时按端点的声明决定放不放行
-/// </remarks>
 internal sealed class AccessContextMiddleware(RequestDelegate next)
 {
     public const string AuthorizationVersionHeader = "X-Authz-Version";

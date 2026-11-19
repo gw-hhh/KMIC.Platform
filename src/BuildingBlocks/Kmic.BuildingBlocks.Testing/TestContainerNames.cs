@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Testing;
 /// <summary>
 /// 测试容器的命名：在 Docker Desktop 里一眼能看出是什么、属于谁
 /// </summary>
-/// <remarks>
-/// 容器名只能用英文字母、数字、点、下划线和短横线，不能用中文。名字里带随机后缀，同时跑两次测试也不会重名
-/// </remarks>
 internal static class TestContainerNames
 {
     /// <summary>

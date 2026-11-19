@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 常用小数精度
 /// </summary>
 /// <remarks>
-/// 目前是占位值，具体位数等业务确认。确认前不要在业务表里依赖这里的小数位
+/// 目前是占位值，业务确认前不要依赖这里的小数位
 /// </remarks>
 public static class Precisions
 {

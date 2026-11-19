@@ -4,11 +4,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
 /// <summary>
-/// 测试组织树
+/// 测试组织树，按名称建树、按名称取 ID
 /// </summary>
-/// <remarks>
-/// 按名称建树，按名称取 ID
-/// </remarks>
 /// <example>
 /// <code>
 /// var org = TestOrgTree.Create(t => t.Unit("总部", hq => hq.Unit("华东", east => east.Unit("上海").Unit("杭州"))));

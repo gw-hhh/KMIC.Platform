@@ -11,9 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 数据权限过滤器
 /// </summary>
-/// <remarks>
-/// 条件通过上下文成员读取当前请求的范围，EF 每次执行时把它们当参数传，查询只编译一次
-/// </remarks>
 internal static class DataScopeFilters
 {
     private static readonly MethodInfo _containsOrgUnit = typeof(Enumerable).GetMethods()

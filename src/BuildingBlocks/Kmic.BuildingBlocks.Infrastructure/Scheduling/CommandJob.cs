@@ -8,9 +8,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 /// <summary>
 /// 框架唯一的 Quartz 作业：按任务名找到声明，发送它的命令或执行框架任务
 /// </summary>
-/// <remarks>
-/// 同一个任务不并发执行。进程崩溃时不自动恢复，等下一次触发或手动执行：命令没提交就没有副作用，框架任务本来就可以重复执行
-/// </remarks>
 [DisallowConcurrentExecution]
 internal sealed class CommandJob(ScheduledTasks tasks, ScheduledCommandRunner runner, ILogger<CommandJob> logger) : IJob
 {

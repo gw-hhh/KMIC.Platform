@@ -39,7 +39,7 @@ public sealed record AccessLoadResult
     /// 当前角色已不可用
     /// </summary>
     /// <remarks>
-    /// 访问上下文是用户自己的、没有这个角色的权限和数据范围的版本：只够查看自己的信息和切换角色
+    /// 返回的访问上下文只够查看自己的信息和切换角色
     /// </remarks>
     public static AccessLoadResult CurrentRoleUnavailable(IAccessContext access)
     {

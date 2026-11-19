@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.Numbering;
 /// 编号规则
 /// </summary>
 /// <remarks>
-/// 占位符：{yyyy} {yy} {MM} {dd} 是取号日期，{seq:N} 是至少 N 位的序号，{partition} 是分组键，其他字符原样输出
+/// 占位符：{yyyy} {yy} {MM} {dd} 是取号日期，{seq:N} 是至少 N 位的序号，{partition} 是分组键
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class NumberRuleAttribute(string format) : Attribute

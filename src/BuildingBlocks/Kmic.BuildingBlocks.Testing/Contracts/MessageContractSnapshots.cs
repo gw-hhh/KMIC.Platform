@@ -8,11 +8,10 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 namespace Kmic.BuildingBlocks.Testing.Contracts;
 
 /// <summary>
-/// 集成消息的契约快照
+/// 集成消息的契约快照，每个消息一个 JSON Schema 文件
 /// </summary>
 /// <remarks>
-/// 每个消息一个 JSON Schema 文件，进版本管理。消息在 Outbox、Inbox 里存着，旧格式的消息还要能被新代码读出来，
-/// 所以契约的任何改动都要有人明确确认：兼容的改动（新增可空字段）更新快照即可，破坏性的改动要新建高一个版本的消息类
+/// 兼容的改动更新快照即可，破坏性的改动要新建高一个版本的消息类
 /// </remarks>
 public static class MessageContractSnapshots
 {
@@ -26,9 +25,6 @@ public static class MessageContractSnapshots
     /// <summary>
     /// 从入口程序集出发，沿着 Kmic 程序集的引用找到全部契约程序集
     /// </summary>
-    /// <remarks>
-    /// 宿主引用了哪些模块，就检查哪些模块的契约，新增模块不用另外登记
-    /// </remarks>
     public static IReadOnlyList<Assembly> FindContractAssemblies(Assembly entry)
     {
         ArgumentNullException.ThrowIfNull(entry);

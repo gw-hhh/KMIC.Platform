@@ -11,10 +11,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 读模型写入
 /// </summary>
-/// <remarks>
-/// 三种写入都是一条 INSERT … ON CONFLICT DO UPDATE … WHERE NOT "IsTerminal"：并发时后到的事务等先到的提交，
-/// 再按最新的行重新判断，所以迟到的旧快照不会把终态改回来。表名、列名和值的转换都取自 EF 模型
-/// </remarks>
 internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadModelWriter<T>, IReadModelMaintenance<T>
     where T : class, IReadModel
 {

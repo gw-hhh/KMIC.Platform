@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Application.ReadModels;
 /// 读模型写入
 /// </summary>
 /// <remarks>
-/// 在同步命令的处理器里调用，和 Inbox 的“已处理”一起提交。重复、乱序、重建与实时同步交错，结果都是保留版本最高的快照
+/// 在同步命令的处理器里调用
 /// </remarks>
 public interface IReadModelWriter<in T>
     where T : class, IReadModel
@@ -15,10 +15,10 @@ public interface IReadModelWriter<in T>
     Task<bool> UpsertAsync(T row, CancellationToken ct);
 
     /// <summary>
-    /// 收到物理删除的快照：置为终态，版本取这次事件的版本；本地还没有这一行时写入一行终态
+    /// 收到物理删除的快照：置为终态
     /// </summary>
     /// <remarks>
-    /// row 只需要 ID、来源版本和状态，其余字段写占位值即可
+    /// row 只需要 ID、来源版本和状态，其余字段写占位值
     /// </remarks>
     Task<bool> PurgeAsync(T row, CancellationToken ct);
 

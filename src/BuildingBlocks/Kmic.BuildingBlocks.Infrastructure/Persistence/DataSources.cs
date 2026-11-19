@@ -7,10 +7,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// <summary>
 /// 连接池
 /// </summary>
-/// <remarks>
-/// 写入上下文只用事务池，查询上下文只用读池。命令占着事务连接时，嵌套查询从读池借，不会等事务池，
-/// 所以并发命令把事务池占满也不会互相卡死。创建时不连接数据库
-/// </remarks>
 internal sealed class DataSources : IAsyncDisposable
 {
     private readonly NpgsqlDataSource _apiTransactions;

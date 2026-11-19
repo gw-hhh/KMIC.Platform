@@ -8,11 +8,10 @@ public static class ConcurrencyEndpointExtensions
     private static readonly string[] _known = [ConcurrencyPolicies.Heavy, ConcurrencyPolicies.HeavyPerUser];
 
     /// <summary>
-    /// 声明这是重型接口，并发超出限制时立即返回 429，不排队
+    /// 声明重型接口，并发超出限制时立即返回 429
     /// </summary>
     /// <remarks>
-    /// 统计、大范围查询、同步预览这类占用大量数据库或内存的端点必须声明。
-    /// 并发许可覆盖整个请求处理过程，流式响应写完才释放
+    /// 统计、大范围查询这类端点必须声明
     /// </remarks>
     /// <param name="policies">策略名，见 <see cref="ConcurrencyPolicies"/>，可以同时用多个</param>
     public static TBuilder RequireConcurrency<TBuilder>(this TBuilder builder, params string[] policies)

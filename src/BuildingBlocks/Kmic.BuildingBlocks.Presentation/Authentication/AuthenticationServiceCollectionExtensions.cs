@@ -15,7 +15,7 @@ public static class AuthenticationServiceCollectionExtensions
     /// 注册访问令牌的验证：JwtBearer，RS256，签名密钥可轮换
     /// </summary>
     /// <remarks>
-    /// 配置在 Kmic:Auth。令牌里的声明保持原名（sub、sid、rid），不映射成 .NET 的声明类型
+    /// 令牌里的声明保持原名（sub、sid、rid）
     /// </remarks>
     public static IServiceCollection AddKmicAuthentication(this IServiceCollection services)
     {

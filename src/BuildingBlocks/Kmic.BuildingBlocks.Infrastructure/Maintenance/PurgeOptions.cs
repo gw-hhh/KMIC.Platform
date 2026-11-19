@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 /// 框架清理任务的配置
 /// </summary>
 /// <remarks>
-/// 各保留期的具体天数还没和业务确认，先用这里的默认值
+/// 保留天数还没和业务确认
 /// </remarks>
 public sealed class PurgeOptions
 {

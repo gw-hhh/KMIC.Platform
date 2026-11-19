@@ -7,8 +7,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 /// 把几段带参数的 SQL 拼成一条
 /// </summary>
 /// <remarks>
-/// <c>SqlQuery</c>、<c>FromSql</c> 只接受一个插值字符串，插值里再放一个插值字符串会被当成一个参数值。
-/// 要把 <see cref="IDataScopeSql"/> 生成的条件放进查询，先用它把各段拼起来，参数仍然是参数
+/// 插值字符串里再嵌插值字符串会变成一个参数值，要用它拼
 /// </remarks>
 public static class SqlFragments
 {

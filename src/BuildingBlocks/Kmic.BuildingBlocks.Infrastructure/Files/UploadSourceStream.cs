@@ -3,11 +3,10 @@ using System.Security.Cryptography;
 namespace Kmic.BuildingBlocks.Infrastructure.Files;
 
 /// <summary>
-/// 交给存储写入的只读流：先给已经读出来识别类型的文件头，再接着读上传的内容；
-/// 边读边算 SHA-256、边数字节，超过上限就中断
+/// 交给存储写入的只读流：边读边算 SHA-256 和字节数，超过上限就中断
 /// </summary>
 /// <remarks>
-/// 只能顺序读一遍。写存储的一端怎么分段、怎么重试都看不到这里的细节
+/// 只能顺序读一遍
 /// </remarks>
 internal sealed class UploadSourceStream(ReadOnlyMemory<byte> header, Stream rest, long maxBytes) : Stream
 {

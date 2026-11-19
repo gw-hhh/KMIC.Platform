@@ -12,9 +12,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
 /// <summary>
 /// 一次命令的审计：收集命令补充的信息，保存前生成审计事件，和业务数据一起写进 Outbox
 /// </summary>
-/// <remarks>
-/// 不自动记录命令参数，里面可能有敏感数据，要记什么由命令自己通过 IAuditContext 写
-/// </remarks>
 internal sealed class AuditRecorder(
     IExecutionContext execution,
     IntegrationEventPublisher publisher,
@@ -41,7 +38,7 @@ internal sealed class AuditRecorder(
     /// 采集这次保存的变更，生成审计事件交给发布器
     /// </summary>
     /// <remarks>
-    /// 在保存之前调用。命令成功但没有任何数据变更时，也记一条没有变更的事件
+    /// 在保存之前调用
     /// </remarks>
     public void Publish(ModuleDbContext context, UseCase useCase)
     {

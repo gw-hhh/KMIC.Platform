@@ -3,9 +3,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Numbering;
 /// <summary>
 /// 业务编号的计数
 /// </summary>
-/// <remarks>
-/// 只用来建表，读写都在 NumberGenerator 里的一条 SQL 里完成。每个规则、周期、分组一行，不清理
-/// </remarks>
 internal sealed class NumberCounterRecord
 {
     /// <summary>

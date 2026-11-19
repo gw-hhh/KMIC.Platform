@@ -6,9 +6,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 /// <summary>
 /// 等待写库的安全事件
 /// </summary>
-/// <remarks>
-/// 写入只入队，不等数据库：攻击来的时候最不该让每个拒绝都同步写库。队列满了丢掉新来的并计数
-/// </remarks>
 internal sealed class SecurityEventQueue
 {
     private readonly Channel<SecurityEventRecord> _channel;

@@ -16,8 +16,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
 /// 从变更跟踪器采集这次保存改了什么
 /// </summary>
 /// <remarks>
-/// 在保存之前采集：保存之后跟踪器里的原值就没有了。新增的记录全部有值的字段，修改的只记录值变了的字段，
-/// 删除只记录类型和 ID。审计列、并发版本号和软删除列不记，它们的含义已经在记录类型里
+/// 要在保存之前采集
 /// </remarks>
 internal static class AuditChanges
 {

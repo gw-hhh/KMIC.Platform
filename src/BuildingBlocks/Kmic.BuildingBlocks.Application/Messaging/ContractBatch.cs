@@ -13,11 +13,10 @@ public static class ContractBatch
     public const int DefaultSize = 1000;
 
     /// <summary>
-    /// 把 ID 去重后按 <paramref name="size"/> 分批查询，合并成一个以 ID 为键的字典
+    /// 按 ID 去重后分批查询，合并成以 ID 为键的字典
     /// </summary>
     /// <remarks>
-    /// 提供方的适配器用它：调用方传多少个 ID 都可以，超过一次的上限就自动分批，每批一个查询，按顺序执行，
-    /// 不会同时占用多条连接。没有查到的 ID 不会出现在结果里；某一批失败就停下，把这个失败原样返回
+    /// 没查到的 ID 不在结果里
     /// </remarks>
     /// <param name="ids">要查的 ID，可以重复，可以为空</param>
     public static async Task<Result<IReadOnlyDictionary<TKey, TValue>>> ChunkedAsync<TKey, TValue>(

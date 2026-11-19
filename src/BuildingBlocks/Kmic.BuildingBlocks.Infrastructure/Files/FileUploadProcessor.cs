@@ -6,11 +6,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Files;
 /// <summary>
 /// 文件上传处理
 /// </summary>
-/// <remarks>
-/// 不整体读入内存，也不落本地临时文件。写存储期间不持有数据库事务，数据库的登记由调用方在前后各用一个短事务完成。
-/// 类型不符、空文件在写入之前就拒绝，存储里不留对象；读流时发现超过上限，中断写入，存储自己清理写了一半的内容
-/// （本地存储删临时文件，S3 中止分段上传）。其他异常（客户端断开、超时、取消）照常向上抛，由调用方把这次上传登记为被拒绝
-/// </remarks>
 public sealed class FileUploadProcessor(IFileStorage storage, FrameworkMetrics metrics) : IFileUploadProcessor
 {
     /// <inheritdoc />

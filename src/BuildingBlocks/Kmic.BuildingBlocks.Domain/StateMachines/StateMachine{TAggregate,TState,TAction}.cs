@@ -8,7 +8,7 @@ namespace Kmic.BuildingBlocks.Domain.StateMachines;
 /// 状态机
 /// </summary>
 /// <remarks>
-/// 声明为聚合根的 private static readonly 字段，所有实例共用
+/// 声明为聚合根的 private static readonly 字段
 /// </remarks>
 public sealed class StateMachine<TAggregate, TState, TAction>
     where TAggregate : class, IAggregateRoot
@@ -38,7 +38,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
     /// 执行动作
     /// </summary>
     /// <remarks>
-    /// 这里不发布领域事件：要不要通知别处由业务决定，聚合根的方法自己 Raise
+    /// 不发布领域事件，聚合根的方法自己 Raise
     /// </remarks>
     public Result Fire(TAggregate aggregate, TAction action, string? reason)
     {

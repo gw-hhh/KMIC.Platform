@@ -69,11 +69,8 @@ public sealed class MessagingOptions
     public double RetryJitter { get; set; } = 0.2;
 
     /// <summary>
-    /// 兜底轮询的间隔
+    /// 兜底轮询的间隔，只在通知丢失时起作用
     /// </summary>
-    /// <remarks>
-    /// 平时靠数据库通知唤醒，这个间隔只在通知丢失（如连接断开）时起作用
-    /// </remarks>
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(10);
 
     /// <summary>

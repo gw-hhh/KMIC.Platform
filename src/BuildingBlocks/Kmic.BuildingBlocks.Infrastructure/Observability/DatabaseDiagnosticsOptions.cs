@@ -19,7 +19,7 @@ public sealed class DatabaseDiagnosticsOptions
     /// 慢查询日志里是否带参数化的 SQL 文本，关闭后只记语句类型（SELECT、UPDATE 等）
     /// </summary>
     /// <remarks>
-    /// 文本里没有参数值，只有占位符；不过表名、列名也算内部信息，生产环境按需要关闭
+    /// 不含参数值，但表名、列名也算内部信息，生产按需关闭
     /// </remarks>
     public bool RecordSqlText { get; set; } = true;
 

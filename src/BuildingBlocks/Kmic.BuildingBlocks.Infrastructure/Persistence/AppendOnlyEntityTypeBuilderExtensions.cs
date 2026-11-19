@@ -9,10 +9,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 public static class AppendOnlyEntityTypeBuilderExtensions
 {
     /// <summary>
-    /// 声明这张表只追加：建表迁移自动对运行账号撤销修改和删除权限，应用只能插入与查询
+    /// 声明这张表只追加，运行账号只能插入与查询
     /// </summary>
     /// <remarks>
-    /// 用在“事后不能改”的记录上，如设置的变更历史。过期数据由迁移程序的维护命令删除，不放在应用的定时任务里
+    /// 过期数据由迁移程序的维护命令删除
     /// </remarks>
     /// <typeparam name="TEntity">实体类型</typeparam>
     public static void IsAppendOnly<TEntity>(this EntityTypeBuilder<TEntity> builder)

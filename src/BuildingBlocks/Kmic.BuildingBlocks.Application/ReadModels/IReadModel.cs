@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Application.ReadModels;
 /// 读模型：别的模块数据在本模块的副本
 /// </summary>
 /// <remarks>
-/// 只能通过 IReadModelWriter 写入。按来源版本取最新，物理删除后成为终态，此后任何同步都不再修改它
+/// 只能通过 IReadModelWriter 写入
 /// </remarks>
 public interface IReadModel
 {
@@ -46,10 +46,7 @@ public interface IReadModel
     Guid? RebuildRunId { get; }
 
     /// <summary>
-    /// 同步时间
+    /// 同步时间，只用于显示和排查
     /// </summary>
-    /// <remarks>
-    /// 只用于显示和排查，不参与任何判断
-    /// </remarks>
     DateTimeOffset SyncedAt { get; }
 }

@@ -9,9 +9,6 @@ namespace Kmic.MigrationRunner;
 /// <summary>
 /// 业务编号计数的维护命令
 /// </summary>
-/// <remarks>
-/// 导入旧数据之后，把计数抬到旧编号的最大序号，新编号才不会和旧编号重复
-/// </remarks>
 internal static class NumbersCommands
 {
     private const string DateFormat = "yyyy-MM-dd";

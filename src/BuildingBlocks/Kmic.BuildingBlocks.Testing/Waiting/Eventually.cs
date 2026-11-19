@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Testing.Waiting;
 /// 等待后台处理完成
 /// </summary>
 /// <remarks>
-/// 测试里不能直接 Task.Delay 或 Thread.Sleep，等后台处理要用它。按真实时间轮询，和宿主里的 FakeTimeProvider 无关
+/// 按真实时间轮询，和宿主里的 FakeTimeProvider 无关
 /// </remarks>
 public static class Eventually
 {

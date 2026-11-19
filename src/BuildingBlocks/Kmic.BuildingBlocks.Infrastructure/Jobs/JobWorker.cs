@@ -12,10 +12,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 /// <summary>
 /// Worker 角色里的作业执行
 /// </summary>
-/// <remarks>
-/// 每个模块一个领取循环，整个实例同时运行的作业数有上限。停机时不再领取，
-/// 进行中的作业收到停机的取消：可续跑的放回队列，其余标记中断
-/// </remarks>
 internal sealed class JobWorker(
     JobExecutor executor,
     ModuleFrameworkTables tables,

@@ -6,7 +6,7 @@ namespace Kmic.BuildingBlocks.Application.Settings;
 /// 偏好
 /// </summary>
 /// <remarks>
-/// 用不可变 record 实现，同时标 [Preference]。偏好只影响使用体验，不能用来控制权限
+/// 只影响使用体验，不能用来控制权限
 /// </remarks>
 /// <typeparam name="TSelf">值类型自身</typeparam>
 public interface IPreference<TSelf>

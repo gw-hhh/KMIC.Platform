@@ -19,7 +19,7 @@ public sealed class SubscriptionOptions
     /// 同一个顺序键的消息按发布顺序处理
     /// </summary>
     /// <remarks>
-    /// 前一条进入死信时，同一个键后面的消息都会等着，要及时处理死信
+    /// 前一条进死信时，同一个键后面的消息会一直等着
     /// </remarks>
     public SubscriptionOptions Ordered()
     {
@@ -28,10 +28,10 @@ public sealed class SubscriptionOptions
     }
 
     /// <summary>
-    /// 订阅第一次登记或运维要求时，从源模块拉取全部快照重建读模型
+    /// 从源模块拉取全部快照重建读模型
     /// </summary>
     /// <remarks>
-    /// 映射要和这个订阅的同步命令用同一份，免得实时同步和重建写出不一样的行
+    /// 映射要和同步命令用同一份
     /// </remarks>
     /// <typeparam name="TSource">源模块提供的快照来源接口</typeparam>
     /// <typeparam name="TSnapshot">快照类型</typeparam>

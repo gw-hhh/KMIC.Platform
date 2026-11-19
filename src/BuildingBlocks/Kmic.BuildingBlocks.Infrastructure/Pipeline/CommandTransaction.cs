@@ -8,9 +8,6 @@ namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 /// <summary>
 /// 命令事务
 /// </summary>
-/// <remarks>
-/// 登记提交前要和业务数据一起写入的记录（如幂等完成标记），以及提交成功后才执行的动作
-/// </remarks>
 internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
 {
     private readonly List<Func<ModuleDbContext, object?, CancellationToken, Task<Error?>>> _beforeCommit = [];

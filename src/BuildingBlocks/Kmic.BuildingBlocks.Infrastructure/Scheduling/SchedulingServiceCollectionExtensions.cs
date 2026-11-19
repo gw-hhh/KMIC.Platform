@@ -17,11 +17,10 @@ namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 public static class SchedulingServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册调度器（待机）、定时任务目录、框架的清理任务和启动时的同步，Api、Worker 两种角色都要调用
+    /// 注册调度器（待机）、定时任务目录和启动同步，两种角色都要调用
     /// </summary>
     /// <remarks>
-    /// 调度器使用 Operations 里的 Quartz 表，集群模式，多个实例同一次触发只执行一次。
-    /// 只调用这个方法的实例不执行任务，只能手动执行和改时间；要执行再调用 <see cref="AddKmicSchedulerWorker"/>
+    /// 只调用它的实例不执行任务，要执行再调用 <see cref="AddKmicSchedulerWorker"/>
     /// </remarks>
     public static IServiceCollection AddKmicScheduler(this IServiceCollection services)
     {

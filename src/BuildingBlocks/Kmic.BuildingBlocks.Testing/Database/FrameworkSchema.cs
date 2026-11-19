@@ -9,11 +9,6 @@ namespace Kmic.BuildingBlocks.Testing.Database;
 /// <summary>
 /// 测试模板库里的框架表
 /// </summary>
-/// <remarks>
-/// 消息路由表、调度表属于 Operations 模块，安全事件表属于 Identity 模块。没有接这两个模块迁移的测试（框架测试）
-/// 直接在模板库里建这些表，并像模块的初始迁移那样授权给运行账号。
-/// 已经接了模块迁移的测试宿主，调用时传 identityHasMigrations、operationsHasMigrations 跳过对应的那一部分
-/// </remarks>
 public static class FrameworkSchema
 {
     /// <summary>

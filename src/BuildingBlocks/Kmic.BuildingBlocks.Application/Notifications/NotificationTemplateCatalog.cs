@@ -7,10 +7,6 @@ namespace Kmic.BuildingBlocks.Application.Notifications;
 /// <summary>
 /// 代码里声明的全部通知模板
 /// </summary>
-/// <remarks>
-/// 在启动时从各模块的 Application 程序集里读取并核对：模板键以声明它的模块名开头且全系统唯一，至少有一个渠道，
-/// 数据模型实现 INotificationModel，发短信的模型实现 ISmsTemplateModel，含密模板不发邮件。声明有误时宿主启动失败
-/// </remarks>
 public sealed class NotificationTemplateCatalog
 {
     private static readonly MethodInfo _read = typeof(NotificationTemplateCatalog).GetMethod(nameof(ReadModel), BindingFlags.NonPublic | BindingFlags.Static)
