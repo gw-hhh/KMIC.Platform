@@ -137,7 +137,7 @@ internal sealed class UploadFileEndpoint : IEndpoint
         var (reason, error) = outcome switch
         {
             UploadOutcome.TooLarge => ("超过大小上限", FilesErrors.TooLarge),
-            UploadOutcome.Empty => ("文件是空的", FilesErrors.EmptyFile),
+            UploadOutcome.Empty => ("文件为空", FilesErrors.EmptyFile),
             _ => ("类型不符", FilesErrors.TypeNotAllowed),
         };
         await sender.SendAsync(new RejectUploadCommand(fileId, reason), CancellationToken.None);

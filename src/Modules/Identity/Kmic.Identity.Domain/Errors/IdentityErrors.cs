@@ -216,7 +216,7 @@ public static class IdentityErrors
     /// <summary>
     /// 没有可用角色，无法登录
     /// </summary>
-    public static readonly Error NoRoleAvailable = Error.Forbidden("Identity.NoRoleAvailable", "你没有可用的角色，请联系管理员");
+    public static readonly Error NoRoleAvailable = Error.Forbidden("Identity.NoRoleAvailable", "无可用角色，请联系管理员");
 
     /// <summary>
     /// 目标角色未授予或已停用，或当前为模拟会话

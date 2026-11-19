@@ -11,7 +11,7 @@ internal sealed class CreateRoleEndpoint : IEndpoint
         group.MapPost("/roles", HandleAsync)
             .Sends<CreateRoleCommand>()
             .WithSummary("新建角色")
-            .WithDescription("新角色不含权限点，默认数据范围按请求设置。必须提供幂等键。");
+            .WithDescription("新角色不含权限点，默认数据范围按请求设置。");
 
     private static async Task<IResult> HandleAsync(CreateRoleRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new CreateRoleCommand(request.Name, request.Description, request.SortOrder, request.DefaultScopeLevel), ct))

@@ -10,6 +10,6 @@ internal sealed class RedeliverCommandValidator : AbstractValidator<RedeliverCom
         RuleFor(c => c.MessageType).NotEmpty().MaximumLength(200);
         RuleFor(c => c.Subscription).NotEmpty().MaximumLength(200);
         RuleFor(c => c.FromSeq).GreaterThanOrEqualTo(1);
-        RuleFor(c => c.ToSeq).GreaterThanOrEqualTo(c => c.FromSeq).WithMessage("结束序号不能小于起始序号");
+        RuleFor(c => c.ToSeq).GreaterThanOrEqualTo(c => c.FromSeq).WithMessage("结束序号不能小于开始序号");
     }
 }

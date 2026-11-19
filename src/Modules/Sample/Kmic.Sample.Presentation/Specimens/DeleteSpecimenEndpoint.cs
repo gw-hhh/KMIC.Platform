@@ -14,7 +14,7 @@ internal sealed class DeleteSpecimenEndpoint : IEndpoint
         group.MapDelete("/specimens/{id}", HandleAsync)
             .Sends<DeleteSpecimenCommand>()
             .WithSummary("删除示例")
-            .WithDescription("仅支持软删除草稿。成功返回 204。");
+            .WithDescription("仅支持软删除草稿。");
 
     private static async Task<IResult> HandleAsync([Description("示例 ID")] SpecimenId id, [FromBody] DeleteSpecimenRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new DeleteSpecimenCommand(id, request.ExpectedVersion), ct)).ToNoContent();

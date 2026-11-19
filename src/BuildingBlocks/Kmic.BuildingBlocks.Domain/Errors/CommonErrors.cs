@@ -146,13 +146,13 @@ public static class CommonErrors
     /// 消息类型当前版本不认识，没法确认能不能放弃
     /// </summary>
     public static readonly Error MessageUnknown =
-        Error.BusinessRule("Common.MessageUnknown", "这条消息的类型当前版本不认识，不能确认能不能放弃");
+        Error.BusinessRule("Common.MessageUnknown", "当前版本不认识这类消息，无法判断能否放弃");
 
     /// <summary>
     /// 消息载荷读不出来，没法确认能不能放弃
     /// </summary>
     public static readonly Error MessagePayloadUnreadable =
-        Error.BusinessRule("Common.MessagePayloadUnreadable", "这条消息的载荷读不出来，不能确认能不能放弃");
+        Error.BusinessRule("Common.MessagePayloadUnreadable", "消息内容读不出来，无法判断能否放弃");
 
     /// <summary>
     /// 文件的内容在存储里读不到：对象被删除标记覆盖或丢失，等运维还原

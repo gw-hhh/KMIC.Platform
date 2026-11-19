@@ -12,7 +12,7 @@ internal sealed class SetSystemPreferenceEndpoint : IEndpoint
         group.MapPut("/preferences/{key}/layers/system", HandleAsync)
             .Sends<SetPreferenceLayerCommand>()
             .WithSummary("设置系统级偏好")
-            .WithDescription("允许且有效的个人或角色设置优先于系统设置。偏好声明须允许系统层设置。必须提供幂等键。");
+            .WithDescription("允许且有效的个人或角色设置优先于系统设置。偏好声明须允许系统层设置。");
 
     private static async Task<IResult> HandleAsync([Description("偏好键")] string key, SetPreferenceLayerRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SetPreferenceLayerCommand(key, null, request.Value, request.ExpectedVersion), ct)).ToOk();

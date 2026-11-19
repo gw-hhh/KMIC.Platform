@@ -20,7 +20,7 @@ public static class FilesErrors
     /// <summary>
     /// 文件是空的
     /// </summary>
-    public static readonly Error EmptyFile = Error.Validation("Files.EmptyFile", "文件是空的");
+    public static readonly Error EmptyFile = Error.Validation("Files.EmptyFile", "文件为空");
 
     /// <summary>
     /// 上传配置不存在

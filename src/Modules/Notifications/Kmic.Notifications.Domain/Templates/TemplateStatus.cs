@@ -15,7 +15,7 @@ public sealed class TemplateStatus : Enumeration<TemplateStatus>
     /// <summary>
     /// 代码里已经删掉这个模板：版本记录保留，不能再发送和修改
     /// </summary>
-    public static readonly TemplateStatus Retired = new("Retired", "退役");
+    public static readonly TemplateStatus Retired = new("Retired", "已退役");
 
     private TemplateStatus(string code, string name)
         : base(code, name)

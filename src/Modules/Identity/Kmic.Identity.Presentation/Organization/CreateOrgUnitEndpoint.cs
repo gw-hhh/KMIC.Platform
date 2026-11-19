@@ -11,7 +11,7 @@ internal sealed class CreateOrgUnitEndpoint : IEndpoint
         group.MapPost("/org-units", HandleAsync)
             .Sends<CreateOrgUnitCommand>()
             .WithSummary("添加组织单元")
-            .WithDescription("在已启用的组织单元下新增下级，排在同级末尾。响应中的 version 是新增后的组织树版本号。必须提供幂等键。");
+            .WithDescription("在已启用的组织单元下新增下级，排在同级末尾。响应中的 version 是新增后的组织树版本号。");
 
     private static async Task<IResult> HandleAsync(CreateOrgUnitRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new CreateOrgUnitCommand(request.ExpectedVersion, request.ParentId, request.Name, request.Code), ct))

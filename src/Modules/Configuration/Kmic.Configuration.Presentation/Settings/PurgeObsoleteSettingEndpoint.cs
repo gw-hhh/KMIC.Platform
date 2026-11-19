@@ -12,7 +12,7 @@ internal sealed class PurgeObsoleteSettingEndpoint : IEndpoint
         group.MapPost("/settings/{key}/purge", HandleAsync)
             .Sends<PurgeObsoleteSettingCommand>()
             .WithSummary("清除已移除声明的设置值")
-            .WithDescription("仍有代码声明的设置不能清除，如需重置请恢复默认值。需要敏感权限“清除不再使用的设置值”。必须提供幂等键。");
+            .WithDescription("仍有代码声明的设置不能清除，如需重置请恢复默认值。需要敏感权限“清除不再使用的设置值”。");
 
     private static async Task<IResult> HandleAsync([Description("设置键")] string key, SettingReasonRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new PurgeObsoleteSettingCommand(key, request.Reason, request.ExpectedVersion), ct)).ToOk();
