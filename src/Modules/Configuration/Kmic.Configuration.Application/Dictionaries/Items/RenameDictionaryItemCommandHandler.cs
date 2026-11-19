@@ -14,8 +14,6 @@ public sealed class RenameDictionaryItemCommandHandler(IDictionaryTypeRepository
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(RenameDictionaryItemCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

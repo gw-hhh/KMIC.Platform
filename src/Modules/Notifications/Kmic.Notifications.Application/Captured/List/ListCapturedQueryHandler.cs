@@ -16,8 +16,6 @@ public sealed class ListCapturedQueryHandler(INotificationsQueryDb db, IOptions<
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<CapturedListItem>>> Handle(ListCapturedQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         if (!capture.Value.Enabled)
         {
             return NotificationsErrors.CapturedUnavailable;

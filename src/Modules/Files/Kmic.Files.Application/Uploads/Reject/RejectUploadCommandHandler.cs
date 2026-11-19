@@ -17,8 +17,6 @@ public sealed class RejectUploadCommandHandler(IStoredFileRepository files, IExe
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RejectUploadCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await files.GetForUpdateAsync(StoredFileId.From(command.FileId), null, cancellationToken);
         if (loaded.IsFailure || loaded.Value.UploadedBy != execution.User.UserId)
         {

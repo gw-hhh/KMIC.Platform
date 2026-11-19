@@ -14,8 +14,6 @@ public sealed class PreviewTemplateQueryHandler(NotificationTemplateCatalog cata
     /// <inheritdoc />
     public async ValueTask<Result<TemplatePreviewResponse>> Handle(PreviewTemplateQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var definition = catalog.Find(query.Key);
         if (definition is null)
         {

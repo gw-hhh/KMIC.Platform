@@ -17,8 +17,6 @@ public sealed class GetTemplateQueryHandler(INotificationsQueryDb db, Notificati
     /// <inheritdoc />
     public async ValueTask<Result<TemplateDetailResponse>> Handle(GetTemplateQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var template = await db.Templates.FirstOrDefaultAsync(t => t.Key == query.Key, cancellationToken);
         if (template is null)
         {

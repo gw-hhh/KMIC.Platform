@@ -18,8 +18,6 @@ public sealed class CancelBackgroundJobCommandHandler(IModuleJobStores stores, I
     /// <inheritdoc />
     public async ValueTask<Result> Handle(CancelBackgroundJobCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var store = stores.Find(command.Module);
         if (store is null || await store.FindAsync(command.JobId, cancellationToken) is null)
         {

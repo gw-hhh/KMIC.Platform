@@ -21,8 +21,6 @@ public sealed class ChangePasswordCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result> Handle(ChangePasswordCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var access = execution.Access ?? throw new InvalidOperationException("修改密码需要已登录的访问上下文。");
         var loaded = await users.GetForUpdateAsync(access.UserId, null, cancellationToken);
         if (loaded.IsFailure)

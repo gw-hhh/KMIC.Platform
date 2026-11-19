@@ -14,8 +14,6 @@ public sealed class GetMyUnreadCountQueryHandler(INotificationsQueryDb db, IExec
     /// <inheritdoc />
     public async ValueTask<Result<UnreadCountResponse>> Handle(GetMyUnreadCountQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var me = (execution.Access ?? throw new InvalidOperationException("查询未读数需要已登录的访问上下文。")).UserId;
         var count = await db.SiteMessages.CountAsync(m => m.RecipientUserId == me && m.ReadAt == null, cancellationToken);
         return new UnreadCountResponse(count);

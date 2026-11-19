@@ -18,8 +18,6 @@ public sealed class RevokeReusedSessionCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RevokeReusedSessionCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var hash = RefreshTokens.Hash(command.RefreshToken);
         var session = await sessions.FindByRefreshTokenForUpdateAsync(hash, cancellationToken);
         if (session is not null && session.RevokeIfReused(hash, time.GetUtcNow(), sessionOptions.Value.RefreshGrace))

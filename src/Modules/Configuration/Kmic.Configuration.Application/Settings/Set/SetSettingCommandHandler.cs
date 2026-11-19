@@ -24,8 +24,6 @@ public sealed class SetSettingCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SystemSettingValueId>>> Handle(SetSettingCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var definition = catalog.Find(command.Key);
         if (definition is null)
         {

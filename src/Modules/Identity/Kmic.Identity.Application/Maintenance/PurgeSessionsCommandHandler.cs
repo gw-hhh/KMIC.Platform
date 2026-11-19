@@ -16,8 +16,6 @@ public sealed class PurgeSessionsCommandHandler(ISessionRepository sessions, IOp
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeSessionsCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var purged = await sessions.PurgeEndedAsync(time.GetUtcNow() - options.Value.EndedRetention, cancellationToken);
         return new ScheduledJobOutcome(purged);
     }

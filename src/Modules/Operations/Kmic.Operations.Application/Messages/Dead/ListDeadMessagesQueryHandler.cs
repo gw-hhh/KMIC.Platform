@@ -16,8 +16,6 @@ public sealed class ListDeadMessagesQueryHandler(IModuleMessageStores stores, IC
     /// <inheritdoc />
     public async ValueTask<Result<CursorPage<DeadMessageItem>>> Handle(ListDeadMessagesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         MessageBox? box = null;
         if (query.Box is { Length: > 0 } code)
         {

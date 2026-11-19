@@ -21,8 +21,6 @@ public sealed class SetPreferenceLayerCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<PreferenceValueId>>> Handle(SetPreferenceLayerCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var found = PreferenceSubject.Find(catalog, command.Key);
         if (found.IsFailure)
         {

@@ -14,8 +14,6 @@ public sealed class DisableDictionaryItemCommandHandler(IDictionaryTypeRepositor
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(DisableDictionaryItemCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

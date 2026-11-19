@@ -26,8 +26,6 @@ public sealed class PurgeExpiredFilesCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeExpiredFilesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var now = time.GetUtcNow();
         var batch = options.Value.PurgeBatchSize;
         var marked = 0;

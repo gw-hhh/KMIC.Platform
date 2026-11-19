@@ -12,8 +12,6 @@ public sealed class GetMessageSummaryQueryHandler(IModuleMessageStores stores) :
     /// <inheritdoc />
     public async ValueTask<Result<MessageSummaryResponse>> Handle(GetMessageSummaryQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var retiring = await stores.GetRetiringSubscriptionsAsync(cancellationToken);
         var backlogs = await Task.WhenAll(stores.All.Select(store => store.GetBacklogAsync(cancellationToken)));
         var modules = backlogs

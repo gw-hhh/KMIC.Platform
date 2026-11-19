@@ -18,8 +18,6 @@ public sealed class CancelMyJobCommandHandler(IModuleJobStores stores, IExecutio
     /// <inheritdoc />
     public async ValueTask<Result> Handle(CancelMyJobCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var job = await MyJobs.FindAsync(execution, stores, command.Module, command.JobId, cancellationToken);
         if (job is null)
         {

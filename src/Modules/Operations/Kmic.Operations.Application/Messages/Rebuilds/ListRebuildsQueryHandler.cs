@@ -13,8 +13,6 @@ public sealed class ListRebuildsQueryHandler(IReadModelRebuildAdmin rebuilds) : 
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<RebuildItem>>> Handle(ListRebuildsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var runs = await rebuilds.ListAsync(cancellationToken);
         List<RebuildItem> items =
         [

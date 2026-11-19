@@ -14,8 +14,6 @@ public sealed class ListSpecimensQueryHandler(ISampleQueryDb db) : IQueryHandler
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SpecimenListItem>>> Handle(ListSpecimensQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var specimens = db.Specimens.AsQueryable();
         if (!string.IsNullOrWhiteSpace(query.Q))
         {

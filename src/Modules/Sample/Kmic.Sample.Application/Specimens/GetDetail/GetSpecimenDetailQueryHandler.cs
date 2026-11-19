@@ -18,8 +18,6 @@ public sealed class GetSpecimenDetailQueryHandler(ISampleQueryDb db, IEntityFind
     /// <inheritdoc />
     public async ValueTask<Result<SpecimenDetailResponse>> Handle(GetSpecimenDetailQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         // 范围外与不存在均返回 NotFound；仅范围外访问记安全事件
         var found = await finder.FindByIdOrNotFoundAsync(db.Specimens.Include(s => s.Items).Include(s => s.Attachments), query.Id, SampleErrors.NotFound, cancellationToken);
         if (found.IsFailure)

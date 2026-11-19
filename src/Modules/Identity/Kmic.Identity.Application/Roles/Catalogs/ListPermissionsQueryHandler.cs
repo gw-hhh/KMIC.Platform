@@ -12,8 +12,6 @@ public sealed class ListPermissionsQueryHandler(PermissionCatalog catalog) : IQu
     /// <inheritdoc />
     public ValueTask<Result<IReadOnlyList<PermissionItem>>> Handle(ListPermissionsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         List<PermissionItem> items =
         [
             .. catalog.All

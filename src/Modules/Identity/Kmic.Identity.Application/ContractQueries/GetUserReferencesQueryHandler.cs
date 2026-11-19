@@ -14,8 +14,6 @@ public sealed class GetUserReferencesQueryHandler(IIdentityQueryDb db) : IQueryH
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetUserReferencesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.Users
             .Where(u => query.Ids.Contains(u.Id))
             .Select(u => new { u.Id, u.DisplayName, u.EmployeeNo, u.Status })

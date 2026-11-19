@@ -19,8 +19,6 @@ public sealed class SetMyPreferenceCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result> Handle(SetMyPreferenceCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var found = PreferenceSubject.Find(catalog, command.Key);
         if (found.IsFailure)
         {

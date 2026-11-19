@@ -17,8 +17,6 @@ public sealed class PurgeObsoleteSettingCommandHandler(SystemSettingCatalog cata
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SystemSettingValueId>>> Handle(PurgeObsoleteSettingCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         if (catalog.Find(command.Key) is not null)
         {
             return ConfigurationErrors.InvalidState.WithDetail("该设置仍有代码声明，不能清除；如需重置，请恢复默认值");

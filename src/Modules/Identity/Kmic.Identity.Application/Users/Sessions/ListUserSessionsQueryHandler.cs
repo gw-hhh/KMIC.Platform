@@ -15,8 +15,6 @@ public sealed class ListUserSessionsQueryHandler(IIdentityQueryDb db, TimeProvid
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<UserSessionItem>>> Handle(ListUserSessionsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         if (!await db.Users.AnyAsync(u => u.Id == query.Id, cancellationToken))
         {
             return IdentityErrors.UserNotFound;

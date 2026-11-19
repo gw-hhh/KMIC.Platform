@@ -15,8 +15,6 @@ public sealed class TriggerRebuildCommandHandler(IReadModelRebuildAdmin rebuilds
     /// <inheritdoc />
     public async ValueTask<Result> Handle(TriggerRebuildCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         return RebuildOutcomes.Of(await rebuilds.TriggerAsync(command.Subscription, cancellationToken));
     }
 }

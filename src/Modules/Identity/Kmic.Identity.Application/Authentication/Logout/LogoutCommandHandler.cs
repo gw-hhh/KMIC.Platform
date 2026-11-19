@@ -15,8 +15,6 @@ public sealed class LogoutCommandHandler(ISessionRepository sessions, IExecution
     /// <inheritdoc />
     public async ValueTask<Result> Handle(LogoutCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var access = execution.Access ?? throw new InvalidOperationException("退出登录需要已登录的访问上下文。");
         var loaded = await sessions.GetForUpdateAsync(access.SessionId, null, cancellationToken);
         if (loaded.IsFailure)

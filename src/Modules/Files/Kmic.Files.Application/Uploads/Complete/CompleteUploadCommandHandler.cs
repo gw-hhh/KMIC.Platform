@@ -17,8 +17,6 @@ public sealed class CompleteUploadCommandHandler(IStoredFileRepository files, IE
     /// <inheritdoc />
     public async ValueTask<Result<UploadCompleted>> Handle(CompleteUploadCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await files.GetForUpdateAsync(StoredFileId.From(command.FileId), null, cancellationToken);
 
         // 无权访问和不存在的文件统一返回 NotFound，避免泄露文件是否存在

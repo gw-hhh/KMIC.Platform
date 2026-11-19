@@ -13,8 +13,6 @@ public sealed class RegisterGeneratedFileCommandHandler(IStoredFileRepository fi
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RegisterGeneratedFileCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var message = command.Message;
         var id = StoredFileId.From(message.FileId);
         if (await files.ExistsAsync(id, cancellationToken))

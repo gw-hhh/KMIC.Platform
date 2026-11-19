@@ -21,8 +21,6 @@ public sealed class GetRoleQueryHandler(
     /// <inheritdoc />
     public async ValueTask<Result<RoleDetailResponse>> Handle(GetRoleQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var access = execution.Access ?? throw new InvalidOperationException("查询角色需要已登录的访问上下文。");
         var found = await db.Roles
             .Where(r => r.Id == query.Id)

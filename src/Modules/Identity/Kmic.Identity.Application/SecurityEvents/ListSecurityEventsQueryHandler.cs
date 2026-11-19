@@ -14,8 +14,6 @@ public sealed class ListSecurityEventsQueryHandler(IIdentityQueryDb db) : IQuery
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SecurityEventItem>>> Handle(ListSecurityEventsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var events = db.SecurityEvents.Where(e => e.OccurredAt >= query.From && e.OccurredAt < query.To);
         if (!string.IsNullOrWhiteSpace(query.Type))
         {

@@ -20,8 +20,6 @@ public sealed class FinalizeRouteCommandHandler(IMessageRouteAdmin routes, IExec
     /// <inheritdoc />
     public async ValueTask<Result<FinalizeRouteResponse>> Handle(FinalizeRouteCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var user = execution.User;
         var by = user.ActualUserId ?? user.UserId ?? UserId.System;
         var result = await routes.FinalizeAsync(

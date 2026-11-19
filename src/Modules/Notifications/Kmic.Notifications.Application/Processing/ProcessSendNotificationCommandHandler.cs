@@ -12,8 +12,6 @@ public sealed class ProcessSendNotificationCommandHandler(NotificationProcessor 
     /// <inheritdoc />
     public async ValueTask<Result> Handle(ProcessSendNotificationCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var message = command.Message;
         return await processor.ProcessAsync(
             new NotificationRequest(

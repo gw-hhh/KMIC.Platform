@@ -18,8 +18,6 @@ public sealed class PurgeRetiredPermissionsCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeRetiredPermissionsCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var cutoff = time.GetUtcNow() - options.Value.RetiredRetention;
         var permissionCodes = await store.RetiredPermissionCodesAsync(cutoff, cancellationToken);
         var scopeObjects = await store.RetiredScopeObjectCodesAsync(cutoff, cancellationToken);

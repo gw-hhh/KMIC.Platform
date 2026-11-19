@@ -16,8 +16,6 @@ public sealed class RetryMessagesCommandHandler(IModuleMessageStores stores) : I
     /// <inheritdoc />
     public async ValueTask<Result<MessageReceipts>> Handle(RetryMessagesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var outcomes = new Dictionary<(string Module, MessageBoxKind Box, Guid Id), MessageReceipt>();
         foreach (var group in command.Messages.GroupBy(m => (m.Module, m.Box)))
         {

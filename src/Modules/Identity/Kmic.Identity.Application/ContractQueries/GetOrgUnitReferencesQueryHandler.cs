@@ -14,8 +14,6 @@ public sealed class GetOrgUnitReferencesQueryHandler(IIdentityQueryDb db) : IQue
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetOrgUnitReferencesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.OrgTrees
             .SelectMany(t => t.Units)
             .Where(u => query.Ids.Contains(u.Id))

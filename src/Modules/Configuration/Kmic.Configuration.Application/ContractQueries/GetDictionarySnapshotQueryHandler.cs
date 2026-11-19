@@ -13,8 +13,6 @@ public sealed class GetDictionarySnapshotQueryHandler(IDictionarySnapshots snaps
     /// <inheritdoc />
     public async ValueTask<Result<DictionarySnapshot?>> Handle(GetDictionarySnapshotQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         return await snapshots.GetAsync(query.TypeCode, cancellationToken);
     }
 }

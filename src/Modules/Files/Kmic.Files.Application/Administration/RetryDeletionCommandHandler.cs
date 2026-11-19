@@ -13,8 +13,6 @@ public sealed class RetryDeletionCommandHandler(IStoredFileRepository files) : I
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RetryDeletionCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         // 文件不存在或不在删除队列中，均返回未找到
         return await files.ResetDeletionAsync(command.Id, cancellationToken) ? Result.Success() : FilesErrors.NotFound;
     }

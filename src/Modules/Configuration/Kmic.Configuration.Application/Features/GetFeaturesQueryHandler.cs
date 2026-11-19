@@ -12,7 +12,6 @@ public sealed class GetFeaturesQueryHandler(IFeatureFlags features) : IQueryHand
     /// <inheritdoc />
     public async ValueTask<Result<FeaturesResponse>> Handle(GetFeaturesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
         return new FeaturesResponse(await features.EnabledAsync(cancellationToken));
     }
 }

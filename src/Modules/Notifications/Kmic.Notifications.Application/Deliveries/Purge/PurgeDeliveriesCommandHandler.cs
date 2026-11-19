@@ -16,8 +16,6 @@ public sealed class PurgeDeliveriesCommandHandler(IDeliveryRepository deliveries
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeDeliveriesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var before = time.GetUtcNow().AddDays(-options.Value.DeliveryDays);
         var purged = await deliveries.PurgeAsync(before, cancellationToken);
         purged += await notifications.PurgeAsync(before, cancellationToken);

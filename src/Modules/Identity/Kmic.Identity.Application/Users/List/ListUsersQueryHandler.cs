@@ -15,8 +15,6 @@ public sealed class ListUsersQueryHandler(IIdentityQueryDb db) : IQueryHandler<L
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<UserListItem>>> Handle(ListUsersQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var statuses = EnumerationFilter.Parse<UserStatus>(query.Status, "status");
         if (statuses.IsFailure)
         {

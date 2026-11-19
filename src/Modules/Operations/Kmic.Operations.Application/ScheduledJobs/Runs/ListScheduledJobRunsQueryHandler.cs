@@ -14,8 +14,6 @@ public sealed class ListScheduledJobRunsQueryHandler(IOperationsQueryDb db, ICur
     /// <inheritdoc />
     public async ValueTask<Result<CursorPage<ScheduledJobRunItem>>> Handle(ListScheduledJobRunsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var page = await db.ScheduledJobRuns
             .Where(r => r.JobName == query.JobName)
             .ToCursorPageAsync(query.Cursor, protector, r => r.StartedAt, r => r.Id, descending: true, cancellationToken);

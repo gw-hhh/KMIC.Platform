@@ -21,8 +21,6 @@ public sealed class SyncPermissionCatalogCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<CatalogSyncResult>> Handle(SyncPermissionCatalogCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var content = CatalogContent.From(permissions, scopeObjects);
         var hash = content.Hash();
         await store.LockSyncAsync(cancellationToken);

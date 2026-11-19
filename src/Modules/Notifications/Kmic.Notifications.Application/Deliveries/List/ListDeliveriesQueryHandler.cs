@@ -15,8 +15,6 @@ public sealed class ListDeliveriesQueryHandler(INotificationsQueryDb db) : IQuer
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<DeliveryListItem>>> Handle(ListDeliveriesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var deliveries = db.Deliveries;
         if (query.RecipientUserId is { } user)
         {

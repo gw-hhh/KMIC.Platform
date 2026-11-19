@@ -12,8 +12,6 @@ public sealed class ListBlockedKeysQueryHandler(IModuleMessageStores stores) : I
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<BlockedKeyItem>>> Handle(ListBlockedKeysQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         IEnumerable<IModuleMessageStore> selected = stores.All;
         if (query.Module is { Length: > 0 } module)
         {

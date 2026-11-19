@@ -28,8 +28,6 @@ public sealed class LoginCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<AuthTokens>> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var now = time.GetUtcNow();
         var account = command.Account.Trim();
         var key = LoginNames.Hash(account);
@@ -44,9 +42,9 @@ public sealed class LoginCommandHandler(
 
         var user = await users.FindByAccountAsync(account, cancellationToken);
         var failure = CheckCredentials(user, command.Password);
-        if (failure is not null)
+        if (failure is { } reason)
         {
-            await RecordFailureAsync(key, account, failure, command, now, cancellationToken);
+            await RecordFailureAsync(key, account, reason, command, now, cancellationToken);
             return IdentityErrors.InvalidCredentials;
         }
 
@@ -83,29 +81,29 @@ public sealed class LoginCommandHandler(
     }
 
     // 校验成功返回 null，并在需要时升级密码哈希
-    private string? CheckCredentials(User? user, string password)
+    private LoginFailure? CheckCredentials(User? user, string password)
     {
         if (user is null)
         {
             // 账号不存在也做一次哈希，使耗时和密码错误接近
             passwords.Burn(password);
-            return "UnknownAccount";
+            return LoginFailure.UnknownAccount;
         }
 
         var check = passwords.Verify(user, password);
         if (check == PasswordCheck.Failed)
         {
-            return "WrongPassword";
+            return LoginFailure.WrongPassword;
         }
 
         if (user.Kind == UserKind.System)
         {
-            return "SystemUser";
+            return LoginFailure.SystemUser;
         }
 
         if (!user.CanLogin)
         {
-            return "UserDisabled";
+            return LoginFailure.UserDisabled;
         }
 
         if (check == PasswordCheck.SuccessRehashNeeded)
@@ -116,10 +114,10 @@ public sealed class LoginCommandHandler(
         return null;
     }
 
-    private async Task RecordFailureAsync(string key, string account, string reason, LoginCommand command, DateTimeOffset now, CancellationToken ct)
+    private async Task RecordFailureAsync(string key, string account, LoginFailure reason, LoginCommand command, DateTimeOffset now, CancellationToken ct)
     {
         var after = await throttles.RecordFailureAsync(key, now, ct);
-        securityEvents.Write(Event("LoginFailed", SecuritySeverity.Warning, reason, account, command));
+        securityEvents.Write(Event("LoginFailed", SecuritySeverity.Warning, reason.ToString(), account, command));
         if (after.LockedUntil is { } lockedUntil && lockedUntil > now)
         {
             securityEvents.Write(Event("AccountLocked", SecuritySeverity.High, $"Level{after.LockLevel}", account, command));
@@ -150,6 +148,15 @@ public sealed class LoginCommandHandler(
                 ["agent"] = Truncate(command.UserAgent, 200) ?? string.Empty,
             },
         };
+
+    // 登录失败的原因，名称原样写进安全事件，不能改名
+    private enum LoginFailure
+    {
+        UnknownAccount,
+        WrongPassword,
+        SystemUser,
+        UserDisabled,
+    }
 
     private static string? Truncate(string? text, int length) => text is null || text.Length <= length ? text : text[..length];
 }

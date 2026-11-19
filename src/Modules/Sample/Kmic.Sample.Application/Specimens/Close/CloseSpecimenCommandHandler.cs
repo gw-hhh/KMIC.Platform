@@ -14,8 +14,6 @@ public sealed class CloseSpecimenCommandHandler(ISpecimenRepository specimens, I
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(CloseSpecimenCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

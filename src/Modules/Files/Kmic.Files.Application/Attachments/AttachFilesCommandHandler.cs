@@ -13,8 +13,6 @@ public sealed class AttachFilesCommandHandler(IStoredFileRepository files, TimeP
     /// <inheritdoc />
     public async ValueTask<Result> Handle(AttachFilesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var message = command.Message;
         var now = time.GetUtcNow();
         foreach (var id in message.FileIds.Distinct())

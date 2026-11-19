@@ -12,8 +12,6 @@ public sealed class AbandonRebuildCommandHandler(IReadModelRebuildAdmin rebuilds
     /// <inheritdoc />
     public async ValueTask<Result> Handle(AbandonRebuildCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         return RebuildOutcomes.Of(await rebuilds.AbandonAsync(command.Subscription, cancellationToken));
     }
 }

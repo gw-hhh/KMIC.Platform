@@ -14,8 +14,6 @@ public sealed class RecordHistoryPurgeCommandHandler(IStoredFileRepository files
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<StoredFileId>>> Handle(RecordHistoryPurgeCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await files.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

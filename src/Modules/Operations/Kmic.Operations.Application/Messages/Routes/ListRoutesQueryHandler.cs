@@ -15,8 +15,6 @@ public sealed class ListRoutesQueryHandler(IOperationsQueryDb db, TimeProvider t
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<RouteItem>>> Handle(ListRoutesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var statuses = EnumerationFilter.Parse<MessageRouteStatus>(query.Status, "status");
         if (statuses.IsFailure)
         {

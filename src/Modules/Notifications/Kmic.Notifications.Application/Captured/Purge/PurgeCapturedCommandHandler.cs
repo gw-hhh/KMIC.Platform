@@ -15,8 +15,6 @@ public sealed class PurgeCapturedCommandHandler(ICapturedMessageRepository captu
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeCapturedCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var purged = await captured.PurgeAsync(time.GetUtcNow().AddDays(-options.Value.CapturedDays), cancellationToken);
         return new ScheduledJobOutcome(purged);
     }

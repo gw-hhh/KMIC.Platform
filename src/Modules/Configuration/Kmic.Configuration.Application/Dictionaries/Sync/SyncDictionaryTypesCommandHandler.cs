@@ -15,8 +15,6 @@ public sealed class SyncDictionaryTypesCommandHandler(DictionaryTypeCatalog cata
     /// <inheritdoc />
     public async ValueTask<Result<DictionarySyncResult>> Handle(SyncDictionaryTypesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         await types.LockCatalogSyncAsync(cancellationToken);
         var existing = (await types.ListWithoutItemsAsync(cancellationToken)).ToDictionary(t => t.Code, StringComparer.Ordinal);
         int registered = 0, updated = 0, retired = 0;

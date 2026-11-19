@@ -13,8 +13,6 @@ public sealed class ReactivateRouteCommandHandler(IMessageRouteAdmin routes) : I
     /// <inheritdoc />
     public async ValueTask<Result> Handle(ReactivateRouteCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         return await routes.ReactivateAsync(command.MessageType, command.Subscription, cancellationToken) switch
         {
             RouteAdminOutcome.Done => Result.Success(),

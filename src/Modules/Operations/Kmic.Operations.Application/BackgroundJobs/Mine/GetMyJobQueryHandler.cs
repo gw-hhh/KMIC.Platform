@@ -16,8 +16,6 @@ public sealed class GetMyJobQueryHandler(IExecutionContext execution, IModuleJob
     /// <inheritdoc />
     public async ValueTask<Result<BackgroundJobItem>> Handle(GetMyJobQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var job = await MyJobs.FindAsync(execution, stores, query.Module, query.JobId, cancellationToken);
         if (job is null)
         {

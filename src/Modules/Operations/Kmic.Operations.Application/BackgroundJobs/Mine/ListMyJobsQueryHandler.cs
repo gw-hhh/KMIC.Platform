@@ -17,8 +17,6 @@ public sealed class ListMyJobsQueryHandler(IExecutionContext execution, IModuleJ
     /// <inheritdoc />
     public async ValueTask<Result<CursorPage<BackgroundJobItem>>> Handle(ListMyJobsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         // 登录的请求一定有用户；没有时（系统身份）没有“我的作业”
         if (execution.User.UserId is not { } me)
         {

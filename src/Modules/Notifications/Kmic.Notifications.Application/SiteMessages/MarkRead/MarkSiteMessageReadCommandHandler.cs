@@ -15,8 +15,6 @@ public sealed class MarkSiteMessageReadCommandHandler(ISiteMessageRepository mes
     /// <inheritdoc />
     public async ValueTask<Result> Handle(MarkSiteMessageReadCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var me = (execution.Access ?? throw new InvalidOperationException("标记已读需要已登录的访问上下文。")).UserId;
         var loaded = await messages.GetForUpdateAsync(command.Id, null, cancellationToken);
         if (loaded.IsFailure || loaded.Value.RecipientUserId != me)

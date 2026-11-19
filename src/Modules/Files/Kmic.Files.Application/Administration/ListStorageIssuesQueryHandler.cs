@@ -14,8 +14,6 @@ public sealed class ListStorageIssuesQueryHandler(IFilesQueryDb db) : IQueryHand
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<StorageIssueItem>>> Handle(ListStorageIssuesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var statuses = EnumerationFilter.Parse<StorageIssueStatus>(query.Status, "status");
         if (statuses.IsFailure)
         {

@@ -11,8 +11,6 @@ public sealed class ProcessSendSecretNotificationCommandHandler(NotificationProc
     /// <inheritdoc />
     public async ValueTask<Result> Handle(ProcessSendSecretNotificationCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var message = command.Message;
         return await processor.ProcessAsync(
             new NotificationRequest(message.TemplateKey, message.To, message.Model, message.DedupKey, Secret: true, HighPriority: true, command.SourceMessageId, command.SourceModule, command.InitiatorUserId),

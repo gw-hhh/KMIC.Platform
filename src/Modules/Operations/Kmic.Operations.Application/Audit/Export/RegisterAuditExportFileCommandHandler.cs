@@ -12,8 +12,6 @@ public sealed class RegisterAuditExportFileCommandHandler(IGeneratedFiles genera
     /// <inheritdoc />
     public ValueTask<Result> Handle(RegisterAuditExportFileCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         generatedFiles.Register(command.File);
         return ValueTask.FromResult(Result.Success());
     }

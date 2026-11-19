@@ -18,8 +18,6 @@ public sealed class GetMeQueryHandler(IIdentityQueryDb db, IExecutionContext exe
     /// <inheritdoc />
     public async ValueTask<Result<MeResponse>> Handle(GetMeQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var access = execution.Access ?? throw new InvalidOperationException("查询当前用户需要已登录的访问上下文。");
         var user = await db.Users
             .Where(u => u.Id == access.UserId)

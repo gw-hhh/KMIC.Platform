@@ -18,8 +18,6 @@ public sealed class RunJobNowCommandHandler(IScheduledJobControl control, IExecu
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RunJobNowCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         // 模拟登录时记录实际操作人
         var user = execution.User;
         var by = user.ActualUserId ?? user.UserId ?? UserId.System;

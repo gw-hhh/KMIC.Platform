@@ -13,8 +13,6 @@ public sealed class GetOrgTreeQueryHandler(IIdentityQueryDb db) : IQueryHandler<
     /// <inheritdoc />
     public async ValueTask<Result<OrgTreeResponse>> Handle(GetOrgTreeQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var tree = await db.OrgTrees
             .Select(t => new
             {

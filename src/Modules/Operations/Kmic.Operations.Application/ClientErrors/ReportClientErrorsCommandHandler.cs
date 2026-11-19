@@ -20,8 +20,6 @@ public sealed class ReportClientErrorsCommandHandler(
     /// <inheritdoc />
     public ValueTask<Result> Handle(ReportClientErrorsCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var max = options.Value.MaxPerRequest;
         if (command.Errors.Count > max)
         {

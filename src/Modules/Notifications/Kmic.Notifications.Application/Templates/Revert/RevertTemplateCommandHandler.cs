@@ -12,8 +12,6 @@ public sealed class RevertTemplateCommandHandler(ITemplateRepository templates) 
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<NotificationTemplateId>>> Handle(RevertTemplateCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await templates.GetByKeyForUpdateAsync(command.Key, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

@@ -16,8 +16,6 @@ public sealed class AbandonMessagesCommandHandler(IModuleMessageStores stores, I
     /// <inheritdoc />
     public async ValueTask<Result<MessageReceipts>> Handle(AbandonMessagesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var reason = command.Reason.Trim();
         var receipts = new Dictionary<(string Module, Guid Id), MessageReceipt>();
         foreach (var group in command.Messages.GroupBy(m => m.Module, StringComparer.Ordinal))

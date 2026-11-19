@@ -14,8 +14,6 @@ public sealed class MarkAllSiteMessagesReadCommandHandler(ISiteMessageRepository
     /// <inheritdoc />
     public async ValueTask<Result<MarkedReadResponse>> Handle(MarkAllSiteMessagesReadCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var me = (execution.Access ?? throw new InvalidOperationException("标记已读需要已登录的访问上下文。")).UserId;
         return new MarkedReadResponse(await messages.MarkAllReadAsync(me, time.GetUtcNow(), cancellationToken));
     }

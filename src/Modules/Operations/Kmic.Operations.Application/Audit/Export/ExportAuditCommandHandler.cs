@@ -12,8 +12,6 @@ public sealed class ExportAuditCommandHandler(IBackgroundJobs jobs) : ICommandHa
     /// <inheritdoc />
     public async ValueTask<Result<JobAccepted>> Handle(ExportAuditCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var queued = await jobs.EnqueueAsync(
             new ExportAuditJob(command.From, command.To, command.ActorUserId, command.ActualUserId, command.Module, command.Action, command.ResourceType, command.ResourceId),
             cancellationToken);

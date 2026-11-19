@@ -87,3 +87,8 @@ rolname
 uuidv
 forloop
 endcapture
+reportgenerator
+targetdir
+reporttypes
+assemblyfilters
+classfilters

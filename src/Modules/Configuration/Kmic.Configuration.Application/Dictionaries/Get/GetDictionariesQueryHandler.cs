@@ -14,8 +14,6 @@ public sealed class GetDictionariesQueryHandler(IDictionarySnapshots snapshots) 
     /// <inheritdoc />
     public async ValueTask<Result<DictionariesResponse>> Handle(GetDictionariesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var found = new List<DictionarySnapshot>();
         foreach (var code in query.Types.Distinct(StringComparer.Ordinal))
         {

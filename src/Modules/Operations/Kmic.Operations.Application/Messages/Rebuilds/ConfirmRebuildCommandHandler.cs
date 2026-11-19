@@ -12,8 +12,6 @@ public sealed class ConfirmRebuildCommandHandler(IReadModelRebuildAdmin rebuilds
     /// <inheritdoc />
     public async ValueTask<Result> Handle(ConfirmRebuildCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         return RebuildOutcomes.Of(await rebuilds.ConfirmAsync(command.Subscription, cancellationToken));
     }
 }

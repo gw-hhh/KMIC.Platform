@@ -1,6 +1,7 @@
 using Kmic.Identity.Application.Authentication;
 using Kmic.Identity.Domain.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Infrastructure.Authentication;
 
@@ -9,7 +10,10 @@ namespace Kmic.Identity.Infrastructure.Authentication;
 /// </summary>
 internal sealed class PasswordService : IPasswordService
 {
-    private readonly PasswordHasher<User> _hasher = new();
+    // PBKDF2-HMAC-SHA512，迭代次数取 OWASP 的建议值；旧哈希的迭代次数更低时，登录成功后会自动重新哈希
+    internal const int IterationCount = 210_000;
+
+    private readonly PasswordHasher<User> _hasher = new(Options.Create(new PasswordHasherOptions { IterationCount = IterationCount }));
 
     // 无账号或未设置密码时也执行哈希校验，减少响应耗时差异
     private readonly string _decoyHash;

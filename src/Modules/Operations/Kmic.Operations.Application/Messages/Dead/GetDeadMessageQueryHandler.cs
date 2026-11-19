@@ -15,8 +15,6 @@ public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores, Inte
     /// <inheritdoc />
     public async ValueTask<Result<DeadMessageDetailItem>> Handle(GetDeadMessageQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         if (!MessageBoxKind.TryFromCode(query.Box, out var kind))
         {
             return CommonErrors.ValidationFailedWith([new FieldError("box", "Invalid", "只能是 Outbox 或 Inbox")]);

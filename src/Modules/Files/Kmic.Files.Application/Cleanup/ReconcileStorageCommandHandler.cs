@@ -27,8 +27,6 @@ public sealed class ReconcileStorageCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(ReconcileStorageCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var now = time.GetUtcNow();
         var cutoff = now - options.Value.ReconcileMinAge;
 

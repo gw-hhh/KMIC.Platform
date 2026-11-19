@@ -13,8 +13,6 @@ public sealed class ListFilesQueryHandler(IFilesQueryDb db) : IQueryHandler<List
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<FileListItem>>> Handle(ListFilesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var statuses = EnumerationFilter.Parse<StoredFileStatus>(query.Status, "status");
         if (statuses.IsFailure)
         {

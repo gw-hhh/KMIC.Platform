@@ -16,8 +16,6 @@ public abstract class AuthorizationAdminCommandHandler<TCommand, TResponse>(IOpe
     /// <inheritdoc />
     public async ValueTask<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var access = execution.Access ?? throw new InvalidOperationException("授权管理命令需要已登录的访问上下文。");
         var rechecked = await recheck.CheckAsync(access, cancellationToken);
         return rechecked.IsFailure ? rechecked.Error : await ExecuteAsync(command, access, cancellationToken);

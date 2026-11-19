@@ -26,8 +26,6 @@ public sealed class SwitchRoleCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<AuthTokens>> Handle(SwitchRoleCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var access = execution.Access ?? throw new InvalidOperationException("切换角色需要已登录的访问上下文。");
         var loadedSession = await sessions.GetForUpdateAsync(access.SessionId, null, cancellationToken);
         var loadedUser = await users.GetForUpdateAsync(access.UserId, null, cancellationToken);

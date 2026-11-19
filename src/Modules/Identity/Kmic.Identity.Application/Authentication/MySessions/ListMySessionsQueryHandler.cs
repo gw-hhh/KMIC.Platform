@@ -15,8 +15,6 @@ public sealed class ListMySessionsQueryHandler(IIdentityQueryDb db, IExecutionCo
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<MySessionItem>>> Handle(ListMySessionsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var access = execution.Access ?? throw new InvalidOperationException("查询登录会话需要已登录的访问上下文。");
         var now = time.GetUtcNow();
         var current = access.SessionId;

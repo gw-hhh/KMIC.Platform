@@ -18,8 +18,6 @@ public sealed class GetSpecimenReferencesQueryHandler(ISampleQueryDb db)
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetSpecimenReferencesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.Specimens
             .WithoutDataScope()
             .Where(s => query.Ids.Contains(s.Id))

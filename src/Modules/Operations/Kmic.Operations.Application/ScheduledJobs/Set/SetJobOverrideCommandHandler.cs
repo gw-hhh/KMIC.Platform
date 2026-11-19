@@ -19,8 +19,6 @@ public sealed class SetJobOverrideCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<ScheduledJobSettingId>>> Handle(SetJobOverrideCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         // 已经从代码里删除的任务只剩设置行，改了也没有触发器可同步
         if (!control.IsDeclared(command.JobName))
         {

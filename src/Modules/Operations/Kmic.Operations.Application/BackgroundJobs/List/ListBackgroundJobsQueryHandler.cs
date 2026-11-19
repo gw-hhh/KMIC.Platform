@@ -16,8 +16,6 @@ public sealed class ListBackgroundJobsQueryHandler(IModuleJobStores stores, ICur
     /// <inheritdoc />
     public async ValueTask<Result<CursorPage<BackgroundJobItem>>> Handle(ListBackgroundJobsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         BackgroundJobState? state = null;
         if (query.Status is { Length: > 0 } status)
         {

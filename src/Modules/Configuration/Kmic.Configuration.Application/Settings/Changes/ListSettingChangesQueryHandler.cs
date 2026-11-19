@@ -15,8 +15,6 @@ public sealed class ListSettingChangesQueryHandler(IConfigurationQueryDb db, IUs
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SettingChangeItem>>> Handle(ListSettingChangesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var changes = db.SettingChanges.AsQueryable();
         if (!string.IsNullOrWhiteSpace(query.Key))
         {

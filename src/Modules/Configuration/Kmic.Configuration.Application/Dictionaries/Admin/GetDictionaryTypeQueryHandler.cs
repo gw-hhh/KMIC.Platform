@@ -15,8 +15,6 @@ public sealed class GetDictionaryTypeQueryHandler(IConfigurationQueryDb db) : IQ
     /// <inheritdoc />
     public async ValueTask<Result<DictionaryTypeDetail>> Handle(GetDictionaryTypeQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var type = await db.DictionaryTypes
             .Where(t => t.Code == query.TypeCode)
             .Select(t => new

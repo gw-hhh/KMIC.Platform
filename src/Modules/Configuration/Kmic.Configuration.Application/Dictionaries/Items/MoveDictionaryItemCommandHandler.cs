@@ -14,8 +14,6 @@ public sealed class MoveDictionaryItemCommandHandler(IDictionaryTypeRepository t
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(MoveDictionaryItemCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

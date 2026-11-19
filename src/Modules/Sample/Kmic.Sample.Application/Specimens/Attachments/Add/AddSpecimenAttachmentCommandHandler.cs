@@ -20,8 +20,6 @@ public sealed class AddSpecimenAttachmentCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(AddSpecimenAttachmentCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

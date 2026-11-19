@@ -13,8 +13,6 @@ public sealed class DeleteSpecimenCommandHandler(ISpecimenRepository specimens) 
     /// <inheritdoc />
     public async ValueTask<Result> Handle(DeleteSpecimenCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

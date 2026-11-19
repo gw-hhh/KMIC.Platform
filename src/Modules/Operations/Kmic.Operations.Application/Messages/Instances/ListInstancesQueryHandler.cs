@@ -12,8 +12,6 @@ public sealed class ListInstancesQueryHandler(IOperationsQueryDb db, TimeProvide
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<InstanceItem>>> Handle(ListInstancesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.MessagingInstances.OrderByDescending(i => i.HeartbeatAt).ThenBy(i => i.Id).ToListAsync(cancellationToken);
         var now = time.GetUtcNow();
         List<InstanceItem> items =

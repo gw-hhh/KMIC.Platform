@@ -13,8 +13,6 @@ public sealed class SearchUserOptionsQueryHandler(IIdentityQueryDb db) : IQueryH
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<UserOption>>> Handle(SearchUserOptionsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var users = db.Users.Where(u => u.Kind == UserKind.Normal);
         if (!string.IsNullOrWhiteSpace(query.Q))
         {

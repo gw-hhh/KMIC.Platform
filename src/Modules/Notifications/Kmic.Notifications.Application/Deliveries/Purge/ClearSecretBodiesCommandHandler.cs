@@ -15,8 +15,6 @@ public sealed class ClearSecretBodiesCommandHandler(IDeliveryRepository deliveri
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(ClearSecretBodiesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var secretKeys = catalog.All.Where(t => t.CarriesSecret).Select(t => t.Key).ToList();
         if (secretKeys.Count == 0)
         {

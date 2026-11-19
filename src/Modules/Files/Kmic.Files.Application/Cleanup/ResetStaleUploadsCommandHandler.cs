@@ -17,8 +17,6 @@ public sealed class ResetStaleUploadsCommandHandler(IStoredFileRepository files,
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(ResetStaleUploadsCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var now = time.GetUtcNow();
         var stale = await files.FindStaleUploadsAsync(now - options.Value.StaleUpload, options.Value.PurgeBatchSize, cancellationToken);
         var rejected = 0;

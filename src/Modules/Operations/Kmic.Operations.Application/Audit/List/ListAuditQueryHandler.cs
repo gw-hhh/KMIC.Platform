@@ -18,8 +18,6 @@ public sealed class ListAuditQueryHandler(IOperationsQueryDb db, ICursorProtecto
     /// <inheritdoc />
     public async ValueTask<Result<CursorPage<AuditListItem>>> Handle(ListAuditQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var audits = AuditFilters.Apply(db, query.From, query.To, query.ActorUserId, query.ActualUserId, query.Module, query.Action, query.ResourceType, query.ResourceId);
 
         var page = await audits

@@ -21,8 +21,6 @@ public sealed class GetAuditExportFileQueryHandler(IModuleJobStores stores, IFil
     /// <inheritdoc />
     public async ValueTask<Result<FileDownload>> Handle(GetAuditExportFileQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var store = stores.Find(OperationsModuleInfo.Name);
         var job = store is null ? null : await store.FindAsync(query.JobId, cancellationToken);
         if (job is null || !string.Equals(job.JobType, ExportAuditJob.Name, StringComparison.Ordinal) || !CanSee(job))

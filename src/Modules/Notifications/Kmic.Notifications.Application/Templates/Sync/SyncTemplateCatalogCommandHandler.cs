@@ -17,8 +17,6 @@ public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalo
     /// <inheritdoc />
     public async ValueTask<Result<TemplateSyncResult>> Handle(SyncTemplateCatalogCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         if ((await locks.TryAcquireExclusiveAsync("Notifications.TemplateSync", [_lockId], cancellationToken)).Count == 0)
         {
             return new TemplateSyncResult(0, 0, 0);

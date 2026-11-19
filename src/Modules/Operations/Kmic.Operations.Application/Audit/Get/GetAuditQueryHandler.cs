@@ -18,8 +18,6 @@ public sealed class GetAuditQueryHandler(IOperationsQueryDb db, IUserReferences 
     /// <inheritdoc />
     public async ValueTask<Result<AuditDetail>> Handle(GetAuditQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var entry = await db.AuditLogs
             .Where(a => a.Id == query.Id)
             .Select(a => new

@@ -40,7 +40,7 @@
 | # | 规则 | 示例 | 章节 |
 |---|---|---|---|
 | 17 | 业务失败返回 `Result`，错误来自错误目录；不抛业务异常 | `return SampleErrors.NoItems;` | 6 |
-| 18 | 不捕获 `Exception`；参数检查用 `ThrowIfNull` 系列 | `ArgumentNullException.ThrowIfNull(sample);` | 6 |
+| 18 | 不捕获 `Exception`；公开 API 的参数检查用 `ThrowIfNull` 系列；命令、查询处理器的 `command`、`query` 不用写，Mediator 不会传 null | `ArgumentNullException.ThrowIfNull(sample);` | 6 |
 | 19 | 全部 I/O 异步；禁止 `.Result`、`.Wait()`、`Task.Run`；不写 `ConfigureAwait(false)` | `await repository.GetForUpdateAsync(id, version, ct);` | 7 |
 | 20 | 模块代码不用 `lock`、`SemaphoreSlim`；业务并发靠数据库 | 版本号、行锁、唯一约束 | 7 |
 | 21 | 当前时间注入 `TimeProvider`；ID 用强类型 ID 的 `New()` | `time.GetUtcNow()`、`SampleId.New()` | 8、15.2 |
@@ -419,7 +419,7 @@ C# 12 的主构造函数可以省去“字段 + 构造函数赋值”的样板�
 | 异常只表示程序缺陷或基础设施故障 | — |
 | 模块代码不捕获 `Exception` / `SystemException`；需要处理特定异常时捕获具体类型 | CA1031 → Error（BuildingBlocks 的异常转换、未处理异常中间件、后台循环用 `[SuppressMessage]` 豁免并写理由） |
 | 重新抛出用 `throw;` | CA2200 → Error |
-| 参数检查用 `ArgumentNullException.ThrowIfNull`、`ArgumentException.ThrowIfNullOrWhiteSpace`、`ArgumentOutOfRangeException.ThrowIfNegative` 等 | CA1510～CA1513 → Error |
+| 参数检查用 `ArgumentNullException.ThrowIfNull`（命令、查询处理器的 `command`、`query` 除外，Mediator 不会传 null）、`ArgumentException.ThrowIfNullOrWhiteSpace`、`ArgumentOutOfRangeException.ThrowIfNegative` 等 | CA1510～CA1513 → Error |
 | 不 `catch` 后记录日志再抛出；一个错误只在最外层记录一次 | 05-12 第 2.4 节；评审 |
 | 不用异常做流程控制（如 `try { Parse } catch` 判断格式），用 `TryParse` 或 `Result` | 评审 |
 | 自定义异常类型只在 BuildingBlocks 中定义 | 架构测试：模块程序集中不得有继承 `Exception` 的类型 |
@@ -837,6 +837,8 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | 测试基础设施 | 两个测试类并行时数据互不可见；模板库在迁移变化后重建 |
 | 提交信息 | 不符合格式的合并请求标题被 CI 拦截 |
 
+**覆盖率**：`dotnet run scripts/coverage.cs` 跑全部测试并出报告（`artifacts/coverage/report`），只做参考、不设门槛；生成代码和测试项目不计入。2026-11-19 的结果：手写代码行覆盖率约 95%。
+
 ---
 
 ## 17. 与其他文档的接口
@@ -907,7 +909,9 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | 2026-11-19 | 第 10.3 节与附录 A 精简：第 10.3 节只列有工具检查的硬性要求；附录 A 由 12 个小节约 300 行改为注释、接口文档、排版、消息与字符串 4 小节，注释只留“一个短语说清是什么、remarks 只写容易用错的规则”等几条原则，删去句式要求、写与不写的对照表、控制流与命名细则、新语法边界、自查清单和参考文档对照表（控制流与命名的要点仍在编码速查，禁用写法仍由分析器和第 6、7、15 节约束）。附录末尾错放的 3 行 2026-11-12 修订记录挪回本表 | 用户确认（2026-11-19，规则精简选 B） |
 | 2026-11-19 | 放宽约束：CS1591、CS1573 全部项目关闭（第 3.1、10.3 节）；模型校验只要求表注释，列注释不强制（属性写了 `summary` 仍会生成）；OpenAPI 完整性只查操作摘要和智能枚举的显示名，参数和字段说明不强制；第 5.4 节参数个数和成员顺序改为建议；A.1 增加参数说明的写法（一眼能看出来的不写，要写就一个词）；编码速查第 6、7、26、27 条与第 14、15.4 节同步 | 用户确认（2026-11-19，放宽约束清单） |
 | 2026-11-19 | 第 14 节评审清单只留工具查不到、出错代价大的 12 条 | 用户确认（2026-11-19，文档规则放宽） |
+| 2026-11-19 | 编码速查第 18 条、第 6 节：命令、查询处理器的 `command`、`query` 不写 `ThrowIfNull`（现有 139 处已删） | 用户确认（2026-11-19，现有系统梳理） |
 
+| 2026-11-19 | 第 16 节：增加覆盖率报告脚本 `scripts/coverage.cs`，只出报告、不设门槛 | 用户确认（2026-11-19，现有系统梳理） |
 ---
 
 ## 附录 A 注释与排版要点

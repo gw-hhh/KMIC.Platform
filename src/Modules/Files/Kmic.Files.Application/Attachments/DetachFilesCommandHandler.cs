@@ -14,8 +14,6 @@ public sealed class DetachFilesCommandHandler(IStoredFileRepository files, IOpti
     /// <inheritdoc />
     public async ValueTask<Result> Handle(DetachFilesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var message = command.Message;
         var now = time.GetUtcNow();
         foreach (var id in message.FileIds.Distinct())

@@ -14,8 +14,6 @@ public sealed class GetUserContactsQueryHandler(IIdentityQueryDb db) : IQueryHan
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, UserContact>>> Handle(GetUserContactsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.Users
             .Where(u => query.Ids.Contains(u.Id))
             .Select(u => new { u.Id, u.DisplayName, u.Email, u.Mobile, u.Status })

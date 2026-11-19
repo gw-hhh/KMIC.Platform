@@ -15,8 +15,6 @@ public sealed class NotifyJobFinishedCommandHandler(NotificationProcessor proces
     /// <inheritdoc />
     public async ValueTask<Result> Handle(NotifyJobFinishedCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var message = command.Message;
 
         // 提交人自己取消的作业不再通知

@@ -22,8 +22,6 @@ public sealed class GetUserQueryHandler(
     /// <inheritdoc />
     public async ValueTask<Result<UserDetailResponse>> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var access = execution.Access ?? throw new InvalidOperationException("查询用户需要已登录的访问上下文。");
         var found = await db.Users
             .Where(u => u.Id == query.Id)

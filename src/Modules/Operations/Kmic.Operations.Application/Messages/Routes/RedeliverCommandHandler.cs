@@ -16,8 +16,6 @@ public sealed class RedeliverCommandHandler(IMessageRouteAdmin routes) : IComman
     /// <inheritdoc />
     public async ValueTask<Result<RedeliverResponse>> Handle(RedeliverCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var result = await routes.RedeliverAsync(command.SourceModule, command.MessageType, command.Subscription, command.FromSeq, command.ToSeq, cancellationToken);
         return result.Outcome switch
         {

@@ -15,8 +15,6 @@ public sealed class ResolveStorageIssueCommandHandler(IStorageIssueRepository is
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<StorageIssueId>>> Handle(ResolveStorageIssueCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await issues.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

@@ -16,8 +16,6 @@ public sealed class RecordAuditCommandHandler(IAuditRepository audits) : IComman
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RecordAuditCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var audit = command.Audit;
         var id = AuditLogId.From(audit.AuditId);
         if (await audits.ExistsAsync(id, cancellationToken))

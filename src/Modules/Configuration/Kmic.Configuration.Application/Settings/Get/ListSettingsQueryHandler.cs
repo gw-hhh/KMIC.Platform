@@ -14,8 +14,6 @@ public sealed class ListSettingsQueryHandler(IConfigurationQueryDb db, SystemSet
     /// <inheritdoc />
     public async ValueTask<Result<SettingsResponse>> Handle(ListSettingsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var stored = await db.SettingValues.Select(v => new { v.Key, v.Value, v.ConcurrencyVersion }).ToDictionaryAsync(v => v.Key, StringComparer.Ordinal, cancellationToken);
         var settings = catalog.All
             .OrderBy(d => d.Module, StringComparer.Ordinal)

@@ -17,8 +17,6 @@ public sealed class GetSpecimenAttachmentContentQueryHandler(ISampleQueryDb db, 
     /// <inheritdoc />
     public async ValueTask<Result<FileDownload>> Handle(GetSpecimenAttachmentContentQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         // 范围外的示例按不存在处理，访问权限和附件归属确认后再查询下载信息
         var found = await finder.FindByIdOrNotFoundAsync(db.Specimens.Include(s => s.Attachments), query.Id, SampleErrors.NotFound, cancellationToken);
         if (found.IsFailure)

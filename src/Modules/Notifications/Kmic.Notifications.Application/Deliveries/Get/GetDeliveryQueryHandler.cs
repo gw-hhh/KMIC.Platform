@@ -15,8 +15,6 @@ public sealed class GetDeliveryQueryHandler(INotificationsQueryDb db) : IQueryHa
     /// <inheritdoc />
     public async ValueTask<Result<DeliveryDetailResponse>> Handle(GetDeliveryQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var delivery = await db.Deliveries
             .Where(d => d.Id == query.Id)
             .Select(d => new DeliveryDetailResponse(

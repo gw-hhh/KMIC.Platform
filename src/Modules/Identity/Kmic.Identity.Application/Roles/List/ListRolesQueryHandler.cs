@@ -13,8 +13,6 @@ public sealed class ListRolesQueryHandler(IIdentityQueryDb db) : IQueryHandler<L
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<RoleListItem>>> Handle(ListRolesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var roles = db.Roles.AsQueryable();
         if (!string.IsNullOrWhiteSpace(query.Q))
         {

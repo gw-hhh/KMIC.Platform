@@ -14,8 +14,6 @@ public sealed class ListMySiteMessagesQueryHandler(INotificationsQueryDb db, IEx
     /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SiteMessageItem>>> Handle(ListMySiteMessagesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var me = (execution.Access ?? throw new InvalidOperationException("查询我的站内消息需要已登录的访问上下文。")).UserId;
         var messages = db.SiteMessages.Where(m => m.RecipientUserId == me);
         if (query.Unread is { } unread)

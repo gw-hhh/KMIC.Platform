@@ -16,8 +16,6 @@ public sealed class GetReadableFileQueryHandler(IFilesQueryDb db) : IQueryHandle
     /// <inheritdoc />
     public async ValueTask<Result<FileDownload>> Handle(GetReadableFileQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var id = StoredFileId.From(query.FileId);
         var row = await db.Files
             .Where(f => f.Id == id)

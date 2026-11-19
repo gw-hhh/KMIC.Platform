@@ -15,8 +15,6 @@ public sealed class GetSettingQueryHandler(IConfigurationQueryDb db, SystemSetti
     /// <inheritdoc />
     public async ValueTask<Result<SettingItem>> Handle(GetSettingQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var definition = catalog.Find(query.Key);
         if (definition is null)
         {

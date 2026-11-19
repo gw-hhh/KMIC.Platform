@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Kmic.Api.Tests.Identity;
@@ -15,7 +16,10 @@ internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
 
     // 一个测试只开一个连接池：每次造数据都新建连接池，连接用完即关，测试多了会把本机的临时端口用光
     private readonly NpgsqlDataSource _data = NpgsqlDataSource.Create(connectionString);
-    private readonly PasswordHasher<object> _hasher = new();
+    // 迭代次数固定为较低的旧值：登录时产品代码会把它升级到现行值，测试据此验证重新哈希
+    internal const int SeedIterationCount = 100_000;
+
+    private readonly PasswordHasher<object> _hasher = new(Options.Create(new PasswordHasherOptions { IterationCount = SeedIterationCount }));
 
     public async ValueTask DisposeAsync() => await _data.DisposeAsync();
 

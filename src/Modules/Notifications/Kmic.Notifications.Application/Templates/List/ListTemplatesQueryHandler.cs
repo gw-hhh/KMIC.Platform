@@ -13,8 +13,6 @@ public sealed class ListTemplatesQueryHandler(INotificationsQueryDb db) : IQuery
     /// <inheritdoc />
     public async ValueTask<Result<TemplateListResponse>> Handle(ListTemplatesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.Templates
             .OrderBy(t => t.Key)
             .Select(t => new { Template = t, LastPublishedAt = db.TemplateVersions.Where(v => v.TemplateId == t.Id).Max(v => (DateTimeOffset?)v.PublishedAt) })

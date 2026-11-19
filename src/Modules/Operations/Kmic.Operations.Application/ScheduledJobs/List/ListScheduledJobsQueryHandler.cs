@@ -22,8 +22,6 @@ public sealed class ListScheduledJobsQueryHandler(
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<ScheduledJobItem>>> Handle(ListScheduledJobsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var declared = await control.ListAsync(cancellationToken);
         var overrides = await db.ScheduledJobSettings
             .Select(s => new Override(s.JobName, s.Enabled, s.Cron, s.ConcurrencyVersion))

@@ -55,6 +55,24 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
     }
 
     [Fact]
+    public async Task Login_WithAHashFromFewerIterations_UpgradesItToTheCurrentIterationCount()
+    {
+        var (userId, _) = await UserWithRoleAsync("old-hash");
+        IterationsOf(await StoredHashAsync(userId)).ShouldBe(IdentitySeed.SeedIterationCount);
+
+        var response = await LoginAsync(NewClient(), "old-hash");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        IterationsOf(await StoredHashAsync(userId)).ShouldBe(210_000);
+    }
+
+    private async Task<string> StoredHashAsync(Guid userId) =>
+        (await Seed.ScalarAsync<string>("""SELECT "PasswordHash" FROM "Identity"."User" WHERE "Id" = @id""", ("id", userId)))!;
+
+    // ASP.NET Core Identity v3 的哈希：1 字节版本、4 字节算法、4 字节迭代次数（大端）、……
+    private static int IterationsOf(string hash) => System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(Convert.FromBase64String(hash).AsSpan(5, 4));
+
+    [Fact]
     public async Task Login_ForTheWeb_PutsTheRefreshTokenInAnHttpOnlyCookieOnly()
     {
         await UserWithRoleAsync("web-user");

@@ -15,8 +15,6 @@ public sealed class PurgeLoginThrottleCommandHandler(ILoginThrottleStore throttl
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeLoginThrottleCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var now = time.GetUtcNow();
         var purged = await throttles.PurgeAsync(now - options.Value.ResetAfter, now, cancellationToken);
         return new ScheduledJobOutcome(purged);

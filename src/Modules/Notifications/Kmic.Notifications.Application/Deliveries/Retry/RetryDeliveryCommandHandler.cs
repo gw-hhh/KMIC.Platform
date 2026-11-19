@@ -14,8 +14,6 @@ public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, 
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RetryDeliveryCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await deliveries.GetForUpdateAsync(command.Id, null, cancellationToken);
         if (loaded.IsFailure)
         {

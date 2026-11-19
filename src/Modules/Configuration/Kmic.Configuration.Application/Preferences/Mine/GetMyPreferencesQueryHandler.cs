@@ -15,8 +15,6 @@ public sealed class GetMyPreferencesQueryHandler(IExecutionContext execution, IP
     /// <inheritdoc />
     public async ValueTask<Result<MyPreferencesResponse>> Handle(GetMyPreferencesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var access = execution.Access ?? throw new InvalidOperationException("查询个人偏好需要已登录的访问上下文。");
         var stack = await layers.GetAsync(access.UserId, access.RoleId, cancellationToken);
 

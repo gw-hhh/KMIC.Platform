@@ -21,8 +21,6 @@ public sealed class ResetSettingCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SystemSettingValueId>>> Handle(ResetSettingCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var definition = catalog.Find(command.Key);
         if (definition is null)
         {

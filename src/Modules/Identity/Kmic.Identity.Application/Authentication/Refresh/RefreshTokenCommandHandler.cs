@@ -21,8 +21,6 @@ public sealed class RefreshTokenCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<AuthTokens>> Handle(RefreshTokenCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var presentedHash = RefreshTokens.Hash(command.RefreshToken);
 
         // 锁定会话，使并发刷新依次执行，后到的请求按宽限期规则处理

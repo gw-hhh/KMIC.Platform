@@ -15,8 +15,6 @@ public sealed class GetFileQueryHandler(IFilesQueryDb db, IStateHistoryQuery his
     /// <inheritdoc />
     public async ValueTask<Result<FileDetail>> Handle(GetFileQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var file = await db.Files.FirstOrDefaultAsync(f => f.Id == query.Id, cancellationToken);
         if (file is null)
         {

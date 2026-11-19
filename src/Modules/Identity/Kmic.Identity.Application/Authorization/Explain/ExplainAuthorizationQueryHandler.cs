@@ -19,8 +19,6 @@ public sealed class ExplainAuthorizationQueryHandler(IIdentityQueryDb db, IAcces
     /// <inheritdoc />
     public async ValueTask<Result<AuthorizationExplanation>> Handle(ExplainAuthorizationQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var scopeObject = query.ScopeObject is { } code ? scopeObjects.All.FirstOrDefault(s => string.Equals(s.Code, code, StringComparison.Ordinal)) : null;
         if (query.ScopeObject is not null && scopeObject is null)
         {

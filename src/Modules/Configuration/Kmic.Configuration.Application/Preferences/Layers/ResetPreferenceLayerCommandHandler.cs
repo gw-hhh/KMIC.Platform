@@ -20,8 +20,6 @@ public sealed class ResetPreferenceLayerCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<PreferenceValueId>>> Handle(ResetPreferenceLayerCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var found = PreferenceSubject.Find(catalog, command.Key);
         if (found.IsFailure)
         {

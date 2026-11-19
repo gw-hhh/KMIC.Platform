@@ -25,8 +25,6 @@ public sealed class PurgeFileCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<StoredFileId>>> Handle(PurgeFileCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await files.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

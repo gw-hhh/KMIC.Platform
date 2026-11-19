@@ -15,8 +15,6 @@ public sealed class EndImpersonationCommandHandler(ISessionRepository sessions, 
     /// <inheritdoc />
     public async ValueTask<Result> Handle(EndImpersonationCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var access = execution.Access ?? throw new InvalidOperationException("结束模拟身份需要已登录的访问上下文。");
         if (access.ImpersonatorUserId is null)
         {

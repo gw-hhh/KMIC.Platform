@@ -18,8 +18,6 @@ public sealed class RestoreJobDefaultCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<ScheduledJobSettingId>>> Handle(RestoreJobDefaultCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         if (!control.IsDeclared(command.JobName))
         {
             return OperationsErrors.JobNotFound;

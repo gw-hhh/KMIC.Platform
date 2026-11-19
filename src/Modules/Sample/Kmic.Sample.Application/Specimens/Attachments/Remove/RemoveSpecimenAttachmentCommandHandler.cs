@@ -19,8 +19,6 @@ public sealed class RemoveSpecimenAttachmentCommandHandler(
     /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(RemoveSpecimenAttachmentCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
         if (loaded.IsFailure)
         {

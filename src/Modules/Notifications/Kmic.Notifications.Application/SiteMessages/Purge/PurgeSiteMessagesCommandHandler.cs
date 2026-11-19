@@ -15,8 +15,6 @@ public sealed class PurgeSiteMessagesCommandHandler(ISiteMessageRepository messa
     /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeSiteMessagesCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var now = time.GetUtcNow();
         var purged = await messages.PurgeAsync(now.AddDays(-options.Value.SiteMessageReadDays), now.AddDays(-options.Value.SiteMessageUnreadDays), cancellationToken);
         return new ScheduledJobOutcome(purged);

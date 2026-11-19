@@ -15,8 +15,6 @@ public sealed class CheckAttachabilityQueryHandler(IFilesQueryDb db) : IQueryHan
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<FileSnapshot>>> Handle(CheckAttachabilityQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var ids = query.FileIds.Select(StoredFileId.From).ToList();
         var uploader = UserId.From(query.UploaderId);
         var bySystem = uploader == UserId.System;

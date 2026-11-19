@@ -13,8 +13,6 @@ public sealed class ListDictionaryTypesQueryHandler(IConfigurationQueryDb db) : 
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<DictionaryTypeListItem>>> Handle(ListDictionaryTypesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         List<DictionaryTypeListItem> items = await db.DictionaryTypes
             .OrderBy(t => t.OwnerModule)
             .ThenBy(t => t.Code)

@@ -12,8 +12,6 @@ public sealed class RevokeMySessionCommandHandler(ISessionRepository sessions, I
     /// <inheritdoc />
     public async ValueTask<Result> Handle(RevokeMySessionCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         var access = execution.Access ?? throw new InvalidOperationException("结束登录会话需要已登录的访问上下文。");
         var loaded = await sessions.GetForUpdateAsync(command.SessionId, null, cancellationToken);
 

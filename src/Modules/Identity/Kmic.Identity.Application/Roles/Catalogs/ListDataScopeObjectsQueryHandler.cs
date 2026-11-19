@@ -12,8 +12,6 @@ public sealed class ListDataScopeObjectsQueryHandler(DataScopeObjectCatalog cata
     /// <inheritdoc />
     public ValueTask<Result<IReadOnlyList<DataScopeObjectItem>>> Handle(ListDataScopeObjectsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         List<DataScopeObjectItem> items =
         [
             .. catalog.All

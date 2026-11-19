@@ -24,8 +24,6 @@ public sealed class StartUploadCommandHandler(
     /// <inheritdoc />
     public ValueTask<Result<UploadStarted>> Handle(StartUploadCommand command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(command);
-
         if (profiles.Find(command.Profile) is not { } profile)
         {
             return ValueTask.FromResult<Result<UploadStarted>>(FilesErrors.ProfileNotFound);

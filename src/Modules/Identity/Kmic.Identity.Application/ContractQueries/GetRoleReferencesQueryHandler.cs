@@ -14,8 +14,6 @@ public sealed class GetRoleReferencesQueryHandler(IIdentityQueryDb db) : IQueryH
     /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetRoleReferencesQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.Roles
             .Where(r => query.Ids.Contains(r.Id))
             .Select(r => new { r.Id, r.Name, r.Status })

@@ -12,8 +12,6 @@ public sealed class PreviewCronQueryHandler(IScheduledJobControl control, TimePr
     /// <inheritdoc />
     public ValueTask<Result<CronPreviewResponse>> Handle(PreviewCronQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var preview = control.Preview(query.Cron.Trim(), time.GetUtcNow(), CronRules.PreviewCount);
         var verdict = CronRules.Check(preview, "cron");
         Result<CronPreviewResponse> result = verdict.IsFailure ? verdict.Error : new CronPreviewResponse(preview.NextFireTimes);

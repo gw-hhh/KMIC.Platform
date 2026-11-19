@@ -19,8 +19,6 @@ public sealed class ListPreferenceDefinitionsQueryHandler(IConfigurationQueryDb 
     /// <inheritdoc />
     public async ValueTask<Result<PreferenceDefinitionsResponse>> Handle(ListPreferenceDefinitionsQuery query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(query);
-
         var rows = await db.PreferenceValues
             .Where(v => v.Layer != PreferenceLayer.UserRole)
             .Select(v => new LayerRow(v.Key, v.RoleId, v.Value, v.ConcurrencyVersion))
