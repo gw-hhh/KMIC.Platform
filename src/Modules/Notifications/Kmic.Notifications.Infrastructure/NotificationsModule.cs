@@ -29,6 +29,7 @@ using Kmic.Notifications.Infrastructure.Rendering;
 using Kmic.Notifications.Infrastructure.Sending;
 using Kmic.Notifications.Infrastructure.Templates;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Kmic.Notifications.Infrastructure;
 
@@ -56,7 +57,11 @@ public sealed class NotificationsModule : IModule
         services.AddScoped<ITemplateRepository, TemplateRepository>();
         services.AddScoped<IStartupTask, SyncTemplateCatalogTask>();
         services.AddScoped<NotificationProcessor>();
-        services.AddKmicOptions<NotificationsCaptureOptions>(NotificationsCaptureOptions.Section);
+        // 捕获会把验证码、临时密码明文写进库，生产环境忘了关就会泄露，所以直接拒绝启动
+        services.AddKmicOptions<NotificationsCaptureOptions>(NotificationsCaptureOptions.Section)
+            .Validate<IHostEnvironment>(
+                (options, environment) => !environment.IsProduction() || !options.Enabled,
+                "生产环境必须配置 Notifications:Capture:Enabled 为 false，否则通知只写入捕获表、不会发送");
         services.AddKmicOptions<NotificationsRetentionOptions>(NotificationsRetentionOptions.Section);
         services.AddKmicOptions<NotificationsRenderOptions>(NotificationsRenderOptions.Section);
         services.AddSingleton<ITemplateRenderer, FluidTemplateRenderer>();

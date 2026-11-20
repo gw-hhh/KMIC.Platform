@@ -22,7 +22,7 @@ internal static class FileNames
 
         var slash = fileName.LastIndexOfAny(_separators);
         var name = slash >= 0 ? fileName[(slash + 1)..] : fileName;
-        name = string.Concat(name.Where(c => !char.IsControl(c))).Trim();
+        name = string.Concat(name.Where(c => !char.IsControl(c) && !IsBidiControl(c))).Trim();
         if (name.Length == 0 || name is "." or "..")
         {
             return null;
@@ -37,4 +37,7 @@ internal static class FileNames
         var keep = MaxLength - Math.Min(extension.Length, 20);
         return name[..keep] + (extension.Length <= 20 ? extension : string.Empty);
     }
+
+    // 方向控制字符（如 U+202E）能把“fdp.exe”显示成“exe.pdf”，用来伪装扩展名
+    private static bool IsBidiControl(char c) => c is >= '‪' and <= '‮' or >= '⁦' and <= '⁩' or '‎' or '‏' or '؜';
 }

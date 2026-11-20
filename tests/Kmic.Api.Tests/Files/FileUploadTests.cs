@@ -54,6 +54,17 @@ public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemp
     }
 
     [Fact]
+    public async Task Upload_AFileNameWithDirectionOverrides_IsStoredWithoutThem()
+    {
+        using var alice = ClientFor(Alice);
+
+        var response = await UploadAsync(alice, "合同‮fdp.pdf", Pdf());
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        (await JsonAsync(response)).GetProperty("name").GetString().ShouldBe("合同fdp.pdf");
+    }
+
+    [Fact]
     public async Task Upload_ANonPdfNamedAsPdf_IsRefusedWith415_AndTheRowIsRejected()
     {
         using var alice = ClientFor(Alice);

@@ -25,6 +25,12 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
             return SendResult.Permanent($"没有配置发件账号 {message.SenderProfile}");
         }
 
+        // 不加密的连接上认证，密码会明文过网络
+        if (SecurityOf(sender.Security) == SecureSocketOptions.None && !string.IsNullOrEmpty(sender.Username))
+        {
+            return SendResult.Permanent($"发件账号 {message.SenderProfile} 配置有误：不加密的连接不能带账号密码");
+        }
+
         MimeMessage mime;
         try
         {

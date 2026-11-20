@@ -37,6 +37,11 @@ public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDa
             ["Notifications:Email:Senders:Down:Host"] = "127.0.0.1",
             ["Notifications:Email:Senders:Down:Port"] = UnusedPort().ToString(CultureInfo.InvariantCulture),
             ["Notifications:Email:Senders:Down:Security"] = "None",
+            ["Notifications:Email:Senders:Plain:Address"] = "noreply@example.com",
+            ["Notifications:Email:Senders:Plain:Host"] = "127.0.0.1",
+            ["Notifications:Email:Senders:Plain:Port"] = smtp.Port.ToString(CultureInfo.InvariantCulture),
+            ["Notifications:Email:Senders:Plain:Security"] = "None",
+            ["Notifications:Email:Senders:Plain:Username"] = "robot",
             ["Notifications:Email:TimeoutSeconds"] = "5",
         };
 
@@ -143,6 +148,15 @@ public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDa
     public async Task AnAddressThatIsNotAnAddress_IsAPermanentFailure_AndNothingIsSent()
     {
         var result = await Sender.SendAsync(Message("not an address@@"), Ct);
+
+        result.Outcome.ShouldBe(SendOutcome.Permanent);
+        _smtp.Mails.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task AnAccountOnAnUnencryptedConnection_IsAPermanentFailure_AndNothingIsSent()
+    {
+        var result = await Sender.SendAsync(Message(profile: "Plain"), Ct);
 
         result.Outcome.ShouldBe(SendOutcome.Permanent);
         _smtp.Mails.ShouldBeEmpty();

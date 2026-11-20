@@ -192,7 +192,7 @@ stateDiagram-v2
 
 ### 3.6 `CapturedMessage`
 
-`"Notifications"."CapturedMessage"`：`Id`、`DeliveryId`、`Channel`、`From`（所用发件账号）、`To`、`Cc`、`Bcc`、`Subject`、`Body`、`AttachmentNames`（名称与大小的 jsonb）、`CapturedAt`。只在非生产环境写入；生产环境这张表存在但没有写入（迁移里照常建，避免环境之间表结构不同）。
+`"Notifications"."CapturedMessage"`：`Id`、`DeliveryId`、`Channel`、`From`（所用发件账号）、`To`、`Cc`、`Bcc`、`Subject`、`Body`、`AttachmentNames`（名称与大小的 jsonb）、`CapturedAt`。只在非生产环境写入；生产环境这张表存在但没有写入（迁移里照常建，避免环境之间表结构不同）。捕获默认开启，所以生产环境必须把 `Notifications:Capture:Enabled` 配成 false，否则宿主启动失败（验证码和临时密码会明文落库，不能靠“忘了关”静默发生）。
 
 ---
 
@@ -563,7 +563,7 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 - 投递工作器 `DeliveryWork`：领取循环由框架的 `ILeasedWork` 运行，配置在 `Notifications:Delivery`（默认并行 4 条、最多尝试 5 次、领取租期 5 分钟、空闲时每 5 秒查一次）。领取待发送和租期已到的投递，高优先级先发。渠道在事务之外调用，结果用带领取令牌的语句记录；令牌对不上说明已被别的实例接管，这次结果不写。
 - 发送前向 Identity 取收件人最新的联系方式，不存在、已禁用或没有地址的记为已跳过。含密通知超过消息声明的有效期就不再发送；发完或最终失败后，清空正文和短信参数。
 - 暂时失败按 30 秒起、每次翻倍、最长 1 小时退避；次数用完或永久失败转为失败，等人工处理。
-- 邮件渠道 `MailKitEmailSender`：每封邮件一个连接。服务器返回 4xx、网络和超时、认证失败算暂时失败；5xx、地址格式不对、没有配置发件账号算永久失败。
+- 邮件渠道 `MailKitEmailSender`：每封邮件一个连接。服务器返回 4xx、网络和超时、认证失败算暂时失败；5xx、地址格式不对、没有配置发件账号、不加密的连接上配了账号密码算永久失败。
 - 短信渠道 `ISmsGateway` 暂时用“未配置”的占位实现：每条都永久失败并写明原因。阿里云网关等 T-08 开通和对照文档之后再做。
 - 测试：投递 6 个，邮件渠道 8 个（用测试里的最小假 SMTP 服务器）。
 
