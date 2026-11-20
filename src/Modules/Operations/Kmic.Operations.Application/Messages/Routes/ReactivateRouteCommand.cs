@@ -14,4 +14,5 @@ namespace Kmic.Operations.Application.Messages.Routes;
 [RequirePermission(OperationsPermissions.MessagesManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record ReactivateRouteCommand(string MessageType, string Subscription) : ICommand;

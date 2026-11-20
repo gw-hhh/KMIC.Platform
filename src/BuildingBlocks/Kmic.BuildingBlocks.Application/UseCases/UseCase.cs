@@ -46,6 +46,11 @@ public sealed record UseCase
     public bool AllowWhenImpersonationReadOnly { get; init; }
 
     /// <summary>
+    /// 消息写入被软线熔断时是否仍可执行
+    /// </summary>
+    public bool ExemptFromMessagingSuspension { get; init; }
+
+    /// <summary>
     /// Contracts 查询的授权方式
     /// </summary>
     public ContractAccess? ContractAccess { get; init; }

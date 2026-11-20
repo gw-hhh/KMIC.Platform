@@ -123,6 +123,8 @@ internal sealed class ProbeHarness : IAsyncDisposable
 
     public ProbeWork Begin(TestIdentity identity) => new(Factory.CreateScope(identity));
 
+    public ProbeWork Begin(TestIdentity identity, CallOrigin origin) => new(Factory.CreateScope(identity, origin));
+
     public ProbeWork BeginAsSystem() => new(Factory.CreateSystemScope());
 
     public ProbeWork Begin(CallOrigin origin, ICurrentUser user) => new(Factory.CreateScope(origin, user));

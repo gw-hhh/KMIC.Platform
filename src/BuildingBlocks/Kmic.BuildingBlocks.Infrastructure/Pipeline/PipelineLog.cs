@@ -18,4 +18,7 @@ internal static partial class PipelineLog
 
     [LoggerMessage(EventId = 2004, Level = LogLevel.Error, Message = "Writing the read audit of {MessageName} failed, the query result was returned without an audit record")]
     public static partial void ReadAuditFailed(ILogger logger, Exception exception, string messageName);
+
+    [LoggerMessage(EventId = 2005, Level = LogLevel.Warning, Message = "{MessageName} was rejected because messaging is suspended for database capacity")]
+    public static partial void MessagingSuspended(ILogger logger, Exception exception, string messageName);
 }

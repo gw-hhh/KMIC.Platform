@@ -43,4 +43,10 @@ public static class OperationsPermissions
     /// </summary>
     [Permission("管理消息", Sensitive = true)]
     public const string MessagesManage = "Operations.Messages.Manage";
+
+    /// <summary>
+    /// 修改数据库已分配容量的设置：设错会让消息写入被误拒绝，或失去保护
+    /// </summary>
+    [Permission("管理消息容量设置", Sensitive = true)]
+    public const string MessagingCapacityManage = "Operations.MessagingCapacity.Manage";
 }

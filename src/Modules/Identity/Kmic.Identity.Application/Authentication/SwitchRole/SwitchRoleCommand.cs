@@ -10,4 +10,5 @@ namespace Kmic.Identity.Application.Authentication.SwitchRole;
 [AllowAuthenticated]
 [NotAudited("通过 RoleSwitched 安全事件记录角色切换")]
 [NotIdempotent("切换结果含访问令牌，不写入幂等记录")]
+[ExemptFromMessagingSuspension]
 public sealed record SwitchRoleCommand(RoleId RoleId) : ICommand<AuthTokens>;

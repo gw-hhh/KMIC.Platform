@@ -14,4 +14,5 @@ namespace Kmic.Operations.Application.BackgroundJobs.Cancel;
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record CancelBackgroundJobCommand(string Module, Guid JobId) : ICommand;

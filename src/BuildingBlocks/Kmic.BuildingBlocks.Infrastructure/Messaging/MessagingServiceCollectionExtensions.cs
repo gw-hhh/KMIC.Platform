@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Application.Jobs;
+using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Jobs;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,23 @@ public static class MessagingServiceCollectionExtensions
         AddListener(services);
         services.TryAddScoped<IJobHandler<ReadModelRebuildJob>, ReadModelRebuildHandler>();
         services.AddHostedService<JobWorker>();
+        return services;
+    }
+
+    /// <summary>
+    /// 注册容量保护：判断数据库空间的采样器（Api 与 Worker 角色都要）和本实例的状态
+    /// </summary>
+    /// <remarks>
+    /// 容量来自 <see cref="IMessagingCapacitySource" />，没有登记时不判断
+    /// </remarks>
+    public static IServiceCollection AddKmicMessagingAdmission(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<StartupState>();
+        services.TryAddSingleton<MessagingAdmission>();
+        services.TryAddSingleton<AdmissionSampler>();
+        services.AddHostedService(provider => provider.GetRequiredService<AdmissionSampler>());
         return services;
     }
 

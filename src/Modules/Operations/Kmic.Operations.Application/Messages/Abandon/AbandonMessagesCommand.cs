@@ -14,4 +14,5 @@ namespace Kmic.Operations.Application.Messages.Abandon;
 [RequirePermission(OperationsPermissions.MessagesManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record AbandonMessagesCommand(IReadOnlyList<MessageRef> Messages, string Reason) : ICommand<MessageReceipts>;

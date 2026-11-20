@@ -12,4 +12,5 @@ namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record RunJobNowCommand(string JobName) : ICommand;

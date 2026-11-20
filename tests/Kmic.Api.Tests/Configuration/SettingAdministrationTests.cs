@@ -42,6 +42,12 @@ public sealed class SettingAdministrationTests(ClassDatabase<ApiTemplate> databa
         return await scope.ServiceProvider.GetRequiredService<ISettings>().GetAsync<SampleSubmissionSetting>(Ct);
     }
 
+    private async Task<FreshSetting<SampleSubmissionSetting>> FreshAsync()
+    {
+        await using var scope = Factory.Services.AsSystem();
+        return await scope.ServiceProvider.GetRequiredService<IFreshSettings>().GetAsync<SampleSubmissionSetting>(Ct);
+    }
+
     private async Task ResetToDefaultAsync(string token)
     {
         var item = await ItemAsync(token);
@@ -98,6 +104,49 @@ public sealed class SettingAdministrationTests(ClassDatabase<ApiTemplate> databa
         reset.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await EffectiveAsync()).ShouldBe(SampleSubmissionSetting.Default);
         (await ItemAsync(editor)).GetProperty("isModified").GetBoolean().ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task FreshRead_NothingSaved_GivesTheDefaultAndNoSaveTime()
+    {
+        var editor = await LoginAsOperatorAsync("set-fresh-default-editor", _editor);
+        await ResetToDefaultAsync(editor);
+
+        var fresh = await FreshAsync();
+
+        fresh.Value.ShouldBe(SampleSubmissionSetting.Default);
+        fresh.SavedAt.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task FreshRead_AfterSaving_GivesTheValueWithItsSaveTime()
+    {
+        var editor = await LoginAsOperatorAsync("set-fresh-saved-editor", _editor);
+        await ResetToDefaultAsync(editor);
+        var before = TimeProvider.System.GetUtcNow();
+
+        (await SetAsync(editor, new { maxItems = 66, reasonRequired = false })).StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var fresh = await FreshAsync();
+        fresh.Value.MaxItems.ShouldBe(66);
+        fresh.SavedAt.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(before.AddSeconds(-5));
+    }
+
+    [Fact]
+    public async Task FreshRead_SeesAChangeTheCachedReadHasNotPickedUpYet()
+    {
+        var editor = await LoginAsOperatorAsync("set-fresh-cache-editor", _editor);
+        await ResetToDefaultAsync(editor);
+        (await SetAsync(editor, new { maxItems = 30, reasonRequired = false })).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await EffectiveAsync()).MaxItems.ShouldBe(30);
+
+        // 直接改库，不经过保存命令，缓存不会失效
+        await using var data = NpgsqlDataSource.Create(ConnectionString);
+        await using var update = data.CreateCommand("""UPDATE "Configuration"."SystemSettingValue" SET "Value" = '{"maxItems": 31, "reasonRequired": false}' WHERE "Key" = 'Sample.Submission'""");
+        await update.ExecuteNonQueryAsync(Ct);
+
+        (await FreshAsync()).Value.MaxItems.ShouldBe(31);
+        (await EffectiveAsync()).MaxItems.ShouldBe(30);
     }
 
     [Fact]

@@ -10,4 +10,5 @@ namespace Kmic.Identity.Application.Authentication.MySessions;
 [AllowAuthenticated]
 [NotAudited("通过 SessionRevoked 安全事件记录会话撤销")]
 [NotIdempotent("会话已撤销时直接返回成功，不会重复记录撤销事件")]
+[ExemptFromMessagingSuspension]
 public sealed record RevokeMySessionCommand(SessionId SessionId) : ICommand;

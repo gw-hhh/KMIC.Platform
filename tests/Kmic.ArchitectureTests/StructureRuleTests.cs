@@ -111,6 +111,21 @@ public sealed class StructureRuleTests
     }
 
     [Fact]
+    public void OperationsManageCommands_AreExemptFromMessagingSuspension() =>
+        StructureRules.OperationsCommandsExemptFromSuspension(ProductAssemblies.Of(Layer.Application).Where(a => string.Equals(a.Module, "Operations", StringComparison.Ordinal)).SelectMany(a => a.Assembly.GetTypes()))
+            .ShouldBeEmpty();
+
+    [Fact]
+    public void Violation_OperationsManageCommandWithoutTheExemption_IsReported()
+    {
+        var problems = StructureRules.OperationsCommandsExemptFromSuspension(_bad);
+
+        problems.ShouldContain(p => p.Contains("RestartEverythingSampleCommand", StringComparison.Ordinal));
+        problems.ShouldNotContain(p => p.Contains("RetrySampleCommand", StringComparison.Ordinal));
+        problems.ShouldNotContain(p => p.Contains("ViewSampleCommand", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Violation_ReadModelThatIsAnAggregateRoot_IsReported() =>
         StructureRules.ReadModels(_bad).ShouldContain(p => p.Contains("BadReadModel", StringComparison.Ordinal));
 

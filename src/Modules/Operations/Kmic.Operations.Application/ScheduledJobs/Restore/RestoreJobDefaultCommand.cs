@@ -12,4 +12,5 @@ namespace Kmic.Operations.Application.ScheduledJobs.Restore;
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record RestoreJobDefaultCommand(string JobName, long ExpectedVersion) : ICommand<VersionedResponse<ScheduledJobSettingId>>;

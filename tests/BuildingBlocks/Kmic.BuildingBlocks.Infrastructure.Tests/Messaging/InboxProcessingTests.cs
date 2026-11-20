@@ -114,6 +114,30 @@ public sealed class InboxProcessingTests(ClassDatabase<ProbeTemplate> database) 
     }
 
     [Fact]
+    public async Task MessagingSuspended_KeepsWaitingWithoutConsumingAttempts()
+    {
+        var (ticket, messageId) = await PublishAsync("容量不足");
+
+        // 超过最多尝试次数也不能进死信：消息本身没有问题，等容量恢复再处理（失败设置用一次就清掉，每轮重设）
+        for (var round = 0; round < new MessagingOptions().MaxAttempts + 2; round++)
+        {
+            _harness.Echo.Failures["容量不足"] = CommonErrors.MessagingSuspended;
+            await DrainAsync();
+            await MakeDueAsync(messageId);
+        }
+
+        var waiting = await InboxAsync(messageId, ProbeHarness.MirrorSubscription);
+        waiting.Status.ShouldBe(MessageStatus.Pending);
+        waiting.Attempts.ShouldBe(0);
+        waiting.LastError.ShouldNotBeNull().ShouldContain(CommonErrors.MessagingSuspended.Code);
+
+        await DrainAsync();
+
+        (await InboxAsync(messageId, ProbeHarness.MirrorSubscription)).Status.ShouldBe(MessageStatus.Done);
+        (await MirroredAsync(ticket)).ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task TakenOverWhileRunning_OriginalCommitRejected()
     {
         var (ticket, messageId) = await PublishAsync("处理中被接管");

@@ -10,4 +10,5 @@ namespace Kmic.Identity.Application.Impersonation.End;
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]
 [NotAudited("通过 ImpersonationEnded 安全事件记录模拟结束")]
+[ExemptFromMessagingSuspension]
 public sealed record EndImpersonationCommand : ICommand;

@@ -926,7 +926,9 @@
         "type": "Project",
         "dependencies": {
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
+          "Kmic.Configuration.Infrastructure": "[1.0.0, )",
           "Kmic.Identity.Infrastructure": "[1.0.0, )",
+          "Kmic.Operations.Application": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.15, )",
           "System.CommandLine": "[2.0.15, )"
         }

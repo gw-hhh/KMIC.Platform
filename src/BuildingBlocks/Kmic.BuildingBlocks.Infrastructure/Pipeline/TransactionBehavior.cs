@@ -84,7 +84,8 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         using (context.Services.SaveGate.Open())
         {
             await context.SaveChangesAsync(ct);
-            await services.GetRequiredService<OutboxWriter>().WriteAsync(context, catalog.Get(typeof(TMessage)).Module, ct);
+            var useCase = catalog.Get(typeof(TMessage));
+            await services.GetRequiredService<OutboxWriter>().WriteAsync(context, useCase.Module, useCase.ExemptFromMessagingSuspension, ct);
         }
 
         response = WithSavedVersion(context, response);

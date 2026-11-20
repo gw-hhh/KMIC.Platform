@@ -44,6 +44,15 @@ public static class CatalogSamples
     [AllowWhenImpersonationReadOnly]
     public sealed record ImpersonationExemptQuery : IQuery<int>;
 
+    [AllowAuthenticated]
+    [ExemptFromMessagingSuspension]
+    public sealed record SuspensionExemptQuery : IQuery<int>;
+
+    [AllowAuthenticated]
+    [ExemptFromMessagingSuspension]
+    [NotAudited("测试")]
+    public sealed record SuspensionExemptCommand : ICommand;
+
     [ContractQuery(ContractAccess.Reference)]
     [NotAudited("测试")]
     public sealed record ContractCommand : ICommand;
@@ -107,6 +116,16 @@ public static class CatalogSamples
     public sealed class ImpersonationExemptWithPermissionCommandHandler : ICommandHandler<ImpersonationExemptWithPermissionCommand>
     {
         public ValueTask<Result> Handle(ImpersonationExemptWithPermissionCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    public sealed class SuspensionExemptCommandHandler : ICommandHandler<SuspensionExemptCommand>
+    {
+        public ValueTask<Result> Handle(SuspensionExemptCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    public sealed class SuspensionExemptQueryHandler : IQueryHandler<SuspensionExemptQuery, int>
+    {
+        public ValueTask<Result<int>> Handle(SuspensionExemptQuery query, CancellationToken cancellationToken) => ValueTask.FromResult<Result<int>>(0);
     }
 
     public sealed class ImpersonationExemptQueryHandler : IQueryHandler<ImpersonationExemptQuery, int>

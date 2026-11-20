@@ -214,6 +214,23 @@ internal static class StructureRules
     ];
 
     /// <summary>
+    /// Operations 中要求“管理”类权限点的命令，必须声明消息写入被软线熔断时仍可执行
+    /// </summary>
+    /// <remarks>
+    /// 运维命令的审计消息也走 Outbox，不豁免的话熔断时连重试死信、放弃消息这些自救操作都做不了
+    /// </remarks>
+    /// <param name="types">Operations Application 中的类型</param>
+    public static IReadOnlyList<string> OperationsCommandsExemptFromSuspension(IEnumerable<Type> types) =>
+    [
+        .. types.Where(t => t is { IsClass: true, IsAbstract: false })
+            .SelectMany(HandledCommands)
+            .Distinct()
+            .Where(c => c.GetCustomAttribute<RequirePermissionAttribute>() is { } permission && permission.Permission.EndsWith(".Manage", StringComparison.Ordinal))
+            .Where(c => !c.IsDefined(typeof(ExemptFromMessagingSuspensionAttribute), inherit: false))
+            .Select(c => $"{c.FullName}：Operations 中要求“管理”权限点的命令必须标 [ExemptFromMessagingSuspension]，否则消息写入熔断时无法自救。"),
+    ];
+
+    /// <summary>
     /// 缓存键只在本模块的 {模块}CacheKeys 类中生成，且第一段是本模块名
     /// </summary>
     /// <remarks>

@@ -21,6 +21,7 @@ internal static class OperatorApp
         var root = new RootCommand("Kmic 运维命令：人工或部署流程触发的一次性操作")
         {
             IdentityCommands.Build(context),
+            OperationsCommands.Build(context),
         };
 
         // 参数解析失败统一返回 2，与执行失败的退出码 1 区分

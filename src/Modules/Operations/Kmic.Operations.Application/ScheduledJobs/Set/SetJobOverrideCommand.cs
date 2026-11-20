@@ -17,4 +17,5 @@ namespace Kmic.Operations.Application.ScheduledJobs.Set;
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record SetJobOverrideCommand(string JobName, bool? Enabled, string? Cron, long? ExpectedVersion) : ICommand<VersionedResponse<ScheduledJobSettingId>>;

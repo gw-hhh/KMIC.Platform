@@ -3,12 +3,14 @@ using System.Text;
 using System.Text.Json;
 using Kmic.BuildingBlocks.Application.Execution;
 using Kmic.BuildingBlocks.Application.Integration;
+using Kmic.BuildingBlocks.Application.Observability;
 using Kmic.BuildingBlocks.Application.Serialization;
 using Kmic.BuildingBlocks.Contracts.Messaging;
 using Kmic.BuildingBlocks.Domain.Entities;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
@@ -23,20 +25,35 @@ internal sealed class OutboxWriter(
     IntegrationEventPublisher publisher,
     IExecutionContext execution,
     CurrentInboxMessage inbox,
+    MessagingAdmission admission,
+    FrameworkMetrics metrics,
     TimeProvider time,
-    IOptions<MessagingOptions> options)
+    IOptions<MessagingOptions> options,
+    ILogger<OutboxWriter> logger)
 {
     public void Discard() => publisher.Discard();
 
-    public Task WriteAsync(ModuleDbContext context, string module, CancellationToken ct) =>
-        WriteAsync(context, module, publisher.TakePending(), ct);
+    public Task WriteAsync(ModuleDbContext context, string module, bool exemptFromSoftLine, CancellationToken ct) =>
+        WriteAsync(context, module, publisher.TakePending(), exemptFromSoftLine ? AdmissionMode.ExemptFromSoftLine : AdmissionMode.Enforce, ct);
 
     /// <summary>
     /// 写入给定的消息，读审计这类不在命令里的写入用它
     /// </summary>
-    public async Task WriteAsync(ModuleDbContext context, string module, IReadOnlyList<PendingMessage> pending, CancellationToken ct)
+    public Task WriteAsync(ModuleDbContext context, string module, IReadOnlyList<PendingMessage> pending, CancellationToken ct) =>
+        WriteAsync(context, module, pending, AdmissionMode.Enforce, ct);
+
+    /// <summary>
+    /// 写入给定的消息，并按容量保护的状态放行或拒绝
+    /// </summary>
+    /// <exception cref="MessagingSuspendedException">被软线或硬线拒绝</exception>
+    public async Task WriteAsync(ModuleDbContext context, string module, IReadOnlyList<PendingMessage> pending, AdmissionMode mode, CancellationToken ct)
     {
         if (pending.Count == 0)
+        {
+            return;
+        }
+
+        if (!IsAdmitted(module, pending.Count, mode))
         {
             return;
         }
@@ -85,6 +102,24 @@ internal sealed class OutboxWriter(
 
         // 通知在提交时才送达，投递程序被唤醒时一定能读到这些消息
         await context.Database.ExecuteSqlAsync($"SELECT pg_notify({MessagingChannels.Outbox}, {module})", ct);
+    }
+
+    // 返回 false 表示这批消息不写了（只有 SkipWhenSuspended）；其他被拒绝的情况抛异常，让业务事务回滚
+    private bool IsAdmitted(string module, int count, AdmissionMode mode)
+    {
+        if (admission.IsAllowed(execution.Origin, mode != AdmissionMode.Enforce))
+        {
+            return true;
+        }
+
+        metrics.MessagingAdmissionRejected(admission.State == AdmissionState.Hard ? "hard" : "soft", execution.Origin.ToString(), mode == AdmissionMode.SkipWhenSuspended);
+        if (mode == AdmissionMode.SkipWhenSuspended)
+        {
+            MessagingLog.AdmissionSkippedWrite(logger, module, count);
+            return false;
+        }
+
+        throw new MessagingSuspendedException($"数据库空间不足，已暂停消息写入（{admission.State}），{module} 模块要写入 {count} 条消息被拒绝。");
     }
 
     private static MessageHeaders Headers(string module, ICurrentUser user, Guid? causationId)

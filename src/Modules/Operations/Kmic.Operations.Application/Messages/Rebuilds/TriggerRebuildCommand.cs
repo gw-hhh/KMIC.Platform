@@ -9,4 +9,5 @@ namespace Kmic.Operations.Application.Messages.Rebuilds;
 [RequirePermission(OperationsPermissions.MessagesManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record TriggerRebuildCommand(string Subscription) : ICommand;

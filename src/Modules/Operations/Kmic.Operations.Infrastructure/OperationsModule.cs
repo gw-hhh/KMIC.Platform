@@ -1,5 +1,6 @@
 using System.Reflection;
 using Kmic.BuildingBlocks.Application.Integration;
+using Kmic.BuildingBlocks.Application.Settings;
 using Kmic.BuildingBlocks.Contracts.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Hosting;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
@@ -13,6 +14,7 @@ using Kmic.Operations.Application.ClientErrors;
 using Kmic.Operations.Contracts;
 using Kmic.Operations.Domain.Audit;
 using Kmic.Operations.Domain.Jobs;
+using Kmic.Operations.Infrastructure.Capacity;
 using Kmic.Operations.Infrastructure.ClientErrors;
 using Kmic.Operations.Infrastructure.Persistence;
 using Kmic.Operations.Infrastructure.Persistence.Repositories;
@@ -43,6 +45,7 @@ public sealed class OperationsModule : IModule
         services.AddKmicOptions<AuditExportOptions>(AuditExportOptions.Section);
         services.AddSingleton<IClientErrorLimiter, ClientErrorLimiter>();
         services.AddSingleton<IClientErrorLog, ClientErrorLog>();
+        services.AddScoped<IMessagingCapacitySource, MessagingCapacitySource>();
     }
 
     /// <inheritdoc />

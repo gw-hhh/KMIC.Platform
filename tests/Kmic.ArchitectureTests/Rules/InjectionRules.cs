@@ -56,6 +56,15 @@ internal static class InjectionRules
     ];
 
     /// <summary>
+    /// 应用层的类型不注入不经缓存的设置读取：业务用例读设置走 ISettings，每次读库的读取只给基础设施里的后台判断用
+    /// </summary>
+    public static IReadOnlyList<string> FreshSettings(IEnumerable<Type> types) =>
+    [
+        .. types.Where(t => t is { IsClass: true })
+            .SelectMany(t => ConstructorTypes(t).Where(p => p == typeof(IFreshSettings)).Select(p => $"{t.FullName}：应用层不能注入 {p.Name}，读设置用 ISettings（经缓存）；每次读库的读取只给基础设施里的后台判断用。")),
+    ];
+
+    /// <summary>
     /// 授权相关的代码（资源策略、动作目录、访问上下文加载器）不依赖用户偏好：偏好是用户自己能改的，授权不能受它影响
     /// </summary>
     public static IReadOnlyList<string> AuthorizationCode(IEnumerable<Type> types) =>

@@ -12,6 +12,7 @@ namespace Kmic.Identity.Application.Authentication.ChangePassword;
 [AllowWhenPasswordChangeRequired]
 [NotAudited("通过 PasswordChanged 安全事件记录修改，密码不进审计")]
 [NotIdempotent("每次修改都须校验旧密码，首次设置密码除外")]
+[ExemptFromMessagingSuspension]
 public sealed record ChangePasswordCommand(string? OldPassword, string NewPassword) : ICommand
 {
     // 不用编译器生成的：它会把密码、令牌的值也打出来

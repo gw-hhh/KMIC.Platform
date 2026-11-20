@@ -42,4 +42,13 @@ internal static partial class MessagingLog
 
     [LoggerMessage(EventId = 2112, Level = LogLevel.Warning, Message = "Registering the instance heartbeat failed, retrying at the next interval")]
     public static partial void HeartbeatFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 2113, Level = LogLevel.Warning, Message = "Evaluating the messaging capacity guard failed, retrying at the next interval")]
+    public static partial void AdmissionSampleFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 2114, Level = LogLevel.Warning, Message = "Messaging admission changed from {Previous} to {Current}: database {DatabaseBytes} bytes, unfinished messages {UnfinishedBytes} bytes, capacity {CapacityBytes} bytes")]
+    public static partial void AdmissionChanged(ILogger logger, AdmissionState previous, AdmissionState current, long databaseBytes, long unfinishedBytes, long? capacityBytes);
+
+    [LoggerMessage(EventId = 2115, Level = LogLevel.Warning, Message = "Skipped writing {MessageCount} messages of {Module}: messaging is suspended")]
+    public static partial void AdmissionSkippedWrite(ILogger logger, string module, int messageCount);
 }

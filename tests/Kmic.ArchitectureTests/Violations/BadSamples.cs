@@ -186,6 +186,42 @@ internal static class BadSamples
             ValueTask.FromResult<Result<Guid>>(Guid.Empty);
     }
 
+    // 运维的“管理”命令没有声明熔断时仍可执行
+    [RequirePermission("Operations.Bad.Manage")]
+    internal sealed record RestartEverythingSampleCommand : ICommand;
+
+    public sealed class RestartEverythingSampleCommandHandler : ICommandHandler<RestartEverythingSampleCommand>
+    {
+        public ValueTask<Result> Handle(RestartEverythingSampleCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    // 合格：声明了豁免
+    [RequirePermission("Operations.Bad.Manage")]
+    [ExemptFromMessagingSuspension]
+    internal sealed record RetrySampleCommand : ICommand;
+
+    public sealed class RetrySampleCommandHandler : ICommandHandler<RetrySampleCommand>
+    {
+        public ValueTask<Result> Handle(RetrySampleCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    // 合格：不是“管理”权限点
+    [RequirePermission("Operations.Bad.View")]
+    internal sealed record ViewSampleCommand : ICommand;
+
+    public sealed class ViewSampleCommandHandler : ICommandHandler<ViewSampleCommand>
+    {
+        public ValueTask<Result> Handle(ViewSampleCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    // 应用层的处理器注入了不经缓存的设置读取
+    public sealed class FreshSettingsHandler(IFreshSettings settings) : ICommandHandler<ViewSampleCommand>
+    {
+        public IFreshSettings Settings => settings;
+
+        public ValueTask<Result> Handle(ViewSampleCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
     // 匿名用例出现在 Identity 之外
     [Kmic.BuildingBlocks.Application.UseCases.AllowAnonymous]
     internal sealed record OpenDoorCommand : ICommand;

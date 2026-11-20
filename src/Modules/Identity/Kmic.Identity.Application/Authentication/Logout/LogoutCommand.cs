@@ -11,4 +11,5 @@ namespace Kmic.Identity.Application.Authentication.Logout;
 [AllowWhenImpersonationReadOnly]
 [NotAudited("通过 SessionRevoked 安全事件记录会话撤销")]
 [NotIdempotent("撤销会话会保留已有撤销信息，无需缓存退出响应")]
+[ExemptFromMessagingSuspension]
 public sealed record LogoutCommand : ICommand;

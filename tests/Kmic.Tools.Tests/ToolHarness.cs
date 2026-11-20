@@ -1,4 +1,5 @@
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.Configuration.Infrastructure;
 using Kmic.Identity.Infrastructure;
 using Kmic.Sample.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +14,7 @@ internal static class ToolHarness
 {
     public static readonly DateTimeOffset Now = new(2030, 6, 15, 8, 0, 0, TimeSpan.Zero);
 
-    public static ToolModules Modules => new ToolModules().Add<IdentityModule>().Add<SampleModule>(nonProductionOnly: true);
+    public static ToolModules Modules => new ToolModules().Add<IdentityModule>().Add<ConfigurationModule>().Add<SampleModule>(nonProductionOnly: true);
 
     public static IConfiguration Configuration(string key, string? connectionString) =>
         new ConfigurationBuilder().AddInMemoryCollection(connectionString is null ? [] : [new(key, connectionString)]).Build();

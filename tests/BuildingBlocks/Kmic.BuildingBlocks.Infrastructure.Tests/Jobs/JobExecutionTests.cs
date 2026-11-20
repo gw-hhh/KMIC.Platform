@@ -144,6 +144,34 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
     }
 
     [Fact]
+    public async Task HardLine_JobStillFinishes_ButTheFinishedEventIsNotWritten()
+    {
+        using var metrics = new Kmic.BuildingBlocks.Testing.Metrics.MetricRecorder(_harness.Services.GetRequiredService<System.Diagnostics.Metrics.IMeterFactory>());
+        var (ticket, jobId) = await SubmitAsync(batches: 2);
+        _harness.Services.GetRequiredService<MessagingAdmission>().Update(AdmissionState.Hard, TimeSpan.Zero, null);
+
+        await _harness.Services.RunJobsAsync(Ct);
+
+        // 结束通知只是提醒：写不进去不能让作业一直停在运行中
+        (await JobAsync(jobId)).Status.ShouldBe(JobStatus.Succeeded);
+        (await LinesAsync(ticket)).ShouldBe(["第 1 批", "第 2 批"]);
+        (await FinishedEventsAsync(jobId)).ShouldBeEmpty();
+        metrics.Of("kmic.messaging.admission.rejected").ShouldContain(m => string.Equals(m.Tags["outcome"], "skipped", StringComparison.Ordinal) && string.Equals(m.Tags["state"], "hard", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task SoftLine_JobStillWritesTheFinishedEvent()
+    {
+        var (_, jobId) = await SubmitAsync(batches: 1);
+        _harness.Services.GetRequiredService<MessagingAdmission>().Update(AdmissionState.Soft, TimeSpan.Zero, null);
+
+        await _harness.Services.RunJobsAsync(Ct);
+
+        (await JobAsync(jobId)).Status.ShouldBe(JobStatus.Succeeded);
+        (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task CancelWhileQueued_NeverRuns()
     {
         var (ticket, jobId) = await SubmitAsync(batches: 2);

@@ -44,6 +44,7 @@ public sealed class ConfigurationModule : IModule
         services.AddScoped<IDictionarySnapshots, DictionarySnapshotReader>();
         services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
         services.AddScoped<ISettings, SettingsReader>();
+        services.AddScoped<IFreshSettings, FreshSettingsReader>();
         services.AddScoped<IPreferenceRepository, PreferenceRepository>();
         services.AddScoped<IPreferenceLayers, PreferenceLayerReader>();
         services.AddScoped<IPreferences, PreferencesReader>();

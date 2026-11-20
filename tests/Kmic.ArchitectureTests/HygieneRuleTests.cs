@@ -67,6 +67,10 @@ public sealed class HygieneRuleTests
         InjectionRules.JobHandlers(Types(Layer.Application)).ShouldBeEmpty();
 
     [Fact]
+    public void ApplicationTypes_DoNotInjectFreshSettings() =>
+        InjectionRules.FreshSettings(Types(Layer.Application)).ShouldBeEmpty();
+
+    [Fact]
     public void AuthorizationCode_DoesNotDependOnPreferences() =>
         InjectionRules.AuthorizationCode(ProductAssemblies.All.SelectMany(a => a.Assembly.GetTypes())).ShouldBeEmpty();
 
@@ -153,6 +157,10 @@ public sealed class HygieneRuleTests
     [Fact]
     public void Violation_JobHandlerInjectingADbContext_IsReported() =>
         InjectionRules.JobHandlers(_bad).ShouldContain(p => p.Contains("DatabaseJobHandler", StringComparison.Ordinal));
+
+    [Fact]
+    public void Violation_HandlerInjectingFreshSettings_IsReported() =>
+        InjectionRules.FreshSettings(_bad).ShouldContain(p => p.Contains("FreshSettingsHandler", StringComparison.Ordinal));
 
     [Fact]
     public void Violation_PolicyDependingOnPreferences_IsReported() =>

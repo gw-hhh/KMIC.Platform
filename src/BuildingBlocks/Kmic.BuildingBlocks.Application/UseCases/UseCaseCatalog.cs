@@ -100,6 +100,12 @@ public sealed class UseCaseCatalog
         var access = ReadAccess(type, name, kind, problems);
         var audit = ReadAudit(type, name, kind, problems);
         var featureGate = ReadFeatureGate(type, name, problems);
+        var exempt = Has<ExemptFromMessagingSuspensionAttribute>(type);
+        if (exempt && kind != MessageKind.Command)
+        {
+            problems.Add($"{name}：[ExemptFromMessagingSuspension] 只能用于命令。");
+        }
+
         if (problems.Count > countBefore)
         {
             return null;
@@ -116,6 +122,7 @@ public sealed class UseCaseCatalog
             AllowSystem = access.AllowSystem,
             AllowWhenPasswordChangeRequired = access.AllowWhenPasswordChangeRequired,
             AllowWhenImpersonationReadOnly = access.AllowWhenImpersonationReadOnly,
+            ExemptFromMessagingSuspension = exempt,
             ContractAccess = access.ContractAccess,
             Idempotent = audit.Idempotent,
             Audited = kind == MessageKind.Command ? audit.Audited is not null : null,

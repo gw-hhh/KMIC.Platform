@@ -245,7 +245,9 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 | 对外 Contracts | 无。业务页面不展示审计（05-09 第 3.8 节）；需要“某条数据的操作记录”时，那是业务历史 |
 | 框架存储接口 | `IModuleMessageStore`、`IModuleJobStore`、`IAbandonPolicy<T>`：Operations 遍历调用，见第 13 节 |
 
-容量保护的软线不拦 Operations 的运维命令（05-07 第 9.5 节）：这些命令写的审计消息进入 Outbox，软线触发时仍然要能重试、放弃、扩容后恢复，否则无法自救。
+容量保护的软线不拦 Operations 的运维命令（05-07 第 9.5 节）：这些命令写的审计消息进入 Outbox，软线触发时仍然要能重试、放弃、扩容后恢复，否则无法自救。做法是在命令上声明 `[ExemptFromMessagingSuspension]`：重试、放弃、路由终结与重新激活、补投、读模型重建的触发与确认、定时任务的修改与立即执行、取消后台作业。审计导出、提交人自己取消作业、前端错误上报不豁免。
+
+Operations 还声明系统设置 `Operations.MessagingCapacity`（数据库已分配容量，权限点 `Operations.MessagingCapacity.Manage`），并实现框架的 `IMessagingCapacitySource`：用 `IFreshSettings` 读这项设置交给容量保护。部署执行机用 `Kmic.Operator operations set-messaging-capacity` 定期写入。要求“管理”权限点的运维命令都必须声明豁免，由架构测试检查。
 
 ---
 

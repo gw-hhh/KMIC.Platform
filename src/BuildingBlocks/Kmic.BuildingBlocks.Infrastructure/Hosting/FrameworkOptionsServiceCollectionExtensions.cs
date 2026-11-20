@@ -10,7 +10,9 @@ using Kmic.BuildingBlocks.Infrastructure.Observability;
 using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 using Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
@@ -35,7 +37,8 @@ public static class FrameworkOptionsServiceCollectionExtensions
         services.AddOptions<AuditOptions>().BindConfiguration(AuditOptions.Section);
         services.AddOptions<CacheOptions>().BindConfiguration(CacheOptions.Section);
         services.AddOptions<JobOptions>().BindConfiguration(JobOptions.Section);
-        services.AddOptions<MessagingOptions>().BindConfiguration(MessagingOptions.Section);
+        services.AddOptions<MessagingOptions>().BindConfiguration(MessagingOptions.Section).ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<MessagingOptions>, MessagingOptionsValidator>());
         services.AddOptions<PurgeOptions>().BindConfiguration(PurgeOptions.Section);
         services.AddOptions<SecurityEventOptions>().BindConfiguration(SecurityEventOptions.Section);
         services.AddOptions<DatabaseDiagnosticsOptions>().BindConfiguration(DatabaseDiagnosticsOptions.Section);

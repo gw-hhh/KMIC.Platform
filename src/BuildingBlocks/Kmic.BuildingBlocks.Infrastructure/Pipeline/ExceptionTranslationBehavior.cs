@@ -5,6 +5,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 using Kmic.BuildingBlocks.Domain.Errors;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Results;
+using Kmic.BuildingBlocks.Infrastructure.Messaging;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,11 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         catch (Exception exception) when (FindPostgres(exception) is { } postgres && Translate(postgres) is { } error)
         {
             return TResponse.Fail(error);
+        }
+        catch (MessagingSuspendedException exception)
+        {
+            PipelineLog.MessagingSuspended(logger, exception, typeof(TMessage).Name);
+            return TResponse.Fail(CommonErrors.MessagingSuspended.WithMetadata(ErrorMetadataKeys.Retryable, true));
         }
         catch (CommitOutcomeUnknownException exception)
         {

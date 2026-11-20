@@ -169,6 +169,12 @@ internal sealed class InboxProcessor(
             return await RecordFailureAsync(module, message, token, exception.Message, dead: false, exception, ct);
         }
 
+        return await RecordResultAsync(module, message, token, result, current, ct);
+    }
+
+    private async Task<InboxResult> RecordResultAsync(
+        string module, ClaimedInboxMessage message, Guid token, Result result, CurrentInboxMessage current, CancellationToken ct)
+    {
         if (result.IsSuccess)
         {
             return InboxResult.Processed;
@@ -177,6 +183,12 @@ internal sealed class InboxProcessor(
         if (current.TakenOver)
         {
             return InboxResult.TakenOver;
+        }
+
+        // 容量保护拒绝了处理时要产生的消息：消息本身没有问题，不能消耗尝试次数，也不会进死信
+        if (string.Equals(result.Error.Code, CommonErrors.MessagingSuspended.Code, StringComparison.Ordinal))
+        {
+            return await RecordFailureAsync(module, message, token, $"{result.Error.Code}：{result.Error.Message}", dead: false, null, ct, suspended: true);
         }
 
         // 暂时不满足的会自己好起来，按退避重试；其余业务失败重试也没用，直接进死信等人看
@@ -210,20 +222,22 @@ internal sealed class InboxProcessor(
     }
 
     public async Task<InboxResult> RecordFailureAsync(
-        string module, ClaimedInboxMessage message, Guid token, string error, bool dead, Exception? exception, CancellationToken ct)
+        string module, ClaimedInboxMessage message, Guid token, string error, bool dead, Exception? exception, CancellationToken ct, bool suspended = false)
     {
         var settings = options.Value;
-        dead = dead || message.Attempts >= settings.MaxAttempts;
+        dead = !suspended && (dead || message.Attempts >= settings.MaxAttempts);
         var inbox = tables.For(module).Inbox;
         try
         {
             await using var command = Database.CreateCommand(
                 $"""
-                UPDATE {inbox} SET "Status" = @status, "NextAttemptAt" = clock_timestamp() + @delay, "LeaseUntil" = NULL, "LastError" = @error
+                UPDATE {inbox} SET "Status" = @status, "NextAttemptAt" = clock_timestamp() + @delay, "LeaseUntil" = NULL, "LastError" = @error,
+                    "Attempts" = CASE WHEN @suspended THEN GREATEST("Attempts" - 1, 0) ELSE "Attempts" END
                 WHERE "Id" = @id AND "Status" = {MessageStatus.Processing} AND "LeaseToken" = @token
                 """);
             command.Parameters.AddWithValue("status", dead ? MessageStatus.Dead : MessageStatus.Pending);
-            command.Parameters.AddWithValue("delay", RetrySchedule.Delay(message.Attempts, settings));
+            command.Parameters.AddWithValue("delay", suspended ? settings.Admission.SampleInterval : RetrySchedule.Delay(message.Attempts, settings));
+            command.Parameters.AddWithValue("suspended", suspended);
             command.Parameters.AddWithValue("error", error.Length > 4000 ? error[..4000] : error);
             command.Parameters.AddWithValue("id", message.Id);
             command.Parameters.AddWithValue("token", token);

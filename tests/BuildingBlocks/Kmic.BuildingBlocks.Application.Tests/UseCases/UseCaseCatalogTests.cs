@@ -40,6 +40,7 @@ public sealed class UseCaseCatalogTests
     [InlineData(typeof(CatalogSamples.PasswordExemptWithPermissionCommand), "[AllowWhenPasswordChangeRequired] 只能")]
     [InlineData(typeof(CatalogSamples.ImpersonationExemptWithPermissionCommand), "[AllowWhenImpersonationReadOnly] 只能")]
     [InlineData(typeof(CatalogSamples.ImpersonationExemptQuery), "[AllowWhenImpersonationReadOnly] 只能")]
+    [InlineData(typeof(CatalogSamples.SuspensionExemptQuery), "[ExemptFromMessagingSuspension] 只能用于命令")]
     [InlineData(typeof(CatalogSamples.ContractCommand), "[ContractQuery] 只能用于查询")]
     [InlineData(typeof(CatalogSamples.UnauditedCommand), "[Audited]、[NotAudited] 之一")]
     [InlineData(typeof(CatalogSamples.IdempotentNotAuditedCommand), "必须 [Audited]")]
@@ -50,6 +51,15 @@ public sealed class UseCaseCatalogTests
         var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.Build([messageType]));
 
         thrown.Problems.ShouldContain(p => p.Contains(reason, StringComparison.Ordinal) && p.Contains(messageType.Name, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Build_ReadsTheSuspensionExemption_OnlyWhereDeclared()
+    {
+        var catalog = UseCaseCatalog.Build([typeof(CatalogSamples.SuspensionExemptCommand), typeof(SubmitThingCommand)]);
+
+        catalog.Get(typeof(CatalogSamples.SuspensionExemptCommand)).ExemptFromMessagingSuspension.ShouldBeTrue();
+        catalog.Get(typeof(SubmitThingCommand)).ExemptFromMessagingSuspension.ShouldBeFalse();
     }
 
     [Fact]

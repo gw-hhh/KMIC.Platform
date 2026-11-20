@@ -362,7 +362,7 @@ internal sealed class JobExecutor(
             using (db.Services.SaveGate.Open())
             {
                 await scope.ServiceProvider.GetRequiredService<OutboxWriter>().WriteAsync(
-                    db, module, [new PendingMessage(finished, messages.Describe(typeof(BackgroundJobFinished)))], CancellationToken.None);
+                    db, module, [new PendingMessage(finished, messages.Describe(typeof(BackgroundJobFinished)))], AdmissionMode.SkipWhenSuspended, CancellationToken.None);
             }
         }
 

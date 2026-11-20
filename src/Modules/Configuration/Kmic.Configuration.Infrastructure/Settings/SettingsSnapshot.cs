@@ -30,14 +30,12 @@ internal sealed class SettingsSnapshot(IReadOnlyDictionary<string, string> value
         where T : class, ISystemSetting<T> =>
         (T)_typed.GetOrAdd(typeof(T), _ => Read<T>(key));
 
-    private T Read<T>(string key)
+    /// <summary>
+    /// 把保存的 JSON 读成设置值，解析失败或结果为 null 时使用代码默认值
+    /// </summary>
+    public static T ParseOrDefault<T>(string json)
         where T : class, ISystemSetting<T>
     {
-        if (!Values.TryGetValue(key, out var json))
-        {
-            return T.Default;
-        }
-
         try
         {
             return JsonSerializer.Deserialize<T>(json, KmicJsonOptions.Stored) ?? T.Default;
@@ -47,6 +45,10 @@ internal sealed class SettingsSnapshot(IReadOnlyDictionary<string, string> value
             return T.Default;
         }
     }
+
+    private T Read<T>(string key)
+        where T : class, ISystemSetting<T> =>
+        Values.TryGetValue(key, out var json) ? ParseOrDefault<T>(json) : T.Default;
 
     [JsonIgnore]
     internal int TypedCount => _typed.Count;

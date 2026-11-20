@@ -38,8 +38,10 @@ public sealed class FrameworkMetrics
     private readonly Counter<long> _terminalConflicts;
     private readonly Counter<long> _readAuditFailures;
     private readonly Counter<long> _slowQueries;
+    private readonly Counter<long> _admissionRejected;
     private readonly Meter _meter;
     private Func<BacklogSnapshot?>? _backlog;
+    private Func<AdmissionReading?>? _admission;
 
     /// <summary>
     /// 创建全部指标
@@ -70,6 +72,7 @@ public sealed class FrameworkMetrics
         _terminalConflicts = meter.CreateCounter<long>("kmic.readmodel.terminal_conflicts", "{row}", "已是终态、源端却还返回存在的行数");
         _readAuditFailures = meter.CreateCounter<long>("kmic.audit.read_write_failures", "{failure}", "读审计写不进去的次数");
         _slowQueries = meter.CreateCounter<long>("kmic.db.slow_queries", "{query}", "超过慢查询阈值的 SQL 次数");
+        _admissionRejected = meter.CreateCounter<long>("kmic.messaging.admission.rejected", "{write}", "容量保护拒绝或跳过的消息写入次数");
     }
 
     /// <summary>
@@ -192,6 +195,15 @@ public sealed class FrameworkMetrics
     public void SlowQuery(string module) => _slowQueries.Add(1, new TagList { { "module", module } });
 
     /// <summary>
+    /// 容量保护拒绝了一次消息写入（业务事务随之回滚），或跳过了一次不该让业务失败的写入
+    /// </summary>
+    /// <param name="state">当时的状态，soft 或 hard</param>
+    /// <param name="origin">发起写入的来源</param>
+    /// <param name="skipped">true 是跳过（不报错），false 是拒绝</param>
+    public void MessagingAdmissionRejected(string state, string origin, bool skipped) =>
+        _admissionRejected.Add(1, new TagList { { "state", state }, { "origin", origin }, { "outcome", skipped ? "skipped" : "rejected" } });
+
+    /// <summary>
     /// 登记积压量表的数据来源，只能登记一次
     /// </summary>
     /// <remarks>
@@ -216,6 +228,32 @@ public sealed class FrameworkMetrics
         Gauge("kmic.background_job.oldest_queued", "s", "最老的排队作业已等待的时间", s => s.Jobs.Select(j => Measure(j.OldestQueued.TotalSeconds, ("module", j.Module), ("type", j.Type))));
         Gauge("kmic.scheduled_job.last_success_age", "s", "定时任务距上次成功的时间", s => s.ScheduledJobs.Select(t => Measure(t.LastSuccessAge.TotalSeconds, ("task", t.Task))));
     }
+
+    /// <summary>
+    /// 登记容量保护状态的数据来源，只能登记一次
+    /// </summary>
+    /// <remarks>
+    /// 回调返回 null 表示还没有读到状态，这时不输出数值
+    /// </remarks>
+    public void ObserveAdmission(Func<AdmissionReading?> read)
+    {
+        ArgumentNullException.ThrowIfNull(read);
+        if (Interlocked.CompareExchange(ref _admission, read, null) is not null)
+        {
+            throw new InvalidOperationException("容量保护量表已经登记过了。");
+        }
+
+        _meter.CreateObservableGauge("kmic.messaging.admission.state", StateReading, "{state}", "消息写入的状态：0 正常、1 软线、2 硬线");
+        _meter.CreateObservableGauge("kmic.messaging.admission.sample_age", SampleAgeReading, "s", "容量保护的判断已经多久没有更新");
+        _meter.CreateObservableGauge("kmic.messaging.admission.capacity_age", CapacityAgeReading, "s", "数据库容量设置已经多久没有更新");
+    }
+
+    private IEnumerable<Measurement<long>> StateReading() => _admission?.Invoke() is { } r ? [new Measurement<long>(r.State)] : [];
+
+    private IEnumerable<Measurement<double>> SampleAgeReading() => _admission?.Invoke() is { } r ? [new Measurement<double>(r.SampleAge.TotalSeconds)] : [];
+
+    private IEnumerable<Measurement<double>> CapacityAgeReading() =>
+        _admission?.Invoke() is { CapacityAge: { } age } ? [new Measurement<double>(age.TotalSeconds)] : [];
 
     private static string ReasonOf(UploadOutcome outcome) => outcome switch
     {

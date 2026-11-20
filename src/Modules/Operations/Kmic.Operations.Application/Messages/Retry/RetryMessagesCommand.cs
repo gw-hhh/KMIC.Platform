@@ -10,4 +10,5 @@ namespace Kmic.Operations.Application.Messages.Retry;
 [RequirePermission(OperationsPermissions.MessagesManage)]
 [Audited]
 [Idempotent]
+[ExemptFromMessagingSuspension]
 public sealed record RetryMessagesCommand(IReadOnlyList<MessageRef> Messages) : ICommand<MessageReceipts>;

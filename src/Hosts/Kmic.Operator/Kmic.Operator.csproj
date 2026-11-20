@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    一次性运维命令：初始化首个管理员、应急重置管理员密码。
+    一次性运维命令：初始化首个管理员、应急重置管理员密码、写入数据库已分配容量。
     使用独立的运维账号，仅授予各命令所需权限
   -->
   <PropertyGroup>
@@ -13,6 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="../../BuildingBlocks/Kmic.BuildingBlocks.Infrastructure/Kmic.BuildingBlocks.Infrastructure.csproj" />
     <ProjectReference Include="../../Modules/Identity/Kmic.Identity.Infrastructure/Kmic.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Configuration/Kmic.Configuration.Infrastructure/Kmic.Configuration.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Operations/Kmic.Operations.Application/Kmic.Operations.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Kmic.Tools.Tests" />

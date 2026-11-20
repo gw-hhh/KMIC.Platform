@@ -89,6 +89,11 @@ public sealed class MessagingOptions
     public TimeSpan ShutdownGrace { get; set; } = TimeSpan.FromSeconds(30);
 
     /// <summary>
+    /// 容量保护
+    /// </summary>
+    public AdmissionOptions Admission { get; } = new();
+
+    /// <summary>
     /// 读模型重建
     /// </summary>
     public RebuildOptions Rebuild { get; } = new();

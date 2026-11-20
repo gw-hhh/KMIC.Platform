@@ -50,6 +50,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddScoped<ITransactionLocks, TransactionLocks>();
         services.TryAddScoped<IUnfinishedMessageProbe, UnfinishedMessageProbe>();
         services.TryAddScoped<OutboxWriter>();
+        services.TryAddSingleton<MessagingAdmission>();
         services.TryAddSingleton<ModuleFrameworkTables>();
         services.TryAddSingleton<OutboxDispatcher>();
         services.TryAddScoped<CurrentInboxMessage>();
