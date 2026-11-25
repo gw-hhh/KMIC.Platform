@@ -491,9 +491,9 @@ export interface paths {
                     /** @description 按模板键筛选 */
                     TemplateKey?: string;
                     /** @description 创建时间下限（含） */
-                    From?: string;
+                    From?: null | string;
                     /** @description 创建时间上限（不含） */
-                    To?: string;
+                    To?: null | string;
                     /** @description 页码 */
                     Page?: number;
                     /** @description 每页数量 */
@@ -1891,9 +1891,9 @@ export interface paths {
                     /** @description 上传人或生成请求人 ID */
                     UploadedBy?: string;
                     /** @description 文件登记时间下限（含） */
-                    From?: string;
+                    From?: null | string;
                     /** @description 文件登记时间上限（不含） */
-                    To?: string;
+                    To?: null | string;
                     /** @description 按引用文件的业务模块筛选 */
                     OwnerModule?: string;
                     /** @description 业务对象类型 */
@@ -8680,9 +8680,9 @@ export interface paths {
                     /** @description 设置键筛选 */
                     Key?: string;
                     /** @description 起始时间 */
-                    From?: string;
+                    From?: null | string;
                     /** @description 结束时间 */
-                    To?: string;
+                    To?: null | string;
                     /** @description 页码 */
                     Page?: number;
                     /** @description 每页数量 */
@@ -15352,7 +15352,7 @@ export interface components {
              * Format: uuid
              * @description 组织单元
              */
-            orgUnitId: string;
+            orgUnitId: null | string;
         };
         /** @description 审计记录的详情 */
         AuditDetail: {
@@ -15542,12 +15542,12 @@ export interface components {
              * Format: date-time
              * @description 首次执行时间
              */
-            startedAt: string;
+            startedAt: null | string;
             /**
              * Format: date-time
              * @description 结束时间
              */
-            finishedAt: string;
+            finishedAt: null | string;
             /**
              * Format: int64
              * @description 已完成数量
@@ -15580,7 +15580,7 @@ export interface components {
              * Format: date-time
              * @description 取消请求时间
              */
-            cancelRequestedAt: string;
+            cancelRequestedAt: null | string;
             /**
              * Format: uuid
              * @description 请求取消的用户 ID
@@ -15699,7 +15699,7 @@ export interface components {
              * Format: date-time
              * @description 浏览器中的错误发生时间
              */
-            occurredAt: string;
+            occurredAt: null | string;
         };
         /**
          * @description 客户端类型，决定刷新令牌怎样存放、滑动与绝对有效期多长
@@ -15980,7 +15980,7 @@ export interface components {
              * Format: uuid
              * @description 系统内收件人 ID，外部收件人为空
              */
-            recipientUserId: string;
+            recipientUserId: null | string;
             /** @description 脱敏后的收件地址 */
             addressMasked: string;
             /** @description 渲染后的主题 */
@@ -16005,7 +16005,7 @@ export interface components {
              * Format: date-time
              * @description 下次可以领取的时间
              */
-            nextAttemptAt: string;
+            nextAttemptAt: null | string;
             /** @description 最近一次失败的原因 */
             lastError: null | string;
             /** @description 渠道返回的消息标识 */
@@ -16014,7 +16014,7 @@ export interface components {
              * Format: date-time
              * @description 发送成功的时间
              */
-            sentAt: string;
+            sentAt: null | string;
             /**
              * Format: date-time
              * @description 创建时间
@@ -16024,7 +16024,7 @@ export interface components {
              * Format: date-time
              * @description 放弃处理的时间，没放弃为空
              */
-            abandonedAt: string;
+            abandonedAt: null | string;
             /** @description 放弃处理的原因 */
             abandonReason: null | string;
         };
@@ -16044,7 +16044,7 @@ export interface components {
              * Format: uuid
              * @description 系统内收件人 ID，外部收件人为空
              */
-            recipientUserId: string;
+            recipientUserId: null | string;
             /** @description 脱敏后的收件地址 */
             addressMasked: string;
             /** @description 模板键 */
@@ -16065,7 +16065,7 @@ export interface components {
              * Format: date-time
              * @description 发送成功的时间
              */
-            sentAt: string;
+            sentAt: null | string;
             /**
              * Format: date-time
              * @description 创建时间
@@ -16256,12 +16256,12 @@ export interface components {
              * Format: uuid
              * @description 操作人
              */
-            actorUserId?: string;
+            actorUserId?: null | string;
             /**
              * Format: uuid
              * @description 模拟身份时的实际操作人
              */
-            actualUserId?: string;
+            actualUserId?: null | string;
             /** @description 产生审计的模块 */
             module?: null | string;
             /** @description 操作名 */
@@ -16310,7 +16310,7 @@ export interface components {
              * Format: uuid
              * @description 上传人或生成请求人 ID，可为空
              */
-            uploadedBy: string;
+            uploadedBy: null | string;
             /**
              * Format: date-time
              * @description 文件登记时间
@@ -16322,31 +16322,31 @@ export interface components {
              * Format: date-time
              * @description 清理到期时间
              */
-            expiresAt: string;
+            expiresAt: null | string;
             /** @description 拒绝原因 */
             rejectReason: null | string;
             /**
              * Format: date-time
              * @description 彻底删除标记时间
              */
-            purgedAt: string;
+            purgedAt: null | string;
             /**
              * Format: uuid
              * @description 彻底删除操作人 ID
              */
-            purgedBy: string;
+            purgedBy: null | string;
             /** @description 彻底删除原因 */
             purgeReason: null | string;
             /**
              * Format: date-time
              * @description 对象删除登记时间
              */
-            objectDeletedAt: string;
+            objectDeletedAt: null | string;
             /**
              * Format: date-time
              * @description 历史版本清除登记时间
              */
-            historyPurgedAt: string;
+            historyPurgedAt: null | string;
             /** @description 历史版本清除记录 */
             historyPurgeNote: null | string;
             /** @description 引用它的业务对象 */
@@ -16399,7 +16399,7 @@ export interface components {
              * Format: uuid
              * @description 上传人或生成请求人 ID，可为空
              */
-            uploadedBy: string;
+            uploadedBy: null | string;
             /**
              * Format: date-time
              * @description 文件登记时间
@@ -16411,7 +16411,7 @@ export interface components {
              * Format: date-time
              * @description 清理到期时间
              */
-            expiresAt: string;
+            expiresAt: null | string;
             /**
              * Format: int64
              * @description 并发版本号
@@ -16463,7 +16463,7 @@ export interface components {
              * Format: uuid
              * @description 目标会话 ID
              */
-            sessionId: string;
+            sessionId: null | string;
         };
         /** @description 授予角色的请求 */
         GrantRoleRequest: {
@@ -16814,7 +16814,7 @@ export interface components {
              * Format: uuid
              * @description 上级组织单元 ID，根单元为空
              */
-            parentId: string;
+            parentId: null | string;
             /** @description 名称 */
             name: string;
             /** @description 编码 */
@@ -17241,7 +17241,7 @@ export interface components {
              * Format: date-time
              * @description 结束时间
              */
-            finishedAt: string;
+            finishedAt: null | string;
         };
         /** @description 触发、确认、放弃读模型重建的请求 */
         RebuildRequest: {
@@ -17562,7 +17562,7 @@ export interface components {
              * Format: date-time
              * @description 终结的时间
              */
-            finalizedAt: string;
+            finalizedAt: null | string;
             /**
              * Format: uuid
              * @description 终结的人
@@ -17602,7 +17602,7 @@ export interface components {
              * Format: date-time
              * @description 下次计划触发时间，无后续触发或无触发器时为空
              */
-            nextFireTime: string;
+            nextFireTime: null | string;
             /** @description 实际调度状态是否与当前配置一致 */
             inSync: boolean;
             lastRun: null | components["schemas"]["ScheduledJobRunItem"];
@@ -17632,7 +17632,7 @@ export interface components {
              * Format: date-time
              * @description 结束时间，执行中为空
              */
-            finishedAt: string;
+            finishedAt: null | string;
             /**
              * Format: int64
              * @description 耗时
@@ -17913,7 +17913,7 @@ export interface components {
              * Format: date-time
              * @description 已读时间
              */
-            readAt: string;
+            readAt: null | string;
         };
         /** @description 示例附件信息，使用关联时保存的文件名、大小和类型 */
         SpecimenAttachmentResponse: {
@@ -17997,7 +17997,7 @@ export interface components {
              * Format: uuid
              * @description 目标用户的角色 ID
              */
-            roleId: string;
+            roleId: null | string;
             /** @description 原因 */
             reason: string;
         };
@@ -18057,12 +18057,12 @@ export interface components {
              * Format: date-time
              * @description 标记已解决的时间
              */
-            resolvedAt: string;
+            resolvedAt: null | string;
             /**
              * Format: uuid
              * @description 标记已解决的用户 ID
              */
-            resolvedBy: string;
+            resolvedBy: null | string;
             /** @description 处理说明 */
             resolutionNote: null | string;
             /**
@@ -18207,7 +18207,7 @@ export interface components {
              * Format: date-time
              * @description 最近一次发布的时间，没发布过的为空
              */
-            lastPublishedAt: string;
+            lastPublishedAt: null | string;
         };
         /** @description 模板列表，按模板键排序 */
         TemplateListResponse: {
@@ -18358,7 +18358,7 @@ export interface components {
              * Format: uuid
              * @description 所属组织单元 ID
              */
-            orgUnitId: string;
+            orgUnitId: null | string;
             /** @description 所属组织单元的名称 */
             orgUnitName: null | string;
             /** @description 是否已设置密码 */
@@ -18369,12 +18369,12 @@ export interface components {
              * Format: date-time
              * @description 最近密码修改时间
              */
-            passwordChangedAt: string;
+            passwordChangedAt: null | string;
             /**
              * Format: date-time
              * @description 登录等待或锁定的截止时间，无限制时为空
              */
-            loginLockedUntil: string;
+            loginLockedUntil: null | string;
             /** @description 角色授予 */
             grants: components["schemas"]["UserGrantItem"][];
             /**
@@ -18434,7 +18434,7 @@ export interface components {
              * Format: uuid
              * @description 所属组织单元 ID
              */
-            orgUnitId: string;
+            orgUnitId: null | string;
             /** @description 所属组织单元的名称 */
             orgUnitName: null | string;
             /** @description 拥有的角色 */
@@ -18489,7 +18489,7 @@ export interface components {
              * Format: uuid
              * @description 模拟会话的实际操作人 ID，普通会话为空
              */
-            impersonatorUserId: string;
+            impersonatorUserId: null | string;
             /** @description 客户端类型 */
             clientType: components["schemas"]["ClientType"];
             /** @description 设备名 */

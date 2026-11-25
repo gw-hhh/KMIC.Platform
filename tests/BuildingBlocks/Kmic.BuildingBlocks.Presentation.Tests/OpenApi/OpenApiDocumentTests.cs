@@ -36,6 +36,21 @@ public sealed class OpenApiDocumentTests(OpenApiFixture fixture) : IClassFixture
     }
 
     [Fact]
+    public void NullableTimestampAndId_KeepTheNullType()
+    {
+        var properties = Schema("ThingDto").GetProperty("properties");
+
+        foreach (var (name, format) in new[] { ("parentId", "uuid"), ("closedAt", "date-time") })
+        {
+            var property = properties.GetProperty(name);
+            property.GetProperty("type").EnumerateArray().Select(t => t.GetString()!).Order(StringComparer.Ordinal).ShouldBe(["null", "string"], Case.Sensitive, name);
+            property.GetProperty("format").GetString().ShouldBe(format);
+        }
+
+        properties.GetProperty("id").GetProperty("type").GetString().ShouldBe("string");
+    }
+
+    [Fact]
     public void Query_RespondsWith200AndItsResponseType()
     {
         var responses = Operation("/api/v1/samples/things/{id}", "get").GetProperty("responses");

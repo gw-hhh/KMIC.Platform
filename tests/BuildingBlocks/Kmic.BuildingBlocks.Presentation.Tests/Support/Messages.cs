@@ -20,7 +20,7 @@ internal static class Messages
         typeof(PublicQuery), typeof(MeQuery), typeof(ListThingsQuery),
     ];
 
-    internal sealed record ThingDto(ThingId Id, string Name);
+    internal sealed record ThingDto(ThingId Id, string Name, ThingId? ParentId = null, DateTimeOffset? ClosedAt = null);
 
     [RequirePermission("Test.Thing.Read")]
     internal sealed record ListThingsQuery(PageRequest Page, SortRequest Sort) : IQuery<PagedResult<ThingDto>>;
