@@ -12,6 +12,7 @@ import { motionDurations, shellSizes, switchWithRipple } from '@/platform/theme'
 import KIcon from '@/platform/ui/KIcon.vue';
 import { useNavigationState } from '../navigation-state';
 import SearchDialog from '../search/SearchDialog.vue';
+import ScrollShadow from './ScrollShadow.vue';
 import { useShellSettingsStore } from '../settings/shell-settings-store';
 import { useWorkspace } from '../workspace/use-workspace';
 import HeaderBar from './HeaderBar.vue';
@@ -100,7 +101,7 @@ const hoverExpanded = computed(
   () =>
     layout.value !== 'mixed-column' &&
     collapsed.value &&
-    settings.value.sidebar.hoverExpand &&
+    settings.value.sidebar.hoverExpandAll &&
     hovering.value &&
     !isMobile.value,
 );
@@ -230,13 +231,14 @@ function startDrag(event: MouseEvent): void {
   });
 }
 
-// 固定：展开且不悬停；取消固定：折叠，鼠标移上去再展开
+// 取消固定：侧栏收起，鼠标还在上面所以先保持展开，移开后收回；固定：一直展开
 function togglePinned(): void {
+  const unpin = !hoverExpanded.value;
   shellSettings.update((draft) => {
-    draft.sidebar.collapsed = !collapsed.value;
-    draft.sidebar.hoverExpand = true;
+    draft.sidebar.collapsed = unpin;
+    draft.sidebar.hoverExpandAll = unpin;
   });
-  hovering.value = false;
+  hovering.value = unpin;
 }
 
 function resetWidth(): void {
@@ -315,7 +317,6 @@ async function resetSettings(): Promise<void> {
       :show-breadcrumb-icon="false"
       :dark="shellSettings.resolvedMode === 'dark'"
       :sidebar-hidden="hidden"
-      :active-key="activeMenuKey"
       @toggle-sidebar="toggleSidebar"
       @open-search="searchOpen = true"
       @open-link="openLink"
@@ -349,21 +350,21 @@ async function resetSettings(): Promise<void> {
           <a class="logo" @click.prevent="openRoute(homeRouteName)">
             <span class="logo-mark">K</span>
           </a>
-          <div class="menu-scroll">
+          <ScrollShadow class="menu-scroll">
             <MixedColumn
               :nodes="nodes"
               :active-key="previewRootKey ?? selectedRootKey"
               @select="selectRoot"
               @enter="previewRoot"
             />
-          </div>
-          <button class="collapse-button" :title="t.header.toggleSidebar" @click="toggleCollapsed">
+          </ScrollShadow>
+          <button class="collapse-button" :aria-label="t.header.toggleSidebar" @click="toggleCollapsed">
             <KIcon :name="collapsed ? 'chevrons-right' : 'chevrons-left'" :size="16" />
           </button>
         </div>
         <div v-if="panelVisible" class="panel" :style="{ width: `${expandedWidth}px` }">
           <div class="panel-title">{{ shownRoot?.title }}</div>
-          <div class="menu-scroll">
+          <ScrollShadow class="menu-scroll">
             <SidebarMenu
               :nodes="sideNodes"
               :active-key="activeMenuKey"
@@ -372,7 +373,7 @@ async function resetSettings(): Promise<void> {
               :show-collapsed-title="false"
               @select="openRoute"
             />
-          </div>
+          </ScrollShadow>
         </div>
       </template>
 
@@ -386,7 +387,7 @@ async function resetSettings(): Promise<void> {
           <span class="logo-mark">K</span>
           <span v-if="!menuCollapsed" class="logo-text">{{ t.appName }}</span>
         </a>
-        <div class="menu-scroll">
+        <ScrollShadow class="menu-scroll">
           <SidebarMenu
             :nodes="sideNodes"
             :active-key="activeMenuKey"
@@ -395,11 +396,11 @@ async function resetSettings(): Promise<void> {
             :show-collapsed-title="settings.sidebar.showCollapsedTitle"
             @select="openRoute"
           />
-        </div>
+        </ScrollShadow>
         <button
           v-if="!isMobile && !hoverExpanded"
           class="collapse-button"
-          :title="t.header.toggleSidebar"
+          :aria-label="t.header.toggleSidebar"
           @click="toggleCollapsed"
         >
           <KIcon :name="collapsed ? 'chevrons-right' : 'chevrons-left'" :size="16" />
@@ -407,10 +408,10 @@ async function resetSettings(): Promise<void> {
         <button
           v-if="!isMobile && (hoverExpanded || !collapsed)"
           class="pin-button"
-          :title="hoverExpanded ? t.header.pinSidebar : t.header.unpinSidebar"
+          :aria-label="hoverExpanded ? t.header.pinSidebar : t.header.unpinSidebar"
           @click="togglePinned"
         >
-          <KIcon :name="hoverExpanded ? 'pin' : 'pin-off'" :size="16" />
+          <KIcon :name="hoverExpanded ? 'pin-off' : 'pin'" :size="14" />
         </button>
       </template>
     </aside>
@@ -434,7 +435,6 @@ async function resetSettings(): Promise<void> {
         :show-breadcrumb-icon="settings.breadcrumb.showIcon"
         :dark="shellSettings.resolvedMode === 'dark'"
         :sidebar-hidden="hidden"
-        :active-key="activeMenuKey"
         @toggle-sidebar="toggleSidebar"
         @open-search="searchOpen = true"
         @toggle-theme="toggleTheme"
@@ -571,7 +571,7 @@ async function resetSettings(): Promise<void> {
 
   &.is-full {
     justify-content: flex-start;
-    padding: 0 16px;
+    padding: 0 12px;
   }
 
   height: var(--kmic-header-height);
@@ -589,8 +589,8 @@ async function resetSettings(): Promise<void> {
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   font-weight: 700;
   color: var(--kmic-color-primary-foreground);
   background: var(--kmic-color-primary);
@@ -605,43 +605,41 @@ async function resetSettings(): Promise<void> {
   font-weight: 600;
 }
 
+// 底部 42px 留给折叠、固定按钮，菜单不会被挡住
 .menu-scroll {
   flex: 1;
-  overflow: hidden auto;
+  margin-bottom: 42px;
+}
+
+.collapse-button,
+.pin-button {
+  position: absolute;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  padding: 4px;
+  color: var(--kmic-sidebar-muted-color);
+  cursor: pointer;
+  background: var(--kmic-sidebar-accent);
+  border: 0;
+  border-radius: var(--kmic-radius-sm);
+  transition:
+    background var(--kmic-motion-fast),
+    color var(--kmic-motion-fast);
+
+  &:hover {
+    color: var(--kmic-sidebar-foreground);
+    background: var(--kmic-sidebar-accent-hover);
+  }
 }
 
 .collapse-button {
-  position: absolute;
-  bottom: 8px;
   left: 12px;
-  display: flex;
-  padding: 4px;
-  color: var(--kmic-color-muted-foreground);
-  cursor: pointer;
-  background: var(--kmic-sidebar-accent);
-  border: 0;
-  border-radius: var(--kmic-radius);
-
-  &:hover {
-    color: var(--kmic-sidebar-foreground);
-  }
 }
 
 .pin-button {
-  position: absolute;
   right: 12px;
-  bottom: 8px;
-  display: flex;
-  padding: 4px;
-  color: var(--kmic-color-muted-foreground);
-  cursor: pointer;
-  background: var(--kmic-sidebar-accent);
-  border: 0;
-  border-radius: var(--kmic-radius);
-
-  &:hover {
-    color: var(--kmic-sidebar-foreground);
-  }
+  padding: 5px;
 }
 
 .column .collapse-button {

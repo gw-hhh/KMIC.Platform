@@ -7,6 +7,7 @@ import { isJobActive, jobsApi, useCommand, type BackgroundJob, type BackgroundJo
 import { enumLabel, useFormat } from '@/platform/format';
 import { shellTexts } from '@/platform/texts/shell';
 import KIcon from '@/platform/ui/KIcon.vue';
+import KTooltip from '@/platform/ui/KTooltip.vue';
 
 const t = shellTexts.jobs;
 const format = useFormat();
@@ -66,11 +67,13 @@ async function cancelJob(job: BackgroundJob): Promise<void> {
 
 <template>
   <Popover v-model:open="open" trigger="click" placement="bottomRight" :arrow="false" :classes="{ root: 'kmic-jobs' }">
-    <button class="jobs-button" :title="t.button" :aria-label="t.button">
-      <Badge :count="activeCount" size="small">
-        <KIcon name="todo" :size="16" />
-      </Badge>
-    </button>
+    <KTooltip :title="t.button" :disabled="open">
+      <button class="jobs-button" :aria-label="t.button">
+        <Badge :count="activeCount" size="small">
+          <KIcon name="todo" :size="16" />
+        </Badge>
+      </button>
+    </KTooltip>
     <template #content>
       <div class="jobs">
         <div class="jobs-header">{{ t.title }}</div>
@@ -110,14 +113,17 @@ async function cancelJob(job: BackgroundJob): Promise<void> {
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: inherit;
+  color: var(--kmic-header-icon-color);
   cursor: pointer;
   background: none;
   border: 0;
   border-radius: 50%;
-  transition: background var(--kmic-motion-fast);
+  transition:
+    background var(--kmic-motion-fast),
+    color var(--kmic-motion-fast);
 
   &:hover {
+    color: var(--kmic-header-foreground);
     background: var(--kmic-header-accent);
   }
 

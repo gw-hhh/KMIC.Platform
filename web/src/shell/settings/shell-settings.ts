@@ -21,7 +21,8 @@ export interface ShellSettings {
     width: number;
     accordion: boolean;
     showCollapsedTitle: boolean;
-    hoverExpand: boolean;
+    /** 折叠后悬停时展开整个侧栏（浮在内容上）；关闭时只弹出所在目录的子菜单，和 Vben 默认一致 */
+    hoverExpandAll: boolean;
     /** 顶栏按钮把侧栏整个隐藏 */
     hidden: boolean;
   };
@@ -38,7 +39,7 @@ export const defaultShellSettings: ShellSettings = {
     width: 224,
     accordion: true,
     showCollapsedTitle: false,
-    hoverExpand: true,
+    hoverExpandAll: false,
     hidden: false,
   },
   breadcrumb: { show: true, showIcon: true },
@@ -76,7 +77,7 @@ const shellSettingsSchema = z.object({
       width: field(z.number().min(60).max(320), d.sidebar.width),
       accordion: field(z.boolean(), d.sidebar.accordion),
       showCollapsedTitle: field(z.boolean(), d.sidebar.showCollapsedTitle),
-      hoverExpand: field(z.boolean(), d.sidebar.hoverExpand),
+      hoverExpandAll: field(z.boolean(), d.sidebar.hoverExpandAll),
       hidden: field(z.boolean(), d.sidebar.hidden),
     }),
     d.sidebar,

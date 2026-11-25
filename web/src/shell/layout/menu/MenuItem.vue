@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { Popover, Tooltip } from 'antdv-next';
+// 尺寸、颜色、动画照 Vben Admin 的 menu-ui（MIT）
+import { Popover } from 'antdv-next';
 import { computed } from 'vue';
 import type { MenuNode } from '@/platform/routing';
 import KIcon from '@/platform/ui/KIcon.vue';
+import KTooltip from '@/platform/ui/KTooltip.vue';
 import { useMenu } from './menu-context';
 
 const props = defineProps<{ node: MenuNode; level: number; popup: boolean }>();
@@ -15,6 +17,7 @@ const isActiveGroup = computed(() => isGroup.value && menu.activeAncestors.value
 const isOpen = computed(() => menu.openKeys.value.has(props.node.key));
 // 弹出的子菜单始终展开显示
 const isCollapsed = computed(() => menu.collapsed.value && !props.popup);
+// 第一级左边 8px，往下每级多缩进 16px
 const indent = computed(() => `${String(props.level === 0 ? 8 : 16 + props.level * 16)}px`);
 
 function onClick(): void {
@@ -30,7 +33,8 @@ function onClick(): void {
   <li class="menu-item" role="none">
     <Popover
       v-if="isCollapsed && isGroup"
-      placement="rightTop"
+      placement="right"
+      :align="{ offset: [10, 0] }"
       :mouse-enter-delay="0.3"
       :mouse-leave-delay="0.3"
       :arrow="false"
@@ -41,30 +45,35 @@ function onClick(): void {
           <MenuItem v-for="child in node.children" :key="child.key" :node="child" :level="0" popup />
         </ul>
       </template>
-      <div class="entry is-collapsed" :class="{ 'is-active-group': isActiveGroup }" role="menuitem" tabindex="0">
-        <KIcon v-if="node.icon" class="icon" :name="node.icon" :size="16" />
+      <div
+        class="entry is-collapsed"
+        :class="{ 'is-active-group': isActiveGroup, 'with-title': menu.showCollapsedTitle.value }"
+        role="menuitem"
+        tabindex="0"
+      >
+        <KIcon class="icon" :name="node.icon ?? 'folder'" :size="menu.showCollapsedTitle.value ? 20 : 16" />
         <span v-if="menu.showCollapsedTitle.value" class="collapsed-title">{{ node.title }}</span>
       </div>
     </Popover>
 
-    <Tooltip v-else-if="isCollapsed" placement="right" :title="node.title">
+    <KTooltip v-else-if="isCollapsed" :title="node.title" placement="right">
       <div
         class="entry is-collapsed"
-        :class="{ 'is-active': isActive }"
+        :class="{ 'is-active': isActive, 'with-title': menu.showCollapsedTitle.value }"
         role="menuitem"
         tabindex="0"
         @click="onClick"
         @keydown.enter="onClick"
       >
-        <KIcon v-if="node.icon" class="icon" :name="node.icon" :size="16" />
+        <KIcon class="icon" :name="node.icon ?? 'file'" :size="menu.showCollapsedTitle.value ? 20 : 16" />
         <span v-if="menu.showCollapsedTitle.value" class="collapsed-title">{{ node.title }}</span>
       </div>
-    </Tooltip>
+    </KTooltip>
 
     <template v-else>
       <div
         class="entry"
-        :class="{ 'is-active': isActive, 'is-active-group': isActiveGroup }"
+        :class="{ 'is-active': isActive, 'is-active-group': isActiveGroup, 'is-group': isGroup }"
         :style="{ paddingLeft: indent }"
         :aria-expanded="isGroup ? isOpen : undefined"
         :data-menu-key="node.key"
@@ -75,7 +84,7 @@ function onClick(): void {
       >
         <KIcon v-if="node.icon" class="icon" :name="node.icon" :size="16" />
         <span class="title">{{ node.title }}</span>
-        <KIcon v-if="isGroup" class="arrow" :class="{ 'is-open': isOpen }" name="chevron-right" :size="16" />
+        <KIcon v-if="isGroup" class="arrow" :class="{ 'is-open': isOpen }" name="chevron-down" :size="16" />
       </div>
       <div v-if="isGroup" class="children" :class="{ 'is-open': isOpen }">
         <ul class="menu-list">
@@ -87,11 +96,26 @@ function onClick(): void {
 </template>
 
 <style lang="scss">
-// 折叠后悬停弹出的子菜单，样式和侧栏一致
+// 折叠后悬停弹出的子菜单：宽 240，从右侧滑入，底色和侧栏一致
 .menu-popup .ant-popover-container {
-  min-width: 180px;
-  padding: 6px 0;
+  width: 240px;
+  padding: 10px 0;
   background: var(--kmic-sidebar-background);
+  border: 1px solid var(--kmic-sidebar-border);
+  border-radius: var(--kmic-radius-md);
+  animation: menu-popup-in var(--kmic-motion-slow) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes menu-popup-in {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 </style>
 
@@ -107,25 +131,33 @@ function onClick(): void {
   align-items: center;
   height: var(--kmic-menu-item-height);
   padding-right: 12px;
-  margin: 2px 8px;
-  color: var(--kmic-sidebar-foreground);
+  margin: 0 8px 2px;
+  color: var(--kmic-sidebar-item-color);
   white-space: nowrap;
   cursor: pointer;
   border-radius: var(--kmic-radius);
   transition:
     background var(--kmic-motion-fast) ease,
-    color var(--kmic-motion-fast) ease;
+    color var(--kmic-motion-fast) ease,
+    padding var(--kmic-motion-fast) ease;
+
+  &.is-group {
+    padding-right: 32px;
+  }
 
   .icon {
+    flex: none;
     transition: transform var(--kmic-motion-slow);
   }
 
-  &:hover {
-    background: var(--kmic-sidebar-accent);
+  &:hover .icon {
+    transform: scale(1.2);
+  }
 
-    .icon {
-      transform: scale(1.2);
-    }
+  // 选中项悬停时保留选中的底色
+  &:not(.is-active):hover {
+    color: var(--kmic-sidebar-item-hover-color);
+    background: var(--kmic-sidebar-accent);
   }
 
   &:focus-visible {
@@ -134,27 +166,33 @@ function onClick(): void {
   }
 
   &.is-active {
-    color: var(--kmic-color-primary);
-    background: var(--kmic-color-primary-soft);
+    color: var(--kmic-sidebar-item-active-color);
+    background: var(--kmic-sidebar-item-active-background);
   }
 
+  // 当前页面所在的目录只变字色，不加底色
   &.is-active-group {
-    color: var(--kmic-color-primary);
+    color: var(--kmic-sidebar-group-active-color);
   }
 
   &.is-collapsed {
     flex-direction: column;
-    gap: 4px;
-    align-items: center;
+    gap: 0;
     justify-content: center;
-    height: auto;
-    min-height: 46px;
+    height: 47px;
+    padding: 0;
     margin: 4px 6px;
-    padding-right: 0;
+    transition: all var(--kmic-motion-slow);
 
-    // 折叠后当前页面所在的目录也带底色，和展开时的选中项一致
+    &.is-active,
     &.is-active-group {
-      background: var(--kmic-color-primary-soft);
+      color: var(--kmic-sidebar-item-active-color);
+      background: var(--kmic-sidebar-item-active-background);
+    }
+
+    &.with-title {
+      height: 64px;
+      margin: 4px 8px;
     }
   }
 }
@@ -168,20 +206,26 @@ function onClick(): void {
 
 .collapsed-title {
   max-width: 100%;
+  margin-top: 8px;
   overflow: hidden;
   font-size: 12px;
+  line-height: normal;
   text-overflow: ellipsis;
 }
 
 .arrow {
-  transition: transform var(--kmic-motion-slow);
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  margin-top: -8px;
+  transition: transform var(--kmic-motion-slow) ease;
 
   &.is-open {
-    transform: rotate(90deg);
+    transform: rotate(180deg);
   }
 }
 
-// 展开动画
+// 展开、收起的动画
 .children {
   display: grid;
   grid-template-rows: 0fr;

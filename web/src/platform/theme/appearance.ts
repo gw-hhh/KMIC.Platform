@@ -1,4 +1,4 @@
-import { formatHsl, type Hsl } from './color';
+import { formatHsl, formatHslAlpha, type Hsl } from './color';
 import {
   colorSets,
   motionDurations,
@@ -52,8 +52,10 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
   const colors = colorSets[runtime.resolvedMode];
   const dark = colorSets.dark;
   const primary = formatHsl(primaryColor(appearance.primary));
-  const sidebar = appearance.darkSidebar ? dark : colors;
+  const sidebarDark = appearance.darkSidebar || runtime.resolvedMode === 'dark';
+  const sidebar = sidebarDark ? dark : colors;
   const header = appearance.darkHeader ? dark : colors;
+  const radius = (offset: number): string => px(Math.max(0, appearance.radius - offset));
 
   return {
     '--kmic-color-background': formatHsl(colors.background),
@@ -61,6 +63,8 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-color-foreground': formatHsl(colors.foreground),
     '--kmic-color-muted-foreground': formatHsl(colors.mutedForeground),
     '--kmic-color-accent': formatHsl(colors.accent),
+    '--kmic-color-accent-foreground': formatHsl(colors.accentForeground),
+    '--kmic-color-accent-hover': formatHsl(colors.accentHover),
     '--kmic-color-border': formatHsl(colors.border),
     '--kmic-color-success': formatHsl(colors.success),
     '--kmic-color-warning': formatHsl(colors.warning),
@@ -71,12 +75,28 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-sidebar-background': formatHsl(sidebar.background),
     '--kmic-sidebar-foreground': formatHsl(sidebar.foreground),
     '--kmic-sidebar-accent': formatHsl(sidebar.accent),
+    '--kmic-sidebar-accent-hover': formatHsl(sidebar.accentHover),
+    // 浅色侧栏：选中项主色字、主色淡底；深色侧栏：选中项白字、灰底，和 Vben 一致
+    '--kmic-sidebar-item-color': sidebarDark
+      ? formatHslAlpha(sidebar.foreground, 80)
+      : formatHsl(sidebar.accentForeground),
+    '--kmic-sidebar-item-hover-color': formatHsl(sidebar.accentForeground),
+    // 侧栏底部按钮这类次要图标
+    '--kmic-sidebar-muted-color': formatHslAlpha(sidebar.foreground, 60),
+    '--kmic-sidebar-item-active-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
+    '--kmic-sidebar-item-active-background': sidebarDark
+      ? formatHsl(sidebar.accent)
+      : `color-mix(in srgb, ${primary} 15%, transparent)`,
+    '--kmic-sidebar-group-active-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
     '--kmic-sidebar-border': formatHsl(sidebar.border),
     '--kmic-header-background': formatHsl(header.background),
     '--kmic-header-foreground': formatHsl(header.foreground),
     '--kmic-header-accent': formatHsl(header.accent),
+    '--kmic-header-icon-color': formatHslAlpha(header.foreground, 80),
     '--kmic-header-border': formatHsl(header.border),
     '--kmic-radius': px(appearance.radius),
+    '--kmic-radius-md': radius(2),
+    '--kmic-radius-sm': radius(4),
     // 两端整圆的胶囊形，不随圆角设置变
     '--kmic-radius-pill': '9999px',
     '--kmic-font-size': px(appearance.fontSize),

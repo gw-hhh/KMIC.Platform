@@ -45,7 +45,7 @@ export const shellTexts = {
     logout: '退出登录',
     logoutConfirm: '确定退出登录吗？',
     pinSidebar: '固定侧栏',
-    unpinSidebar: '悬停展开',
+    unpinSidebar: '取消固定',
   },
   jobs: {
     button: '后台作业',
@@ -147,7 +147,7 @@ export const shellTexts = {
       sidebar: '侧栏',
       accordion: '手风琴模式',
       showCollapsedTitle: '折叠时显示菜单名',
-      hoverExpand: '折叠时悬停展开',
+      hoverExpandAll: '折叠后悬停展开整个侧栏',
       breadcrumb: '面包屑',
       showBreadcrumb: '显示面包屑',
       breadcrumbIcon: '显示面包屑图标',

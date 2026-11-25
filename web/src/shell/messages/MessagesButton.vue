@@ -7,6 +7,7 @@ import { useCommand } from '@/platform/api';
 import { useFormat } from '@/platform/format';
 import { shellTexts } from '@/platform/texts/shell';
 import KIcon from '@/platform/ui/KIcon.vue';
+import KTooltip from '@/platform/ui/KTooltip.vue';
 import { isInternalLink, siteMessagesApi, type SiteMessage } from './site-messages-api';
 import { browserEnvironment, createUnreadCounter } from './unread-counter';
 
@@ -80,11 +81,13 @@ async function readAll(): Promise<void> {
 
 <template>
   <Popover v-model:open="open" trigger="click" placement="bottomRight" :arrow="false" :classes="{ root: 'kmic-inbox' }">
-    <button class="inbox-button" :title="t.button" :aria-label="t.button">
-      <Badge :count="unread" size="small" :overflow-count="99">
-        <KIcon name="bell" :size="16" />
-      </Badge>
-    </button>
+    <KTooltip :title="t.button" :disabled="open">
+      <button class="inbox-button" :aria-label="t.button">
+        <Badge :count="unread" size="small" :overflow-count="99">
+          <KIcon name="bell" :size="16" />
+        </Badge>
+      </button>
+    </KTooltip>
     <template #content>
       <div class="inbox">
         <div class="inbox-header">
@@ -128,14 +131,17 @@ async function readAll(): Promise<void> {
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: inherit;
+  color: var(--kmic-header-icon-color);
   cursor: pointer;
   background: none;
   border: 0;
   border-radius: 50%;
-  transition: background var(--kmic-motion-fast);
+  transition:
+    background var(--kmic-motion-fast),
+    color var(--kmic-motion-fast);
 
   &:hover {
+    color: var(--kmic-header-foreground);
     background: var(--kmic-header-accent);
   }
 

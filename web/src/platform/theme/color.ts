@@ -8,6 +8,11 @@ export function formatHsl({ h, s, l }: Hsl): string {
   return `hsl(${String(h)} ${String(s)}% ${String(l)}%)`;
 }
 
+/** 带不透明度，percent 为 0～100 */
+export function formatHslAlpha({ h, s, l }: Hsl, percent: number): string {
+  return `hsl(${String(h)} ${String(s)}% ${String(l)}% / ${String(percent)}%)`;
+}
+
 function toRgb({ h, s, l }: Hsl): [number, number, number] {
   const sat = s / 100;
   const light = l / 100;

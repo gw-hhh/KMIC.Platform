@@ -173,10 +173,10 @@ function change(change: (draft: ShellSettings) => void): void {
             />
           </label>
           <label class="row">
-            {{ t.layout.hoverExpand }}
+            {{ t.layout.hoverExpandAll }}
             <Switch
-              :checked="settings.sidebar.hoverExpand"
-              @change="(v) => change((d) => (d.sidebar.hoverExpand = Boolean(v)))"
+              :checked="settings.sidebar.hoverExpandAll"
+              @change="(v) => change((d) => (d.sidebar.hoverExpandAll = Boolean(v)))"
             />
           </label>
         </section>

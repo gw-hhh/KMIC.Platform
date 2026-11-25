@@ -11,6 +11,10 @@ export interface ColorSet {
   mutedForeground: Hsl;
   /** 悬停底色 */
   accent: Hsl;
+  /** 悬停底色上的文字，比正文深一档 */
+  accentForeground: Hsl;
+  /** 已有悬停底色的元素（如侧栏底部按钮）再悬停时 */
+  accentHover: Hsl;
   border: Hsl;
   success: Hsl;
   warning: Hsl;
@@ -24,6 +28,8 @@ export const colorSets: Record<ThemeMode, ColorSet> = {
     foreground: { h: 210, s: 6, l: 21 },
     mutedForeground: { h: 240, s: 3.8, l: 46.1 },
     accent: { h: 240, s: 5, l: 96 },
+    accentForeground: { h: 240, s: 6, l: 10 },
+    accentHover: { h: 200, s: 10, l: 90 },
     border: { h: 240, s: 5.9, l: 90 },
     success: { h: 144, s: 57, l: 40 },
     warning: { h: 42, s: 84, l: 45 },
@@ -35,6 +41,8 @@ export const colorSets: Record<ThemeMode, ColorSet> = {
     foreground: { h: 0, s: 0, l: 95 },
     mutedForeground: { h: 240, s: 5, l: 64.9 },
     accent: { h: 216, s: 5, l: 19 },
+    accentForeground: { h: 0, s: 0, l: 98 },
+    accentHover: { h: 216, s: 5, l: 24 },
     border: { h: 240, s: 3.7, l: 22 },
     success: { h: 144, s: 57, l: 50 },
     warning: { h: 42, s: 84, l: 55 },

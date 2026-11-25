@@ -5,20 +5,19 @@ import { computed, ref } from 'vue';
 import type { Me } from '@/platform/session/current-user';
 import { shellTexts } from '@/platform/texts/shell';
 import KIcon from '@/platform/ui/KIcon.vue';
+import KTooltip from '@/platform/ui/KTooltip.vue';
 import JobsButton from '../jobs/JobsButton.vue';
 import MessagesButton from '../messages/MessagesButton.vue';
 import type { CrumbView } from './menu/menu-tree';
 import UserMenu from './UserMenu.vue';
 
-const { me, crumbs, showBreadcrumb, showBreadcrumbIcon, dark, sidebarHidden, activeKey } = defineProps<{
+const { me, crumbs, showBreadcrumb, showBreadcrumbIcon, dark, sidebarHidden } = defineProps<{
   me: Me;
   crumbs: readonly CrumbView[];
   showBreadcrumb: boolean;
   showBreadcrumbIcon: boolean;
   dark: boolean;
   sidebarHidden: boolean;
-  /** 当前页面对应的菜单项，用于高亮面包屑下拉里的当前页 */
-  activeKey: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -58,7 +57,11 @@ function onToggleTheme(event: MouseEvent): void {
 <template>
   <header class="header-bar">
     <slot name="logo" />
-    <button class="icon-button" :title="sidebarHidden ? t.showSidebar : t.hideSidebar" @click="emit('toggleSidebar')">
+    <button
+      class="icon-button is-square"
+      :aria-label="sidebarHidden ? t.showSidebar : t.hideSidebar"
+      @click="emit('toggleSidebar')"
+    >
       <KIcon :name="sidebarHidden ? 'indent-increase' : 'indent-decrease'" :size="18" />
     </button>
 
@@ -76,19 +79,18 @@ function onToggleTheme(event: MouseEvent): void {
             :classes="{ root: 'crumb-pages' }"
             @update:open="(value: boolean) => (openCrumbIndex = value ? index : null)"
           >
-            <button class="crumb is-link" :class="{ 'is-open': openCrumbIndex === index }">
-              <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="14" />
+            <button class="crumb is-link is-dropdown" :class="{ 'is-open': openCrumbIndex === index }">
+              <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="20" />
               {{ crumb.title }}
+              <KIcon name="chevron-down" :size="16" />
             </button>
             <template #content>
               <button
                 v-for="page in crumb.pages"
                 :key="page.routeName"
                 class="crumb-page"
-                :class="{ 'is-active': page.routeName === activeKey }"
                 @click="openPage(page.routeName)"
               >
-                <KIcon v-if="page.icon" :name="page.icon" :size="16" />
                 {{ page.title }}
               </button>
             </template>
@@ -98,11 +100,11 @@ function onToggleTheme(event: MouseEvent): void {
             class="crumb is-link"
             @click="emit('openCrumb', crumb.routeName)"
           >
-            <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="14" />
+            <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="16" />
             {{ crumb.title }}
           </button>
           <span v-else class="crumb" :class="{ 'is-current': index === crumbs.length - 1 }">
-            <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="14" />
+            <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="16" />
             {{ crumb.title }}
           </span>
         </li>
@@ -120,12 +122,16 @@ function onToggleTheme(event: MouseEvent): void {
     <JobsButton />
     <MessagesButton :key="me.userId" :user-id="me.userId" @open-link="(path) => emit('openLink', path)" />
 
-    <button class="icon-button" :title="dark ? t.lightMode : t.darkMode" @click="onToggleTheme">
-      <KIcon :name="dark ? 'sun' : 'moon'" :size="16" />
-    </button>
-    <button class="icon-button" :title="t.settings" @click="emit('openSettings')">
-      <KIcon name="settings" :size="16" />
-    </button>
+    <KTooltip :title="dark ? t.lightMode : t.darkMode">
+      <button class="icon-button" :aria-label="dark ? t.lightMode : t.darkMode" @click="onToggleTheme">
+        <KIcon :name="dark ? 'sun' : 'moon'" :size="16" />
+      </button>
+    </KTooltip>
+    <KTooltip :title="t.settings">
+      <button class="icon-button" :aria-label="t.settings" @click="emit('openSettings')">
+        <KIcon name="settings" :size="16" />
+      </button>
+    </KTooltip>
 
     <Dropdown v-if="me.roles.length > 1" :menu="roleMenu" :trigger="['click']">
       <Tag class="role" :bordered="false" :title="t.switchRole">{{ me.currentRole.name }}</Tag>
@@ -142,7 +148,7 @@ function onToggleTheme(event: MouseEvent): void {
   gap: 4px;
   align-items: center;
   height: var(--kmic-header-height);
-  padding: 0 0 0 12px;
+  padding: 0 0 0 8px;
   color: var(--kmic-header-foreground);
   background: var(--kmic-header-background);
   border-bottom: 1px solid var(--kmic-header-border);
@@ -154,15 +160,24 @@ function onToggleTheme(event: MouseEvent): void {
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: inherit;
+  color: var(--kmic-header-icon-color);
   cursor: pointer;
   background: none;
   border: 0;
   border-radius: 50%;
-  transition: background var(--kmic-motion-fast);
+  transition:
+    background var(--kmic-motion-fast),
+    color var(--kmic-motion-fast);
 
   &:hover {
+    color: var(--kmic-header-foreground);
     background: var(--kmic-header-accent);
+  }
+
+  // 侧栏开关是圆角方块，其余图标按钮是圆形
+  &.is-square {
+    margin-right: 4px;
+    border-radius: var(--kmic-radius-md);
   }
 
   &:focus-visible {
@@ -184,8 +199,9 @@ function onToggleTheme(event: MouseEvent): void {
   align-items: center;
 }
 
+// 前一项与箭头隔 6px，箭头与后一项隔 10px
 .separator {
-  margin: 0 6px;
+  margin: 0 10px 0 6px;
 }
 
 .crumb {
@@ -204,7 +220,7 @@ function onToggleTheme(event: MouseEvent): void {
 
     &:hover,
     &.is-open {
-      color: var(--kmic-color-primary);
+      color: var(--kmic-header-foreground);
     }
   }
 
@@ -215,33 +231,24 @@ function onToggleTheme(event: MouseEvent): void {
 
 .crumb-page {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   width: 100%;
-  min-width: 200px;
-  height: 40px;
-  padding: 0 12px;
+  padding: 6px 8px;
   font: inherit;
-  color: inherit;
+  color: var(--kmic-color-foreground);
+  text-align: left;
+  white-space: nowrap;
   cursor: pointer;
   background: none;
   border: 0;
-  border-radius: var(--kmic-radius);
-  transition:
-    background var(--kmic-motion-fast),
-    color var(--kmic-motion-fast);
+  border-radius: var(--kmic-radius-sm);
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
+    color: var(--kmic-color-accent-foreground);
     background: var(--kmic-color-accent);
-  }
-
-  &.is-active {
-    color: var(--kmic-color-primary);
-    background: var(--kmic-color-primary-soft);
-  }
-
-  & + & {
-    margin-top: 4px;
+    outline: none;
   }
 }
 
@@ -327,5 +334,26 @@ function onToggleTheme(event: MouseEvent): void {
 .role {
   margin: 0 4px 0 8px;
   cursor: pointer;
+}
+</style>
+
+<style lang="scss">
+// 面包屑下拉：紧凑的菜单样式，细边框、缩放淡入，照 Vben Admin 的下拉菜单
+.crumb-pages .ant-popover-container {
+  min-width: 128px;
+  padding: 4px;
+  border: 1px solid var(--kmic-color-border);
+  border-radius: var(--kmic-radius-md);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -2px rgb(0 0 0 / 10%);
+  animation: crumb-pages-in var(--kmic-motion-fast) ease-out;
+}
+
+@keyframes crumb-pages-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
 }
 </style>

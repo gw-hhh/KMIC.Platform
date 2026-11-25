@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, toRef, useTemplateRef, watch } from 'vue';
 import type { MenuNode } from '@/platform/routing';
 import { provideMenu } from './menu-context';
 import MenuItem from './MenuItem.vue';
@@ -38,16 +38,28 @@ const activeAncestors = computed(() => {
   return chain;
 });
 
-// 自动展开当前页面所在目录
+// 自动展开当前页面所在目录；等展开动画走完再把当前项平滑滚到中间
+const scrollDelay = 320;
+let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+
 watch(
   [() => props.activeKey, () => props.nodes],
   async () => {
     openKeys.value = new Set([...openKeys.value, ...activeAncestors.value]);
     await nextTick();
-    rootRef.value?.querySelector('.is-active')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    clearTimeout(scrollTimer);
+    if (!props.collapsed) {
+      scrollTimer = setTimeout(() => {
+        rootRef.value?.querySelector('.entry.is-active')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }, scrollDelay);
+    }
   },
   { immediate: true },
 );
+
+onBeforeUnmount(() => {
+  clearTimeout(scrollTimer);
+});
 
 function toggle(groupKey: string): void {
   const next = new Set(openKeys.value);
@@ -90,7 +102,7 @@ provideMenu({
 
 <style scoped lang="scss">
 .sidebar-menu {
-  padding: 4px 0;
+  padding-top: 8px;
 }
 
 .menu-list {
