@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
+import prettier from 'eslint-config-prettier';
 import vueParser from 'vue-eslint-parser';
 import { boundariesConfig } from './eslint/boundaries.js';
 import { moduleRestrictions } from './eslint/restrictions.js';
@@ -72,4 +73,6 @@ export default tseslint.config(
   },
   ...boundariesConfig({ root: 'src', tsconfig: 'tsconfig.json' }),
   ...moduleRestrictions('src/modules'),
+  // 格式交给 Prettier，放在最后关掉和它冲突的规则
+  prettier,
 );

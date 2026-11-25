@@ -4,8 +4,59 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>KMIC</title>
+        <style>
+            #app-loading {
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+                align-items: center;
+                justify-content: center;
+                font:
+                    600 20px system-ui,
+                    sans-serif;
+                color: #333;
+                background: #f1f3f6;
+                transition: opacity 0.3s;
+            }
+            #app-loading.is-done {
+                opacity: 0;
+            }
+            #app-loading .cube {
+                width: 48px;
+                height: 48px;
+                background: hsl(212 100% 45%);
+                border-radius: 6px;
+                animation: kmic-jump 0.6s ease-in-out infinite alternate;
+            }
+            @keyframes kmic-jump {
+                from {
+                    transform: translateY(0) rotate(0);
+                }
+                to {
+                    transform: translateY(-16px) rotate(45deg);
+                }
+            }
+            @media (prefers-color-scheme: dark) {
+                #app-loading {
+                    color: #eee;
+                    background: #141518;
+                }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                #app-loading .cube {
+                    animation: none;
+                }
+            }
+        </style>
     </head>
     <body>
+        <div id="app-loading">
+            <div class="cube"></div>
+            KMIC
+        </div>
         <div id="app"></div>
         <script type="module" src="/src/app/main.ts"></script>
     </body>

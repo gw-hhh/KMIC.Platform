@@ -6,36 +6,29 @@ type AuthTokens = components['schemas']['AuthTokens'];
 
 const readMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-/** 跨浏览器标签页的互斥，navigator.locks 的最小形状，测试里可以换成假的 */
+/** navigator.locks 的最小接口 */
 export interface RefreshLocks {
   request<T>(name: string, callback: () => Promise<T>): Promise<T>;
 }
 
 export interface KmicFetchOptions {
   session: Session;
-  /** 底层的 fetch，默认用全局的 */
+  /** 默认用全局 fetch */
   fetch?: typeof fetch;
-  /** 相对地址的基准，默认是当前页面的来源 */
+  /** 默认用当前页面的 origin */
   origin?: string;
-  /** 刷新令牌的地址 */
   refreshUrl?: string;
-  /** 读写请求的超时，略大于后端的 30 秒请求超时 */
+  /** 请求超时，比后端的 30 秒略长 */
   timeoutMs?: number;
-  /** 刷新时的跨标签页锁，默认用 navigator.locks，没有就不加锁 */
+  /** 刷新令牌的跨标签页锁 */
   locks?: RefreshLocks | null;
-  /** 生成幂等键 */
   newId?: () => string;
 }
 
 const authPaths = ['/auth/login', '/auth/refresh'];
 
 /**
- * 给 openapi-fetch 用的 fetch：令牌与 401 刷新、幂等键、会话纪元、错误转换
- *
- * - 带访问令牌；401 时进入刷新，同一标签页并发的 401 共享一次刷新，成功后重放一次，写请求重放用同一个幂等键
- * - 写请求自动带幂等键，没有声明幂等的接口会忽略它
- * - 发出时记下会话纪元，响应回来纪元变了就丢弃，不写缓存也不提示
- * - 所有失败都抛 KmicError；写请求区分“确定没有生效”和“结果未知”
+ * 给 openapi-fetch 用的 fetch：令牌、401 刷新、幂等键、epoch 检查、错误转换
  */
 export function createKmicFetch(options: KmicFetchOptions): (request: Request) => Promise<Response> {
   const session = options.session;
@@ -58,7 +51,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
     let response = await attempt(pristine, request);
     if (response.status === 401 && !isAuthRequest(request.url)) {
       if (await refresh()) {
-        // 重放用原始请求和同一个幂等键，不会重复执行
+        // 用同一个幂等键重放，不会重复执行
         response = await attempt(pristine, request);
       } else {
         session.expire();
@@ -66,9 +59,9 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
       }
     }
 
-    // 登录失效本身就是这次请求的结果，要原样报给调用方；其余情况纪元变了就说明结果属于上一个身份
+    // 身份已变，丢弃结果（登录失效除外）
     if (!expired && session.epoch !== epoch) {
-      throw new KmicError({ kind: 'aborted', message: '身份已经变化，丢弃这次请求的结果' });
+      throw new KmicError({ kind: 'aborted', message: '身份已变化，请求结果已丢弃' });
     }
 
     if (!response.ok) {
@@ -87,7 +80,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
         headers.set('Idempotency-Key', idempotencyKey);
       }
 
-      // 每次发送都要新的请求对象：同一个请求体只能读一次
+      // 请求对象只能用一次
       const outgoing = new Request(source.clone(), { headers, signal: signalOf(original.signal) });
       try {
         return await send(outgoing);
@@ -101,7 +94,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
     return AbortSignal.any([caller, AbortSignal.timeout(timeoutMs)]);
   }
 
-  // 刷新令牌：同一标签页内共享一次，跨标签页经锁串行，后拿到锁的标签页用的已经是前一个轮换后的 Cookie
+  // 同一标签页共用一次刷新，跨标签页用锁排队
   function refresh(): Promise<boolean> {
     refreshing ??= (locks === null ? doRefresh() : locks.request('kmic-refresh', doRefresh)).finally(() => {
       refreshing = null;
@@ -127,7 +120,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
   }
 }
 
-// 没有 HTTPS 的环境里浏览器不提供 navigator.locks，只能不加锁
+// 非 HTTPS 下没有 navigator.locks
 function defaultLocks(): RefreshLocks | null {
   return 'locks' in globalThis.navigator ? globalThis.navigator.locks : null;
 }
@@ -158,7 +151,7 @@ function toTransportError(error: unknown, isWrite: boolean, caller: AbortSignal 
 
   return new KmicError({
     kind: 'network',
-    message: '网络不通，请检查网络后再试',
+    message: '网络连接失败，请检查网络',
     ...(unknown === undefined ? {} : { outcome: unknown }),
     cause: error,
   });
@@ -174,7 +167,7 @@ async function toError(response: Response, isWrite: boolean): Promise<KmicError>
     : KmicError.fromProblem(problem, retryAfter, outcome);
 }
 
-// 写请求遇到 500，或 503 的“结果未知”：服务端也不确定有没有生效；其余状态码都是确定没有生效
+// 500 和“结果未知”的 503，不确定是否已生效
 function outcomeOf(status: number, code: string | undefined): KmicOutcome {
   return status === 500 || (status === 503 && code === 'Common.ResultUnknown') ? 'unknown' : 'failed';
 }

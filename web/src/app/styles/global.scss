@@ -1,0 +1,45 @@
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: var(--kmic-font-size);
+  color: var(--kmic-color-foreground);
+  background: var(--kmic-color-background-deep);
+}
+
+* {
+  scrollbar-color: var(--kmic-color-border) transparent;
+  scrollbar-width: thin;
+}
+
+html[data-color-weak='true'] {
+  filter: invert(80%);
+}
+
+// 圆形扩散切换，去掉默认渐变
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+html[data-theme='dark']::view-transition-old(root) {
+  z-index: 2;
+}
+
+html[data-theme='dark']::view-transition-new(root) {
+  z-index: 1;
+}

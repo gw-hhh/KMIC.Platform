@@ -1,0 +1,56 @@
+import { Permissions } from '@/generated/permissions';
+import { defineModuleRoutes } from '@/platform/routing';
+
+// 假后端模式下的示例页面
+export const demoRoutes = defineModuleRoutes('demo', [
+  {
+    name: 'demo.list',
+    path: '/demo/items',
+    title: '示例列表',
+    icon: 'table',
+    menu: { group: 'demo-orders', order: 10 },
+    requires: [Permissions.Sample.Specimen.View],
+    tab: { mode: 'singleton' },
+    component: () => import('./pages/DemoListPage.vue'),
+  },
+  {
+    name: 'demo.detail',
+    path: '/demo/items/:id',
+    title: '示例详情',
+    icon: 'file',
+    requires: [Permissions.Sample.Specimen.View],
+    tab: { mode: 'byParams', params: ['id'] },
+    parent: 'demo.list',
+    component: () => import('./pages/DemoDetailPage.vue'),
+  },
+  {
+    name: 'demo.create',
+    path: '/demo/new',
+    title: '新建示例',
+    icon: 'clipboard',
+    menu: { group: 'demo-orders', order: 20 },
+    requires: [Permissions.Sample.Specimen.Create],
+    tab: { mode: 'multiple' },
+    component: () => import('./pages/DemoCreatePage.vue'),
+  },
+  {
+    name: 'demo.report',
+    path: '/demo/report',
+    title: '示例报表',
+    icon: 'chart',
+    menu: { group: 'demo-system', order: 10 },
+    requires: [Permissions.Operations.Audit.View],
+    tab: { mode: 'singleton' },
+    component: () => import('./pages/DemoListPage.vue'),
+  },
+  {
+    name: 'demo.users',
+    path: '/demo/users',
+    title: '用户（示例）',
+    icon: 'users',
+    menu: { group: 'demo-system', order: 20 },
+    requires: [Permissions.Identity.User.View],
+    tab: { mode: 'singleton' },
+    component: () => import('./pages/DemoListPage.vue'),
+  },
+]);

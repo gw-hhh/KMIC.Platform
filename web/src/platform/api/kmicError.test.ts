@@ -31,6 +31,6 @@ describe('KmicError', () => {
     const other = KmicError.fromStatus(404, undefined, undefined);
 
     expect([gateway.message, gateway.traceId]).toEqual(['服务暂时不可用，请稍后再试', 'gw']);
-    expect([other.message, other.traceId]).toEqual(['请求没有成功', undefined]);
+    expect([other.message, other.traceId]).toEqual(['请求失败', undefined]);
   });
 });

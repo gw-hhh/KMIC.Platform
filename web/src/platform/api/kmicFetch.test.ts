@@ -343,7 +343,7 @@ describe('401 与刷新', () => {
   });
 });
 
-describe('会话纪元', () => {
+describe('epoch', () => {
   it('响应回来时身份已经变了：丢弃，不当作错误提示', async () => {
     const { client, session } = newClient();
     server.use(

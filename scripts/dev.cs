@@ -66,6 +66,9 @@ async Task<int> UpAsync()
         ("Kmic__Auth__SigningKeys__0__Kid", "local-1"),
         ("Kmic__Auth__SigningKeys__0__Status", "Active"),
         ("Kmic__Auth__SigningKeys__0__PrivateKeyPath", Path.Combine(local, "keys", "private.pem")),
+        // 前端开发服务的地址，刷新令牌时要校验来源
+        ("Identity__Cookie__TrustedOrigins__0", "http://localhost:5173"),
+        ("Identity__Cookie__TrustedOrigins__1", "http://127.0.0.1:5173"),
         ("Files__Storage__LocalRoot", Path.Combine(local, "files"))));
 }
 

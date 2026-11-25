@@ -3,9 +3,7 @@ import type { paths } from '@/generated/api';
 import { createKmicFetch, type KmicFetchOptions } from './kmicFetch';
 
 /**
- * 类型化的 API 客户端：路径、参数、请求体、响应都有类型
- *
- * 请求失败一律抛 KmicError，所以调用方拿到的 data 一定有值，不用再判断 error
+ * 带类型的 API 客户端，请求失败抛 KmicError
  */
 export function createApiClient(options: KmicFetchOptions & { baseUrl?: string }) {
   return createClient<paths>({
