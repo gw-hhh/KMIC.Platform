@@ -3,7 +3,7 @@ using Kmic.BuildingBlocks.Application.Messaging;
 using Kmic.BuildingBlocks.Testing.Assertions;
 using Kmic.BuildingBlocks.Testing.Database;
 using Kmic.BuildingBlocks.Testing.Identity;
-using Kmic.Identity.Application.Maintenance;
+using Kmic.Identity.Application.Cleanup;
 using Npgsql;
 using Shouldly;
 
@@ -12,7 +12,7 @@ namespace Kmic.Api.Tests.Identity;
 /// <summary>
 /// 定时清理：已结束的会话、登录失败计数
 /// </summary>
-public sealed class IdentityMaintenanceTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
+public sealed class IdentityCleanupTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
 {

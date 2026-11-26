@@ -1,5 +1,5 @@
 using System.CommandLine;
-using Kmic.BuildingBlocks.Infrastructure.Maintenance;
+using Kmic.BuildingBlocks.Infrastructure.Cleanup;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;

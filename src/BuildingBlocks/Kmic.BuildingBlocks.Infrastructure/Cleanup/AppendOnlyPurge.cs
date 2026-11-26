@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>
 /// 只追加表的过期数据清理，由迁移账号执行

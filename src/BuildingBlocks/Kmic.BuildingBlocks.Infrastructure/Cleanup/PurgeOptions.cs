@@ -1,4 +1,4 @@
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>
 /// 框架清理任务的配置

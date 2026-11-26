@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>
 /// 分批删除

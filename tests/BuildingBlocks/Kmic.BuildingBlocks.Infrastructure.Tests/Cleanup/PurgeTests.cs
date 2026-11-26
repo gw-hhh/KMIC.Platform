@@ -1,4 +1,4 @@
-using Kmic.BuildingBlocks.Infrastructure.Maintenance;
+using Kmic.BuildingBlocks.Infrastructure.Cleanup;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
@@ -11,7 +11,7 @@ using Kmic.Echo.Probe;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Tests.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Tests.Cleanup;
 
 /// <summary>
 /// 过期的数据直接把时间往前改，不等真实时间。每批只删 2 行，几行数据就能走到分批的路径

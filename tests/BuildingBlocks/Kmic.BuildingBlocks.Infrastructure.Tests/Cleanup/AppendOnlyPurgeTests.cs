@@ -1,9 +1,9 @@
-using Kmic.BuildingBlocks.Infrastructure.Maintenance;
+using Kmic.BuildingBlocks.Infrastructure.Cleanup;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Testing.Database;
 using Shouldly;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Tests.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Tests.Cleanup;
 
 /// <summary>
 /// 用库的管理账号模拟迁移账号：运行账号对这些表没有 DELETE 权限（见 MigrationTests）

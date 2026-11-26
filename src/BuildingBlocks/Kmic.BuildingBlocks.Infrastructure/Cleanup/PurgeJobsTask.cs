@@ -4,18 +4,18 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>
-/// 每小时删除各模块已过期的幂等记录
+/// 每天删除过了保留期的后台作业记录
 /// </summary>
-internal sealed class PurgeIdempotencyTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
+internal sealed class PurgeJobsTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {
-    public string Name => "Framework.PurgeIdempotency";
+    public string Name => "Framework.PurgeJobs";
 
-    public string Cron => "0 0 * * * ?";
+    public string Cron => "0 10 3 * * ?";
 
-    public string DisplayName => "清理过期的幂等记录";
+    public string DisplayName => "清理过期的后台作业记录";
 
     public async Task<ScheduledJobOutcome> ExecuteAsync(CancellationToken ct)
     {
@@ -24,7 +24,7 @@ internal sealed class PurgeIdempotencyTask(ModuleFrameworkTables tables, DataSou
         {
             total += await BatchDelete.RunAsync(
                 dataSources.Transactions(CallOrigin.ScheduledJob),
-                tables.For(module).Idempotency,
+                tables.For(module).Jobs,
                 """t."ExpiresAt" < clock_timestamp()""",
                 new Dictionary<string, object>(StringComparer.Ordinal),
                 options.Value.BatchSize,

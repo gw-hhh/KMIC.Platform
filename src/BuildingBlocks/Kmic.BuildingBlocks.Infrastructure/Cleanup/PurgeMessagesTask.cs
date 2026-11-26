@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>
 /// 每天按保留规则清理 Outbox 与 Inbox

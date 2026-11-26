@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Identity.Application.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.Identity.Application.Maintenance;
+namespace Kmic.Identity.Application.Cleanup;
 
 /// <summary>
 /// 清理过期的登录失败记录

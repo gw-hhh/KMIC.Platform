@@ -5,7 +5,7 @@ using Kmic.Identity.Application.Authentication;
 using Kmic.Identity.Domain.Sessions;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.Identity.Application.Maintenance;
+namespace Kmic.Identity.Application.Cleanup;
 
 /// <summary>
 /// 清理超过保留期的已结束会话

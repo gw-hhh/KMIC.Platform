@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>
 /// 每天把停在“执行中”太久的执行记录标为中断，删除过了保留期的记录
