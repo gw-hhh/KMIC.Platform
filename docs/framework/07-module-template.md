@@ -162,11 +162,12 @@ builder.AddKmicHost()
 
 `KMIC.Platform/docs/modules/README.md` 维护全部模块的登记表：
 
-| 模块 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 |
-|---|---|---|---|---|---|---|
-| Identity | `Identity` | 10 | 平台 | — | | `modules/identity/` |
-| Sample | `Sample` | 99 | 参考（D3） | Identity | | 本文 |
+| 模块 | 中文名 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 | 设计状态 |
+|---|---|---|---|---|---|---|---|---|
+| Identity | 身份与授权 | `Identity` | 10 | 平台 | — | | `modules/identity/` | 已确认 |
+| Sample | 示例 | `Sample` | 99 | 参考（D3） | Identity | | 本文 | — |
 
+- 中文名是权限分组等界面上的显示名，新建模块的脚本从登记表读取；表里只记设计状态，实现进度在 `docs/implementation/00-README.md`。
 - 编号 10～19 留给平台模块，20～89 给业务模块，99 为参考模块。架构测试检查：模块名、编号唯一；`[LoggerMessage]` 的 `EventId` 落在本模块的编号段内。
 
 ---
@@ -513,18 +514,18 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 
 新建模块的方式（原型 #11 验证）：
 
-- **用脚本新建模块**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号 → `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 构建 → 生成初始迁移 → `check.cs --fix` → 格式检查 → 运行模块测试，任一步失败即停止。模板本身不做“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
-- **初始迁移由脚本调用 EF 工具生成**，不是模板中的静态文件：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 同为 10.0.14），脚本自动执行 `dotnet tool restore`。
-- 迁移文件按生成代码处理，编码由 `check.cs --fix` 规整（06 第 3.2 节）。
+- **用脚本新建模块**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号，并取出登记的中文名（权限分组等界面上的显示名）→ `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 在 `Kmic.Api`、`Kmic.MigrationRunner` 中引用并登记模块、架构测试引用新模块的五个项目 → 构建 → `dotnet tool restore` → 生成初始迁移 → 统一编码与换行、`dotnet format`，任一步失败即停止。之后运行 `check.cs` 确认。模板本身不做“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
+- **初始迁移由脚本调用 EF 工具生成**，不是模板中的静态文件：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 版本一致），脚本先执行 `dotnet tool restore`。
+- 迁移文件按生成代码处理，`dotnet ef` 写出的 BOM 和 CRLF 由脚本规整（06 第 3.2 节）。
 
 ### 6.2 步骤
 
 | 步骤 | 内容 |
 |---|---|
 | 1 | 写模块设计文档 `docs/modules/<模块>/README.md`（第 8 节格式），评审通过 |
-| 2 | 模块登记表（2.4）登记模块名、schema、编号、依赖、负责人 |
+| 2 | 模块登记表（2.4）登记模块名、中文名、schema、编号、依赖、负责人 |
 | 3 | `dotnet run scripts/new-module.cs -- <模块> <编号>`（6.1） |
-| 4 | 宿主 `Program.cs` 中 `AddModule<XxxModule, XxxEndpoints>()`；测试宿主同步注册 |
+| 4 | 核对脚本在宿主 `Program.cs` 里加的 `AddModule<XxxModule, XxxEndpoints>()`；API 测试的模板库按宿主引用的模块自动迁移，不用另外登记 |
 | 5 | `CODEOWNERS` 增加模块目录的负责人 |
 | 6 | 按设计文档逐个用例实现（第 5 节） |
 | 7 | 迁移脚本随 CI 生成，人工审查（05-03 第 9.2 节） |
