@@ -1,5 +1,7 @@
+using Kmic.BuildingBlocks.Application.UseCases;
 using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Testing.Database;
+using Kmic.BuildingBlocks.Testing.Identity;
 using Shouldly;
 
 namespace Kmic.Api.Tests;
@@ -38,4 +40,37 @@ public sealed class ModuleConformanceTests(ClassDatabase<ApiTemplate> database, 
 
         pending.ShouldBeEmpty();
     }
+
+    // 处理器在第一次请求时才从容器里取，漏注册的服务（如简单维护档的 AddRepository）要到这时才报错
+    [Fact]
+    public async Task EveryHandler_ResolvesFromTheHost()
+    {
+        var messages = Factory.Services.GetRequiredService<UseCaseCatalog>().All.Select(u => u.MessageType).ToHashSet();
+        var handlers = messages.Select(m => m.Assembly).Distinct()
+            .SelectMany(a => a.GetTypes())
+            .Where(t => t is { IsClass: true, IsAbstract: false } && t.GetInterfaces().Any(i => HandlesOneOf(i, messages)))
+            .ToList();
+
+        await using var scope = Factory.Services.AsSystem();
+        var unresolved = new List<string>();
+        foreach (var handler in handlers)
+        {
+            try
+            {
+                scope.ServiceProvider.GetRequiredService(handler);
+            }
+            catch (InvalidOperationException e)
+            {
+                unresolved.Add($"{handler.FullName}：{e.Message}");
+            }
+        }
+
+        handlers.ShouldNotBeEmpty();
+        unresolved.ShouldBeEmpty();
+    }
+
+    private static bool HandlesOneOf(Type contract, HashSet<Type> messages) =>
+        contract.IsGenericType
+        && (contract.GetGenericTypeDefinition() == typeof(Mediator.ICommandHandler<,>) || contract.GetGenericTypeDefinition() == typeof(Mediator.IQueryHandler<,>))
+        && messages.Contains(contract.GetGenericArguments()[0]);
 }

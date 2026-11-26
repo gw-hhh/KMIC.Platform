@@ -244,6 +244,11 @@ dotnet_diagnostic.CA1848.severity = none
 [{src,tests}/**/*{Id,Ref}.cs]
 dotnet_diagnostic.MA0097.severity = none
 
+# ---------------------------------------------------------------- 简单维护档（07 第 4.10 节）
+# 命令、校验器、处理器写在一个文件里，文件名只要和第一个类型一致
+[src/Modules/*/Kmic.*.Application/Maintenance/**.cs]
+MA0048.only_validate_first_type = true
+
 # ---------------------------------------------------------------- 分析器项目
 # RS1033 只认英文句点，诊断说明用中文句号结尾（06 第 15.3 节）
 [src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers/**.cs]
