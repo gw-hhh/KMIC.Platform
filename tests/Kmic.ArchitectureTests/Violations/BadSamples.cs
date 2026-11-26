@@ -18,6 +18,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Repositories;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Files;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Presentation.Endpoints;
 using Kmic.Identity.Application.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -389,6 +390,29 @@ internal static class BadSamples
     internal sealed class ScopeHelper
     {
         public static int CountAll(IQueryable<FakeAggregate> source) => source.WithoutDataScope().Count();
+    }
+
+    // 手写 SQL 查带数据范围的表 "Orders"."Order"：没加范围条件的要报，用了 IDataScopeSql 或标了 [BypassesDataScope] 的合格；
+    // 只查 "Orders"."OrderLine" 的不算查了 "Orders"."Order"
+    internal sealed class RawSqlWithoutScope
+    {
+        public static FormattableString Select(Guid id) => $"""SELECT * FROM "Orders"."Order" WHERE "Id" = {id}""";
+    }
+
+    internal sealed class RawSqlWithScope(IDataScopeSql scope)
+    {
+        public string Select() => """SELECT * FROM "Orders"."Order" o WHERE """ + scope.Condition("Orders.Order", "o.\"OwnerId\"", null).Format;
+    }
+
+    [BypassesDataScope("系统清理，按创建时间删除全部过期数据")]
+    internal sealed class RawSqlCleanup
+    {
+        public static FormattableString Delete(DateTimeOffset before) => $"""DELETE FROM "Orders"."Order" WHERE "CreatedAt" < {before}""";
+    }
+
+    internal sealed class RawSqlOnLines
+    {
+        public static FormattableString Select(Guid id) => $"""SELECT * FROM "Orders"."OrderLine" WHERE "OrderId" = {id}""";
     }
 
     // 缓存值：可变的类和不可变的记录

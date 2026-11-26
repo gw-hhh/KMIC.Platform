@@ -163,6 +163,21 @@ public sealed class StructureRuleTests
     }
 
     [Fact]
+    public void RawSqlOnScopedTables_UsesTheDataScopeCondition()
+    {
+        ScopedTables.All.Contains("\"Sample\".\"Specimen\"").ShouldBeTrue("设计时模型里应能找到示例单据这张带数据范围的表");
+        StructureRules.RawSqlOnScopedTables(ModuleTypes, ScopedTables.All).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Violation_RawSqlOnAScopedTableWithoutTheCondition_IsReported()
+    {
+        var problems = StructureRules.RawSqlOnScopedTables(_bad, new HashSet<string>(StringComparer.Ordinal) { "\"Orders\".\"Order\"" });
+
+        problems.ShouldHaveSingleItem().ShouldContain(nameof(BadSamples.RawSqlWithoutScope));
+    }
+
+    [Fact]
     public void CachedValues_AreImmutable() => StructureRules.CacheValues(AllTypes).ShouldBeEmpty();
 
     [Fact]
