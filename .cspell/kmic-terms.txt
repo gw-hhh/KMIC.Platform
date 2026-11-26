@@ -79,6 +79,7 @@ EHLO
 ESMTP
 HELO
 RSET
+SMTPUTF
 Sasl
 Unconfigured
 Abandonable

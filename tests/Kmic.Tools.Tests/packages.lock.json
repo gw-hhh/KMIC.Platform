@@ -536,19 +536,15 @@
         "resolved": "5.0.0",
         "contentHash": "dDoKi0PnDz31yAyETfRntsLArTlVAVzUzCIvvEDsDsucrl33Dl8pIJG06ePTJTI3tGpeyHS9Cq7Foc/s4EeKcg=="
       },
-      "MimeKit": {
+      "MimeKit.Core": {
         "type": "Transitive",
-        "resolved": "4.18.2",
-        "contentHash": "aYnwCCq+ZgQIsnHSJd3TMeGqf/Rz/9jYEItXpOoG3E2REOCZtLishwBSDFl2wQ/W2SB5wBsvE38DgHZ0IEyz4Q==",
-        "dependencies": {
-          "BouncyCastle.Cryptography": "2.7.0",
-          "System.Security.Cryptography.Pkcs": "10.0.13"
-        }
+        "resolved": "5.0.0",
+        "contentHash": "0RLaVyex/BjUGqiw9xtGwzyCMaBcsu33Rth61bDCeVeQaaQK7tjcy4TA+nHKTqwUdp4OGd+gnhuq2fuR+c20qA=="
       },
       "Parlot": {
         "type": "Transitive",
-        "resolved": "1.5.9",
-        "contentHash": "Vro4ZKVZLBoPdCftyMUlzhlRpegI3N6TlT0zpyn79a42mH214VDqzkAdV70vu578W6NKS84hBA9H6j81cz0dLg=="
+        "resolved": "2.3.1",
+        "contentHash": "wCNWERk46ATkXor8SK43dgpO8GCuH5BQnvwuVogEVWrYilDKA7QituNhq17iYyL0RAHTuIIyczfuV0AWSe8ZLw=="
       },
       "Polly.Core": {
         "type": "Transitive",
@@ -632,11 +628,6 @@
           "SSH.NET": "2026.0.0",
           "SharpZipLib": "1.4.2"
         }
-      },
-      "TimeZoneConverter": {
-        "type": "Transitive",
-        "resolved": "7.2.0",
-        "contentHash": "4Poqu79dTmacVETqUJ53g3x4U21V/cmWPSlehdsVE4Q00akavvlRq+SRjcg/CmfO9ibOCjRl6TeUV7hkC5RC4w=="
       },
       "xunit.analyzers": {
         "type": "Transitive",
@@ -855,7 +846,7 @@
           "Kmic.Operations.Infrastructure": "[1.0.0, )",
           "Kmic.Sample.Infrastructure": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.15, )",
-          "System.CommandLine": "[2.0.15, )"
+          "System.CommandLine": "[3.0.0, )"
         }
       },
       "kmic.notifications.application": {
@@ -884,10 +875,10 @@
       "kmic.notifications.infrastructure": {
         "type": "Project",
         "dependencies": {
-          "Fluid.Core": "[2.41.2, )",
+          "Fluid.Core": "[3.0.0, )",
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
           "Kmic.Notifications.Application": "[1.0.0, )",
-          "MailKit": "[4.18.2, )",
+          "MailKit": "[5.0.0, )",
           "Vogen": "[8.0.7, )"
         }
       },
@@ -930,7 +921,7 @@
           "Kmic.Identity.Infrastructure": "[1.0.0, )",
           "Kmic.Operations.Application": "[1.0.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.15, )",
-          "System.CommandLine": "[2.0.15, )"
+          "System.CommandLine": "[3.0.0, )"
         }
       },
       "kmic.sample.application": {
@@ -991,22 +982,21 @@
       },
       "Fluid.Core": {
         "type": "CentralTransitive",
-        "requested": "[2.41.2, )",
-        "resolved": "2.41.2",
-        "contentHash": "Il/PoBc72gIw71o1oEGwKpRsiy6cXf19F13NqEAlAHQL8cJaOrysSRAuonOw/7HIjG84YhS/fmYvkGzIhNs5qA==",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "6upSUbyz4K7WyDBpZbXYud7Ck4cvUog8XE0I5AObzJHPN0ZEtl3foR5PXt3DqimTa/3xf3uMqw4f+gPalDVWZA==",
         "dependencies": {
           "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0",
-          "Parlot": "1.5.9",
-          "TimeZoneConverter": "7.2.0"
+          "Parlot": "2.3.1"
         }
       },
       "MailKit": {
         "type": "CentralTransitive",
-        "requested": "[4.18.2, )",
-        "resolved": "4.18.2",
-        "contentHash": "ofqddpSbdrD00NqTD0ZyVfKvrl/ZZ70VFFEQ+DuR8r8CdbY3U02/sdb0CSQBNUqJifsXfVHIwRe1ToR2MvJJkw==",
+        "requested": "[5.0.0, )",
+        "resolved": "5.0.0",
+        "contentHash": "PG6hnsklTzd/iK9A6j03OxDOas9mh8zOBkbPzcsLmFOODE8Hw3HTy7HAKiJvVHXNpKc3/KMVG/4QvOAKCBbGhA==",
         "dependencies": {
-          "MimeKit": "4.18.2"
+          "MimeKit.Core": "5.0.0"
         }
       },
       "Mediator.Abstractions": {
@@ -1257,15 +1247,9 @@
       },
       "System.CommandLine": {
         "type": "CentralTransitive",
-        "requested": "[2.0.15, )",
-        "resolved": "2.0.15",
-        "contentHash": "zsnY7Ex2dPmbS/Nrg5RUKJFCEMbHeP9TdzmTJrsNh59mgr8ulba1SHmE1SVgmVqivvr79kV1GAlInC44F4ggEg=="
-      },
-      "System.Security.Cryptography.Pkcs": {
-        "type": "CentralTransitive",
-        "requested": "[10.0.15, )",
-        "resolved": "10.0.15",
-        "contentHash": "4jEv/lXDuQkh60lPU3hlwASErXdv1ZMKmsxVuBfZWiVKT5Q2QGo58kTa6rN519+PU+m4Hsj1m3yT8fN+Xw0XZw=="
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "swNpSTl0iYJeBuvYYfaY+VxzZ5YC8wklwkqDCNOq2aTQqJzjauJfh/O3Zw93nwxspWrxvZTjT45f8VPR0ParEA=="
       },
       "Testcontainers.PostgreSql": {
         "type": "CentralTransitive",

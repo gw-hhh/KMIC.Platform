@@ -49,6 +49,18 @@ public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, Ap
         (await client.GetAsync("/openapi/v1.json", Ct)).IsSuccessStatusCode.ShouldBeTrue();
     }
 
+    // 页面里怎么引用文档是 Scalar 自己的实现，这里只确认页面能打开
+    [Fact]
+    public async Task ReferencePage_IsServedWhenNotInProduction()
+    {
+        using var client = ClientFor();
+
+        var response = await client.GetAsync("/scalar", Ct);
+
+        response.EnsureSuccessStatusCode();
+        response.Content.Headers.ContentType!.MediaType.ShouldBe("text/html");
+    }
+
     // 前端生成类型、破坏性变更检查（oasdiff）都读这个文件。文档由真实宿主生成：构建时生成的工具会启动整个宿主，
     // 启动任务要连数据库，所以改由这里导出
     [Fact]

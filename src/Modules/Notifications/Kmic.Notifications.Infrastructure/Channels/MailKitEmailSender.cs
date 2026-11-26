@@ -5,6 +5,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using SendResult = Kmic.Notifications.Application.Channels.SendResult;
 
 namespace Kmic.Notifications.Infrastructure.Channels;
 
@@ -43,7 +44,7 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
 
         try
         {
-            using var client = new SmtpClient { Timeout = options.Value.TimeoutSeconds * 1000 };
+            await using var client = new SmtpClient { Timeout = options.Value.TimeoutSeconds * 1000 };
             await client.ConnectAsync(sender.Host, sender.Port, SecurityOf(sender.Security), ct);
             if (!string.IsNullOrEmpty(sender.Username))
             {
@@ -58,6 +59,11 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
         {
             // 4xx 是暂时的（邮箱忙、稍后再试），5xx 是永久的（邮箱不存在、被拒绝）
             return (int)exception.StatusCode >= 500 ? SendResult.Permanent($"邮件服务器拒绝发送：{(int)exception.StatusCode}") : SendResult.Transient($"邮件服务器暂时拒绝发送：{(int)exception.StatusCode}");
+        }
+        catch (SmtpUtf8AddressException)
+        {
+            // 用 SMTPUTF8 发送时，含中文等字符的地址没通过校验（如夹着零宽空格），重试也发不出去
+            return SendResult.Permanent("收件或发件地址含有不允许的字符");
         }
         catch (Exception exception) when (exception is AuthenticationException or SaslException or ProtocolException or ServiceNotConnectedException or ServiceNotAuthenticatedException or IOException or SocketException or TimeoutException or OperationCanceledException)
         {

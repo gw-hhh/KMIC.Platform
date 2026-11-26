@@ -52,7 +52,7 @@
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.15" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.21.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="3.2.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="10.0.15" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
@@ -78,14 +78,14 @@
   <!-- 后台处理、通知、文件 -->
   <ItemGroup>
     <PackageVersion Include="Quartz" Version="4.8.1" />
-    <PackageVersion Include="MailKit" Version="4.18.2" />
-    <PackageVersion Include="Fluid.Core" Version="2.41.2" />
+    <PackageVersion Include="MailKit" Version="5.0.0" />
+    <PackageVersion Include="Fluid.Core" Version="3.0.0" />
     <PackageVersion Include="AWSSDK.S3" Version="4.1.2.1" />
   </ItemGroup>
 
   <!-- 命令行程序（Kmic.MigrationRunner、Kmic.Operator）：Microsoft 官方，MIT -->
   <ItemGroup>
-    <PackageVersion Include="System.CommandLine" Version="2.0.15" />
+    <PackageVersion Include="System.CommandLine" Version="3.0.0" />
   </ItemGroup>
 
   <!-- 阿里云：验证码 2.0、短信（R01 L1；阶段 3 引入时随依赖树再核一次许可） -->

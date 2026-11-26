@@ -154,6 +154,18 @@ public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDa
     }
 
     [Fact]
+    public async Task AnInvalidInternationalAddress_IsAPermanentFailure_AndNothingIsSent()
+    {
+        // 服务器支持 SMTPUTF8 时，MailKit 发送前会校验国际化地址；夹着零宽空格（从网页复制时常见）的地址通不过，重试也没用
+        _smtp.SmtpUtf8 = true;
+
+        var result = await Sender.SendAsync(Message("张三\u200B@example.com"), Ct);
+
+        result.Outcome.ShouldBe(SendOutcome.Permanent);
+        _smtp.Mails.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task AnAccountOnAnUnencryptedConnection_IsAPermanentFailure_AndNothingIsSent()
     {
         var result = await Sender.SendAsync(Message(profile: "Plain"), Ct);

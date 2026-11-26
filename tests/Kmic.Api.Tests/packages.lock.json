@@ -328,14 +328,10 @@
         "resolved": "5.0.0",
         "contentHash": "dDoKi0PnDz31yAyETfRntsLArTlVAVzUzCIvvEDsDsucrl33Dl8pIJG06ePTJTI3tGpeyHS9Cq7Foc/s4EeKcg=="
       },
-      "MimeKit": {
+      "MimeKit.Core": {
         "type": "Transitive",
-        "resolved": "4.18.2",
-        "contentHash": "aYnwCCq+ZgQIsnHSJd3TMeGqf/Rz/9jYEItXpOoG3E2REOCZtLishwBSDFl2wQ/W2SB5wBsvE38DgHZ0IEyz4Q==",
-        "dependencies": {
-          "BouncyCastle.Cryptography": "2.7.0",
-          "System.Security.Cryptography.Pkcs": "10.0.13"
-        }
+        "resolved": "5.0.0",
+        "contentHash": "0RLaVyex/BjUGqiw9xtGwzyCMaBcsu33Rth61bDCeVeQaaQK7tjcy4TA+nHKTqwUdp4OGd+gnhuq2fuR+c20qA=="
       },
       "OpenTelemetry": {
         "type": "Transitive",
@@ -363,8 +359,8 @@
       },
       "Parlot": {
         "type": "Transitive",
-        "resolved": "1.5.9",
-        "contentHash": "Vro4ZKVZLBoPdCftyMUlzhlRpegI3N6TlT0zpyn79a42mH214VDqzkAdV70vu578W6NKS84hBA9H6j81cz0dLg=="
+        "resolved": "2.3.1",
+        "contentHash": "wCNWERk46ATkXor8SK43dgpO8GCuH5BQnvwuVogEVWrYilDKA7QituNhq17iYyL0RAHTuIIyczfuV0AWSe8ZLw=="
       },
       "Polly.Core": {
         "type": "Transitive",
@@ -511,11 +507,6 @@
           "SharpZipLib": "1.4.2"
         }
       },
-      "TimeZoneConverter": {
-        "type": "Transitive",
-        "resolved": "7.2.0",
-        "contentHash": "4Poqu79dTmacVETqUJ53g3x4U21V/cmWPSlehdsVE4Q00akavvlRq+SRjcg/CmfO9ibOCjRl6TeUV7hkC5RC4w=="
-      },
       "xunit.analyzers": {
         "type": "Transitive",
         "resolved": "2.3.0",
@@ -594,7 +585,7 @@
           "Kmic.Sample.Presentation": "[1.0.0, )",
           "Kmic.ServiceDefaults": "[1.0.0, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.15, )",
-          "Scalar.AspNetCore": "[2.21.0, )"
+          "Scalar.AspNetCore": "[3.2.1, )"
         }
       },
       "kmic.buildingblocks.application": {
@@ -797,10 +788,10 @@
       "kmic.notifications.infrastructure": {
         "type": "Project",
         "dependencies": {
-          "Fluid.Core": "[2.41.2, )",
+          "Fluid.Core": "[3.0.0, )",
           "Kmic.BuildingBlocks.Infrastructure": "[1.0.0, )",
           "Kmic.Notifications.Application": "[1.0.0, )",
-          "MailKit": "[4.18.2, )",
+          "MailKit": "[5.0.0, )",
           "Vogen": "[8.0.7, )"
         }
       },
@@ -926,21 +917,20 @@
       },
       "Fluid.Core": {
         "type": "CentralTransitive",
-        "requested": "[2.41.2, )",
-        "resolved": "2.41.2",
-        "contentHash": "Il/PoBc72gIw71o1oEGwKpRsiy6cXf19F13NqEAlAHQL8cJaOrysSRAuonOw/7HIjG84YhS/fmYvkGzIhNs5qA==",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "6upSUbyz4K7WyDBpZbXYud7Ck4cvUog8XE0I5AObzJHPN0ZEtl3foR5PXt3DqimTa/3xf3uMqw4f+gPalDVWZA==",
         "dependencies": {
-          "Parlot": "1.5.9",
-          "TimeZoneConverter": "7.2.0"
+          "Parlot": "2.3.1"
         }
       },
       "MailKit": {
         "type": "CentralTransitive",
-        "requested": "[4.18.2, )",
-        "resolved": "4.18.2",
-        "contentHash": "ofqddpSbdrD00NqTD0ZyVfKvrl/ZZ70VFFEQ+DuR8r8CdbY3U02/sdb0CSQBNUqJifsXfVHIwRe1ToR2MvJJkw==",
+        "requested": "[5.0.0, )",
+        "resolved": "5.0.0",
+        "contentHash": "PG6hnsklTzd/iK9A6j03OxDOas9mh8zOBkbPzcsLmFOODE8Hw3HTy7HAKiJvVHXNpKc3/KMVG/4QvOAKCBbGhA==",
         "dependencies": {
-          "MimeKit": "4.18.2"
+          "MimeKit.Core": "5.0.0"
         }
       },
       "Mediator.Abstractions": {
@@ -1108,9 +1098,9 @@
       },
       "Scalar.AspNetCore": {
         "type": "CentralTransitive",
-        "requested": "[2.21.0, )",
-        "resolved": "2.21.0",
-        "contentHash": "pDaxW7B1HqQIU5T64Jn1Txn2JKyVqoOvskCAqTb/lffZyUS8hBxhxmOkJum4wbzFmhc2LsKULVQ/4GDHLb7yjQ=="
+        "requested": "[3.2.1, )",
+        "resolved": "3.2.1",
+        "contentHash": "wGrsLOwWvTffOeOLkvNFQFuRVClo4EOADsEby490Hze/5eIxrSkAzqmZ8slJDMRiRrKRoyBzijzTlHS0KSDzyA=="
       },
       "Serilog.AspNetCore": {
         "type": "CentralTransitive",
@@ -1126,12 +1116,6 @@
           "Serilog.Sinks.Debug": "3.0.0",
           "Serilog.Sinks.File": "7.0.0"
         }
-      },
-      "System.Security.Cryptography.Pkcs": {
-        "type": "CentralTransitive",
-        "requested": "[10.0.15, )",
-        "resolved": "10.0.15",
-        "contentHash": "4jEv/lXDuQkh60lPU3hlwASErXdv1ZMKmsxVuBfZWiVKT5Q2QGo58kTa6rN519+PU+m4Hsj1m3yT8fN+Xw0XZw=="
       },
       "Testcontainers.PostgreSql": {
         "type": "CentralTransitive",
