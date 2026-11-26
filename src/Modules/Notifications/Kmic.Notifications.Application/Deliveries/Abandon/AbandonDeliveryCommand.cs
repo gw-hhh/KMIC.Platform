@@ -7,6 +7,8 @@ namespace Kmic.Notifications.Application.Deliveries.Abandon;
 /// <summary>
 /// 放弃失败的投递
 /// </summary>
+/// <param name="Id">投递 ID</param>
+/// <param name="Reason">原因</param>
 [RequirePermission(NotificationsPermissions.DeliveryManage)]
 [Audited]
 [Idempotent]

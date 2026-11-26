@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Reflection;
 using FluentValidation;
 using Kmic.BuildingBlocks.Application.Authorization;
@@ -134,7 +133,7 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(sp => SubscriptionCatalog.Build(
             sp.GetServices<ModuleSubscriptions>(), sp.GetRequiredService<UseCaseCatalog>(), sp.GetRequiredService<IntegrationMessageCatalog>()));
 
-        ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.GetCultureInfo("zh-CN");
+        ValidationMessages.Configure(ValidatorOptions.Global);
         foreach (var assembly in validatorAssemblies)
         {
             services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Scoped, includeInternalTypes: true);

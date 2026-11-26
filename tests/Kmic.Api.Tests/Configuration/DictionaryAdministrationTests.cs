@@ -40,6 +40,28 @@ public sealed class DictionaryAdministrationTests(ClassDatabase<ApiTemplate> dat
     private static async Task<string> CodeOfAsync(HttpResponseMessage response) => (await JsonAsync(response)).GetProperty("code").GetString()!;
 
     [Fact]
+    public async Task ValidationMessages_UseTheChineseNameFromTheDocumentation()
+    {
+        var admin = await LoginAsOperatorAsync("dict-validation-admin", _manage);
+        var type = SampleDictionaries.Category;
+
+        var response = await CallAsync(HttpMethod.Post, $"/dictionary-types/{type}/items", admin, new
+        {
+            expectedVersion = await VersionAsync(admin, type),
+            code = "",
+            name = "名称",
+            parentCode = new string('x', 60),
+            sortOrder = (int?)null,
+        });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var errors = (await JsonAsync(response)).GetProperty("errors").EnumerateArray()
+            .ToDictionary(e => e.GetProperty("path").GetString()!, e => e.GetProperty("message").GetString()!, StringComparer.Ordinal);
+        errors["code"].ShouldBe("编码不能为空");
+        errors["parentCode"].ShouldBe("父项编码最多 50 个字符（现在 60 个）");
+    }
+
+    [Fact]
     public async Task TheDeclaredTypes_AreRegisteredAtStartup()
     {
         var admin = await LoginAsOperatorAsync("dict-list-admin", _manage);

@@ -9,6 +9,7 @@ namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 /// <remarks>
 /// 任务忙或已在排队时拒绝
 /// </remarks>
+/// <param name="JobName">任务名</param>
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]

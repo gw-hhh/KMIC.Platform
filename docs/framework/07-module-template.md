@@ -335,6 +335,7 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 | 处理器是 `public sealed`（Mediator 生成的代码要引用它），参数名沿用 `command` / `cancellationToken` | 05-02 第 2.2 节、06 第 4.2 节 |
 | 一个命令只取一次当前时间 | 05-13 第 3.1 节 |
 | 校验器是 `internal sealed`，只查形状，不注入数据访问 | 05-02 第 4.4 节 |
+| 校验提示里的属性名自动取中文：属性 `summary`（记录类型写 `param`）的第一个短语，如“登录名，唯一”取“登录名”；不用写 `WithName`。用内置规则的属性取不到中文名时测试失败，补一个简短的说明即可（写了 `WithName` 或 `WithMessage` 的不要求）。`Must`、`Custom` 必须写 `WithMessage`；对整个对象的跨字段规则（`RuleFor(x => x)`）没有字段路径，提示要写完整 | 本文；`ValidationMessageTests` |
 | 只服务于一个命令的内嵌 DTO 也单独一个文件（`CreateSpecimenItemInput.cs`），不与命令同文件 | 本文 D2 修订 |
 | 用户传入的其他模块 ID 用 `CallerScoped` 查询校验 | 05-07 第 4 节 |
 
