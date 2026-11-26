@@ -8,6 +8,7 @@
 //   --fix       先修，再跑全部检查
 //   --fast      只跑静态检查和单元测试（约一两分钟），跳过 .NET 测试、依赖漏洞、前端构建与端到端、密钥扫描、拼写
 // 依赖漏洞扫描在本地依赖锁文件未变时 24 小时内只扫一次，CI 每次都扫
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -19,6 +20,9 @@ var root = FindRepositoryRoot();
 var fixOnly = args.Contains("--fix-only", StringComparer.Ordinal);
 var fix = fixOnly || args.Contains("--fix", StringComparer.Ordinal);
 var fast = args.Contains("--fast", StringComparer.Ordinal);
+
+// 与 shell 一致：命令不存在时退出码为 127
+const int CommandNotFound = 127;
 
 if (fixOnly)
 {
@@ -36,7 +40,7 @@ var steps = new (string Name, bool Fast, Func<int> Run)[]
     // 代码风格与分析器规则由编译检查（EnforceCodeStyleInBuild、警告即错误），这里只查编译不管的空白、文件末尾换行与 using 顺序
     ("格式（空白与 using 顺序）", true, () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes --diagnostics IMPORTS")),
     ("编译（警告即错误）", true, () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
-    ("测试", false, () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
+    ("测试", false, () => WhenProjectsExist(root, () => WithDocker(() => Run(root, "dotnet", "test --solution Kmic.slnx --no-build")))),
     ("依赖漏洞（含传递依赖）", false, () => WhenProjectsExist(root, () => CheckVulnerabilities(root))),
     // pnpm 版本与 web/package.json 保持一致
     // 接口类型比对依赖后端测试导出的 OpenAPI 文档，须在后端测试后执行
@@ -49,7 +53,7 @@ var steps = new (string Name, bool Fast, Func<int> Run)[]
     ("前端构建", false, () => RunWeb(root, "run build")),
     ("前端端到端（Playwright，假后端）", false, () => RunEndToEnd(root)),
     // 密钥扫描包含提交历史，CI 必须检出完整历史
-    ("密钥扫描（Gitleaks）", false, () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
+    ("密钥扫描（Gitleaks）", false, () => WithDocker(() => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner"))),
     ("拼写（cspell）", false, () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
 
@@ -204,7 +208,12 @@ static (int ExitCode, string Output) Capture(string root, string fileName, strin
         RedirectStandardOutput = true,
         StandardOutputEncoding = Encoding.UTF8,
     };
-    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"无法启动 {fileName}。");
+    using var process = Start(startInfo);
+    if (process is null)
+    {
+        return (CommandNotFound, "");
+    }
+
     var output = process.StandardOutput.ReadToEnd();
     process.WaitForExit();
     return (process.ExitCode, output);
@@ -237,9 +246,56 @@ static int Run(string root, string fileName, string arguments)
         : new ProcessStartInfo(fileName, arguments);
     startInfo.WorkingDirectory = root;
     startInfo.UseShellExecute = false;
-    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"无法启动 {fileName}。");
+    using var process = Start(startInfo);
+    if (process is null)
+    {
+        return CommandNotFound;
+    }
+
     process.WaitForExit();
     return process.ExitCode;
+}
+
+// 命令不存在时提示并返回空，不抛出未处理的异常
+static Process? Start(ProcessStartInfo startInfo)
+{
+    try
+    {
+        return Process.Start(startInfo) ?? throw new InvalidOperationException($"无法启动 {startInfo.FileName}。");
+    }
+    catch (Win32Exception)
+    {
+        Console.WriteLine($"   找不到命令 {startInfo.FileName}，请先安装并确认它在 PATH 里");
+        return null;
+    }
+}
+
+// 数据库测试（Testcontainers）和密钥扫描要用 Docker：先确认装了、也启动了，否则测试会成片报连接失败，看不出原因
+static int WithDocker(Func<int> run)
+{
+    var startInfo = new ProcessStartInfo("docker", "info --format {{.ServerVersion}}")
+    {
+        UseShellExecute = false,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+    };
+    using var process = Start(startInfo);
+    if (process is null)
+    {
+        Console.WriteLine("   这一步要用 Docker：Windows 上安装 Docker Desktop，Linux 上安装 Docker Engine");
+        return CommandNotFound;
+    }
+
+    process.StandardOutput.ReadToEnd();
+    process.StandardError.ReadToEnd();
+    process.WaitForExit();
+    if (process.ExitCode != 0)
+    {
+        Console.WriteLine("   Docker 没有运行：先启动 Docker Desktop（或 Docker 服务），再重新运行检查");
+        return process.ExitCode;
+    }
+
+    return run();
 }
 
 static int CheckEncoding(string root, bool fix)
