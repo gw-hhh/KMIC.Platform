@@ -106,7 +106,7 @@ Operations 的特点：**它自己的业务数据很少，大部分是管理其�
 - 没有行为方法，只有一个工厂 `Record(message)`；不是聚合行为，是“把消息落成一行”。迁移带框架的只追加约定（`Kmic:AppendOnly` 注解，运行账号撤销修改与删除）。
 - 索引沿用 05-09：`(ActorUserId, OccurredAt DESC)`、`(Action, OccurredAt DESC)`、`Targets` 上的 GIN；另加 `(OccurredAt DESC)`，时间范围是必填条件，按它扫描要能走索引。
 - 保留期到期的数据只能由迁移程序的维护命令删除：`Kmic.MigrationRunner purge --table audit-log --older-than-days N`（已实现，保留期必填、没有默认值）。保留期本身仍是 `待确认`（00-README“待决事项”，阶段 5）。
-- 分区：不分区（05-09 D8 的触发条件见 `docs/framework/00-README.md` 延后事项）。
+- 分区：不分区（05-09 D8 的触发条件见 `docs/implementation/00-README.md` 的延后事项）。
 
 ### 3.3 `JobOverride`
 
@@ -389,14 +389,14 @@ Operations 还声明系统设置 `Operations.MessagingCapacity`（数据库已�
 
 ### 13.2 需要同步修订的文档
 
-按 R01 L2 修订并登记修订记录（只落实决定）。**2026-11-12 已完成**，其中 `S2-框架骨架.md` 一项见该清单的进展记录：
+按 R01 L2 修订并登记修订记录（只落实决定）。**2026-11-12 已完成**：
 
 | 文档 | 修订 | 来源 |
 |---|---|---|
 | 05-07 第 8.3 节（实现补充） | “放弃时是否清除路由的‘需要初始化’标记”按 D-O2 定稿，并把“待用户确认”的标注去掉（连同其余已确认的实现补充） | D-O2 |
 | 05-12 第 2.5 节 | “各字段有长度上限（阶段 1 定）”改为引用本文第 8 节的数值 | 本文 8 节 |
 | 05-12 第 6.1 节 | D-O1 选 A 时，`/health/dependencies` 的“或要求权限点 `Operations.Health.View`”一句改为只保留内网访问 | D-O1 |
-| `docs/implementation/S2-框架骨架.md` | 游标分页（S2-12 余项）标为随 Operations 实现；第 13.1 节的公开服务列为阶段 3 的开工项 | 本文 10、13.1 |
+| 阶段 2 任务清单（已归档） | 游标分页（S2-12 余项）标为随 Operations 实现；第 13.1 节的公开服务列为阶段 3 的开工项 | 本文 10、13.1 |
 | `docs/glossary.md`、`docs/modules/README.md` | 登记第 2 节术语与模块状态 | 本文 |
 
 ---

@@ -496,7 +496,7 @@ Notifications 的请求型消息 `SendNotification`（05-11 第 7.2 节）。收
 
 ## 10. 延后事项对照
 
-对照 `docs/framework/00-README.md` 的“延后事项”表：
+对照延后事项表（现在在 `docs/implementation/00-README.md`）：
 
 | 事项 | 结论 |
 |---|---|

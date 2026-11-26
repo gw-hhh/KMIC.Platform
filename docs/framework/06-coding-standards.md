@@ -164,7 +164,7 @@ graph LR
 | `KM90xx`～`KM99xx` | 全部项目通用 |
 
 - 分析器项目：`src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers`（`netstandard2.0`，Roslyn 要求），通过 `Directory.Build.props` 以分析器方式引用到全部项目。
-- 分析器项目只能编译为 `netstandard2.0`，但代码同样用最新语言特性（质量原则）：项目中写 `<LangVersion>latest</LangVersion>`（`netstandard2.0` 默认是 C# 7.3），并引用 PolySharp（编译期为 `netstandard2.0` 补上 `record`、`init`、`required`、列表模式、范围运算符等需要的类型，不带进运行时，MIT）。另需 `AnalyzerReleases.Shipped.md` / `Unshipped.md` 登记规则编号（RS2000 系），诊断描述在字段上直接创建；细节见 `docs/framework/spikes/08-state-analyzer.md` 第 3 节。
+- 分析器项目只能编译为 `netstandard2.0`，但代码同样用最新语言特性（质量原则）：项目中写 `<LangVersion>latest</LangVersion>`（`netstandard2.0` 默认是 C# 7.3），并引用 PolySharp（编译期为 `netstandard2.0` 补上 `record`、`init`、`required`、列表模式、范围运算符等需要的类型，不带进运行时，MIT）。另需 `AnalyzerReleases.Shipped.md` / `Unshipped.md` 登记规则编号（RS2000 系），诊断描述在字段上直接创建。
 - 每条规则有对应的分析器测试（`Microsoft.CodeAnalysis.Testing`），至少覆盖“触发”与“不触发”各一例。
 
 ### 2.3 D1 规则豁免怎么写
@@ -262,6 +262,33 @@ ADR-0021 已定 `.editorconfig` + `dotnet format --verify-no-changes`。这里�
 - **已验证**（SDK 10.0.403，临时项目逐条用旧写法触发）：上表规则均实际报出；IDE0038、IDE0260 为同类规则的变体，未单独构造例子。实体的 `private` 构造函数不会被要求改成主构造函数。
 - 参数判空时 IDE0016（throw 表达式）与 CA1510（`ThrowIfNull`）会同时报出，按第 6 节用 `ArgumentNullException.ThrowIfNull`，两条都消除。
 
+### 3.5 依赖版本与许可
+
+版本号只以锁文件为准：后端 `Directory.Packages.props` 与 `packages.lock.json`，前端 `package.json` 与 `pnpm-lock.yaml`，SDK 看 `global.json`。文档里不抄版本号。
+
+| 范围 | 规则 |
+|---|---|
+| .NET SDK | `global.json` 固定版本，`rollForward: latestPatch`（只接受同一功能段的补丁） |
+| 后端包 | 中央包管理，写精确版本，项目文件里不写版本；只用正式版 |
+| 前端包 | 写精确版本（不用 `^`、`~`），提交锁文件；`packageManager` 固定 pnpm 版本 |
+| 新引入的包 | 引入前核对许可：可以用 MIT、Apache-2.0、BSD、ISC、PostgreSQL 许可；MPL-2.0 只能用在测试里（如 `@axe-core/playwright`）；其他许可先问。元数据没写许可的，以官方源码仓库里的 LICENSE 为准 |
+| 升级 | 大版本升级在提交说明里写理由；漏洞修复优先 |
+
+下面这些版本是有意锁住的，升级前先确认原因是否还在：
+
+| 依赖 | 现状 | 原因 |
+|---|---|---|
+| Roslyn（`Microsoft.CodeAnalysis.CSharp` 与 `.Workspaces`） | 锁 .NET 10 首个 SDK 自带的 5.0.0 | 自定义分析器引用的 Roslyn 不能高于 SDK 自带的编译器；EF Core 设计时工具也要求工作区组件严格为 5.0.0，锁得更高会在引用它的项目里报 NU1608。按低版本写的分析器可以在新编译器上运行 |
+| 传递依赖的安全修复 | `Directory.Packages.props` 里单独一组 | 某个包间接引入的旧版本有漏洞时在这里提升版本；引入它的包升级后不再需要就删掉 |
+| Quartz | 只引用 `Quartz` | 4.x 已把依赖注入、宿主集成和 System.Text.Json 序列化并进主包，`Quartz.Extensions.Hosting`、`Quartz.Serialization.SystemTextJson` 只剩空壳 |
+| TypeScript | 6.x | typescript-eslint 还不支持 7 |
+| Stylelint | 17.x | SCSS 规则集和 `stylelint-declaration-strict-value` 还不支持 18 |
+| VueUse | 与 Antdv Next 依赖的大版本一致 | 避免打包两份 VueUse |
+| pnpm | 11 系列 | 12 在 Windows 上遇到 `packageManager` 字段会崩溃 |
+| VXE Table | 同时装 `@vxe-ui/core`、`xe-utils`（运行时）和 `vxe-pc-ui`（只作类型） | vxe-table 运行时导入前两个包但没有声明依赖；不注册 `vxe-pc-ui` 的界面组件 |
+| PolySharp | 只在分析器项目 | `netstandard2.0` 的分析器要用新语法，编译期补类型，不进运行时 |
+| Shouldly | 4.x | 更新慢，2027 年中仍没有新正式版时评估替代 |
+
 ---
 
 ## 4. 命名
@@ -279,7 +306,7 @@ ADR-0021 已定 `.editorconfig` + `dotnet format --verify-no-changes`。这里�
 - **决定（已确认，2026-11-04）**：A。具体做法：
   - 术语表放在 `KMIC.Platform/docs/glossary.md`，格式：`中文术语 | 英文标识符 | 所属模块 | 含义 | 备注`。同一个中文词在不同模块含义不同时，分两行登记（模块是限界上下文，允许同名不同义，但必须写明）。
   - 新增业务概念时先登记术语表，再写代码；评审时对照。
-  - 拼写检查工具：cspell（MIT，Node 运行；前端工具链已有 Node）。检查 `src/`、`tests/` 中的标识符与注释里的英文部分；项目词典 = 术语表英文列 + 技术词汇表。版本与许可见 `docs/implementation/S0-04-版本与许可.md`（cspell 10.4.0，MIT）。
+  - 拼写检查工具：cspell（MIT，Node 运行；前端工具链已有 Node）。检查 `src/`、`tests/` 中的标识符与注释里的英文部分；项目词典 = 术语表英文列 + 技术词汇表。cspell 为 MIT 许可。
   - 标识符只允许 ASCII 字符（KM9004），测试项目同样适用（见 D9）。
 - **理由**：一个概念一个名字是可维护性的基础，也是 DDD“统一语言”的落地方式；只有工具检查才能在第 1000 个文件时仍然成立。
 - **取舍**：要为少数中国特有的业务概念商定译名；拼写检查有一定误报，需要补词典。
@@ -582,7 +609,7 @@ query = query.Where(x =>
     KmicFunctions.ContainsText(x.Code, filter.Q));
 ```
 
-- 翻译为：`("Col" COLLATE "C") ILIKE @pattern ESCAPE '\'`，`@pattern` 为 `%` + 转义后的 term + `%`（原型 #5 已验证，`docs/framework/spikes/05-text-matching.md`）。
+- 翻译为：`("Col" COLLATE "C") ILIKE @pattern ESCAPE '\'`，`@pattern` 为 `%` + 转义后的 term + `%`（原型 #5 已验证）。
   - 显式指定确定性排序规则 `"C"`：非确定性排序规则的列不支持 `ILIKE`，统一转换后两类列写法相同。PG 18 在非确定性排序规则下支持 `LIKE`，但翻译仍统一用这一种。
   - `"C"` 下 `ILIKE` 只对 ASCII 字母做大小写折叠，中文不受影响；对编码、账号、邮箱这类 ASCII 字段正好合适。
 - 实现为 EF 的方法翻译器插件。**转义在数据库端完成**（`'%' || replace(replace(replace(@term, '\', '\\'), '%', '\%'), '_', '\_') || '%'`）：翻译器拿到的是参数表达式，不能在程序中改写参数值。按实际参数值做计划时 trigram 索引照样可用。
@@ -618,7 +645,7 @@ query = query.Where(x =>
 | 回退只退一个发布 | 例如发布 3 新增的行 `Name` 为空：退回发布 2（读新列）没有问题，再退回发布 1（读旧列）就会读到空值 |
 | 发布 3 的迁移 | “去掉映射会生成删除列的操作”是按 EF 迁移的模型差异规则推断，阶段 2 实现 `.MirrorTo` 时用真实迁移确认；迁移评审（05-03 第 9.2 节）中逐项核对 |
 
-- `.MirrorTo(...)` 的实现（原型 #7，`docs/framework/spikes/07-mirror-to.md`）：影子属性映射另一列 + 保存拦截器在保存前复制当前值。发布 1 读旧列（而不是新列）的原因也见该页：读新列会读到上一版在滚动期间写入的旧值，新建的行还会因新列为空而抛异常。
+- `.MirrorTo(...)` 的实现（原型 #7 验证）：影子属性映射另一列 + 保存拦截器在保存前复制当前值。发布 1 读旧列（而不是新列）的原因：读新列会读到上一版在滚动期间写入的旧值，新建的行还会因新列为空而抛异常。
 
 **示例二：拆表（把 `Sample` 上的联系信息列移到新表 `SampleContact`）**
 
@@ -655,7 +682,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 - **决定（已确认，2026-11-04）**：B。框架提供测试基础设施项目 `Kmic.BuildingBlocks.Testing`：程序集级夹具（xUnit v3 的 assembly fixture）管理容器与模板库；测试类基类负责克隆、提供已配置的宿主与 `FakeTimeProvider`。需要“空库”语义的测试（如统计）放在单独的测试类中。
 - **理由**：在“隔离可靠”与“速度”之间最平衡，且只依赖 PostgreSQL 自身能力，符合选型原则（03 第 1 节）。
 - **取舍**：同一个类内的测试要自觉使用自己的数据。
-- 实现要点（原型 #10，`docs/framework/spikes/10-test-infrastructure.md`）：PG 克隆模板库时要求模板库没有活动连接，连接池中空闲的物理连接同样算（克隆报 `55006`），所以迁移模板库的连接用 `Pooling=false`；程序集级夹具只创建一次，类级夹具可直接注入它；并发克隆可行，单次约 30 ms。
+- 实现要点（原型 #10 实测）：PG 克隆模板库时要求模板库没有活动连接，连接池中空闲的物理连接同样算（克隆报 `55006`），所以迁移模板库的连接用 `Pooling=false`；程序集级夹具只创建一次，类级夹具可直接注入它；并发克隆可行，单次约 30 ms。
 
 ### 12.2 D9 测试方法名用什么语言
 
@@ -713,7 +740,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 - **理由**：本系统是持续部署的内部 Web 系统，没有需要并行维护的多个发布版本；主干开发让每次合并都经过全部门禁，问题暴露最早。
 - **取舍**：未完成的功能合入主干时需要隐藏；具体的发布与标签规则在 08 实施计划与运维文档中定。CI 平台见 ADR-0032，上述规则不依赖具体平台。
 
-**单人开发阶段的合并规则**（阶段 0 确认）：目前只有一位开发者，而代码平台不允许批准自己发起的合并请求。因此单人阶段的分支保护只强制“CI 全部通过”与“`main` 禁止直接推送、禁止强制推送”，不强制“至少 1 人审核”与 `CODEOWNERS` 负责人审核；人工审核由开发者审阅 AI 助手的改动完成。`CODEOWNERS` 照常维护（先写这位开发者）。第二位开发者加入时开启两项审核要求（`docs/implementation/00-README.md` 待办 T-04）。过渡期仓库在个人 GitHub、CI 暂时搁置时，以推送前本机 `dotnet run scripts/check.cs` 通过为准（`docs/implementation/S0-开工准备.md` 问题 7）。
+**单人开发阶段的合并规则**（阶段 0 确认）：目前只有一位开发者，而代码平台不允许批准自己发起的合并请求。因此单人阶段的分支保护只强制“CI 全部通过”与“`main` 禁止直接推送、禁止强制推送”，不强制“至少 1 人审核”与 `CODEOWNERS` 负责人审核；人工审核由开发者审阅 AI 助手的改动完成。`CODEOWNERS` 照常维护（先写这位开发者）。第二位开发者加入时开启两项审核要求（`docs/implementation/00-README.md` 待办 T-04）。过渡期仓库在个人 GitHub、CI 暂时搁置时，以推送前本机 `dotnet run scripts/check.cs` 通过为准（阶段 0 用户决定，2026-11-06）。
 
 ---
 
@@ -802,7 +829,7 @@ ADR-0021 已定测试层次、工具（xUnit v3、Testcontainers、`WebApplicati
 | RS1033（诊断说明要以标点结尾） | 只对分析器项目关闭：`.editorconfig` 的 `[src/BuildingBlocks/Kmic.BuildingBlocks.Analyzers/**.cs]` 节 | 它只认英文的 `.` `!` `?`，中文句号过不了；它要求的是写成完整的句子，中文说明以“。”结尾已经满足（2026-11-11 用户确认） |
 | MA0097（实现 `IComparable` 时要求比较运算符） | 只对强类型 ID 文件关闭：`.editorconfig` 的 `[src/**/*{Id,Ref}.cs]` 节（依赖 05-01 第 4.1 节“以 `Id` / `Ref` 结尾”的命名约定，该约定由架构测试守护） | Vogen 默认生成 `IComparable` 但不生成运算符；键集分页（05-06 第 6.3 节）用 `CompareTo` 即可翻译为 SQL 的 `<`（原型 #2 验证），不需要运算符；其他手写类型仍检查 |
 
-其余 Meziantou 规则在实施时逐条确认级别（03 第 4.10 节）。Meziantou.Analyzer 锁定 3.0.320，MA0137、MA0138、MA0155 存在且含义与本文一致（`docs/implementation/S0-04-版本与许可.md`）。
+其余 Meziantou 规则在实施时逐条确认级别（03 第 4.10 节）。MA0137、MA0138、MA0155 已核实存在且含义与本文一致。
 
 ### 15.4 架构测试
 

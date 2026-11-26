@@ -409,7 +409,7 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 
 ## 10. 延后事项对照
 
-对照 `docs/framework/00-README.md` 的“延后事项”表：
+对照延后事项表（现在在 `docs/implementation/00-README.md`）：
 
 | 事项 | 结论 |
 |---|---|
@@ -448,7 +448,7 @@ Identity 声明的三个（`Identity.SmsCode`、`Identity.AccountLocked`、`Iden
 | `SendNotification` 的契约 | **已实现**（`Kmic.Notifications.Contracts`，含 `For`） | 05-11 第 7.2 节 |
 | 含密消息类型 | **已实现**：`[IntegrationMessage(CarriesSecret = true, SecretLifetimeSeconds = …)]`，目录校验只有请求型可声明、有效期 1～600 秒；契约快照照常；日志不输出载荷的约束由各处写日志的代码遵守（Operations 的死信查看同样不显示含密消息的载荷） | Identity 设计 D-F |
 | 渲染原型 | Fluid 的访问限制、限时与输出上限，在开工时做一个小验证并记录 | 05-11 待确认 |
-| 阿里云短信 SDK | 版本与许可在 `docs/implementation/S0-04-版本与许可.md` 核对后锁定；开通与费用见实施待办 T-08 | 05-11 第 8.3 节 |
+| 阿里云短信 SDK | 实际引入时按 06 第 3.5 节核对许可（官方 SDK 的包元数据没写许可，以源码仓库里的 LICENSE 为准）；开通与费用见实施待办 T-08 | 05-11 第 8.3 节 |
 
 ---
 
