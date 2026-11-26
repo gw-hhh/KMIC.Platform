@@ -49,4 +49,10 @@ public static class SamplePermissions
     /// </summary>
     [Permission("管理示例设置")]
     public const string SettingManage = "Sample.Setting.Manage";
+
+    /// <summary>
+    /// 维护示例分类
+    /// </summary>
+    [Permission("维护示例分类")]
+    public const string CategoryManage = "Sample.Category.Manage";
 }

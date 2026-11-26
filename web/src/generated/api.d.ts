@@ -14257,6 +14257,445 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sample/specimen-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 查询示例分类列表
+         * @description 包括已停用的分类。每页条数须为 1 到 200，否则返回 400。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 名称关键字 */
+                    Q?: string;
+                    /** @description 页码 */
+                    Page?: number;
+                    /** @description 每页数量 */
+                    PageSize?: number;
+                    /** @description 排序 */
+                    Sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 成功 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfSpecimenCategoryListItem"];
+                    };
+                };
+                /** @description 请求格式不正确，或者提交的数据没有通过校验，具体见 errors */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有登录，或者登录已失效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有执行这个操作的权限 */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据不存在，或者当前用户看不到 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据已被他人修改，或者与现有数据冲突，当前版本号见 currentVersion */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 违反了业务规则，原因见 code 和 title */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 请求太频繁，或者系统正忙，按 Retry-After 等待后再试 */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 系统出错了，原因没有写在响应里，报障时提供 traceId */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * 新建示例分类
+         * @description 名称不区分大小写，重名返回 409。必须提供幂等键。成功返回 201，Location 指向新分类。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description 幂等键，1 到 100 个字符，建议用 UUID。用户发起一次提交时生成，超时重试用同一个键，才不会重复执行；同一个键不能用于内容不同的请求 */
+                    "Idempotency-Key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateSpecimenCategoryRequest"];
+                };
+            };
+            responses: {
+                /** @description 已创建，Location 指向新数据，响应体是新数据的 ID 与版本号 */
+                201: {
+                    headers: {
+                        /** @description 新数据的地址 */
+                        Location?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedResponseOfSpecimenCategoryId"];
+                    };
+                };
+                /** @description 请求格式不正确，或者提交的数据没有通过校验，具体见 errors */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有登录，或者登录已失效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有执行这个操作的权限 */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据不存在，或者当前用户看不到 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据已被他人修改，或者与现有数据冲突，当前版本号见 currentVersion */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 违反了业务规则，原因见 code 和 title */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 请求太频繁，或者系统正忙，按 Retry-After 等待后再试 */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 系统出错了，原因没有写在响应里，报障时提供 traceId */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sample/specimen-categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 修改示例分类
+         * @description 修改名称和启用状态，重名返回 409。
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 示例分类 ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateSpecimenCategoryRequest"];
+                };
+            };
+            responses: {
+                /** @description 成功 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["VersionedResponseOfSpecimenCategoryId"];
+                    };
+                };
+                /** @description 请求格式不正确，或者提交的数据没有通过校验，具体见 errors */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有登录，或者登录已失效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有执行这个操作的权限 */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据不存在，或者当前用户看不到 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据已被他人修改，或者与现有数据冲突，当前版本号见 currentVersion */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 违反了业务规则，原因见 code 和 title */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 请求太频繁，或者系统正忙，按 Retry-After 等待后再试 */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 系统出错了，原因没有写在响应里，报障时提供 traceId */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** 删除示例分类 */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 示例分类 ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DeleteSpecimenCategoryRequest"];
+                };
+            };
+            responses: {
+                /** @description 成功，没有响应体 */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description 请求格式不正确，或者提交的数据没有通过校验，具体见 errors */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有登录，或者登录已失效 */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 没有执行这个操作的权限 */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据不存在，或者当前用户看不到 */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 数据已被他人修改，或者与现有数据冲突，当前版本号见 currentVersion */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 违反了业务规则，原因见 code 和 title */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 请求太频繁，或者系统正忙，按 Retry-After 等待后再试 */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+                /** @description 系统出错了，原因没有写在响应里，报障时提供 traceId */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["KmicProblem"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sample/specimens/{id}/attachments": {
         parameters: {
             query?: never;
@@ -15743,6 +16182,20 @@ export interface components {
             version: number;
         };
         /** @description 创建结果 */
+        CreatedResponseOfSpecimenCategoryId: {
+            /**
+             * Format: uuid
+             * @description 新数据的 ID
+             */
+            id: string;
+            /**
+             * Format: int64
+             * @description 保存后的版本号
+             * @default 0
+             */
+            version: number;
+        };
+        /** @description 创建结果 */
         CreatedResponseOfSpecimenId: {
             /**
              * Format: uuid
@@ -15800,6 +16253,11 @@ export interface components {
             sortOrder: number;
             /** @description 默认数据范围等级：Self、OrgUnit、OrgUnitAndBelow、All */
             defaultScopeLevel: components["schemas"]["RoleScopeLevel"];
+        };
+        /** @description 新建示例分类的请求 */
+        CreateSpecimenCategoryRequest: {
+            /** @description 名称 */
+            name: string;
         };
         /** @description 创建示例时的一项明细 */
         CreateSpecimenItemRequest: {
@@ -15943,6 +16401,14 @@ export interface components {
             attempts: number;
             /** @description 最近一次的错误 */
             lastError: null | string;
+        };
+        /** @description 删除示例分类的请求 */
+        DeleteSpecimenCategoryRequest: {
+            /**
+             * Format: int64
+             * @description 读取时的版本号
+             */
+            expectedVersion: number;
         };
         /** @description 删除示例的请求 */
         DeleteSpecimenRequest: {
@@ -17015,6 +17481,28 @@ export interface components {
             totalCountExact: boolean;
         };
         /** @description 一页数据 */
+        PagedResultOfSpecimenCategoryListItem: {
+            /** @description 本页的数据，页码超过末页时为空 */
+            items: components["schemas"]["SpecimenCategoryListItem"][];
+            /**
+             * Format: int32
+             * @description 页码
+             */
+            page: number;
+            /**
+             * Format: int32
+             * @description 每页数量
+             */
+            pageSize: number;
+            /**
+             * Format: int64
+             * @description 总数
+             */
+            totalCount: number;
+            /** @description 总数是否精确 */
+            totalCountExact: boolean;
+        };
+        /** @description 一页数据 */
         PagedResultOfSpecimenListItem: {
             /** @description 本页的数据，页码超过末页时为空 */
             items: components["schemas"]["SpecimenListItem"][];
@@ -17934,6 +18422,23 @@ export interface components {
             /** @description 文件类型编码 */
             fileType: string;
         };
+        /** @description 示例分类列表项 */
+        SpecimenCategoryListItem: {
+            /**
+             * Format: uuid
+             * @description 示例分类 ID
+             */
+            id: string;
+            /** @description 名称 */
+            name: string;
+            /** @description 是否启用 */
+            isEnabled: boolean;
+            /**
+             * Format: int64
+             * @description 版本号，修改、删除时带上
+             */
+            version: number;
+        };
         /** @description 示例的详情 */
         SpecimenDetailResponse: {
             /**
@@ -18288,6 +18793,18 @@ export interface components {
              */
             sortOrder: number;
         };
+        /** @description 修改示例分类的请求 */
+        UpdateSpecimenCategoryRequest: {
+            /** @description 名称 */
+            name: string;
+            /** @description 是否启用 */
+            isEnabled: boolean;
+            /**
+             * Format: int64
+             * @description 读取时的版本号
+             */
+            expectedVersion: number;
+        };
         /** @description 修改用户资料的请求 */
         UpdateUserProfileRequest: {
             /**
@@ -18591,6 +19108,20 @@ export interface components {
         };
         /** @description 修改结果 */
         VersionedResponseOfScheduledJobSettingId: {
+            /**
+             * Format: uuid
+             * @description ID
+             */
+            id: string;
+            /**
+             * Format: int64
+             * @description 保存后的版本号
+             * @default 0
+             */
+            version: number;
+        };
+        /** @description 修改结果 */
+        VersionedResponseOfSpecimenCategoryId: {
             /**
              * Format: uuid
              * @description ID

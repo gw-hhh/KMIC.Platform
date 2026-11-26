@@ -46,4 +46,14 @@ public static class SampleErrors
     /// 用户没有所属组织，无法确定数据归属
     /// </summary>
     public static readonly Error NoOrgUnit = Error.BusinessRule("Sample.NoOrgUnit", "当前用户没有所属组织，无法创建示例");
+
+    /// <summary>
+    /// 示例分类不存在
+    /// </summary>
+    public static readonly Error CategoryNotFound = Error.NotFound("Sample.CategoryNotFound", "示例分类不存在");
+
+    /// <summary>
+    /// 示例分类重名
+    /// </summary>
+    public static readonly Error CategoryNameExists = Error.Conflict("Sample.CategoryNameExists", "已有同名的示例分类");
 }

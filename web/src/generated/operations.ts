@@ -43,6 +43,7 @@ export const idempotentOperations: ReadonlySet<string> = new Set([
   "POST /api/v1/operations/my-jobs/{module}/{id}/cancel",
   "POST /api/v1/operations/scheduled-jobs/{name}/restore-default",
   "POST /api/v1/operations/scheduled-jobs/{name}/run",
+  "POST /api/v1/sample/specimen-categories",
   "POST /api/v1/sample/specimens",
   "POST /api/v1/sample/specimens/{id}/submit",
   "PUT /api/v1/configuration/dictionary-types/{typeCode}/items-order",

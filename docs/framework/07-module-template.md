@@ -212,6 +212,7 @@ src/Modules/Sample/
 │  │  ├─ EventHandlers/               领域事件处理器
 │  │  └─ Shared/                      本聚合多个用例共用的 DTO
 │  ├─ (CloseExpired/ …)               定时任务的命令也是用例（按需）
+│  ├─ Maintenance/SpecimenCategories/ 简单维护档的聚合，一个用例一个文件（第 4.10 节）
 │  └─ (ContractQueries/)             本模块 Contracts 接口的实现与对外查询（薄适配器、带 [ContractQuery] 的查询和处理器，按需，05-07 D2）
 │
 ├─ Kmic.Sample.Infrastructure/
@@ -466,6 +467,7 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 
 - **不直接用 DbContext**：处理器照旧只注入仓储；列表和详情查询照旧用 `I<模块>QueryDb`。只是不用为每个聚合写仓储，不是换一种数据访问方式。
 - **升档**：业务变复杂、四个条件有一条不再满足时，把这个聚合的用例移出 `Maintenance/`，拆成标准写法，并改用专用仓储；不在 `Maintenance/` 里继续堆规则。
+- **示例**：Sample 的示例分类（`SpecimenCategory`，只有名称和启用状态）。用例在 `Kmic.Sample.Application/Maintenance/SpecimenCategories/`（新建、修改、删除、列表各一个文件），注册在 `SampleModule.cs`，端点在 `Kmic.Sample.Presentation/SpecimenCategories/`，测试是 `Kmic.Api.Tests/Sample/SpecimenCategoryApiTests.cs`。
 - **检查**：`.editorconfig` 只对 `src/Modules/*/Kmic.*.Application/Maintenance/` 把 MA0048 改为只检查文件里的第一个类型，其他目录照旧一个类型一个文件。处理器漏写 `AddRepository` 时，`ModuleConformanceTests` 从宿主里逐个取处理器，测试会失败。
 
 ---
