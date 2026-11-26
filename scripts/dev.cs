@@ -5,6 +5,7 @@
 // 起数据库容器 → 建库与运行账号 → 迁移 → 首次建管理员 → 启动 Api（含后台处理）。再次运行会复用已有的库和账号。
 // 需要 Docker 和 .NET 10 SDK。生成的密码、签名密钥、上传的文件都放在仓库根目录的 .local 文件夹里，不进仓库。
 // 命令：up（默认，在前台运行 Api，Ctrl+C 停止）｜ status（看现在是什么状态）｜ reset（删掉本机的库，下次 up 重新建）
+// up --dashboard：另起可观测面板（Aspire Dashboard 独立镜像），Api 的日志、追踪、指标发到它，浏览器打开 http://localhost:18888
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,6 +18,10 @@ const string Database = "kmic_local";
 const int DatabasePort = 5433;
 const int ApiPort = 5080;
 const string AdminAccount = "admin";
+const string DashboardContainer = "kmic-test-dashboard";
+const string DashboardImage = "mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5";
+const int DashboardPort = 18888;
+const int OtlpPort = 4317;
 
 var root = FindRepositoryRoot();
 var local = Path.Combine(root, ".local");
@@ -25,6 +30,7 @@ var statePath = Path.Combine(local, "dev.json");
 var state = LoadState(statePath);
 
 var command = args.FirstOrDefault(a => !a.StartsWith('-')) ?? "up";
+var dashboard = args.Contains("--dashboard", StringComparer.Ordinal);
 return command switch
 {
     "up" => await UpAsync(),
@@ -49,13 +55,21 @@ async Task<int> UpAsync()
 
     EnsureAdministrator(superConnection);
     EnsureSigningKey();
+    if (dashboard && !EnsureDashboard())
+    {
+        return Fail("可观测面板没有起来，上面有原因。");
+    }
 
     Console.WriteLine("== 启动 Api");
     Console.WriteLine($"   接口文档：http://localhost:{ApiPort}/scalar");
     Console.WriteLine($"   管理员账号：{AdminAccount}（密码见 {Path.Combine(".local", "dev.json")}，首次登录要先改密码）");
     Console.WriteLine("   Ctrl+C 停止；数据库容器会继续运行");
     var runtime = RuntimeConnection(Get("AppPassword"));
-    return RunDotnet("src/Hosts/Kmic.Api", [], Env(
+    // 只有打开面板时才导出遥测，Kmic.ServiceDefaults 看到这个地址才导出
+    (string, string)[] telemetry = dashboard
+        ? [("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{OtlpPort}"), ("OTEL_SERVICE_NAME", "kmic-api")]
+        : [];
+    return RunDotnet("src/Hosts/Kmic.Api", [], Env([.. telemetry,
         ("ASPNETCORE_ENVIRONMENT", "Development"),
         ("ASPNETCORE_URLS", $"http://localhost:{ApiPort}"),
         ("Kmic__Database__ConnectionString", runtime),
@@ -69,7 +83,28 @@ async Task<int> UpAsync()
         // 前端开发服务的地址，刷新令牌时要校验来源
         ("Identity__Cookie__TrustedOrigins__0", "http://localhost:5173"),
         ("Identity__Cookie__TrustedOrigins__1", "http://127.0.0.1:5173"),
-        ("Files__Storage__LocalRoot", Path.Combine(local, "files"))));
+        ("Files__Storage__LocalRoot", Path.Combine(local, "files"))]));
+}
+
+// 面板只绑本机地址、免登录，只用于开发；数据在容器内存里，重启即清空
+bool EnsureDashboard()
+{
+    Console.WriteLine("== 可观测面板");
+    var existing = Capture("docker", ["ps", "-a", "--filter", $"name=^{DashboardContainer}$", "--format", "{{.Status}}"]).Output.Trim();
+    var result = existing.Length == 0
+        ? Capture("docker", ["run", "-d", "--name", DashboardContainer,
+            "-p", $"127.0.0.1:{DashboardPort}:18888", "-p", $"127.0.0.1:{OtlpPort}:18889",
+            "-e", "Dashboard__Frontend__AuthMode=Unsecured", "-e", "Dashboard__Otlp__AuthMode=Unsecured",
+            DashboardImage])
+        : existing.StartsWith("Up", StringComparison.Ordinal) ? (ExitCode: 0, Output: "", Error: "") : Capture("docker", ["start", DashboardContainer]);
+    if (result.ExitCode != 0)
+    {
+        Console.WriteLine(result.Error);
+        return false;
+    }
+
+    Console.WriteLine($"   http://localhost:{DashboardPort}");
+    return true;
 }
 
 int Status()
@@ -88,6 +123,8 @@ int Status()
     }
 
     Console.WriteLine($"Api 地址：http://localhost:{ApiPort}（运行时才有）");
+    var panel = Capture("docker", ["ps", "-a", "--filter", $"name=^{DashboardContainer}$", "--format", "{{.Status}}"]).Output.Trim();
+    Console.WriteLine($"可观测面板 {DashboardContainer}：{(panel.Length == 0 ? "没有（up --dashboard 时才起）" : $"{panel}，http://localhost:{DashboardPort}")}");
     return 0;
 }
 

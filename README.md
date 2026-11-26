@@ -22,7 +22,7 @@
 | 路径 | 内容 | 状态 |
 |---|---|---|
 | `docs/modules/` | 各模块的设计文档与模块登记表（五个平台模块已确认） | 已建立 |
-| `src/` | 后端源码：`Kmic.BuildingBlocks.*`、各模块 5 个项目（ADR-0004）、`Kmic.Api`、`Kmic.MigrationRunner`、`Kmic.Operator`、Aspire 编排 | 已建立 |
+| `src/` | 后端源码：`Kmic.BuildingBlocks.*`、各模块 5 个项目（ADR-0004）、`Kmic.Api`、`Kmic.MigrationRunner`、`Kmic.Operator`、`Kmic.ServiceDefaults`（日志、追踪、指标的统一配置） | 已建立 |
 | `tests/` | 测试项目与架构测试 | 已建立 |
 | `scripts/`、`templates/` | 本地与 CI 共用的检查脚本；`dotnet new` 模块模板与新建模块脚本 | 已建立 |
 | `docs/ops/` | 部署、运维手册 | 规划，阶段 5 |

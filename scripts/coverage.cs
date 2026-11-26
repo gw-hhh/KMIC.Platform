@@ -17,7 +17,7 @@ Run(
     root,
     "dotnet",
     $"reportgenerator -reports:\"{data}\" -targetdir:\"{Path.Combine(output, "report")}\" -reporttypes:TextSummary;Html "
-    + "\"-assemblyfilters:+Kmic.*;-*Tests*;-Kmic.Echo.Probe;-Kmic.AppHost\" "
+    + "\"-assemblyfilters:+Kmic.*;-*Tests*;-Kmic.Echo.Probe\" "
     + "\"-classfilters:-Kmic.Generated.*;-*.Migrations.*;-*Log;-*Log.*\"");
 Console.WriteLine(File.ReadAllText(Path.Combine(output, "report", "Summary.txt")));
 return 0;
