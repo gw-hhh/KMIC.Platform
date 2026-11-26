@@ -3,7 +3,14 @@ import { defineStore } from 'pinia';
 import { computed, ref, toRaw, watch } from 'vue';
 import { KmicError, useApi } from '@/platform/api';
 import { useCurrentUserStore } from '@/platform/session/current-user';
-import { applyTheme, buildAntdTheme, type ThemeMode, type ThemeRuntime } from '@/platform/theme';
+import {
+  applyTheme,
+  buildAntdTheme,
+  motionDurations,
+  switchWithRipple,
+  type ThemeMode,
+  type ThemeRuntime,
+} from '@/platform/theme';
 import { parseShellSettings, serializeShellSettings, type ShellSettings } from './shell-settings';
 
 const preferenceKey = 'Ui.Shell';
@@ -60,12 +67,30 @@ export const useShellSettingsStore = defineStore('shellSettings', () => {
     }
   }, saveDelayMs);
 
+  // 未登录时（登录页切深浅色）只存本机
   function update(change: (draft: ShellSettings) => void): void {
     const draft = structuredClone(toRaw(settings.value));
     change(draft);
     settings.value = draft;
-    writeCache(currentUser.me?.userId ?? null, draft);
-    void save();
+    const userId = currentUser.me?.userId ?? null;
+    writeCache(userId, draft);
+    if (userId !== null) {
+      void save();
+    }
+  }
+
+  /** 在深色和浅色之间切换，从点击位置圆形扩散 */
+  async function toggleMode(origin: { x: number; y: number }): Promise<void> {
+    const next = resolvedMode.value === 'dark' ? 'light' : 'dark';
+    await switchWithRipple(
+      origin,
+      () => {
+        update((draft) => {
+          draft.appearance.mode = next;
+        });
+      },
+      { reducedMotion: reducedMotion.value, durationMs: motionDurations.theme },
+    );
   }
 
   async function load(): Promise<void> {
@@ -92,7 +117,7 @@ export const useShellSettingsStore = defineStore('shellSettings', () => {
     await load();
   }
 
-  return { settings, resolvedMode, antdTheme, reducedMotion, saveFailed, update, load, reset };
+  return { settings, resolvedMode, antdTheme, reducedMotion, saveFailed, update, toggleMode, load, reset };
 });
 
 const cacheKey = (userId: string | null): string => `kmic.shell.${userId ?? 'anonymous'}`;

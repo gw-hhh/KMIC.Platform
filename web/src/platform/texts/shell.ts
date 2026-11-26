@@ -2,7 +2,8 @@
 export const shellTexts = {
   appName: 'KMIC',
   login: {
-    title: '登录',
+    title: '欢迎回来',
+    description: '请输入账号和密码',
     account: '账号',
     password: '密码',
     submit: '登录',

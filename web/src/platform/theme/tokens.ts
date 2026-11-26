@@ -7,6 +7,8 @@ export interface ColorSet {
   background: Hsl;
   /** 内容区底色 */
   backgroundDeep: Hsl;
+  /** 浮层底色：下拉、弹出框、对话框 */
+  popover: Hsl;
   foreground: Hsl;
   mutedForeground: Hsl;
   /** 标签栏工具按钮等的悬停底色，比 accent 略深 */
@@ -27,6 +29,7 @@ export const colorSets: Record<ThemeMode, ColorSet> = {
   light: {
     background: { h: 0, s: 0, l: 100 },
     backgroundDeep: { h: 216, s: 20.11, l: 95.47 },
+    popover: { h: 0, s: 0, l: 100 },
     foreground: { h: 210, s: 6, l: 21 },
     mutedForeground: { h: 240, s: 3.8, l: 46.1 },
     muted: { h: 240, s: 4.8, l: 95.9 },
@@ -41,6 +44,7 @@ export const colorSets: Record<ThemeMode, ColorSet> = {
   dark: {
     background: { h: 222.34, s: 10.43, l: 12.27 },
     backgroundDeep: { h: 220, s: 13.06, l: 9 },
+    popover: { h: 0, s: 0, l: 14.2 },
     foreground: { h: 0, s: 0, l: 95 },
     mutedForeground: { h: 240, s: 5, l: 64.9 },
     muted: { h: 240, s: 3.7, l: 15.9 },

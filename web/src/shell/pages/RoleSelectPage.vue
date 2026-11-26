@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useCurrentUserStore } from '@/platform/session/current-user';
 import { useAuth } from '@/platform/session/use-auth';
 import { shellTexts } from '@/platform/texts/shell';
-import AuthCard from './AuthCard.vue';
+import AuthLayout from './AuthLayout.vue';
 
 const t = shellTexts.selectRole;
 const auth = useAuth();
@@ -23,14 +23,14 @@ async function logout(): Promise<void> {
 </script>
 
 <template>
-  <AuthCard :title="t.title" :description="t.description">
+  <AuthLayout :title="t.title" :description="t.description">
     <div class="roles">
       <Button v-for="role in currentUser.me?.roles ?? []" :key="role.id" block @click="select(role.id)">{{
         role.name
       }}</Button>
     </div>
     <Button type="link" class="logout" @click="logout">{{ t.logout }}</Button>
-  </AuthCard>
+  </AuthLayout>
 </template>
 
 <style scoped lang="scss">

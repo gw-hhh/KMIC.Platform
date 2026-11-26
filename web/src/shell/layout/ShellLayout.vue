@@ -8,7 +8,7 @@ import { useCatalog } from '@/platform/routing/use-catalog';
 import { useCurrentUserStore } from '@/platform/session/current-user';
 import { useAuth } from '@/platform/session/use-auth';
 import { shellTexts } from '@/platform/texts/shell';
-import { motionDurations, shellSizes, switchWithRipple } from '@/platform/theme';
+import { shellSizes } from '@/platform/theme';
 import KIcon from '@/platform/ui/KIcon.vue';
 import { useNavigationState } from '../navigation-state';
 import SearchDialog from '../search/SearchDialog.vue';
@@ -255,19 +255,6 @@ function resetWidth(): void {
   });
 }
 
-async function toggleTheme(origin: { x: number; y: number }): Promise<void> {
-  const next = shellSettings.resolvedMode === 'dark' ? 'light' : 'dark';
-  await switchWithRipple(
-    origin,
-    () => {
-      shellSettings.update((draft) => {
-        draft.appearance.mode = next;
-      });
-    },
-    { reducedMotion: shellSettings.reducedMotion, durationMs: motionDurations.theme },
-  );
-}
-
 function confirmLogout(): Promise<boolean> {
   return new Promise((resolve) => {
     Modal.confirm({
@@ -328,7 +315,7 @@ async function resetSettings(): Promise<void> {
       @toggle-sidebar="toggleSidebar"
       @open-search="searchOpen = true"
       @open-link="openLink"
-      @toggle-theme="toggleTheme"
+      @toggle-theme="shellSettings.toggleMode"
       @open-settings="settingsOpen = true"
       @switch-role="switchRole"
       @change-password="changePassword"
@@ -450,7 +437,7 @@ async function resetSettings(): Promise<void> {
         :sidebar-hidden="hidden"
         @toggle-sidebar="toggleSidebar"
         @open-search="searchOpen = true"
-        @toggle-theme="toggleTheme"
+        @toggle-theme="shellSettings.toggleMode"
         @open-settings="settingsOpen = true"
         @open-crumb="openRoute"
         @open-link="openLink"

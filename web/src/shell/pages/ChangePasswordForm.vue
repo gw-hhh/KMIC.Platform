@@ -7,7 +7,7 @@ import { usePage } from '@/platform/page';
 import { useCurrentUserStore } from '@/platform/session/current-user';
 import { useAuth } from '@/platform/session/use-auth';
 import { shellTexts } from '@/platform/texts/shell';
-import AuthCard from './AuthCard.vue';
+import AuthLayout from './AuthLayout.vue';
 
 const { standalone } = defineProps<{ standalone: boolean }>();
 
@@ -55,7 +55,7 @@ const confirmRule = {
 
 <template>
   <component
-    :is="standalone ? AuthCard : 'div'"
+    :is="standalone ? AuthLayout : 'div'"
     v-bind="standalone ? { title: t.title, description: t.required } : { class: 'inline' }"
   >
     <Alert v-if="errorMessage" class="error" type="error" show-icon :message="errorMessage" />

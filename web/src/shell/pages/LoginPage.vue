@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { KmicError } from '@/platform/api';
 import { useAuth } from '@/platform/session/use-auth';
 import { shellTexts } from '@/platform/texts/shell';
-import AuthCard from './AuthCard.vue';
+import AuthLayout from './AuthLayout.vue';
 
 const t = shellTexts.login;
 const auth = useAuth();
@@ -38,7 +38,7 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <AuthCard :title="t.title">
+  <AuthLayout :title="t.title" :description="t.description">
     <Alert v-if="errorMessage" class="error" type="error" show-icon :message="errorMessage" />
     <Form layout="vertical" :model="form" @finish="submit">
       <FormItem name="account" :label="t.account" :rules="[{ required: true, message: t.accountRequired }]">
@@ -49,7 +49,7 @@ async function submit(): Promise<void> {
       </FormItem>
       <Button type="primary" html-type="submit" block :loading="submitting">{{ t.submit }}</Button>
     </Form>
-  </AuthCard>
+  </AuthLayout>
 </template>
 
 <style scoped lang="scss">

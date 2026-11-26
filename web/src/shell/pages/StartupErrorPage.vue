@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useCurrentUserStore } from '@/platform/session/current-user';
 import { useAuth } from '@/platform/session/use-auth';
 import { shellTexts } from '@/platform/texts/shell';
-import AuthCard from './AuthCard.vue';
+import AuthLayout from './AuthLayout.vue';
 
 const t = shellTexts.startupError;
 const auth = useAuth();
@@ -23,13 +23,13 @@ async function logout(): Promise<void> {
 </script>
 
 <template>
-  <AuthCard :title="t.title" :description="currentUser.failure?.message">
+  <AuthLayout :title="t.title" :description="currentUser.failure?.message">
     <p v-if="currentUser.failure?.traceId" class="trace">{{ t.traceId }}：{{ currentUser.failure.traceId }}</p>
     <div class="actions">
       <Button type="primary" @click="retry">{{ t.retry }}</Button>
       <Button @click="logout">{{ t.logout }}</Button>
     </div>
-  </AuthCard>
+  </AuthLayout>
 </template>
 
 <style scoped lang="scss">
