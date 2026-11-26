@@ -32,7 +32,7 @@
 | S3-04 | Files | `docs/modules/files/` | 后端完成：上传、关联、下载、管理、清理、对账、生成文件。预签名下载与 S3 范围读取在延后事项 |
 | S3-05 | Notifications | `docs/modules/notifications/` | 后端完成：站内消息、模板目录与渲染、版本与管理、发送请求处理、投递（邮件、短信渠道接口）、投递管理、清理、非生产捕获。阿里云短信网关已搁置 |
 | S3-06 | 联调 | 退出标准 | 附件、通知、审计查询已接入 `Sample` 并有端到端测试；访问上下文加载在本机压过一轮（2 万用户，顺序 p95 2.01 毫秒）。测试环境的部分等 T-20、T-30 |
-| S3-07 | 前端 | F03～F07 | 外壳（F06）、请求层与查询（`defineModuleApi`、`useCommand`、`page.useQuery`）、类型与常量生成已完成。未做：表单（KForm）、业务表格首版（F07）、`platform/ui` 的交互组件、结果未知的待核对清单、`useJob` 与作业结果下载、前端错误上报；然后是 `Sample` 前端样板和平台模块管理页面（见第 2 节） |
+| S3-07 | 前端 | F03～F07 | 外壳（F06）、请求层与查询（`defineModuleApi`、`useCommand`、`page.useQuery`）、类型与常量生成已完成。未做：表单（KForm）、业务表格首版（F07）、`platform/ui` 的交互组件、结果未知的待核对清单、`useJob` 与作业结果下载、前端错误上报；然后是 `Sample` 前端样板和平台模块管理页面；2026-11-26 起暂停（见第 2 节） |
 
 ## 2. 下一步：打磨框架
 
@@ -45,16 +45,14 @@
 - 用词检查把“租约”移出名单；summary 标签各占一行的检查改为 `--fix-only` 自动修复。
 - 删除 `Kmic.AppHost`，本地可观测面板改由 `dev.cs` 可选启动独立的 aspire-dashboard 容器；`Kmic.ServiceDefaults` 保留。
 
-顺序：
+顺序（2026-11-26 用户再次决定：前端暂停，先打磨现有项目）：
 
 | 批次 | 内容 | 状态 |
 |---|---|---|
-| 1 | 已确认的缺陷与工程修复：刷新请求超时、启动遮罩可能挡住点击、退出后同一账号重新登录不重建工作区、切换角色后不重新加载偏好、浏览器回归脚本收进仓库、`Dockerfile` 分层还原与锁定模式、补 `Identity.slnf` 与 `Sample.slnf`、`check.cs --fast` / `--fix-only`、上面的用词与 summary 调整、MinIO 测试镜像从源码构建（`docker/minio`）已完成；剩 T-18 | 进行中 |
+| 1 | 已确认的缺陷与工程修复（刷新超时、启动遮罩、重新登录与切换角色重读偏好、端到端测试进仓库、`Dockerfile` 分层还原与锁定模式、两个 `.slnf`、`check.cs --fast` / `--fix-only`、用词与 summary 调整、MinIO 镜像从源码构建） | 完成；剩 T-18 要用户在 Actions 页面手动运行 |
 | 2 | 删除 `Kmic.AppHost`，`dev.cs` 加可观测面板开关（ADR-0033） | 完成 |
-| 3 | 前端底座：`KForm`、`KTable`（F07 首版）、`platform/ui` 交互组件、`useJob` 与作业结果下载、结果未知的待核对清单、前端错误上报 | 未开始 |
-| 4 | `Sample` 前端样板（F05 的活样板，非生产环境才有） | 未开始 |
-| 5 | 平台模块管理页面：Configuration → Identity → Files → Notifications → Operations | 未开始 |
-| 穿插 | 后端简单维护档、T-32 框架余项 | 未开始 |
+| 3 | 后端打磨：作业受理返回加模块名（接口只加字段）；07 的“简单维护”档（通用仓储、`Maintenance/` 目录放开 MA0048）；T-32 框架余项 | 进行中 |
+| 暂停 | 前端底座（`KForm`、`KTable`、`platform/ui`、`useJob` 与作业结果下载、待核对清单、错误上报）、`Sample` 前端样板、平台模块管理页面 | 等用户恢复前端 |
 
 ## 3. 待决事项
 
