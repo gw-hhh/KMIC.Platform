@@ -10,6 +10,11 @@ internal sealed class StartRecountCommandHandler(IBackgroundJobs jobs) : IComman
     {
         IBackgroundJob job = command.Export ? new ExportTicketJob(command.Id.Value) : new RecountTicketJob(command.Id.Value, command.Batches);
         var enqueued = await jobs.EnqueueAsync(job, cancellationToken);
-        return command.Fail && enqueued.IsSuccess ? TicketErrors.Rejected : enqueued;
+        if (enqueued.IsFailure)
+        {
+            return enqueued.Error;
+        }
+
+        return command.Fail ? TicketErrors.Rejected : enqueued.Value.JobId;
     }
 }

@@ -79,6 +79,11 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         var accepted = await JsonAsync(response);
         var jobId = accepted.GetProperty("jobId").GetGuid();
         response.Headers.Location!.ToString().ShouldBe($"{Root}/{jobId}/file");
+
+        // 返回的模块名直接能用来查作业进度
+        var module = accepted.GetProperty("module").GetString();
+        var job = await SendAsync(HttpMethod.Get, $"/api/v1/operations/my-jobs/{module}/{jobId}", token);
+        job.StatusCode.ShouldBe(HttpStatusCode.OK);
         return jobId;
     }
 

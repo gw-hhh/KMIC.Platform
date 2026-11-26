@@ -68,16 +68,18 @@ public sealed class ResultHttpTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ToAccepted_Returns202WithLocationAndJobId()
+    public async Task ToAccepted_Returns202WithLocationJobIdAndModule()
     {
         var jobId = Guid.CreateVersion7();
-        _api.Script.On<StartExportCommand, JobAccepted>((_, _) => new JobAccepted(jobId));
+        _api.Script.On<StartExportCommand, JobAccepted>((_, _) => new JobAccepted(jobId, "Samples"));
 
         var response = await _api.Client.PostAsync("/api/v1/samples/things/export", content: null, Ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Accepted);
         response.Headers.Location!.OriginalString.ShouldBe($"/api/v1/operations/jobs/{jobId}");
-        (await response.JsonAsync()).GetProperty("jobId").GetGuid().ShouldBe(jobId);
+        var body = await response.JsonAsync();
+        body.GetProperty("jobId").GetGuid().ShouldBe(jobId);
+        body.GetProperty("module").GetString().ShouldBe("Samples");
     }
 
     [Fact]

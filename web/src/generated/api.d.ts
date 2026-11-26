@@ -16526,6 +16526,8 @@ export interface components {
              * @description 作业 ID
              */
             jobId: string;
+            /** @description 作业所在的模块，查进度和取消时放进地址：my-jobs/{模块}/{作业 ID} */
+            module: string;
         };
         /**
          * @description 定时任务一次执行的状态

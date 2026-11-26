@@ -20,7 +20,7 @@ internal sealed class BackgroundJobs(
     CommandTransaction transaction,
     TimeProvider time) : IBackgroundJobs
 {
-    public async Task<Result<Guid>> EnqueueAsync(IBackgroundJob job, CancellationToken ct)
+    public async Task<Result<JobAccepted>> EnqueueAsync(IBackgroundJob job, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(job);
         if (!execution.InCommand)
@@ -75,7 +75,7 @@ internal sealed class BackgroundJobs(
         };
         jobs.Add(record);
         RegisterNotify(type.Module);
-        return record.Id;
+        return new JobAccepted(record.Id, type.Module);
     }
 
     // 通知在提交时才送达，执行器被唤醒时一定能读到作业行。同一事务里重复的通知数据库会合并

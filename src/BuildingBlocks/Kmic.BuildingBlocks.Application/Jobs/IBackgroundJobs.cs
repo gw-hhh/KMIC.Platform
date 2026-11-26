@@ -11,7 +11,7 @@ namespace Kmic.BuildingBlocks.Application.Jobs;
 public interface IBackgroundJobs
 {
     /// <summary>
-    /// 排队一个作业，返回作业 ID；同一用户这种作业排队和运行中的数量到上限时返回 Common.TooManyJobs
+    /// 排队一个作业，返回作业 ID 和所在模块；同一用户这种作业排队和运行中的数量到上限时返回 Common.TooManyJobs
     /// </summary>
-    Task<Result<Guid>> EnqueueAsync(IBackgroundJob job, CancellationToken ct);
+    Task<Result<JobAccepted>> EnqueueAsync(IBackgroundJob job, CancellationToken ct);
 }
