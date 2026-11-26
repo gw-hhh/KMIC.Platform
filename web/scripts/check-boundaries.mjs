@@ -19,6 +19,7 @@ const expected = new Map([
   ['modules/orders/pages/rawFetch.ts', 'no-restricted-globals'],
   ['modules/orders/pages/ImportInteractiveComponent.vue', 'no-restricted-imports'],
   ['modules/orders/pages/importVxe.ts', 'no-restricted-imports'],
+  ['modules/orders/pages/rawUseQuery.ts', 'no-restricted-imports'],
 ]);
 
 const eslint = new ESLint({

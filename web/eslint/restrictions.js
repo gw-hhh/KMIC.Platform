@@ -63,6 +63,11 @@ export function moduleRestrictions(modulesGlob) {
                 importNames: ['useMutation'],
                 message: '写入经 useCommand，它负责幂等、版本和结果未知',
               },
+              {
+                name: '@tanstack/vue-query',
+                importNames: ['useQuery'],
+                message: '读取经 page.useQuery，页面不是当前标签时它会暂停，切回来再刷新',
+              },
             ],
             patterns: [
               {

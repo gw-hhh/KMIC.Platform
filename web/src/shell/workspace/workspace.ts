@@ -79,7 +79,10 @@ export function createWorkspace(options: WorkspaceOptions): Workspace {
 
   function createPage(key: string): void {
     pages.value.get(key)?.destroy();
-    pages.value = new Map(pages.value).set(key, createPageInstance({ key, epoch: options.epoch() }));
+    pages.value = new Map(pages.value).set(
+      key,
+      createPageInstance({ key, epoch: options.epoch(), isActive: () => state.activeKey === key }),
+    );
   }
 
   function removePage(key: string): void {
