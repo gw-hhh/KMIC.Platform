@@ -105,7 +105,14 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
   async function doRefresh(): Promise<boolean> {
     let response: Response;
     try {
-      response = await send(new Request(refreshUrl, { method: 'POST', headers: { 'X-Requested-With': 'kmic' } }));
+      // 刷新也要超时：挂住的话，所有等刷新的请求和别的标签页都会跟着卡住
+      response = await send(
+        new Request(refreshUrl, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'kmic' },
+          signal: AbortSignal.timeout(timeoutMs),
+        }),
+      );
     } catch (error) {
       throw toTransportError(error, false, undefined);
     }

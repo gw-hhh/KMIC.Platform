@@ -3,7 +3,10 @@
 // 本地和 CI 共用的质量检查：dotnet run scripts/check.cs
 // 按下方顺序执行，任一步失败即停止，并返回该步骤的退出码
 // 数据库测试和密钥扫描需要 Docker
-// 本地可加 -- --fix 移除 BOM，并将 CRLF 换行改为 LF；CI 只检查，不修复
+// 参数（本地用，CI 不加）：
+//   --fix-only  只修能自动修的（BOM、CRLF、summary 标签各占一行）然后退出，几秒钟
+//   --fix       先修，再跑全部检查
+//   --fast      只跑静态检查和单元测试（约一两分钟），跳过 .NET 测试、依赖漏洞、前端构建与端到端、密钥扫描、拼写
 // 依赖漏洞扫描在本地依赖锁文件未变时 24 小时内只扫一次，CI 每次都扫
 using System.Diagnostics;
 using System.Globalization;
@@ -13,33 +16,45 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 
 var root = FindRepositoryRoot();
-var fix = args.Contains("--fix", StringComparer.Ordinal);
-var steps = new (string Name, Func<int> Run)[]
+var fixOnly = args.Contains("--fix-only", StringComparer.Ordinal);
+var fix = fixOnly || args.Contains("--fix", StringComparer.Ordinal);
+var fast = args.Contains("--fast", StringComparer.Ordinal);
+
+if (fixOnly)
 {
-    ("编码与换行（UTF-8 无 BOM、LF）", () => CheckEncoding(root, fix)),
-    ("注释格式（summary 三行）", () => CheckCommentStyle(root)),
-    ("用词（设计文档编号、不用的说法）", () => CheckWording(root)),
+    var encoding = CheckEncoding(root, fix: true);
+    var comments = CheckCommentStyle(root, fix: true);
+    return encoding == 0 && comments == 0 ? 0 : 1;
+}
+
+// Fast：--fast 时也跑
+var steps = new (string Name, bool Fast, Func<int> Run)[]
+{
+    ("编码与换行（UTF-8 无 BOM、LF）", true, () => CheckEncoding(root, fix)),
+    ("注释格式（summary 标签各占一行）", true, () => CheckCommentStyle(root, fix)),
+    ("用词（设计文档编号、不用的说法）", true, () => CheckWording(root)),
     // 代码风格与分析器规则由编译检查（EnforceCodeStyleInBuild、警告即错误），这里只查编译不管的空白、文件末尾换行与 using 顺序
-    ("格式（空白与 using 顺序）", () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes --diagnostics IMPORTS")),
-    ("编译（警告即错误）", () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
-    ("测试", () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
-    ("依赖漏洞（含传递依赖）", () => WhenProjectsExist(root, () => CheckVulnerabilities(root))),
+    ("格式（空白与 using 顺序）", true, () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes --diagnostics IMPORTS")),
+    ("编译（警告即错误）", true, () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
+    ("测试", false, () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
+    ("依赖漏洞（含传递依赖）", false, () => WhenProjectsExist(root, () => CheckVulnerabilities(root))),
     // pnpm 版本与 web/package.json 保持一致
     // 接口类型比对依赖后端测试导出的 OpenAPI 文档，须在后端测试后执行
-    ("前端依赖（pnpm install --frozen-lockfile）", () => RunWeb(root, "install --frozen-lockfile")),
-    ("前端接口类型比对", () => RunWeb(root, "run generate:api -- --check")),
-    ("前端类型检查", () => RunWeb(root, "run typecheck")),
-    ("前端代码及依赖边界检查", () => RunWeb(root, "run lint")),
-    ("前端格式（prettier --check）", () => RunWeb(root, "run format:check")),
-    ("前端测试", () => RunWeb(root, "run test")),
-    ("前端构建", () => RunWeb(root, "run build")),
+    ("前端依赖（pnpm install --frozen-lockfile）", true, () => RunWeb(root, "install --frozen-lockfile")),
+    ("前端接口类型比对", false, () => RunWeb(root, "run generate:api -- --check")),
+    ("前端类型检查", true, () => RunWeb(root, "run typecheck")),
+    ("前端代码及依赖边界检查", true, () => RunWeb(root, "run lint")),
+    ("前端格式（prettier --check）", true, () => RunWeb(root, "run format:check")),
+    ("前端测试", true, () => RunWeb(root, "run test")),
+    ("前端构建", false, () => RunWeb(root, "run build")),
+    ("前端端到端（Playwright，假后端）", false, () => RunEndToEnd(root)),
     // 密钥扫描包含提交历史，CI 必须检出完整历史
-    ("密钥扫描（Gitleaks）", () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
-    ("拼写（cspell）", () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
+    ("密钥扫描（Gitleaks）", false, () => Run(root, "docker", $"run --rm -v \"{root}:/repo\" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --config /repo/.gitleaks.toml --redact --no-banner")),
+    ("拼写（cspell）", false, () => Run(root, "npx", "--yes cspell@10.4.0 lint --no-progress --no-must-find-files --config cspell.json")),
 };
 
 var total = Stopwatch.StartNew();
-foreach (var (name, run) in steps)
+foreach (var (name, _, run) in steps.Where(s => !fast || s.Fast))
 {
     Console.WriteLine($"== {name}");
     var step = Stopwatch.StartNew();
@@ -52,7 +67,9 @@ foreach (var (name, run) in steps)
     }
 }
 
-Console.WriteLine($"== 全部通过（共 {Seconds(total.Elapsed)} 秒）");
+Console.WriteLine(fast
+    ? $"== 快速检查通过（共 {Seconds(total.Elapsed)} 秒；提交前仍要跑一次完整检查）"
+    : $"== 全部通过（共 {Seconds(total.Elapsed)} 秒）");
 return 0;
 
 static int Seconds(TimeSpan elapsed) => (int)Math.Round(elapsed.TotalSeconds);
@@ -204,6 +221,14 @@ static int RunWeb(string root, string pnpmArguments)
     return Run(root, "npx", $"--yes pnpm@11.28.9 --dir web {pnpmArguments}");
 }
 
+// 浏览器装在用户目录，已装过时几乎不花时间；CI 的 Linux 执行机还要装系统依赖
+static int RunEndToEnd(string root)
+{
+    var ci = string.Equals(Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
+    var install = RunWeb(root, ci ? "exec playwright install --with-deps chromium" : "exec playwright install chromium");
+    return install != 0 ? install : RunWeb(root, "run test:e2e");
+}
+
 static int Run(string root, string fileName, string arguments)
 {
     // Windows 上的 npx 是批处理命令，需要通过 cmd.exe 执行
@@ -342,10 +367,11 @@ static int CheckWording(string root)
     return problems == 0 ? 0 : 1;
 }
 
-// 只检查整行的 XML 注释：summary 的开始、结束标签各占一行。句号不检查
-static int CheckCommentStyle(string root)
+// 只检查整行的 XML 注释：summary 的开始、结束标签各占一行。句号不检查。修复时按原缩进拆成多行
+static int CheckCommentStyle(string root, bool fix)
 {
     var problems = 0;
+    var fixedFiles = 0;
     foreach (var file in ListFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
     {
         var path = Path.Combine(root, file);
@@ -355,17 +381,36 @@ static int CheckCommentStyle(string root)
         }
 
         var lines = File.ReadAllLines(path);
+        var output = new List<string>(lines.Length);
+        var changed = false;
         for (var i = 0; i < lines.Length; i++)
         {
-            if (HasInlineSummaryTag(lines[i].Trim()))
+            if (!HasInlineSummaryTag(lines[i].Trim()))
+            {
+                output.Add(lines[i]);
+                continue;
+            }
+
+            if (!fix)
             {
                 Console.WriteLine($"   {file}:{i + 1} summary 的开始、结束标签要各占一行");
                 problems++;
+                continue;
             }
+
+            output.AddRange(SplitSummaryTags(lines[i]));
+            changed = true;
+        }
+
+        if (changed)
+        {
+            File.WriteAllText(path, string.Join('\n', output) + "\n", new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            Console.WriteLine($"   已修复：{file}");
+            fixedFiles++;
         }
     }
 
-    Console.WriteLine($"   注释格式问题 {problems} 处");
+    Console.WriteLine(fix ? $"   已修复 {fixedFiles} 个文件" : $"   注释格式问题 {problems} 处");
     return problems == 0 ? 0 : 1;
 }
 
@@ -381,6 +426,30 @@ static bool HasInlineSummaryTag(string line)
         || (text.EndsWith("</summary>", StringComparison.Ordinal) && text.Length > "</summary>".Length);
 }
 
+// "/// <summary>文字</summary>" 拆成三行；只有开始或结束标签和文字挤在一行的，拆成两行
+static IEnumerable<string> SplitSummaryTags(string line)
+{
+    var indent = line[..line.IndexOf("///", StringComparison.Ordinal)];
+    var text = line.Trim()[3..].Trim();
+    var opens = text.StartsWith("<summary>", StringComparison.Ordinal);
+    var closes = text.EndsWith("</summary>", StringComparison.Ordinal);
+    var body = text[(opens ? "<summary>".Length : 0)..^(closes ? "</summary>".Length : 0)].Trim();
+    if (opens)
+    {
+        yield return $"{indent}/// <summary>";
+    }
+
+    if (body.Length > 0)
+    {
+        yield return $"{indent}/// {body}";
+    }
+
+    if (closes)
+    {
+        yield return $"{indent}/// </summary>";
+    }
+}
+
 namespace Kmic.Scripts
 {
     internal static partial class Patterns
@@ -390,7 +459,7 @@ namespace Kmic.Scripts
         public static partial Regex DesignReference();
 
         // 只收没有正当用法的说法：设计文档里的说法、自造词、空话。评审发现新的同类说法再加
-        [GeneratedRegex("定稿|挂接|租约|管道第|落地|收口|闭环|赋能|抓手|进行统一处理|高效管理|完整、灵活|完整性与可靠性", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
+        [GeneratedRegex("定稿|挂接|管道第|落地|收口|闭环|赋能|抓手|进行统一处理|高效管理|完整、灵活|完整性与可靠性", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
         public static partial Regex AvoidedWording();
     }
 }

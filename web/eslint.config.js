@@ -11,7 +11,15 @@ import { moduleRestrictions } from './eslint/restrictions.js';
 export default tseslint.config(
   {
     // generated/ 是生成代码不手改；边界样例是故意写错的，由 scripts/check-boundaries.mjs 单独检查
-    ignores: ['dist', 'node_modules', 'src/generated', 'tests/boundaries', 'coverage'],
+    ignores: [
+      'dist',
+      'node_modules',
+      'src/generated',
+      'tests/boundaries',
+      'coverage',
+      'test-results',
+      'playwright-report',
+    ],
   },
   {
     // 所有豁免只能指定规则、写在下一行；多余的豁免也报错

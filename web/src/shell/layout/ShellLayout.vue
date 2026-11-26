@@ -284,6 +284,8 @@ async function switchRole(roleId: string): Promise<void> {
     return;
   }
   await auth.switchRole(roleId);
+  // 偏好有角色默认层，换了角色要重新读
+  await shellSettings.load();
   workspace.onEpochChange();
   message.success(t.header.roleSwitched.replace('{role}', me.value?.currentRole.name ?? ''));
 }

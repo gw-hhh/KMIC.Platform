@@ -4,11 +4,23 @@
 #   docker build --target migrator -t kmic-migrator .
 # 配置、连接串、密钥都不进镜像，由部署时的环境变量与挂载文件提供
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# 只挑出还原要用的文件（项目文件、锁文件、全局属性、包源）。这些文件不变时，下一阶段的还原层直接用缓存
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS restore-inputs
 WORKDIR /src
 COPY . .
-RUN dotnet publish src/Hosts/Kmic.Api -c Release -o /out/api \
- && dotnet publish src/Hosts/Kmic.MigrationRunner -c Release -o /out/migrator
+RUN mkdir /inputs \
+ && find . -type f \( -name '*.csproj' -o -name 'packages.lock.json' -o -name 'Directory.*.props' -o -name 'Directory.*.targets' \
+      -o -name 'global.json' -o -iname 'nuget.config' \) -exec cp --parents {} /inputs \;
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY --from=restore-inputs /inputs .
+# 锁定模式：锁文件和项目要求的版本不一致就失败，镜像里不会悄悄换成别的版本
+RUN dotnet restore src/Hosts/Kmic.Api -p:RestoreLockedMode=true \
+ && dotnet restore src/Hosts/Kmic.MigrationRunner -p:RestoreLockedMode=true
+COPY . .
+RUN dotnet publish src/Hosts/Kmic.Api -c Release -o /out/api --no-restore \
+ && dotnet publish src/Hosts/Kmic.MigrationRunner -c Release -o /out/migrator --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra AS api
 WORKDIR /app

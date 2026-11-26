@@ -77,6 +77,8 @@ export function installNavigationGuards(router: Router, deps: RouterDeps): void 
     };
     const target = forced[currentUser.status];
     if (target !== undefined) {
+      // 退出或进不了系统后，下次进入外壳要重新加载偏好、重建工作区，即使还是同一个账号
+      shellReadyFor = null;
       if (to.name === target) {
         return true;
       }

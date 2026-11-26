@@ -12,7 +12,9 @@
     "**/Migrations/**",
     "**/weak-passwords.txt",
     "**/generated/**",
-    "**/*.verified.*"
+    "**/*.verified.*",
+    "**/test-results/**",
+    "**/playwright-report/**"
   ],
   "dictionaryDefinitions": [
     {

@@ -65,8 +65,14 @@ app.provide(navigateKey, (name, params) => workspace.open(name, params));
 app.use(router);
 app.mount('#app');
 
+// 启动动画淡出后移除；后台标签页里过渡可能不触发 transitionend，到时间也移除
 const loading = document.getElementById('app-loading');
-loading?.classList.add('is-done');
-loading?.addEventListener('transitionend', () => {
-  loading.remove();
-});
+if (loading !== null) {
+  loading.classList.add('is-done');
+  loading.addEventListener('transitionend', () => {
+    loading.remove();
+  });
+  setTimeout(() => {
+    loading.remove();
+  }, 1000);
+}

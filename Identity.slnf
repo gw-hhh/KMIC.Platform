@@ -1,0 +1,20 @@
+{
+  "solution": {
+    "path": "Kmic.slnx",
+    "projects": [
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Application\\Kmic.BuildingBlocks.Application.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Contracts\\Kmic.BuildingBlocks.Contracts.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Domain\\Kmic.BuildingBlocks.Domain.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Infrastructure\\Kmic.BuildingBlocks.Infrastructure.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Presentation\\Kmic.BuildingBlocks.Presentation.csproj",
+      "src\\BuildingBlocks\\Kmic.BuildingBlocks.Testing\\Kmic.BuildingBlocks.Testing.csproj",
+      "src\\Modules\\Identity\\Kmic.Identity.Application\\Kmic.Identity.Application.csproj",
+      "src\\Modules\\Identity\\Kmic.Identity.Contracts\\Kmic.Identity.Contracts.csproj",
+      "src\\Modules\\Identity\\Kmic.Identity.Domain\\Kmic.Identity.Domain.csproj",
+      "src\\Modules\\Identity\\Kmic.Identity.Infrastructure\\Kmic.Identity.Infrastructure.csproj",
+      "src\\Modules\\Identity\\Kmic.Identity.Presentation\\Kmic.Identity.Presentation.csproj",
+      "tests\\Modules\\Identity\\Kmic.Identity.Application.Tests\\Kmic.Identity.Application.Tests.csproj",
+      "tests\\Modules\\Identity\\Kmic.Identity.Domain.Tests\\Kmic.Identity.Domain.Tests.csproj"
+    ]
+  }
+}

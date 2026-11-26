@@ -315,6 +315,44 @@ describe('401 与刷新', () => {
     expect([error.code, refreshCalls]).toEqual(['Identity.LoginFailed', 0]);
   });
 
+  it('刷新挂住时按超时失败并释放锁，之后的刷新照常进行', async () => {
+    let refreshCalls = 0;
+    let held = 0;
+    const locks = {
+      async request<T>(_name: string, callback: () => Promise<T>) {
+        held++;
+        try {
+          return await callback();
+        } finally {
+          held--;
+        }
+      },
+    };
+    server.use(
+      http.get(`${origin}/api/v1/identity/me`, ({ request }) =>
+        request.headers.get('Authorization') === 'Bearer token-2'
+          ? HttpResponse.json({})
+          : problem(401, 'Common.Unauthenticated'),
+      ),
+      http.post(`${origin}/api/v1/identity/auth/refresh`, async () => {
+        refreshCalls++;
+        if (refreshCalls === 1) {
+          await new Promise(() => {});
+        }
+        return refreshed('token-2');
+      }),
+    );
+    const session = createSession();
+    session.setToken('token-1');
+    const client = createApiClient({ session, origin, baseUrl: origin, locks, timeoutMs: 50 });
+
+    const error = (await client.GET('/api/v1/identity/me').catch((e: unknown) => e)) as KmicError;
+    expect([error.kind, held, session.token]).toEqual(['timeout', 0, 'token-1']);
+
+    await client.GET('/api/v1/identity/me');
+    expect([refreshCalls, session.token]).toEqual([2, 'token-2']);
+  });
+
   it('跨标签页的锁：刷新在锁里执行', async () => {
     const order: string[] = [];
     const locks = {
