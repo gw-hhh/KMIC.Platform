@@ -62,6 +62,11 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-color-background-deep': formatHsl(colors.backgroundDeep),
     '--kmic-color-foreground': formatHsl(colors.foreground),
     '--kmic-color-muted-foreground': formatHsl(colors.mutedForeground),
+    '--kmic-color-muted': formatHsl(colors.muted),
+    // 当前标签：浅色主题主色字、主色淡底；深色主题白字、灰底，和 Vben 一致
+    '--kmic-tab-active-color': runtime.resolvedMode === 'dark' ? formatHsl(colors.accentForeground) : primary,
+    '--kmic-tab-active-background':
+      runtime.resolvedMode === 'dark' ? formatHsl(colors.accent) : `color-mix(in srgb, ${primary} 15%, transparent)`,
     '--kmic-color-accent': formatHsl(colors.accent),
     '--kmic-color-accent-foreground': formatHsl(colors.accentForeground),
     '--kmic-color-accent-hover': formatHsl(colors.accentHover),

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { Dropdown } from 'antdv-next';
 import type { MenuProps } from 'antdv-next';
 import Sortable from 'sortablejs';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import type { RouteCatalog } from '@/platform/routing';
 import { shellTexts } from '@/platform/texts/shell';
+import KDropdown from '@/platform/ui/KDropdown.vue';
 import KIcon from '@/platform/ui/KIcon.vue';
+import type { IconName } from '@/platform/ui/icons';
 import type { TabStyle } from '../settings/shell-settings';
 import type { Tab, Workspace } from '../workspace/workspace';
 
@@ -20,6 +22,7 @@ const { workspace, catalog, homeRouteName, tabStyle, showIcon } = defineProps<{
 const maximized = defineModel<boolean>('maximized', { default: false });
 
 const t = shellTexts.tabs;
+const router = useRouter();
 const scroller = useTemplateRef<HTMLElement>('scroller');
 const list = useTemplateRef<HTMLElement>('list');
 const canScrollLeft = ref(false);
@@ -41,16 +44,25 @@ function menuFor(tab: Tab): MenuProps {
   const others = (predicate: (other: Tab, otherIndex: number) => boolean) =>
     tabs.value.some((other, otherIndex) => !other.pinned && other.key !== tab.key && predicate(other, otherIndex));
   const isHome = tab.routeName === homeRouteName;
+  const icon = (name: IconName) => h(KIcon, { name, size: 16 });
+  // 顺序、图标、分隔照 Vben 的标签右键菜单
   return {
     items: [
-      { key: 'close', label: t.close, disabled: tab.pinned },
-      { key: 'pin', label: tab.pinned ? t.unpin : t.pin, disabled: isHome },
-      { key: 'reload', label: t.reload },
+      { key: 'close', label: t.close, icon: icon('close'), disabled: tab.pinned },
+      { key: 'pin', label: tab.pinned ? t.unpin : t.pin, icon: icon(tab.pinned ? 'pin-off' : 'pin'), disabled: isHome },
+      {
+        key: 'maximize',
+        label: maximized.value ? t.exitMaximize : t.maximize,
+        icon: icon(maximized.value ? 'minimize' : 'fullscreen'),
+      },
+      { key: 'reload', label: t.reload, icon: icon('rotate') },
+      { key: 'window', label: t.openInNewWindow, icon: icon('external-link') },
       { type: 'divider' },
-      { key: 'left', label: t.closeLeft, disabled: !others((_, i) => i < index) },
-      { key: 'right', label: t.closeRight, disabled: !others((_, i) => i > index) },
-      { key: 'others', label: t.closeOthers, disabled: !others(() => true) },
-      { key: 'all', label: t.closeAll, disabled: closableCount.value === 0 },
+      { key: 'left', label: t.closeLeft, icon: icon('arrow-left-to-line'), disabled: !others((_, i) => i < index) },
+      { key: 'right', label: t.closeRight, icon: icon('arrow-right-to-line'), disabled: !others((_, i) => i > index) },
+      { type: 'divider' },
+      { key: 'others', label: t.closeOthers, icon: icon('fold-horizontal'), disabled: !others(() => true) },
+      { key: 'all', label: t.closeAll, icon: icon('arrow-right-left'), disabled: closableCount.value === 0 },
     ],
     onClick: ({ key }) => {
       void runMenuAction(key, tab, index);
@@ -70,6 +82,13 @@ async function runMenuAction(action: string, tab: Tab, index: number): Promise<v
       break;
     case 'reload':
       await workspace.reload(tab.key);
+      break;
+    case 'maximize':
+      await workspace.activate(tab.key);
+      maximized.value = !maximized.value;
+      break;
+    case 'window':
+      window.open(router.resolve({ name: tab.routeName, params: tab.params }).href, '_blank');
       break;
     case 'left':
       await workspace.closeMany(keysWhere((_, i) => i < index));
@@ -196,7 +215,7 @@ onBeforeUnmount(() => {
     <div ref="scroller" class="scroller" @scroll="updateScrollState" @wheel="onWheel">
       <div ref="list" class="list" role="tablist">
         <TransitionGroup name="tab-slide">
-          <Dropdown v-for="(tab, index) in tabs" :key="tab.key" :trigger="['contextmenu']" :menu="menuFor(tab)">
+          <KDropdown v-for="(tab, index) in tabs" :key="tab.key" :trigger="['contextmenu']" :menu="menuFor(tab)">
             <div
               class="tab"
               :class="{ 'is-active': tab.key === workspace.activeKey.value, 'is-pinned': tab.pinned }"
@@ -216,7 +235,7 @@ onBeforeUnmount(() => {
 
               <span class="main">
                 <KIcon v-if="showIcon && iconOf(tab)" class="tab-icon" :name="iconOf(tab) ?? 'file'" :size="16" />
-                <span class="title" :title="workspace.titleOf(tab)">{{ workspace.titleOf(tab) }}</span>
+                <span class="title">{{ workspace.titleOf(tab) }}</span>
                 <span v-if="statusOf(tab) === 'dirty'" class="state dirty" :title="t.unsaved" />
                 <KIcon
                   v-else-if="statusOf(tab) === 'saving'"
@@ -237,13 +256,13 @@ onBeforeUnmount(() => {
               <span class="extra">
                 <KIcon
                   v-if="tab.pinned && tab.routeName !== homeRouteName"
-                  class="extra-icon"
+                  class="extra-icon pin"
                   name="pin"
                   :size="14"
                   @click.stop="workspace.togglePin(tab.key)"
                 />
                 <KIcon
-                  v-else-if="!tab.pinned"
+                  v-else-if="!tab.pinned && tabs.length > 1"
                   class="extra-icon close"
                   name="close"
                   :size="12"
@@ -251,7 +270,7 @@ onBeforeUnmount(() => {
                 />
               </span>
             </div>
-          </Dropdown>
+          </KDropdown>
         </TransitionGroup>
       </div>
     </div>
@@ -266,20 +285,21 @@ onBeforeUnmount(() => {
     </button>
 
     <div class="tools">
-      <Dropdown v-if="activeTab" :menu="menuFor(activeTab)" :trigger="['click']">
-        <button class="tool" :title="t.more"><KIcon name="grid" :size="16" /></button>
-      </Dropdown>
-      <button class="tool" :title="t.reload" @click="activeTab && workspace.reload(activeTab.key)">
-        <KIcon name="refresh" :size="16" />
+      <KDropdown v-if="activeTab" :menu="menuFor(activeTab)" placement="bottomRight">
+        <button class="tool" :aria-label="t.more"><KIcon name="grid" :size="16" /></button>
+      </KDropdown>
+      <button class="tool" :aria-label="t.reload" @click="activeTab && workspace.reload(activeTab.key)">
+        <KIcon name="rotate" :size="16" />
       </button>
-      <button class="tool" :title="maximized ? t.exitMaximize : t.maximize" @click="maximized = !maximized">
-        <KIcon :name="maximized ? 'minimize' : 'maximize'" :size="16" />
+      <button class="tool" :aria-label="maximized ? t.exitMaximize : t.maximize" @click="maximized = !maximized">
+        <KIcon :name="maximized ? 'minimize' : 'fullscreen'" :size="16" />
       </button>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+// 尺寸、颜色、动画照 Vben Admin 的 tabs-ui（MIT）
 $gap: 7px;
 
 .tab-bar {
@@ -317,7 +337,7 @@ $gap: 7px;
 
   &:hover:not(:disabled) {
     color: var(--kmic-color-foreground);
-    background: var(--kmic-color-accent);
+    background: var(--kmic-color-muted);
   }
 
   &:disabled {
@@ -330,13 +350,16 @@ $gap: 7px;
   border-right: 1px solid var(--kmic-color-border);
 }
 
-.tools {
-  display: flex;
+.scroll-button:not(:first-child) {
   border-left: 1px solid var(--kmic-color-border);
 }
 
+.tools {
+  display: flex;
+}
+
 .tool {
-  padding: 0 10px;
+  border-left: 1px solid var(--kmic-color-border);
 }
 
 .tab {
@@ -354,12 +377,16 @@ $gap: 7px;
   }
 }
 
-// 新增、关闭标签时从左侧滑入滑出
+// 新增、关闭标签时从左侧滑入滑出，其余标签平移让位
 .tab-slide-enter-active,
 .tab-slide-leave-active {
   transition:
     opacity var(--kmic-motion-slow) var(--kmic-easing-tab),
     transform var(--kmic-motion-slow) var(--kmic-easing-tab);
+}
+
+.tab-slide-move {
+  transition: transform var(--kmic-motion-slow);
 }
 
 .tab-slide-enter-from,
@@ -374,13 +401,14 @@ $gap: 7px;
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 16px 0 8px;
   overflow: hidden;
+  color: var(--kmic-color-accent-foreground);
+  white-space: nowrap;
   transition: color var(--kmic-motion-fast);
 }
 
-.tab-icon {
-  margin-right: 4px;
+.tab.is-active .main {
+  color: var(--kmic-tab-active-color);
 }
 
 .tab:hover .tab-icon {
@@ -394,10 +422,8 @@ $gap: 7px;
 }
 
 .title {
-  max-width: 160px;
+  flex: 1;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .state {
@@ -427,34 +453,38 @@ $gap: 7px;
   }
 }
 
+// 关闭按钮一直显示，贴在标签内侧右边
 .extra {
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 6px;
   z-index: 3;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
   transform: translateY(-50%);
 }
 
 .extra-icon {
-  color: var(--kmic-color-muted-foreground);
+  color: var(--kmic-color-accent-foreground);
+  cursor: pointer;
   border-radius: 50%;
+  opacity: 0.8;
   transition: all var(--kmic-motion-fast);
 
-  // 关闭按钮只在悬浮和当前标签上出现
   &.close {
-    opacity: 0;
+    margin-top: 2px;
   }
 
-  .tab:hover &.close,
-  .tab.is-active &.close,
-  .tab:focus-visible &.close {
+  .tab.is-active & {
     opacity: 1;
   }
 
   &:hover {
-    color: var(--kmic-color-foreground);
     background: var(--kmic-color-accent);
+    opacity: 1;
   }
 }
 
@@ -474,8 +504,17 @@ $gap: 7px;
   }
 
   .main {
+    padding: 0 16px 0 8px;
     margin: 0 #{$gap * 2};
-    border-radius: var(--kmic-radius) var(--kmic-radius) 0 0;
+    border-radius: var(--kmic-radius-md) var(--kmic-radius-md) 0 0;
+  }
+
+  .tab-icon {
+    margin-right: 4px;
+  }
+
+  .extra {
+    right: $gap;
   }
 
   .divider {
@@ -486,7 +525,7 @@ $gap: 7px;
     height: 16px;
     background: var(--kmic-color-border);
     transform: translateY(-50%);
-    transition: opacity var(--kmic-motion-fast);
+    transition: all var(--kmic-motion-fast);
   }
 
   .tab:first-child .divider,
@@ -499,21 +538,21 @@ $gap: 7px;
     inset: 0;
     z-index: -1;
     padding: 0 #{$gap - 1};
-    transition: padding var(--kmic-motion-fast);
+    transition: opacity var(--kmic-motion-fast);
   }
 
   .background-fill {
     display: block;
     height: 100%;
     border-radius: $gap $gap 0 0;
-    transition: background var(--kmic-motion-fast);
+    transition: all var(--kmic-motion-fast);
   }
 
   .corner {
     position: absolute;
     bottom: 0;
     fill: transparent;
-    transition: fill var(--kmic-motion-fast);
+    transition: all var(--kmic-motion-fast);
 
     &.left {
       left: -1px;
@@ -525,16 +564,12 @@ $gap: 7px;
   }
 
   .tab.is-active {
-    .main {
-      color: var(--kmic-color-primary);
-    }
-
     .background-fill {
-      background: var(--kmic-color-primary-soft);
+      background: var(--kmic-tab-active-background);
     }
 
     .corner {
-      fill: var(--kmic-color-primary-soft);
+      fill: var(--kmic-tab-active-background);
     }
   }
 
@@ -546,7 +581,7 @@ $gap: 7px;
     .background-fill {
       margin: 0 2px;
       background: var(--kmic-color-accent);
-      border-radius: var(--kmic-radius);
+      border-radius: var(--kmic-radius-md);
     }
 
     .divider {
@@ -554,58 +589,86 @@ $gap: 7px;
     }
   }
 
-  .tab:not(.is-active):hover + .tab .divider {
-    opacity: 0;
-  }
-
+  .tab:not(.is-active):hover + .tab .divider,
   .tab.is-active + .tab .divider {
     opacity: 0;
   }
 }
 
-// 卡片、朴素、轻快
+// 卡片、朴素、轻快：标题左右 12/16px，关闭按钮离右边 6px，当前标签的关闭按钮跟着变色
 .style-card,
 .style-plain,
 .style-brisk {
-  .list {
-    gap: 6px;
-    align-items: center;
-    padding-left: 6px;
-  }
-
   .tab {
-    height: 28px;
-    padding: 0 8px;
-    transition:
-      background var(--kmic-motion-fast),
-      color var(--kmic-motion-fast);
+    transition: all var(--kmic-motion-fast);
 
-    &:hover:not(.is-active) {
+    &:not(.is-active):hover {
       background: var(--kmic-color-accent);
     }
 
     &.is-active {
-      color: var(--kmic-color-primary);
-      background: var(--kmic-color-primary-soft);
+      background: var(--kmic-tab-active-background);
+
+      .extra-icon {
+        color: var(--kmic-tab-active-color);
+      }
+    }
+  }
+
+  .main {
+    padding-right: 12px;
+    margin: 0 16px 0 12px;
+  }
+
+  .tab-icon {
+    margin-right: 8px;
+  }
+}
+
+.style-card {
+  .list {
+    align-items: center;
+  }
+
+  .tab {
+    height: calc(100% - 6px);
+    margin-left: 8px;
+    border: 1px solid var(--kmic-color-border);
+    border-radius: var(--kmic-radius-md);
+  }
+}
+
+.style-plain,
+.style-brisk {
+  .tab {
+    &:not(:first-child) {
+      border-left: 1px solid var(--kmic-color-border);
+    }
+
+    &:last-child {
+      border-right: 1px solid var(--kmic-color-border);
     }
   }
 }
 
-.style-card .tab {
-  border: 1px solid var(--kmic-color-border);
-  border-radius: var(--kmic-radius);
-}
-
-.style-plain .tab {
-  border-radius: var(--kmic-radius);
-}
-
+// 轻快：底部主色线，悬停时从左往右展开
 .style-brisk .tab {
-  border-radius: 0;
+  &::after {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    content: '';
+    background: var(--kmic-color-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--kmic-motion-slow) ease-out;
+  }
 
-  &.is-active {
-    background: none;
-    box-shadow: inset 0 -2px 0 var(--kmic-color-primary);
+  &:hover::after,
+  &.is-active::after {
+    transform: scaleX(1);
   }
 }
 </style>

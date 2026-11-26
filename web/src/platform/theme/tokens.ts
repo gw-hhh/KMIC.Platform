@@ -9,6 +9,8 @@ export interface ColorSet {
   backgroundDeep: Hsl;
   foreground: Hsl;
   mutedForeground: Hsl;
+  /** 标签栏工具按钮等的悬停底色，比 accent 略深 */
+  muted: Hsl;
   /** 悬停底色 */
   accent: Hsl;
   /** 悬停底色上的文字，比正文深一档 */
@@ -27,6 +29,7 @@ export const colorSets: Record<ThemeMode, ColorSet> = {
     backgroundDeep: { h: 216, s: 20.11, l: 95.47 },
     foreground: { h: 210, s: 6, l: 21 },
     mutedForeground: { h: 240, s: 3.8, l: 46.1 },
+    muted: { h: 240, s: 4.8, l: 95.9 },
     accent: { h: 240, s: 5, l: 96 },
     accentForeground: { h: 240, s: 6, l: 10 },
     accentHover: { h: 200, s: 10, l: 90 },
@@ -40,6 +43,7 @@ export const colorSets: Record<ThemeMode, ColorSet> = {
     backgroundDeep: { h: 220, s: 13.06, l: 9 },
     foreground: { h: 0, s: 0, l: 95 },
     mutedForeground: { h: 240, s: 5, l: 64.9 },
+    muted: { h: 240, s: 3.7, l: 15.9 },
     accent: { h: 216, s: 5, l: 19 },
     accentForeground: { h: 0, s: 0, l: 98 },
     accentHover: { h: 216, s: 5, l: 24 },

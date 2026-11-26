@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Avatar, Popover, Tag } from 'antdv-next';
+import { Avatar, Popover } from 'antdv-next';
 import { computed, ref } from 'vue';
 import type { Me } from '@/platform/session/current-user';
 import { shellTexts } from '@/platform/texts/shell';
@@ -25,7 +25,7 @@ function run(action: 'changePassword' | 'logout'): void {
 
 <template>
   <Popover v-model:open="open" trigger="click" placement="bottomRight" :arrow="false" :classes="{ root: 'user-menu' }">
-    <button class="avatar-button" :title="me.displayName">
+    <button class="avatar-button" :aria-label="me.displayName">
       <Avatar :size="32" class="avatar">{{ initial }}</Avatar>
     </button>
     <template #content>
@@ -34,29 +34,39 @@ function run(action: 'changePassword' | 'logout'): void {
         <div class="profile-text">
           <div class="name">
             {{ me.displayName }}
-            <Tag class="role" :bordered="false" color="success">{{ me.currentRole.name }}</Tag>
+            <span class="role">{{ me.currentRole.name }}</span>
           </div>
           <div class="account">{{ me.account }}</div>
         </div>
       </div>
       <div class="divider" />
       <button class="item" @click="run('changePassword')">
-        <KIcon name="key" :size="16" />
+        <span class="item-icon"><KIcon name="key" :size="16" /></span>
         {{ t.changePassword }}
       </button>
       <div class="divider" />
       <button class="item" @click="run('logout')">
-        <KIcon name="log-out" :size="16" />
+        <span class="item-icon"><KIcon name="log-out" :size="16" /></span>
         {{ t.logout }}
       </button>
     </template>
   </Popover>
 </template>
 
+<style lang="scss">
+// 浮层挂在 body 下：宽 240、无内边距，底部留 4px，照 Vben 的用户菜单
+.user-menu .ant-popover-container {
+  min-width: 240px;
+  padding: 0 0 4px;
+  border: 1px solid var(--kmic-color-border);
+  border-radius: var(--kmic-radius-md);
+}
+</style>
+
 <style scoped lang="scss">
 .avatar-button {
   display: flex;
-  padding: 4px;
+  padding: 6px;
   margin: 0 8px 0 4px;
   cursor: pointer;
   background: none;
@@ -74,6 +84,7 @@ function run(action: 'changePassword' | 'logout'): void {
 }
 
 .avatar {
+  flex: none;
   color: var(--kmic-color-primary-foreground);
   background: var(--kmic-color-primary);
 }
@@ -82,23 +93,30 @@ function run(action: 'changePassword' | 'logout'): void {
   display: flex;
   gap: 8px;
   align-items: center;
-  min-width: 220px;
-  padding: 8px 8px 12px;
+  padding: 12px;
 }
 
 .name {
   display: flex;
   gap: 8px;
   align-items: center;
+  margin-bottom: 4px;
   font-weight: 500;
+  color: var(--kmic-color-foreground);
 }
 
+// 角色标签：浅灰底绿字
 .role {
-  margin: 0;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--kmic-color-success);
+  background: var(--kmic-color-accent);
+  border-radius: var(--kmic-radius-sm);
 }
 
 .account {
-  margin-top: 4px;
   font-size: 12px;
   color: var(--kmic-color-muted-foreground);
 }
@@ -111,20 +129,34 @@ function run(action: 'changePassword' | 'logout'): void {
 
 .item {
   display: flex;
-  gap: 10px;
   align-items: center;
-  width: 100%;
-  height: 36px;
+  width: calc(100% - 8px);
+  height: 40px;
   padding: 0 8px;
+  margin: 0 4px;
+  font: inherit;
   color: inherit;
   cursor: pointer;
   background: none;
   border: 0;
-  border-radius: var(--kmic-radius);
+  border-radius: var(--kmic-radius-sm);
   transition: background var(--kmic-motion-fast);
 
   &:hover {
+    color: var(--kmic-color-accent-foreground);
     background: var(--kmic-color-accent);
   }
+}
+
+// 图标放在 32px 的圆里，和 Vben 一样
+.item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  margin-left: -8px;
+  border-radius: 50%;
 }
 </style>

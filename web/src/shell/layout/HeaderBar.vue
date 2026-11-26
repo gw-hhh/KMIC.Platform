@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { Dropdown, Popover, Tag } from 'antdv-next';
+import { Tag } from 'antdv-next';
 import type { MenuProps } from 'antdv-next';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import type { Me } from '@/platform/session/current-user';
 import { shellTexts } from '@/platform/texts/shell';
+import KDropdown from '@/platform/ui/KDropdown.vue';
 import KIcon from '@/platform/ui/KIcon.vue';
 import KTooltip from '@/platform/ui/KTooltip.vue';
 import JobsButton from '../jobs/JobsButton.vue';
 import MessagesButton from '../messages/MessagesButton.vue';
 import type { CrumbView } from './menu/menu-tree';
+import ThemeToggle from './ThemeToggle.vue';
 import UserMenu from './UserMenu.vue';
 
 const { me, crumbs, showBreadcrumb, showBreadcrumbIcon, dark, sidebarHidden } = defineProps<{
@@ -42,11 +44,16 @@ const roleMenu = computed<MenuProps>(() => ({
   },
 }));
 
-const openCrumbIndex = ref<number | null>(null);
+// 和 Vben 一样，点上级跳到它下面的第一个页面
+function targetOf(crumb: CrumbView): string | undefined {
+  return crumb.routeName ?? crumb.pages[0]?.routeName;
+}
 
-function openPage(routeName: string): void {
-  openCrumbIndex.value = null;
-  emit('openCrumb', routeName);
+function openCrumb(crumb: CrumbView): void {
+  const target = targetOf(crumb);
+  if (target !== undefined) {
+    emit('openCrumb', target);
+  }
 }
 
 function onToggleTheme(event: MouseEvent): void {
@@ -70,36 +77,7 @@ function onToggleTheme(event: MouseEvent): void {
       <TransitionGroup tag="ol" name="breadcrumb" class="breadcrumb">
         <li v-for="(crumb, index) in crumbs" :key="`${crumb.title}-${index}`" class="crumb-item">
           <KIcon v-if="index > 0" class="separator" name="chevron-right" :size="14" />
-          <Popover
-            v-if="crumb.pages.length > 0"
-            :open="openCrumbIndex === index"
-            trigger="click"
-            placement="bottomLeft"
-            :arrow="false"
-            :classes="{ root: 'crumb-pages' }"
-            @update:open="(value: boolean) => (openCrumbIndex = value ? index : null)"
-          >
-            <button class="crumb is-link is-dropdown" :class="{ 'is-open': openCrumbIndex === index }">
-              <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="20" />
-              {{ crumb.title }}
-              <KIcon name="chevron-down" :size="16" />
-            </button>
-            <template #content>
-              <button
-                v-for="page in crumb.pages"
-                :key="page.routeName"
-                class="crumb-page"
-                @click="openPage(page.routeName)"
-              >
-                {{ page.title }}
-              </button>
-            </template>
-          </Popover>
-          <button
-            v-else-if="crumb.routeName !== undefined && index < crumbs.length - 1"
-            class="crumb is-link"
-            @click="emit('openCrumb', crumb.routeName)"
-          >
+          <button v-if="index < crumbs.length - 1 && targetOf(crumb)" class="crumb is-link" @click="openCrumb(crumb)">
             <KIcon v-if="showBreadcrumbIcon && crumb.icon" :name="crumb.icon" :size="16" />
             {{ crumb.title }}
           </button>
@@ -123,8 +101,8 @@ function onToggleTheme(event: MouseEvent): void {
     <MessagesButton :key="me.userId" :user-id="me.userId" @open-link="(path) => emit('openLink', path)" />
 
     <KTooltip :title="dark ? t.lightMode : t.darkMode">
-      <button class="icon-button" :aria-label="dark ? t.lightMode : t.darkMode" @click="onToggleTheme">
-        <KIcon :name="dark ? 'sun' : 'moon'" :size="16" />
+      <button class="icon-button theme-button" :aria-label="dark ? t.lightMode : t.darkMode" @click="onToggleTheme">
+        <ThemeToggle :dark="dark" />
       </button>
     </KTooltip>
     <KTooltip :title="t.settings">
@@ -133,9 +111,9 @@ function onToggleTheme(event: MouseEvent): void {
       </button>
     </KTooltip>
 
-    <Dropdown v-if="me.roles.length > 1" :menu="roleMenu" :trigger="['click']">
+    <KDropdown v-if="me.roles.length > 1" :menu="roleMenu" placement="bottomRight">
       <Tag class="role" :bordered="false" :title="t.switchRole">{{ me.currentRole.name }}</Tag>
-    </Dropdown>
+    </KDropdown>
     <Tag v-else class="role" :bordered="false">{{ me.currentRole.name }}</Tag>
 
     <UserMenu :me="me" @change-password="emit('changePassword')" @logout="emit('logout')" />
@@ -172,6 +150,10 @@ function onToggleTheme(event: MouseEvent): void {
   &:hover {
     color: var(--kmic-header-foreground);
     background: var(--kmic-header-accent);
+  }
+
+  &.theme-button:hover :deep(.theme-toggle) {
+    animation: shrink var(--kmic-motion-slow) ease-in-out;
   }
 
   // 侧栏开关是圆角方块，其余图标按钮是圆形
@@ -218,37 +200,13 @@ function onToggleTheme(event: MouseEvent): void {
     cursor: pointer;
     transition: color var(--kmic-motion-fast);
 
-    &:hover,
-    &.is-open {
+    &:hover {
       color: var(--kmic-header-foreground);
     }
   }
 
   &.is-current {
     color: var(--kmic-header-foreground);
-  }
-}
-
-.crumb-page {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-  padding: 6px 8px;
-  font: inherit;
-  color: var(--kmic-color-foreground);
-  text-align: left;
-  white-space: nowrap;
-  cursor: pointer;
-  background: none;
-  border: 0;
-  border-radius: var(--kmic-radius-sm);
-
-  &:hover,
-  &:focus-visible {
-    color: var(--kmic-color-accent-foreground);
-    background: var(--kmic-color-accent);
-    outline: none;
   }
 }
 
@@ -335,25 +293,10 @@ function onToggleTheme(event: MouseEvent): void {
   margin: 0 4px 0 8px;
   cursor: pointer;
 }
-</style>
 
-<style lang="scss">
-// 面包屑下拉：紧凑的菜单样式，细边框、缩放淡入，照 Vben Admin 的下拉菜单
-.crumb-pages .ant-popover-container {
-  min-width: 128px;
-  padding: 4px;
-  border: 1px solid var(--kmic-color-border);
-  border-radius: var(--kmic-radius-md);
-  box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 10%),
-    0 2px 4px -2px rgb(0 0 0 / 10%);
-  animation: crumb-pages-in var(--kmic-motion-fast) ease-out;
-}
-
-@keyframes crumb-pages-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+@keyframes shrink {
+  50% {
+    transform: scale(0.8);
   }
 }
 </style>
