@@ -40,7 +40,7 @@ var steps = new (string Name, bool Fast, Func<int> Run)[]
     // 代码风格与分析器规则由编译检查（EnforceCodeStyleInBuild、警告即错误），这里只查编译不管的空白、文件末尾换行与 using 顺序
     ("格式（空白与 using 顺序）", true, () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes --diagnostics IMPORTS")),
     ("编译（警告即错误）", true, () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
-    ("测试", false, () => WhenProjectsExist(root, () => WithDocker(() => Run(root, "dotnet", "test --solution Kmic.slnx --no-build")))),
+    ("测试", false, () => WhenProjectsExist(root, () => WithDocker(() => RunLogged(root, "dotnet", "test --solution Kmic.slnx --no-build", Path.Combine("artifacts", "check", "tests.log"))))),
     ("依赖漏洞（含传递依赖）", false, () => WhenProjectsExist(root, () => CheckVulnerabilities(root))),
     // pnpm 版本与 web/package.json 保持一致
     // 接口类型比对依赖后端测试导出的 OpenAPI 文档，须在后端测试后执行
@@ -253,6 +253,55 @@ static int Run(string root, string fileName, string arguments)
     }
 
     process.WaitForExit();
+    return process.ExitCode;
+}
+
+// 照常输出到控制台，同时完整写进日志文件：偶发的失败事后还能查到是哪个测试、什么错误
+static int RunLogged(string root, string fileName, string arguments, string logPath)
+{
+    var path = Path.Combine(root, logPath);
+    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+    using var log = new StreamWriter(path, append: false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)) { AutoFlush = true };
+    var startInfo = new ProcessStartInfo(fileName, arguments)
+    {
+        WorkingDirectory = root,
+        UseShellExecute = false,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        StandardOutputEncoding = Encoding.UTF8,
+        StandardErrorEncoding = Encoding.UTF8,
+    };
+    using var process = Start(startInfo);
+    if (process is null)
+    {
+        return CommandNotFound;
+    }
+
+    var gate = new Lock();
+    void Write(string? line)
+    {
+        if (line is null)
+        {
+            return;
+        }
+
+        lock (gate)
+        {
+            Console.WriteLine(line);
+            log.WriteLine(line);
+        }
+    }
+
+    process.OutputDataReceived += (_, e) => Write(e.Data);
+    process.ErrorDataReceived += (_, e) => Write(e.Data);
+    process.BeginOutputReadLine();
+    process.BeginErrorReadLine();
+    process.WaitForExit();
+    if (process.ExitCode != 0)
+    {
+        Console.WriteLine($"   完整输出在 {logPath}");
+    }
+
     return process.ExitCode;
 }
 

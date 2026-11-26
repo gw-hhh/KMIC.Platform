@@ -1,9 +1,12 @@
-import { QueryClient } from '@tanstack/vue-query';
+import { QueryClient, type QueryFunctionContext } from '@tanstack/vue-query';
 import type { Session } from '@/platform/session/session';
 import type { ApiClient } from './client';
 import { KmicError } from './kmicError';
 
-const clients = new WeakMap<QueryClient, ApiClient>();
+// 查询函数上下文里给的是 query-core 的 QueryClient 基类，按它做键；vue-query 的 QueryClient 是它的子类，同样能查
+type AnyQueryClient = QueryFunctionContext['client'];
+
+const clients = new WeakMap<AnyQueryClient, ApiClient>();
 
 /** 可重试的错误最多再试两次 */
 export const maxQueryRetries = 2;
@@ -31,7 +34,7 @@ export function createKmicQueryClient(options: { api: ApiClient; session: Sessio
 }
 
 /** 查询函数经上下文里的 QueryClient 拿到请求客户端，模块的 api.ts 不需要注入 */
-export function apiOf(client: QueryClient): ApiClient {
+export function apiOf(client: AnyQueryClient): ApiClient {
   const api = clients.get(client);
   if (api === undefined) {
     throw new Error('QueryClient 不是 createKmicQueryClient 创建的');
