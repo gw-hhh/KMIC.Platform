@@ -83,13 +83,13 @@ public sealed class OpenApiDocumentTests(OpenApiFixture fixture) : IClassFixture
     }
 
     [Fact]
-    public void JobCommand_RespondsWith202AndTheJobId()
+    public void JobCommand_RespondsWith202AndTheJobIdAndModule()
     {
         var responses = Operation("/api/v1/samples/things/export", "post").GetProperty("responses");
 
         responses.EnumerateObject().Select(r => r.Name).Where(n => n.StartsWith('2')).ShouldBe(["202"]);
         var accepted = responses.GetProperty("202").GetProperty("content").GetProperty("application/json").GetProperty("schema");
-        Schema(accepted.GetProperty("$ref").GetString()!.Split('/')[^1]).GetProperty("properties").EnumerateObject().Select(p => p.Name).ShouldBe(["jobId"]);
+        Schema(accepted.GetProperty("$ref").GetString()!.Split('/')[^1]).GetProperty("properties").EnumerateObject().Select(p => p.Name).ShouldBe(["jobId", "module"]);
     }
 
     [Fact]
