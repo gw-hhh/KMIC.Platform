@@ -78,6 +78,8 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-color-primary-foreground': 'hsl(0 0% 100%)',
     '--kmic-color-primary-soft': `color-mix(in srgb, ${primary} 15%, transparent)`,
     '--kmic-sidebar-background': formatHsl(sidebar.background),
+    // 双列布局左边的图标栏：深色时比侧栏再深一档
+    '--kmic-sidebar-deep-background': formatHsl(sidebarDark ? dark.backgroundDeep : sidebar.background),
     '--kmic-sidebar-foreground': formatHsl(sidebar.foreground),
     '--kmic-sidebar-accent': formatHsl(sidebar.accent),
     '--kmic-sidebar-accent-hover': formatHsl(sidebar.accentHover),
@@ -93,6 +95,10 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
       ? formatHsl(sidebar.accent)
       : `color-mix(in srgb, ${primary} 15%, transparent)`,
     '--kmic-sidebar-group-active-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
+    // 图标栏的项：浅色时选中项主色实底，深色时和悬停一样灰底白字，和 Vben 一致
+    '--kmic-column-item-hover-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
+    '--kmic-column-item-hover-background': formatHsl(sidebarDark ? sidebar.accent : sidebar.accentHover),
+    '--kmic-column-item-active-background': sidebarDark ? formatHsl(sidebar.accent) : primary,
     '--kmic-sidebar-border': formatHsl(sidebar.border),
     '--kmic-header-background': formatHsl(header.background),
     '--kmic-header-foreground': formatHsl(header.foreground),

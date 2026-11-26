@@ -40,6 +40,7 @@ const settings = computed(() => shellSettings.settings);
 const me = computed(() => currentUser.me);
 
 // 小于 1280 自动折叠成图标，小于 768 改为抽屉
+// 窄屏时侧栏固定收成图标，折叠和固定按钮都不显示
 const isCompact = useMediaQuery('(max-width: 1279px)');
 const isMobile = useMediaQuery('(max-width: 767px)');
 const mobileOpen = ref(false);
@@ -241,6 +242,13 @@ function togglePinned(): void {
   hovering.value = unpin;
 }
 
+// 双列：取消固定后第二列收起，鼠标还在上面所以先浮着，移开后收回
+function togglePanelPinned(): void {
+  shellSettings.update((draft) => {
+    draft.sidebar.collapsed = panelPinned.value;
+  });
+}
+
 function resetWidth(): void {
   shellSettings.update((draft) => {
     draft.sidebar.width = shellSizes.sidebarWidth;
@@ -358,9 +366,6 @@ async function resetSettings(): Promise<void> {
               @enter="previewRoot"
             />
           </ScrollShadow>
-          <button class="collapse-button" :aria-label="t.header.toggleSidebar" @click="toggleCollapsed">
-            <KIcon :name="collapsed ? 'chevrons-right' : 'chevrons-left'" :size="16" />
-          </button>
         </div>
         <div v-if="panelVisible" class="panel" :style="{ width: `${expandedWidth}px` }">
           <div class="panel-title">{{ shownRoot?.title }}</div>
@@ -374,6 +379,14 @@ async function resetSettings(): Promise<void> {
               @select="openRoute"
             />
           </ScrollShadow>
+          <button
+            v-if="!isCompact"
+            class="pin-button"
+            :aria-label="panelPinned ? t.header.unpinSidebar : t.header.pinSidebar"
+            @click="togglePanelPinned"
+          >
+            <KIcon :name="panelPinned ? 'pin' : 'pin-off'" :size="14" />
+          </button>
         </div>
       </template>
 
@@ -398,7 +411,7 @@ async function resetSettings(): Promise<void> {
           />
         </ScrollShadow>
         <button
-          v-if="!isMobile && !hoverExpanded"
+          v-if="!isCompact && !hoverExpanded"
           class="collapse-button"
           :aria-label="t.header.toggleSidebar"
           @click="toggleCollapsed"
@@ -406,7 +419,7 @@ async function resetSettings(): Promise<void> {
           <KIcon :name="collapsed ? 'chevrons-right' : 'chevrons-left'" :size="16" />
         </button>
         <button
-          v-if="!isMobile && (hoverExpanded || !collapsed)"
+          v-if="!isCompact && (hoverExpanded || !collapsed)"
           class="pin-button"
           :aria-label="hoverExpanded ? t.header.pinSidebar : t.header.unpinSidebar"
           @click="togglePinned"
@@ -543,6 +556,7 @@ async function resetSettings(): Promise<void> {
   flex: none;
   flex-direction: column;
   width: 80px;
+  background: var(--kmic-sidebar-deep-background);
   border-right: 1px solid var(--kmic-sidebar-border);
 }
 
@@ -640,11 +654,6 @@ async function resetSettings(): Promise<void> {
 .pin-button {
   right: 12px;
   padding: 5px;
-}
-
-.column .collapse-button {
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .drag-bar {

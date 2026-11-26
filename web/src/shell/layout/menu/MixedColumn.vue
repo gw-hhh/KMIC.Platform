@@ -40,9 +40,9 @@ const emit = defineEmits<{ select: [node: MenuNode]; enter: [node: MenuNode] }>(
   align-items: center;
   padding: 9px 0;
   margin: 4px 8px;
-  color: var(--kmic-sidebar-foreground);
+  color: var(--kmic-sidebar-item-color);
   cursor: pointer;
-  border-radius: var(--kmic-radius);
+  border-radius: var(--kmic-radius-md);
   transition:
     background var(--kmic-motion-fast) ease,
     color var(--kmic-motion-fast) ease;
@@ -51,13 +51,13 @@ const emit = defineEmits<{ select: [node: MenuNode]; enter: [node: MenuNode] }>(
     transition: transform var(--kmic-motion-slow);
   }
 
-  &:hover {
-    color: var(--kmic-color-primary);
-    background: var(--kmic-sidebar-accent);
+  &:not(.is-active):hover {
+    color: var(--kmic-column-item-hover-color);
+    background: var(--kmic-column-item-hover-background);
+  }
 
-    .icon {
-      transform: scale(1.2);
-    }
+  &:hover .icon {
+    transform: scale(1.2);
   }
 
   &:focus-visible {
@@ -68,7 +68,7 @@ const emit = defineEmits<{ select: [node: MenuNode]; enter: [node: MenuNode] }>(
   &.is-active {
     font-weight: 600;
     color: var(--kmic-color-primary-foreground);
-    background: var(--kmic-color-primary);
+    background: var(--kmic-column-item-active-background);
   }
 }
 
