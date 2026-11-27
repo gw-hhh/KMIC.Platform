@@ -1,9 +1,9 @@
-using Kmic.BuildingBlocks.Infrastructure.Maintenance;
+using Kmic.BuildingBlocks.Infrastructure.Cleanup;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Testing.Database;
 using Shouldly;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Tests.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Tests.Cleanup;
 
 // 用管理账号模拟迁移账号：运行账号对追加写入表无 DELETE 权限
 public sealed class AppendOnlyPurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>

@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 internal sealed class PurgeIdempotencyTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {

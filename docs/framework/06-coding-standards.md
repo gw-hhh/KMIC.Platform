@@ -282,7 +282,6 @@ ADR-0021 已定 `.editorconfig` + `dotnet format --verify-no-changes`。这里�
 | 传递依赖的安全修复 | `Directory.Packages.props` 里单独一组 | 某个包间接引入的旧版本有漏洞时在这里提升版本；引入它的包升级后不再需要就删掉 |
 | Quartz | 只引用 `Quartz` | 4.x 已把依赖注入、宿主集成和 System.Text.Json 序列化并进主包，`Quartz.Extensions.Hosting`、`Quartz.Serialization.SystemTextJson` 只剩空壳 |
 | TypeScript | 6.x | typescript-eslint 还不支持 7 |
-| Stylelint | 17.x | SCSS 规则集和 `stylelint-declaration-strict-value` 还不支持 18 |
 | VueUse | 与 Antdv Next 依赖的大版本一致 | 避免打包两份 VueUse |
 | pnpm | 11 系列 | 12 在 Windows 上遇到 `packageManager` 字段会崩溃 |
 | VXE Table | 同时装 `@vxe-ui/core`、`xe-utils`（运行时）和 `vxe-pc-ui`（只作类型） | vxe-table 运行时导入前两个包但没有声明依赖；不注册 `vxe-pc-ui` 的界面组件 |

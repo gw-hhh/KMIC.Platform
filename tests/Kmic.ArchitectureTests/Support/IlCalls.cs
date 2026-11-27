@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Kmic.ArchitectureTests.Support;
 
-// 解析方法体 IL 指令（含 async 与 lambda 生成的嵌套类型）提取方法调用
+// 解析方法体 IL 指令（含 async 与 lambda 编译器嵌套类型），提取调用的方法及字符串常量
 internal static class IlCalls
 {
     private const BindingFlags AllMembers = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -29,26 +29,31 @@ internal static class IlCalls
         }
     }
 
-    public static IEnumerable<MethodBase> CalledBy(Type type)
+    public static IEnumerable<MethodBase> CalledBy(Type type) => Operands(type).OfType<MethodBase>();
+
+    // 包含插值字符串的固定常量段
+    public static IEnumerable<string> StringsUsedBy(Type type) => Operands(type).OfType<string>();
+
+    private static IEnumerable<object> Operands(Type type)
     {
         foreach (var method in type.GetMethods(AllMembers).Cast<MethodBase>().Concat(type.GetConstructors(AllMembers)))
         {
-            foreach (var called in Calls(method))
+            foreach (var operand in Operands(method))
             {
-                yield return called;
+                yield return operand;
             }
         }
 
         foreach (var nested in type.GetNestedTypes(AllMembers).Where(n => n.GetCustomAttribute<CompilerGeneratedAttribute>() is not null))
         {
-            foreach (var called in CalledBy(nested))
+            foreach (var operand in Operands(nested))
             {
-                yield return called;
+                yield return operand;
             }
         }
     }
 
-    private static IEnumerable<MethodBase> Calls(MethodBase method)
+    private static IEnumerable<object> Operands(MethodBase method)
     {
         var il = method.GetMethodBody()?.GetILAsByteArray();
         if (il is null)
@@ -72,13 +77,14 @@ internal static class IlCalls
                 position++;
             }
 
-            if (code.OperandType == OperandType.InlineMethod)
+            if (code.OperandType == OperandType.InlineMethod
+                && method.Module.ResolveMethod(BitConverter.ToInt32(il, position), typeArguments, methodArguments) is { } called)
             {
-                var called = method.Module.ResolveMethod(BitConverter.ToInt32(il, position), typeArguments, methodArguments);
-                if (called is not null)
-                {
-                    yield return called;
-                }
+                yield return called;
+            }
+            else if (code.OperandType == OperandType.InlineString)
+            {
+                yield return method.Module.ResolveString(BitConverter.ToInt32(il, position));
             }
 
             position += OperandSize(code, il, position);

@@ -1,6 +1,6 @@
 // 由 scripts/generate-api.mjs 从 OpenAPI 文档生成，禁止手改
 
-export type PermissionCode = "Configuration.Dictionary.Manage" | "Configuration.Preference.Manage" | "Configuration.Setting.Manage" | "Configuration.Setting.View" | "Files.File.Manage" | "Files.File.Purge" | "Files.File.View" | "Identity.Authorization.Explain" | "Identity.OrgUnit.Manage" | "Identity.Role.Manage" | "Identity.Role.View" | "Identity.SecurityEvent.View" | "Identity.User.ForceLogout" | "Identity.User.Grant" | "Identity.User.Impersonate" | "Identity.User.ImpersonateWrite" | "Identity.User.Manage" | "Identity.User.ResetPassword" | "Identity.User.Unlock" | "Identity.User.View" | "Notifications.Captured.View" | "Notifications.Delivery.Manage" | "Notifications.Delivery.View" | "Notifications.Template.Manage" | "Notifications.Template.View" | "Operations.Audit.Export" | "Operations.Audit.View" | "Operations.Jobs.Manage" | "Operations.Jobs.View" | "Operations.Messages.Manage" | "Operations.Messages.View" | "Operations.MessagingCapacity.Manage" | "Sample.Setting.Manage" | "Sample.Specimen.Close" | "Sample.Specimen.Create" | "Sample.Specimen.Delete" | "Sample.Specimen.Edit" | "Sample.Specimen.Submit" | "Sample.Specimen.View";
+export type PermissionCode = "Configuration.Dictionary.Manage" | "Configuration.Preference.Manage" | "Configuration.Setting.Manage" | "Configuration.Setting.View" | "Files.File.Manage" | "Files.File.Purge" | "Files.File.View" | "Identity.Authorization.Explain" | "Identity.OrgUnit.Manage" | "Identity.Role.Manage" | "Identity.Role.View" | "Identity.SecurityEvent.View" | "Identity.User.ForceLogout" | "Identity.User.Grant" | "Identity.User.Impersonate" | "Identity.User.ImpersonateWrite" | "Identity.User.Manage" | "Identity.User.ResetPassword" | "Identity.User.Unlock" | "Identity.User.View" | "Notifications.Captured.View" | "Notifications.Delivery.Manage" | "Notifications.Delivery.View" | "Notifications.Template.Manage" | "Notifications.Template.View" | "Operations.Audit.Export" | "Operations.Audit.View" | "Operations.Jobs.Manage" | "Operations.Jobs.View" | "Operations.Messages.Manage" | "Operations.Messages.View" | "Operations.MessagingCapacity.Manage" | "Sample.Category.Manage" | "Sample.Setting.Manage" | "Sample.Specimen.Close" | "Sample.Specimen.Create" | "Sample.Specimen.Delete" | "Sample.Specimen.Edit" | "Sample.Specimen.Submit" | "Sample.Specimen.View";
 
 export const Permissions = {
   Configuration: {
@@ -78,6 +78,9 @@ export const Permissions = {
     },
   },
   Sample: {
+    Category: {
+      Manage: "Sample.Category.Manage",
+    },
     Setting: {
       Manage: "Sample.Setting.Manage",
     },

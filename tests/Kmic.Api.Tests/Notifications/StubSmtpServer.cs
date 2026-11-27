@@ -15,6 +15,7 @@ public sealed class StubSmtpServer : IAsyncDisposable
     private readonly ConcurrentBag<Task> _sessions = [];
     private readonly Task _accepting;
     private volatile string _rcptReply = "250 OK";
+    private volatile bool _smtpUtf8;
 
     public StubSmtpServer()
     {
@@ -33,10 +34,19 @@ public sealed class StubSmtpServer : IAsyncDisposable
         set => _rcptReply = value;
     }
 
+    /// <summary>EHLO 时是否声明支持 SMTPUTF8，默认不声明</summary>
+    public bool SmtpUtf8
+    {
+        get => _smtpUtf8;
+        set => _smtpUtf8 = value;
+    }
+
+    /// <summary>清空已收邮件并将收件人回复恢复为接受，同时重置 SMTPUTF8 声明</summary>
     public void Reset()
     {
         Mails.Clear();
         _rcptReply = "250 OK";
+        _smtpUtf8 = false;
     }
 
     public async ValueTask DisposeAsync()
@@ -117,7 +127,7 @@ public sealed class StubSmtpServer : IAsyncDisposable
     {
         if (Is(line, "EHLO") || Is(line, "HELO"))
         {
-            return "250 stub";
+            return _smtpUtf8 ? "250-stub\r\n250 SMTPUTF8" : "250 stub";
         }
 
         if (Is(line, "MAIL FROM:"))

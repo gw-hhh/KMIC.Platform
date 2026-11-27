@@ -4,6 +4,8 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Sample.Application;
 using Kmic.Sample.Application.ContractQueries;
 using Kmic.Sample.Contracts;
+using Kmic.Sample.Domain.Errors;
+using Kmic.Sample.Domain.SpecimenCategories;
 using Kmic.Sample.Domain.Specimens;
 using Kmic.Sample.Infrastructure.Persistence;
 using Kmic.Sample.Infrastructure.Persistence.Repositories;
@@ -23,6 +25,7 @@ public sealed class SampleModule : IModule
 
         services.AddModuleDbContexts<SampleDbContext, SampleQueryDbContext, ISampleQueryDb>();
         services.AddScoped<ISpecimenRepository, SpecimenRepository>();
+        services.AddRepository<SampleDbContext, SpecimenCategory, SpecimenCategoryId>(SampleErrors.CategoryNotFound);
         services.AddScoped<ISpecimenReferences, SpecimenReferences>();
     }
 }

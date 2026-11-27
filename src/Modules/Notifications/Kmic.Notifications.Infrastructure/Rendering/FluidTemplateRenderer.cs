@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Fluid;
+using Fluid.Accessors;
 using Fluid.Values;
 using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Notifications.Application;
@@ -50,18 +51,19 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
         }
 
         var limits = options.Value;
-        var templateOptions = new TemplateOptions { MaxSteps = limits.MaxSteps };
+        var builder = new TemplateOptionsBuilder()
+            .WithMaxSteps(limits.MaxSteps)
+            .ConfigureMemberAccess(access => Register(access, model.GetType(), []));
         if (undefined is not null)
         {
-            templateOptions.Undefined = name =>
+            builder = builder.WithUndefined((name, _) =>
             {
                 undefined.Add(name);
                 return ValueTask.FromResult<FluidValue>(NilValue.Instance);
-            };
+            });
         }
 
-        Register(templateOptions, model.GetType(), []);
-        var context = new TemplateContext(model, templateOptions);
+        var context = new TemplateContext(model, builder.Build());
         using var writer = new CappedWriter(limits.MaxOutputKb * 1024, TimeSpan.FromMilliseconds(limits.RenderTimeoutMs), time);
         try
         {
@@ -75,7 +77,7 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
     }
 
     // 仅注册模型及其公开属性可达的嵌套类型和集合元素类型，限制模板成员访问
-    private static void Register(TemplateOptions options, Type type, HashSet<Type> seen)
+    private static void Register(MemberAccessStrategy access, Type type, HashSet<Type> seen)
     {
         var element = ElementOf(type) ?? type;
         if (IsPlain(element) || !seen.Add(element))
@@ -83,10 +85,10 @@ internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions>
             return;
         }
 
-        options.MemberAccessStrategy.Register(element);
-        foreach (var property in element.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var property in element.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetIndexParameters().Length == 0))
         {
-            Register(options, property.PropertyType, seen);
+            access.Register(element, property.Name, new PropertyInfoAccessor(property));
+            Register(access, property.PropertyType, seen);
         }
     }
 

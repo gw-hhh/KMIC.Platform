@@ -14,6 +14,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 using Kmic.BuildingBlocks.Domain.Identifiers;
 using Kmic.BuildingBlocks.Domain.Repositories;
 using Kmic.BuildingBlocks.Infrastructure.Modules;
+using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.Identity.Application.Authorization;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
@@ -309,6 +310,23 @@ internal static class StructureRules
             else if (type.GetCustomAttribute<BypassesDataScopeAttribute>() is null)
             {
                 problems.Add($"{type.FullName}：调用了 WithoutDataScope，处理器要标 [BypassesDataScope] 并写明原因。");
+            }
+        }
+
+        return problems;
+    }
+
+    // 手写 SQL 查询带数据范围的表时，须用 IDataScopeSql 附加范围条件；无需过滤的类型须标注 [BypassesDataScope]
+    public static IReadOnlyList<string> RawSqlOnScopedTables(IEnumerable<Type> types, IReadOnlySet<string> scopedTables)
+    {
+        var problems = new List<string>();
+        foreach (var type in types.Where(t => t.GetCustomAttribute<CompilerGeneratedAttribute>() is null && t.GetCustomAttribute<BypassesDataScopeAttribute>() is null))
+        {
+            var strings = IlCalls.StringsUsedBy(type).ToList();
+            var tables = scopedTables.Where(table => strings.Exists(s => s.Contains(table, StringComparison.Ordinal))).Order(StringComparer.Ordinal).ToList();
+            if (tables.Count > 0 && !IlCalls.CalledBy(type).Any(m => m.DeclaringType == typeof(IDataScopeSql)))
+            {
+                problems.Add($"{type.FullName}：手写 SQL 查了带数据范围的表 {string.Join("、", tables)}，要用 IDataScopeSql.Condition 加上范围条件；确实不需要时在类型上标 [BypassesDataScope] 写明原因。");
             }
         }
 

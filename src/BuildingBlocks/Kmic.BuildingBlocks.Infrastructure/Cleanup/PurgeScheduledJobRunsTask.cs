@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 internal sealed class PurgeScheduledJobRunsTask(DataSources dataSources, IOptions<PurgeOptions> options, ILogger<PurgeScheduledJobRunsTask> logger) : IFrameworkTask
 {

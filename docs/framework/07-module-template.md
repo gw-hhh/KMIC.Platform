@@ -19,7 +19,7 @@
 
 | 类别 | 本文中的内容 |
 |---|---|
-| 第一类：现在确定 | D1～D3：模块注册类的位置、Application 的文件粒度、模块模板与参考模块的形态 |
+| 第一类：现在确定 | D1～D4：模块注册类的位置、Application 的文件粒度、模块模板与参考模块的形态、简单维护档 |
 | 第二类：框架定写法，业务定用不用 | 第 4 节中标为“按需”的构件（Contracts 查询、事件、订阅、定时任务、后台作业、编号、附件、通知）——模块需要时按本文写，不需要就不写 |
 | 第三类：延后 | 无 |
 
@@ -162,11 +162,12 @@ builder.AddKmicHost()
 
 `KMIC.Platform/docs/modules/README.md` 维护全部模块的登记表：
 
-| 模块 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 |
-|---|---|---|---|---|---|---|
-| Identity | `Identity` | 10 | 平台 | — | | `modules/identity/` |
-| Sample | `Sample` | 99 | 参考（D3） | Identity | | 本文 |
+| 模块 | 中文名 | schema | 编号 | 类型 | 依赖 | 负责人 | 设计文档 | 设计状态 |
+|---|---|---|---|---|---|---|---|---|
+| Identity | 身份与授权 | `Identity` | 10 | 平台 | — | | `modules/identity/` | 已确认 |
+| Sample | 示例 | `Sample` | 99 | 参考（D3） | Identity | | 本文 | — |
 
+- 中文名是权限分组等界面上的显示名，新建模块的脚本从登记表读取；表里只记设计状态，实现进度在 `docs/implementation/00-README.md`。
 - 编号 10～19 留给平台模块，20～89 给业务模块，99 为参考模块。架构测试检查：模块名、编号唯一；`[LoggerMessage]` 的 `EventId` 落在本模块的编号段内。
 
 ---
@@ -212,6 +213,7 @@ src/Modules/Sample/
 │  │  ├─ EventHandlers/               领域事件处理器
 │  │  └─ Shared/                      本聚合多个用例共用的 DTO
 │  ├─ (CloseExpired/ …)               定时任务的命令也是用例（按需）
+│  ├─ Maintenance/SpecimenCategories/ 简单维护档的聚合，一个用例一个文件（第 4.10 节）
 │  └─ (ContractQueries/)             本模块 Contracts 接口的实现与对外查询（薄适配器、带 [ContractQuery] 的查询和处理器，按需，05-07 D2）
 │
 ├─ Kmic.Sample.Infrastructure/
@@ -262,6 +264,7 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 - **决定（已确认，2026-11-04）**：A。原定有两种例外：Presentation 中请求模型与端点同一文件；只被一个命令 / 查询使用的内嵌 DTO 与该消息同一文件。**实现时没有采用这两种例外**（见修订记录 2026-11-12）：文件名与类型名一致由 MA0048 检查，是错误级，例外要逐处豁免；改为一个类型一个文件，请求模型、内嵌 DTO 各自一个文件，放在同一文件夹里，被第二个消息使用时移到 `Shared/`。
 - **理由**：用例文件夹已经把相关文件放在一起，B 的“看得全”优势很小；A 让每个类型都有固定、可预测的位置。
 - **取舍**：文件数量多一些，模块模板与 IDE 模板负责生成。
+- **例外（2026-11-26）**：简单维护档的用例按 B 写，只限 `Application/Maintenance/` 目录（D4，第 4.10 节）。
 
 ---
 
@@ -444,6 +447,30 @@ tests/Kmic.Api.Tests/                 宿主级测试，所有模块共用一个
 | 日志 | 每个类旁边的 `{类名}Log` 静态 partial 类，`[LoggerMessage]`，`EventId` 在本模块编号段 | 06 D6 |
 | 缓存 | 只在确有需要时，按 05-10 第 4.1 节分类说明 | 05-10 第 4 节 |
 
+### 4.10 D4 简单维护档
+
+基础资料、配置类的增删改（示例：分类、类型）照标准写法要一个仓储接口、一个仓储实现，每个用例一个文件夹、三四个文件，写法上的开销比业务本身还大。简单维护档只省这两样，其他要求不变。
+
+**档位按聚合定**：同一个聚合的用例要么都是简单档，要么都是标准档。同时满足下面四条才能用简单档，有一条不满足就用标准写法：
+
+| 条件 | 说明 |
+|---|---|
+| 只按 ID 读取 | `IRepository` 自带的 `GetForUpdateAsync`、`GetForUpdateLockedAsync` 就够用；要按编码查找、按条件更新、批量处理就要写专用仓储 |
+| 没有状态流转 | 没有状态机，也没有“提交后不能改”一类的规则；启用 / 停用可以作为普通字段 |
+| 授权只靠权限点和数据范围 | 没有资源策略（`IResourcePolicy`），也没有 `allowedActions` |
+| 不和别的模块联动 | 不发集成事件、不提交后台作业、不调外部系统 |
+
+| 项目 | 简单档 | 标准写法 |
+|---|---|---|
+| 仓储 | 模块注册类里 `services.AddRepository<SampleDbContext, 聚合, 聚合Id>(SampleErrors.XxxNotFound)`，要带出子实体的加第二个参数 `set => set.Include(...)`；处理器注入 `IRepository<聚合, 聚合Id>` | 模块的仓储接口和实现（第 4.2 节） |
+| 文件 | `Kmic.<模块>.Application/Maintenance/<聚合复数>/`，一个用例一个文件：命令、校验器、处理器写在一起，文件名和命令同名；查询同理，列表项、详情等响应类型也放在同一个文件里 | 一个用例一个文件夹，一个类型一个文件（D2） |
+| 其余 | 授权声明、审计、幂等、`ExpectedVersion`、端点、测试要求都和标准写法一样 | |
+
+- **不直接用 DbContext**：处理器照旧只注入仓储；列表和详情查询照旧用 `I<模块>QueryDb`。只是不用为每个聚合写仓储，不是换一种数据访问方式。
+- **升档**：业务变复杂、四个条件有一条不再满足时，把这个聚合的用例移出 `Maintenance/`，拆成标准写法，并改用专用仓储；不在 `Maintenance/` 里继续堆规则。
+- **示例**：Sample 的示例分类（`SpecimenCategory`，只有名称和启用状态）。用例在 `Kmic.Sample.Application/Maintenance/SpecimenCategories/`（新建、修改、删除、列表各一个文件），注册在 `SampleModule.cs`，端点在 `Kmic.Sample.Presentation/SpecimenCategories/`，测试是 `Kmic.Api.Tests/Sample/SpecimenCategoryApiTests.cs`。
+- **检查**：`.editorconfig` 只对 `src/Modules/*/Kmic.*.Application/Maintenance/` 把 MA0048 改为只检查文件里的第一个类型，其他目录照旧一个类型一个文件。处理器漏写 `AddRepository` 时，`ModuleConformanceTests` 从宿主里逐个取处理器，测试会失败。
+
 ---
 
 ## 5. 新增一个用例的步骤
@@ -487,18 +514,18 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 
 新建模块的方式（原型 #11 验证）：
 
-- **用脚本新建模块**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号 → `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 构建 → 生成初始迁移 → `check.cs --fix` → 格式检查 → 运行模块测试，任一步失败即停止。模板本身不做“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
-- **初始迁移由脚本调用 EF 工具生成**，不是模板中的静态文件：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 同为 10.0.14），脚本自动执行 `dotnet tool restore`。
-- 迁移文件按生成代码处理，编码由 `check.cs --fix` 规整（06 第 3.2 节）。
+- **用脚本新建模块**：`dotnet run scripts/new-module.cs -- <模块名> <编号>`。脚本依次：对照模块登记表校验名称与编号，并取出登记的中文名（权限分组等界面上的显示名）→ `dotnet new kmic-module` → `dotnet sln Kmic.slnx add`（显式指定解决方案）→ 在 `Kmic.Api`、`Kmic.MigrationRunner` 中引用并登记模块、架构测试引用新模块的五个项目 → 构建 → `dotnet tool restore` → 生成初始迁移 → 统一编码与换行、`dotnet format`，任一步失败即停止。之后运行 `check.cs` 确认。模板本身不做“加入解决方案”：模板引擎的这个功能只认 `.sln`，并且会向上层目录查找，原型中误改了上层目录的解决方案。
+- **初始迁移由脚本调用 EF 工具生成**，不是模板中的静态文件：脚本运行 `dotnet ef migrations add InitializeModuleSchema`，迁移内容总是与当时的模型一致，框架表结构变化后不需要同步修改模板。EF 工具作为仓库本地工具锁定版本（根目录 `dotnet-tools.json`，与 EF Core 版本一致），脚本先执行 `dotnet tool restore`。
+- 迁移文件按生成代码处理，`dotnet ef` 写出的 BOM 和 CRLF 由脚本规整（06 第 3.2 节）。
 
 ### 6.2 步骤
 
 | 步骤 | 内容 |
 |---|---|
 | 1 | 写模块设计文档 `docs/modules/<模块>/README.md`（第 8 节格式），评审通过 |
-| 2 | 模块登记表（2.4）登记模块名、schema、编号、依赖、负责人 |
+| 2 | 模块登记表（2.4）登记模块名、中文名、schema、编号、依赖、负责人 |
 | 3 | `dotnet run scripts/new-module.cs -- <模块> <编号>`（6.1） |
-| 4 | 宿主 `Program.cs` 中 `AddModule<XxxModule, XxxEndpoints>()`；测试宿主同步注册 |
+| 4 | 核对脚本在宿主 `Program.cs` 里加的 `AddModule<XxxModule, XxxEndpoints>()`；API 测试的模板库按宿主引用的模块自动迁移，不用另外登记 |
 | 5 | `CODEOWNERS` 增加模块目录的负责人 |
 | 6 | 按设计文档逐个用例实现（第 5 节） |
 | 7 | 迁移脚本随 CI 生成，人工审查（05-03 第 9.2 节） |
@@ -602,8 +629,9 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 | 编号 | 事项 | 决定（均已确认，2026-11-04） |
 |---|---|---|
 | D1 | 模块注册类放在哪里 | 两个注册类：Infrastructure 的 `IModule` + Presentation 的 `ModuleEndpoints`，宿主 `AddModule<TModule, TEndpoints>()` 配对 |
-| D2 | 一个用例的文件粒度 | 一个类型一个文件、一个用例一个文件夹；原定的两种“同文件”例外实现时没有采用，请求模型和内嵌 DTO 同样单独一个文件 |
+| D2 | 一个用例的文件粒度 | 一个类型一个文件、一个用例一个文件夹；原定的两种“同文件”例外实现时没有采用，请求模型和内嵌 DTO 同样单独一个文件；唯一的例外是简单维护档（D4） |
 | D3 | 模块模板与参考模块 | 空骨架模板（经 `scripts/new-module.cs` 调用，初始迁移由脚本生成）+ 仓库中常驻、随 CI 编译测试、生产不注册的参考模块 `Sample` |
+| D4 | 简单维护档（2026-11-26 确认） | 只按 ID 读取、没有状态流转、只靠权限点和数据范围授权、不和别的模块联动的聚合，用通用仓储 `AddRepository`，用例放在 `Application/Maintenance/`，一个用例一个文件（第 4.10 节） |
 
 ---
 
@@ -624,3 +652,4 @@ ADR-0004 已定用 `dotnet new` 模板生成 5 个项目和标准目录。还需
 | 2026-11-12 | 第 3.1、4 节：Contracts 接口的实现放在 Application 的 `ContractQueries/` 文件夹，不叫 `Contracts/`（决定不变，只改文件夹名）：命名空间 `Kmic.<模块>.Application.Contracts` 会遮住 `Kmic.<模块>.Contracts`，模块里 `Contracts.Events.…` 这类相对写法就编译不过（Sample 实测）；适配器要 `public sealed`，因为 `AddServices` 在 Infrastructure，看不到 Application 的 internal 类型（`InternalsVisibleTo` 只给本模块的测试）。Sample 增加 `ISpecimenReferences` 的完整示例，第 4 节表格对应补行 | S2-18 FR-MSG-01 |
 | 2026-11-19 | 第 4.2、4.6 节：列注释、路径参数和字段说明改为按需写，表注释和接口摘要仍必须有 | 用户确认（2026-11-19，放宽约束清单） |
 | 2026-11-19 | 第 8 节：业务模块设计文档必填的只留概述、旧系统对照、聚合、用例、授权、数据迁移、待决七节，其余按需 | 用户确认（2026-11-19，文档规则放宽） |
+| 2026-11-26 | 新增第 4.10 节 D4 简单维护档：分档标准、通用仓储 `AddRepository`、`Maintenance/` 目录里一个用例一个文件（MA0048 只在这个目录放宽）；第 0.1 节、D2 相应补一句 | 用户确认（2026-11-26，打磨框架第 3 批） |

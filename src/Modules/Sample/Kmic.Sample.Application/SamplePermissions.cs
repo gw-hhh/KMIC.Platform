@@ -25,4 +25,7 @@ public static class SamplePermissions
 
     [Permission("管理示例设置")]
     public const string SettingManage = "Sample.Setting.Manage";
+
+    [Permission("维护示例分类")]
+    public const string CategoryManage = "Sample.Category.Manage";
 }

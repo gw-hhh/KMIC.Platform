@@ -1,4 +1,4 @@
-using Kmic.BuildingBlocks.Infrastructure.Maintenance;
+using Kmic.BuildingBlocks.Infrastructure.Cleanup;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 using Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
@@ -11,7 +11,7 @@ using Kmic.Echo.Probe;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Tests.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Tests.Cleanup;
 
 public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {

@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.Identity.Application.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.Identity.Application.Maintenance;
+namespace Kmic.Identity.Application.Cleanup;
 
 public sealed class PurgeLoginThrottleCommandHandler(ILoginThrottleStore throttles, IOptions<LoginThrottleOptions> options, TimeProvider time)
     : ICommandHandler<PurgeLoginThrottleCommand, ScheduledJobOutcome>

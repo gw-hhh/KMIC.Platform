@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 // 按条件分批删除，每批独立提交直至清空
 internal static class BatchDelete

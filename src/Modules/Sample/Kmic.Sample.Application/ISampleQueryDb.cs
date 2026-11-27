@@ -1,3 +1,4 @@
+using Kmic.Sample.Domain.SpecimenCategories;
 using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application;
@@ -6,4 +7,9 @@ namespace Kmic.Sample.Application;
 public interface ISampleQueryDb
 {
     IQueryable<Specimen> Specimens { get; }
+
+    /// <summary>
+    /// 示例分类
+    /// </summary>
+    IQueryable<SpecimenCategory> SpecimenCategories { get; }
 }

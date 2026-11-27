@@ -5,7 +5,7 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 using Kmic.BuildingBlocks.Infrastructure.Scheduling;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 // 每天清理 Outbox 与 Inbox（Inbox 去重凭证须在来源 Outbox 删除后方可清理）
 internal sealed class PurgeMessagesTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask

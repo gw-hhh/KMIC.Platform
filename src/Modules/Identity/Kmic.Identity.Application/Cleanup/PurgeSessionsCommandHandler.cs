@@ -5,7 +5,7 @@ using Kmic.Identity.Application.Authentication;
 using Kmic.Identity.Domain.Sessions;
 using Microsoft.Extensions.Options;
 
-namespace Kmic.Identity.Application.Maintenance;
+namespace Kmic.Identity.Application.Cleanup;
 
 public sealed class PurgeSessionsCommandHandler(ISessionRepository sessions, IOptions<SessionLifetimeOptions> options, TimeProvider time)
     : ICommandHandler<PurgeSessionsCommand, ScheduledJobOutcome>

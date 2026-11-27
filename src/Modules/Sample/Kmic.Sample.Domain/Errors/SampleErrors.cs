@@ -20,4 +20,8 @@ public static class SampleErrors
     public static readonly Error AttachmentExists = Error.Conflict("Sample.AttachmentExists", "该文件已添加为此示例的附件");
 
     public static readonly Error NoOrgUnit = Error.BusinessRule("Sample.NoOrgUnit", "当前用户没有所属组织，无法创建示例");
+
+    public static readonly Error CategoryNotFound = Error.NotFound("Sample.CategoryNotFound", "示例分类不存在");
+
+    public static readonly Error CategoryNameExists = Error.Conflict("Sample.CategoryNameExists", "已有同名的示例分类");
 }

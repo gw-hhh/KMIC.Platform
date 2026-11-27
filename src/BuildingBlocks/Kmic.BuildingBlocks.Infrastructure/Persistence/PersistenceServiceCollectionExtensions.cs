@@ -8,6 +8,10 @@ using Kmic.BuildingBlocks.Application.Jobs;
 using Kmic.BuildingBlocks.Application.Locking;
 using Kmic.BuildingBlocks.Application.Numbering;
 using Kmic.BuildingBlocks.Application.ReadModels;
+using Kmic.BuildingBlocks.Domain.Entities;
+using Kmic.BuildingBlocks.Domain.Identifiers;
+using Kmic.BuildingBlocks.Domain.Repositories;
+using Kmic.BuildingBlocks.Domain.Results;
 using Kmic.BuildingBlocks.Infrastructure.Auditing;
 using Kmic.BuildingBlocks.Infrastructure.Caching;
 using Kmic.BuildingBlocks.Infrastructure.History;
@@ -105,6 +109,29 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IExportReader<TQueryDb>, ExportReader<TQueryDb, TQueryContext>>();
         services.AddSingleton(new ModuleWriteContext(ModuleNames.Of(typeof(TContext)), typeof(TContext)));
         services.AddSingleton(new ModuleQueryContext(ModuleNames.Of(typeof(TContext)), typeof(TQueryContext)));
+        return services;
+    }
+
+    /// <summary>注册仅按 ID 读写即可满足需求的聚合通用仓储；需按条件查找或更新时请编写专用仓储</summary>
+    /// <param name="notFound">找不到时返回的错误，如 <c>SampleErrors.CategoryNotFound</c></param>
+    /// <param name="aggregate">读取时包含的子实体查询，为空表示只读取聚合根</param>
+    public static IServiceCollection AddRepository<TContext, TAggregate, TId>(
+        this IServiceCollection services,
+        Error notFound,
+        Func<IQueryable<TAggregate>, IQueryable<TAggregate>>? aggregate = null)
+        where TContext : ModuleDbContext
+        where TAggregate : AggregateRoot<TId>
+        where TId : struct, IStronglyTypedId
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(notFound);
+        if (services.Any(d => d.ServiceType == typeof(IRepository<TAggregate, TId>)))
+        {
+            throw new InvalidOperationException($"{typeof(TAggregate).Name} 的仓储已经注册过了。");
+        }
+
+        services.AddScoped<IRepository<TAggregate, TId>>(
+            provider => new ModuleRepository<TContext, TAggregate, TId>(provider.GetRequiredService<TContext>(), notFound, aggregate));
         return services;
     }
 

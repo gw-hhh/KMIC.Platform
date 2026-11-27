@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
+namespace Kmic.BuildingBlocks.Infrastructure.Cleanup;
 
 /// <summary>只追加表过期数据清理工具（由迁移账号执行）</summary>
 public static class AppendOnlyPurge

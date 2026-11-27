@@ -33,7 +33,7 @@ public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, Ap
         paths.GetProperty("/api/v1/sample/specimens").GetProperty("get").GetProperty("x-sortable-fields").EnumerateArray().Select(f => f.GetString()).ShouldBe(["number", "title", "createdAt"]);
         paths.GetProperty("/api/v1/sample/specimens/{id}/submit").GetProperty("post").GetProperty("x-permission").GetString().ShouldBe("Sample.Specimen.Submit");
         document.RootElement.GetProperty("x-kmic-permissions").EnumerateArray().Select(p => p.GetProperty("code").GetString())
-            .ShouldBe(["Configuration.Dictionary.Manage", "Configuration.Preference.Manage", "Configuration.Setting.Manage", "Configuration.Setting.View", "Files.File.Manage", "Files.File.Purge", "Files.File.View", "Identity.Authorization.Explain", "Identity.OrgUnit.Manage", "Identity.Role.Manage", "Identity.Role.View", "Identity.SecurityEvent.View", "Identity.User.ForceLogout", "Identity.User.Grant", "Identity.User.Impersonate", "Identity.User.ImpersonateWrite", "Identity.User.Manage", "Identity.User.ResetPassword", "Identity.User.Unlock", "Identity.User.View", "Notifications.Captured.View", "Notifications.Delivery.Manage", "Notifications.Delivery.View", "Notifications.Template.Manage", "Notifications.Template.View", "Operations.Audit.Export", "Operations.Audit.View", "Operations.Jobs.Manage", "Operations.Jobs.View", "Operations.Messages.Manage", "Operations.Messages.View", "Operations.MessagingCapacity.Manage", "Sample.Setting.Manage", "Sample.Specimen.Close", "Sample.Specimen.Create", "Sample.Specimen.Delete", "Sample.Specimen.Edit", "Sample.Specimen.Submit", "Sample.Specimen.View"]);
+            .ShouldBe(["Configuration.Dictionary.Manage", "Configuration.Preference.Manage", "Configuration.Setting.Manage", "Configuration.Setting.View", "Files.File.Manage", "Files.File.Purge", "Files.File.View", "Identity.Authorization.Explain", "Identity.OrgUnit.Manage", "Identity.Role.Manage", "Identity.Role.View", "Identity.SecurityEvent.View", "Identity.User.ForceLogout", "Identity.User.Grant", "Identity.User.Impersonate", "Identity.User.ImpersonateWrite", "Identity.User.Manage", "Identity.User.ResetPassword", "Identity.User.Unlock", "Identity.User.View", "Notifications.Captured.View", "Notifications.Delivery.Manage", "Notifications.Delivery.View", "Notifications.Template.Manage", "Notifications.Template.View", "Operations.Audit.Export", "Operations.Audit.View", "Operations.Jobs.Manage", "Operations.Jobs.View", "Operations.Messages.Manage", "Operations.Messages.View", "Operations.MessagingCapacity.Manage", "Sample.Category.Manage", "Sample.Setting.Manage", "Sample.Specimen.Close", "Sample.Specimen.Create", "Sample.Specimen.Delete", "Sample.Specimen.Edit", "Sample.Specimen.Submit", "Sample.Specimen.View"]);
         document.RootElement.GetProperty("x-kmic-enums").GetProperty("SpecimenStatus").GetArrayLength().ShouldBe(3);
     }
 
@@ -46,8 +46,19 @@ public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, Ap
         (await client.GetAsync("/openapi/v1.json", Ct)).IsSuccessStatusCode.ShouldBeTrue();
     }
 
-    // 前端类型生成与破坏性变更检查（oasdiff）均依赖此文件。由于构建期生成工具会启动完整宿主并连接数据库，
-    // 因此由本测试负责导出
+    // 页面引用文档的方式由 Scalar 内部决定，此处仅验证页面可正常访问
+    [Fact]
+    public async Task ReferencePage_IsServedWhenNotInProduction()
+    {
+        using var client = ClientFor();
+
+        var response = await client.GetAsync("/scalar", Ct);
+
+        response.EnsureSuccessStatusCode();
+        response.Content.Headers.ContentType!.MediaType.ShouldBe("text/html");
+    }
+
+    // 前端类型生成与破坏性变更检查（oasdiff）均依赖此文件；由于生成工具会启动完整宿主并连接数据库，由本测试负责导出
     [Fact]
     public async Task Document_IsExportedToTheArtifactsFolder()
     {

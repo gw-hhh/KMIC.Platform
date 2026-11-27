@@ -7,5 +7,14 @@
   "shortName": "kmic-module",
   "sourceName": "Customer",
   "preferNameDirectory": false,
+  "symbols": {
+    "displayName": {
+      "type": "parameter",
+      "datatype": "text",
+      "isRequired": true,
+      "replaces": "客户",
+      "description": "模块的中文名，显示在权限分组等界面上"
+    }
+  },
   "tags": { "language": "C#", "type": "project" }
 }

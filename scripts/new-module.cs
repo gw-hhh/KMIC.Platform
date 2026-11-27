@@ -1,7 +1,7 @@
 #:property RestorePackagesWithLockFile=false
 
 // 创建模块骨架：dotnet run scripts/new-module.cs -- <模块名> <编号>
-// 先在 docs/modules/README.md 登记模块名和编号。
+// 先在 docs/modules/README.md 登记模块名、中文名和编号。
 // 脚本会更新项目引用和模块注册、编译解决方案，并生成含 schema 初始化的初始迁移。
 // 完成后按已确认的模块设计实现用例，再运行 dotnet run scripts/check.cs -- --fix
 using System.Diagnostics;
@@ -19,7 +19,7 @@ const string MigrationRunner = "Kmic.MigrationRunner";
 
 var module = args[0];
 var root = FindRepositoryRoot();
-var problems = Validate(root, module, number);
+var (problems, displayName) = Validate(root, module, number);
 if (problems.Count > 0)
 {
     problems.ForEach(p => Console.WriteLine($"   {p}"));
@@ -29,10 +29,11 @@ if (problems.Count > 0)
 // 显式指定 Kmic.slnx，避免向上查找其他解决方案
 var steps = new (string Name, Func<int> Run)[]
 {
-    ("安装并运行模板", () => Template(root, module)),
+    ("安装并运行模板", () => Template(root, module, displayName)),
     ("加入解决方案", () => AddToSolution(root, module)),
     ("宿主、迁移程序与架构测试引用新模块并登记", () => Register(root, module)),
     ("编译", () => Run(root, "dotnet", "build Kmic.slnx --nologo")),
+    ("还原本地工具（dotnet-ef）", () => Run(root, "dotnet", "tool restore")),
     ("生成初始迁移", () => Migration(root, module)),
     ("修复编码与换行", () => Normalize(root, module)),
 };
@@ -62,8 +63,8 @@ static string FindRepositoryRoot()
     return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录下运行。");
 }
 
-// 检查模块名称、编号和登记情况，避免与已有模块冲突
-static List<string> Validate(string root, string module, int number)
+// 检查模块名称、编号和登记情况，避免与已有模块冲突；同时取出登记的中文名
+static (List<string> Problems, string DisplayName) Validate(string root, string module, int number)
 {
     var problems = new List<string>();
     if (!Regex.IsMatch(module, "^[A-Z][A-Za-z0-9]*$", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)))
@@ -92,6 +93,13 @@ static List<string> Validate(string root, string module, int number)
         problems.Add($"登记表中 {module} 的编号与输入 {number} 不一致。");
     }
 
+    // 列的顺序：模块 | 中文名 | schema | 编号 | …
+    var displayName = row?.Split('|', StringSplitOptions.TrimEntries) is [_, _, var name, ..] ? name : "";
+    if (row is not null && displayName.Length == 0)
+    {
+        problems.Add($"登记表里 {module} 没有填中文名。");
+    }
+
     var others = registry.Where(l => l.Contains($"| {number} |", StringComparison.Ordinal) && !l.StartsWith($"| {module} |", StringComparison.Ordinal));
     if (others.Any())
     {
@@ -103,13 +111,13 @@ static List<string> Validate(string root, string module, int number)
         problems.Add($"src/Modules/{module} 已存在。");
     }
 
-    return problems;
+    return (problems, displayName);
 }
 
-static int Template(string root, string module)
+static int Template(string root, string module, string displayName)
 {
     var install = Run(root, "dotnet", "new install templates/kmic-module --force");
-    return install != 0 ? install : Run(root, "dotnet", $"new kmic-module -n {module} -o . --force");
+    return install != 0 ? install : Run(root, "dotnet", $"new kmic-module -n {module} -o . --force --displayName \"{displayName}\"");
 }
 
 static string[] ProjectsOf(string module) =>
@@ -190,11 +198,14 @@ static int Migration(string root, string module)
     return Run(root, "dotnet", "build Kmic.slnx --nologo");
 }
 
-// dotnet CLI 生成的文件默认使用 CRLF（迁移文件还含 BOM），需统一转换为 UTF-8 无 BOM 与 LF 换行
+// dotnet CLI 生成的文件默认使用 CRLF（迁移文件还含 BOM），需统一转换为 UTF-8 无 BOM 与 LF 换行；
+// restore --force-evaluate 会重写所有项目的锁文件（仅换行差异），一并规整以避免 git status 出现大量误报修改
 static int Normalize(string root, string module)
 {
     var files = Directory.GetFiles(Path.Combine(root, "src", "Modules", module), "*", SearchOption.AllDirectories)
         .Concat(Directory.GetFiles(Path.Combine(root, "tests", "Modules", module), "*", SearchOption.AllDirectories))
+        .Concat(Directory.GetFiles(Path.Combine(root, "src"), "packages.lock.json", SearchOption.AllDirectories))
+        .Concat(Directory.GetFiles(Path.Combine(root, "tests"), "packages.lock.json", SearchOption.AllDirectories))
         .Concat([
             Path.Combine(root, "Kmic.slnx"),
             Path.Combine(root, $"{module}.slnf"),
