@@ -1,4 +1,4 @@
 interface ImportMetaEnv {
-  /** mock 时用假后端 */
+  /** mock 模式下启用本地 Mock 服务 */
   readonly VITE_API_MODE?: 'mock';
 }

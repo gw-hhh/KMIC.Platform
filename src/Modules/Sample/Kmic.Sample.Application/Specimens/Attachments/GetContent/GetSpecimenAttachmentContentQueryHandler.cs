@@ -8,13 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Application.Specimens.Attachments.GetContent;
 
-/// <summary>
-/// 获取示例附件的下载信息
-/// </summary>
 public sealed class GetSpecimenAttachmentContentQueryHandler(ISampleQueryDb db, IEntityFinder finder, IFileDownloads files)
     : IQueryHandler<GetSpecimenAttachmentContentQuery, FileDownload>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<FileDownload>> Handle(GetSpecimenAttachmentContentQuery query, CancellationToken cancellationToken)
     {
         // 范围外的示例按不存在处理，访问权限和附件归属确认后再查询下载信息

@@ -7,14 +7,11 @@ using Mediator;
 
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
-/// <summary>
-/// 请求校验
-/// </summary>
 public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
 {
-    // 内置规则的错误码换成短码，自定义规则用 WithErrorCode 写明
+    // 内置规则错误码映射为短码，自定义规则通过 WithErrorCode 显式指定
     private static readonly FrozenDictionary<string, string> _builtInCodes = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["NotNullValidator"] = "Required",
@@ -42,7 +39,6 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
 
     private readonly IValidator<TMessage>[] _validators = [.. validators];
 
-    /// <inheritdoc />
     public async ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);
@@ -67,14 +63,14 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
         return TResponse.Fail(CommonErrors.ValidationFailedWith(fieldErrors));
     }
 
-    // Items[2].Quantity 转成 items[2].quantity，和请求 JSON 一致
+    // 将 Items[2].Quantity 转换为 items[2].quantity，与请求 JSON 命名保持一致
     internal static string ToJsonPath(string propertyName) =>
         string.Join('.', propertyName.Split('.').Select(segment => segment.Length == 0 ? segment : char.ToLowerInvariant(segment[0]) + segment[1..]));
 
     private static string ToCode(string errorCode) =>
         _builtInCodes.TryGetValue(errorCode, out var code) ? code : TrimValidatorSuffix(errorCode);
 
-    // 没有对应短码的内置规则去掉 Validator 后缀，自定义规则原样保留
+    // 未映射短码的内置规则移除 Validator 后缀，自定义规则保持原样
     private static string TrimValidatorSuffix(string errorCode) =>
         errorCode.EndsWith("Validator", StringComparison.Ordinal) ? errorCode[..^"Validator".Length] : errorCode;
 }

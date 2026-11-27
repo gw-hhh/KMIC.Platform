@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Hosting;
 
-/// <summary>
-/// 框架参数从部署配置绑定后，启动时就检查：写错的容量保护配置不能带着上线
-/// </summary>
 public sealed class FrameworkOptionsValidationTests
 {
     [Fact]

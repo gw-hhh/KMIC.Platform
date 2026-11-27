@@ -2,14 +2,9 @@ using System.Globalization;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 端点的废弃声明
-/// </summary>
 public static class DeprecationExtensions
 {
-    /// <summary>
-    /// 标记端点已废弃：响应带 Deprecation 和 Sunset 头，OpenAPI 文档里标为废弃
-    /// </summary>
+    /// <summary>标记端点已废弃：附加 Deprecation 与 Sunset 响应头，并在 OpenAPI 中标为废弃</summary>
     public static TBuilder Deprecated<TBuilder>(this TBuilder builder, DateOnly since, DateOnly sunset)
         where TBuilder : IEndpointConventionBuilder
     {

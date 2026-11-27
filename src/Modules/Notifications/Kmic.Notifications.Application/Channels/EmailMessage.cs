@@ -1,8 +1,6 @@
 namespace Kmic.Notifications.Application.Channels;
 
-/// <summary>
-/// 待发送邮件
-/// </summary>
+/// <summary>待发送邮件</summary>
 /// <param name="DeliveryId">投递 ID</param>
 /// <param name="SenderProfile">发件账号名</param>
 /// <param name="Address">收件地址</param>

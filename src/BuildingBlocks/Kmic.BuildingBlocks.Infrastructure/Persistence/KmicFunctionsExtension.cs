@@ -5,9 +5,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Query;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 注册 KmicFunctions 的翻译器
-/// </summary>
 internal sealed class KmicFunctionsExtension : IDbContextOptionsExtension
 {
     public DbContextOptionsExtensionInfo Info => new ExtensionInfo(this);

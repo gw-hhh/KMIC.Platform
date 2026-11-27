@@ -23,18 +23,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Configuration.Infrastructure;
 
-/// <summary>
-/// Configuration 模块的服务端注册类
-/// </summary>
 public sealed class ConfigurationModule : IModule
 {
-    /// <inheritdoc />
     public string Name => ConfigurationModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(IConfigurationQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -49,7 +43,7 @@ public sealed class ConfigurationModule : IModule
         services.AddScoped<IPreferenceLayers, PreferenceLayerReader>();
         services.AddScoped<IPreferences, PreferencesReader>();
 
-        // Contracts 的实现：薄适配器，经 IContractQuerySender 调用本模块的契约查询
+        // 通过契约查询转发实现 IDictionaries
         services.AddScoped<IDictionaries, DictionaryLookup>();
         services.AddScoped<IStartupTask, SyncDictionaryTypesTask>();
         services.AddKmicOptions<DictionaryOptions>(DictionaryOptions.Section);
@@ -57,7 +51,6 @@ public sealed class ConfigurationModule : IModule
         services.AddKmicOptions<PreferenceOptions>(PreferenceOptions.Section);
     }
 
-    /// <inheritdoc />
     public void DeclareDependencies(IModuleDependencies dependencies)
     {
         ArgumentNullException.ThrowIfNull(dependencies);

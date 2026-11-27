@@ -63,7 +63,7 @@ public sealed class SessionTests
     {
         var session = NewSession();
 
-        // 每 6 天刷新一次，一直刷到接近绝对上限
+        // 每 6 天刷新一次，持续刷新直至接近绝对有效期上限
         for (var day = 6; day <= 24; day += 6)
         {
             session.Rotate(Hash($"t{(day / 6) - 1}"), Hash($"t{day / 6}"), _start.AddDays(day), _refreshLifetime, _grace).Outcome.ShouldBe(RotationOutcome.Rotated);

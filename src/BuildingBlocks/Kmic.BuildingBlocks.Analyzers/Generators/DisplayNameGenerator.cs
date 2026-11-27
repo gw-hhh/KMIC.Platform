@@ -8,28 +8,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Kmic.BuildingBlocks.Analyzers.Generators;
 
-/// <summary>
-/// 属性中文名生成器：校验提示里的属性名用它，不用写 WithName
-/// </summary>
-/// <remarks>
-/// 只收集 Application、Contracts 层；名称取属性 summary（记录类型取 param）的第一个短语
-/// </remarks>
+/// <summary>属性中文显示名生成器，供校验提示自动读取（仅扫描 Application 与 Contracts 层，提取属性 summary 或记录 param 的首个短语）。</summary>
 [Generator(LanguageNames.CSharp)]
 public sealed class DisplayNameGenerator : IIncrementalGenerator
 {
-    /// <summary>
-    /// 生成的类型名
-    /// </summary>
     public const string GeneratedTypeName = "Kmic.Generated.DisplayNames";
 
-    // 超过这个长度的第一个短语多半是一句说明，不当名称用
+    // 首短语超过此长度通常为完整说明而非属性名，不予采用
     private const int MaxNameLength = 12;
 
     private static readonly char[] _phraseEnds = ['，', ',', '；', ';', '：', ':', '。', '（', '('];
 
     private static readonly string[] _frameworkAssemblies = ["Kmic.BuildingBlocks.Application", "Kmic.BuildingBlocks.Contracts"];
 
-    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var applies = context.CompilationProvider.Select(static (compilation, _) => Applies(compilation.AssemblyName));
@@ -81,9 +72,7 @@ public sealed class DisplayNameGenerator : IIncrementalGenerator
         return builder.ToImmutable();
     }
 
-    /// <summary>
-    /// 第一个短语；太长或没有中文的不算名称
-    /// </summary>
+    // 提取首个短语作为显示名；超长或不含中文时返回 null
     internal static string? ShortName(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -98,7 +87,7 @@ public sealed class DisplayNameGenerator : IIncrementalGenerator
 
     private static bool IsChinese(char c) => c is >= '一' and <= '鿿';
 
-    // 嵌套类型用 +，和反射拿到的 Type.FullName 对得上
+    // 嵌套类型使用 + 连接，与 Type.FullName 保持一致
     private static string MetadataName(INamedTypeSymbol type)
     {
         var name = type.MetadataName;
@@ -139,7 +128,7 @@ public sealed class DisplayNameGenerator : IIncrementalGenerator
         }
         catch (System.Xml.XmlException)
         {
-            // 格式错误编译器会报警告，这里不重复报
+            // XML 格式错误由编译器直接告警，此处跳过
             return null;
         }
     }
@@ -166,7 +155,7 @@ public sealed class DisplayNameGenerator : IIncrementalGenerator
         source.AppendLine("        new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.Ordinal)");
         source.AppendLine("        {");
 
-        // 分部类型会被收集多次，先去重，再按键排序，生成的文件才不会随收集顺序变化
+        // 分部类型会被多次收集，先去重并按键排序以保证生成结果稳定
         foreach (var (key, name) in entries.GroupBy(e => e.Key, StringComparer.Ordinal).Select(g => g.First()).OrderBy(e => e.Key, StringComparer.Ordinal))
         {
             source.Append("            [").Append(SymbolDisplay.FormatLiteral(key, quote: true)).Append("] = ")

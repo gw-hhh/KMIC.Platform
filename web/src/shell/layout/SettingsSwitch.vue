@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 偏好设置里的开关行：点整行都能切换，照 Vben 的 SwitchItem（MIT）
+// 偏好设置开关行组件：支持点击整行切换，参考 Vben 的 SwitchItem（MIT）
 import { Switch } from 'antdv-next';
 
 const { label, checked } = defineProps<{ label: string; checked: boolean }>();
@@ -10,7 +10,7 @@ const emit = defineEmits<{ toggle: [] }>();
 <template>
   <div class="switch-row" @click="emit('toggle')">
     {{ label }}
-    <!-- 开关自己处理点击和键盘，点击不能再冒泡到整行，否则切两次 -->
+    <!-- 阻止点击事件冒泡到整行，避免触发两次切换 -->
     <span @click.stop>
       <Switch size="small" :checked="checked" :aria-label="label" @change="emit('toggle')" />
     </span>

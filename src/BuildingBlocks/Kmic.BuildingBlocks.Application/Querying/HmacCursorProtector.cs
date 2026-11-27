@@ -6,9 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// <see cref="ICursorProtector" /> 的实现：排序键与 ID 拼成文本，Base64Url 编码，后面跟 HMAC-SHA256 签名
-/// </summary>
+/// <summary><see cref="ICursorProtector" /> 默认实现：Base64Url 编码“排序键 + ID”并附带 HMAC-SHA256 签名。</summary>
 public sealed class HmacCursorProtector : ICursorProtector
 {
     private const char Separator = '.';
@@ -16,9 +14,7 @@ public sealed class HmacCursorProtector : ICursorProtector
 
     private readonly byte[] _key;
 
-    /// <summary>
-    /// 用配置里的密钥；没有配置时随机生成一个，只在本进程内有效
-    /// </summary>
+    /// <summary>优先使用配置密钥，未配置时生成进程内随机密钥。</summary>
     public HmacCursorProtector(IOptions<CursorOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -28,17 +24,15 @@ public sealed class HmacCursorProtector : ICursorProtector
             : RandomNumberGenerator.GetBytes(MinKeyBytes);
     }
 
-    /// <inheritdoc />
     public string Protect(string key, Guid id)
     {
         ArgumentNullException.ThrowIfNull(key);
 
-        // 排序键在前、ID 在后：键里不会有换行，用换行分开
+        // 排序键在前、ID 在后，以换行符分隔（排序键本身不含换行符）
         var payload = Base64Url.EncodeToString(Encoding.UTF8.GetBytes(string.Create(CultureInfo.InvariantCulture, $"{key}\n{id:N}")));
         return payload + Separator + Base64Url.EncodeToString(Sign(payload));
     }
 
-    /// <inheritdoc />
     public bool TryUnprotect(string cursor, out string key, out Guid id)
     {
         key = string.Empty;
@@ -77,11 +71,11 @@ public sealed class HmacCursorProtector : ICursorProtector
             var bytes = Convert.FromBase64String(configured);
             return bytes.Length >= MinKeyBytes
                 ? bytes
-                : throw new InvalidOperationException($"Kmic:Paging:SigningKey 至少 {MinKeyBytes} 字节（Base64 解码后）。");
+                : throw new InvalidOperationException($"Kmic:Paging:SigningKey 解码后长度须至少 {MinKeyBytes} 字节。");
         }
         catch (FormatException exception)
         {
-            throw new InvalidOperationException("Kmic:Paging:SigningKey 不是合法的 Base64。", exception);
+            throw new InvalidOperationException("Kmic:Paging:SigningKey 不是有效的 Base64 字符串。", exception);
         }
     }
 

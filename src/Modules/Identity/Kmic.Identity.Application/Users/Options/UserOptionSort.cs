@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Application.Querying;
 
 namespace Kmic.Identity.Application.Users.Options;
 
-/// <summary>
-/// 选人下拉的排序：固定按姓名，不开放给调用方选择
-/// </summary>
+// 选人下拉框固定按姓名排序，不对外开放排序字段
 internal static class UserOptionSort
 {
     public static readonly SortMap<UserOption> Map = SortMap<UserOption>

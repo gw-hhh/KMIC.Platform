@@ -4,21 +4,13 @@ using System.Text;
 
 namespace Kmic.Operations.Application.Audit.Export;
 
-/// <summary>
-/// 审计导出的 CSV 写法
-/// </summary>
 internal static class AuditCsv
 {
     private static readonly SearchValues<char> _special = SearchValues.Create(",\"\r\n");
 
-    /// <summary>
-    /// 表头，列的顺序和 <see cref="Line" /> 一致
-    /// </summary>
+    // 列顺序须与 Line 保持一致
     public const string Header = "发生时间,模块,动作,来源,操作人编号,操作人,实际操作人编号,实际操作人,追踪编号,操作对象";
 
-    /// <summary>
-    /// 生成一行 CSV
-    /// </summary>
     public static string Line(
         DateTimeOffset occurredAt,
         string module,

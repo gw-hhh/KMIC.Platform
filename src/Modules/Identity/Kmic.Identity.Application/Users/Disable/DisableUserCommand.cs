@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.Disable;
 
-/// <summary>
-/// 禁用用户并作废其全部会话
-/// </summary>
+/// <summary>禁用用户并作废其全部会话。</summary>
 [RequirePermission(IdentityPermissions.UserManage)]
 [Audited]
 [Idempotent]

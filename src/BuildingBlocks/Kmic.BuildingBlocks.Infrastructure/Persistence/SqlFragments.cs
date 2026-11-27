@@ -3,17 +3,10 @@ using System.Text;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 把几段带参数的 SQL 拼成一条
-/// </summary>
-/// <remarks>
-/// 插值字符串里再嵌插值字符串会变成一个参数值，要用它拼
-/// </remarks>
+/// <summary>参数化 SQL 片段拼接工具（防止 FormattableString 直接嵌套时内层被整体当成单个参数）</summary>
 public static class SqlFragments
 {
-    /// <summary>
-    /// 按顺序拼接，各段的占位符编号顺延，参数按原样保留
-    /// </summary>
+    /// <summary>按顺序拼接多个 SQL 片段，自动顺延参数占位符编号并保留参数值</summary>
     public static FormattableString Concat(params FormattableString[] parts)
     {
         ArgumentNullException.ThrowIfNull(parts);
@@ -34,7 +27,7 @@ public static class SqlFragments
         return FormattableStringFactory.Create(format.ToString(), [.. arguments]);
     }
 
-    // 逐字符扫描：{{ 和 }} 是转义的花括号，原样保留；{n、{n,对齐、{n:格式} 里的 n 加上偏移
+    // 逐字符扫描格式化模板：转义花括号 {{ 与 }} 原样保留，占位符 {n}、{n,对齐}、{n:格式} 中的索引 n 按当前参数偏移量递增
     private static void AppendRenumbered(StringBuilder target, string format, int offset)
     {
         var i = 0;
@@ -57,7 +50,7 @@ public static class SqlFragments
 
                 if (end == start)
                 {
-                    throw new FormatException($"SQL 片段里的占位符不对：{format}");
+                    throw new FormatException($"SQL 片段中的占位符格式无效：{format}");
                 }
 
                 target.Append('{').Append(int.Parse(format.AsSpan(start, end - start), System.Globalization.CultureInfo.InvariantCulture) + offset);

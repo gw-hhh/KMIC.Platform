@@ -7,12 +7,7 @@ using Npgsql;
 
 namespace Kmic.MigrationRunner;
 
-/// <summary>
-/// 迁移程序的命令
-/// </summary>
-/// <remarks>
-/// 退出码：0 成功，1 执行失败，2 参数错误，3 status 发现待执行迁移
-/// </remarks>
+// 退出码：0 成功，1 失败，2 参数错误，3 存在待执行迁移（仅 status）
 internal static class RunnerApp
 {
     public const string ConnectionStringKey = "Kmic:Migration:ConnectionString";
@@ -33,7 +28,7 @@ internal static class RunnerApp
         CancellationToken ct)
     {
         var context = new RunnerContext(configuration, modules.For(production), output, time);
-        var root = new RootCommand("Kmic 数据库迁移程序：用迁移账号执行各模块的迁移，并做数据库层面的维护")
+        var root = new RootCommand("Kmic 数据库迁移工具：使用迁移账号执行模块迁移及数据库维护操作")
         {
             MigrateCommand(context),
             StatusCommand(context),
@@ -41,7 +36,7 @@ internal static class RunnerApp
             NumbersCommands.Build(context),
         };
 
-        // 命令行写错了统一返回 2：System.CommandLine 默认返回 1，会和“执行失败”混在一起
+        // 命令行参数解析错误统一返回退出码 2，以区分执行失败（1）
         var parsed = root.Parse(args);
         if (parsed.Errors.Count > 0)
         {
@@ -58,7 +53,7 @@ internal static class RunnerApp
 
     private static Command MigrateCommand(RunnerContext context)
     {
-        var command = new Command("migrate", "执行全部模块未执行的迁移。先做数据库级的准备（不区分大小写的排序规则），再按模块名称顺序逐个迁移");
+        var command = new Command("migrate", "执行所有模块的待处理迁移。先完成数据库级初始化（如不区分大小写排序规则），再按模块名称依次执行");
         command.SetAction((_, ct) => context.GuardedAsync(async () =>
         {
             var connection = context.ConnectionString();
@@ -76,7 +71,7 @@ internal static class RunnerApp
 
     private static Command StatusCommand(RunnerContext context)
     {
-        var command = new Command("status", "列出未执行的迁移，不改库。有未执行的迁移时退出码为 3，部署流程可以用它判断");
+        var command = new Command("status", "列出待执行的迁移（只读检查）；存在待执行迁移时返回退出码 3，供部署流程判断");
         command.SetAction((_, ct) => context.GuardedAsync(async () =>
         {
             await using var services = context.Services();
@@ -101,13 +96,13 @@ internal static class RunnerApp
     {
         var table = new Option<string>("--table")
         {
-            Description = "要清理的表",
+            Description = "待清理的目标表",
             Required = true,
         };
         table.AcceptOnlyFromAmong([.. AppendOnlyPurge.Targets.Keys]);
         var days = new Option<int>("--older-than-days")
         {
-            Description = "保留期（天），删除发生时间早于保留截止时间的记录；须按运维制度显式指定，无默认值",
+            Description = "数据保留天数，清理早于该截止时间的记录；须按运维规范显式指定，无默认值",
             Required = true,
         };
         var batch = new Option<int>("--batch-size")
@@ -116,7 +111,7 @@ internal static class RunnerApp
             DefaultValueFactory = _ => DefaultBatchSize,
         };
 
-        var command = new Command("purge", "分批删除只追加表（审计日志、安全事件）里超过保留期的行；运行账号对这些表没有删除权限，只能由迁移账号执行")
+        var command = new Command("purge", "分批清理只追加表（审计日志、安全事件）中超出保留期的记录；应用运行账号无删除权限，须由迁移账号执行")
         {
             table,
             days,
@@ -128,7 +123,7 @@ internal static class RunnerApp
             var size = parse.GetValue(batch);
             if (retention < 1 || size < 1)
             {
-                await context.Output.WriteLineAsync("保留期和每批行数都要大于 0。");
+                await context.Output.WriteLineAsync("保留期和每批行数均须大于 0。");
                 return UsageExitCode;
             }
 

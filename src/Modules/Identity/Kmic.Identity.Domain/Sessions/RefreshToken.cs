@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Identity.Domain.Sessions;
 
-/// <summary>
-/// 刷新令牌，数据库里只存哈希，只能经 Session 创建和修改
-/// </summary>
+/// <summary>刷新令牌，仅存储哈希并由 <see cref="Session" /> 创建和修改。</summary>
 public sealed class RefreshToken : Entity<RefreshTokenId>
 {
     private RefreshToken(RefreshTokenId id, string tokenHash, DateTimeOffset issuedAt, DateTimeOffset expiresAt)

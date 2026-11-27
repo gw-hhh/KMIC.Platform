@@ -7,9 +7,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 
-/// <summary>
-/// 慢查询日志
-/// </summary>
 internal sealed class SlowQueryInterceptor(IOptions<DatabaseDiagnosticsOptions> options, FrameworkMetrics metrics, ILogger<SlowQueryInterceptor> logger)
     : DbCommandInterceptor
 {
@@ -71,9 +68,7 @@ internal sealed class SlowQueryInterceptor(IOptions<DatabaseDiagnosticsOptions> 
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// 只留语句类型：跳过开头的注释（EF 的 TagWith 会写在最前面）和空白，取第一个单词
-    /// </summary>
+    // 提取首个非注释 SQL 关键字
     internal static string StatementKind(string commandText)
     {
         ArgumentNullException.ThrowIfNull(commandText);

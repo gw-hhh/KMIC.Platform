@@ -8,12 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 业务模块怎样用文件：上传得到文件 ID，在业务命令里关联，关联与业务写入在同一个事务里
-/// </summary>
-/// <remarks>
-/// 这里只有 Api 角色，关联请求停在发件箱里，Files 一侧还是临时状态；请求被处理之后的变化见 FileLifecycleTests
-/// </remarks>
 public sealed class SpecimenAttachmentTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -38,7 +32,7 @@ public sealed class SpecimenAttachmentTests(ClassDatabase<ApiTemplate> database,
         attachment.GetProperty("fileType").GetString().ShouldBe("pdf");
         detail.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()).ShouldContain("Edit", StringComparer.Ordinal);
         await using var seed = NewSeed();
-        (await ColumnAsync<string>(seed, fileId, "Status")).ShouldBe("Available", "关联请求要由 Worker 处理，这里没有");
+        (await ColumnAsync<string>(seed, fileId, "Status")).ShouldBe("Available", "关联请求需由 Worker 处理，当前测试仅启用了 Api 角色");
     }
 
     [Fact]
@@ -88,7 +82,7 @@ public sealed class SpecimenAttachmentTests(ClassDatabase<ApiTemplate> database,
 
         var added = await AddAttachmentAsync(client, specimen, fileId, version);
 
-        added.StatusCode.ShouldBe(HttpStatusCode.OK, "上传登记与关联检查都按被模拟的用户判断");
+        added.StatusCode.ShouldBe(HttpStatusCode.OK, "上传登记与关联权限校验均应以被模拟用户的身份为准");
         await using var seed = NewSeed();
         (await ColumnAsync<Guid>(seed, fileId, "UploadedBy")).ShouldBe(erin.UserId.Value);
     }
@@ -190,7 +184,7 @@ public sealed class SpecimenAttachmentTests(ClassDatabase<ApiTemplate> database,
         return detail.GetProperty("attachments").EnumerateArray().First().GetProperty("id").GetGuid();
     }
 
-    // 有“编辑”权限、能看全部数据的另一个人：能上传、能看到别人的标本，但不是负责人
+    // 具备编辑权限且数据范围为全部的非负责人用户：可上传文件并查看他人标本，但无权修改非本人负责的标本
     private TestIdentity Dave()
     {
         var dave = TestIdentity.User("丁").InTree(_org).InOrgUnit(_org["华东"]).WithRole(r => r

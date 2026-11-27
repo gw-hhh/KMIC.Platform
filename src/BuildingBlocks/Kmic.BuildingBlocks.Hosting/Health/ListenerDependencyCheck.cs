@@ -3,16 +3,13 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 消息与缓存失效的监听连接，断开算降级
-/// </summary>
 internal sealed class ListenerDependencyCheck(MessagingListener listener) : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         if (!listener.IsRunning)
         {
-            return Task.FromResult(HealthCheckResult.Unhealthy("监听线程没有运行"));
+            return Task.FromResult(HealthCheckResult.Unhealthy("监听线程未运行"));
         }
 
         return Task.FromResult(listener.IsConnected

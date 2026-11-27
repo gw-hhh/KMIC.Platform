@@ -13,9 +13,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Organization.AssignUser;
 
-/// <summary>
-/// 设置用户所属组织
-/// </summary>
 public sealed class AssignUserOrgUnitCommandHandler(
     IUserRepository users,
     IOrgTreeRepository trees,
@@ -25,7 +22,6 @@ public sealed class AssignUserOrgUnitCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<AssignUserOrgUnitCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(AssignUserOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         // 先锁定组织树，防止检查通过后组织单元被并发停用

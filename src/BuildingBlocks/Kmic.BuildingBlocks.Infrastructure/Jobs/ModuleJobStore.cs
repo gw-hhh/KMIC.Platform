@@ -7,9 +7,6 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// <see cref="IModuleJobStore" /> 的实现：读一个模块的作业表，取消走执行器
-/// </summary>
 internal sealed class ModuleJobStore(string module, ModuleFrameworkTables tables, DataSources dataSources, JobExecutor executor, BackgroundJobCatalog catalog)
     : IModuleJobStore
 {

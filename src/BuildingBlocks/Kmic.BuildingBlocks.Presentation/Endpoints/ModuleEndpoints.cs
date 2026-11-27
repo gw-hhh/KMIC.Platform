@@ -1,35 +1,21 @@
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 模块的端点注册类
-/// </summary>
-/// <remarks>
-/// 路由前缀是 /api/v1/{模块名小写，多个单词用连字符}
-/// </remarks>
+/// <summary>模块端点注册基类（路由前缀固定为 /api/v1/{模块名小写连字符}）</summary>
 public abstract class ModuleEndpoints
 {
-    /// <summary>
-    /// 模块名，与 Infrastructure 里模块注册类的名字一致
-    /// </summary>
+    /// <summary>模块名称，须与 Infrastructure 层模块注册名称一致</summary>
     public abstract string Module { get; }
 
-    /// <summary>
-    /// 模块级的路由组设置，极少使用
-    /// </summary>
+    /// <summary>模块级路由组扩展配置</summary>
     public virtual void ConfigureGroup(RouteGroupBuilder group)
     {
     }
 
-    /// <summary>
-    /// 本模块的端点类型，默认是子类所在程序集里的全部 <see cref="IEndpoint"/> 实现
-    /// </summary>
-    /// <remarks>
-    /// 只有框架测试需要重写
-    /// </remarks>
+    /// <summary>发现当前模块的端点类型，默认扫描所在程序集全部 IEndpoint 实现（仅测试场景需重写）</summary>
     protected virtual IEnumerable<Type> FindEndpointTypes() =>
         GetType().Assembly.GetTypes().Where(t => t is { IsClass: true, IsAbstract: false } && typeof(IEndpoint).IsAssignableFrom(t));
 
-    // 按类型名排序，注册顺序不随反射的返回顺序变化
+    // 按类型全名排序，确保注册顺序稳定，不受反射枚举顺序影响
     internal IEnumerable<IEndpoint> CreateEndpoints() => FindEndpointTypes()
         .OrderBy(t => t.FullName, StringComparer.Ordinal)
         .Select(t => (IEndpoint)(Activator.CreateInstance(t, nonPublic: true) ?? throw new InvalidOperationException($"无法创建端点 {t.FullName}。")));

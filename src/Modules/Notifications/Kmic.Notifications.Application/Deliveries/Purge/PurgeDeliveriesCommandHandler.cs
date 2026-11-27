@@ -7,13 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Application.Deliveries.Purge;
 
-/// <summary>
-/// 清理超过保留期的投递和发送请求记录
-/// </summary>
 public sealed class PurgeDeliveriesCommandHandler(IDeliveryRepository deliveries, INotificationRepository notifications, IOptions<NotificationsRetentionOptions> options, TimeProvider time)
     : ICommandHandler<PurgeDeliveriesCommand, ScheduledJobOutcome>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeDeliveriesCommand command, CancellationToken cancellationToken)
     {
         var before = time.GetUtcNow().AddDays(-options.Value.DeliveryDays);

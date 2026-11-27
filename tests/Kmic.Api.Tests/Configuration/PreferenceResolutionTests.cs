@@ -11,12 +11,7 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Configuration;
 
-/// <summary>
-/// 偏好的四层覆盖：默认、系统、角色、本人，逐层设置、逐层恢复、缓存失效，端到端
-/// </summary>
-/// <remarks>
-/// 系统层是全局的，同一个类里的测试共用一个库，所以只有这一个类动 Sample.List.PageSize 的系统层
-/// </remarks>
+// 系统层为全局共享配置，仅本测试类修改 Sample.List.PageSize 的系统层
 public sealed class PreferenceResolutionTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -125,7 +120,7 @@ public sealed class PreferenceResolutionTests(ClassDatabase<ApiTemplate> databas
         (await ReadAsync(identity with { RoleId = RoleId.New() })).ShouldBe(40);
         (await ReadAsync(null)).ShouldBe(40);
 
-        // 系统层是全局的：用完恢复，别的测试才看得到默认值
+        // 系统层为全局配置：测试结束后恢复默认状态，避免影响其他测试
         var definition = await DefinitionAsync(admin, PageSize);
         (await ResetLayerAsync(admin, role, VersionOf(definition, role))).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await ResetLayerAsync(admin, null, VersionOf(definition, null))).StatusCode.ShouldBe(HttpStatusCode.OK);

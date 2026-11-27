@@ -2,16 +2,7 @@ using Kmic.BuildingBlocks.Application.Messaging;
 
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 校验过的定时任务
-/// </summary>
-/// <param name="Name">稳定名称</param>
-/// <param name="Module">所属模块</param>
-/// <param name="CommandType">发送的命令</param>
-/// <param name="Cron">代码里的默认执行时间</param>
-/// <param name="Create">按触发构造命令</param>
-/// <param name="Misfire">错过触发时怎么办</param>
-/// <param name="DisplayName">显示名</param>
+/// <summary>已校验的定时任务定义；<paramref name="Cron"/> 为代码配置的默认表达式，<paramref name="Create"/> 根据触发信息构造命令。</summary>
 public sealed record ScheduledJobDefinition(
     string Name,
     string Module,

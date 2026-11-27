@@ -2,9 +2,7 @@ using Kmic.Notifications.Domain.SiteMessages;
 
 namespace Kmic.Notifications.Application.SiteMessages.List;
 
-/// <summary>
-/// 站内消息列表项
-/// </summary>
+/// <summary>站内消息列表项</summary>
 /// <param name="Id">消息 ID</param>
 /// <param name="Title">标题</param>
 /// <param name="Body">正文</param>

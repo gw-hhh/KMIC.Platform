@@ -4,7 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe.Commands;
 
 /// <summary>
-/// 按测试给的方法修改单据，用来看审计记录
+/// 按测试传入的委托修改单据，用于验证审计记录生成。
 /// </summary>
 /// <param name="Id">单据</param>
 /// <param name="Edit">修改单据的方法</param>

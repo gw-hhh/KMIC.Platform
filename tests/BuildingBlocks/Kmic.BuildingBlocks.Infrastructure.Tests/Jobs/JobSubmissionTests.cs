@@ -12,9 +12,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Jobs;
 
-/// <summary>
-/// 每个测试用自己的用户，同时运行数量的上限互不影响
-/// </summary>
 public sealed class JobSubmissionTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

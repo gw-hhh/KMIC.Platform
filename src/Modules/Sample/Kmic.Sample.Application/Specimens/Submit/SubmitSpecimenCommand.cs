@@ -4,9 +4,7 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Submit;
 
-/// <summary>
-/// 提交示例
-/// </summary>
+/// <summary>提交示例</summary>
 /// <param name="Id">示例 ID</param>
 /// <param name="ExpectedVersion">读取时的版本号</param>
 [RequirePermission(SamplePermissions.Submit)]

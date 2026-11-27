@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import type { components } from '@/generated/api';
 
-// 假后端的后台作业和站内消息，按账号存在 sessionStorage。
-// 第一次访问时放进几条示例：一个 40 秒跑完的导出（完成后发一条站内消息）、一个失败的导入、一个已完成的作业
+// 本地 Mock 后台作业与站内消息，按账号隔离存储于 sessionStorage
+// 首次访问时预置示例数据：运行中导出（40 秒后完成并推送站内消息）、失败导入与已完成作业
 
 type Job = components['schemas']['BackgroundJobItem'];
 type Message = components['schemas']['SiteMessageItem'];
@@ -89,7 +89,7 @@ function seed(): Inbox {
       siteMessage({
         id: 'msg-password',
         title: '密码将在 7 天后过期',
-        body: '请在过期前修改密码，过期后要联系管理员重置。',
+        body: '请在过期前及时修改，过期后需联系管理员重置。',
         sentAt: minutesAgo(60),
       }),
       siteMessage({
@@ -104,7 +104,7 @@ function seed(): Inbox {
   };
 }
 
-// 运行中的作业按经过的时间推进，跑完后和真实后端一样给提交人发站内消息
+// 按已耗时推进运行中作业进度，完成后向提交人发送站内消息（与真实后端行为一致）
 function advance(inbox: Inbox): void {
   for (const item of inbox.jobs) {
     if (item.status !== 'Running' || item.startedAt === null) {
@@ -167,7 +167,7 @@ const notFound = (): Response =>
     { status: 404, headers: { 'Content-Type': 'application/problem+json' } },
   );
 
-// 未读在前、新的在前
+// 未读优先，同状态按发送时间倒序
 const ordered = (messages: Message[]): Message[] =>
   [...messages].sort((a, b) => Number(a.isRead) - Number(b.isRead) || b.sentAt.localeCompare(a.sentAt));
 

@@ -3,12 +3,7 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 订阅路由的读写
-/// </summary>
-/// <remarks>
-/// 路由只增不删，停止投递只能由运维终结
-/// </remarks>
+// 订阅路由读写（路由只增不删，停投须由运维终结）
 internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
 {
     public static IReadOnlyList<RouteDeclaration> Declared(SubscriptionCatalog catalog) =>
@@ -20,10 +15,7 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
     public static IReadOnlyList<RouteRetirement> Retirements(SubscriptionCatalog catalog) =>
         [.. catalog.Retired.Select(r => new RouteRetirement(r.Name, r.Reason))];
 
-    /// <summary>
-    /// 登记本实例声明的路由，返回第一次登记的订阅
-    /// </summary>
-    /// <exception cref="InvalidOperationException">声明的订阅已经终结</exception>
+    // 登记路由并返回首次新增的订阅；声明的订阅已终结时抛出 InvalidOperationException
     public async Task<IReadOnlyList<string>> RegisterAsync(
         IReadOnlyList<RouteDeclaration> declared, IReadOnlyList<RouteRetirement> retired, string build, CancellationToken ct)
     {
@@ -64,7 +56,7 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
             }
         }
 
-        // 只从生效改为待终结，不能反过来：回滚到还在用这个订阅的旧构建，也不会把它改回生效
+        // 仅允许从生效状态转为待终结，不可逆转，防止回滚至旧构建时意外重新启用已退出的订阅
         foreach (var item in retired)
         {
             await using var retire = new NpgsqlCommand(
@@ -83,9 +75,6 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
         return added;
     }
 
-    /// <summary>
-    /// 还在投递的路由：生效的和待终结的
-    /// </summary>
     public async Task<IReadOnlyList<MessageRoute>> ListDeliveringAsync(CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand(
@@ -103,9 +92,6 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
         return routes;
     }
 
-    /// <summary>
-    /// 在给定的订阅里，还没完成初始化的
-    /// </summary>
     public async Task<IReadOnlyList<string>> ListNeedingInitializationAsync(IReadOnlyCollection<string> subscriptions, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(subscriptions);
@@ -146,7 +132,7 @@ internal sealed class MessageRoutes(NpgsqlDataSource dataSource)
         if (finalized.Count > 0)
         {
             throw new InvalidOperationException(
-                $"订阅 {string.Join("、", finalized)} 已经终结，声明它的构建不能启动。确实要恢复时，请运维重新激活并核对补投范围。");
+                $"订阅 {string.Join("、", finalized)} 已终结，声明该订阅的构建禁止启动。如需恢复，请联系运维重新激活并核对补投范围。");
         }
     }
 }

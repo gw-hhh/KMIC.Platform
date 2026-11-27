@@ -1,8 +1,5 @@
 namespace Kmic.Operations.Presentation.Messages;
 
-/// <summary>
-/// 补投的请求
-/// </summary>
 /// <param name="SourceModule">发布消息的模块</param>
 /// <param name="MessageType">消息名称</param>
 /// <param name="Subscription">订阅名</param>

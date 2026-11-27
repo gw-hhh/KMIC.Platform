@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Jobs;
 
-/// <summary>
-/// Operations 汇总作业用的存储：按模块遍历、筛选、跨批翻页、看状态、请求取消
-/// </summary>
 public sealed class ModuleJobStoreTests : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string Module = "BuildingBlocks";
@@ -53,13 +50,13 @@ public sealed class ModuleJobStoreTests : IClassFixture<ClassDatabase<ProbeTempl
     [Fact]
     public async Task List_NewestFirst_FiltersAndPagesAcrossBatches()
     {
-        // 每种作业每个用户同时最多两个，所以三个人分着提交
+        // 单用户同类作业并发上限为 2，因此由三位用户分别提交
         var mine = new List<Guid> { await SubmitAsync(_alice), await SubmitAsync(_alice), await SubmitAsync(_carol) };
 
         var theirs = await SubmitAsync(_bob);
         HashSet<Guid> ids = [.. mine, theirs];
 
-        // 同一个类里的测试共用一个库，别的测试提交的作业也在里面，所以只看这个测试自己提交的
+        // 同类测试共享数据库实例，需过滤并仅断言本测试提交的作业
         var all = await Store.ListAsync(JobFilter.None, null, 100, Ct);
         var onlyBob = await Store.ListAsync(new JobFilter(SubmittedBy: _bob.UserId.Value), null, 100, Ct);
         var queued = await Store.ListAsync(new JobFilter(State: BackgroundJobState.Queued), null, 100, Ct);

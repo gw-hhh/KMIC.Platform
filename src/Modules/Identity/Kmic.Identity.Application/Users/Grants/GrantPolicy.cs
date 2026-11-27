@@ -5,15 +5,9 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Grants;
 
-/// <summary>
-/// 角色授予的操作限制
-/// </summary>
-/// <remarks>
-/// 收回后必须还有能登录的受保护角色持有人
-/// </remarks>
+/// <summary>角色授予的操作限制，收回后须保留至少一位可登录的受保护角色持有人。</summary>
 public sealed class GrantPolicy : IResourcePolicy<GrantTarget, GrantAction>
 {
-    /// <inheritdoc />
     public PolicyDecision Evaluate(IAccessContext access, GrantTarget resource, GrantAction action)
     {
         ArgumentNullException.ThrowIfNull(access);

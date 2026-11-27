@@ -1,13 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-/// <summary>
-/// 数据范围对象分组
-/// </summary>
+/// <summary>声明数据范围对象分组的所属模块。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class DataScopeObjectGroupAttribute(string module) : Attribute
 {
-    /// <summary>
-    /// 模块名
-    /// </summary>
     public string Module { get; } = module;
 }

@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Jobs;
 
-/// <summary>
-/// 像宿主一样启动和停止后台服务，作业由执行循环自己领取
-/// </summary>
 public sealed class JobWorkerTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -24,14 +21,14 @@ public sealed class JobWorkerTests(ClassDatabase<ProbeTemplate> database) : ICla
     [Fact]
     public async Task Running_SubmittedJobPickedUpWithoutPolling()
     {
-        // 兜底轮询设成很长，能及时执行只能是靠提交时的通知唤醒
+        // 将兜底轮询间隔设为较长值，确保及时执行完全依赖提交时的通知唤醒机制
         await using var harness = NewHarness();
         await harness.StartHostedServicesAsync(Ct);
         try
         {
             var (ticket, jobId) = await SubmitAsync(harness, batches: 2);
 
-            await Eventually.UntilAsync(async ct => (await StatusAsync(harness, jobId, ct)) == JobStatus.Succeeded, "作业执行完", TimeSpan.FromSeconds(15), Ct);
+            await Eventually.UntilAsync(async ct => (await StatusAsync(harness, jobId, ct)) == JobStatus.Succeeded, "作业执行完成", TimeSpan.FromSeconds(15), Ct);
             (await LinesAsync(harness, ticket)).ShouldBe(["第 1 批", "第 2 批"]);
         }
         finally

@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 我的登录设备：自己查看，结束别的设备，不能碰别人的会话，端到端
-/// </summary>
 public sealed class MySessionsTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

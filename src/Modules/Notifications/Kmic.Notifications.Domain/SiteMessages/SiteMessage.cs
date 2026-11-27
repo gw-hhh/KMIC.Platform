@@ -6,29 +6,19 @@ using Kmic.Notifications.Domain.Notifications;
 
 namespace Kmic.Notifications.Domain.SiteMessages;
 
-/// <summary>
-/// 用户的站内消息
-/// </summary>
+/// <summary>用户站内消息</summary>
 public sealed class SiteMessage : AggregateRoot<SiteMessageId>
 {
-    /// <summary>
-    /// 标题最大长度（字符数）
-    /// </summary>
+    /// <summary>标题最大长度（字符数）</summary>
     public const int TitleMaxLength = 200;
 
-    /// <summary>
-    /// 正文最大长度（字符数）
-    /// </summary>
+    /// <summary>正文最大长度（字符数）</summary>
     public const int BodyMaxLength = 2000;
 
-    /// <summary>
-    /// 类别最大长度（字符数）
-    /// </summary>
+    /// <summary>类别最大长度（字符数）</summary>
     public const int CategoryMaxLength = 50;
 
-    /// <summary>
-    /// 链接最大长度（字符数）
-    /// </summary>
+    /// <summary>链接最大长度（字符数）</summary>
     public const int LinkMaxLength = 500;
 
     private SiteMessage(SiteMessageId id, UserId recipientUserId, NotificationId? notificationId, string title, string body, string? link, string category, DateTimeOffset sentAt)
@@ -83,12 +73,7 @@ public sealed class SiteMessage : AggregateRoot<SiteMessageId>
     /// </summary>
     public DateTimeOffset? ReadAt { get; private set; }
 
-    /// <summary>
-    /// 创建一条站内消息
-    /// </summary>
-    /// <remarks>
-    /// 链接只能是站内相对路径
-    /// </remarks>
+    /// <summary>创建站内消息（<paramref name="link" /> 仅支持站内相对路径）</summary>
     public static Result<SiteMessage> Create(UserId recipient, NotificationId? notificationId, string title, string body, string? link, string category, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -111,9 +96,7 @@ public sealed class SiteMessage : AggregateRoot<SiteMessageId>
             now);
     }
 
-    /// <summary>
-    /// 标为已读，已读消息保留原已读时间
-    /// </summary>
+    /// <summary>标记为已读（已读消息保留首次阅读时间）</summary>
     public void MarkRead(DateTimeOffset now) => ReadAt ??= now;
 
     // 仅允许以单个 / 开头的站内路径；禁止 // 开头、://、反斜杠和控制字符

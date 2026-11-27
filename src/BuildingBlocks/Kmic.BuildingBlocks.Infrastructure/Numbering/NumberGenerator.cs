@@ -9,9 +9,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Numbering;
 
-/// <summary>
-/// 业务编号生成
-/// </summary>
 internal sealed class NumberGenerator(
     NumberRuleCatalog rules,
     IBusinessCalendar calendar,
@@ -27,19 +24,19 @@ internal sealed class NumberGenerator(
         var definition = rules.Get(rule);
         if (!execution.InCommand || transaction.Module is null)
         {
-            throw new InvalidOperationException($"取编号 {rule} 只能在命令里调用，计数要和单据一起提交。");
+            throw new InvalidOperationException($"生成编号 {rule} 仅限在命令中调用，以保证计数与单据在同一事务中提交。");
         }
 
         if (!string.Equals(transaction.Module, definition.Module, StringComparison.Ordinal))
         {
-            throw new InvalidOperationException($"编号规则 {rule} 属于 {definition.Module} 模块，只能由该模块的命令取号。");
+            throw new InvalidOperationException($"编号规则 {rule} 归属 {definition.Module} 模块，仅允许该模块的命令调用。");
         }
 
         var now = time.GetUtcNow();
         var businessDate = calendar.DateOf(now);
         var partitionKey = definition.PartitionKey(partition);
         var dbTransaction = contexts.Get(definition.Module).Database.CurrentTransaction?.GetDbTransaction()
-            ?? throw new InvalidOperationException("命令的事务还没有开始。");
+            ?? throw new InvalidOperationException("命令事务尚未开启。");
 
         await using var command = dbTransaction.Connection!.CreateCommand();
         command.Transaction = dbTransaction;

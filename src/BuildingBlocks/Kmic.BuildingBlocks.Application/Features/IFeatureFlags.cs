@@ -1,20 +1,11 @@
 namespace Kmic.BuildingBlocks.Application.Features;
 
-/// <summary>
-/// 功能开关
-/// </summary>
-/// <remarks>
-/// 值来自部署配置，改了要重启
-/// </remarks>
+/// <summary>功能开关，配置值源自部署配置，修改后须重启应用生效。</summary>
 public interface IFeatureFlags
 {
-    /// <summary>
-    /// 开关是否开启；没有配置过的开关按关闭处理
-    /// </summary>
+    /// <summary>判断功能开关是否启用；未配置的开关默认视为关闭。</summary>
     ValueTask<bool> IsEnabledAsync(string name, CancellationToken ct);
 
-    /// <summary>
-    /// 当前对请求开放的开关名，按名称排序
-    /// </summary>
+    /// <summary>获取当前启用的开关名称列表，按名称排序。</summary>
     ValueTask<IReadOnlyList<string>> EnabledAsync(CancellationToken ct);
 }

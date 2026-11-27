@@ -7,9 +7,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Limits;
 
-/// <summary>
-/// 重型接口的并发限制：超出立即返回 429，不排队；许可覆盖整个请求
-/// </summary>
 public sealed class ConcurrencyLimitTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -34,7 +31,7 @@ public sealed class ConcurrencyLimitTests
         (await first).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await second).StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        // 处理完许可就还回去了
+        // 请求处理完成后立即归还并发许可
         (await api.Client.GetAsync("/api/v1/samples/heavy", Ct)).StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
@@ -46,7 +43,7 @@ public sealed class ConcurrencyLimitTests
         var running = api.Client.GetAsync("/api/v1/samples/heavy", Ct);
         await gate.WaitEnteredAsync(1, Ct);
 
-        // 放行之前，第二个请求就已经有了结果：它没有排在后面等
+        // 放行前第二个请求即已返回结果，表明未进入排队等待
         var rejected = await api.Client.GetAsync("/api/v1/samples/heavy", Ct);
 
         rejected.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests);
@@ -85,7 +82,7 @@ public sealed class ConcurrencyLimitTests
         var alice = api.Client.GetAsync("/api/v1/samples/heavy-both", Ct);
         await gate.WaitEnteredAsync(1, Ct);
 
-        // 第二个请求拿到了实例名额、却被“每用户一个”拒绝：名额要还回去，否则下面的 bob 会被误拒
+        // 第二个请求获取实例名额后被单用户并发限制拒绝：必须立即归还实例名额，否则后续 bob 的请求将被误拒
         var aliceAgain = await api.Client.GetAsync("/api/v1/samples/heavy-both", Ct);
         var bobRequest = bob.GetAsync("/api/v1/samples/heavy-both", Ct);
         await gate.WaitEnteredAsync(1, Ct);

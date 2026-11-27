@@ -8,6 +8,6 @@ Console.CancelKeyPress += (_, e) =>
     cancellation.Cancel();
 };
 
-// 连接串只从配置读（环境变量 Kmic__Operator__ConnectionString 或密钥管理注入），不接受命令行参数，免得出现在进程列表和日志里
+// 连接字符串仅从配置读取，不接收命令行传参，避免泄露至进程列表或日志
 var builder = Host.CreateApplicationBuilder();
 return await OperatorApp.RunAsync(args, builder.Configuration, Console.In, Console.Out, TimeProvider.System, cancellation.Token);

@@ -1,8 +1,5 @@
 namespace Kmic.Identity.Presentation.Users;
 
-/// <summary>
-/// 新建用户的请求
-/// </summary>
 /// <param name="Account">登录名</param>
 /// <param name="DisplayName">姓名</param>
 /// <param name="EnglishName">英文名</param>

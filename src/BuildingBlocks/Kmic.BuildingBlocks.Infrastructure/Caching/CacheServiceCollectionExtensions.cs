@@ -7,16 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 
-/// <summary>
-/// 缓存的服务注册
-/// </summary>
+/// <summary>缓存 DI 注册</summary>
 public static class CacheServiceCollectionExtensions
 {
     private const string InnerCacheKey = "Kmic.Cache.Inner";
 
-    /// <summary>
-    /// 注册 HybridCache 及其命中统计和失效通知
-    /// </summary>
+    /// <summary>注册 HybridCache 及其命中统计和失效广播</summary>
     public static IServiceCollection AddKmicCache(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -37,7 +33,7 @@ public static class CacheServiceCollectionExtensions
         return services;
     }
 
-    // 原注册改成带键服务，仍由容器创建和释放，对外的 HybridCache 换成带命中统计的包装；已经包过就不再包
+    // 将原 HybridCache 转为键控服务由容器管理生命周期，再注册带命中统计的包装器（幂等）
     private static void DecorateWithMetrics(IServiceCollection services)
     {
         if (services.Any(d => d.ServiceType == typeof(HybridCache) && d.IsKeyedService && Equals(d.ServiceKey, InnerCacheKey)))

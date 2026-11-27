@@ -11,7 +11,7 @@ internal sealed class ReactivateRouteEndpoint : IEndpoint
         group.MapPost("/messages/routes/reactivate", HandleAsync)
             .Sends<ReactivateRouteCommand>()
             .WithSummary("重新激活订阅")
-            .WithDescription("仅可重新激活已终结的订阅，恢复后继续投递。终结期间的消息不会自动补投，须核对缺口后补投。");
+            .WithDescription("仅可重新激活已终结订阅以恢复投递；终结期间的消息不会自动补投，须核对缺口后补投");
 
     private static async Task<IResult> HandleAsync(ReactivateRouteRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ReactivateRouteCommand(request.MessageType, request.Subscription), ct)).ToNoContent();

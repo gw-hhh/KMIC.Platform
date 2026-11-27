@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Authentication;
 
-/// <summary>
-/// 访问令牌的验证、请求的访问上下文加载、授权版本头、当前角色不可用时的拦截
-/// </summary>
 public sealed class JwtAuthenticationTests : IAsyncLifetime
 {
     private const string Protected = "/api/v1/samples/whoami";
@@ -105,7 +102,7 @@ public sealed class JwtAuthenticationTests : IAsyncLifetime
     [Fact]
     public async Task KeyBeingRetired_StillValidatesTokens()
     {
-        // 轮换期间新旧密钥并存：旧密钥签的令牌在过期前仍有效
+        // 轮换期间新旧密钥并存：旧密钥签发的令牌在过期前仍有效
         var response = await GetAsync(Protected, _tokens.Create(_alice, "2026-05"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);

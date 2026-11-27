@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 
-/// <summary>
-/// 缓存的日志
-/// </summary>
 internal static partial class CacheLog
 {
     [LoggerMessage(EventId = 2701, Level = LogLevel.Warning, Message = "Handling a cache invalidation from another instance failed, relying on expiry")]

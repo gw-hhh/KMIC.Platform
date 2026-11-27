@@ -12,9 +12,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 探查未完成的消息：各模块的发件箱与收件箱都要查，只有待处理、处理中、死信算未完成，按消息类型和主体匹配
-/// </summary>
 public sealed class UnfinishedMessageProbeTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const short Pending = 0;
@@ -86,7 +83,7 @@ public sealed class UnfinishedMessageProbeTests(ClassDatabase<ProbeTemplate> dat
         await InsertOutboxAsync("BuildingBlocks", Pending, [mentioned, alongside]);
         await InsertOutboxAsync("BuildingBlocks", Pending, [otherType], _type + ".Other");
 
-        // 一条消息提到的其他对象不会被带出来，别的消息类型也不算
+        // 同一消息关联的其他主体 ID 不应被误返回，其他消息类型亦不纳入匹配
         (await FindAsync(mentioned, otherType)).ShouldBe([mentioned]);
     }
 

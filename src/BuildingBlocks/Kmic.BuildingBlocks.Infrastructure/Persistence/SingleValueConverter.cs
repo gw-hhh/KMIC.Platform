@@ -5,9 +5,6 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 单值值对象转换器
-/// </summary>
 internal sealed class SingleValueConverter<TObject, TValue>() : ValueConverter<TObject, TValue>(_toProvider, _fromProvider)
     where TObject : class, ISingleValueObject<TValue>
 {

@@ -3,9 +3,7 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 违反端点声明规则的端点：每个只犯一个错，启动校验要逐条指出
-/// </summary>
+// 违反端点声明规则的示例端点：每类仅含单项错误，验证启动校验逐条检出
 internal static class BrokenEndpoints
 {
     internal sealed class NoSendsEndpoint : IEndpoint

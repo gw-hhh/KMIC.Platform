@@ -18,8 +18,8 @@ function memoryStorage(): HistoryStorage & { data: Map<string, string> } {
   };
 }
 
-describe('搜索的最近访问', () => {
-  it('最近打开的排在最前，不重复，超出上限的丢掉', () => {
+describe('搜索最近访问记录', () => {
+  it('最近访问项置于首位且去重，超出上限时淘汰最旧记录', () => {
     let history: string[] = [];
     for (let i = 0; i < historyLimit + 2; i++) {
       history = addToHistory(history, `page-${String(i)}`);
@@ -32,7 +32,7 @@ describe('搜索的最近访问', () => {
     expect(history).not.toContain('page-0');
   });
 
-  it('按用户分开存', () => {
+  it('按用户标识隔离存储最近访问记录', () => {
     const storage = memoryStorage();
     saveSearchHistory(storage, 'u1', ['orders']);
     saveSearchHistory(storage, 'u2', ['ar-aging']);
@@ -42,7 +42,7 @@ describe('搜索的最近访问', () => {
     expect(loadSearchHistory(storage, 'u3')).toEqual([]);
   });
 
-  it('存的内容坏了或存储不可用时当作没有记录', () => {
+  it('存储内容损坏或存储不可用时按空记录处理且不抛出异常', () => {
     const storage = memoryStorage();
     storage.data.set('kmic.search-history.u1', '{not json');
     storage.data.set('kmic.search-history.u2', JSON.stringify({ orders: true }));

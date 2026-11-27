@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 模拟身份：只读与可写两种会话、不能模拟谁、结束与强制下线，端到端
-/// </summary>
 public sealed class ImpersonationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -16,7 +13,7 @@ public sealed class ImpersonationTests(ClassDatabase<ApiTemplate> database, ApiT
     private static readonly string[] _readOnly = [IdentityPermissions.UserView, IdentityPermissions.UserImpersonate];
     private static readonly string[] _canWrite = [IdentityPermissions.UserView, IdentityPermissions.UserImpersonate, IdentityPermissions.UserImpersonateWrite];
 
-    // 被模拟的人：有角色管理的权限，写入的效果一眼能看出来
+    // 为被模拟用户分配角色管理权限，以便直接验证只读/可写模式下的写操作结果
     private async Task<Guid> TargetAsync(string account, bool protectedRole = false, bool active = true, IReadOnlyCollection<string>? permissions = null)
     {
         var role = await Seed.RoleAsync("被模拟-" + account, permissions ?? [IdentityPermissions.RoleView, IdentityPermissions.RoleManage], isProtected: protectedRole);

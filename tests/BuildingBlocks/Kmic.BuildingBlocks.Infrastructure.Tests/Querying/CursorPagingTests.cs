@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Querying;
 
-/// <summary>
-/// 游标分页在真实 PostgreSQL 上执行：25 张单据，一种按创建时间排序，一种排序键全部相同（标题长度），只能靠 ID 定先后
-/// </summary>
 public sealed class CursorPagingTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const int Count = 25;
@@ -68,7 +65,7 @@ public sealed class CursorPagingTests(ClassDatabase<ProbeTemplate> database) : I
     [InlineData(false)]
     public async Task ARowFromRawSql_WithAGuidId_PagesTheSameWay(bool descending)
     {
-        // 原生 SQL 映射的只读行没有强类型 ID，用 Guid 的重载
+        // 原生 SQL 映射的只读 DTO 使用 Guid 主键，调用对应 Guid 键选择器重载
         var seen = new List<RawRow>();
         string? after = null;
         do

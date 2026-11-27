@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Users.Sessions;
 
-/// <summary>
-/// 查询用户有效会话
-/// </summary>
 public sealed class ListUserSessionsQueryHandler(IIdentityQueryDb db, TimeProvider time) : IQueryHandler<ListUserSessionsQuery, IReadOnlyList<UserSessionItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<UserSessionItem>>> Handle(ListUserSessionsQuery query, CancellationToken cancellationToken)
     {
         if (!await db.Users.AnyAsync(u => u.Id == query.Id, cancellationToken))

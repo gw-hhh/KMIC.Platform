@@ -2,9 +2,6 @@ using System.Collections.Concurrent;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
-/// <summary>
-/// 测试用来控制处理器行为、统计调用次数的开关
-/// </summary>
 internal sealed class ProbeHooks
 {
     private Func<CancellationToken, Task>? _beforeReturn;
@@ -15,45 +12,22 @@ internal sealed class ProbeHooks
 
     public bool FailClosedEvent { get; set; }
 
-    /// <summary>
-    /// 处理器返回前执行的动作，如在另一个连接上改同一行、等待另一个请求
-    /// </summary>
+    // 处理器返回前执行（如在另一连接上修改同行或等待并发请求）
     public void OnBeforeReturn(Func<CancellationToken, Task>? action) => _beforeReturn = action;
 
     public Task BeforeReturnAsync(CancellationToken ct) => _beforeReturn?.Invoke(ct) ?? Task.CompletedTask;
 
-    /// <summary>
-    /// 作业在第几批（从 0 开始）返回失败
-    /// </summary>
     public int? JobFailAtBatch { get; set; }
 
-    /// <summary>
-    /// 作业在第几批（从 0 开始）抛出异常
-    /// </summary>
     public int? JobThrowAtBatch { get; set; }
 
-    /// <summary>
-    /// 作业每一批开始前执行，参数是批次序号
-    /// </summary>
     public Func<int, CancellationToken, Task>? BeforeJobBatch { get; set; }
 
-    /// <summary>
-    /// 定时任务命令收到的计划触发时刻，按执行顺序
-    /// </summary>
     public ConcurrentQueue<DateTimeOffset> ScheduledFires { get; } = new();
 
-    /// <summary>
-    /// 导出作业写出的单据标题
-    /// </summary>
     public ConcurrentQueue<string> Exported { get; } = new();
 
-    /// <summary>
-    /// 定时任务命令给这张单据加一行
-    /// </summary>
     public TicketId? StampTicket { get; set; }
 
-    /// <summary>
-    /// 定时任务命令返回失败
-    /// </summary>
     public bool FailScheduled { get; set; }
 }

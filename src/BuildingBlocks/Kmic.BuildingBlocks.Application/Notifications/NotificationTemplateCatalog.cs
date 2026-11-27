@@ -4,43 +4,28 @@ using Kmic.BuildingBlocks.Contracts.Notifications;
 
 namespace Kmic.BuildingBlocks.Application.Notifications;
 
-/// <summary>
-/// 代码里声明的全部通知模板
-/// </summary>
+/// <summary>代码中声明的通知模板目录。</summary>
 public sealed class NotificationTemplateCatalog
 {
     private static readonly MethodInfo _read = typeof(NotificationTemplateCatalog).GetMethod(nameof(ReadModel), BindingFlags.NonPublic | BindingFlags.Static)
-        ?? throw new InvalidOperationException("找不到读取模板模型的方法。");
+        ?? throw new InvalidOperationException("未找到用于读取模板模型的方法。");
 
     private readonly FrozenDictionary<string, NotificationTemplateDefinition> _byKey;
 
     private NotificationTemplateCatalog(IEnumerable<NotificationTemplateDefinition> templates) =>
         _byKey = templates.ToFrozenDictionary(t => t.Key, StringComparer.Ordinal);
 
-    /// <summary>
-    /// 全部模板
-    /// </summary>
     public IReadOnlyCollection<NotificationTemplateDefinition> All => _byKey.Values;
 
-    /// <summary>
-    /// 按键取模板，不存在返回空
-    /// </summary>
+    /// <summary>按键查找模板定义，不存在时返回 null。</summary>
     public NotificationTemplateDefinition? Find(string key) => _byKey.GetValueOrDefault(key);
 
-    /// <summary>
-    /// 从程序集里读取
-    /// </summary>
-    /// <exception cref="DeclarationException">声明有误</exception>
     public static NotificationTemplateCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
         return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()).Where(t => t.IsDefined(typeof(NotificationTemplateAttribute), inherit: false)));
     }
 
-    /// <summary>
-    /// 从声明了模板的模型类型里读取
-    /// </summary>
-    /// <exception cref="DeclarationException">声明有误</exception>
     public static NotificationTemplateCatalog Build(IEnumerable<Type> modelTypes)
     {
         ArgumentNullException.ThrowIfNull(modelTypes);
@@ -50,7 +35,7 @@ public sealed class NotificationTemplateCatalog
         foreach (var type in modelTypes.Distinct())
         {
             var attribute = type.GetCustomAttribute<NotificationTemplateAttribute>()
-                ?? throw new ArgumentException($"{type.Name} 没有标 [NotificationTemplate]。", nameof(modelTypes));
+                ?? throw new ArgumentException($"{type.Name} 未标注 [NotificationTemplate]。", nameof(modelTypes));
             if (Read(type, attribute, problems) is { } definition)
             {
                 templates.Add(definition);
@@ -84,20 +69,20 @@ public sealed class NotificationTemplateCatalog
 
         if (attribute.CarriesSecret && attribute.Channels.HasFlag(NotificationChannels.Email))
         {
-            problems.Add($"{name}：含密模板 {attribute.Key} 不能发邮件，验证码这类凭据只走短信或站内消息。");
+            problems.Add($"{name}：敏感模板 {attribute.Key} 不能发邮件，验证码等凭据仅限短信或站内消息。");
             found = false;
         }
 
         if (attribute.Channels.HasFlag(NotificationChannels.Sms) && !typeof(ISmsTemplateModel).IsAssignableFrom(type))
         {
-            problems.Add($"{name}：模板 {attribute.Key} 发短信，数据模型要实现 ISmsTemplateModel 说明怎样变成短信模板的参数。");
+            problems.Add($"{name}：模板 {attribute.Key} 包含短信渠道，数据模型须实现 ISmsTemplateModel 以映射短信参数。");
             found = false;
         }
 
         var implements = type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationModel<>) && i.GetGenericArguments()[0] == type);
         if (!implements)
         {
-            problems.Add($"{name}：数据模型要实现 INotificationModel<{name}>。");
+            problems.Add($"{name}：数据模型须实现 INotificationModel<{name}>。");
             return null;
         }
 
@@ -113,7 +98,7 @@ public sealed class NotificationTemplateCatalog
             attribute.Key, attribute.DisplayName, module, attribute.Channels, attribute.SenderProfile, attribute.CarriesSecret, type, subject, body, text, example, variables);
     }
 
-    // 静态抽象成员只能通过泛型读取，反射调用时给它一个具体的类型参数
+    // 静态抽象成员须通过泛型方法读取，反射调用时传入具体模型类型参数
     private static (string Subject, string Body, string Text, object Example) ReadModel<TModel>()
         where TModel : INotificationModel<TModel> =>
         (TModel.DefaultSubject, TModel.DefaultBody, TModel.DefaultTextBody, TModel.Example);

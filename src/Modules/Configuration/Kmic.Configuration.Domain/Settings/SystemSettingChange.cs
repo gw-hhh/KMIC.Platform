@@ -2,12 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Configuration.Domain.Settings;
 
-/// <summary>
-/// 系统设置变更记录
-/// </summary>
-/// <remarks>
-/// 只追加；设置里不能放密钥
-/// </remarks>
+/// <summary>系统设置变更记录（仅追加，禁止在设置值中存放密钥）</summary>
 public sealed class SystemSettingChange : AggregateRoot<SettingChangeId>
 {
     private SystemSettingChange(SettingChangeId id, string key, string? oldValue, string? newValue, string reason, string? traceId)
@@ -45,9 +40,6 @@ public sealed class SystemSettingChange : AggregateRoot<SettingChangeId>
     /// </summary>
     public string? TraceId { get; private set; }
 
-    /// <summary>
-    /// 创建设置变更记录
-    /// </summary>
     public static SystemSettingChange Record(string key, string? oldValue, string? newValue, string reason, string? traceId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);

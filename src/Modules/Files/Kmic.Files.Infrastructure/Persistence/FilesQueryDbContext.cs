@@ -6,25 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Infrastructure.Persistence;
 
-/// <summary>
-/// Files 模块的查询上下文，不跟踪实体
-/// </summary>
 internal sealed class FilesQueryDbContext(DbContextOptions<FilesQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), IFilesQueryDb
 {
-    /// <inheritdoc />
     public override string Module => FilesModuleInfo.Name;
 
-    /// <inheritdoc />
     public IQueryable<StoredFile> Files => Set<StoredFile>();
 
-    /// <inheritdoc />
     public IQueryable<StorageIssue> StorageIssues => Set<StorageIssue>();
 
-    /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
         configurationBuilder.RegisterAllInFilesIdConverters();
 
-    /// <inheritdoc />
     protected override void ConfigureModel(ModelBuilder modelBuilder) => FilesModel.Configure(modelBuilder);
 }

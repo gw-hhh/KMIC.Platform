@@ -24,7 +24,7 @@ internal sealed class ScheduledJobSettingRepository(OperationsDbContext context)
             return expectedVersion is null ? (ScheduledJobSetting?)null : CommonErrors.VersionConflict;
         }
 
-        // 未带版本号表示读取时没有设置，现在已有记录则发生了版本冲突
+        // 未带版本号说明读取时无设置记录，若此时记录已存在则判定为版本冲突
         if (expectedVersion is null)
         {
             return CommonErrors.VersionConflict;

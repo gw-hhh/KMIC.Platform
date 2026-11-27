@@ -4,8 +4,6 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.Get;
 
-/// <summary>
-/// 查询用户详情及可用操作
-/// </summary>
+/// <summary>查询用户详情及可用操作。</summary>
 [RequirePermission(IdentityPermissions.UserView)]
 public sealed record GetUserQuery(UserId Id) : IQuery<UserDetailResponse>;

@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Configuration;
 
-/// <summary>
-/// 系统设置：列表、修改、校验、恢复默认、变更历史、清除已不存在的设置，端到端
-/// </summary>
 public sealed class SettingAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -140,7 +137,7 @@ public sealed class SettingAdministrationTests(ClassDatabase<ApiTemplate> databa
         (await SetAsync(editor, new { maxItems = 30, reasonRequired = false })).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await EffectiveAsync()).MaxItems.ShouldBe(30);
 
-        // 直接改库，不经过保存命令，缓存不会失效
+        // 直接修改数据库而不经过保存命令，验证缓存不会失效
         await using var data = NpgsqlDataSource.Create(ConnectionString);
         await using var update = data.CreateCommand("""UPDATE "Configuration"."SystemSettingValue" SET "Value" = '{"maxItems": 31, "reasonRequired": false}' WHERE "Key" = 'Sample.Submission'""");
         await update.ExecuteNonQueryAsync(Ct);

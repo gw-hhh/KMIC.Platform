@@ -11,9 +11,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Authentication.Login;
 
-/// <summary>
-/// 校验账号密码并创建登录会话
-/// </summary>
 public sealed class LoginCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -25,14 +22,13 @@ public sealed class LoginCommandHandler(
     ISecurityEventWriter securityEvents,
     TimeProvider time) : ICommandHandler<LoginCommand, AuthTokens>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<AuthTokens>> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
         var now = time.GetUtcNow();
         var account = command.Account.Trim();
         var key = LoginNames.Hash(account);
 
-        // 限制检查放在“按账号查用户”之前：存在与不存在的登录名行为一致
+        // 先检查限流状态再查询账号，确保无论账号是否存在响应行为一致
         var state = await throttles.GetAsync(key, cancellationToken);
         if (LoginThrottlePolicy.Remaining(state, now) is { } wait)
         {
@@ -85,7 +81,7 @@ public sealed class LoginCommandHandler(
     {
         if (user is null)
         {
-            // 账号不存在也做一次哈希，使耗时和密码错误接近
+            // 账号不存在时仍执行等效哈希校验，使响应耗时与密码错误相近
             passwords.Burn(password);
             return LoginFailure.UnknownAccount;
         }
@@ -124,7 +120,7 @@ public sealed class LoginCommandHandler(
         }
     }
 
-    // 登录时的角色：优先上次使用的，已失效或没有记录时取排在最前的启用角色
+    // 登录默认角色：优先沿用上次使用的角色，失效或无记录时取排序最前的启用角色
     private async Task<Role?> ChooseRoleAsync(User user, CancellationToken ct)
     {
         var granted = user.Grants.Select(g => g.RoleId).ToList();
@@ -149,7 +145,7 @@ public sealed class LoginCommandHandler(
             },
         };
 
-    // 登录失败的原因，名称原样写进安全事件，不能改名
+    // 登录失败原因枚举名将原样写入安全事件，禁止重命名
     private enum LoginFailure
     {
         UnknownAccount,

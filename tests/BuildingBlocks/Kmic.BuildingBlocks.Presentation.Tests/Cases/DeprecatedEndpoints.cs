@@ -5,9 +5,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 已废弃的端点和同样功能的未废弃端点
-/// </summary>
 internal static class DeprecatedEndpoints
 {
     public static readonly Type[] All = [typeof(OldMeEndpoint), typeof(OldFailingEndpoint), typeof(CurrentMeEndpoint)];

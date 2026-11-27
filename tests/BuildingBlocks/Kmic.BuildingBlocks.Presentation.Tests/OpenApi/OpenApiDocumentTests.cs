@@ -3,9 +3,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.OpenApi;
 
-/// <summary>
-/// OpenAPI 文档里的框架约定：类型、错误响应、用例声明和给前端生成代码用的目录
-/// </summary>
 public sealed class OpenApiDocumentTests(OpenApiFixture fixture) : IClassFixture<OpenApiFixture>
 {
     private static readonly string[] _problemStatuses = ["400", "401", "403", "404", "409", "422", "429", "500"];

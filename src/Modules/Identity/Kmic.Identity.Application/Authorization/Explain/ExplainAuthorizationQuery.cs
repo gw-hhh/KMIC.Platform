@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Authorization.Explain;
 
-/// <summary>
-/// 授权诊断：用户在某个角色下的权限和数据范围
-/// </summary>
+/// <summary>授权诊断：查询用户在指定角色下的权限与数据范围</summary>
 /// <param name="UserId">用户 ID</param>
 /// <param name="RoleId">角色 ID</param>
 /// <param name="ScopeObject">范围对象编码，为空时不返回数据范围</param>

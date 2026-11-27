@@ -1,11 +1,6 @@
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 所有响应都带 X-Trace-Id，用户报障时提供它
-/// </summary>
-/// <remarks>
-/// 要放在最外层
-/// </remarks>
+// 须置于管道最外层，为所有响应附加 X-Trace-Id 便于排障追踪
 internal sealed class TraceIdMiddleware(RequestDelegate next)
 {
     public const string Header = "X-Trace-Id";

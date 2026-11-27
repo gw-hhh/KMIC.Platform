@@ -4,12 +4,8 @@ using Kmic.Notifications.Contracts;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 处理普通通知发送请求
-/// </summary>
 public sealed class ProcessSendNotificationCommandHandler(NotificationProcessor processor) : ICommandHandler<ProcessSendNotificationCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(ProcessSendNotificationCommand command, CancellationToken cancellationToken)
     {
         var message = command.Message;

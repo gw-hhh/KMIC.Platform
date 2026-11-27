@@ -7,7 +7,7 @@ import { useNavigate } from '@/platform/routing';
 const navigate = useNavigate();
 const canCreate = useCan(Permissions.Sample.Specimen.Create);
 const ids = ['SP-001', 'SP-002', 'SP-003'];
-// 撑出滚动条，用来看切回标签时滚动位置和焦点能否恢复
+// 生成足够行以撑出滚动条，用于验证切换标签页后滚动位置与焦点的恢复
 const rows = Array.from({ length: 40 }, (_, i) => `示例记录 ${String(i + 1)}`);
 </script>
 
@@ -21,7 +21,7 @@ const rows = Array.from({ length: 40 }, (_, i) => `示例记录 ${String(i + 1)}
     </Card>
     <Card title="示例记录">
       <p v-for="row in rows" :key="row">{{ row }}</p>
-      <Input placeholder="滚到底部输入，切到别的标签再切回来" aria-label="底部输入框" />
+      <Input placeholder="滚动到底部输入内容，切换至其他标签页后再切回" aria-label="底部输入框" />
     </Card>
   </Space>
 </template>

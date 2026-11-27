@@ -11,9 +11,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Kmic.Configuration.Infrastructure.Preferences;
 
-/// <summary>
-/// 读取分层偏好：系统层和各角色层分别缓存并按标签失效，用户层直接读库
-/// </summary>
+// 缓存系统层和各角色层偏好并按标签失效，用户层直接读库
 internal sealed class PreferenceLayerReader(IQueryScopeFactory queries, HybridCache cache) : IPreferenceLayers
 {
     // 定期过期，避免失效通知丢失后一直读取旧值
@@ -60,9 +58,6 @@ internal sealed class PreferenceLayerReader(IQueryScopeFactory queries, HybridCa
                 .ToDictionaryAsync(v => v.Key, v => v.Value, StringComparer.Ordinal, token),
             ct);
 
-    /// <summary>
-    /// 单层偏好的缓存快照，内容不可变
-    /// </summary>
     [ImmutableObject(true)]
     private sealed class LayerSnapshot(Dictionary<string, string> values)
     {

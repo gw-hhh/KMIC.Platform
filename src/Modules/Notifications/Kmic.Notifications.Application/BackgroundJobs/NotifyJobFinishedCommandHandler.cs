@@ -7,12 +7,8 @@ using Kmic.Notifications.Contracts;
 
 namespace Kmic.Notifications.Application.BackgroundJobs;
 
-/// <summary>
-/// 给作业提交人发站内消息
-/// </summary>
 public sealed class NotifyJobFinishedCommandHandler(NotificationProcessor processor) : ICommandHandler<NotifyJobFinishedCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(NotifyJobFinishedCommand command, CancellationToken cancellationToken)
     {
         var message = command.Message;

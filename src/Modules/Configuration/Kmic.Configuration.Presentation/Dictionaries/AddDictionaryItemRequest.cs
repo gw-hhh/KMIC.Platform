@@ -1,8 +1,5 @@
 namespace Kmic.Configuration.Presentation.Dictionaries;
 
-/// <summary>
-/// 添加字典项的请求
-/// </summary>
 /// <param name="ExpectedVersion">字典类型的预期版本号</param>
 /// <param name="Code">编码</param>
 /// <param name="Name">显示名</param>

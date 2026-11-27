@@ -1,8 +1,8 @@
-// 搜索用拼音首字母：sllb 示例列表、slbb 示例报表、xjsl 新建示例
+// 拼音首字母检索缩写对照：sllb（示例列表）、slbb（示例报表）、xjsl（新建示例）
 // cspell:ignore sllb slbb xjsl
 import { expect, loginToShell, openBySearch, test } from './support';
 
-test('搜索：拼音首字母、汉字、最近访问、没有结果的提示、关闭后焦点回到按钮', async ({ page }) => {
+test('菜单搜索：支持拼音首字母、汉字、最近访问、空结果提示及关闭后焦点回归按钮', async ({ page }) => {
   await loginToShell(page);
   const dialog = page.locator('.kmic-search .search-container');
 
@@ -31,16 +31,16 @@ test('搜索：拼音首字母、汉字、最近访问、没有结果的提示�
   await expect(page.locator('.search-button')).toBeFocused();
 });
 
-test('切回标签：入场时就在原来的滚动位置，焦点和输入的内容都还在', async ({ page }) => {
+test('切换标签页：切回时立即恢复原滚动位置、焦点与输入内容', async ({ page }) => {
   await loginToShell(page);
   await openBySearch(page, 'sllb');
   await openBySearch(page, 'slbb');
   await page.getByRole('tab', { name: /示例列表/ }).click();
-  // 等切换动画结束，只剩当前页面一层
+  // 等待切换过渡动画结束，仅保留当前激活页面节点
   await expect(page.locator('.tab-stage > [data-tab-page]')).toHaveCount(1);
 
   const scroller = page.locator('.tab-content');
-  // 示例报表页也有这个输入框，失活的页面被 KeepAlive 留着，只看当前显示的
+  // 示例报表页存在同名输入框且由 KeepAlive 缓存，需限定匹配当前可见实例
   const input = page.getByLabel('底部输入框').filter({ visible: true });
   await expect(page).toHaveURL(/\/demo\/items/);
   await input.scrollIntoViewIfNeeded();
@@ -52,7 +52,7 @@ test('切回标签：入场时就在原来的滚动位置，焦点和输入的�
   await expect(page).toHaveURL(/\/demo\/report/);
   const otherTop = await scroller.evaluate((el) => el.scrollTop);
 
-  // 每帧记录滚动位置，确认入场时没有先出现在顶部再跳下去
+  // 逐帧记录滚动位置，验证切回入场时未出现先回顶再跳转的闪烁
   await page.evaluate(() => {
     const box = document.querySelector('.tab-content');
     const tops: number[] = [];
@@ -74,7 +74,7 @@ test('切回标签：入场时就在原来的滚动位置，焦点和输入的�
   await expect(input).toHaveValue('写到一半');
 });
 
-test('用键盘切换标签时焦点留在标签栏', async ({ page }) => {
+test('使用键盘切换标签页时焦点保留在标签栏', async ({ page }) => {
   await loginToShell(page);
   await openBySearch(page, 'sllb');
   await openBySearch(page, 'slbb');
@@ -86,7 +86,7 @@ test('用键盘切换标签时焦点留在标签栏', async ({ page }) => {
   await expect(page.getByRole('tab', { name: /示例列表/ })).toBeFocused();
 });
 
-test('快速连续切换：同时最多一出一进，停在最后点的页面', async ({ page }) => {
+test('快速连续切换标签页：同时最多保留一出一进两层且最终停留在末次点击页面', async ({ page }) => {
   await loginToShell(page);
   for (const keyword of ['sllb', 'slbb', 'xjsl', 'yh']) {
     await openBySearch(page, keyword);
@@ -119,7 +119,7 @@ test('快速连续切换：同时最多一出一进，停在最后点的页面',
   expect(layers).toBeLessThanOrEqual(2);
 });
 
-test('系统设置了减少动画：过渡时长为 0，切换立即完成', async ({ page }) => {
+test('系统启用减少动画偏好时过渡时长为 0ms 且切换立即完成', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await loginToShell(page);
   await openBySearch(page, 'sllb');

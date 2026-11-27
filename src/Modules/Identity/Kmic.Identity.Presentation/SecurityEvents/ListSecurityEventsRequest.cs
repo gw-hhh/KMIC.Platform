@@ -1,8 +1,5 @@
 namespace Kmic.Identity.Presentation.SecurityEvents;
 
-/// <summary>
-/// 查询安全事件的参数
-/// </summary>
 /// <param name="From">起始时间</param>
 /// <param name="To">结束时间</param>
 /// <param name="Type">按类型筛选</param>

@@ -7,15 +7,9 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.ScheduledJobs.RunNow;
 
-/// <summary>
-/// 立即触发定时任务
-/// </summary>
-/// <remarks>
-/// 触发不在命令事务里，任务要能重复执行
-/// </remarks>
+// 触发操作不纳入命令事务，任务本身须具备幂等性
 public sealed class RunJobNowCommandHandler(IScheduledJobControl control, IExecutionContext execution) : ICommandHandler<RunJobNowCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(RunJobNowCommand command, CancellationToken cancellationToken)
     {
         // 模拟登录时记录实际操作人

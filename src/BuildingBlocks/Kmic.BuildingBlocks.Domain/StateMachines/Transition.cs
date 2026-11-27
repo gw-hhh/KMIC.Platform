@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
-/// <summary>
-/// 状态流转
-/// </summary>
 internal sealed record Transition<TAggregate, TState, TAction>(TState From, TAction Action, TState To, Func<TAggregate, Result>? Guard)
     where TAggregate : class, IAggregateRoot
     where TState : notnull

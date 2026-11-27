@@ -122,7 +122,7 @@ public sealed class UseCaseCatalogTests
     [Fact]
     public void FromAssemblies_DoesNotSkipMalformedTypes()
     {
-        // 测试程序集里有故意写错的样例，扫描要把它们都找出来，不能悄悄跳过
+        // 测试程序集中包含故意构造的错误样例，扫描时必须全部检出，不得静默跳过
         var thrown = Should.Throw<DeclarationException>(() => UseCaseCatalog.FromAssemblies([typeof(CatalogSamples).Assembly]));
 
         thrown.Problems.ShouldContain(p => p.Contains(nameof(CatalogSamples.NoDeclarationCommand), StringComparison.Ordinal));

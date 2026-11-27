@@ -1,21 +1,13 @@
 namespace Kmic.Files.Application.Uploads;
 
-/// <summary>
-/// 清理用于显示的文件名，移除路径和控制字符并限制长度
-/// </summary>
+// 清理用于显示的文件名：移除路径和控制字符并限制长度
 internal static class FileNames
 {
-    /// <summary>
-    /// 文件名最大字符数
-    /// </summary>
     public const int MaxLength = 200;
 
     private static readonly char[] _separators = ['/', '\\'];
 
-    /// <summary>
-    /// 清理文件名
-    /// </summary>
-    /// <returns>清理后的文件名；为空、"." 或 ".." 时返回 null</returns>
+    // 为空、"." 或 ".." 时返回 null
     public static string? Sanitize(string fileName)
     {
         ArgumentNullException.ThrowIfNull(fileName);
@@ -38,6 +30,6 @@ internal static class FileNames
         return name[..keep] + (extension.Length <= 20 ? extension : string.Empty);
     }
 
-    // 方向控制字符（如 U+202E）能把“fdp.exe”显示成“exe.pdf”，用来伪装扩展名
+    // 方向控制字符（如 U+202E）可将“fdp.exe”渲染为“exe.pdf”以伪装扩展名
     private static bool IsBidiControl(char c) => c is >= '‪' and <= '‮' or >= '⁦' and <= '⁩' or '‎' or '‏' or '؜';
 }

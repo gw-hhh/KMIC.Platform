@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Files.Domain.Files;
 
-/// <summary>
-/// 一个业务对象对文件的引用
-/// </summary>
+/// <summary>业务对象对文件的引用</summary>
 public sealed class FileReference : Entity<FileReferenceId>
 {
     private FileReference(FileReferenceId id, string ownerModule, string ownerType, Guid ownerId, DateTimeOffset attachedAt)
@@ -36,9 +34,6 @@ public sealed class FileReference : Entity<FileReferenceId>
     /// </summary>
     public DateTimeOffset AttachedAt { get; private set; }
 
-    /// <summary>
-    /// 是否属于指定业务对象
-    /// </summary>
     public bool IsOwnedBy(string module, string type, Guid id) =>
         string.Equals(OwnerModule, module, StringComparison.Ordinal) && string.Equals(OwnerType, type, StringComparison.Ordinal) && OwnerId == id;
 

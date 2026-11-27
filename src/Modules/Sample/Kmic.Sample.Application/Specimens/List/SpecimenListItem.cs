@@ -2,9 +2,7 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.List;
 
-/// <summary>
-/// 示例列表项
-/// </summary>
+/// <summary>示例列表项</summary>
 /// <param name="Id">示例 ID</param>
 /// <param name="Number">编号</param>
 /// <param name="Title">标题</param>

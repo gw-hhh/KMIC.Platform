@@ -6,17 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 在依赖注入之外创建模块上下文，身份是系统身份
-/// </summary>
+/// <summary>在 DI 容器之外独立创建模块上下文（默认使用系统身份）</summary>
 public static class StandaloneContexts
 {
-    /// <summary>
-    /// 用连接串直接创建模块的写入上下文
-    /// </summary>
-    /// <remarks>
-    /// 保存要用 <see cref="ModuleDbContext.SaveForToolAsync" />，业务代码不能用
-    /// </remarks>
+    /// <summary>按指定连接串创建模块写入上下文（持久化须调用 SaveForToolAsync，业务代码禁止使用）</summary>
     public static TContext Create<TContext>(string connectionString)
         where TContext : ModuleDbContext
     {
@@ -24,7 +17,7 @@ public static class StandaloneContexts
         return (TContext)Activator.CreateInstance(typeof(TContext), options, Services(typeof(TContext)))!;
     }
 
-    // 模型校验要核对范围对象，从上下文所在程序集及其引用的 Kmic.* 程序集里读取
+    // 模型校验需核对数据范围对象定义，从上下文所在程序集及其引用的 Kmic.* 程序集中扫描读取
     private static ModuleDbContextServices Services(Type contextType)
     {
         var execution = new ExecutionScope();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 面板的布局参照 Vben Admin 的通知面板
+// 站内消息面板，布局参考 Vben Admin 通知面板
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { Badge, Popover, Spin, message } from 'antdv-next';
 import { computed, onScopeDispose, ref, watch } from 'vue';
@@ -30,7 +30,7 @@ onScopeDispose(() => {
 
 const unread = computed(() => counter.count.value ?? 0);
 
-// 只在打开面板时查列表，未读在前、新的在前
+// 仅在面板打开时查询消息列表（服务端按未读优先、时间倒序返回）
 const list = useQuery(
   computed(() => ({
     ...siteMessagesApi.list.options({ params: { query: { PageSize: 10 } } }),
@@ -54,7 +54,7 @@ async function openMessage(item: SiteMessage): Promise<void> {
     if (result.ok) {
       counter.set(Math.max(0, unread.value - 1));
     } else {
-      // 标已读失败不影响打开链接，下次再标
+      // 标记已读失败时不阻断页面跳转，留待下次重试
       markRead.reset();
     }
   }
@@ -279,7 +279,7 @@ async function readAll(): Promise<void> {
 </style>
 
 <style lang="scss">
-// 浮层挂在 body 下，内边距由面板自己控制
+// 浮层挂载于 body，清零默认内边距由面板内部控制
 .kmic-inbox .ant-popover-container {
   padding: 0;
 }

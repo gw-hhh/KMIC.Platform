@@ -7,12 +7,7 @@ using Microsoft.CodeAnalysis.Testing;
 
 namespace Kmic.BuildingBlocks.Analyzers.Tests;
 
-/// <summary>
-/// 分析器测试工具
-/// </summary>
-/// <remarks>
-/// 按指定的程序集名编译源码，规则按程序集名判断模块和层
-/// </remarks>
+// 按指定程序集名编译源码，供规则按程序集名识别模块与层
 internal static class AnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
 {

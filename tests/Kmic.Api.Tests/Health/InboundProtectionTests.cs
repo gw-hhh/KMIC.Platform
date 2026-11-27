@@ -10,12 +10,7 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Health;
 
-/// <summary>
-/// 入站防护：转发头只信任可信代理、安全响应头、请求体上限
-/// </summary>
-/// <remarks>
-/// 测试服务器没有真实的来源地址，用 X-Test-Peer 头模拟直连的对端
-/// </remarks>
+// 测试服务器无真实对端 IP，通过 X-Test-Peer 头模拟直连对端地址
 public sealed class InboundProtectionTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IAsyncLifetime, IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -72,8 +67,8 @@ public sealed class InboundProtectionTests(ClassDatabase<ApiTemplate> database, 
 
         var response = await client.SendAsync(request, Ct);
 
-        // 转发头中间件处理完会清掉 X-Forwarded-For，并把来源换成客户端地址：客户端是内网地址（如经 VPN 走内部负载均衡）时，
-        // 不能因此把经过代理的请求当成内部请求
+        // 转发头中间件处理后会清除 X-Forwarded-For 并将来源地址更新为客户端 IP：当客户端位于内网（如经 VPN 访问内部负载均衡）时，
+        // 不应将经代理转发的请求误判为内部直连请求
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
@@ -104,7 +99,7 @@ public sealed class InboundProtectionTests(ClassDatabase<ApiTemplate> database, 
             response.Headers.Contains("Server").ShouldBeFalse();
         }
 
-        api.StatusCode.ShouldBe(HttpStatusCode.Unauthorized, "没带令牌的接口请求，错误响应同样带安全头");
+        api.StatusCode.ShouldBe(HttpStatusCode.Unauthorized, "未携带令牌的接口请求在返回 401 错误响应时也应包含安全响应头");
         api.Headers.CacheControl!.NoStore.ShouldBeTrue();
     }
 
@@ -158,7 +153,7 @@ public sealed class InboundProtectionTests(ClassDatabase<ApiTemplate> database, 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
-    // 安全事件由后台批量写库，要等一下
+    // 安全事件由后台服务批量写入数据库，需轮询等待落库完成
     private async Task<string?> LastLoginIpAsync(string account) =>
         await Eventually.UntilAsync(
             async _ => await _seed.ScalarAsync<string>(
@@ -172,9 +167,7 @@ public sealed class InboundProtectionTests(ClassDatabase<ApiTemplate> database, 
             $"{account} 的登录失败事件写入数据库",
             ct: Ct);
 
-    /// <summary>
-    /// 测试服务器没有对端地址：由请求头指定，放在管道最前面
-    /// </summary>
+    // 在请求管线最前端读取 X-Test-Peer 头模拟对端 IP
     private sealed class PeerFilter : IStartupFilter
     {
         public const string Header = "X-Test-Peer";

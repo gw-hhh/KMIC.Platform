@@ -3,12 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Operations.Application.Messages.Routes;
 
-/// <summary>
-/// 按来源序号区间补投消息
-/// </summary>
-/// <remarks>
-/// 已终结的订阅要先重新激活
-/// </remarks>
+/// <summary>按来源序号区间补投消息（已终结的订阅须先重新激活）。</summary>
 /// <param name="SourceModule">发布消息的模块</param>
 /// <param name="MessageType">消息名称</param>
 /// <param name="Subscription">订阅名</param>

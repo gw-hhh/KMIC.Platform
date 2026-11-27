@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 把请求本身的问题转成 4xx：请求体无法解析、请求体太大等
-/// </summary>
 internal sealed class KmicExceptionHandler(IProblemDetailsService problems) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
@@ -31,12 +28,12 @@ internal sealed class KmicExceptionHandler(IProblemDetailsService problems) : IE
         return true;
     }
 
-    // 解析请求体出错时给出字段路径。异常消息是英文且可能带内部类型名，不给调用方，也不去解析它
+    // 请求体反序列化失败时仅返回字段路径；原始异常消息可能暴露内部类型名，不透传给调用方
     private static IReadOnlyList<FieldError>? FieldErrorsOf(BadHttpRequestException bad) =>
         bad.InnerException is JsonException { Path: { } path }
             ? [new FieldError(ClientPath(path), "Malformed", "格式不正确")]
             : null;
 
-    // System.Text.Json 的路径以 $ 开头：$.items[2].quantity 去掉前缀，整个请求体有问题时是空字符串
+    // System.Text.Json 路径以 $ 开头（如 $.items[2].quantity），移除前缀以对齐字段名；根节点异常时为空字符串
     private static string ClientPath(string path) => path.TrimStart('$').TrimStart('.');
 }

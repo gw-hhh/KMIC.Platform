@@ -2,18 +2,12 @@ using Kmic.BuildingBlocks.Contracts.References;
 
 namespace Kmic.BuildingBlocks.Application.Auditing;
 
-/// <summary>
-/// 解析业务历史里的操作人和角色，由 Identity 实现
-/// </summary>
+/// <summary>业务历史操作人与角色引用解析器，由 Identity 模块实现。</summary>
 public interface IActorReferences
 {
-    /// <summary>
-    /// 按用户 ID 批量取引用信息，查不到的不在结果里
-    /// </summary>
+    /// <summary>按用户 ID 批量解析引用信息，未匹配项不返回。</summary>
     Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveUsersAsync(IReadOnlyCollection<Guid> userIds, CancellationToken ct);
 
-    /// <summary>
-    /// 按角色 ID 批量取引用信息，查不到的不在结果里
-    /// </summary>
+    /// <summary>按角色 ID 批量解析引用信息，未匹配项不返回。</summary>
     Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveRolesAsync(IReadOnlyCollection<Guid> roleIds, CancellationToken ct);
 }

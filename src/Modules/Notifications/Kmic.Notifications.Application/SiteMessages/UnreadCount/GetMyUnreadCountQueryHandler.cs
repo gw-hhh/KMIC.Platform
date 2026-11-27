@@ -5,16 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Application.SiteMessages.UnreadCount;
 
-/// <summary>
-/// 查询本人的未读站内消息数
-/// </summary>
 public sealed class GetMyUnreadCountQueryHandler(INotificationsQueryDb db, IExecutionContext execution)
     : IQueryHandler<GetMyUnreadCountQuery, UnreadCountResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<UnreadCountResponse>> Handle(GetMyUnreadCountQuery query, CancellationToken cancellationToken)
     {
-        var me = (execution.Access ?? throw new InvalidOperationException("查询未读数需要已登录的访问上下文。")).UserId;
+        var me = (execution.Access ?? throw new InvalidOperationException("查询未读数需要已登录的用户身份。")).UserId;
         var count = await db.SiteMessages.CountAsync(m => m.RecipientUserId == me && m.ReadAt == null, cancellationToken);
         return new UnreadCountResponse(count);
     }

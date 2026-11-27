@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// Identity 对外的 Contracts：其他模块解析人员、角色、组织单元的名称，Notifications 取联系方式
-/// </summary>
 public sealed class IdentityContractsTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

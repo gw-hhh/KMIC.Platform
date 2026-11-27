@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests;
 
-/// <summary>
-/// 真实宿主生成的 OpenAPI 文档：XML 注释要真的出现在文档里，前端才看得懂
-/// </summary>
 public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -43,14 +40,14 @@ public sealed class OpenApiDocumentTests(ClassDatabase<ApiTemplate> database, Ap
     [Fact]
     public async Task ProductionDocument_IsNotExposedWhenNotInProduction_ButIsHere()
     {
-        // 测试环境开放文档与界面；生产环境不开放由宿主的环境判断保证
+        // 测试环境开放 OpenAPI 文档与界面；生产环境禁用由宿主环境判断逻辑保证
         using var client = ClientFor();
 
         (await client.GetAsync("/openapi/v1.json", Ct)).IsSuccessStatusCode.ShouldBeTrue();
     }
 
-    // 前端生成类型、破坏性变更检查（oasdiff）都读这个文件。文档由真实宿主生成：构建时生成的工具会启动整个宿主，
-    // 启动任务要连数据库，所以改由这里导出
+    // 前端类型生成与破坏性变更检查（oasdiff）均依赖此文件。由于构建期生成工具会启动完整宿主并连接数据库，
+    // 因此由本测试负责导出
     [Fact]
     public async Task Document_IsExportedToTheArtifactsFolder()
     {

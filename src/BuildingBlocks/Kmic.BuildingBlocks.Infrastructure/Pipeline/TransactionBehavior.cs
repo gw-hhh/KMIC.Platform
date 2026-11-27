@@ -16,21 +16,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 命令事务：处理器、领域事件处理器和保存在同一个事务里
-/// </summary>
+/// <summary>将命令执行、领域事件分发与持久化包裹在同一事务中</summary>
 public sealed class TransactionBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
-    // 从容器取框架服务：宿主要直接引用行为类型，所以行为只能是 public，构造函数里就放不了 internal 的服务
+    // 从服务容器解析框架内部服务：由于宿主需直接引用行为类型（必须为 public），构造函数无法直接注入 internal 服务
     IServiceProvider services,
     ILogger<TransactionBehavior<TMessage, TResponse>> logger) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IBaseCommand
     where TResponse : Result, IResultFactory<TResponse>
 {
-    // 超过这么多轮还有新事件，说明事件处理器在互相触发
+    // 分发轮次超过上限仍有新事件产生，通常意味着事件处理器之间存在循环触发
     private const int MaxDispatchRounds = 10;
 
-    /// <inheritdoc />
     public async ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);
@@ -47,7 +44,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         }
         catch
         {
-            // 出异常时同样丢弃本次的修改、登记的动作和没写出去的消息，事务由 await using 回滚
+            // 发生异常时同步丢弃未保存修改、待执行动作及未发布消息，数据库事务由 await using 自动回滚
             context.ChangeTracker.Clear();
             transaction.Discard();
             services.GetRequiredService<OutboxWriter>().Discard();
@@ -77,7 +74,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
 
         if (catalog.Get(typeof(TMessage)) is { Audited: true } audited)
         {
-            // 变更要在保存之前采集，保存之后跟踪器里就没有原值了
+            // 须在保存前采集变更：保存完成后变更跟踪器中的原始值将被清除
             services.GetRequiredService<AuditRecorder>().Publish(context, audited);
         }
 
@@ -100,7 +97,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         return response;
     }
 
-    // 版本号在保存时才递增，所以要在保存后回填
+    // 并发版本号在保存阶段才会递增，因此需在保存完成后回填至响应结果
     private static TResponse WithSavedVersion(ModuleDbContext context, TResponse response)
     {
         if (ResponseValues<TResponse>.Read(response) is not IHasConcurrencyVersion receipt)
@@ -115,7 +112,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
             : ResponseValues<TResponse>.Create(receipt.WithConcurrencyVersion(aggregate.Entity.ConcurrencyVersion));
     }
 
-    // 事件处理器可能修改别的聚合根并产生新事件，一直处理到没有新事件为止
+    // 事件处理器可能修改其他聚合根并产生衍生领域事件，需循环分发直至无新增事件
     private async Task<Error?> DispatchDomainEventsAsync(ModuleDbContext context, CancellationToken ct)
     {
         var dispatcher = services.GetRequiredService<DomainEventDispatcher>();
@@ -148,7 +145,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
 
     private async Task RollBackAsync(ModuleDbContext context, CommandTransaction transaction)
     {
-        // 清空变更跟踪，免得同一作用域里残留的修改被后面的操作误保存
+        // 清空变更跟踪器，防止异常路径上的残留状态被后续操作误保存
         await context.Database.RollbackTransactionAsync(CancellationToken.None);
         context.ChangeTracker.Clear();
         transaction.Discard();
@@ -156,7 +153,7 @@ public sealed class TransactionBehavior<TMessage, TResponse>(
         services.GetRequiredService<AuditRecorder>().Discard();
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "提交后的动作失败了也没关系，只记警告，不能影响已提交的结果")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "提交后动作失败仅记录警告日志，不能影响已成功提交的命令结果")]
     private async Task RunAfterCommitAsync(IReadOnlyList<Func<CancellationToken, ValueTask>> actions)
     {
         foreach (var action in actions)

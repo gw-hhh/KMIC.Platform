@@ -3,14 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.ServiceDefaults;
 
-/// <summary>
-/// 注册数据分类脱敏器
-/// </summary>
 public static class RedactionExtensions
 {
-    /// <summary>
-    /// 注册按数据分类脱敏的服务
-    /// </summary>
+    /// <summary>注册基于数据分类的日志与数据脱敏器</summary>
     public static IServiceCollection AddKmicRedaction(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

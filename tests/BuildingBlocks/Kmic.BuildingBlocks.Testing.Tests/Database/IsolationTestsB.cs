@@ -3,9 +3,7 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Testing.Tests.Database;
 
-/// <summary>
-/// 和 IsolationTestsA 并行运行
-/// </summary>
+// 与 IsolationTestsA 并行运行，验证克隆库隔离
 public sealed class IsolationTestsB(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     [Fact]

@@ -6,12 +6,8 @@ using Kmic.Configuration.Contracts;
 
 namespace Kmic.Configuration.Application.Dictionaries.Get;
 
-/// <summary>
-/// 批量读取字典并生成 ETag
-/// </summary>
 public sealed class GetDictionariesQueryHandler(IDictionarySnapshots snapshots) : IQueryHandler<GetDictionariesQuery, DictionariesResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<DictionariesResponse>> Handle(GetDictionariesQuery query, CancellationToken cancellationToken)
     {
         var found = new List<DictionarySnapshot>();

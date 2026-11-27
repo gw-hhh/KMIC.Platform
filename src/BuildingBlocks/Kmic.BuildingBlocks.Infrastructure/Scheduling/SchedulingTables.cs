@@ -1,37 +1,22 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 定时任务用到的表
-/// </summary>
-/// <remarks>
-/// 表属于 Operations 模块，由它的迁移建立
-/// </remarks>
+/// <summary>定时任务相关表定义（归属 Operations 模块，由其迁移创建）</summary>
 public static class SchedulingTables
 {
-    /// <summary>
-    /// Quartz 表名的前缀，带 schema
-    /// </summary>
     public const string QuartzPrefix = """
         "Operations".qrtz_
         """;
 
-    /// <summary>
-    /// 定时任务设置表（管理员的开关与 Cron 覆盖），带 schema
-    /// </summary>
+    /// <summary>运维覆盖配置表名（含 schema），存储管理员调整的开关与 Cron</summary>
     public const string Settings = """
         "Operations"."ScheduledJobSetting"
         """;
 
-    /// <summary>
-    /// 定时任务执行记录表，带 schema
-    /// </summary>
     public const string Runs = """
         "Operations"."ScheduledJobRun"
         """;
 
-    /// <summary>
-    /// 设置表与执行记录表的建表语句：Operations 模块的迁移执行，框架测试直接执行
-    /// </summary>
+    /// <summary>配置表与执行记录表建表 DDL（供 Operations 迁移及框架测试使用）</summary>
     public const string CreateSql = """
         CREATE TABLE "Operations"."ScheduledJobSetting" (
             "JobName" varchar(200) NOT NULL,
@@ -65,12 +50,7 @@ public static class SchedulingTables
         COMMENT ON TABLE "Operations"."ScheduledJobRun" IS '定时任务的执行记录';
         """;
 
-    /// <summary>
-    /// Quartz 自带的 PostgreSQL 建表语句，换上本系统的表名前缀
-    /// </summary>
-    /// <remarks>
-    /// Operations 的迁移里原样写这段 SQL，不在迁移里读程序集资源
-    /// </remarks>
+    /// <summary>生成替换表前缀后的 Quartz PostgreSQL 建表脚本（迁移中应直接内联 SQL）</summary>
     public static string QuartzCreateSql()
     {
         using var stream = typeof(Quartz.IJob).Assembly.GetManifestResourceStream("Quartz.Impl.AdoJobStore.Schema.create_postgres.sql")

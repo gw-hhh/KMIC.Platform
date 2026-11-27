@@ -8,18 +8,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Kmic.BuildingBlocks.Analyzers.Generators;
 
-/// <summary>
-/// 实体列注释生成器：把属性的 summary 编译进程序集
-/// </summary>
+/// <summary>实体列注释生成器，将实体与记录类型属性的 XML summary 编译为静态字典供 EF 配置读取。</summary>
 [Generator(LanguageNames.CSharp)]
 public sealed class EntityCommentGenerator : IIncrementalGenerator
 {
-    /// <summary>
-    /// 生成的类型名
-    /// </summary>
     public const string GeneratedTypeName = "Kmic.Generated.EntityComments";
 
-    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var comments = context.SyntaxProvider
@@ -55,7 +49,7 @@ public sealed class EntityCommentGenerator : IIncrementalGenerator
     private static bool IsEntityOrValueObject(Compilation compilation, INamedTypeSymbol type) =>
         type.IsRecord || KnownTypes.InheritsFrom(type, compilation.GetTypeByMetadataName(KnownTypes.Entity));
 
-    // 嵌套类型用 +，和反射拿到的 Type.FullName 对得上
+    // 嵌套类型使用 + 连接，与 Type.FullName 保持一致
     private static string MetadataName(INamedTypeSymbol type)
     {
         var name = type.MetadataName;
@@ -67,7 +61,7 @@ public sealed class EntityCommentGenerator : IIncrementalGenerator
         return type.ContainingNamespace is { IsGlobalNamespace: false } ns ? $"{ns.ToDisplayString()}.{name}" : name;
     }
 
-    // cref 换成成员名，不然列注释里会出现 "P:Kmic.Sample.Domain.Sample.Title"
+    // 将 cref 替换为成员名，避免列注释出现完整符号前缀
     private static string? Summary(string? xml)
     {
         if (string.IsNullOrWhiteSpace(xml))
@@ -95,7 +89,7 @@ public sealed class EntityCommentGenerator : IIncrementalGenerator
         }
         catch (System.Xml.XmlException)
         {
-            // 格式错误编译器会报警告，这里不重复报
+            // XML 格式错误由编译器直接告警，此处跳过
             return null;
         }
     }
@@ -119,8 +113,7 @@ public sealed class EntityCommentGenerator : IIncrementalGenerator
         source.AppendLine("        new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.Ordinal)");
         source.AppendLine("        {");
 
-        // 分部类型会被收集多次，先去重
-        // 再按键排序，生成的文件才不会随收集顺序变化
+        // 分部类型会被多次收集，先去重并按键排序以保证生成结果稳定
         foreach (var (key, comment) in entries.GroupBy(e => e.Key, StringComparer.Ordinal).Select(g => g.First()).OrderBy(e => e.Key, StringComparer.Ordinal))
         {
             source.Append("            [").Append(SymbolDisplay.FormatLiteral(key, quote: true)).Append("] = ")

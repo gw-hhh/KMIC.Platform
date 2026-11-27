@@ -6,26 +6,16 @@ using Microsoft.Net.Http.Headers;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// Result 转 HTTP 响应
-/// </summary>
 public static class ResultHttpExtensions
 {
-    /// <summary>
-    /// 成功返回 200 和值
-    /// </summary>
+    /// <summary>成功时返回 200 及响应体</summary>
     public static IResult ToOk<T>(this Result<T> result)
     {
         ArgumentNullException.ThrowIfNull(result);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : Problem(result);
     }
 
-    /// <summary>
-    /// 成功返回 200 和值并带 ETag，If-None-Match 一致时返回 304
-    /// </summary>
-    /// <remarks>
-    /// 给变化少、反复读的数据用，如字典
-    /// </remarks>
+    /// <summary>成功时返回 200 及 ETag（命中 If-None-Match 时返回 304），适合低频变更的高频查询</summary>
     public static IResult ToOkWithETag<T>(this Result<T> result, HttpContext http, Func<T, string> etagOf)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -47,18 +37,14 @@ public static class ResultHttpExtensions
             : TypedResults.Ok(result.Value);
     }
 
-    /// <summary>
-    /// 成功返回 204，没有响应体
-    /// </summary>
+    /// <summary>成功时返回 204</summary>
     public static IResult ToNoContent(this Result result)
     {
         ArgumentNullException.ThrowIfNull(result);
         return result.IsSuccess ? TypedResults.NoContent() : Problem(result);
     }
 
-    /// <summary>
-    /// 成功返回 201，Location 指向新数据，响应体是新数据的 ID 和版本号
-    /// </summary>
+    /// <summary>成功时返回 201、Location 头及新资源 ID 与版本号</summary>
     public static IResult ToCreated<TId>(this Result<CreatedResponse<TId>> result, Func<TId, string> location)
         where TId : struct, IStronglyTypedId
     {
@@ -68,9 +54,7 @@ public static class ResultHttpExtensions
         return result.IsSuccess ? TypedResults.Created(location(result.Value.Id), result.Value) : Problem(result);
     }
 
-    /// <summary>
-    /// 成功返回 202，Location 指向后台作业，响应体是作业 ID
-    /// </summary>
+    /// <summary>成功时返回 202、Location 头及后台作业信息</summary>
     public static IResult ToAccepted(this Result<JobAccepted> result, Func<Guid, string> location)
     {
         ArgumentNullException.ThrowIfNull(result);

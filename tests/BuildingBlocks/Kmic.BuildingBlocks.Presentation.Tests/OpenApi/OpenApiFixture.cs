@@ -9,9 +9,6 @@ using Kmic.BuildingBlocks.Presentation.Tests.Support;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.OpenApi;
 
-/// <summary>
-/// 生成一次文档，OpenApiDocumentTests 的各个测试读同一份
-/// </summary>
 public sealed class OpenApiFixture : IAsyncLifetime
 {
     private ApiHost _api = null!;

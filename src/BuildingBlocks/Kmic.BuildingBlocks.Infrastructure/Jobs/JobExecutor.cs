@@ -22,9 +22,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// 执行后台作业
-/// </summary>
 internal sealed class JobExecutor(
     JobStore store,
     BackgroundJobCatalog catalog,
@@ -38,14 +35,11 @@ internal sealed class JobExecutor(
     private JobOptions Options => options.Value;
 
     private IAccessContextLoader Loader => loaders.FirstOrDefault()
-        ?? throw new InvalidOperationException("没有注册 IAccessContextLoader，用户提交的后台作业无法执行。");
+        ?? throw new InvalidOperationException("未注册 IAccessContextLoader，无法执行用户提交的后台作业。");
 
     public Task<IReadOnlyList<ClaimedJob>> ClaimAsync(string module, int max, Guid token, CancellationToken ct) =>
         store.ClaimAsync(module, max, token, Options.Lease, ct);
 
-    /// <summary>
-    /// 领取一批并依次执行完，返回领取到的个数
-    /// </summary>
     public async Task<int> RunBatchAsync(string module, int max, CancellationToken ct)
     {
         var token = Guid.CreateVersion7();
@@ -68,10 +62,10 @@ internal sealed class JobExecutor(
         var type = catalog.Find(job.JobType, job.SchemaVersion);
         if (type is null)
         {
-            return await FailAsync(module, job, token, CommonErrors.JobFailed.WithDetail($"本实例不认识作业 {job.JobType} 的版本 {job.SchemaVersion}。"));
+            return await FailAsync(module, job, token, CommonErrors.JobFailed.WithDetail($"当前实例无法识别作业 {job.JobType} 的版本 {job.SchemaVersion}。"));
         }
 
-        // 执行者失联后领回来的：只有声明了可续跑、次数还没用完的才接着跑
+        // 原执行器失联回收的作业：仅可续跑且未达重试上限时继续执行
         if (job.Previous == JobStatus.Running && (!type.Attribute.Resumable || job.Attempts > Options.MaxResumeAttempts + 1))
         {
             return await FailAsync(module, job, token, CommonErrors.JobInterrupted);
@@ -80,11 +74,11 @@ internal sealed class JobExecutor(
         object args;
         try
         {
-            args = JsonSerializer.Deserialize(job.Args, type.ClrType, KmicJsonOptions.Stored) ?? throw new JsonException("作业参数是 null。");
+            args = JsonSerializer.Deserialize(job.Args, type.ClrType, KmicJsonOptions.Stored) ?? throw new JsonException("作业参数反序列化结果为空。");
         }
         catch (JsonException exception)
         {
-            return await FailAsync(module, job, token, CommonErrors.JobFailed.WithDetail($"作业参数读不出来：{exception.Message}"));
+            return await FailAsync(module, job, token, CommonErrors.JobFailed.WithDetail($"作业参数反序列化失败：{exception.Message}"));
         }
 
         var identity = await LoadIdentityAsync(job, type, shutdown);
@@ -96,20 +90,17 @@ internal sealed class JobExecutor(
         return await ExecuteAsync(module, job, token, type, args, identity.Value, shutdown);
     }
 
-    /// <summary>
-    /// 请求取消，作业已结束时返回 false
-    /// </summary>
-    /// <exception cref="CommitOutcomeUnknownException">提交没有得到确认</exception>
+    // 请求取消作业，已结束返回 false；提交结果未确认时抛出 CommitOutcomeUnknownException
     public async Task<bool> RequestCancelAsync(string module, Guid jobId, UserId? by, CancellationToken ct) =>
         await UpdateAsync(module, jobId, db => store.RequestCancelAsync(db, module, jobId, by?.Value, Options.ResultRetention, ct)) is not null;
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "处理器的任何异常都只让这个作业失败，执行器继续处理别的作业，详细信息在日志里")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "单次作业处理器异常仅标记当前作业失败并记录详细日志，不中断执行器继续处理后续作业")]
     private async Task<JobRunResult> ExecuteAsync(
         string module, ClaimedJob job, Guid token, BackgroundJobType type, object args, (ICurrentUser User, IAccessContext? Access) identity, CancellationToken shutdown)
     {
         var started = TimeProvider.System.GetTimestamp();
 
-        // 每次执行一个根 span，不挂在领取它的循环下面；每一批在它下面是一个子 span
+        // 每次作业执行创建独立的根 span（不挂在领取循环下），各批次作为其子 span
         using var activity = KmicActivities.Messaging.StartActivity(
             $"job {type.Name}", ActivityKind.Internal, default(ActivityContext), [new("kmic.job.id", job.Id.ToString()), new("kmic.module", module)]);
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(shutdown);
@@ -161,8 +152,8 @@ internal sealed class JobExecutor(
     }
 
 
-    // 调用处理器，同时按间隔续期占用。处理器的异常和取消都在这里收住，由调用方按原因决定作业的结局
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "处理器的任何异常都只让这个作业失败，执行器继续处理别的作业，详细信息在日志里")]
+    // 调用作业处理器并定时续期占用，捕获所有处理器异常与取消信号，由调用方统一判定最终状态
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "单次作业处理器异常仅标记当前作业失败并记录详细日志，不中断执行器继续处理后续作业")]
     private async Task<(Result<JobOutcome>? Result, Exception? Failure)> InvokeAsync(
         string module,
         ClaimedJob job,
@@ -201,8 +192,8 @@ internal sealed class JobExecutor(
         return (result, failure);
     }
 
-    // 作业结束后写一条审计事件，是尽力而为：作业的结果已经写好，审计写不进去只记日志
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "审计写不进去不能改变已经写好的作业结果，只记错误日志")]
+    // 作业结束后尽力写入审计事件，写入失败仅记录日志
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "审计事件写入失败不应改变已提交的作业结果，仅记录错误日志")]
     private async Task AuditAsync(
         string module, ClaimedJob job, BackgroundJobType type, (ICurrentUser User, IAccessContext? Access) identity, JobRunResult finished, Result<JobOutcome>? result)
     {
@@ -225,9 +216,9 @@ internal sealed class JobExecutor(
             JobsLog.AuditFailed(logger, exception, job.Id, job.JobType);
         }
     }
-    // 每过占用时长的三分之一续期一次，顺便发现用户的取消请求、超时和提交人被禁用。
-    // 占用以数据库时钟为准，这里按真实时间等待，不用注入的时钟（测试里它是固定的）
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "续期出错只记日志，占用到期前还有两次机会；到期后由别的实例接管")]
+    // 每隔占用时长的 1/3 续期一次，并同步检测取消请求、超时及提交人状态
+    // 占用过期以数据库时钟为准，此处按真实物理时间等待，避免使用测试中可能被固定的注入时钟
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "占用续期异常仅记录日志，占用过期前仍有两次重试机会，过期后将由其他实例接管")]
     private async Task RenewAsync(string module, ClaimedJob job, Guid token, JobContext context, IAccessContext? access, CancellationToken ct)
     {
         try
@@ -278,7 +269,7 @@ internal sealed class JobExecutor(
         return access is not null && access.Permissions.Contains(type.Attribute.Permission) ? (CurrentUser.From(access), access) : null;
     }
 
-    // 只看人还在不在，不比较权限：一个作业从头到尾按开始时加载的权限执行
+    // 仅校验提交人是否仍有效，不复核权限变更，作业全程沿用启动时加载的权限快照
     private async Task<bool> SubmitterActiveAsync(IAccessContext access, CancellationToken ct) =>
         await Loader.LoadForJobAsync(access.UserId, access.RoleId, ct) is not null;
 
@@ -331,7 +322,7 @@ internal sealed class JobExecutor(
         }
     }
 
-    // 作业行和结束事件在同一个事务里写：结果没写进去就不会发通知，同一个结果也只通知一次
+    // 作业状态与结束事件在同一事务中写入，确保结果落库前不发通知且同一结果仅通知一次
     private async Task<UpdatedJob?> UpdateAsync(string module, Guid jobId, Func<ModuleDbContext, Task<UpdatedJob?>> update)
     {
         await using var scope = scopes.CreateScope(CallOrigin.BackgroundJob, CurrentUser.System(), null);

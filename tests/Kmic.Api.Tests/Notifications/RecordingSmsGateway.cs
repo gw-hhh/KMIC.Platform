@@ -3,9 +3,6 @@ using Kmic.Notifications.Application.Channels;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 记录发了什么的短信渠道
-/// </summary>
 internal sealed class RecordingSmsGateway : ISmsGateway
 {
     private int _calls;

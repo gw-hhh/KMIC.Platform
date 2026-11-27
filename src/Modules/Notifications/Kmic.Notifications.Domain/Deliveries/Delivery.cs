@@ -4,12 +4,7 @@ using Kmic.Notifications.Domain.Notifications;
 
 namespace Kmic.Notifications.Domain.Deliveries;
 
-/// <summary>
-/// 一次投递：把一条通知用某个渠道发给一个收件人
-/// </summary>
-/// <remarks>
-/// 渲染结果随投递保存，重试不受模板修改影响
-/// </remarks>
+/// <summary>单收件人单渠道的通知投递记录（渲染结果随记录保存，重试不受后续模板修改影响）</summary>
 public sealed class Delivery : AggregateRoot<DeliveryId>
 {
     private Delivery(
@@ -144,9 +139,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
     /// </summary>
     public DeliverySkipReason? SkipReason { get; private set; }
 
-    /// <summary>
-    /// 创建一条等待发送的投递
-    /// </summary>
+    /// <summary>创建待发送的投递记录</summary>
     public static Delivery Queue(
         NotificationId notificationId,
         DeliveryChannel channel,
@@ -166,9 +159,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         DeliveryPriority priority) =>
         Create(notificationId, channel, recipientUserId, recipientKey, addressMasked, address, role, subject, body, smsParameters, attachmentFileIds, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Pending, null);
 
-    /// <summary>
-    /// 记录已跳过的投递及原因，如用户不存在、已禁用或缺少地址
-    /// </summary>
+    /// <summary>记录被跳过的投递及原因（用户不存在、已禁用或缺少地址）</summary>
     public static Delivery Skip(
         NotificationId notificationId,
         DeliveryChannel channel,
@@ -184,9 +175,7 @@ public sealed class Delivery : AggregateRoot<DeliveryId>
         DeliverySkipReason reason) =>
         Create(notificationId, channel, recipientUserId, recipientKey, string.Empty, null, role, subject, null, null, null, templateKey, dedupKey, templateVersion, codeHash, priority, DeliveryStatus.Skipped, reason);
 
-    /// <summary>
-    /// 创建已捕获的投递记录；捕获模式下保存内容，不实际发送
-    /// </summary>
+    /// <summary>创建已捕获的投递记录（仅保存内容，不实际发送）</summary>
     public static Delivery Capture(
         NotificationId notificationId,
         DeliveryChannel channel,

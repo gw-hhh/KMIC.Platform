@@ -9,23 +9,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 标了 [AuditedRead] 的查询成功之后，写一条审计事件
-/// </summary>
-/// <remarks>
-/// 写审计出错时查询照常返回，只记错误日志
-/// </remarks>
+/// <summary>对标注 [AuditedRead] 的查询在成功后记录读取审计（写入失败仅记日志，不影响结果返回）</summary>
 public sealed class ReadAuditBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     FrameworkMetrics metrics,
-    // 从容器取框架服务：宿主要直接引用行为类型，所以行为只能是 public，构造函数里就放不了 internal 的服务
+    // 从服务容器解析框架内部服务：由于宿主需直接引用行为类型（必须为 public），构造函数无法直接注入 internal 服务
     IServiceProvider services,
     ILogger<ReadAuditBehavior<TMessage, TResponse>> logger) : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IBaseQuery
     where TResponse : Result, IResultFactory<TResponse>
 {
-    /// <inheritdoc />
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "写审计失败不能影响已经读出来的查询结果，只记错误日志")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "写入读取审计失败时仅记录错误日志，不能影响已获取的查询结果")]
     public async ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);

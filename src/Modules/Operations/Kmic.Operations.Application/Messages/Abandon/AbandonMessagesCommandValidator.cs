@@ -13,7 +13,7 @@ internal sealed class AbandonMessagesCommandValidator : AbstractValidator<Abando
         {
             message.RuleFor(m => m.Module).NotEmpty().MaximumLength(100);
             message.RuleFor(m => m.Id).NotEmpty();
-            message.RuleFor(m => m.Box).Must(box => box == MessageBoxKind.Inbox).WithMessage("只有收件箱里的死信能放弃，发件箱的死信只能重试");
+            message.RuleFor(m => m.Box).Must(box => box == MessageBoxKind.Inbox).WithMessage("仅支持放弃收件箱死信，发件箱死信只能重试");
         });
     }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 尺寸、颜色、动画照 Vben Admin 的 menu-ui（MIT）
+// 尺寸、配色与动效参考 Vben Admin 的 menu-ui（MIT）
 import { Popover } from 'antdv-next';
 import { computed } from 'vue';
 import type { MenuNode } from '@/platform/routing';
@@ -15,9 +15,8 @@ const isGroup = computed(() => props.node.children.length > 0);
 const isActive = computed(() => !isGroup.value && props.node.routeName === menu.activeKey.value);
 const isActiveGroup = computed(() => isGroup.value && menu.activeAncestors.value.has(props.node.key));
 const isOpen = computed(() => menu.openKeys.value.has(props.node.key));
-// 弹出的子菜单始终展开显示
+// 悬停弹出的子菜单始终以展开态渲染
 const isCollapsed = computed(() => menu.collapsed.value && !props.popup);
-// 第一级左边 8px，往下每级多缩进 16px
 const indent = computed(() => `${String(props.level === 0 ? 8 : 16 + props.level * 16)}px`);
 
 function onClick(): void {
@@ -96,7 +95,7 @@ function onClick(): void {
 </template>
 
 <style lang="scss">
-// 折叠后悬停弹出的子菜单：宽 240，从右侧滑入，底色和侧栏一致
+// 浮层挂载于 body，需使用全局非 scoped 样式
 .menu-popup .ant-popover-container {
   width: 240px;
   padding: 10px 0;
@@ -154,7 +153,7 @@ function onClick(): void {
     transform: scale(1.2);
   }
 
-  // 选中项悬停时保留选中的底色
+  // 选中项在悬停时保留激活态底色
   &:not(.is-active):hover {
     color: var(--kmic-sidebar-item-hover-color);
     background: var(--kmic-sidebar-accent);
@@ -170,7 +169,7 @@ function onClick(): void {
     background: var(--kmic-sidebar-item-active-background);
   }
 
-  // 当前页面所在的目录只变字色，不加底色
+  // 活动页面所属目录仅高亮文字颜色，不添加背景底色
   &.is-active-group {
     color: var(--kmic-sidebar-group-active-color);
   }
@@ -225,7 +224,6 @@ function onClick(): void {
   }
 }
 
-// 展开、收起的动画
 .children {
   display: grid;
   grid-template-rows: 0fr;

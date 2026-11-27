@@ -10,9 +10,7 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 定期登记本实例的心跳：构建号、角色、声明的订阅
-/// </summary>
+// 定期上报实例心跳（构建号、角色、订阅清单）并清理过期实例记录
 internal sealed class InstanceHeartbeat(
     SubscriptionCatalog subscriptions,
     DataSources dataSources,
@@ -22,7 +20,7 @@ internal sealed class InstanceHeartbeat(
     IOptions<MessagingOptions> options,
     ILogger<InstanceHeartbeat> logger) : BackgroundService
 {
-    // 清单里的属性名用小写开头：终结订阅时按包含运算匹配，名字的大小写要固定
+    // 订阅清单 JSON 属性统一采用小写开头，确保终结订阅时按包含匹配的大小写一致性
     private static readonly JsonSerializerOptions _json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,9 +41,6 @@ internal sealed class InstanceHeartbeat(
         }
     }
 
-    /// <summary>
-    /// 登记一次心跳：第一次插入，之后更新心跳时间；顺手删掉早就没有心跳的旧行
-    /// </summary>
     public async Task BeatAsync(DateTimeOffset startedAt, CancellationToken ct)
     {
         var declared = subscriptions.All

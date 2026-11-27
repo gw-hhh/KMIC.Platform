@@ -15,9 +15,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 容量保护拒绝消息写入：业务事务回滚，返回可重试的 503；软线按来源和命令声明放行
-/// </summary>
 public sealed class AdmissionEnforcementTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -54,7 +51,7 @@ public sealed class AdmissionEnforcementTests(ClassDatabase<ProbeTemplate> datab
 
         error.Metadata[ErrorMetadataKeys.Retryable].ShouldBe(true);
         (await OutboxCountAsync(ticket)).ShouldBe(0);
-        (await TitleAsync(ticket)).ShouldBe(ticket.Title, "业务修改要随消息一起回滚");
+        (await TitleAsync(ticket)).ShouldBe(ticket.Title, "消息写入被拒绝时，同一事务内的业务实体修改应随之回滚");
     }
 
     [Theory]

@@ -1,8 +1,5 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
-/// <summary>
-/// 启动任务是否已全部完成
-/// </summary>
 internal sealed class StartupState
 {
     private readonly TaskCompletionSource _completed = new(TaskCreationOptions.RunContinuationsAsynchronously);

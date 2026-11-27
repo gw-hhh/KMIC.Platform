@@ -3,9 +3,7 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Options;
 
-/// <summary>
-/// 用户选择项
-/// </summary>
+/// <summary>用户选择项。</summary>
 /// <param name="Id">用户 ID</param>
 /// <param name="DisplayName">姓名</param>
 /// <param name="EmployeeNo">工号</param>

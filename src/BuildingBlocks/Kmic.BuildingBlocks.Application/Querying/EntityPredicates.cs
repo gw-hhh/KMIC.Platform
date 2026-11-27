@@ -4,14 +4,9 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 按 ID 过滤用的表达式
-/// </summary>
 public static class EntityPredicates
 {
-    /// <summary>
-    /// ID 等于给定值
-    /// </summary>
+    /// <summary>生成按实体 ID 过滤的查询表达式。</summary>
     public static Expression<Func<TEntity, bool>> HasId<TEntity, TId>(TId id)
         where TEntity : Entity<TId>
         where TId : struct, IStronglyTypedId

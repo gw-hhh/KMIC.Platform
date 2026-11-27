@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 定时任务的日志
-/// </summary>
 internal static partial class SchedulingLog
 {
     [LoggerMessage(EventId = 2401, Level = LogLevel.Error, Message = "Scheduled job {JobName} failed with {ErrorCode}")]

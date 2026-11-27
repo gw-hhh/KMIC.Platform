@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Organization.Get;
 
-/// <summary>
-/// 查询完整组织树
-/// </summary>
 public sealed class GetOrgTreeQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetOrgTreeQuery, OrgTreeResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<OrgTreeResponse>> Handle(GetOrgTreeQuery query, CancellationToken cancellationToken)
     {
         var tree = await db.OrgTrees

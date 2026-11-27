@@ -2,23 +2,13 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
-/// <summary>
-/// Contracts 批量查询的辅助方法
-/// </summary>
+/// <summary>Contracts 批量查询辅助工具。</summary>
 public static class ContractBatch
 {
-    /// <summary>
-    /// 一次调用最多带多少个 ID
-    /// </summary>
+    /// <summary>单次批量查询默认最大 ID 数量。</summary>
     public const int DefaultSize = 1000;
 
-    /// <summary>
-    /// 按 ID 去重后分批查询，合并成以 ID 为键的字典
-    /// </summary>
-    /// <remarks>
-    /// 没查到的 ID 不在结果里
-    /// </remarks>
-    /// <param name="ids">要查的 ID，可以重复，可以为空</param>
+    /// <summary>对 <paramref name="ids"/> 去重后分批查询并合并为字典；未命中的 ID 不包含在结果中。</summary>
     public static async Task<Result<IReadOnlyDictionary<TKey, TValue>>> ChunkedAsync<TKey, TValue>(
         IReadOnlyCollection<TKey> ids,
         int size,

@@ -12,9 +12,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.ForceLogout;
 
-/// <summary>
-/// 强制结束用户会话
-/// </summary>
 public sealed class ForceLogoutCommandHandler(
     IUserRepository users,
     ISessionRepository sessions,
@@ -25,7 +22,6 @@ public sealed class ForceLogoutCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<ForceLogoutCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(ForceLogoutCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await UserAdminLoading.LoadForAsync(users, db, authorizer, command.Id, null, UserAdminAction.ForceLogout, access, cancellationToken);

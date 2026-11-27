@@ -5,9 +5,7 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Attachments.GetContent;
 
-/// <summary>
-/// 下载示例的一个附件
-/// </summary>
+/// <summary>获取示例附件下载内容</summary>
 [RequirePermission(SamplePermissions.View)]
 [AuditedRead]
 public sealed record GetSpecimenAttachmentContentQuery(SpecimenId Id, SpecimenAttachmentId AttachmentId) : IQuery<FileDownload>;

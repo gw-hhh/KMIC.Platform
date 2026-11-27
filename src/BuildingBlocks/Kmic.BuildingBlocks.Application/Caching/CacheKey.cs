@@ -3,19 +3,11 @@ using System.Text;
 
 namespace Kmic.BuildingBlocks.Application.Caching;
 
-/// <summary>
-/// 缓存键，格式是“模块:对象:标识”
-/// </summary>
-/// <remarks>
-/// 只在各模块的 XxxCacheKeys 类里调用
-/// </remarks>
+/// <summary>缓存键工具，格式为“模块:对象:标识”，仅限在各模块的 XxxCacheKeys 类中调用。</summary>
 public static class CacheKey
 {
     private const char Separator = ':';
 
-    /// <summary>
-    /// 生成缓存键或标签
-    /// </summary>
     public static string Of(string module, string item, params ReadOnlySpan<object> identifiers)
     {
         var key = new StringBuilder();
@@ -32,12 +24,7 @@ public static class CacheKey
         return key.ToString();
     }
 
-    /// <summary>
-    /// 缓存键的类别，即前两段“模块:对象”
-    /// </summary>
-    /// <remarks>
-    /// 标识放在第三段以后，否则指标维度会失控
-    /// </remarks>
+    /// <summary>提取前两段“模块:对象”作为指标分类，避免标识段导致维度基数失控。</summary>
     public static string CategoryOf(string key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -49,7 +36,7 @@ public static class CacheKey
 
     private static void Append(StringBuilder key, string? segment, string parameterName)
     {
-        // 段里不能出现分隔符，否则两个不同的键可能拼成同一个字符串
+        // 各段禁止包含分隔符，避免不同缓存键拼接后产生冲突
         if (string.IsNullOrWhiteSpace(segment) || segment.Contains(Separator, StringComparison.Ordinal))
         {
             throw new ArgumentException($"缓存键的段不能为空，也不能包含“{Separator}”：“{segment}”。", parameterName);

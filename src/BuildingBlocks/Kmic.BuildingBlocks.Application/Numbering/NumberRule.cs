@@ -4,9 +4,6 @@ using System.Text.RegularExpressions;
 
 namespace Kmic.BuildingBlocks.Application.Numbering;
 
-/// <summary>
-/// 编号规则
-/// </summary>
 public sealed partial class NumberRule
 {
     private const int MaxSequenceDigits = 18;
@@ -35,44 +32,23 @@ public sealed partial class NumberRule
         Partition,
     }
 
-    /// <summary>
-    /// 规则名
-    /// </summary>
     public string Name { get; }
 
-    /// <summary>
-    /// 模块
-    /// </summary>
     public string Module { get; }
 
-    /// <summary>
-    /// 编号格式
-    /// </summary>
     public string Format { get; }
 
-    /// <summary>
-    /// 重置周期
-    /// </summary>
     public NumberReset Reset { get; }
 
-    /// <summary>
-    /// 是否按分组键分别计数
-    /// </summary>
+    /// <summary>是否按分组键分别计数。</summary>
     public bool Partitioned { get; }
 
-    /// <summary>
-    /// 序号最少位数
-    /// </summary>
+    /// <summary>序号最少位数。</summary>
     public int SequenceDigits { get; }
 
-    /// <summary>
-    /// 序号告警值：到这里再往后编号会变长
-    /// </summary>
+    /// <summary>序号告警阈值，达到该值后继续递增将超出预设位数。</summary>
     public long WarningThreshold => 9 * (long)Math.Pow(10, SequenceDigits - 1);
 
-    /// <summary>
-    /// 周期键
-    /// </summary>
     public string PeriodKey(DateOnly businessDate) => Reset switch
     {
         NumberReset.Never => "-",
@@ -82,15 +58,12 @@ public sealed partial class NumberRule
         _ => throw new InvalidOperationException($"未知的重置周期 {Reset}。"),
     };
 
-    /// <summary>
-    /// 分组键，不分组的规则固定为 "-"
-    /// </summary>
-    /// <exception cref="ArgumentException">分组键缺失、格式不对，或不分组的规则传了分组键</exception>
+    /// <summary>校验并规范化分组键（不分组规则固定返回 "-"）；缺失、格式非法或误传分组键时抛出 <see cref="ArgumentException" />。</summary>
     public string PartitionKey(string? partition)
     {
         if (!Partitioned)
         {
-            return partition is null ? "-" : throw new ArgumentException($"编号规则 {Name} 不分组，不能传分组键。", nameof(partition));
+            return partition is null ? "-" : throw new ArgumentException($"编号规则 {Name} 不按分组计数，禁止传入分组键。", nameof(partition));
         }
 
         return partition is not null && PartitionPattern().IsMatch(partition)
@@ -98,9 +71,6 @@ public sealed partial class NumberRule
             : throw new ArgumentException($"编号规则 {Name} 的分组键必须是 1～10 位大写字母或数字，实际为“{partition}”。", nameof(partition));
     }
 
-    /// <summary>
-    /// 生成编号
-    /// </summary>
     public string Render(DateOnly businessDate, long sequence, string? partition)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(sequence, 1);
@@ -125,9 +95,6 @@ public sealed partial class NumberRule
         return number.ToString();
     }
 
-    /// <summary>
-    /// 解析格式，有问题时记入 problems 并返回空
-    /// </summary>
     internal static NumberRule? Parse(string name, string module, NumberRuleAttribute declaration, List<string> problems)
     {
         var countBefore = problems.Count;
@@ -150,7 +117,7 @@ public sealed partial class NumberRule
             problems.Add($"{name}：Partitioned = true 时格式中必须有且只有一个 {{partition}}，否则不能有。");
         }
 
-        // 格式里没有区分周期的日期段时不能重置，否则不同周期会生成相同的编号
+        // 格式中缺少可区分重置周期的日期段时禁止重置，避免不同周期生成重复编号
         var hasYear = kinds.Contains(SegmentKind.Year4) || kinds.Contains(SegmentKind.Year2);
         var periodDistinct = declaration.Reset switch
         {

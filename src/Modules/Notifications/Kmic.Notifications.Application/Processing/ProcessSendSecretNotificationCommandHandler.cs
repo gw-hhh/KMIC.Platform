@@ -3,12 +3,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 处理含密通知发送请求
-/// </summary>
 public sealed class ProcessSendSecretNotificationCommandHandler(NotificationProcessor processor) : ICommandHandler<ProcessSendSecretNotificationCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(ProcessSendSecretNotificationCommand command, CancellationToken cancellationToken)
     {
         var message = command.Message;

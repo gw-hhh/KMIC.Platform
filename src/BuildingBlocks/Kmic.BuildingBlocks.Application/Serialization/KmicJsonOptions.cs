@@ -5,40 +5,30 @@ using System.Text.Unicode;
 
 namespace Kmic.BuildingBlocks.Application.Serialization;
 
-/// <summary>
-/// 全系统共用的 JSON 选项
-/// </summary>
+/// <summary>全系统共用的 JSON 序列化选项。</summary>
 public static class KmicJsonOptions
 {
     private const int MaxDepth = 32;
 
-    // 中文原样输出，HTML 敏感字符仍然转义。共用一个实例，Configure 写进去的和 Create 的才是同一个
+    // 中文原样输出，HTML 敏感字符保持转义；共用同一实例以确保 Configure 与 Create 行为一致
     private static readonly JavaScriptEncoder _encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
 
-    /// <summary>
-    /// 只读的共用实例
-    /// </summary>
+    /// <summary>只读共用默认选项。</summary>
     public static JsonSerializerOptions Default { get; } = ReadOnly(Create());
 
-    /// <summary>
-    /// 读写已落库数据（集成消息、幂等记录里的响应）用的只读实例
-    /// </summary>
+    /// <summary>读写持久化 JSON 数据的只读选项。</summary>
     public static JsonSerializerOptions Stored { get; } = ReadOnly(CreateForStored());
 
-    /// <summary>
-    /// 新建一份可修改的选项
-    /// </summary>
+    /// <summary>创建可修改的选项副本。</summary>
     public static JsonSerializerOptions Create()
     {
-        // Strict 已经禁止未知字段、重复属性和字符串形式的数字，也检查可空注解和必填构造参数
+        // Strict 模式已禁止未知字段、重复属性及字符串形式数字，并启用可空注解与必填构造参数校验
         var options = new JsonSerializerOptions(JsonSerializerOptions.Strict);
         Apply(options);
         return options;
     }
 
-    /// <summary>
-    /// 把同样的设置写进已有的选项
-    /// </summary>
+    /// <summary>将统一序列化配置应用到已有选项实例。</summary>
     public static void Configure(JsonSerializerOptions target)
     {
         ArgumentNullException.ThrowIfNull(target);
@@ -69,7 +59,7 @@ public static class KmicJsonOptions
         options.MaxDepth = MaxDepth;
         options.Encoder = _encoder;
 
-        // 普通枚举写成员名，不接受数字
+        // 普通枚举序列化为成员名称，不接受数值输入
         options.Converters.Add(new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: false));
         options.Converters.Add(new EnumerationJsonConverterFactory());
         options.Converters.Add(new UtcDateTimeOffsetJsonConverter());

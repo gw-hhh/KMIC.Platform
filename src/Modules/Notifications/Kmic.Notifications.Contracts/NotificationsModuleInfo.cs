@@ -1,15 +1,8 @@
 namespace Kmic.Notifications.Contracts;
 
-/// <summary>
-/// Notifications 模块的基本信息
-/// </summary>
-/// <remarks>
-/// 模块名不能改，它是 schema 名和各类编码的前缀
-/// </remarks>
+/// <summary>Notifications 模块基本信息</summary>
 public static class NotificationsModuleInfo
 {
-    /// <summary>
-    /// 模块名
-    /// </summary>
+    /// <summary>模块名（用作数据库 Schema 名及各类编码前缀，不可更改）</summary>
     public const string Name = "Notifications";
 }

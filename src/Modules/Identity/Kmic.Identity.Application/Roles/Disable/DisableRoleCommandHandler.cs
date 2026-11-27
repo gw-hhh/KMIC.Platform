@@ -10,9 +10,6 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.Disable;
 
-/// <summary>
-/// 停用角色
-/// </summary>
 public sealed class DisableRoleCommandHandler(
     IRoleRepository roles,
     IIdentityCommandReads db,
@@ -21,7 +18,6 @@ public sealed class DisableRoleCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<DisableRoleCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<RoleId>>> ExecuteAsync(DisableRoleCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await RoleAdminLoading.LoadForAsync(roles, db, authorizer, command.Id, command.ExpectedVersion, RoleAdminAction.Disable, access, cancellationToken);

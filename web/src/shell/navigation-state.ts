@@ -4,7 +4,7 @@ const showAfterMs = 200;
 const showAtLeastMs = 500;
 
 export interface NavigationState {
-  /** 超过 200ms 才显示，至少显示 500ms */
+  /** 导航进度指示器可见状态（延迟 200ms 显示，展示后至少保持 500ms） */
   readonly visible: Readonly<Ref<boolean>>;
   start(): void;
   finish(): void;
@@ -51,7 +51,7 @@ export const navigationKey: InjectionKey<NavigationState> = Symbol('kmic.navigat
 export function useNavigationState(): NavigationState {
   const state = inject(navigationKey, null);
   if (state === null) {
-    throw new Error('navigationKey 未注册，请在 main.ts 里 provide');
+    throw new Error('navigationKey 未注入，请在 main.ts 中通过 app.provide 注册');
   }
   return state;
 }

@@ -7,9 +7,6 @@ using Npgsql;
 
 namespace Kmic.MigrationRunner;
 
-/// <summary>
-/// 迁移命令共用的配置、目标模块、输出及时间服务
-/// </summary>
 internal sealed class RunnerContext(IConfiguration configuration, IReadOnlyList<IModule> modules, TextWriter output, TimeProvider time)
 {
     private readonly Lazy<NumberRuleCatalog> _rules = new(() => NumberRuleCatalog.FromAssemblies(modules.Select(m => m.ApplicationAssembly)));
@@ -25,9 +22,9 @@ internal sealed class RunnerContext(IConfiguration configuration, IReadOnlyList<
     public string ConnectionString() =>
         configuration[RunnerApp.ConnectionStringKey] is { Length: > 0 } connection
             ? KmicConnectionString.Normalize(connection)
-            : throw new InvalidOperationException($"没有配置迁移账号的连接串 {RunnerApp.ConnectionStringKey}。");
+            : throw new InvalidOperationException($"未配置迁移账号连接字符串 {RunnerApp.ConnectionStringKey}。");
 
-    // 通过模块注册取得迁移所需的数据库上下文，不启动宿主或后台工作器
+    // 仅注册迁移所需的模块数据库上下文，不启动 Web 宿主或后台任务
     public ServiceProvider Services()
     {
         var services = new ServiceCollection();

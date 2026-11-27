@@ -1,9 +1,4 @@
 namespace Kmic.BuildingBlocks.Contracts.Messaging;
 
-/// <summary>
-/// 集成事件
-/// </summary>
-/// <remarks>
-/// 事件要带上订阅方处理所需的数据，订阅方不回查发布方
-/// </remarks>
+/// <summary>集成事件；须携带订阅方所需的全部数据，订阅方不得回查发布方。</summary>
 public interface IIntegrationEvent : IIntegrationMessage;

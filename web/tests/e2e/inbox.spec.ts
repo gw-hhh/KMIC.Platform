@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from './support';
 
-// 假后端里 sales 账号有 2 条未读消息和一个约 40 秒后完成的作业
+// 模拟后端中 sales 账号预置 2 条未读消息及 1 个约 40 秒后完成的后台作业
 async function loginAsSales(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByLabel('账号').fill('sales');
@@ -12,7 +12,7 @@ async function loginAsSales(page: Page): Promise<void> {
 
 const badge = (page: Page, label: string) => page.getByRole('button', { name: label }).locator('.ant-badge-count');
 
-test('站内消息：未读数、点击打开链接并标为已读、全部已读', async ({ page }) => {
+test('站内消息：展示未读计数、点击跳转后标记已读及全部标为已读', async ({ page }) => {
   await loginAsSales(page);
   await expect(badge(page, '站内消息')).toHaveText('2');
 
@@ -32,7 +32,7 @@ test('站内消息：未读数、点击打开链接并标为已读、全部已�
   await expect(page.locator('.kmic-inbox .inbox-dot')).toHaveCount(0);
 });
 
-test('后台作业：进度、失败原因、取消时面板不关闭，取消后不再轮询', async ({ page }) => {
+test('后台作业：展示进度与失败原因，取消作业时不关闭面板且停止轮询', async ({ page }) => {
   const jobPolls: string[] = [];
   page.on('request', (request) => {
     if (new URL(request.url()).pathname.endsWith('/my-jobs')) {
@@ -61,7 +61,7 @@ test('后台作业：进度、失败原因、取消时面板不关闭，取消�
   expect(jobPolls.length).toBe(before);
 });
 
-test('作业跑完：角标消失，消息面板收到“作业已完成”', async ({ page }) => {
+test('后台作业完成后角标消失，且消息面板收到完成通知', async ({ page }) => {
   test.setTimeout(90_000);
   await loginAsSales(page);
   await expect(badge(page, '后台作业')).toHaveText('1');

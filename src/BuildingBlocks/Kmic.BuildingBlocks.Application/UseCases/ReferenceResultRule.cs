@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Contracts.References;
 
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 引用解析查询的返回类型规则
-/// </summary>
 internal static class ReferenceResultRule
 {
     private static readonly HashSet<Type> _containers =
@@ -52,7 +49,7 @@ internal static class ReferenceResultRule
 
         if (standard && exemption is not null)
         {
-            problems.Add($"{name}：返回类型已经是 ReferenceInfo，不需要 ResultExemption，去掉它。");
+            problems.Add($"{name}：返回类型已为 ReferenceInfo，不需要 ResultExemption，请移除。");
         }
     }
 

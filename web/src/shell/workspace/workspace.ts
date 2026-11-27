@@ -10,7 +10,7 @@ export interface Tab {
   readonly params: RouteParams;
   readonly instance: string | null;
   readonly pinned: boolean;
-  /** 重新加载次数 */
+  /** 页面重新加载代次（用于强制刷新 KeepAlive 实例） */
   readonly generation: number;
 }
 
@@ -23,19 +23,19 @@ export interface LeaveReport {
 export interface WorkspaceOptions {
   router: Router;
   catalog: RouteCatalog;
-  /** 首页，固定且不能关闭 */
+  /** 首页路由名称（默认固定且不可关闭） */
   homeRouteName: string;
   epoch: () => number;
   maxTabs: () => number;
-  /** 未保存确认，返回 true 表示离开 */
+  /** 存在未保存或保存中状态时的离开确认回调，返回 true 表示确认离开 */
   confirmLeave: (reports: readonly LeaveReport[]) => Promise<boolean>;
-  /** 标签满时询问是否关闭 candidate */
+  /** 标签页达到上限时的替换确认回调；candidate 为建议关闭的候选标签 */
   confirmReplace: (candidate: { key: string; title: string } | null) => Promise<boolean>;
   storage: TabStorage | null;
   userId: () => string | null;
 }
 
-/** 标签只能通过它修改 */
+/** 工作区多标签状态管理接口；所有标签页变更均须经由该接口执行 */
 export interface Workspace {
   readonly tabs: ComputedRef<readonly Tab[]>;
   readonly activeKey: ComputedRef<string | null>;
@@ -46,13 +46,13 @@ export interface Workspace {
   close(key: string): Promise<boolean>;
   closeMany(keys: readonly string[]): Promise<boolean>;
   togglePin(key: string): void;
-  /** 只能在同类标签之间移动 */
+  /** 调整标签页顺序（仅允许在固定或非固定同类分组内移动） */
   move(from: number, to: number): void;
   reload(key: string): Promise<boolean>;
-  /** 身份变化后重建已保存的页面 */
+  /** 身份代际变更后，递增无未保存变更页面的 generation 以重建实例 */
   onEpochChange(): void;
   canLeaveAll(): Promise<boolean>;
-  /** 返回 false 取消跳转 */
+  /** 导航前置钩子（校验标签上限与替换逻辑），返回 false 时中止跳转 */
   beforeNavigate(to: RouteLocationNormalized): Promise<boolean>;
   commit(to: RouteLocationNormalized): void;
   reset(): void;
@@ -139,7 +139,7 @@ export function createWorkspace(options: WorkspaceOptions): Workspace {
     if (!(await options.confirmLeave(reports))) {
       return false;
     }
-    // 只放行确认时列出的标签
+    // 仅放行确认弹窗中涵盖的标签页，防止确认期间新增脏状态被误关闭
     const confirmed = new Set(reports.map((report) => report.key));
     return keys.every((key) => confirmed.has(key) || statusOf(key) === 'free');
   }
@@ -174,7 +174,7 @@ export function createWorkspace(options: WorkspaceOptions): Workspace {
     async open(name, params = {}) {
       const entry = catalog.find(name);
       if (entry === undefined) {
-        throw new Error(`路由 ${name} 不在目录里`);
+        throw new Error(`路由 ${name} 未在路由目录中注册`);
       }
       const instance = entry.tab.mode === 'multiple' ? crypto.randomUUID().slice(0, 8) : null;
       const existing = state.tabs.find((t) => t.key === catalog.tabKey(name, params, instance ?? ''));
@@ -255,7 +255,7 @@ export function createWorkspace(options: WorkspaceOptions): Workspace {
       if (target === null || state.tabs.some((t) => t.key === target.key) || state.tabs.length < options.maxTabs()) {
         return true;
       }
-      // 建议关闭最久未用且已保存的标签
+      // 优先建议关闭最久未访问、未固定且无未保存变更的标签页
       const replaceable = (t: Tab | undefined): t is Tab => t !== undefined && !t.pinned && statusOf(t.key) === 'free';
       const candidate =
         state.visited.map((key) => state.tabs.find((t) => t.key === key)).find(replaceable) ??

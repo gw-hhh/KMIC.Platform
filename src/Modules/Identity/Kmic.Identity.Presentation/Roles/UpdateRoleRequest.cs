@@ -1,8 +1,5 @@
 namespace Kmic.Identity.Presentation.Roles;
 
-/// <summary>
-/// 修改角色的请求
-/// </summary>
 /// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="Name">名称</param>
 /// <param name="Description">说明</param>

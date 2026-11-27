@@ -6,19 +6,13 @@ using Kmic.Files.Domain.Errors;
 
 namespace Kmic.Files.Domain.Files;
 
-/// <summary>
-/// 存储文件，内容在对象存储里，状态变更记入业务历史
-/// </summary>
+/// <summary>存储文件，内容保存在对象存储中，状态变更记入业务历史</summary>
 public sealed class StoredFile : AggregateRoot<StoredFileId>
 {
-    /// <summary>
-    /// 单文件引用数上限，防止引用集合无限增长
-    /// </summary>
+    /// <summary>单文件引用数上限，防止引用集合无限增长</summary>
     public const int MaxReferences = 100;
 
-    /// <summary>
-    /// 生成文件的 Profile 前缀
-    /// </summary>
+    /// <summary>生成文件的上传配置前缀</summary>
     public const string GeneratedProfilePrefix = "Generated:";
 
     private static readonly StateMachine<StoredFile, StoredFileStatus, StoredFileAction> _machine = Build();
@@ -138,9 +132,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
     /// </summary>
     public IReadOnlyList<FileReference> References => _references;
 
-    /// <summary>
-    /// 创建文件并设为上传中
-    /// </summary>
+    /// <summary>创建文件并设为上传中</summary>
     public static StoredFile Start(StoredFileId id, string storageKey, string originalName, string profile, UserId? uploadedBy, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(storageKey);
@@ -152,9 +144,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return file;
     }
 
-    /// <summary>
-    /// 登记已生成的文件
-    /// </summary>
+    /// <summary>登记已生成的文件</summary>
     public static StoredFile RegisterGenerated(
         StoredFileId id,
         string storageKey,
@@ -176,9 +166,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return file;
     }
 
-    /// <summary>
-    /// 完成上传并设置临时保留期；需要扫描时进入扫描中，否则为可用
-    /// </summary>
+    /// <summary>完成上传并设置临时保留期；需要扫描时进入扫描中，否则为可用</summary>
     public Result CompleteUpload(string fileType, string contentType, long size, string sha256, string? objectVersionId, bool needsScan, DateTimeOffset now, TimeSpan temporaryLifetime)
     {
         if (Status != StoredFileStatus.Uploading)
@@ -193,9 +181,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
             : _machine.Fire(this, StoredFileAction.Complete, "写入完成");
     }
 
-    /// <summary>
-    /// 扫描通过后转为可用，重新计算临时保留期
-    /// </summary>
+    /// <summary>扫描通过后转为可用，重新计算临时保留期</summary>
     public Result PassScan(DateTimeOffset now, TimeSpan temporaryLifetime)
     {
         var fired = _machine.Fire(this, StoredFileAction.PassScan, "扫描通过");
@@ -207,9 +193,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return fired;
     }
 
-    /// <summary>
-    /// 将上传或扫描失败的文件标记为被拒绝，保留期满后可清理
-    /// </summary>
+    /// <summary>将上传或扫描失败的文件标记为被拒绝，保留期满后可清理</summary>
     public Result Reject(string reason, DateTimeOffset now, TimeSpan retention)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
@@ -224,9 +208,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return fired;
     }
 
-    /// <summary>
-    /// 将对象丢失的文件标记为被拒绝，保留期满后可清理
-    /// </summary>
+    /// <summary>将对象丢失的文件标记为被拒绝，保留期满后可清理</summary>
     public Result MarkLost(string reason, DateTimeOffset now, TimeSpan retention)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
@@ -241,12 +223,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return fired;
     }
 
-    /// <summary>
-    /// 关联业务对象
-    /// </summary>
-    /// <remarks>
-    /// 调用方要在锁内先检查能否关联
-    /// </remarks>
+    /// <summary>关联业务对象（调用方须在锁内先校验是否允许关联）</summary>
     public Result Attach(string ownerModule, string ownerType, Guid ownerId, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ownerModule);
@@ -279,9 +256,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 解除业务引用，最后一个引用解除后进入保留期；引用不存在时直接返回成功
-    /// </summary>
+    /// <summary>解除业务引用</summary>
     public Result Detach(string ownerModule, string ownerType, Guid ownerId, DateTimeOffset now, TimeSpan retention)
     {
         var reference = _references.Find(r => r.IsOwnedBy(ownerModule, ownerType, ownerId));
@@ -305,20 +280,10 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return fired;
     }
 
-    /// <summary>
-    /// 将到期文件转为删除中
-    /// </summary>
-    /// <remarks>
-    /// 不取锁，调用方要先取排他锁并重读
-    /// </remarks>
+    /// <summary>将到期文件转为删除中（内部不加锁，调用方须先获取排他锁并重读）</summary>
     public Result Expire(string reason) => _machine.Fire(this, StoredFileAction.Expire, reason);
 
-    /// <summary>
-    /// 标记文件为已彻底删除
-    /// </summary>
-    /// <remarks>
-    /// 之后不能再关联或恢复
-    /// </remarks>
+    /// <summary>标记文件为已彻底删除，标记后不可再关联或恢复</summary>
     public Result Purge(string reason, UserId by, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
@@ -334,9 +299,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return fired;
     }
 
-    /// <summary>
-    /// 登记已完成的历史版本清除操作
-    /// </summary>
+    /// <summary>登记已完成的历史版本清除操作</summary>
     public Result RecordHistoryPurge(string note, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(note);
@@ -351,9 +314,7 @@ public sealed class StoredFile : AggregateRoot<StoredFileId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 检查当前状态是否允许指定操作
-    /// </summary>
+    /// <summary>检查当前状态是否允许指定操作</summary>
     public Result CanFire(StoredFileAction action) => _machine.CanFire(this, action);
 
     private static StateMachine<StoredFile, StoredFileStatus, StoredFileAction> Build()

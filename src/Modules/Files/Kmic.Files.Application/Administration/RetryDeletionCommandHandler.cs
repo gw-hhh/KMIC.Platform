@@ -5,12 +5,8 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 重置文件删除重试次数
-/// </summary>
 public sealed class RetryDeletionCommandHandler(IStoredFileRepository files) : ICommandHandler<RetryDeletionCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(RetryDeletionCommand command, CancellationToken cancellationToken)
     {
         // 文件不存在或不在删除队列中，均返回未找到

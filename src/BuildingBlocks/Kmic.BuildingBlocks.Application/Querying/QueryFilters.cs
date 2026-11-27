@@ -1,23 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 查询过滤器名称
-/// </summary>
 public static class QueryFilters
 {
-    /// <summary>
-    /// 软删除
-    /// </summary>
-    /// <remarks>
-    /// 回收站用 IgnoreQueryFilters([QueryFilters.SoftDelete]) 只关掉它
-    /// </remarks>
+    /// <summary>软删除过滤器；回收站查询可通过 IgnoreQueryFilters([QueryFilters.SoftDelete]) 单独禁用。</summary>
     public const string SoftDelete = nameof(SoftDelete);
 
-    /// <summary>
-    /// 数据权限
-    /// </summary>
-    /// <remarks>
-    /// 只能用 WithoutDataScope() 关掉
-    /// </remarks>
+    /// <summary>数据权限过滤器；仅允许通过 WithoutDataScope() 禁用。</summary>
     public const string DataScope = nameof(DataScope);
 }

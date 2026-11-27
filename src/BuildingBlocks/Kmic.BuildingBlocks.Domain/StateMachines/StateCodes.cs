@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
-/// <summary>
-/// 状态和动作的编码与全部取值，支持智能枚举和普通枚举
-/// </summary>
+// 提取状态与动作的编码及全集，兼容智能枚举与普通枚举
 internal static class StateCodes
 {
     public static void EnsureSupported<T>()

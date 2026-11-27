@@ -4,27 +4,17 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-/// <summary>
-/// 资源动作目录，只返回当前用户能执行的动作
-/// </summary>
+/// <summary>资源动作目录，只返回当前用户允许执行的动作。</summary>
 public abstract class ResourceActionCatalog<TResource, TAction> : IResourceActionCatalog
     where TAction : notnull
 {
     private readonly Lazy<IReadOnlyList<ResourceAction>> _actions;
 
-    /// <summary>
-    /// 由派生类调用
-    /// </summary>
     protected ResourceActionCatalog() => _actions = new(Collect);
 
-    /// <summary>
-    /// 全部动作用到的权限点
-    /// </summary>
     public IEnumerable<string> Permissions => _actions.Value.Select(a => a.Permission);
 
-    /// <summary>
-    /// 当前用户可用的动作编码，按声明顺序
-    /// </summary>
+    /// <summary>评估当前用户对指定资源可执行的动作编码，按声明顺序返回。</summary>
     public IReadOnlyList<string> Evaluate(IAccessContext access, IResourcePolicy<TResource, TAction> policy, TResource resource)
     {
         ArgumentNullException.ThrowIfNull(access);
@@ -42,9 +32,6 @@ public abstract class ResourceActionCatalog<TResource, TAction> : IResourceActio
         ];
     }
 
-    /// <summary>
-    /// 声明动作
-    /// </summary>
     protected abstract void Define(IResourceActionBuilder<TResource, TAction> builder);
 
     private static string CodeOf(TAction action) =>

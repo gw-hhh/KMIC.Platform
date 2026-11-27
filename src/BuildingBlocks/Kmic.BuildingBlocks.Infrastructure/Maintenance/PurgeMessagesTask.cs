@@ -7,12 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
-/// <summary>
-/// 每天按保留规则清理 Outbox 与 Inbox
-/// </summary>
-/// <remarks>
-/// Inbox 的去重凭证要等来源 Outbox 行删了才能删
-/// </remarks>
+// 每天清理 Outbox 与 Inbox（Inbox 去重凭证须在来源 Outbox 删除后方可清理）
 internal sealed class PurgeMessagesTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {
     public string Name => "Framework.PurgeMessages";
@@ -26,11 +21,11 @@ internal sealed class PurgeMessagesTask(ModuleFrameworkTables tables, DataSource
         var database = dataSources.Transactions(CallOrigin.ScheduledJob);
         var window = new Dictionary<string, object>(StringComparer.Ordinal) { ["window"] = options.Value.RedeliveryWindow };
 
-        // 先删 Outbox：同一次执行里，刚删掉来源行的凭证接着就能删
+        // 先清理 Outbox，使同一次执行中刚删除来源记录的 Inbox 凭证可紧接着被清理
         long outbox = 0;
         foreach (var module in tables.Modules)
         {
-            // 投递时刻不早于发生时刻，多带一个发生时刻的条件是为了用上 (Status, OccurredAt) 索引
+            // 投递时间不早于发生时间，附加发生时间条件以命中 (Status, OccurredAt) 索引
             outbox += await BatchDelete.RunAsync(
                 database,
                 tables.For(module).Outbox,
@@ -43,7 +38,7 @@ internal sealed class PurgeMessagesTask(ModuleFrameworkTables tables, DataSource
                 ct);
         }
 
-        // 来源模块不在本实例里的凭证无法判断，留着
+        // 来源模块未注册于当前实例的凭证无法校验来源状态，予以保留
         long inbox = 0;
         foreach (var module in tables.Modules)
         {

@@ -7,9 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Sample;
 
-/// <summary>
-/// 一致性：详情返回的 allowedActions 包含某个动作，当且仅当执行对应的命令不会因权限、资源策略、状态被拒绝
-/// </summary>
 public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -17,7 +14,7 @@ public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> datab
 
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部", hq => hq.Unit("华东")));
 
-    // 动作目录里的每个动作，各对应一个接口
+    // 动作目录中的每项动作均对应一个执行接口
     private static readonly (string Code, string Path)[] _actions = [("Submit", "submit"), ("Close", "close")];
 
     public static TheoryData<string> States => ["Draft", "Submitted", "Closed"];
@@ -26,7 +23,7 @@ public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> datab
     [MemberData(nameof(States))]
     public async Task AllowedActions_AgreeWithWhatTheCommandsDo(string state)
     {
-        // 甲是负责人，有全部权限；乙有提交权限但不是负责人；丁只能查看
+        // 甲为负责人且拥有全部权限；乙拥有提交权限但非负责人；丁仅拥有查看权限
         var ding = Viewer("丁", SamplePermissions.View);
         Factory.Loader.Register(ding);
 
@@ -60,7 +57,7 @@ public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> datab
     [InlineData("Submitted")]
     public async Task OwnerWhoCanSubmitButNotClose_GetsOnlyTheActionsHeIsEntitledTo(string state)
     {
-        // 动作目录里 Close 绑错权限点时，只有这个组合会露出来：他是负责人，有提交权限，没有关闭权限
+        // 专门覆盖 Close 动作的权限点绑定校验：该用户为负责人且具备提交权限，但缺少关闭权限
         var ji = Viewer("己", SamplePermissions.View, SamplePermissions.Create, SamplePermissions.Submit);
         Factory.Loader.Register(ji);
 
@@ -82,7 +79,7 @@ public sealed class SpecimenAllowedActionsTests(ClassDatabase<ApiTemplate> datab
         return (await JsonAsync(response)).GetProperty("version").GetInt64();
     }
 
-    // 负责人创建标本并推进到指定状态；推进用的是负责人自己的权限
+    // 由负责人创建标本并使用自身权限将其推进至指定目标状态
     private async Task<(Guid Id, long Version)> CreateInStateAsync(TestIdentity owner, string state)
     {
         using var client = ClientFor(owner);

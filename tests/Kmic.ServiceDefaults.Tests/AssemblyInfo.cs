@@ -1,3 +1,3 @@
-// AddSerilog 会把新建的日志器写进全局的 Log.Logger，请求日志中间件也从那里取；
-// 并行的测试会互相覆盖，所以这个项目的全部测试放进同一个集合，逐个运行
+// AddSerilog 会将新建日志器写入全局 Log.Logger，请求日志中间件亦从该全局实例读取；
+// 为避免并行测试相互覆盖全局状态，本测试项目中的所有测试均放入同一集合顺序执行
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]

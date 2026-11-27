@@ -13,7 +13,7 @@ internal sealed class ListScheduledJobRunsEndpoint : IEndpoint
         group.MapGet("/scheduled-jobs/{name}/runs", HandleAsync)
             .Sends<ListScheduledJobRunsQuery>()
             .WithSummary("查询定时任务执行记录")
-            .WithDescription("按开始时间倒序，使用游标分页：将 nextCursor 作为下一页的 after，未返回 nextCursor 表示已到末页。任务声明已移除时，仍可查询历史记录。");
+            .WithDescription("按开始时间倒序游标分页（传 nextCursor 到 after）；任务声明已移除时仍可查询历史记录");
 
     private static async Task<IResult> HandleAsync(
         [Description("任务名，如 Identity.PurgeSessions")] string name,

@@ -1,7 +1,6 @@
 import { Permissions } from '@/generated/permissions';
 import { defineModuleRoutes } from '@/platform/routing';
 
-// 假后端模式下的示例页面
 export const demoRoutes = defineModuleRoutes('demo', [
   {
     name: 'demo.list',

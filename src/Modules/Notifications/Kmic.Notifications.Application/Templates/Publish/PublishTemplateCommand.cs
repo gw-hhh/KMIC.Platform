@@ -4,12 +4,7 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates.Publish;
 
-/// <summary>
-/// 发布指定渠道的模板新版本
-/// </summary>
-/// <remarks>
-/// 发布前用示例数据严格渲染
-/// </remarks>
+/// <summary>发布指定渠道的模板新版本（发布前使用示例数据严格校验）</summary>
 /// <param name="Key">模板键</param>
 /// <param name="Channel">渠道</param>
 /// <param name="Subject">主题</param>

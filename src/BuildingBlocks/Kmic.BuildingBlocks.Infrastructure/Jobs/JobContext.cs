@@ -15,9 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// 一次作业执行的进度、检查点与批次提交
-/// </summary>
+// 单次作业执行的进度、检查点与批次提交上下文
 internal sealed class JobContext(
     JobStore store,
     IExecutionScopeFactory scopes,
@@ -36,10 +34,10 @@ internal sealed class JobContext(
 
     public JobCancellationReason? CancellationReason { get; private set; }
 
-    // 占用已被别的执行者接管：本地停下，不再写任何结果
+    // 占用已被其他执行器接管，立即中止本地执行并不再写入任何结果
     public bool TakenOver { get; private set; }
 
-    // 某一批的提交结果未知：本地停下，不重试这一批，由领取流程按是否可续跑处理
+    // 批次提交结果未知时立即中止，避免重复提交；后续由领取流程按是否支持续跑决定恢复策略
     public bool OutcomeUnknown { get; private set; }
 
     public T? GetCheckpoint<T>()
@@ -48,7 +46,7 @@ internal sealed class JobContext(
 
     public async ValueTask ReportProgressAsync(long done, long? total = null, string? message = null)
     {
-        // 节流只看真实经过的时间
+        // 节流基于真实物理耗时计算
         var now = TimeProvider.System.GetTimestamp();
         if (_lastProgress != long.MinValue && TimeProvider.System.GetElapsedTime(_lastProgress, now) < options.ProgressInterval)
         {
@@ -84,9 +82,7 @@ internal sealed class JobContext(
         }
     }
 
-    /// <summary>
-    /// 框架自己的作业写一页，写入和检查点同一个事务提交
-    /// </summary>
+    // 供框架内置作业使用：单页写入与检查点在同一事务中提交
     public async ValueTask<Result> WritePageAsync(Func<IServiceProvider, CancellationToken, Task> write, object checkpoint, long done)
     {
         ArgumentNullException.ThrowIfNull(write);
@@ -131,7 +127,7 @@ internal sealed class JobContext(
         stop.Cancel();
     }
 
-    // 每一批一个子 span，挂在这次执行的根 span 下面
+    // 每个批次创建独立子 span，挂载于本次作业执行的根 span 下
     private static Activity? StartBatchSpan(long done) => KmicActivities.Messaging.StartActivity("job batch")?.SetTag("kmic.job.done", done);
 
     private (AsyncServiceScope Scope, string Checkpoint) Prepare(object checkpoint, long done)

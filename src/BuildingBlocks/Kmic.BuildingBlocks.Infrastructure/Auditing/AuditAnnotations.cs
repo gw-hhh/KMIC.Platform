@@ -5,9 +5,7 @@ using Microsoft.Extensions.Compliance.Classification;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
 
-/// <summary>
-/// 属性上的审计设置，存在 EF 模型的注解里
-/// </summary>
+// 属性级审计模式（存放在 EF Core 模型注解）
 internal static class AuditAnnotations
 {
     public const string Name = "Kmic:AuditMode";
@@ -20,7 +18,7 @@ internal static class AuditAnnotations
 
     public static string Masked(AuditMask mask) => MaskedPrefix + mask;
 
-    // Internal 完整记录，不需要注解
+    // Internal 级别默认完整记录，无需额外注解
     public static string? For(DataClassification classification)
     {
         if (classification == KmicData.Secret)
@@ -33,7 +31,7 @@ internal static class AuditAnnotations
             return Masked(AuditMask.Personal);
         }
 
-        return classification == KmicData.Internal ? null : throw new ArgumentOutOfRangeException(nameof(classification), classification, "不是 Kmic 的数据分类。");
+        return classification == KmicData.Internal ? null : throw new ArgumentOutOfRangeException(nameof(classification), classification, "不支持的 Kmic 数据分类。");
     }
 
     public static string? ModeOf(IReadOnlyPropertyBase property) => property.FindAnnotation(Name)?.Value as string;

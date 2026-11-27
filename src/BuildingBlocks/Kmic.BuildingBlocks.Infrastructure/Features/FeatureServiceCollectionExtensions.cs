@@ -6,25 +6,18 @@ using Microsoft.FeatureManagement;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Features;
 
-/// <summary>
-/// 功能开关服务注册
-/// </summary>
+/// <summary>功能开关 DI 注册</summary>
 public static class FeatureServiceCollectionExtensions
 {
-    /// <summary>
-    /// 配置节：开关写在 <c>Kmic:Features:{开关名}</c>，值是 true 或 false，也可以用 Feature Management 的过滤器写法
-    /// </summary>
+    /// <summary>配置节名称，开关定义在 Kmic:Features:{开关名}（支持布尔值或 Feature Management 过滤器）</summary>
     public const string Section = "Kmic:Features";
 
-    /// <summary>
-    /// 注册功能开关：值来自配置，改了要重启生效
-    /// </summary>
+    /// <summary>注册功能开关服务（读取部署配置，变更后需重启生效）</summary>
     public static IServiceCollection AddKmicFeatures(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        // 开关名里有点（Sample.NewImport）：Feature Management 要求配置节里每个开关是一个子节，名字含点时按整体当作名字
         services.AddFeatureManagement(configuration.GetSection(Section));
         services.TryAddScoped<IFeatureFlags, FeatureFlags>();
         return services;

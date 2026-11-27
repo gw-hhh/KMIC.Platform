@@ -4,22 +4,14 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 健康检查用的数据库探测，就绪检查和依赖检查共用
-/// </summary>
 internal sealed class DatabaseProbe(IOptions<DatabaseOptions> database) : IDisposable
 {
-    /// <summary>
-    /// 一次探测最多等多久，编排平台的探测不能被拖住
-    /// </summary>
+    // 限制单次探测超时，避免阻塞编排平台探针
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(3);
 
     private readonly Lazy<NpgsqlDataSource> _dataSource = new(() => NpgsqlDataSource.Create(
         new NpgsqlConnectionStringBuilder(database.Value.ConnectionString) { MaxPoolSize = 2, Pooling = true, ApplicationName = "kmic-health" }.ConnectionString));
 
-    /// <summary>
-    /// 执行一条最简单的查询，连不上、超时都会抛出异常
-    /// </summary>
     public async Task PingAsync(CancellationToken ct)
     {
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(ct);

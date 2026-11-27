@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Limits;
 
-/// <summary>
-/// 请求超时：超过时间的请求被取消，返回 504 和统一格式的错误
-/// </summary>
 public sealed class RequestTimeoutTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

@@ -8,10 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// Operations 管理消息用的存储：积压汇总、死信列表与内容、被挡住的键、重试、放弃，在真实 PostgreSQL 上执行。
-/// 同一个类里的测试共用一个库，所以每个测试用自己的消息类型、订阅和顺序键，互不干扰
-/// </summary>
 public sealed class ModuleMessageStoreTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string Module = "Echo";
@@ -71,7 +67,7 @@ public sealed class ModuleMessageStoreTests(ClassDatabase<ProbeTemplate> databas
         plainBacklog.OldestAge.ShouldBeGreaterThanOrEqualTo(TimeSpan.FromHours(2.9));
         plainBacklog.Dead.ShouldBe(2);
         plainBacklog.Abandoned.ShouldBe(1);
-        plainBacklog.BlockedKeys.ShouldBe(0, "没有声明为有序的订阅里，死信不挡别的消息");
+        plainBacklog.BlockedKeys.ShouldBe(0, "非有序订阅中的死信不应阻塞其他消息");
         var orderedAfter = after.Subscriptions.Single(s => string.Equals(s.Subscription, ordered, StringComparison.Ordinal));
         orderedAfter.BlockedKeys.ShouldBe((orderedBefore?.BlockedKeys ?? 0) + 1);
         after.Subscriptions.Select(s => s.Subscription).ShouldBe(after.Subscriptions.Select(s => s.Subscription).Order(StringComparer.Ordinal));
@@ -116,7 +112,7 @@ public sealed class ModuleMessageStoreTests(ClassDatabase<ProbeTemplate> databas
         all.Single(m => m.Id == o1).Subscription.ShouldBeNull();
         inboxOnly.Select(m => m.Id).ShouldBe([i2, i1]);
         outboxOnly.Select(m => m.Id).ShouldBe([o2, o1]);
-        bySubscription.Select(m => m.Id).ShouldBe([i2, i1], "给了订阅就只看收件箱");
+        bySubscription.Select(m => m.Id).ShouldBe([i2, i1], "指定订阅过滤条件时应仅返回收件箱中的记录");
         seen.ShouldBe([i2, o2, i1, o1]);
     }
 
@@ -144,7 +140,7 @@ public sealed class ModuleMessageStoreTests(ClassDatabase<ProbeTemplate> databas
         outboxDetail.Payload.ShouldContain("\"y\"");
         (await Store.GetAsync(MessageBox.Inbox, pending, Ct)).ShouldNotBeNull().State.ShouldBe(DeadMessageState.Other);
         (await Store.GetAsync(MessageBox.Outbox, outboxPending, Ct)).ShouldNotBeNull().State.ShouldBe(DeadMessageState.Other);
-        (await Store.GetAsync(MessageBox.Inbox, outboxDead, Ct)).ShouldBeNull("ID 在另一个箱里");
+        (await Store.GetAsync(MessageBox.Inbox, outboxDead, Ct)).ShouldBeNull("指定消息箱类型与记录所属不匹配时应返回 null");
         (await Store.GetAsync(MessageBox.Inbox, Guid.CreateVersion7(), Ct)).ShouldBeNull();
     }
 
@@ -200,7 +196,7 @@ public sealed class ModuleMessageStoreTests(ClassDatabase<ProbeTemplate> databas
         row.NextAttemptAt.ShouldBeLessThanOrEqualTo(TimeProvider.System.GetUtcNow().AddSeconds(5));
         (await RowAsync(box, pending)).Attempts.ShouldBe(2);
         (await RowAsync(box, done)).Status.ShouldBe(Done);
-        (await Store.RetryAsync(box, [dead], Ct)).Single().Outcome.ShouldBe(MessageActionOutcome.WrongState, "已经不是死信了，不会再改一次");
+        (await Store.RetryAsync(box, [dead], Ct)).Single().Outcome.ShouldBe(MessageActionOutcome.WrongState, "非死信状态的消息不应再次被重试修改");
     }
 
     [Fact]
@@ -220,7 +216,7 @@ public sealed class ModuleMessageStoreTests(ClassDatabase<ProbeTemplate> databas
         row.LastError.ShouldNotBeNull().ShouldContain("对方已经不存在");
         row.LastError.ShouldContain("原来的错误");
         (await RowAsync(MessageBox.Inbox, pending)).Status.ShouldBe(Pending);
-        (await RowAsync(MessageBox.Outbox, outboxDead)).Status.ShouldBe(Dead, "发件箱的死信不能放弃，只能重试");
+        (await RowAsync(MessageBox.Outbox, outboxDead)).Status.ShouldBe(Dead, "发件箱中的死信不允许放弃，应保持死信状态");
         await Should.ThrowAsync<ArgumentException>(async () => await Store.AbandonAsync([dead], " ", Ct));
     }
 

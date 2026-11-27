@@ -12,9 +12,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 执行一次定时任务，前后写执行记录
-/// </summary>
 internal sealed class ScheduledCommandRunner(
     ScheduledTasks tasks, ScheduledJobRuns runs, IExecutionScopeFactory scopes, FrameworkMetrics metrics, ILogger<ScheduledCommandRunner> logger)
 {
@@ -23,7 +20,7 @@ internal sealed class ScheduledCommandRunner(
     {
         var started = TimeProvider.System.GetTimestamp();
 
-        // 每次执行一个根 span（调度器自己有追踪时挂在它下面），先于执行记录开始，记录里的追踪 ID 才是这个 span 的
+        // 为每次任务执行开启独立根追踪 Span（若调度器已有追踪上下文则挂载其下），并在写入执行记录前启动，确保记录中保存正确的追踪 ID
         using var activity = KmicActivities.Messaging.StartActivity($"scheduled {name}", ActivityKind.Internal);
         var id = await runs.StartAsync(name, run, actualFireTime, triggeredBy, instance, Activity.Current?.TraceId.ToString(), ct);
         try
@@ -35,7 +32,7 @@ internal sealed class ScheduledCommandRunner(
         }
         catch (Exception exception)
         {
-            // 命令管道已经把处理器里的异常换成了结果，能到这里的是框架任务的数据库错误、建作用域失败这类问题
+            // 命令管道已将业务处理器异常转换为结果；捕获至此的异常通常为框架任务的数据库异常或作用域创建失败
             metrics.ScheduledJobFinished(name, succeeded: false, TimeProvider.System.GetElapsedTime(started));
             SchedulingLog.RunThrew(logger, exception, name);
             await runs.FinishAsync(id, ScheduledRunStatus.Failed, null, exception.GetType().Name, exception.Message, CancellationToken.None);

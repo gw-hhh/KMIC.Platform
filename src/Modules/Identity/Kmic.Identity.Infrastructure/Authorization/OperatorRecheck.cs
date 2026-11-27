@@ -10,9 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Infrastructure.Authorization;
 
-/// <summary>
-/// 操作者重查：在命令事务里按固定顺序（会话、用户、授予、角色）加共享锁并检查
-/// </summary>
+// 命令事务内按固定顺序对会话、用户、授予和角色加共享锁（FOR SHARE）复核
 internal sealed class OperatorRecheck(IdentityDbContext db, TimeProvider time) : IOperatorRecheck
 {
     public async Task<Result> CheckAsync(IAccessContext access, CancellationToken ct)

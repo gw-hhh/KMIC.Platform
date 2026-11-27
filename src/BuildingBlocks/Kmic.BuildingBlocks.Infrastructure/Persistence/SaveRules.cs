@@ -7,9 +7,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 保存前的规则
-/// </summary>
 internal static class SaveRules
 {
     public static void Apply(DbContext context, IExecutionContext execution, DateTimeOffset now)
@@ -19,7 +16,7 @@ internal static class SaveRules
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted && EntityKinds.IsBusinessEntity(e.Metadata.ClrType))
             .ToList();
 
-        // 软删除放在最前面：删除改成修改后，审计列和版本号才会按一次修改处理
+        // 优先处理软删除：将删除状态转换为修改后，后续审计字段与并发版本号才能按修改操作统一更新
         foreach (var entry in changed.Where(e => e is { State: EntityState.Deleted, Entity: ISoftDeletable }))
         {
             entry.State = EntityState.Modified;
@@ -35,7 +32,7 @@ internal static class SaveRules
 
         foreach (var root in AffectedRoots(context, changed))
         {
-            // 只改了子实体时，聚合根也算修改：版本号加一，修改人和修改时间一起更新
+            // 仅修改子实体时亦视为聚合根变更：同步递增并发版本号并更新修改人与修改时间
             if (root.State == EntityState.Unchanged)
             {
                 root.Property(AuditColumns.UpdatedAt).CurrentValue = now;
@@ -47,7 +44,7 @@ internal static class SaveRules
         }
     }
 
-    // 模拟登录时记实际操作人，系统身份和匿名请求（如登录）记系统用户
+    // 模拟身份操作时记录实际操作人，系统身份及匿名请求（如登录）则记录系统用户
     public static UserId Actor(ICurrentUser user) => user.ActualUserId ?? user.UserId ?? UserId.System;
 
     private static void StampAudit(EntityEntry entry, UserId actor, DateTimeOffset now)
@@ -64,7 +61,7 @@ internal static class SaveRules
         }
     }
 
-    // 新增和删除的聚合根不加版本号：新增的从 0 开始，删除靠 DELETE 条件里的原版本号检查冲突
+    // 新增与物理删除的聚合根不递增版本号：新增记录初始版本为 0，物理删除通过 DELETE 语句中的原版本号条件检测并发冲突
     private static List<EntityEntry> AffectedRoots(DbContext context, List<EntityEntry> changed)
     {
         var roots = new List<EntityEntry>();
@@ -87,13 +84,13 @@ internal static class SaveRules
         {
             current = ParentOf(context, current)
                 ?? throw new InvalidOperationException(
-                    $"{current.Metadata.DisplayName()} 被修改了，但它的聚合根没有被跟踪。子实体要通过仓储读取整个聚合后再修改。");
+                    $"{current.Metadata.DisplayName()} 已被修改，但其聚合根没有被跟踪。子实体须通过仓储读取整个聚合后再行修改。");
         }
 
         return current;
     }
 
-    // 父子关系取自模型里父实体指向子实体的导航，子实体不用另外声明
+    // 依据模型中父实体指向子实体的导航属性识别聚合归属，子实体无需额外声明
     private static EntityEntry? ParentOf(DbContext context, EntityEntry child)
     {
         var foreignKey = child.Metadata.GetForeignKeys().FirstOrDefault(fk => fk.PrincipalToDependent is not null);
@@ -108,7 +105,7 @@ internal static class SaveRules
             && foreignKey.PrincipalKey.Properties.Select(p => e.Property(p.Name).CurrentValue).SequenceEqual(parentKey));
     }
 
-    // 离开集合的子实体在保存前还是 Modified，外键已经被清空，要用原值找到它的聚合根
+    // 从集合移除的子实体在保存前可能处于 Modified 状态且外键已置空，需通过外键原始值追溯其所属聚合根
     private static object? ParentKeyValue(PropertyEntry foreignKey) =>
         foreignKey.EntityEntry.State == EntityState.Deleted || foreignKey.CurrentValue is null ? foreignKey.OriginalValue : foreignKey.CurrentValue;
 }

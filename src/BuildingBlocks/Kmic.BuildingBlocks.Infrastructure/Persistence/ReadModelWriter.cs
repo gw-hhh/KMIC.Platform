@@ -8,9 +8,6 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 读模型写入
-/// </summary>
 internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadModelWriter<T>, IReadModelMaintenance<T>
     where T : class, IReadModel
 {
@@ -52,7 +49,7 @@ internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadMo
         var (context, statement) = Prepare(row);
         await using (statement)
         {
-            // 本地版本不高于扫描版本时覆盖全部字段，否则只记轮次，版本不会倒退
+            // 当本地版本号不高于扫描版本时覆盖全部业务字段；否则仅更新重建轮次，确保版本不回退
             var run = statement.Column(nameof(IReadModel.RebuildRunId));
             var runValue = statement.Parameter(nameof(IReadModel.RebuildRunId), runId);
             var version = statement.Version;
@@ -109,7 +106,7 @@ internal sealed class ReadModelWriter<T>(ModuleWriteContexts contexts) : IReadMo
             var at = statement.Column(nameof(IReadModel.TerminalAt));
             var confirmed = statement.Parameter(nameof(IReadModel.TerminalReason), ReadModelTerminalReason.ConfirmedMissing);
 
-            // 版本也要对得上：选为候选之后被实时事件更新过的行不动
+            // 校验版本号一致性：跳过在选为候选后已被实时事件更新的记录
             var sql = $"""
                 UPDATE {statement.Table} AS r
                 SET {statement.Terminal} = true, {reason} = {confirmed}, {at} = clock_timestamp(), {statement.Synced} = clock_timestamp()

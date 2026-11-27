@@ -3,9 +3,7 @@ using Kmic.Notifications.Domain.Deliveries;
 
 namespace Kmic.Notifications.Domain.Captured;
 
-/// <summary>
-/// 捕获模式下保存的邮件或短信内容，供查看核对
-/// </summary>
+/// <summary>捕获模式下保存的邮件或短信内容，供核对查看</summary>
 public sealed class CapturedMessage : AggregateRoot<CapturedMessageId>
 {
     private CapturedMessage(CapturedMessageId id, DeliveryId deliveryId, DeliveryChannel channel, string address, DeliveryRole role, string subject, string body, DateTimeOffset capturedAt)
@@ -55,9 +53,7 @@ public sealed class CapturedMessage : AggregateRoot<CapturedMessageId>
     /// </summary>
     public DateTimeOffset CapturedAt { get; private set; }
 
-    /// <summary>
-    /// 记录捕获内容
-    /// </summary>
+    /// <summary>记录捕获内容</summary>
     public static CapturedMessage Create(DeliveryId deliveryId, DeliveryChannel channel, string address, DeliveryRole role, string subject, string body, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(channel);

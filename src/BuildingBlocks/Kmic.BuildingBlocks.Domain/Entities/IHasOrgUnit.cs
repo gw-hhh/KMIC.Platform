@@ -2,16 +2,9 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
-/// <summary>
-/// 有所属组织的数据
-/// </summary>
-/// <remarks>
-/// 没同时实现 IHasOwner 时，“仅本人”权限看不到这类数据
-/// </remarks>
+/// <summary>标识数据归属特定组织单元；未同时实现 <see cref="IHasOwner" /> 时，“仅本人”数据权限范围不可访问此类数据。</summary>
 public interface IHasOrgUnit
 {
-    /// <summary>
-    /// 所属组织
-    /// </summary>
+    /// <summary>所属组织单元 ID。</summary>
     OrgUnitId OrgUnitId { get; }
 }

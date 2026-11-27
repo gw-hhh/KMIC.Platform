@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// TicketChanged 路由到 Echo 模块，TicketClosedNotice 没有订阅。各测试按自己的消息 ID 断言
-/// </summary>
 public sealed class OutboxDeliveryTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const string Source = "BuildingBlocks";
@@ -111,7 +108,7 @@ public sealed class OutboxDeliveryTests(ClassDatabase<ProbeTemplate> database) :
         await ExpireLeaseAsync(messageId);
         await DrainAsync();
 
-        // 按保留规则清理：先删来源行，再删 Inbox 里的去重凭证
+        // 模拟按保留策略清理：先删除 Outbox 来源行，再删除 Inbox 去重凭证
         await ExecuteAsync("""DELETE FROM "Probe"."OutboxMessage" WHERE "Id" = @id""", messageId);
         await ExecuteAsync("""DELETE FROM "Echo"."InboxMessage" WHERE "MessageId" = @id""", messageId);
 
@@ -130,7 +127,7 @@ public sealed class OutboxDeliveryTests(ClassDatabase<ProbeTemplate> database) :
 
         (await Dispatcher.DeliverAsync(Source, claimed, token, routes, Ct)).ShouldBe(DeliveryResult.Delivered);
 
-        // 模拟写完 Inbox、标记已投递之前进程停了：占用到期后别的投递者重新投递
+        // 模拟写入 Inbox 后、标记 Outbox 已投递前进程中断：租约到期后由其他投递者重新投递
         await ExecuteAsync("""UPDATE "Probe"."OutboxMessage" SET "Status" = 1, "LeaseUntil" = clock_timestamp() - interval '1 second' WHERE "Id" = @id""", messageId);
         await DrainAsync();
 

@@ -2,9 +2,7 @@ using System.Net;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
-/// <summary>
-/// 假的合作方：按顺序返回给定的状态码，用完后一直返回最后一个
-/// </summary>
+// 按预设顺序返回状态码，耗尽后持续返回最后一个状态码
 internal sealed class FakePartnerServer(params HttpStatusCode[] responses) : HttpMessageHandler
 {
     private int _calls;

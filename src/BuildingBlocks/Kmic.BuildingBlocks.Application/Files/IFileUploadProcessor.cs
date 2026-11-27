@@ -1,16 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Files;
 
-/// <summary>
-/// 处理上传的文件流
-/// </summary>
-/// <remarks>
-/// 不持有数据库事务，调用方前后各用短事务登记文件状态
-/// </remarks>
+/// <summary>上传文件流处理器；不持有数据库事务，调用方须在前后分别通过短事务维护文件状态。</summary>
 public interface IFileUploadProcessor
 {
-    /// <summary>
-    /// 处理上传的文件流
-    /// </summary>
-    /// <returns>写入成功，或没有写入的原因；客户端断开、超时、取消、存储写入失败向上抛异常</returns>
+    /// <summary>处理并写入上传文件流；客户端断开、超时、取消或存储写入失败时抛出异常。</summary>
     Task<UploadResult> StoreAsync(UploadProfile profile, string fileName, Stream content, string key, CancellationToken ct);
 }

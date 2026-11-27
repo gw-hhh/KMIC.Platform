@@ -68,7 +68,7 @@ export function installNavigationGuards(router: Router, deps: RouterDeps): void 
     navigation.start();
     await deps.loginRestored;
 
-    // 没进入系统时只能停在对应的页面
+    // 未就绪状态下仅允许停留在对应的认证引导页
     const forced: Partial<Record<typeof currentUser.status, string>> = {
       anonymous: 'auth.login',
       'password-change-required': 'auth.change-password',
@@ -77,7 +77,7 @@ export function installNavigationGuards(router: Router, deps: RouterDeps): void 
     };
     const target = forced[currentUser.status];
     if (target !== undefined) {
-      // 退出或进不了系统后，下次进入外壳要重新加载偏好、重建工作区，即使还是同一个账号
+      // 退出或未能进入系统时重置就绪标记，确保下次即使同一账号登录也重新加载偏好并重建工作区
       shellReadyFor = null;
       if (to.name === target) {
         return true;

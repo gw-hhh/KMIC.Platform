@@ -7,8 +7,13 @@ import type { KmicError } from '@/platform/api';
 export type Me = components['schemas']['MeResponse'];
 
 /**
- * starting 恢复登录中；anonymous 未登录；ready 已登录；password-change-required 要先改密码；
- * role-unavailable 当前角色失效，要重新选；failed 启动出错
+ * 会话状态：
+ * - starting：正在恢复登录态
+ * - anonymous：未登录
+ * - ready：已就绪
+ * - password-change-required：需先修改密码
+ * - role-unavailable：当前角色不可用，需重新选择
+ * - failed：启动初始化失败
  */
 export type SessionStatus =
   'starting' | 'anonymous' | 'ready' | 'password-change-required' | 'role-unavailable' | 'failed';

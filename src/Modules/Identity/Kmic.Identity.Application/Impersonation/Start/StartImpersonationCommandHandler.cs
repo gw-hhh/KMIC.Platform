@@ -16,9 +16,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Impersonation.Start;
 
-/// <summary>
-/// 创建独立的身份模拟会话
-/// </summary>
 public sealed class StartImpersonationCommandHandler(
     IUserRepository users,
     ISessionRepository sessions,
@@ -32,7 +29,6 @@ public sealed class StartImpersonationCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<StartImpersonationCommand, AuthTokens>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<AuthTokens>> ExecuteAsync(StartImpersonationCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         // 禁止嵌套模拟，确保能明确追溯实际操作人
@@ -59,7 +55,7 @@ public sealed class StartImpersonationCommandHandler(
             return IdentityErrors.ImpersonationDenied.WithDetail(command.RoleId is null ? "目标用户没有可用角色" : "目标用户未获授该角色，或该角色已停用");
         }
 
-        // 能不能写由“模拟身份时允许写入”权限点决定，开始时确定，会话期间不变
+        // 写入权限由“模拟身份时允许写入”权限点决定，创建时确定且会话期间不可变更
         var allowsWrite = allowedActions.For(await UserTargets.BuildAsync(db, target, access, cancellationToken)).Contains(UserAdminAction.ImpersonateWrite.Code, StringComparer.Ordinal);
         var now = time.GetUtcNow();
         var lifetime = sessionOptions.Value.ImpersonationLifetime;
@@ -83,7 +79,7 @@ public sealed class StartImpersonationCommandHandler(
         return new AuthTokens(accessToken.Value, "Bearer", (int)(accessToken.ExpiresAt - now).TotalSeconds, null, PasswordChangeRequired: false);
     }
 
-    // 指定角色须已授予目标用户且启用；未指定时优先用上次角色，不可用时取排序最前的启用角色
+    // 指定角色须已授予目标用户且处于启用状态；未指定时优先沿用上次角色，否则取排序最前的启用角色
     private async Task<Role?> ChooseRoleAsync(User target, RoleId? requested, CancellationToken ct)
     {
         List<RoleId> granted = [.. target.Grants.Select(g => g.RoleId)];

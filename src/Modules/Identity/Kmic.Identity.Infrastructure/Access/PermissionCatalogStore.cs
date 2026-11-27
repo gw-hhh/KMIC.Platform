@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Infrastructure.Access;
 
-/// <summary>
-/// 通过写上下文同步权限点与范围对象目录，与命令共用事务
-/// </summary>
+// 使用写上下文同步目录，与所属命令共用事务
 internal sealed class PermissionCatalogStore(IdentityDbContext context) : IPermissionCatalogStore
 {
     private const long SyncLockKey = 0x4B4D_4943_0003;
@@ -76,7 +74,7 @@ internal sealed class PermissionCatalogStore(IdentityDbContext context) : IPermi
         return (added, touched.Count, gone.Count, renames);
     }
 
-    // 改名保留记录 ID；新编码已存在时跳过改名，旧记录随后按退役规则处理
+    // 重命名保留记录 ID；新编码已存在时跳过，旧记录随后按废弃处理
     private static Dictionary<string, string> RenameInPlace(CatalogContent content, Dictionary<string, PermissionRow> byCode, HashSet<PermissionRow> touched)
     {
         var renames = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -94,7 +92,7 @@ internal sealed class PermissionCatalogStore(IdentityDbContext context) : IPermi
         return renames;
     }
 
-    // 新增或更新有变化的权限声明，重新出现的退役项恢复启用；返回新增数量
+    // 新增或更新变更的权限声明，恢复重新出现的废弃项，返回新增数量
     private int Upsert(CatalogContent content, Dictionary<string, PermissionRow> byCode, HashSet<PermissionRow> touched)
     {
         var added = 0;

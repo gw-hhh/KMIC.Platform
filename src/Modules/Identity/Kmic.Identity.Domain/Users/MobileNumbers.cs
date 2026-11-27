@@ -4,17 +4,10 @@ using Kmic.Identity.Domain.Errors;
 
 namespace Kmic.Identity.Domain.Users;
 
-/// <summary>
-/// 手机号规范化：大陆号码统一加 +86，其他按国际格式校验
-/// </summary>
+/// <summary>手机号规范化：大陆号码统一加 +86，其余按国际格式校验。</summary>
 public static partial class MobileNumbers
 {
-    /// <summary>
-    /// 校验并规范化手机号
-    /// </summary>
-    /// <remarks>
-    /// 大陆号码可带 86、0086 或 +86 前缀
-    /// </remarks>
+    /// <summary>校验并规范化手机号（大陆号码支持 86、0086 或 +86 前缀）。</summary>
     public static Result<string> Normalize(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))

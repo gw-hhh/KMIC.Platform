@@ -6,9 +6,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 写执行记录
-/// </summary>
 internal sealed class ScheduledJobRuns(DataSources dataSources)
 {
     private NpgsqlDataSource Database => dataSources.Transactions(CallOrigin.ScheduledJob);

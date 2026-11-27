@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Application.Execution;
 
 namespace Kmic.BuildingBlocks.Infrastructure.External;
 
-/// <summary>
-/// 命令里不能调用外部系统
-/// </summary>
+// 禁止在命令事务内直接发起外部 HTTP 调用
 internal sealed class ExternalCallGuardHandler : DelegatingHandler
 {
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -24,7 +22,7 @@ internal sealed class ExternalCallGuardHandler : DelegatingHandler
         if (ExecutionScope.CurrentlyInCommand)
         {
             throw new InvalidOperationException(
-                $"命令里不能调用外部系统（{request.Method} {request.RequestUri?.Host}）。在命令里写待办，由后台作业或投递程序在事务之外调用。");
+                $"命令里不能调用外部系统（{request.Method} {request.RequestUri?.Host}）。请在命令中记录待办，由后台作业或投递程序在事务之外调用。");
         }
     }
 }

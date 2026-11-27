@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 集成消息的日志
-/// </summary>
 internal static partial class MessagingLog
 {
     [LoggerMessage(EventId = 2101, Level = LogLevel.Warning, Message = "Delivery of message {MessageId} ({MessageType}) from {Module} failed, attempt {Attempts}")]

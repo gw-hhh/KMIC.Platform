@@ -7,9 +7,6 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Catalog;
 
-/// <summary>
-/// 同步权限及数据范围对象目录
-/// </summary>
 public sealed class SyncPermissionCatalogCommandHandler(
     PermissionCatalog permissions,
     DataScopeObjectCatalog scopeObjects,
@@ -18,7 +15,6 @@ public sealed class SyncPermissionCatalogCommandHandler(
     ISecurityEventWriter securityEvents,
     TimeProvider time) : ICommandHandler<SyncPermissionCatalogCommand, CatalogSyncResult>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CatalogSyncResult>> Handle(SyncPermissionCatalogCommand command, CancellationToken cancellationToken)
     {
         var content = CatalogContent.From(permissions, scopeObjects);

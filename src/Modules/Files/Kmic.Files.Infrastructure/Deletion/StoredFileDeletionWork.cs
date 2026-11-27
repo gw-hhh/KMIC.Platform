@@ -8,9 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Infrastructure.Deletion;
 
-/// <summary>
-/// 处理文件删除队列，在数据库事务之外先删除存储对象，再更新数据库记录
-/// </summary>
+// 处理文件删除队列：在数据库事务外先删除存储对象，再更新数据库记录
 internal sealed class StoredFileDeletionWork(
     IExecutionScopeFactory scopes,
     IFileStorage storage,

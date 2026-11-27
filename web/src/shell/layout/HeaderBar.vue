@@ -44,7 +44,7 @@ const roleMenu = computed<MenuProps>(() => ({
   },
 }));
 
-// 和 Vben 一样，点上级跳到它下面的第一个页面
+// 点击上级面包屑时跳转至其下首个页面
 function targetOf(crumb: CrumbView): string | undefined {
   return crumb.routeName ?? crumb.pages[0]?.routeName;
 }
@@ -156,7 +156,7 @@ function onToggleTheme(event: MouseEvent): void {
     animation: shrink var(--kmic-motion-slow) ease-in-out;
   }
 
-  // 侧栏开关是圆角方块，其余图标按钮是圆形
+  // 侧栏开关采用圆角矩形，其余图标按钮采用圆形
   &.is-square {
     margin-right: 4px;
     border-radius: var(--kmic-radius-md);
@@ -181,7 +181,6 @@ function onToggleTheme(event: MouseEvent): void {
   align-items: center;
 }
 
-// 前一项与箭头隔 6px，箭头与后一项隔 10px
 .separator {
   margin: 0 10px 0 6px;
 }
@@ -210,7 +209,7 @@ function onToggleTheme(event: MouseEvent): void {
   }
 }
 
-// 切换页面时新的面包屑斜着滑入，旧的直接消失
+// 切换页面时新面包屑斜向滑入，旧面包屑直接移除
 .breadcrumb-enter-active {
   transition:
     transform 0.4s cubic-bezier(0.76, 0, 0.24, 1),
@@ -273,7 +272,7 @@ function onToggleTheme(event: MouseEvent): void {
   border-radius: var(--kmic-radius-pill);
 }
 
-// 窄屏只留图标
+// 窄屏下仅保留图标
 @media (width < 768px) {
   .search-button {
     width: 32px;

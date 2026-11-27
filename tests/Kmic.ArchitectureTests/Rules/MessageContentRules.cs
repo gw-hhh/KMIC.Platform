@@ -5,16 +5,9 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.ArchitectureTests.Rules;
 
-/// <summary>
-/// 消息与响应的内容：只出现原始类型、强类型 ID、智能枚举、其他 DTO，不出现领域实体和值对象
-/// </summary>
+// 命令、查询及响应中不得出现 Domain 层的实体与值对象（强类型 ID 与智能枚举除外）
 internal static class MessageContentRules
 {
-    /// <summary>
-    /// 命令、查询和它们的响应里不出现模块 Domain 里的实体、值对象
-    /// </summary>
-    /// <param name="types">要检查的类型，通常是模块 Application 程序集里的全部类型</param>
-    /// <param name="domainAssembly">模块的 Domain 程序集，里面的类型除了强类型 ID 和智能枚举都算领域类型</param>
     public static IReadOnlyList<string> NoDomainTypes(IEnumerable<Type> types, Assembly domainAssembly)
     {
         var problems = new List<string>();

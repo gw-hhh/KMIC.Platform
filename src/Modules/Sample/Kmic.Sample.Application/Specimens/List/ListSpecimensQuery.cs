@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Sample.Application.Specimens.List;
 
-/// <summary>
-/// 查询示例列表
-/// </summary>
+/// <summary>查询示例列表</summary>
 /// <param name="Q">关键字</param>
 /// <param name="Status">状态编码</param>
 /// <param name="Page">分页</param>

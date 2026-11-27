@@ -3,9 +3,7 @@ using Kmic.Notifications.Domain.Deliveries;
 
 namespace Kmic.Notifications.Application.Captured.Get;
 
-/// <summary>
-/// 捕获内容详情
-/// </summary>
+/// <summary>捕获内容详情</summary>
 /// <param name="Id">捕获记录 ID</param>
 /// <param name="DeliveryId">投递 ID</param>
 /// <param name="Channel">渠道</param>

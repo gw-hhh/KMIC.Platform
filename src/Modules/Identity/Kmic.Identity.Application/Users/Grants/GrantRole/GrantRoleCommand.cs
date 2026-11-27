@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.Grants.GrantRole;
 
-/// <summary>
-/// 授予用户一个角色
-/// </summary>
 /// <param name="Id">用户 ID</param>
 /// <param name="ExpectedVersion">用户的预期版本号</param>
 /// <param name="RoleId">角色 ID</param>

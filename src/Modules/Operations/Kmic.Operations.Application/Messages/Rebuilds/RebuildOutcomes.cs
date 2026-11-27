@@ -4,9 +4,6 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
-/// <summary>
-/// 将框架重建结果转换为成功或模块错误
-/// </summary>
 internal static class RebuildOutcomes
 {
     public static Result Of(RebuildAdminOutcome outcome) =>

@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Application.Integration;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// <see cref="IReadModelRebuildAdmin"/> 的实现
-/// </summary>
 internal sealed class RebuildAdmin(SubscriptionCatalog subscriptions, RebuildRunStore runs) : IReadModelRebuildAdmin
 {
     private const int RunsPerModule = 20;

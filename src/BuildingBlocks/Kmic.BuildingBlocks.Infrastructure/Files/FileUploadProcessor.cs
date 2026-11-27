@@ -3,12 +3,9 @@ using Kmic.BuildingBlocks.Application.Observability;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Files;
 
-/// <summary>
-/// 文件上传处理
-/// </summary>
+/// <summary>文件上传处理器</summary>
 public sealed class FileUploadProcessor(IFileStorage storage, FrameworkMetrics metrics) : IFileUploadProcessor
 {
-    /// <inheritdoc />
     public async Task<UploadResult> StoreAsync(UploadProfile profile, string fileName, Stream content, string key, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(profile);

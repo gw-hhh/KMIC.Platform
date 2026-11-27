@@ -17,7 +17,7 @@ public sealed class MessagingWorkerTests(ClassDatabase<ProbeTemplate> database) 
     [Fact]
     public async Task Running_PublishedSnapshotReachesSubscriberWithoutPolling()
     {
-        // 兜底轮询设成很长，能及时处理只能是靠通知唤醒
+        // 将兜底轮询间隔设为较长值，验证消息投递与处理及时性完全依赖通知唤醒机制
         await using var harness = new ProbeHarness(database.ConnectionString, messaging: o => o.PollInterval = TimeSpan.FromMinutes(5));
         await harness.StartHostedServicesAsync(Ct);
         try
@@ -37,7 +37,7 @@ public sealed class MessagingWorkerTests(ClassDatabase<ProbeTemplate> database) 
                     command.Parameters.AddWithValue("id", ticket.Id.Value.ToString());
                     return (long)(await command.ExecuteScalarAsync(ct))! == 1;
                 },
-                "Echo 处理完单据快照",
+                "Echo 完成单据快照处理",
                 TimeSpan.FromSeconds(15),
                 Ct);
         }

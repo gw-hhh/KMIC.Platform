@@ -6,22 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Infrastructure.Persistence;
 
-/// <summary>
-/// Sample 模块的查询上下文，不跟踪实体
-/// </summary>
 internal sealed class SampleQueryDbContext(DbContextOptions<SampleQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), ISampleQueryDb
 {
-    /// <inheritdoc />
     public override string Module => SampleModuleInfo.Name;
 
-    /// <inheritdoc />
     public IQueryable<Specimen> Specimens => Set<Specimen>();
 
-    /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
         configurationBuilder.RegisterAllInSampleIdConverters();
 
-    /// <inheritdoc />
     protected override void ConfigureModel(ModelBuilder modelBuilder) => SampleModel.Configure(modelBuilder);
 }

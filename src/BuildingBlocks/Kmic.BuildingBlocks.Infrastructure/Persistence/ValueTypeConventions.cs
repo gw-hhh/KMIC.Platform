@@ -5,15 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 值类型映射约定
-/// </summary>
-/// <remarks>
-/// 必须在建模之前登记
-/// </remarks>
+// 须在模型构建前注册
 internal static class ValueTypeConventions
 {
-    // 编码列统一 varchar(64)
+    // 智能枚举编码列统一映射为 varchar(64)
     public const int CodeLength = 64;
 
     public static void Register(ModelConfigurationBuilder configurationBuilder, IEnumerable<Assembly> assemblies)
@@ -38,7 +33,7 @@ internal static class ValueTypeConventions
     public static bool IsEnumeration(Type type) =>
         type.BaseType is { IsGenericType: true } baseType && baseType.GetGenericTypeDefinition() == typeof(Enumeration<>);
 
-    // 编码列的全部取值，用于检查约束
+    // 收集枚举的全部有效编码值，用于生成数据库检查约束
     public static IReadOnlyList<string> CodesOf(Type type)
     {
         if (type.IsEnum)

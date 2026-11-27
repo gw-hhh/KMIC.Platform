@@ -24,7 +24,7 @@ public sealed class S3FileStorageTests : FileStorageContractTests, IClassFixture
         new Amazon.Runtime.BasicAWSCredentials(_minio.OptionsFor(_bucket).AccessKeyId, _minio.OptionsFor(_bucket).SecretAccessKey),
         new AmazonS3Config { ServiceURL = _minio.ServiceUrl, ForcePathStyle = true });
 
-    // 每个测试开始前创建自己的桶
+    // 每个测试开始前创建独立的存储桶
     public async ValueTask InitializeAsync()
     {
         using var admin = Admin();
@@ -60,9 +60,9 @@ public sealed class S3FileStorageTests : FileStorageContractTests, IClassFixture
 
         await Storage.DeleteAsync("test/versioned", Ct);
 
-        (await Storage.ExistsAsync("test/versioned", null, Ct)).ShouldBeFalse("当前对象被删除标记覆盖");
-        (await Storage.ExistsAsync("test/versioned", stored.VersionId, Ct)).ShouldBeTrue("旧版本还在，可以还原");
-        (await Storage.ExistsAsync("test/versioned", Guid.CreateVersion7().ToString(), Ct)).ShouldBeFalse("没有这个版本");
+        (await Storage.ExistsAsync("test/versioned", null, Ct)).ShouldBeFalse("当前对象已被删除标记覆盖，不应视为存在");
+        (await Storage.ExistsAsync("test/versioned", stored.VersionId, Ct)).ShouldBeTrue("历史版本仍保留在存储中，应可通过版本号检索");
+        (await Storage.ExistsAsync("test/versioned", Guid.CreateVersion7().ToString(), Ct)).ShouldBeFalse("不存在的版本号应返回 false");
     }
 
     private static ServiceProvider BuildHttp()

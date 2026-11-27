@@ -4,9 +4,6 @@ using Quartz;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// Worker 角色里运行调度器
-/// </summary>
 internal sealed class SchedulerService(ISchedulerFactory schedulers, StartupState startup) : BackgroundService
 {
     private readonly Lock _gate = new();
@@ -16,7 +13,7 @@ internal sealed class SchedulerService(ISchedulerFactory schedulers, StartupStat
     {
         await base.StopAsync(cancellationToken);
 
-        // 两次停机等同一个关闭任务，避免 Quartz 关到一半时容器已被另一次停机释放（测试宿主释放时会同时停两次）
+        // 多次调用停机时复用同一关闭任务，防止测试宿主释放并发起多次停机时提前释放容器
         Task shutdown;
         lock (_gate)
         {

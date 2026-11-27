@@ -5,12 +5,8 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Delete;
 
-/// <summary>
-/// 删除示例
-/// </summary>
 public sealed class DeleteSpecimenCommandHandler(ISpecimenRepository specimens) : ICommandHandler<DeleteSpecimenCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(DeleteSpecimenCommand command, CancellationToken cancellationToken)
     {
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

@@ -6,23 +6,19 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
-/// <summary>
-/// KM0102：Domain 里只能抛参数异常、InvalidOperationException 和 DomainInvariantException
-/// </summary>
+/// <summary>KM0102：领域层仅允许抛出参数异常、InvalidOperationException 和 DomainInvariantException。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainThrowAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM0102",
         Rules.DomainCategory,
-        "领域层不能抛业务异常",
-        "领域层不能抛 {0}，业务失败改为返回 Result",
-        "业务上的失败（如状态不对、余额不足）要返回 Result。只有代码写错时才抛异常：参数传错用 ArgumentException，调用时机不对用 InvalidOperationException，数据出现了不该有的状态用 DomainInvariantException。");
+        "领域层禁止抛出业务异常",
+        "领域层禁止抛出 {0}，业务失败请改为返回 Result",
+        "业务失败（如状态不符、余额不足）应返回 Result。仅在程序缺陷时抛出异常：参数错误用 ArgumentException，调用时机不符用 InvalidOperationException，领域不变量被破坏用 DomainInvariantException。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -46,7 +42,7 @@ public sealed class DomainThrowAnalyzer : DiagnosticAnalyzer
 
     private static void Analyze(OperationAnalysisContext context, ImmutableArray<INamedTypeSymbol?> allowed)
     {
-        // throw; 抛的是原异常，不算新的异常类型
+        // throw; 重新抛出原异常，不视为新增的异常类型
         if (((IThrowOperation)context.Operation).Exception is not { } exception)
         {
             return;

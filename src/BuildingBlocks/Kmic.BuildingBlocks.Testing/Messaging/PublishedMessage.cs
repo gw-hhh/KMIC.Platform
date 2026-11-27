@@ -2,10 +2,8 @@ using Kmic.BuildingBlocks.Application.Integration;
 
 namespace Kmic.BuildingBlocks.Testing.Messaging;
 
-/// <summary>
-/// 写进 Outbox 的一条消息
-/// </summary>
-/// <param name="Message">消息</param>
-/// <param name="Envelope">信封</param>
-/// <param name="CausationId">引发它的消息 ID</param>
+/// <summary>已写入发件箱的消息记录。</summary>
+/// <param name="Message">消息体</param>
+/// <param name="Envelope">消息信封</param>
+/// <param name="CausationId">触发该消息的上游消息 ID</param>
 public sealed record PublishedMessage<T>(T Message, MessageEnvelope Envelope, Guid? CausationId);

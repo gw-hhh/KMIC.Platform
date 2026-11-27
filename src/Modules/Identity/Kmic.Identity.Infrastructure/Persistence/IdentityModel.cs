@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Infrastructure.Persistence;
 
-/// <summary>
-/// 读写上下文共用的实体配置清单
-/// </summary>
 internal static class IdentityModel
 {
     public static void Configure(ModelBuilder modelBuilder) =>

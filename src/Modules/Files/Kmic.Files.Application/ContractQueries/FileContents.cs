@@ -6,12 +6,8 @@ using Kmic.Files.Contracts;
 
 namespace Kmic.Files.Application.ContractQueries;
 
-/// <summary>
-/// 经契约查询确认文件可读，再打开存储流
-/// </summary>
 public sealed class FileContents(IContractQuerySender sender, IFileContentReader reader) : IFileContents
 {
-    /// <inheritdoc />
     public async Task<Result<FileContent>> OpenReadAsync(Guid fileId, CancellationToken ct)
     {
         var located = await sender.SendAsync(new GetReadableFileQuery(fileId), ct);

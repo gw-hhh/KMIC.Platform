@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
-/// <summary>
-/// 在处理器里再发命令，用来验证运行时的拦截
-/// </summary>
+// 在处理器内再发命令，用于验证运行时拦截
 [AllowAuthenticated]
 [AllowSystem]
 [NotAudited("测试")]

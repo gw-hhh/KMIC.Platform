@@ -5,12 +5,8 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Options;
 
-/// <summary>
-/// 分页查询用户选择列表
-/// </summary>
 public sealed class SearchUserOptionsQueryHandler(IIdentityQueryDb db) : IQueryHandler<SearchUserOptionsQuery, PagedResult<UserOption>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<UserOption>>> Handle(SearchUserOptionsQuery query, CancellationToken cancellationToken)
     {
         var users = db.Users.Where(u => u.Kind == UserKind.Normal);

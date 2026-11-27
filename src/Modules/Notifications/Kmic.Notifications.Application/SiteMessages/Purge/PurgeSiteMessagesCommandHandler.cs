@@ -6,13 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Application.SiteMessages.Purge;
 
-/// <summary>
-/// 按保留期清理站内消息
-/// </summary>
 public sealed class PurgeSiteMessagesCommandHandler(ISiteMessageRepository messages, IOptions<NotificationsRetentionOptions> options, TimeProvider time)
     : ICommandHandler<PurgeSiteMessagesCommand, ScheduledJobOutcome>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeSiteMessagesCommand command, CancellationToken cancellationToken)
     {
         var now = time.GetUtcNow();

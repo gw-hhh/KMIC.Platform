@@ -2,19 +2,10 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 
 namespace Kmic.Identity.Domain.Sessions;
 
-/// <summary>
-/// 会话的状态
-/// </summary>
 public sealed class SessionStatus : Enumeration<SessionStatus>
 {
-    /// <summary>
-    /// 未作废；到期后不改状态，由调用方按绝对到期时间判断
-    /// </summary>
     public static readonly SessionStatus Active = new("Active", "有效");
 
-    /// <summary>
-    /// 已作废
-    /// </summary>
     public static readonly SessionStatus Revoked = new("Revoked", "已作废");
 
     private SessionStatus(string code, string name)

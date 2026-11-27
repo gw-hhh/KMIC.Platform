@@ -6,9 +6,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 条件请求：带 ETag 的查询，请求的 If-None-Match 一致时返回 304
-/// </summary>
 internal static class ConditionalEndpoints
 {
     public static readonly Type[] All = [typeof(GetCachedThingEndpoint)];

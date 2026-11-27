@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Identity.Application.Authentication.Logout;
 
-/// <summary>
-/// 退出登录：作废当前会话
-/// </summary>
+/// <summary>退出登录：作废当前会话</summary>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]

@@ -4,8 +4,6 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.GetDetail;
 
-/// <summary>
-/// 查询示例的详情
-/// </summary>
+/// <summary>查询示例详情</summary>
 [RequirePermission(SamplePermissions.View)]
 public sealed record GetSpecimenDetailQuery(SpecimenId Id) : IQuery<SpecimenDetailResponse>;

@@ -6,16 +6,12 @@ using Kmic.Notifications.Domain.SiteMessages;
 
 namespace Kmic.Notifications.Application.SiteMessages.MarkRead;
 
-/// <summary>
-/// 将当前用户的站内消息标为已读
-/// </summary>
 public sealed class MarkSiteMessageReadCommandHandler(ISiteMessageRepository messages, IExecutionContext execution, TimeProvider time)
     : ICommandHandler<MarkSiteMessageReadCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(MarkSiteMessageReadCommand command, CancellationToken cancellationToken)
     {
-        var me = (execution.Access ?? throw new InvalidOperationException("标记已读需要已登录的访问上下文。")).UserId;
+        var me = (execution.Access ?? throw new InvalidOperationException("标记已读需要已登录的用户身份。")).UserId;
         var loaded = await messages.GetForUpdateAsync(command.Id, null, cancellationToken);
         if (loaded.IsFailure || loaded.Value.RecipientUserId != me)
         {

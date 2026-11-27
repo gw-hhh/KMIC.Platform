@@ -5,9 +5,7 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Disable;
 
-/// <summary>
-/// 停用组织单元
-/// </summary>
+/// <summary>停用组织单元</summary>
 /// <param name="ExpectedVersion">组织树的预期版本号</param>
 /// <param name="Id">组织单元 ID</param>
 [RequirePermission(IdentityPermissions.OrgUnitManage)]

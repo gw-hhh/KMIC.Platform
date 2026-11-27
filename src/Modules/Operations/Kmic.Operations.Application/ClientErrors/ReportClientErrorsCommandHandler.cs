@@ -8,16 +8,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Operations.Application.ClientErrors;
 
-/// <summary>
-/// 限流并记录前端上报的错误
-/// </summary>
 public sealed class ReportClientErrorsCommandHandler(
     IExecutionContext execution,
     IClientErrorLimiter limiter,
     IClientErrorLog log,
     IOptions<ClientErrorOptions> options) : ICommandHandler<ReportClientErrorsCommand>
 {
-    /// <inheritdoc />
     public ValueTask<Result> Handle(ReportClientErrorsCommand command, CancellationToken cancellationToken)
     {
         var max = options.Value.MaxPerRequest;

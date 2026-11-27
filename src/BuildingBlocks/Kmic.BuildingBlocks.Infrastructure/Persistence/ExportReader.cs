@@ -9,9 +9,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 在流式池上为导出单独建一个查询上下文
-/// </summary>
 internal sealed class ExportReader<TQueryDb, TQueryContext>(
     IServiceProvider services, DataSources dataSources, IExecutionContext execution, IOptions<JobOptions> options) : IExportReader<TQueryDb>
     where TQueryDb : class
@@ -23,14 +20,14 @@ internal sealed class ExportReader<TQueryDb, TQueryContext>(
         ArgumentNullException.ThrowIfNull(write);
         if (execution.Origin != CallOrigin.BackgroundJob)
         {
-            throw new InvalidOperationException("导出入口只能在后台作业里用：流式连接只有 Worker 有，请求里导出会长时间占着连接。");
+            throw new InvalidOperationException("导出仅限在后台作业中调用（流式连接池仅 Worker 可用，避免在请求中长时间占用连接）。");
         }
 
         var builder = new DbContextOptionsBuilder<TQueryContext>();
         PersistenceServiceCollectionExtensions.AddFrameworkExtensions(services, builder.UseNpgsql(dataSources.Stream));
         await using var context = ActivatorUtilities.CreateInstance<TQueryContext>(services, builder.Options);
 
-        // 多取一行，读到它就说明超了上限
+        // 多读取一行用于判断是否超出最大导出行数限制
         var limit = options.Value.ExportMaxRows;
         long count = 0;
         await foreach (var row in query(context).Take(limit + 1).AsAsyncEnumerable().WithCancellation(ct))

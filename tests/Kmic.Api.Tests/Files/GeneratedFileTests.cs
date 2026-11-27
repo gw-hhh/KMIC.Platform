@@ -17,12 +17,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 模块生成的文件：写入存储并请求登记，登记之后系统能读取内容
-/// </summary>
-/// <remarks>
-/// 发请求的发布器换成记录用的，其余（存储、类型识别、登记处理）都是真的：先看请求里写了什么，再把它交给登记命令
-/// </remarks>
 public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(database, template, storageRoot: _root), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -45,7 +39,7 @@ public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiT
         await using var stream = new MemoryStream(content);
         var written = await generated.WriteAsync(Source, fileName, stream, retention ?? TimeSpan.FromDays(7), Ct);
 
-        // 登记是第二步：成功写入之后，由调用方在命令里做
+        // 登记作为第二步操作，由调用方在存储写入成功后通过命令执行
         if (written.IsSuccess)
         {
             generated.Register(written.Value);
@@ -82,7 +76,7 @@ public sealed class GeneratedFileTests(ClassDatabase<ApiTemplate> database, ApiT
         var (result, sent) = await WriteAsync("../../导出.pdf", bytes, TimeSpan.FromDays(3));
 
         var file = result.ShouldBeSuccess();
-        file.Name.ShouldBe("导出.pdf", "路径部分被去掉");
+        file.Name.ShouldBe("导出.pdf", "文件名中的路径部分应被剥离");
         file.FileType.ShouldBe("pdf");
         file.Size.ShouldBe(bytes.Length);
         var message = sent.ShouldHaveSingleItem().ShouldBeOfType<RegisterGeneratedFile>();

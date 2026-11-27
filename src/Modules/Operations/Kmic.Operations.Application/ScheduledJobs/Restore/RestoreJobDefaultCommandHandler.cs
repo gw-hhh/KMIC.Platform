@@ -7,15 +7,11 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.ScheduledJobs.Restore;
 
-/// <summary>
-/// 恢复定时任务默认设置
-/// </summary>
 public sealed class RestoreJobDefaultCommandHandler(
     IScheduledJobControl control,
     IScheduledJobSettingRepository settings,
     IAfterCommit afterCommit) : ICommandHandler<RestoreJobDefaultCommand, VersionedResponse<ScheduledJobSettingId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<ScheduledJobSettingId>>> Handle(RestoreJobDefaultCommand command, CancellationToken cancellationToken)
     {
         if (!control.IsDeclared(command.JobName))

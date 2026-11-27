@@ -4,12 +4,8 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates.Revert;
 
-/// <summary>
-/// 将通知模板恢复为代码默认内容
-/// </summary>
 public sealed class RevertTemplateCommandHandler(ITemplateRepository templates) : ICommandHandler<RevertTemplateCommand, VersionedResponse<NotificationTemplateId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<NotificationTemplateId>>> Handle(RevertTemplateCommand command, CancellationToken cancellationToken)
     {
         var loaded = await templates.GetByKeyForUpdateAsync(command.Key, command.ExpectedVersion, cancellationToken);

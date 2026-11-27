@@ -18,7 +18,7 @@ import { createAppRouter, installNavigationGuards } from './router';
 import { confirmLeave, confirmReplace } from './workspace-dialogs';
 import './styles/global.scss';
 
-// pnpm dev 用假后端，pnpm dev:api 连真实后端
+// pnpm dev 使用本地 Mock 服务，pnpm dev:api 连接真实后端
 const mock = import.meta.env.VITE_API_MODE === 'mock' ? await import('./dev') : null;
 await mock?.startMock();
 
@@ -65,7 +65,7 @@ app.provide(navigateKey, (name, params) => workspace.open(name, params));
 app.use(router);
 app.mount('#app');
 
-// 启动动画淡出后移除；后台标签页里过渡可能不触发 transitionend，到时间也移除
+// 启动动画淡出后移除；后台标签页可能不触发 transitionend，超时后强制移除
 const loading = document.getElementById('app-loading');
 if (loading !== null) {
   loading.classList.add('is-done');

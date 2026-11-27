@@ -19,7 +19,7 @@ internal sealed class FileReferenceConfiguration : IEntityTypeConfiguration<File
             .IsUnique()
             .MapsToError(CommonErrors.VersionConflict);
 
-        // 按业务对象反查它引用了哪些文件
+        // 支持按业务对象反查所引用的文件
         builder.HasIndex(r => new { r.OwnerModule, r.OwnerType, r.OwnerId });
     }
 }

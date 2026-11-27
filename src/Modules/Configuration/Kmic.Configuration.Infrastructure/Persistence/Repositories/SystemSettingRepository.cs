@@ -24,7 +24,7 @@ internal sealed class SystemSettingRepository(ConfigurationDbContext context)
             return expectedVersion is null ? (SystemSettingValue?)null : CommonErrors.VersionConflict;
         }
 
-        // 未带版本号表示读取时没有设置值，现在已有值则发生了版本冲突
+        // 未指定版本号表示读取时尚未保存值，若当前已存在记录则视为版本冲突
         if (expectedVersion is null)
         {
             return CommonErrors.VersionConflict;

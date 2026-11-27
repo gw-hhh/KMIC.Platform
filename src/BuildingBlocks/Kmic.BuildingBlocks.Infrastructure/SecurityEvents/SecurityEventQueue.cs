@@ -3,9 +3,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 等待写库的安全事件
-/// </summary>
 internal sealed class SecurityEventQueue
 {
     private readonly Channel<SecurityEventRecord> _channel;
@@ -15,7 +12,7 @@ internal sealed class SecurityEventQueue
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        // 用 Wait 模式：只调 TryWrite，满了就返回 false，不会真的等待；DropWrite 模式下满了也返回 true，没法知道有没有丢
+        // 使用 Wait 模式：仅调用 TryWrite，队列满时返回 false 且不阻塞；DropWrite 模式下队满仍返回 true，无法判断是否发生丢弃
         _channel = Channel.CreateBounded<SecurityEventRecord>(new BoundedChannelOptions(options.Value.QueueCapacity)
         {
             FullMode = BoundedChannelFullMode.Wait,
@@ -23,16 +20,10 @@ internal sealed class SecurityEventQueue
         });
     }
 
-    /// <summary>
-    /// 因为队列满了丢弃的事件数
-    /// </summary>
     public long Dropped => Interlocked.Read(ref _dropped);
 
     public ChannelReader<SecurityEventRecord> Reader => _channel.Reader;
 
-    /// <summary>
-    /// 入队，满了返回 false
-    /// </summary>
     public bool TryWrite(SecurityEventRecord record)
     {
         if (_channel.Writer.TryWrite(record))

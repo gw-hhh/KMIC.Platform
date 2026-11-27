@@ -5,12 +5,8 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
-/// <summary>
-/// 查询读模型重建记录
-/// </summary>
 public sealed class ListRebuildsQueryHandler(IReadModelRebuildAdmin rebuilds) : IQueryHandler<ListRebuildsQuery, IReadOnlyList<RebuildItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<RebuildItem>>> Handle(ListRebuildsQuery query, CancellationToken cancellationToken)
     {
         var runs = await rebuilds.ListAsync(cancellationToken);

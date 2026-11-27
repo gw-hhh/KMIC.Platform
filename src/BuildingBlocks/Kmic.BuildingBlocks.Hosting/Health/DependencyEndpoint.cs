@@ -2,9 +2,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 依赖状态端点，只接受直接来自内网的请求
-/// </summary>
+// 仅限内网直连访问的依赖状态端点
 internal static class DependencyEndpoint
 {
     public const string Path = "/health/dependencies";

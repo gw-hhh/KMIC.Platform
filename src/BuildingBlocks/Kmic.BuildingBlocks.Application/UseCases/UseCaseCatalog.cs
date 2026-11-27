@@ -6,32 +6,21 @@ using Kmic.BuildingBlocks.Contracts.Files;
 
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 用例目录，声明缺失或冲突时拒绝启动
-/// </summary>
+/// <summary>用例目录，声明缺失或冲突时拒绝启动。</summary>
 public sealed class UseCaseCatalog
 {
     private readonly FrozenDictionary<Type, UseCase> _byType;
 
     private UseCaseCatalog(IEnumerable<UseCase> useCases) => _byType = useCases.ToFrozenDictionary(u => u.MessageType);
 
-    /// <summary>
-    /// 全部用例
-    /// </summary>
     public IReadOnlyCollection<UseCase> All => _byType.Values;
 
-    /// <summary>
-    /// 从程序集中读取
-    /// </summary>
     public static UseCaseCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
         return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()).Where(t => IsMessage(t) || t.IsDefined(typeof(BypassesDataScopeAttribute), inherit: false)));
     }
 
-    /// <summary>
-    /// 从给定类型中读取，问题汇总后一次报出
-    /// </summary>
     public static UseCaseCatalog Build(IEnumerable<Type> types)
     {
         ArgumentNullException.ThrowIfNull(types);
@@ -57,20 +46,15 @@ public sealed class UseCaseCatalog
         return new UseCaseCatalog(useCases);
     }
 
-    /// <summary>
-    /// 取消息的用例，不在目录里时抛异常
-    /// </summary>
     public UseCase Get(Type messageType) =>
         _byType.TryGetValue(messageType, out var useCase)
             ? useCase
-            : throw new InvalidOperationException($"{messageType.FullName} 不在用例目录中，检查宿主是否注册了它所在的模块。");
+            : throw new InvalidOperationException($"{messageType.FullName} 不在用例目录中，请检查宿主是否已注册其所在模块。");
 
-    /// <summary>
-    /// 取消息的用例，不在目录里时返回空
-    /// </summary>
+    /// <summary>查找消息对应的用例定义，不存在时返回 null。</summary>
     public UseCase? Find(Type messageType) => _byType.GetValueOrDefault(messageType);
 
-    // 既是命令又是查询的类型也要读进来，才能报错
+    // 同时实现命令与查询接口的类型也需纳入扫描，以便统一报告冲突
     private static bool IsMessage(Type type) =>
         type is { IsClass: true, IsAbstract: false } && (IsCommand(type) || IsQuery(type));
 
@@ -92,7 +76,7 @@ public sealed class UseCaseCatalog
         var name = type.FullName ?? type.Name;
         if (KindOf(type) is not { } kind)
         {
-            problems.Add($"{name}：必须是命令或查询之一，不能两者都是。");
+            problems.Add($"{name}：不能同时实现命令与查询接口。");
             return null;
         }
 
@@ -133,7 +117,7 @@ public sealed class UseCaseCatalog
         };
     }
 
-    // 开关名是“模块.功能”，和模块代码一个写法
+    // 开关名格式为“模块.功能”，命名规则与模块编码一致
     private static string? ReadFeatureGate(Type type, string name, List<string> problems)
     {
         if (type.GetCustomAttribute<FeatureGateAttribute>() is not { } gate)
@@ -143,14 +127,14 @@ public sealed class UseCaseCatalog
 
         if (!ModuleCodes.IsValidFeatureName(gate.Name))
         {
-            problems.Add($"{name}：功能开关名 \"{gate.Name}\" 不对，格式是 模块.功能，如 Sample.NewImport。");
+            problems.Add($"{name}：功能开关名 \"{gate.Name}\" 格式无效，须为“模块.功能”，如 Sample.NewImport。");
             return null;
         }
 
         return gate.Name;
     }
 
-    // [BypassesDataScope] 标在处理器上，记到它处理的消息名下
+    // [BypassesDataScope] 标注在处理器上，需关联记录到其处理的消息名下
     private static Dictionary<Type, string> ReadBypasses(IEnumerable<Type> types, List<string> problems)
     {
         var bypasses = new Dictionary<Type, string>();
@@ -188,7 +172,7 @@ public sealed class UseCaseCatalog
                 && (definition == typeof(Mediator.ICommandHandler<,>) || definition == typeof(Mediator.IQueryHandler<,>)))
             .Select(i => i.GetGenericArguments()[0]);
 
-    // 授权声明必须有且只有一种，AllowSystem、AllowWhenPasswordChangeRequired、AllowWhenImpersonationReadOnly 只能和特定声明一起用
+    // 授权声明须有且仅有一种；AllowSystem、AllowWhenPasswordChangeRequired、AllowWhenImpersonationReadOnly 仅可与特定声明组合
     private static AccessDeclaration ReadAccess(Type type, string name, MessageKind kind, List<string> problems)
     {
         var permission = type.GetCustomAttribute<RequirePermissionAttribute>();
@@ -247,7 +231,7 @@ public sealed class UseCaseCatalog
         return new AccessDeclaration(requirement, permission?.Permission, allowSystem, allowWhenPasswordChangeRequired, allowWhenImpersonationReadOnly, contractQuery?.Access);
     }
 
-    // 幂等和审计只能用于命令，读取审计只能用于查询，每个命令都要声明是否审计
+    // 幂等与审计仅限命令，读取审计仅限查询，所有命令均须显式声明是否审计
     private static AuditDeclaration ReadAudit(Type type, string name, MessageKind kind, List<string> problems)
     {
         var audited = type.GetCustomAttribute<AuditedAttribute>();
@@ -263,7 +247,7 @@ public sealed class UseCaseCatalog
                 problems.Add($"{name}：[Idempotent]、[NotIdempotent]、[Audited]、[NotAudited] 只能用于命令。");
             }
 
-            // 模块之间的契约查询只是给业务的下载查询取下载信息，审计记在业务的下载查询上
+            // 模块间契约查询仅用于向业务下载查询提供文件元信息，读取审计由业务下载查询记录
             if (!auditedRead && !Has<ContractQueryAttribute>(type) && ReturnsFileDownload(type))
             {
                 problems.Add($"{name}：返回 FileDownload 的查询必须 [AuditedRead]，每次下载都要留审计记录。");
@@ -279,7 +263,7 @@ public sealed class UseCaseCatalog
 
         if (idempotent && audited is null)
         {
-            problems.Add($"{name}：标了 [Idempotent] 的命令必须 [Audited]。");
+            problems.Add($"{name}：标注 [Idempotent] 的命令必须 [Audited]。");
         }
 
         if (idempotent && notIdempotent)
@@ -295,8 +279,7 @@ public sealed class UseCaseCatalog
         return new AuditDeclaration(idempotent, audited, false);
     }
 
-
-    // 命令按 [Audited] 的 Action 或“模块.命令名”，敏感查询按“模块.查询名”
+    // 命令取 [Audited].Action 或“模块.命令名”，敏感查询取“模块.查询名”
     private static string? AuditActionOf(AuditDeclaration audit, string module, Type type)
     {
         if (audit.Audited is { } audited)

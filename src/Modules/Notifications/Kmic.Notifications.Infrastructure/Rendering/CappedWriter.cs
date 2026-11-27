@@ -2,9 +2,6 @@ using System.Text;
 
 namespace Kmic.Notifications.Infrastructure.Rendering;
 
-/// <summary>
-/// 限制模板输出长度和渲染用时的文本写入器
-/// </summary>
 internal sealed class CappedWriter(int maxChars, TimeSpan timeout, TimeProvider time) : TextWriter
 {
     private readonly StringBuilder _text = new();

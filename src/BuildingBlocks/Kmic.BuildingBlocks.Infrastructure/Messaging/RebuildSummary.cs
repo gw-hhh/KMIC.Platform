@@ -1,10 +1,4 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 重建作业的结果摘要
-/// </summary>
-/// <param name="Scanned">扫描的行数</param>
-/// <param name="MarkedGone">源端确认已不存在、置为终态的行数</param>
-/// <param name="Missing">收尾时源端找不到的行数</param>
-/// <param name="AwaitingConfirmation">是否因为找不到的行太多而暂停</param>
+// 重建作业结果摘要（MarkedGone 为已标记消失数，Missing 为收尾时源端缺失总数）
 internal sealed record RebuildSummary(long Scanned, long MarkedGone, long Missing, bool AwaitingConfirmation);

@@ -3,20 +3,11 @@ using Kmic.BuildingBlocks.Presentation.Limits;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 映射模块端点
-/// </summary>
 public static class EndpointRouteBuilderExtensions
 {
-    /// <summary>
-    /// API 版本路由组的前缀
-    /// </summary>
     public const string ApiV1 = "/api/v1";
 
-    /// <summary>
-    /// 为每个注册的模块建路由组并映射它的全部端点
-    /// </summary>
-    /// <returns>版本路由组，宿主可以在上面追加全局设置</returns>
+    /// <summary>为已注册模块创建路由组并映射全部端点</summary>
     public static RouteGroupBuilder MapKmicEndpoints(this IEndpointRouteBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);

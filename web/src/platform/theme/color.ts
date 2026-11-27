@@ -8,7 +8,7 @@ export function formatHsl({ h, s, l }: Hsl): string {
   return `hsl(${String(h)} ${String(s)}% ${String(l)}%)`;
 }
 
-/** 带不透明度，percent 为 0～100 */
+/** 格式化带透明度的 HSL 颜色值，percent 取值范围为 0～100 */
 export function formatHslAlpha({ h, s, l }: Hsl, percent: number): string {
   return `hsl(${String(h)} ${String(s)}% ${String(l)}% / ${String(percent)}%)`;
 }
@@ -33,7 +33,7 @@ function luminance(color: Hsl): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-/** WCAG 对比度，文字至少要 4.5 */
+/** 计算 WCAG 对比度（正文文本需不低于 4.5） */
 export function contrastRatio(a: Hsl, b: Hsl): number {
   const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
   return (light + 0.05) / (dark + 0.05);

@@ -9,16 +9,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Authentication.GetMe;
 
-/// <summary>
-/// 查询当前用户及授权信息
-/// </summary>
 public sealed class GetMeQueryHandler(IIdentityQueryDb db, IExecutionContext execution, IOptions<BusinessTimeOptions> businessTime)
     : IQueryHandler<GetMeQuery, MeResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<MeResponse>> Handle(GetMeQuery query, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("查询当前用户需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("查询当前用户需要已登录的用户身份。");
         var user = await db.Users
             .Where(u => u.Id == access.UserId)
             .Select(u => new { u.Account, u.DisplayName, u.EnglishName, u.OrgUnitId, u.PasswordHash, RoleIds = u.Grants.Select(g => g.RoleId).ToList() })

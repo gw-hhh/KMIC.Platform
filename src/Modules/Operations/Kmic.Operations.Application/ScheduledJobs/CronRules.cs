@@ -4,24 +4,13 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.ScheduledJobs;
 
-/// <summary>
-/// 定时任务的 Cron 校验规则
-/// </summary>
 internal static class CronRules
 {
-    /// <summary>
-    /// 最小触发间隔，限制高频调度的数据库负载
-    /// </summary>
+    // 最小触发间隔，避免高频调度加重数据库负载
     public static readonly TimeSpan MinimumInterval = TimeSpan.FromMinutes(1);
 
-    /// <summary>
-    /// 预览触发次数上限
-    /// </summary>
     public const int PreviewCount = 5;
 
-    /// <summary>
-    /// 校验 Cron 格式、后续触发时间和最小触发间隔
-    /// </summary>
     public static Result Check(CronPreview preview, string path)
     {
         ArgumentNullException.ThrowIfNull(preview);

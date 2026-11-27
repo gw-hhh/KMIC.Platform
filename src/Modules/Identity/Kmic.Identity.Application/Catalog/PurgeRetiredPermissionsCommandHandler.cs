@@ -6,16 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Catalog;
 
-/// <summary>
-/// 清理超过保留期的退役权限及数据范围配置
-/// </summary>
 public sealed class PurgeRetiredPermissionsCommandHandler(
     IPermissionCatalogStore store,
     IRoleRepository roles,
     IOptions<CatalogOptions> options,
     TimeProvider time) : ICommandHandler<PurgeRetiredPermissionsCommand, ScheduledJobOutcome>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeRetiredPermissionsCommand command, CancellationToken cancellationToken)
     {
         var cutoff = time.GetUtcNow() - options.Value.RetiredRetention;

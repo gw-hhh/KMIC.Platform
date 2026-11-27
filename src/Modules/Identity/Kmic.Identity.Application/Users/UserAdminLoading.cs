@@ -6,14 +6,9 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users;
 
-/// <summary>
-/// 用户管理命令共用的加载与授权检查
-/// </summary>
+// 用户管理命令共用的加锁加载与资源策略鉴权（指定版本号时校验乐观锁）
 internal static class UserAdminLoading
 {
-    /// <summary>
-    /// 加载目标用户并按资源策略授权，指定版本号时校验版本
-    /// </summary>
     public static async Task<Result<User>> LoadForAsync(
         IUserRepository users,
         IIdentityReads db,
@@ -24,7 +19,7 @@ internal static class UserAdminLoading
         IAccessContext access,
         CancellationToken ct)
     {
-        // 禁用前串行检查受保护角色持有人，避免并发禁用后失去最后一位可登录的持有人
+        // 禁用前加串行锁，防止并发禁用最后一位可登录的受保护角色持有人
         if (action == UserAdminAction.Disable)
         {
             await users.LockProtectedHolderChecksAsync(ct);

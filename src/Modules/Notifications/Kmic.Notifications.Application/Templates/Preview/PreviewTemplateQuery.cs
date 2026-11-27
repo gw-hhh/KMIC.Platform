@@ -5,9 +5,7 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates.Preview;
 
-/// <summary>
-/// 预览一段模板内容的渲染结果，不保存
-/// </summary>
+/// <summary>预览模板渲染结果（不保存）</summary>
 /// <param name="Key">模板键</param>
 /// <param name="Channel">渠道</param>
 /// <param name="Subject">主题</param>

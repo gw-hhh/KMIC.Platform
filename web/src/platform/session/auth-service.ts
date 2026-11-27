@@ -67,7 +67,7 @@ export function createAuthService({ api, session, currentUser }: AuthServiceOpti
       try {
         await api.POST('/api/v1/identity/auth/logout');
       } finally {
-        // 请求失败也退出
+        // 即使服务端注销请求失败，仍强制清理本地会话
         session.expire();
       }
     },

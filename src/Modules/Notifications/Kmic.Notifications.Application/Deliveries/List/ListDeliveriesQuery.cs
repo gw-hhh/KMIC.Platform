@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Notifications.Application.Deliveries.List;
 
-/// <summary>
-/// 查询投递记录
-/// </summary>
+/// <summary>查询投递记录</summary>
 /// <param name="RecipientUserId">按收件用户筛选</param>
 /// <param name="Channel">按渠道筛选：Email、Sms</param>
 /// <param name="Status">按状态筛选：Pending、Sending、Sent、Failed、Skipped、Captured</param>

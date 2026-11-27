@@ -1,8 +1,5 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 新的幂等记录
-/// </summary>
 internal sealed record NewIdempotencyRecord
 {
     public required Guid Id { get; init; }

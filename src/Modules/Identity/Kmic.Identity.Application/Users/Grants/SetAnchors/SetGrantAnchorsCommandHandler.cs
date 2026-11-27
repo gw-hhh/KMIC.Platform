@@ -10,9 +10,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Grants.SetAnchors;
 
-/// <summary>
-/// 替换角色授予的组织锚点
-/// </summary>
 public sealed class SetGrantAnchorsCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -21,7 +18,6 @@ public sealed class SetGrantAnchorsCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<SetGrantAnchorsCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(SetGrantAnchorsCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await GrantLoading.LoadForAsync(users, db, authorizer, command.Id, command.ExpectedVersion, command.RoleId, GrantAction.SetAnchors, access, cancellationToken);

@@ -8,17 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 游标分页：按“排序键 + ID”往后翻，不数总数
-/// </summary>
+/// <summary>游标分页扩展：按“排序键 + ID”向后推进，不统计总数。</summary>
 public static class CursorQueryableExtensions
 {
-    /// <summary>
-    /// 取一页
-    /// </summary>
-    /// <typeparam name="T">列表项</typeparam>
-    /// <typeparam name="TKey">排序键类型</typeparam>
-    /// <typeparam name="TId">强类型 ID</typeparam>
+    /// <summary>获取游标分页数据。</summary>
     public static Task<Result<CursorPage<T>>> ToCursorPageAsync<T, TKey, TId>(
         this IQueryable<T> source,
         CursorRequest request,
@@ -31,11 +24,7 @@ public static class CursorQueryableExtensions
         where TId : struct, IStronglyTypedId, IComparable<TId> =>
         ToCursorPageCoreAsync(source, request, protector, key, id, descending, StronglyTypedIds<TId>.FromGuid, value => value.Value, ct);
 
-    /// <summary>
-    /// 取一页，行的 ID 是 Guid：给原生 SQL 映射的只读行类型用，它们不走强类型 ID 的值转换
-    /// </summary>
-    /// <typeparam name="T">列表项</typeparam>
-    /// <typeparam name="TKey">排序键类型</typeparam>
+    /// <summary>按 Guid ID 执行游标分页，适用于原生 SQL 映射的只读行类型。</summary>
     public static Task<Result<CursorPage<T>>> ToCursorPageAsync<T, TKey>(
         this IQueryable<T> source,
         CursorRequest request,
@@ -96,7 +85,7 @@ public static class CursorQueryableExtensions
         return new CursorPage<T>(items, next);
     }
 
-    // (key, id) 排在游标行之后：倒序是更小，正序是更大。键相同时比 ID
+    // 定位游标之后的记录：降序取更小值，升序取更大值；排序键相同时比较 ID
     private static Expression<Func<T, bool>> After<T, TKey, TId>(Expression<Func<T, TKey>> key, Expression<Func<T, TId>> id, TKey lastKey, TId lastId, bool descending)
         where TKey : struct
         where TId : struct, IComparable<TId>
@@ -155,21 +144,21 @@ public static class CursorQueryableExtensions
             return ok;
         }
 
-        throw new NotSupportedException($"游标分页不支持 {typeof(TKey).Name} 作为排序键，请用 DateTimeOffset、DateTime、int 或 long。");
+        throw new NotSupportedException($"游标分页不支持 {typeof(TKey).Name} 作为排序键，请使用 DateTimeOffset、DateTime、int 或 long。");
     }
 
-    // 把选择器里的参数换成同一个参数，两个选择器才能合进一个谓词，EF 才翻译得了
+    // 统一两个选择器的参数表达式，便于合并谓词并由 EF 翻译
     private sealed class ParameterReplacer(ParameterExpression replacement) : ExpressionVisitor
     {
         protected override Expression VisitParameter(ParameterExpression node) => replacement;
     }
 
-    // 强类型 ID 由 Vogen 生成，有静态的 From(Guid)；游标里存的是 Guid，翻页时要变回强类型 ID 才能和列比较
+    // 强类型 ID 由 Vogen 生成，具备静态方法 From(Guid)；游标中保存 Guid，翻页时须还原为强类型 ID 以匹配列类型
     private static class StronglyTypedIds<TId>
         where TId : struct, IStronglyTypedId
     {
         public static readonly Func<Guid, TId> FromGuid = typeof(TId).GetMethod("From", BindingFlags.Public | BindingFlags.Static, [typeof(Guid)])
             ?.CreateDelegate<Func<Guid, TId>>()
-            ?? throw new InvalidOperationException($"{typeof(TId).Name} 没有 From(Guid) 静态方法，游标分页要求强类型 ID 由 Vogen 生成。");
+            ?? throw new InvalidOperationException($"{typeof(TId).Name} 缺少 From(Guid) 静态方法，游标分页要求强类型 ID 由 Vogen 生成。");
     }
 }

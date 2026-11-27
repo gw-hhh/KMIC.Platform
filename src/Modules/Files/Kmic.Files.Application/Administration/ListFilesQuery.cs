@@ -5,9 +5,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 查询文件元数据列表，不含内容和存储键
-/// </summary>
+/// <summary>查询文件元数据列表，不含内容和存储键</summary>
 /// <param name="Q">文件名搜索关键字</param>
 /// <param name="Status">状态编码</param>
 /// <param name="Profile">上传配置标识</param>

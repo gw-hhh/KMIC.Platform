@@ -8,9 +8,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Http;
 
-/// <summary>
-/// 不经过 Result、由中间件或框架产生的错误，格式与业务错误一致
-/// </summary>
 public sealed class ErrorHandlingTests : IAsyncLifetime
 {
     private ApiHost _api = null!;

@@ -4,9 +4,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 连接池
-/// </summary>
 internal sealed class DataSources : IAsyncDisposable
 {
     private readonly NpgsqlDataSource _apiTransactions;
@@ -31,13 +28,11 @@ internal sealed class DataSources : IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// 流式池，导出用
-    /// </summary>
+    // 导出用流式连接池
     public NpgsqlDataSource Stream =>
         _workerStream ?? throw new InvalidOperationException("没有配置流式池（Kmic:Database:Worker:StreamMaxPoolSize）。");
 
-    // 只有 HTTP 请求用前台池。Contracts 调用沿用入口的来源，入口不会是 ModuleCall
+    // 仅 HTTP 请求使用前台连接池；Contracts 模块间调用沿用初始入口来源（不会以 ModuleCall 作为根入口）
     public NpgsqlDataSource Transactions(CallOrigin entry) => entry == CallOrigin.Http ? _apiTransactions : _workerTransactions;
 
     public NpgsqlDataSource Reads(CallOrigin entry) => entry == CallOrigin.Http ? _apiReads : _workerReads;
@@ -63,7 +58,7 @@ internal sealed class DataSources : IAsyncDisposable
 
         var connection = new NpgsqlConnectionStringBuilder(connectionString);
 
-        // 关闭自动预编译：数据权限条件要按实际参数值做执行计划才用得上索引，预编译的通用计划会退化成全表扫描
+        // 禁用自动预编译：数据权限条件需根据实际参数值生成执行计划以命中索引，通用预编译计划可能退化为全表扫描
         return connection.MaxAutoPrepare == 0
             ? connection
             : throw new InvalidOperationException("连接串里的 Max Auto Prepare 必须为 0。");

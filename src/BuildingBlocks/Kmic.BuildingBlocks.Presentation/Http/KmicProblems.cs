@@ -4,12 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 生成 ProblemDetails
-/// </summary>
-/// <remarks>
-/// 扩展字段只输出白名单，Error.Metadata 里的其他键不输出
-/// </remarks>
+// 仅输出白名单扩展字段，自动过滤 Error.Metadata 中的内部键
 internal static class KmicProblems
 {
     public const string CodeKey = "code";
@@ -21,15 +16,9 @@ internal static class KmicProblems
 
     private const string TypePrefix = "urn:kmic:error:";
 
-    /// <summary>
-    /// 错误里声明的等待秒数，没有声明或不是正整数时为空
-    /// </summary>
     public static int? RetryAfterSecondsOf(Error error) =>
         error.Metadata.TryGetValue(ErrorMetadataKeys.RetryAfterSeconds, out var value) && value is int seconds and > 0 ? seconds : null;
 
-    /// <summary>
-    /// 链路追踪 ID，和响应头 X-Trace-Id 相同
-    /// </summary>
     public static string TraceIdOf(HttpContext http) =>
         Activity.Current is { IdFormat: ActivityIdFormat.W3C } activity ? activity.TraceId.ToString() : http.TraceIdentifier;
 
@@ -46,10 +35,10 @@ internal static class KmicProblems
         ErrorType.PayloadTooLarge => StatusCodes.Status413PayloadTooLarge,
         ErrorType.UnsupportedMediaType => StatusCodes.Status415UnsupportedMediaType,
         ErrorType.Gone => StatusCodes.Status410Gone,
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "没有为这种错误类型定义状态码。"),
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "未为该错误类型定义对应的 HTTP 状态码。"),
     };
 
-    // 错误自己声明了 retryable 就用它；没有声明时，暂时不可用和请求过于频繁的错误可以重试
+    // 优先采用错误元数据声明的 retryable；未显式声明时，仅 Unavailable 与 TooManyRequests 允许重试
     public static bool IsRetryable(Error error) =>
         error.Metadata.TryGetValue(ErrorMetadataKeys.Retryable, out var value) && value is bool declared
             ? declared

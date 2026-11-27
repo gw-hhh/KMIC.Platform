@@ -3,9 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 文件存储（本地目录或对象存储），没有登记文件存储的部署跳过
-/// </summary>
+// 文件存储依赖检查（未启用文件存储时视为健康）
 internal sealed class FileStorageDependencyCheck(IServiceProvider services) : IHealthCheck
 {
     private const string ProbePrefix = "health-probe/";
@@ -14,10 +12,10 @@ internal sealed class FileStorageDependencyCheck(IServiceProvider services) : IH
     {
         if (services.GetService(typeof(IFileStorage)) is not IFileStorage storage)
         {
-            return HealthCheckResult.Healthy("没有启用文件存储");
+            return HealthCheckResult.Healthy("未启用文件存储");
         }
 
-        // 列举一个不存在的前缀：能返回（哪怕是空）就说明存储可以连接、凭据有效
+        // 列举不存在的前缀：能正常返回（包括空结果）即表明存储可连接且凭据有效
         await foreach (var unused in storage.ListAsync(ProbePrefix, cancellationToken))
         {
             break;

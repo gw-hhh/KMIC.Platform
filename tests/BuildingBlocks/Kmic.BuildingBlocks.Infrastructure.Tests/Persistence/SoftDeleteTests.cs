@@ -59,7 +59,7 @@ public sealed class SoftDeleteTests(ClassDatabase<ProbeTemplate> database) : ICl
         (await work.Query.Tickets.AnyAsync(t => t.Id == ticket.Id, Ct)).ShouldBeFalse();
         (await work.Query.Tickets.IgnoreQueryFilters([QueryFilters.SoftDelete]).AnyAsync(t => t.Id == ticket.Id, Ct)).ShouldBeTrue();
 
-        // 回收站只关掉软删除过滤，别人的数据仍然看不到
+        // 回收站查询仅关闭软删除过滤，数据范围过滤仍生效，无法查看他人数据
         await using var stranger = _harness.Begin(TestIdentity.User("丙").InTree(_org).InOrgUnit(_org["总部"]));
         (await stranger.Query.Tickets.IgnoreQueryFilters([QueryFilters.SoftDelete]).AnyAsync(t => t.Id == ticket.Id, Ct)).ShouldBeFalse();
     }

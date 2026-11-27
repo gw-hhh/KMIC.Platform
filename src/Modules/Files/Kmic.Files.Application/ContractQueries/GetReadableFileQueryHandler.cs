@@ -8,12 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Application.ContractQueries;
 
-/// <summary>
-/// 查询系统读取文件所需的信息
-/// </summary>
 public sealed class GetReadableFileQueryHandler(IFilesQueryDb db) : IQueryHandler<GetReadableFileQuery, FileDownload>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<FileDownload>> Handle(GetReadableFileQuery query, CancellationToken cancellationToken)
     {
         var id = StoredFileId.From(query.FileId);

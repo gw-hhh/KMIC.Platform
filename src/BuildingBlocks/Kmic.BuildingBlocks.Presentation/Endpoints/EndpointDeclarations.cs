@@ -4,12 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 端点声明的启动校验
-/// </summary>
+// 启动期校验端点声明，避免路由歧义或权限配置遗漏到运行时才暴露
 internal static partial class EndpointDeclarations
 {
-    // 允许匿名的消息和端点只能在认证模块里
+    // 允许匿名访问的消息与端点仅限于认证模块（Identity）
     private const string AnonymousModule = "Identity";
 
     public static IReadOnlyList<string> Check(IEnumerable<RouteEndpoint> endpoints, UseCaseCatalog catalog)
@@ -32,7 +30,7 @@ internal static partial class EndpointDeclarations
         switch (sends.Count)
         {
             case 0:
-                problems.Add($"{name}：没有声明 .Sends<T>()。每个端点要声明它发送的消息。");
+                problems.Add($"{name}：没有声明 .Sends<T>()。每个端点须声明所发送的消息。");
                 return;
             case > 1:
                 problems.Add($"{name}：声明了 {sends.Count} 个 .Sends<T>()，一个端点只能发送一个消息。");
@@ -42,7 +40,7 @@ internal static partial class EndpointDeclarations
         var messageType = sends[0].MessageType;
         if (catalog.Find(messageType) is not { } useCase)
         {
-            problems.Add($"{name}：发送的 {messageType.FullName} 不在用例目录中，检查宿主是否注册了它所在的模块。");
+            problems.Add($"{name}：发送的 {messageType.FullName} 不在用例目录中，请检查宿主是否已注册其所在模块。");
             return;
         }
 
@@ -54,10 +52,10 @@ internal static partial class EndpointDeclarations
         switch (useCase.Requirement)
         {
             case AccessRequirement.SystemOnly:
-                problems.Add($"{name}：{useCase.MessageType.Name} 标了 [SystemOnly]，只给后台作业和定时任务使用，不能由端点发送。");
+                problems.Add($"{name}：{useCase.MessageType.Name} 已标注 [SystemOnly]，仅限后台作业与定时任务使用，不可通过端点发送。");
                 return;
             case AccessRequirement.ContractQuery:
-                problems.Add($"{name}：{useCase.MessageType.Name} 标了 [ContractQuery]，只给其他模块通过 Contracts 调用，不能由端点发送。");
+                problems.Add($"{name}：{useCase.MessageType.Name} 已标注 [ContractQuery]，仅限其他模块通过 Contracts 调用，不可通过端点发送。");
                 return;
         }
 
@@ -66,8 +64,8 @@ internal static partial class EndpointDeclarations
         if (messageAnonymous != endpointAnonymous)
         {
             problems.Add(messageAnonymous
-                ? $"{name}：{useCase.MessageType.Name} 标了 [AllowAnonymous]，端点也要 .AllowAnonymous()。"
-                : $"{name}：端点 .AllowAnonymous()，但 {useCase.MessageType.Name} 没有标 [AllowAnonymous]。");
+                ? $"{name}：{useCase.MessageType.Name} 标注了 [AllowAnonymous]，端点也须调用 .AllowAnonymous()。"
+                : $"{name}：端点调用了 .AllowAnonymous()，但 {useCase.MessageType.Name} 未标注 [AllowAnonymous]。");
         }
         else if (messageAnonymous && !string.Equals(useCase.Module, AnonymousModule, StringComparison.Ordinal))
         {
@@ -75,7 +73,7 @@ internal static partial class EndpointDeclarations
         }
     }
 
-    // 两个端点的方法与路径相同，路由要到第一次请求匹配时才报“多个端点匹配”
+    // 若两个端点的方法与路径相同，默认直到首次请求匹配时才触发歧义异常，需在启动期提前拦截
     private static void CheckDuplicateRoutes(List<RouteEndpoint> endpoints, List<string> problems)
     {
         var duplicates = endpoints
@@ -94,7 +92,7 @@ internal static partial class EndpointDeclarations
     private static string Describe(RouteEndpoint endpoint) =>
         $"端点 {string.Join('/', MethodsOf(endpoint))} {endpoint.RoutePattern.RawText}";
 
-    // 路径里的参数名不参与匹配，{id} 和 {sampleId} 是同一个路由；约束写法（{id:guid}）同样归一
+    // 路由匹配忽略参数名与约束（如 {id}、{sampleId}、{id:guid} 视为同一路由），需先归一化再判重
     [GeneratedRegex(@"\{[^}]+\}", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 100)]
     private static partial Regex RouteParameter();
 }

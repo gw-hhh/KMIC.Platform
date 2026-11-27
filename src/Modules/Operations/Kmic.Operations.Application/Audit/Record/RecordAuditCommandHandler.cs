@@ -8,12 +8,8 @@ using Kmic.Operations.Domain.Audit;
 
 namespace Kmic.Operations.Application.Audit.Record;
 
-/// <summary>
-/// 保存审计记录
-/// </summary>
 public sealed class RecordAuditCommandHandler(IAuditRepository audits) : ICommandHandler<RecordAuditCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(RecordAuditCommand command, CancellationToken cancellationToken)
     {
         var audit = command.Audit;

@@ -26,18 +26,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Identity.Infrastructure;
 
-/// <summary>
-/// Identity 模块的服务端注册类
-/// </summary>
 public sealed class IdentityModule : IModule
 {
-    /// <inheritdoc />
     public string Name => IdentityModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(IIdentityQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -57,7 +51,7 @@ public sealed class IdentityModule : IModule
         services.AddScoped<IOrgUnitReferences, OrgUnitReferences>();
         services.AddScoped<IUserContacts, UserContacts>();
 
-        // 框架的业务历史查询用它取人员和角色的显示名
+        // 供框架业务历史查询获取人员与角色显示名
         services.AddScoped<IActorReferences, ActorReferences>();
 
         // 加载器为单例，每次查询独立创建作用域，供请求和后台作业共用
@@ -77,13 +71,12 @@ public sealed class IdentityModule : IModule
         services.AddSingleton<TemporaryPasswordGenerator>();
     }
 
-    /// <inheritdoc />
     public void ConfigureScheduling(ISchedulingBuilder scheduling)
     {
         ArgumentNullException.ThrowIfNull(scheduling);
 
         scheduling.Schedule("Identity.PurgeSessions", "0 30 3 * * ?", run => new PurgeSessionsCommand(run.ScheduledFireTime), o => o.DisplayName("清理已结束的会话"));
-        scheduling.Schedule("Identity.PurgeRetiredPermissions", "0 0 5 ? * SUN", run => new PurgeRetiredPermissionsCommand(run.ScheduledFireTime), o => o.DisplayName("清理退役的权限点"));
+        scheduling.Schedule("Identity.PurgeRetiredPermissions", "0 0 5 ? * SUN", run => new PurgeRetiredPermissionsCommand(run.ScheduledFireTime), o => o.DisplayName("清理已废弃的权限点"));
         scheduling.Schedule("Identity.PurgeLoginThrottle", "0 0 4 * * ?", run => new PurgeLoginThrottleCommand(run.ScheduledFireTime), o => o.DisplayName("清理登录失败计数"));
     }
 }

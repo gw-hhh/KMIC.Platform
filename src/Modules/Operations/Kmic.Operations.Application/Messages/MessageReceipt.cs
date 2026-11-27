@@ -2,11 +2,9 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages;
 
-/// <summary>
-/// 消息重试或放弃结果，各条结果独立，单条失败不影响其他消息
-/// </summary>
+/// <summary>消息重试或放弃结果（各条独立，单条失败不影响其他消息）。</summary>
 /// <param name="Module">所在模块</param>
-/// <param name="Box">在发件箱还是收件箱</param>
+/// <param name="Box">所属消息箱（发件箱或收件箱）</param>
 /// <param name="Id">行 ID</param>
 /// <param name="Status">结果</param>
 /// <param name="Reason">未成功原因</param>

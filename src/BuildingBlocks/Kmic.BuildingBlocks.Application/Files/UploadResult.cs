@@ -1,14 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Files;
 
-/// <summary>
-/// 上传处理的结果：成功时带着写入的文件，失败时只有原因
-/// </summary>
-/// <param name="Outcome">结果</param>
-/// <param name="File">写入的文件；只有 <see cref="UploadOutcome.Stored" /> 时有</param>
+/// <param name="File">已存储的文件信息；仅当结果为 <see cref="UploadOutcome.Stored" /> 时非空。</param>
 public sealed record UploadResult(UploadOutcome Outcome, StoredFileInfo? File)
 {
-    /// <summary>
-    /// 没有写入存储的结果
-    /// </summary>
+    /// <summary>构造未写入存储的拒绝结果。</summary>
     public static UploadResult Refused(UploadOutcome outcome) => new(outcome, null);
 }

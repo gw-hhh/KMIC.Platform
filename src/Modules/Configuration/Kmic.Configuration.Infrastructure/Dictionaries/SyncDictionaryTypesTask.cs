@@ -5,9 +5,6 @@ using Kmic.Configuration.Application.Dictionaries.Sync;
 
 namespace Kmic.Configuration.Infrastructure.Dictionaries;
 
-/// <summary>
-/// 启动任务：迁移之后、接收请求之前，把代码里声明的字典类型同步进数据库
-/// </summary>
 internal sealed class SyncDictionaryTypesTask(ICommandSender sender) : IStartupTask
 {
     public string Name => "Configuration.SyncDictionaryTypes";

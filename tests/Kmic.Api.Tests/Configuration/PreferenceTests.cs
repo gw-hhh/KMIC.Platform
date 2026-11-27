@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Configuration;
 
-/// <summary>
-/// 个人偏好：默认值、校验、不允许个人设置的偏好、偏好族、模拟登录、表上的约束，端到端
-/// </summary>
 public sealed class PreferenceTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

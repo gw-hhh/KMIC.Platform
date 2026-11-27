@@ -5,13 +5,9 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 登记文件历史版本清除记录
-/// </summary>
 public sealed class RecordHistoryPurgeCommandHandler(IStoredFileRepository files, TimeProvider time)
     : ICommandHandler<RecordHistoryPurgeCommand, VersionedResponse<StoredFileId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<StoredFileId>>> Handle(RecordHistoryPurgeCommand command, CancellationToken cancellationToken)
     {
         var loaded = await files.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

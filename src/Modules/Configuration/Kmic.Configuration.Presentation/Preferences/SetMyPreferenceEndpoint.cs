@@ -12,7 +12,7 @@ internal sealed class SetMyPreferenceEndpoint : IEndpoint
         group.MapPut("/preferences/me/{key}", HandleAsync)
             .Sends<SetMyPreferenceCommand>()
             .WithSummary("保存个人偏好")
-            .WithDescription("仅保存当前角色下的个人设置，再次保存同一键时覆盖原值。偏好族的键须符合格式要求，值须为大小符合限制的 JSON 对象，具体内容由前端约定。只读模拟会话不能保存。");
+            .WithDescription("保存当前角色下的个人偏好并覆盖旧值；偏好族值须为符合大小上限的 JSON 对象，只读模拟会话不可操作");
 
     private static async Task<IResult> HandleAsync([Description("偏好键，如 Ui.Shell 或 Ui.Table.Sample.Specimens.Main")] string key, SetMyPreferenceRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SetMyPreferenceCommand(key, request.Value), ct)).ToNoContent();

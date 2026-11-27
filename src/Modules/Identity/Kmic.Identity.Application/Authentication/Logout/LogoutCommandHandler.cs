@@ -6,20 +6,16 @@ using Kmic.Identity.Domain.Sessions;
 
 namespace Kmic.Identity.Application.Authentication.Logout;
 
-/// <summary>
-/// 作废当前登录会话
-/// </summary>
 public sealed class LogoutCommandHandler(ISessionRepository sessions, IExecutionContext execution, ISecurityEventWriter securityEvents, TimeProvider time)
     : ICommandHandler<LogoutCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(LogoutCommand command, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("退出登录需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("退出登录需要已登录的用户身份。");
         var loaded = await sessions.GetForUpdateAsync(access.SessionId, null, cancellationToken);
         if (loaded.IsFailure)
         {
-            // 会话已经不存在：退出的目的已经达到
+            // 会话已不存在，视为退出成功
             return Result.Success();
         }
 

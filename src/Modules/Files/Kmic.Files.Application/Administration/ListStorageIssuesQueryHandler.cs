@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 查询存储问题列表
-/// </summary>
 public sealed class ListStorageIssuesQueryHandler(IFilesQueryDb db) : IQueryHandler<ListStorageIssuesQuery, PagedResult<StorageIssueItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<StorageIssueItem>>> Handle(ListStorageIssuesQuery query, CancellationToken cancellationToken)
     {
         var statuses = EnumerationFilter.Parse<StorageIssueStatus>(query.Status, "status");

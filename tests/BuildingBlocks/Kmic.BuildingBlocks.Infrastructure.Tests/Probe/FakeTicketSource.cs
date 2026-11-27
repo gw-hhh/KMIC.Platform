@@ -2,30 +2,19 @@ using Kmic.BuildingBlocks.Contracts.Snapshots;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
-/// <summary>
-/// 单据的快照来源，数据由测试直接摆放
-/// </summary>
 internal sealed class FakeTicketSource : ITicketSnapshotSource
 {
-    // 按 uuid 的字节顺序排，和数据库里的排序一致
+    // 按 UUID 大端字节序排序，与数据库中的排序规则保持一致
     private static readonly Comparer<Guid> _byBytes = Comparer<Guid>.Create(
         (a, b) => a.ToByteArray(bigEndian: true).AsSpan().SequenceCompareTo(b.ToByteArray(bigEndian: true)));
 
     private readonly SortedDictionary<Guid, SnapshotItem<TicketSnapshot>> _items = new(_byBytes);
 
-    /// <summary>
-    /// 每次读一页之前执行，比如在扫描中途改动数据
-    /// </summary>
+    // 每次读页前执行，用于在扫描中途模拟数据变更
     public Func<int, CancellationToken, Task>? BeforePage { get; set; }
 
-    /// <summary>
-    /// 读过的页数
-    /// </summary>
     public int Pages { get; private set; }
 
-    /// <summary>
-    /// 摆一条快照，已有的按新版本覆盖
-    /// </summary>
     public Guid Set(string title, long version, Guid? id = null)
     {
         var key = id ?? Guid.CreateVersion7();
@@ -33,9 +22,6 @@ internal sealed class FakeTicketSource : ITicketSnapshotSource
         return key;
     }
 
-    /// <summary>
-    /// 源端物理删除
-    /// </summary>
     public void Remove(Guid id) => _items.Remove(id);
 
     public async Task<SnapshotPage<TicketSnapshot>> GetPageAsync(Guid? after, int size, CancellationToken ct)

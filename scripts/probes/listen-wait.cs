@@ -1,6 +1,6 @@
-// 检查 Npgsql 的四种监听等待写法是否按时返回。
-// Windows 上异步等待（WaitAsync）曾经不响应超时和取消，所以监听循环用专用线程上的同步 Wait；
-// 升级 Npgsql 后运行一次，异步写法都按时返回了，监听循环就可以改回异步。
+// 验证 Npgsql 四种监听等待方式是否能按时返回。
+// Windows 平台下异步等待（WaitAsync）曾存在不响应超时与取消的问题，因此监听循环目前在专用线程中调用同步 Wait；
+// 升级 Npgsql 后可运行此探测脚本，若异步方式均能正常超时/取消返回，即可将监听循环改回异步实现。
 // Windows：先 docker run -d --rm --name kmic-listen -e POSTGRES_PASSWORD=x -p 55432:5432 postgres:18，再 dotnet run scripts/probes/listen-wait.cs
 // Linux：把连接串改为 Host=127.0.0.1;Port=5432，在 sdk:10.0 容器中以 --network container:kmic-listen 运行
 #:package Npgsql

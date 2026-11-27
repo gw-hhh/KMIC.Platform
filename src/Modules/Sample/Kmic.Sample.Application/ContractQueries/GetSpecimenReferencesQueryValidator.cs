@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Application.Messaging;
 
 namespace Kmic.Sample.Application.ContractQueries;
 
-/// <summary>
-/// 示例引用查询的参数校验
-/// </summary>
 internal sealed class GetSpecimenReferencesQueryValidator : AbstractValidator<GetSpecimenReferencesQuery>
 {
     public GetSpecimenReferencesQueryValidator() =>
@@ -13,5 +10,5 @@ internal sealed class GetSpecimenReferencesQueryValidator : AbstractValidator<Ge
             .NotNull()
             .Must(ids => ids.Count <= ContractBatch.DefaultSize)
             .WithErrorCode("Range")
-            .WithMessage($"一次最多解析 {ContractBatch.DefaultSize} 个示例。");
+            .WithMessage($"一次最多解析 {ContractBatch.DefaultSize} 个示例");
 }

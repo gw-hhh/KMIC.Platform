@@ -1,20 +1,13 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 唤醒一个等待中的循环
-/// </summary>
-/// <remarks>
-/// 等待开始前收到的唤醒不会丢
-/// </remarks>
+// 异步等待循环唤醒信号（WaitAsync 前收到的 Set 不会丢失）
 internal sealed class AsyncSignal
 {
     private TaskCompletionSource _pending = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public void Set() => Volatile.Read(ref _pending).TrySetResult();
 
-    /// <summary>
-    /// 等到被唤醒、超时或取消，都正常返回；被唤醒时返回 true
-    /// </summary>
+    // 被信号唤醒返回 true，超时或取消返回 false
     public async Task<bool> WaitAsync(TimeSpan timeout, CancellationToken ct)
     {
         var pending = Volatile.Read(ref _pending);
@@ -31,7 +24,7 @@ internal sealed class AsyncSignal
         {
         }
 
-        // 换一个新的等待。换之前到达的唤醒落在旧的上面，调用方接下来本来就要查一次，不会漏掉数据
+        // 替换为新的等待句柄；替换前到达的信号作用于旧句柄，且调用方随后会执行一次查询，不会遗漏数据
         Interlocked.CompareExchange(ref _pending, new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously), pending);
         return woken;
     }

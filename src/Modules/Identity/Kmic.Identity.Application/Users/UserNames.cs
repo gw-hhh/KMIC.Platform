@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Users;
 
-/// <summary>
-/// 批量解析用户、角色和组织名称
-/// </summary>
 internal static class UserNames
 {
     public static async Task<IReadOnlyDictionary<OrgUnitId, string>> OrgUnitsAsync(IIdentityReads db, IEnumerable<OrgUnitId> ids, CancellationToken ct)

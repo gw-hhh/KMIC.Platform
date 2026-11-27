@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 登录、/me、刷新、退出、切换角色、修改密码：真实的 Identity 模块、真实的令牌，端到端
-/// </summary>
 public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityApiTestBase(database, template, new Dictionary<string, string>(StringComparer.Ordinal) { ["Identity:Session:RefreshGrace"] = "00:00:00" }),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -125,7 +122,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         body.GetProperty("retryAfterSeconds").GetInt32().ShouldBeGreaterThan(0);
         blocked.Headers.Contains("Retry-After").ShouldBeTrue();
 
-        // 不存在的登录名同样被限制，不暴露账号是否存在
+        // 对不存在的账号同样实施失败计数限制，防止枚举探测账号是否存在
         for (var i = 0; i < 3; i++)
         {
             await LoginAsync(client, "ghost-user", "wrong password here");
@@ -171,7 +168,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         string.Equals(newRefresh, oldRefresh, StringComparison.Ordinal).ShouldBeFalse();
         (await GetAsync(client, "/api/v1/identity/me", second.GetProperty("access_token").GetString())).StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        // 宽限期在这个测试里是 0：旧令牌再出现就是重用，整个会话作废，新令牌也跟着失效
+        // 本测试中宽限期配置为 0：旧刷新令牌再次使用即视为重用攻击，整个会话作废且新令牌同步失效
         var reused = await PostAsync(client, "/api/v1/identity/auth/refresh", new { refreshToken = oldRefresh });
 
         reused.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -241,7 +238,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         me.GetProperty("currentRole").GetProperty("id").GetGuid().ShouldBe(secondRole);
         string.Join(",", me.GetProperty("permissions").EnumerateArray().Select(p => p.GetString())).ShouldBe(SamplePermissions.View);
 
-        // 旧角色的令牌随着切换失效
+        // 切换角色后，原角色对应的令牌随之失效
         (await GetAsync(client, "/api/v1/identity/me", access)).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
@@ -287,7 +284,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
         var client = NewClient();
         var access = (await JsonAsync(await LoginAsync(client, "guesser"))).GetProperty("access_token").GetString();
 
-        // 前两次免费，第三次失败后开始等待
+        // 前两次失败直接放行，第三次失败后触发冷却等待
         for (var i = 0; i < 3; i++)
         {
             var wrong = await PostAsync(client, "/api/v1/identity/auth/change-password", new { oldPassword = "not the old one", newPassword = "a brand new passphrase" }, bearer: access);
@@ -299,7 +296,7 @@ public sealed class AuthenticationTests(ClassDatabase<ApiTemplate> database, Api
 
         blocked.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests);
         (await JsonAsync(blocked)).GetProperty("code").GetString().ShouldBe("Identity.LoginThrottled");
-        login.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests, "改密码时猜旧密码和登录共用同一份失败计数");
+        login.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests, "修改密码时验证旧密码与登录操作共用同一失败计数");
         await Eventually.UntilAsync(
             async _ => await Seed.CountAsync("""SELECT count(*) FROM "Identity"."SecurityEvent" WHERE "Type" = 'PasswordChangeFailed'"""),
             count => count >= 3,

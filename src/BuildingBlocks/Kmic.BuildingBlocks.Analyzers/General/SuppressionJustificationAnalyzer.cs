@@ -7,28 +7,24 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
-/// <summary>
-/// KM9001：[SuppressMessage] 必须写明理由
-/// </summary>
+/// <summary>KM9001：[SuppressMessage] 必须通过 Justification 说明豁免原因。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class SuppressionJustificationAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9001",
         Rules.GeneralCategory,
-        "豁免必须写明理由",
-        "[{0}] 要用 Justification 写明豁免的理由",
-        "写了理由，评审和以后复查时才知道当初为什么豁免。");
+        "告警豁免必须说明原因",
+        "[{0}] 必须通过 Justification 说明豁免原因",
+        "写明豁免原因有助于代码评审及后续排查回溯。");
 
     private static readonly ImmutableHashSet<string> _suppressionAttributes = ImmutableHashSet.Create(
         StringComparer.Ordinal,
         "System.Diagnostics.CodeAnalysis.SuppressMessageAttribute",
         "System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

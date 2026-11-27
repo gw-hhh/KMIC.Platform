@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 宿主同时跑 Api 与 Worker 两个角色：后台的整条链路——发件箱投递、路由、收件箱处理、调度器执行——在真实宿主里走通
-/// </summary>
 public sealed class WorkerRoleTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template, new Dictionary<string, string>(StringComparer.Ordinal) { ["Kmic:Roles"] = "Api,Worker" }),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -28,11 +25,11 @@ public sealed class WorkerRoleTests(ClassDatabase<ApiTemplate> database, ApiTemp
         var changed = await SendAsync(HttpMethod.Put, $"{Jobs}/Identity.PurgeLoginThrottle/override", manager, new { enabled = true, cron = (string?)null, expectedVersion = (long?)null });
         changed.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        // 审计消息由发件箱的投递程序送到 Operations 的收件箱，再由订阅命令落成一行
+        // 审计消息经由发件箱投递至 Operations 收件箱，再由订阅处理器落库
         await Eventually.UntilAsync(
             _ => Seed.CountAsync("""SELECT count(*) FROM "Operations"."AuditLog" WHERE "Action" = 'Operations.SetJobOverride'"""),
             count => count >= 1,
-            "审计汇总到 Operations 的审计表",
+            "审计记录汇总至 Operations 审计表",
             ct: Ct);
         var from = Uri.EscapeDataString(started.AddMinutes(-1).ToString("O"));
         var to = Uri.EscapeDataString(started.AddMinutes(5).ToString("O"));
@@ -56,7 +53,7 @@ public sealed class WorkerRoleTests(ClassDatabase<ApiTemplate> database, ApiTemp
         await Eventually.UntilAsync(
             _ => Seed.CountAsync($"""SELECT count(*) FROM "Operations"."ScheduledJobRun" WHERE "JobName" = '{Name}' AND "Trigger" = 1 AND "Status" = 1"""),
             count => count >= 1,
-            "任务被调度器执行，执行记录里是手动触发、成功",
+            "调度器完成任务执行，并记录为手动触发且执行成功",
             ct: Ct);
         var runs = await SendAsync(HttpMethod.Get, $"{Jobs}/{Name}/runs", manager);
         var run = (await JsonAsync(runs)).GetProperty("items").EnumerateArray().First();

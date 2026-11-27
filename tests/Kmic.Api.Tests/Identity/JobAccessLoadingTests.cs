@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 后台作业按提交人加载访问上下文：没有会话，只看用户、授予和角色现在的状态
-/// </summary>
 public sealed class JobAccessLoadingTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -47,7 +44,7 @@ public sealed class JobAccessLoadingTests(ClassDatabase<ApiTemplate> database, A
         await Seed.SetRoleStatusAsync(role, active: false);
 
         (await LoadAsync(disabled, role)).ShouldBeNull("用户已停用");
-        (await LoadAsync(withoutGrant, otherRole)).ShouldBeNull("这个用户没有被授予这个角色");
+        (await LoadAsync(withoutGrant, otherRole)).ShouldBeNull("该用户未被授予指定角色");
         (await LoadAsync(roleDisabled, role)).ShouldBeNull("角色已停用");
     }
 }

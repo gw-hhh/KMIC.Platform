@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Contracts.Jobs;
 
 namespace Kmic.Notifications.Application.BackgroundJobs;
 
-/// <summary>
-/// 后台作业结束后通知提交人，提交人自己取消的不通知
-/// </summary>
+/// <summary>后台作业结束后通知提交人（自行取消的除外）</summary>
 /// <param name="Message">作业结束事件</param>
 /// <param name="SourceMessageId">来源消息的 ID</param>
 /// <param name="SourceModule">作业所在模块</param>

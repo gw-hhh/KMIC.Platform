@@ -4,9 +4,7 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates.Revert;
 
-/// <summary>
-/// 恢复模板某个渠道的默认内容
-/// </summary>
+/// <summary>恢复指定渠道的模板默认内容</summary>
 /// <param name="Key">模板键</param>
 /// <param name="Channel">渠道</param>
 /// <param name="ExpectedVersion">模板记录的预期并发版本号</param>

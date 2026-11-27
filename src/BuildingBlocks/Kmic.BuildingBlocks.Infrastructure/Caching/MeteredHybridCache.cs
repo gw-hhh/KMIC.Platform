@@ -4,9 +4,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 
-/// <summary>
-/// 按缓存键的类别记录命中次数的 HybridCache，本次调用执行了加载方法才算未命中
-/// </summary>
+// 带命中统计的 HybridCache 包装：仅当执行加载回调时记为未命中
 internal sealed class MeteredHybridCache(HybridCache inner, FrameworkMetrics metrics) : HybridCache
 {
     public override async ValueTask<T> GetOrCreateAsync<TState, T>(

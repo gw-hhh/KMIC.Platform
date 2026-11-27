@@ -15,12 +15,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Kmic.Files.Presentation.Uploads;
 
-/// <summary>
-/// 以 multipart/form-data 流式上传单个文件，不将完整内容读入内存
-/// </summary>
-/// <remarks>
-/// 写存储期间不持有数据库事务
-/// </remarks>
+// 流式读取首个带文件名的 multipart 段，写入存储期间不持有数据库事务
 internal sealed class UploadFileEndpoint : IEndpoint
 {
     // 请求体上限预留 multipart 边界和段头所需空间
@@ -33,12 +28,12 @@ internal sealed class UploadFileEndpoint : IEndpoint
             .WithRequestTimeout(TimeSpan.FromMinutes(10))
             .DisableAntiforgery()
             .WithSummary("上传文件")
-            .WithDescription("使用 multipart/form-data，仅处理第一个带文件名的部分。profile 指定上传配置，决定大小上限、允许类型和所需权限；按扩展名及文件头识别类型，不采用客户端声明的内容类型。成功后返回临时文件 ID，须在保留期内（默认 24 小时）关联业务对象，未关联的到期后可被清理。超过大小上限返回 413，类型不允许返回 415。");
+            .WithDescription("multipart/form-data 流式上传首个文件，按扩展名与文件头校验类型；返回临时文件 ID（须在保留期内关联业务对象）。超限返回 413，类型不符返回 415");
 
     private static async Task<IResult> HandleAsync(
         HttpContext http,
         [Description("上传配置名称，如 Sample.SpecimenAttachment")] string profile,
-        [Description("文件大小（字节），可选；声明大小超过配置上限时直接拒绝，实际读取仍受该上限限制")] long? size,
+        [Description("可选的文件字节数；声明值或实际流超限均拒绝")] long? size,
         ICommandSender sender,
         UploadProfileCatalog profiles,
         IFileUploadProcessor processor,
@@ -85,7 +80,7 @@ internal sealed class UploadFileEndpoint : IEndpoint
         return completed.IsSuccess ? Results.Json(completed.Value, statusCode: StatusCodes.Status201Created) : completed.ToOk();
     }
 
-    // 取请求里第一个带文件名的部分；没有 multipart 边界或没有文件时返回空
+    // 提取请求中首个包含文件名的段；无 multipart 边界或无文件时返回 null
     private static async Task<FilePart?> ReadFirstFileAsync(HttpRequest request, CancellationToken ct)
     {
         if (!MediaTypeHeaderValue.TryParse(request.ContentType, out var contentType)
@@ -126,7 +121,7 @@ internal sealed class UploadFileEndpoint : IEndpoint
         }
         catch
         {
-            // 客户端断开、超时、存储写入失败：登记为被拒绝，已经写进存储的部分由清理与对账处理
+            // 客户端断开、超时或存储写入失败时登记为被拒绝，已写入存储的数据由清理与对账任务处理
             await sender.SendAsync(new RejectUploadCommand(started.FileId, "上传中断"), CancellationToken.None);
             throw;
         }

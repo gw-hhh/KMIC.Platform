@@ -4,9 +4,6 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages;
 
-/// <summary>
-/// 框架的消息类型与 Operations 响应类型之间的转换
-/// </summary>
 internal static class MessageItems
 {
     public static MessageBoxKind ToKind(MessageBox box) => box == MessageBox.Inbox ? MessageBoxKind.Inbox : MessageBoxKind.Outbox;

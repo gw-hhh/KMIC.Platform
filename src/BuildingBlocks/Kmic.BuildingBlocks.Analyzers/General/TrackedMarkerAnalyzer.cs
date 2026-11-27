@@ -8,43 +8,39 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
-/// <summary>
-/// KM9003：TODO、FIXME 和测试的 Skip 必须带跟踪编号，不能用 HACK
-/// </summary>
+/// <summary>KM9003：TODO、FIXME 及测试 Skip 必须附带跟踪编号，禁止使用 HACK。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TrackedMarkerAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor UntrackedMarker = Rules.Create(
         "KM9003",
         Rules.GeneralCategory,
-        "待办和跳过的测试必须带跟踪编号",
-        "{0} 要带跟踪编号，写成 {0}(#123): 说明",
-        "没有编号的待办没人跟进，会一直留在代码里。");
+        "待办标记与跳过测试必须附带跟踪编号",
+        "{0} 必须附带跟踪编号，格式为 {0}(#123): 说明",
+        "缺少跟踪编号的待办事项难以追踪跟进，易长期滞留于代码中。");
 
     internal static readonly DiagnosticDescriptor Hack = Rules.Create(
         "KM9003",
         Rules.GeneralCategory,
-        "待办和跳过的测试必须带跟踪编号",
-        "不用 HACK，改写成说明原因的普通注释，需要以后清理的加 TODO(#编号)",
-        "HACK 只说明这里有问题，不说明原因，也没人跟进。");
+        "待办标记与跳过测试必须附带跟踪编号",
+        "禁止使用 HACK，请改写为说明原因的普通注释；若需后续清理，请使用 TODO(#编号)",
+        "HACK 仅标示存在问题而不说明缘由，且缺乏后续跟踪机制。");
 
     internal static readonly DiagnosticDescriptor UntrackedSkip = Rules.Create(
         "KM9003",
         Rules.GeneralCategory,
-        "待办和跳过的测试必须带跟踪编号",
-        "跳过的测试要在 Skip 里写明跟踪编号，如 Skip = \"#123 等待接口上线\"",
-        "没有编号的跳过没人跟进，测试会一直不运行。");
+        "待办标记与跳过测试必须附带跟踪编号",
+        "跳过的测试必须在 Skip 中注明跟踪编号，例如 Skip = \"#123 等待接口上线\"",
+        "缺少跟踪编号的跳过测试容易被遗忘，导致长期处于未执行状态。");
 
-    // 超时给 1 秒：并行编译时线程会被挤占，100 毫秒曾经误报超时。这几个模式不会回溯，正常用不到超时
+    // 正则匹配超时设为 1 秒，避免并行编译线程争抢时 100 毫秒误报超时；当前正则无回溯，正常情况下不会触发超时
     private static readonly TimeSpan _matchTimeout = TimeSpan.FromSeconds(1);
     private static readonly Regex _marker = new(@"\b(?<marker>TODO|FIXME)\b(?!\(#\d+\))", RegexOptions.CultureInvariant, _matchTimeout);
     private static readonly Regex _hack = new(@"\bHACK\b", RegexOptions.CultureInvariant, _matchTimeout);
     private static readonly Regex _ticket = new(@"#\d+", RegexOptions.CultureInvariant, _matchTimeout);
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [UntrackedMarker, Hack, UntrackedSkip];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

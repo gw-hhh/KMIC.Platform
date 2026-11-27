@@ -7,23 +7,19 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
-/// <summary>
-/// KM9004：标识符只能用 ASCII 字符
-/// </summary>
+/// <summary>KM9004：标识符仅允许使用 ASCII 字符。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AsciiIdentifierAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9004",
         Rules.GeneralCategory,
-        "标识符只能用 ASCII 字符",
-        "标识符 {0} 含有非 ASCII 字符，改用术语表中的英文名",
-        "同一个概念只用一个英文名，代码、测试、术语表保持一致。");
+        "标识符仅限使用 ASCII 字符",
+        "标识符 {0} 包含非 ASCII 字符，请改用术语表中的英文命名",
+        "同一概念应采用唯一英文命名，保证代码、测试与术语表一致。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -36,7 +32,7 @@ public sealed class AsciiIdentifierAnalyzer : DiagnosticAnalyzer
         var root = context.Tree.GetRoot(context.CancellationToken);
         foreach (var token in root.DescendantTokens())
         {
-            // 只报声明处，引用处指向的是同一个声明，不重复报
+            // 仅在声明处报告诊断，引用处指向同一声明，避免重复告警
             if (token.IsKind(SyntaxKind.IdentifierToken)
                 && token.Parent is not IdentifierNameSyntax
                 && token.ValueText.Any(c => c > 127))

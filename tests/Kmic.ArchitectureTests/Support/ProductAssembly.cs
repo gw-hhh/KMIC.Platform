@@ -2,9 +2,7 @@ using System.Reflection;
 
 namespace Kmic.ArchitectureTests.Support;
 
-/// <summary>
-/// 一个模块的某一层程序集，按名字 Kmic.{模块}.{层} 识别
-/// </summary>
+// 按命名约定 Kmic.{模块}.{层} 识别的程序集
 internal sealed record ProductAssembly(Assembly Assembly, string Module, Layer Layer)
 {
     public string Name => Assembly.GetName().Name!;

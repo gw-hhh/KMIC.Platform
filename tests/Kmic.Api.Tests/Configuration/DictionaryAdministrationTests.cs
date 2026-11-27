@@ -14,9 +14,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Configuration;
 
-/// <summary>
-/// 字典：启动同步、字典项的增改停用、缓存失效、ETag、Contracts，端到端
-/// </summary>
 public sealed class DictionaryAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

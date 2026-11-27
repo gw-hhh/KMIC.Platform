@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Behaviors;
 
-/// <summary>
-/// 通过 Mediator 生成的真实管道发送消息
-/// </summary>
 public sealed class PipelineTests : IAsyncLifetime
 {
     private static readonly SubmitThingCommand _validSubmit = new("样品", [new ThingItem(1)]);

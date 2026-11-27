@@ -6,9 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Users.Grants;
 
-/// <summary>
-/// 校验角色授予的组织锚点，所有单元必须存在且已启用
-/// </summary>
+// 校验角色授予的组织锚点，要求单元均存在且已启用
 internal static class OrgAnchors
 {
     public static async Task<Result> CheckAsync(IIdentityReads db, IReadOnlyList<OrgUnitId> anchors, CancellationToken ct)

@@ -1,12 +1,12 @@
 import boundaries from 'eslint-plugin-boundaries';
 
 /**
- * 目录分层的依赖规则
+ * 目录分层依赖规则
  *
- * app 可以用 shell、modules、platform；shell 和 modules 只能用 platform；所有层都可以用 generated。
- * modules 之间、modules 到 shell、platform 到 shell 都不允许；modules 只能导入自己所在的模块
+ * app 可依赖 shell、modules、platform；shell 与 modules 仅可依赖 platform；各层均可使用 generated。
+ * 禁止 modules 间互访、modules 依赖 shell 及 platform 依赖 shell；业务模块仅允许内部引用自身。
  *
- * root 是 src 所在的目录：正式检查用 web/src，边界样例用 tests/boundaries/legal|violations/src，两边共用同一套规则
+ * root 为源码根目录：正式检查传入 web/src，边界测试传入 tests/boundaries/legal|violations/src，两者共用同一套规则
  *
  * @param {{ root: string, tsconfig: string }} options
  */
@@ -16,7 +16,7 @@ export function boundariesConfig({ root, tsconfig }) {
       files: [`${root}/**/*.{ts,vue}`],
       plugins: { boundaries },
       settings: {
-        // 默认的 node 解析器认不出 @/ 别名，越界导入会被当作外部包悄悄放过，必须用 TypeScript 解析器
+        // 默认的 Node 解析器无法识别 @/ 别名，会导致越界导入被误判为外部包并放行，须使用 TypeScript 解析器
         'import/resolver': { typescript: { project: tsconfig } },
         'boundaries/elements': [
           { type: 'app', pattern: `${root}/app/**` },
@@ -44,7 +44,7 @@ export function boundariesConfig({ root, tsconfig }) {
                 from: { element: { type: 'platform' } },
                 allow: { to: { element: { types: ['platform', 'generated'] } } },
               },
-              // 业务模块只能用自己（同名）、platform 和 generated，不能碰别的模块和 shell
+              // 业务模块仅允许访问自身模块、platform 与 generated，禁止引用其他模块和 shell
               {
                 from: { element: { type: 'module' } },
                 allow: { to: { element: { types: ['platform', 'generated'] } } },

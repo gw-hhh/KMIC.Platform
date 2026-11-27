@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Identity.Domain.Roles;
 
-/// <summary>
-/// 角色对某个范围对象单独设置的数据范围等级
-/// </summary>
+/// <summary>角色对单个范围对象的数据范围覆盖配置。</summary>
 public sealed class RoleDataScope : Entity<RoleDataScopeId>
 {
     private RoleDataScope(RoleDataScopeId id, string scopeObject, RoleScopeLevel level)

@@ -5,12 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 唯一约束对应的错误
-/// </summary>
 internal static class UniqueConstraintErrors
 {
-    // 不放在模型注解里，否则会写进迁移快照。EF 在进程里只建一次模型，收集也只有一次，所以存在静态字段里
+    // 避免存入模型注解而污染迁移快照；由于 EF Core 在进程生命周期内仅构建一次模型且仅收集一次，故缓存于静态字段中
     private static readonly ConcurrentDictionary<(string Schema, string Constraint), Error> _errors = new();
 
     public static Error? Find(string? schema, string? constraint) =>

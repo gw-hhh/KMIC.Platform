@@ -7,9 +7,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.OpenApi;
 
-/// <summary>
-/// 架构名就是前端生成的类型名，全系统唯一
-/// </summary>
 public sealed class OpenApiSchemaNameTests
 {
     [Fact]

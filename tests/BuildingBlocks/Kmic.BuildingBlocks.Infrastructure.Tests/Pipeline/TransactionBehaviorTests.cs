@@ -28,7 +28,7 @@ public sealed class TransactionBehaviorTests(ClassDatabase<ProbeTemplate> databa
         await using var work = _harness.Begin(_alice);
         var renamed = (await work.Sender.SendAsync(new RenameTicketCommand(created.Id, created.ConcurrencyVersion, "改名"), Ct)).ShouldBeSuccess();
 
-        // 处理器填的是保存前的 0，返回的是提交后的 1
+        // 处理器返回保存前的旧版本号 0，事务提交后响应应体现更新后的新版本号 1
         renamed.ConcurrencyVersion.ShouldBe(1);
         (await VersionOfAsync(created.Id)).ShouldBe(1);
     }
@@ -91,7 +91,7 @@ public sealed class TransactionBehaviorTests(ClassDatabase<ProbeTemplate> databa
     {
         var created = (await OpenAsync(TicketNumbers.Next())).ShouldBeSuccess();
 
-        // 处理器读取之后、保存之前，另一个连接改了这一行
+        // 模拟处理器读取实体后、保存提交前，另一数据库连接并发修改了同一记录
         _harness.Hooks.OnBeforeReturn(async ct =>
         {
             await using var command = database.DataSource.CreateCommand(

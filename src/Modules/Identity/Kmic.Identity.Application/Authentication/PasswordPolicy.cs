@@ -4,17 +4,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Authentication;
 
-/// <summary>
-/// 新密码校验规则
-/// </summary>
 public sealed class PasswordPolicy(IOptions<PasswordOptions> settings, IWeakPasswordList weakPasswords)
 {
     private PasswordOptions Options => settings.Value;
 
-    /// <summary>
-    /// 校验新密码：长度在范围内、不是常见弱密码、不与账号或手机号相同
-    /// </summary>
-    /// <param name="mobile">用户的手机号，没有时为空</param>
+    /// <summary>校验新密码：须满足长度要求、非弱密码，且不与账号或手机号相同</summary>
+    /// <param name="mobile">手机号，未绑定时为空</param>
     public Result Validate(string? password, string account, string? mobile)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(account);

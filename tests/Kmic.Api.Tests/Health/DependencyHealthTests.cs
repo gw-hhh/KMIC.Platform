@@ -15,9 +15,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Health;
 
-/// <summary>
-/// 依赖状态端点，以及框架配置项能不能从配置里读到
-/// </summary>
 public sealed class DependencyHealthTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -31,14 +28,14 @@ public sealed class DependencyHealthTests(ClassDatabase<ApiTemplate> database, A
         var report = await Eventually.UntilAsync(
             async ct => await JsonAsync(await client.GetAsync(Path, ct)),
             r => Is(r.GetProperty("status"), "Healthy"),
-            "监听连接建立后整体健康",
+            "消息监听连接建立后整体健康状态恢复为 Healthy",
             ct: Ct);
 
         var entries = report.GetProperty("entries").EnumerateArray().ToDictionary(e => e.GetProperty("name").GetString()!, e => e, StringComparer.Ordinal);
         entries.Keys.ShouldBe(["database", "file-storage", "message-listener"], ignoreOrder: true);
         entries["database"].GetProperty("status").GetString().ShouldBe("Healthy");
         entries["message-listener"].GetProperty("description").GetString().ShouldBe("监听连接正常");
-        entries["file-storage"].GetProperty("description").GetString().ShouldBe("可以访问", "Files 模块登记了文件存储，测试里是本地目录");
+        entries["file-storage"].GetProperty("description").GetString().ShouldBe("可以访问", "Files 模块已注册文件存储健康检查（测试环境使用本地目录）");
         report.GetProperty("totalDurationMs").GetDouble().ShouldBeGreaterThan(0);
     }
 

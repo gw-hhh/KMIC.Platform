@@ -3,12 +3,8 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens;
 
-/// <summary>
-/// 示例的操作目录，用于计算详情中的可用操作
-/// </summary>
 public sealed class SpecimenActions : ResourceActionCatalog<Specimen, SpecimenAction>
 {
-    /// <inheritdoc />
     protected override void Define(IResourceActionBuilder<Specimen, SpecimenAction> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

@@ -20,9 +20,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.ArchitectureTests.Rules;
 
-/// <summary>
-/// 用例与注册的结构规则
-/// </summary>
 internal static class StructureRules
 {
     private const BindingFlags AllMembers = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -33,9 +30,7 @@ internal static class StructureRules
 
     private static readonly string[] _idempotentVerbs = ["Create", "Submit", "Approve", "Pay"];
 
-    /// <summary>
-    /// 类型所在的模块名；框架、BCL、第三方库的类型返回 null
-    /// </summary>
+    // 返回类型所属模块名；框架、BCL 和第三方库返回 null
     public static string? ModuleOf(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
@@ -44,12 +39,7 @@ internal static class StructureRules
         return parts is ["Kmic", var module, _] && !string.Equals(module, "BuildingBlocks", StringComparison.Ordinal) ? module : null;
     }
 
-    /// <summary>
-    /// 命令的响应只是收据：属性只有标识、版本号、编码、计数、时刻、布尔值，没有嵌套对象；集合只允许“逐条收据”，元素同样不再嵌套
-    /// </summary>
-    /// <remarks>
-    /// 语义上收据里是不是只有本人可取回的最小信息，由评审判断；这里只检查结构。系统专用命令不受限
-    /// </remarks>
+    // 命令响应仅作操作收据，禁止嵌套对象（系统专用命令除外；集合元素仅允许无嵌套的逐条收据）
     public static IReadOnlyList<string> CommandResponses(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -81,12 +71,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 命令、查询处理器只由 Mediator 生成的代码引用：产品代码里没有别的类型把它们当参数、字段、属性或返回值
-    /// </summary>
-    /// <remarks>
-    /// 只检查成员的签名，不读方法体；Mediator 生成的代码在宿主程序集里，不在检查范围内
-    /// </remarks>
+    // 业务代码成员签名中不得直接引用命令/查询处理器（仅 Mediator 在宿主生成的代码可引用）
     public static IReadOnlyList<string> HandlerReferences(IEnumerable<Type> types)
     {
         var all = types.Where(t => t.GetCustomAttribute<CompilerGeneratedAttribute>() is null).ToList();
@@ -103,11 +88,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 领域事件处理器和命令在同一个事务里执行，只能依赖本模块和框架，不注入别的模块的任何类型
-    /// </summary>
-    /// <param name="types">要检查的类型</param>
-    /// <param name="moduleOf">类型所在的模块，框架类型返回 null</param>
+    // 领域事件处理器与命令同事务执行，不得注入其他模块的任何类型
     public static IReadOnlyList<string> DomainEventHandlers(IEnumerable<Type> types, Func<Type, string?> moduleOf)
     {
         ArgumentNullException.ThrowIfNull(moduleOf);
@@ -128,12 +109,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 服务注册只在模块的注册类里：别的类型不接收也不返回服务集合
-    /// </summary>
-    /// <remarks>
-    /// 模块里的扩展方法类也算违规：它们会让注册散落在注册类之外，读代码的人找不到服务是在哪里登记的
-    /// </remarks>
+    // 服务注册仅限模块的 IModule 实现类，其他类型（含扩展方法类）不得接收或返回 IServiceCollection
     public static IReadOnlyList<string> ServiceRegistration(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -151,9 +127,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 每个聚合根的类型初始化都成功：状态机在静态字段里构建，声明有误时第一次使用才抛异常，这里提前触发
-    /// </summary>
+    // 提前触发各聚合根的类型初始化，尽早暴露静态状态机声明错误
     public static IReadOnlyList<string> AggregateInitialization(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -172,12 +146,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 名字表明是物理删除、模拟身份、导出全部数据的权限点，必须标 Sensitive
-    /// </summary>
-    /// <remarks>
-    /// 按命名提示：权限点编码的最后一段以 Purge、Impersonate、Export 开头即视为敏感。标了 Sensitive 的权限点，用到它的命令必须审计
-    /// </remarks>
+    // 末段以 Purge/Impersonate/Export 开头的权限点必须标记 Sensitive
     public static IReadOnlyList<string> SensitivePermissions(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -201,10 +170,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// Identity 中声明 [RequirePermission] 的命令，处理器须继承 AuthorizationAdminCommandHandler，提交前在同一事务中重查操作者
-    /// </summary>
-    /// <param name="types">Identity Application 中的类型</param>
+    // Identity 中带 [RequirePermission] 的命令，其处理器须继承 AuthorizationAdminCommandHandler
     public static IReadOnlyList<string> AuthorizationAdminHandlers(IEnumerable<Type> types) =>
     [
         .. types.Where(t => t is { IsClass: true, IsAbstract: false })
@@ -213,13 +179,7 @@ internal static class StructureRules
             .Select(t => $"{t.FullName}：Identity 中需要权限点的命令，处理器须继承 AuthorizationAdminCommandHandler，提交前重查操作者。"),
     ];
 
-    /// <summary>
-    /// Operations 中要求“管理”类权限点的命令，必须声明消息写入被软线熔断时仍可执行
-    /// </summary>
-    /// <remarks>
-    /// 运维命令的审计消息也走 Outbox，不豁免的话熔断时连重试死信、放弃消息这些自救操作都做不了
-    /// </remarks>
-    /// <param name="types">Operations Application 中的类型</param>
+    // Operations 中带“管理”权限点的命令须声明在消息写入熔断期间豁免，否则熔断时无法执行恢复操作
     public static IReadOnlyList<string> OperationsCommandsExemptFromSuspension(IEnumerable<Type> types) =>
     [
         .. types.Where(t => t is { IsClass: true, IsAbstract: false })
@@ -230,12 +190,7 @@ internal static class StructureRules
             .Select(c => $"{c.FullName}：Operations 中要求“管理”权限点的命令必须标 [ExemptFromMessagingSuspension]，否则消息写入熔断时无法自救。"),
     ];
 
-    /// <summary>
-    /// 缓存键只在本模块的 {模块}CacheKeys 类中生成，且第一段是本模块名
-    /// </summary>
-    /// <remarks>
-    /// 先读方法体，找出调用 CacheKey.Of 的类型；再逐个取 CacheKeys 类的常量、静态属性，并用样例参数调用静态方法，检查生成的键
-    /// </remarks>
+    // 缓存键只能在本模块 {模块}CacheKeys 类中构造，且首段必须是本模块名
     public static IReadOnlyList<string> CacheKeys(IEnumerable<ProductAssembly> assemblies)
     {
         var problems = new List<string>();
@@ -263,9 +218,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 读模型只能经 <c>IReadModelWriter&lt;T&gt;</c> 写入：读模型不是聚合根，也没有仓储
-    /// </summary>
+    // 读模型不是聚合根，只能经 IReadModelWriter<T> 写入
     public static IReadOnlyList<string> ReadModels(IEnumerable<Type> types)
     {
         var all = types.ToList();
@@ -283,12 +236,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 创建、提交、审批、支付类命令要么标 [Idempotent]，要么用 [NotIdempotent] 写明原因
-    /// </summary>
-    /// <remarks>
-    /// 按命名提示：命令名以 Create、Submit、Approve、Pay 开头。系统专用命令不经 HTTP 调用，不受限
-    /// </remarks>
+    // 以 Create/Submit/Approve/Pay 开头的非系统命令须标注 [Idempotent] 或 [NotIdempotent]
     public static IReadOnlyList<string> IdempotencyDeclarations(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -304,11 +252,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 校验器不注入别的类型的 Contracts：校验器只看命令本身，要查其他模块的数据放进处理器
-    /// </summary>
-    /// <param name="types">要检查的类型</param>
-    /// <param name="isContractsType">是否模块 Contracts 里的类型</param>
+    // 校验器不得注入其他模块的 Contracts 类型，跨模块查询应放在处理器中
     public static IReadOnlyList<string> ValidatorsAndContracts(IEnumerable<Type> types, Func<Type, bool> isContractsType)
     {
         ArgumentNullException.ThrowIfNull(isContractsType);
@@ -325,9 +269,6 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 类型是否在某个模块的 Contracts 程序集里
-    /// </summary>
     public static bool IsModuleContracts(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
@@ -350,12 +291,7 @@ internal static class StructureRules
         return false;
     }
 
-    /// <summary>
-    /// 调用 <c>WithoutDataScope()</c> 的处理器必须标 [BypassesDataScope] 并写明原因，其他类型不能调用它
-    /// </summary>
-    /// <remarks>
-    /// 读方法体的调用关系，含 async 方法和 lambda 生成的嵌套类型。绕过数据范围的用例会登记进用例目录，评审和审计能看到
-    /// </remarks>
+    // 调用 WithoutDataScope() 的处理器须标 [BypassesDataScope] 并说明原因，其他类型禁止调用
     public static IReadOnlyList<string> DataScopeBypasses(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -379,12 +315,7 @@ internal static class StructureRules
         return problems;
     }
 
-    /// <summary>
-    /// 放进缓存的值不可变：缓存里的同一个对象会被多个请求共用，谁改了它，别人看到的就是被改过的数据
-    /// </summary>
-    /// <remarks>
-    /// 读方法体，检查调用 HybridCache 时的泛型参数。可变指有公开的 set（init 不算）、公开的非只读字段、List、Dictionary、数组这类可修改的集合
-    /// </remarks>
+    // HybridCache 缓存值类型须为不可变类型，避免多请求共享时发生数据污染
     public static IReadOnlyList<string> CacheValues(IEnumerable<Type> types)
     {
         var problems = new List<string>();

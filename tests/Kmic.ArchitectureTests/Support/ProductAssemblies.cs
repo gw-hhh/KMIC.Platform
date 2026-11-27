@@ -2,14 +2,9 @@ using System.Reflection;
 
 namespace Kmic.ArchitectureTests.Support;
 
-/// <summary>
-/// 全部产品程序集：框架与各业务模块，测试项目、测试基础设施和宿主不在其中
-/// </summary>
+// 全部产品程序集（框架与各业务模块，不含测试项目、测试基础设施和宿主）
 internal static class ProductAssemblies
 {
-    /// <summary>
-    /// 框架构件的“模块名”
-    /// </summary>
     public const string FrameworkModule = "BuildingBlocks";
 
     // 测试基础设施和宿主组装库可以引用任何层，不受层次规则约束
@@ -25,9 +20,6 @@ internal static class ProductAssemblies
 
     public static IEnumerable<ProductAssembly> Of(Layer layer, bool modulesOnly = true) => All.Where(a => a.Layer == layer && (!modulesOnly || a.IsModule));
 
-    /// <summary>
-    /// 仓库根目录：向上找解决方案文件
-    /// </summary>
     public static string RepositoryRoot()
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)

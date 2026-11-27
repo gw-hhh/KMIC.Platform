@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
-/// <summary>
-/// 把提交人能看到的单据标题逐行导出到钩子里
-/// </summary>
 internal sealed class ExportTicketJobHandler(ProbeHooks hooks, IExportReader<IProbeQueryDb> reader) : IJobHandler<ExportTicketJob>
 {
     public async Task<Result<JobOutcome>> ExecuteAsync(ExportTicketJob job, IJobContext context, CancellationToken ct)

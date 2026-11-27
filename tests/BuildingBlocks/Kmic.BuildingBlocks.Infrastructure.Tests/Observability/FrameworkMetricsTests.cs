@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Observability;
 
-/// <summary>
-/// 每个测试用自己的服务，指标按各自的指标工厂记录，不受并行的其他测试影响
-/// </summary>
 public sealed class FrameworkMetricsTests : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     // 框架指标允许的维度：全是取值有限的名字，不能有用户、资源、追踪 ID

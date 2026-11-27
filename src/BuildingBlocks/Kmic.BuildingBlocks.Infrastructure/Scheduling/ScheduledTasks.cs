@@ -3,16 +3,10 @@ using Kmic.BuildingBlocks.Application.Scheduling;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 本实例声明的全部定时任务：模块的加上框架的
-/// </summary>
 internal sealed class ScheduledTasks
 {
     private const string FrameworkPrefix = "Framework.";
 
-    /// <summary>
-    /// 框架任务归属的“模块”名
-    /// </summary>
     public const string FrameworkModule = "Framework";
 
     private readonly ScheduledJobCatalog _catalog;

@@ -1,23 +1,13 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 实例心跳表，只用于诊断
-/// </summary>
-/// <remarks>
-/// 表属于 Operations 模块，由它的迁移执行这里的建表语句
-/// </remarks>
+/// <summary>实例心跳表（归属 Operations 模块，仅用于诊断）</summary>
 public static class MessagingInstanceTable
 {
-    /// <summary>
-    /// 表名，带 schema
-    /// </summary>
     public const string Name = """
         "Operations"."MessagingInstance"
         """;
 
-    /// <summary>
-    /// 建表语句：Operations 模块的迁移执行，框架测试直接执行
-    /// </summary>
+    /// <summary>建表语句（由 Operations 迁移脚本与框架测试执行）</summary>
     public const string CreateSql = """
         CREATE TABLE "Operations"."MessagingInstance" (
             "Id" uuid NOT NULL,
@@ -31,8 +21,6 @@ public static class MessagingInstanceTable
         COMMENT ON TABLE "Operations"."MessagingInstance" IS '运行中的实例：构建号、角色、声明的订阅和最近一次心跳，只用于诊断';
         """;
 
-    /// <summary>
-    /// 超过这么久没有心跳的行在下一次登记时顺手删掉
-    /// </summary>
+    // 超时未上报的心跳记录在下次登记时一并清理
     internal static readonly TimeSpan Retention = TimeSpan.FromDays(1);
 }

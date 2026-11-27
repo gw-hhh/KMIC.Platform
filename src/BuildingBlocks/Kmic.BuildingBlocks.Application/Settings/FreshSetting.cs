@@ -1,10 +1,5 @@
 namespace Kmic.BuildingBlocks.Application.Settings;
 
-/// <summary>
-/// 不经缓存读到的设置值和它的保存时间
-/// </summary>
-/// <typeparam name="T">设置的值类型</typeparam>
-/// <param name="Value">值，没保存过时是代码默认值</param>
-/// <param name="SavedAt">最后一次保存的时间；没保存过时为空</param>
+/// <summary>直连数据库读取的系统设置值及其保存时间；未保存过时 <paramref name="Value"/> 为代码默认值、<paramref name="SavedAt"/> 为 null。</summary>
 public sealed record FreshSetting<T>(T Value, DateTimeOffset? SavedAt)
     where T : class, ISystemSetting<T>;

@@ -7,15 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Authentication.MySessions;
 
-/// <summary>
-/// 查询本人的有效登录会话
-/// </summary>
 public sealed class ListMySessionsQueryHandler(IIdentityQueryDb db, IExecutionContext execution, TimeProvider time) : IQueryHandler<ListMySessionsQuery, IReadOnlyList<MySessionItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<MySessionItem>>> Handle(ListMySessionsQuery query, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("查询登录会话需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("查询登录会话需要已登录的用户身份。");
         var now = time.GetUtcNow();
         var current = access.SessionId;
         var rows = await db.Sessions

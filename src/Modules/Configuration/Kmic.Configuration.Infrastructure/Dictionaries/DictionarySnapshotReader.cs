@@ -10,9 +10,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Kmic.Configuration.Infrastructure.Dictionaries;
 
-/// <summary>
-/// 按类型缓存字典快照，修改提交后按标签失效
-/// </summary>
+// 按类型缓存字典快照，修改提交后按标签失效
 internal sealed class DictionarySnapshotReader(IQueryScopeFactory queries, HybridCache cache) : IDictionarySnapshots
 {
     // 定期过期，避免失效通知丢失后一直读取旧缓存

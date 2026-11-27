@@ -7,15 +7,9 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.BackgroundJobs.Cancel;
 
-/// <summary>
-/// 请求取消后台作业
-/// </summary>
-/// <remarks>
-/// 不在 Operations 的命令事务里
-/// </remarks>
+// 直接操作目标模块作业存储，不纳入 Operations 本地事务
 public sealed class CancelBackgroundJobCommandHandler(IModuleJobStores stores, IExecutionContext execution) : ICommandHandler<CancelBackgroundJobCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(CancelBackgroundJobCommand command, CancellationToken cancellationToken)
     {
         var store = stores.Find(command.Module);

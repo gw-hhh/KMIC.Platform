@@ -13,9 +13,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Maintenance;
 
-/// <summary>
-/// 过期的数据直接把时间往前改，不等真实时间。每批只删 2 行，几行数据就能走到分批的路径
-/// </summary>
 public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -56,7 +53,7 @@ public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFi
         await _harness.Services.DrainAsync(Ct);
         var message = (await _harness.Services.PublishedAsync<TicketChanged>(Ct)).Single(m => m.Message.Ticket.Id == ticket.Id.Value).Envelope.MessageId;
 
-        // Echo 已经处理完；假设还有一个订阅方一直写不进去，来源行进了死信。两边都早已过了补投窗口
+        // 模拟场景：Echo 已完成处理，但存在另一订阅方持续失败导致来源 Outbox 进入死信；双方均已超出补投窗口
         await ExecuteAsync(
             """
             UPDATE "Probe"."OutboxMessage" SET "Status" = 3, "DeliveredAt" = NULL, "OccurredAt" = "OccurredAt" - interval '30 days' WHERE "Id" = @id;
@@ -68,14 +65,14 @@ public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFi
         (await CountAsync("""SELECT count(*) FROM "Probe"."OutboxMessage" WHERE "Id" = @id""", ("id", message))).ShouldBe(1);
         (await CountAsync("""SELECT count(*) FROM "Echo"."InboxMessage" WHERE "MessageId" = @id""", ("id", message))).ShouldBe(1);
 
-        // 运维重试死信：去重凭证还在，Echo 不会再执行一遍
+        // 运维重试死信后：Inbox 去重凭证仍在，Echo 不会重复执行
         await ExecuteAsync("""UPDATE "Probe"."OutboxMessage" SET "Status" = 0, "NextAttemptAt" = clock_timestamp() WHERE "Id" = @id""", message);
         await _harness.Services.DrainAsync(Ct);
         (await CountAsync("""SELECT count(*) FROM "Probe"."OutboxMessage" WHERE "Id" = @id AND "Status" = 2""", ("id", message))).ShouldBe(1);
         (await CountAsync("""SELECT count(*) FROM "Echo"."InboxMessage" WHERE "MessageId" = @id""", ("id", message))).ShouldBe(1);
         (await _harness.Services.PublishedAsync<TicketMirrored>(Ct)).Count(m => m.Message.TicketId == ticket.Id.Value).ShouldBe(1);
 
-        // 投递完成也过了补投窗口：同一次清理里先删来源行，再删凭证
+        // 投递完成且超出补投窗口后：同一次清理任务依次删除来源 Outbox 行与 Inbox 去重凭证
         await ExecuteAsync(
             """UPDATE "Probe"."OutboxMessage" SET "DeliveredAt" = "DeliveredAt" - interval '30 days' WHERE "Id" = @id""",
             message);
@@ -96,7 +93,7 @@ public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFi
         await _harness.Services.DrainAsync(Ct);
         var message = (await _harness.Services.PublishedAsync<TicketChanged>(Ct)).Single(m => m.Message.Ticket.Id == ticket.Id.Value).Envelope.MessageId;
 
-        // 来源行还在补投窗口内；Echo 的行改成死信并过了窗口，也不自动删
+        // 来源 Outbox 仍在补投窗口内；即使 Echo 的 Inbox 处于死信且超出保留窗口，也不应自动删除
         await ExecuteAsync("""UPDATE "Echo"."InboxMessage" SET "Status" = 3, "ReceivedAt" = "ReceivedAt" - interval '30 days' WHERE "MessageId" = @id""", message);
         await PurgeMessagesAsync();
 
@@ -114,7 +111,7 @@ public sealed class PurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFi
         await _harness.Services.FireAsync("Framework.PurgeJobs", _at, Ct);
 
         (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", expired))).ShouldBe(0);
-        (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", withFile))).ShouldBe(0, "结果文件由 Files 按自己的保留期清理");
+        (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", withFile))).ShouldBe(0, "作业记录应直接删除，关联结果文件由文件模块按各自保留期独立清理");
         (await CountAsync("""SELECT count(*) FROM "Probe"."BackgroundJob" WHERE "Id" = @id""", ("id", alive))).ShouldBe(1);
     }
 

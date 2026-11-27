@@ -4,12 +4,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Operations.Application.Audit.Export;
 
-/// <summary>
-/// 提交审计导出作业
-/// </summary>
 public sealed class ExportAuditCommandHandler(IBackgroundJobs jobs) : ICommandHandler<ExportAuditCommand, JobAccepted>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<JobAccepted>> Handle(ExportAuditCommand command, CancellationToken cancellationToken)
     {
         return await jobs.EnqueueAsync(

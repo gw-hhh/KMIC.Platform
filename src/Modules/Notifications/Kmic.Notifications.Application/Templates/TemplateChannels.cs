@@ -4,9 +4,6 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates;
 
-/// <summary>
-/// 模板渠道转换及默认正文选择
-/// </summary>
 internal static class TemplateChannels
 {
     public static IReadOnlyList<TemplateChannel> From(NotificationChannels channels)
@@ -30,9 +27,7 @@ internal static class TemplateChannels
         return result;
     }
 
-    /// <summary>
-    /// 代码里声明的某个渠道的默认正文：邮件是 HTML，短信和站内消息是纯文本
-    /// </summary>
+    // 邮件默认使用 HTML 正文，短信和站内消息使用纯文本正文
     public static string DefaultBody(NotificationTemplateDefinition definition, TemplateChannel channel)
     {
         ArgumentNullException.ThrowIfNull(definition);

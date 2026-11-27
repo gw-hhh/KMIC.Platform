@@ -5,9 +5,7 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Maintenance;
 
-/// <summary>
-/// 用库的管理账号模拟迁移账号：运行账号对这些表没有 DELETE 权限（见 MigrationTests）
-/// </summary>
+// 用管理账号模拟迁移账号：运行账号对追加写入表无 DELETE 权限
 public sealed class AppendOnlyPurgeTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static readonly DateTimeOffset _cutoff = new(2030, 1, 1, 0, 0, 0, TimeSpan.Zero);

@@ -11,9 +11,6 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.SetPermissions;
 
-/// <summary>
-/// 替换角色权限
-/// </summary>
 public sealed class SetRolePermissionsCommandHandler(
     IRoleRepository roles,
     IIdentityCommandReads db,
@@ -23,7 +20,6 @@ public sealed class SetRolePermissionsCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<SetRolePermissionsCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<RoleId>>> ExecuteAsync(SetRolePermissionsCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var unknown = command.Permissions.Where(code => !catalog.Contains(code)).Distinct(StringComparer.Ordinal).ToList();

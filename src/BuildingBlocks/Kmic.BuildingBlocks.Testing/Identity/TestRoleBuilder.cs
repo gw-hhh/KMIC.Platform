@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Application.Access;
 
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
-/// <summary>
-/// 测试角色
-/// </summary>
+/// <summary>测试角色构建器。</summary>
 public sealed class TestRoleBuilder
 {
     private readonly HashSet<string> _permissions = new(StringComparer.Ordinal);
@@ -15,27 +13,21 @@ public sealed class TestRoleBuilder
     {
     }
 
-    /// <summary>
-    /// 添加权限点
-    /// </summary>
+    /// <summary>添加权限点。</summary>
     public TestRoleBuilder Permissions(params IEnumerable<string> permissions)
     {
         _permissions.UnionWith(permissions);
         return this;
     }
 
-    /// <summary>
-    /// 默认数据权限等级，不设置时只能看本人数据
-    /// </summary>
+    /// <summary>设置默认数据权限范围，未设置时仅限本人数据。</summary>
     public TestRoleBuilder Scope(ScopeLevel level)
     {
         _defaultLevel = level;
         return this;
     }
 
-    /// <summary>
-    /// 某个范围对象上的等级
-    /// </summary>
+    /// <summary>设置指定范围对象的数据权限覆盖等级。</summary>
     public TestRoleBuilder Override(string scopeObject, ScopeLevel level)
     {
         _overrides[scopeObject] = level;

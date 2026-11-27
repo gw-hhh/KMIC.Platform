@@ -7,13 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Maintenance;
 
-/// <summary>
-/// 清理超过保留期的已结束会话
-/// </summary>
 public sealed class PurgeSessionsCommandHandler(ISessionRepository sessions, IOptions<SessionLifetimeOptions> options, TimeProvider time)
     : ICommandHandler<PurgeSessionsCommand, ScheduledJobOutcome>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeSessionsCommand command, CancellationToken cancellationToken)
     {
         var purged = await sessions.PurgeEndedAsync(time.GetUtcNow() - options.Value.EndedRetention, cancellationToken);

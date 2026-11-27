@@ -2,35 +2,19 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 订阅路由的运维操作：终结与重新激活
-/// </summary>
+/// <summary>订阅路由运维操作（终结、重新激活与补投）。</summary>
 public interface IMessageRouteAdmin
 {
-    /// <summary>
-    /// 终结待终结的订阅，之后不再向它投递
-    /// </summary>
+    /// <summary>终结待终结的订阅路由，此后不再向该订阅投递消息。</summary>
     Task<RouteFinalizeResult> FinalizeAsync(
         string messageType, string subscription, UserId by, string reason, bool abandonUnfinished, TimeSpan instanceAliveWithin, CancellationToken ct);
 
-    /// <summary>
-    /// 重新激活已终结的订阅
-    /// </summary>
-    /// <remarks>
-    /// 终结期间漏掉的消息不会补回，要用补投
-    /// </remarks>
+    /// <summary>重新激活已终结的订阅；终结期间遗漏的消息不会自动补发，需通过补投恢复。</summary>
     Task<RouteAdminOutcome> ReactivateAsync(string messageType, string subscription, CancellationToken ct);
 
-    /// <summary>
-    /// 补投：按序号区间把已投递的消息再投给指定订阅
-    /// </summary>
-    /// <remarks>
-    /// 已终结的订阅要先重新激活
-    /// </remarks>
+    /// <summary>按序号区间补投已投递消息；已终结的订阅须先重新激活后再补投。</summary>
     Task<RedeliverResult> RedeliverAsync(string sourceModule, string messageType, string subscription, long fromSeq, long toSeq, CancellationToken ct);
 
-    /// <summary>
-    /// 一次补投最多多少条
-    /// </summary>
+    /// <summary>单次补投允许的最大消息条数。</summary>
     const int MaxRedeliverRows = 5000;
 }

@@ -3,12 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Operations.Application.Messages.Routes;
 
-/// <summary>
-/// 终结消息订阅路由
-/// </summary>
-/// <remarks>
-/// 须在维护窗口执行
-/// </remarks>
+/// <summary>终结消息订阅路由（须在维护窗口执行）。</summary>
 /// <param name="MessageType">消息名称</param>
 /// <param name="Subscription">订阅名</param>
 /// <param name="Reason">原因</param>

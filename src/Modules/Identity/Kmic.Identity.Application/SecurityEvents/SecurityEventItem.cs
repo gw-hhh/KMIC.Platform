@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Application.Security;
 
 namespace Kmic.Identity.Application.SecurityEvents;
 
-/// <summary>
-/// 安全事件列表项
-/// </summary>
+/// <summary>安全事件列表项。</summary>
 /// <param name="Id">事件 ID</param>
 /// <param name="OccurredAt">发生时间</param>
 /// <param name="Type">类型</param>

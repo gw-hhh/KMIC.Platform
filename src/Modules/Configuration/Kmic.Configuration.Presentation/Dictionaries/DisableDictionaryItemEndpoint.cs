@@ -12,7 +12,7 @@ internal sealed class DisableDictionaryItemEndpoint : IEndpoint
         group.MapPost("/dictionary-types/{typeCode}/items/{code}/disable", HandleAsync)
             .Sends<DisableDictionaryItemCommand>()
             .WithSummary("停用字典项")
-            .WithDescription("停用项仍供历史数据显示，新数据不可选用。有启用的子项时返回 422，须先停用子项。");
+            .WithDescription("停用后仅历史数据可见，新数据不可选；若仍有启用的子项则返回 422");
 
     private static async Task<IResult> HandleAsync([Description("字典类型编码")] string typeCode, [Description("字典项编码")] string code, DictionaryItemVersionRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new DisableDictionaryItemCommand(typeCode, request.ExpectedVersion, code), ct)).ToOk();

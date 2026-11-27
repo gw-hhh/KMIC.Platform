@@ -13,7 +13,7 @@ internal sealed class ListCapturedEndpoint : IEndpoint
             .Sends<ListCapturedQuery>()
             .Sortable(CapturedSort.Map)
             .WithSummary("查询捕获的通知内容")
-            .WithDescription("查询捕获模式下保存的邮件和短信，不含正文。未开启捕获时返回 404。内容可能含验证码，查看会记录读审计。");
+            .WithDescription("分页查询捕获模式下保存的邮件与短信摘要（不含正文，记录读取审计）；未开启捕获返回 404");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListCapturedRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListCapturedQuery(request.Channel, new PageRequest(request.Page, request.PageSize), new SortRequest(request.Sort)), ct)).ToOk();

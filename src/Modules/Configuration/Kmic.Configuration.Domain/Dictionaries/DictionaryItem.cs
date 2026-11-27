@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Configuration.Domain.Dictionaries;
 
-/// <summary>
-/// 字典项：业务数据里存的是它的编码，名称可以改，编码创建后不能改
-/// </summary>
+/// <summary>字典项（业务数据保存其编码，显示名可改，编码创建后不可变更）</summary>
 public sealed class DictionaryItem : Entity<DictionaryItemId>
 {
     private DictionaryItem(DictionaryItemId id, string code, string name, string? parentCode, int sortOrder)

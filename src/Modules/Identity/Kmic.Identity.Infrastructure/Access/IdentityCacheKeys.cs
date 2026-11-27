@@ -4,18 +4,10 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Identity.Infrastructure.Access;
 
-/// <summary>
-/// Identity 模块的缓存键
-/// </summary>
+// 键中附带版本号，角色或组织树变更后自动切向新键
 internal static class IdentityCacheKeys
 {
-    /// <summary>
-    /// 角色授权快照，版本变化后使用新的缓存键
-    /// </summary>
     public static string RoleSnapshot(RoleId role, long version) => CacheKey.Of(IdentityModuleInfo.Name, "RoleSnapshot", role.Value, version);
 
-    /// <summary>
-    /// 组织树快照，键里带树版本号
-    /// </summary>
     public static string OrgTree(long version) => CacheKey.Of(IdentityModuleInfo.Name, "OrgTree", version);
 }

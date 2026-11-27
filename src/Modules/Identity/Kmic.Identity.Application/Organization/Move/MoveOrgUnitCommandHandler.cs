@@ -8,13 +8,9 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Move;
 
-/// <summary>
-/// 移动组织单元及其下级
-/// </summary>
 public sealed class MoveOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<MoveOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<OrgTreeId>>> ExecuteAsync(MoveOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await trees.GetForUpdateAsync(OrgTreeId.Default, command.ExpectedVersion, cancellationToken);

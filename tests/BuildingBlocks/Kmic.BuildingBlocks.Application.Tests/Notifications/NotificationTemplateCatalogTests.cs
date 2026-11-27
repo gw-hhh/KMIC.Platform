@@ -60,7 +60,7 @@ public sealed class NotificationTemplateCatalogTests
     [Fact]
     public void FromAssemblies_FindsEveryDeclaredModelInTheAssembly_AndRefusesTheBadOnes()
     {
-        // 这个测试程序集里同时有对的和故意写错的声明：整体读取必须失败，不会悄悄只收对的
+        // 当前测试程序集同时包含合法与故意构造的错误声明：整体扫描必须失败，不得静默忽略错误项
         var thrown = Should.Throw<DeclarationException>(() => NotificationTemplateCatalog.FromAssemblies([typeof(TemplateSamples).Assembly]));
 
         thrown.Problems.Count.ShouldBeGreaterThanOrEqualTo(5);

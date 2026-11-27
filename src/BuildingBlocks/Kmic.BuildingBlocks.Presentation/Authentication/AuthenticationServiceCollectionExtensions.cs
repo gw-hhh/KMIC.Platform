@@ -6,17 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 认证的服务注册与中间件
-/// </summary>
 public static class AuthenticationServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册访问令牌的验证：JwtBearer，RS256，签名密钥可轮换
-    /// </summary>
-    /// <remarks>
-    /// 令牌里的声明保持原名（sub、sid、rid）
-    /// </remarks>
+    /// <summary>注册 RS256 访问令牌认证与密钥轮换支持（保留 sub、sid、rid 原始声明名）</summary>
     public static IServiceCollection AddKmicAuthentication(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -28,7 +20,7 @@ public static class AuthenticationServiceCollectionExtensions
         services.AddSingleton<SigningKeyStore>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
 
-        // 密钥有问题时在启动阶段就失败，而不是第一个请求才发现
+        // 启动阶段即校验签名密钥配置，避免首个请求到达时才暴露异常
         services.AddTransient<IStartupFilter, SigningKeyValidationFilter>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -38,12 +30,7 @@ public static class AuthenticationServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 为每个请求加载访问上下文、设置当前身份、写授权版本头，并在当前角色不可用时拦截
-    /// </summary>
-    /// <remarks>
-    /// 放在认证之后、授权之前，并且在路由之后
-    /// </remarks>
+    /// <summary>加载访问上下文、写入授权版本头并拦截不可用角色（须置于路由与认证之后、授权之前）</summary>
     public static IApplicationBuilder UseKmicAccessContext(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -67,7 +54,7 @@ public static class AuthenticationServiceCollectionExtensions
             ValidateIssuerSigningKey = true,
             ClockSkew = auth.Value.ClockSkew,
 
-            // 只接受 RS256：拒绝 none 和对称算法；kid 对不上的令牌不去试别的密钥
+            // 仅接受 RS256 算法（拒绝 none 与对称算法）；kid 不匹配时不回退尝试其他密钥
             ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
             IssuerSigningKeys = keys.ValidationKeys,
             TryAllIssuerSigningKeys = false,

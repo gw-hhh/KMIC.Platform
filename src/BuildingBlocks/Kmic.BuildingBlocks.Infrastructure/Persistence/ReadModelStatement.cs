@@ -5,20 +5,14 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 一条读模型写入语句要用的表名、列名和参数
-/// </summary>
 internal sealed class ReadModelStatement(IEntityType entity, DbCommand factory) : IAsyncDisposable
 {
-    // 这几列由框架维护，不取行上的值
+    // 以下系统列由框架自动维护，不从业务行数据中读取
     private static readonly string[] _managed =
         [nameof(IReadModel.IsTerminal), nameof(IReadModel.TerminalReason), nameof(IReadModel.TerminalAt), nameof(IReadModel.RebuildRunId), nameof(IReadModel.SyncedAt)];
 
     private readonly List<DbParameter> _parameters = [];
 
-    /// <summary>
-    /// 写入一行：数据列和它们的值取自这一行
-    /// </summary>
     public ReadModelStatement(IEntityType entity, DbCommand factory, object row)
         : this(entity, factory)
     {

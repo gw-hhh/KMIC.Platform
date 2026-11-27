@@ -66,7 +66,7 @@ public sealed class ConcurrencyVersionTests(ClassDatabase<ProbeTemplate> databas
         mine.Rename("先保存");
         await first.SaveAsync();
 
-        // 后保存的一方只改了子实体，同样会被版本号拦下
+        // 后提交一方仅修改子实体时，同样应触发聚合根并发版本号冲突检测
         theirs.ChangeLine(line.Id, "后保存");
         await Should.ThrowAsync<DbUpdateConcurrencyException>(second.SaveAsync);
     }

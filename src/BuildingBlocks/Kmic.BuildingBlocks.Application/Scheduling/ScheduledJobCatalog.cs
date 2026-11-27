@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 定时任务目录
-/// </summary>
 public sealed class ScheduledJobCatalog
 {
     private readonly FrozenDictionary<string, ScheduledJobDefinition> _byName;
@@ -16,14 +13,9 @@ public sealed class ScheduledJobCatalog
         _byName = all.ToFrozenDictionary(j => j.Name, StringComparer.Ordinal);
     }
 
-    /// <summary>
-    /// 全部定时任务
-    /// </summary>
     public IReadOnlyList<ScheduledJobDefinition> All { get; }
 
-    /// <summary>
-    /// 按名称查找，本实例没有声明时返回空
-    /// </summary>
+    /// <summary>按名称查找定时任务定义，未声明时返回 null。</summary>
     public ScheduledJobDefinition? Find(string name) => _byName.GetValueOrDefault(name);
 
     internal static ScheduledJobCatalog Build(IEnumerable<ModuleSchedules> modules, UseCaseCatalog useCases, Func<string, string?> checkCron)
@@ -47,7 +39,7 @@ public sealed class ScheduledJobCatalog
         var name = declared.Name;
         if (!name.StartsWith(module + ".", StringComparison.Ordinal) || name.Length == module.Length + 1)
         {
-            problems.Add($"定时任务名“{name}”要以“{module}.”开头。");
+            problems.Add($"定时任务名“{name}”须以“{module}.”开头。");
         }
 
         var useCase = useCases.Find(declared.CommandType);
@@ -57,12 +49,12 @@ public sealed class ScheduledJobCatalog
         }
         else if (useCase.Requirement != AccessRequirement.SystemOnly)
         {
-            problems.Add($"定时任务 {name} 发送的 {declared.CommandType.Name} 只由系统执行，要标 [SystemOnly]。");
+            problems.Add($"定时任务 {name} 发送的 {declared.CommandType.Name} 仅限系统执行，须标注 [SystemOnly]。");
         }
 
         if (checkCron(declared.Cron) is { } cronProblem)
         {
-            problems.Add($"定时任务 {name} 的执行时间“{declared.Cron}”写得不对：{cronProblem}");
+            problems.Add($"定时任务 {name} 的 Cron 表达式“{declared.Cron}”无效：{cronProblem}");
         }
 
         return new ScheduledJobDefinition(

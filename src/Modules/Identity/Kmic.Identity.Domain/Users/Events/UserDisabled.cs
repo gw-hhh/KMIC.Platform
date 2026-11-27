@@ -3,8 +3,5 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Domain.Users.Events;
 
-/// <summary>
-/// 用户已被禁用，同一事务里作废他的全部会话
-/// </summary>
-/// <param name="UserId">用户</param>
+/// <summary>用户已禁用，在同一事务内作废该用户的全部会话。</summary>
 public sealed record UserDisabled(UserId UserId) : IDomainEvent;

@@ -10,9 +10,6 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.Enable;
 
-/// <summary>
-/// 启用角色
-/// </summary>
 public sealed class EnableRoleCommandHandler(
     IRoleRepository roles,
     IIdentityCommandReads db,
@@ -21,7 +18,6 @@ public sealed class EnableRoleCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<EnableRoleCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<RoleId>>> ExecuteAsync(EnableRoleCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await RoleAdminLoading.LoadForAsync(roles, db, authorizer, command.Id, command.ExpectedVersion, RoleAdminAction.Enable, access, cancellationToken);

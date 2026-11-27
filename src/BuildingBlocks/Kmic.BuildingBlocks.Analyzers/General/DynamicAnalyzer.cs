@@ -7,23 +7,19 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
-/// <summary>
-/// KM9006：不能用 dynamic
-/// </summary>
+/// <summary>KM9006：禁止使用 dynamic。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DynamicAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9006",
         Rules.GeneralCategory,
-        "不能用 dynamic",
-        "不能用 dynamic，改用明确的类型或 JsonElement",
-        "用了 dynamic，编译器就不检查类型，写错了要到运行时才发现。");
+        "禁止使用 dynamic",
+        "禁止使用 dynamic，请改用明确类型或 JsonElement",
+        "使用 dynamic 会绕过编译期类型检查，错误将延迟至运行时暴露。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

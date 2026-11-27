@@ -2,16 +2,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Authentication;
 
-/// <summary>
-/// 登录失败的等待与锁定算法
-/// </summary>
+/// <summary>登录失败等待与锁定策略计算</summary>
 public sealed class LoginThrottlePolicy(IOptions<LoginThrottleOptions> settings)
 {
     private LoginThrottleOptions Options => settings.Value;
 
-    /// <summary>
-    /// 距离下次允许登录的等待时间；无需等待时返回 null
-    /// </summary>
+    /// <summary>计算距下次允许登录的等待时长；无需等待时返回 null</summary>
     public static TimeSpan? Remaining(LoginThrottleState? state, DateTimeOffset now)
     {
         if (state is null)
@@ -23,9 +19,7 @@ public sealed class LoginThrottlePolicy(IOptions<LoginThrottleOptions> settings)
         return until is { } moment && moment > now ? moment - now : null;
     }
 
-    /// <summary>
-    /// 计算本次登录失败后的状态
-    /// </summary>
+    /// <summary>计算本次登录失败后的限流状态</summary>
     public LoginThrottleState OnFailure(LoginThrottleState? previous, DateTimeOffset now)
     {
         // 超过重置间隔时，失败次数和锁定等级一并重置

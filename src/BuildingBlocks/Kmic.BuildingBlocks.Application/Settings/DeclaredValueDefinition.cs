@@ -2,9 +2,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Settings;
 
-/// <summary>
-/// 设置定义
-/// </summary>
 public abstract class DeclaredValueDefinition
 {
     private readonly Func<object, Result> _validate;
@@ -19,34 +16,16 @@ public abstract class DeclaredValueDefinition
         _validate = validate;
     }
 
-    /// <summary>
-    /// 键
-    /// </summary>
     public string Key { get; }
 
-    /// <summary>
-    /// 所属模块
-    /// </summary>
     public string Module { get; }
 
-    /// <summary>
-    /// 显示名称
-    /// </summary>
     public string DisplayName { get; }
 
-    /// <summary>
-    /// 值类型
-    /// </summary>
     public Type ValueType { get; }
 
-    /// <summary>
-    /// 默认值
-    /// </summary>
     public object DefaultValue { get; }
 
-    /// <summary>
-    /// 校验值
-    /// </summary>
     public Result Validate(object value)
     {
         ArgumentNullException.ThrowIfNull(value);

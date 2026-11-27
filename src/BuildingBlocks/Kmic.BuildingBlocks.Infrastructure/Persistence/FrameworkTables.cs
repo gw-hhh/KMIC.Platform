@@ -6,9 +6,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 框架表
-/// </summary>
 internal static class FrameworkTables
 {
     public const string Idempotency = nameof(IdempotencyRecord);
@@ -23,7 +20,7 @@ internal static class FrameworkTables
 
     public const string NumberCounters = "NumberCounter";
 
-    // 只索引还没完成的消息：接收方删除对象前只关心这些
+    // 仅索引尚未完成的消息，供接收方在删除关联对象前进行引用检查
     private const string UnfinishedWithSubjects = """
         "SubjectIds" IS NOT NULL AND "Status" IN (0, 1, 3)
         """;
@@ -32,7 +29,7 @@ internal static class FrameworkTables
         "Status" IN (0, 1)
         """;
 
-    // 还没处理完的和死信：积压统计按订阅分组，只看这些行
+    // 仅包含未完成与死信消息，供按订阅分组的积压统计查询使用
     private const string Outstanding = """
         "Status" IN (0, 1, 3)
         """;
@@ -41,7 +38,7 @@ internal static class FrameworkTables
         "Status" IN (0, 1, 3) AND "OrderingKey" IS NOT NULL
         """;
 
-    // 清理时只找已完成的：Inbox 的去重凭证、到期的作业记录
+    // 仅索引已完成的记录，用于加速清理 Inbox 去重凭证及过期作业记录
     private const string Done = """
         "Status" = 2
         """;
@@ -50,7 +47,7 @@ internal static class FrameworkTables
         "ExpiresAt" IS NOT NULL
         """;
 
-    // 同一个订阅同时只能有一轮没结束的重建
+    // 确保同一订阅同一时间最多仅有一轮未结束的重建任务
     private const string ActiveRun = """
         "Status" IN (0, 1)
         """;
@@ -140,7 +137,7 @@ internal static class FrameworkTables
         job.HasIndex(j => new { j.SubmittedBy, j.SubmittedAt }).IsDescending(false, true);
     }
 
-    // 两张表共有的列。时间默认取数据库时钟，各实例的时钟有偏差也不影响
+    // 两张表共用的列；默认时间戳采用数据库时钟，不受各应用实例间时钟偏差影响
     private static void MapCommonColumns<T>(EntityTypeBuilder<T> message)
         where T : class
     {

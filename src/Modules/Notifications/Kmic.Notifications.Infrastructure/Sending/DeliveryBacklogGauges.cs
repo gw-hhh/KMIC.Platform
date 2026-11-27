@@ -7,12 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Infrastructure.Sending;
 
-/// <summary>
-/// 投递队列的积压量表，按渠道统计，没有积压的渠道也输出 0
-/// </summary>
-/// <remarks>
-/// 最老积压包含退避等待的时间
-/// </remarks>
+// 按渠道统计投递积压（无积压时输出 0），最早积压时长包含退避等待时间
 internal sealed class DeliveryBacklogGauges(IQueryScopeFactory queries) : IBacklogGauges
 {
     private const string Pending = "kmic.notifications.pending";
@@ -26,7 +21,7 @@ internal sealed class DeliveryBacklogGauges(IQueryScopeFactory queries) : IBackl
     public IReadOnlyList<BacklogGauge> Gauges { get; } =
     [
         new(Pending, "{delivery}", "待发送和发送中的投递数"),
-        new(OldestAge, "s", "最老的待发送投递创建至今的时间"),
+        new(OldestAge, "s", "最早一条待发送投递创建至今的时间"),
     ];
 
     public async Task<IReadOnlyList<BacklogReading>> ReadAsync(CancellationToken ct)

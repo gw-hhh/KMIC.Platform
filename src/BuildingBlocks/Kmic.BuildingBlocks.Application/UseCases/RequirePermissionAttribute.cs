@@ -1,13 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 需要权限点
-/// </summary>
+/// <summary>声明用例执行所需的权限点编码。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class RequirePermissionAttribute(string permission) : Attribute
 {
-    /// <summary>
-    /// 权限点编码
-    /// </summary>
     public string Permission { get; } = permission;
 }

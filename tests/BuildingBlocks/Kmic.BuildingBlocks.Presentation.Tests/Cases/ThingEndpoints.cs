@@ -8,9 +8,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 一组正常的端点，覆盖 Result 转 HTTP 的每种写法和请求解析的几种情况。路径是 /api/v1/{模块}/...
-/// </summary>
 internal static class ThingEndpoints
 {
     public static readonly Type[] All =

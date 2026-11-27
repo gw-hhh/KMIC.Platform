@@ -5,15 +5,9 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages.Retry;
 
-/// <summary>
-/// 重试死信并逐条返回结果
-/// </summary>
-/// <remarks>
-/// 不在 Operations 的命令事务里
-/// </remarks>
+// 直接操作各模块消息存储，不纳入 Operations 本地事务
 public sealed class RetryMessagesCommandHandler(IModuleMessageStores stores) : ICommandHandler<RetryMessagesCommand, MessageReceipts>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<MessageReceipts>> Handle(RetryMessagesCommand command, CancellationToken cancellationToken)
     {
         var outcomes = new Dictionary<(string Module, MessageBoxKind Box, Guid Id), MessageReceipt>();

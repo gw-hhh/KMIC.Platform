@@ -2,27 +2,17 @@ using Microsoft.CodeAnalysis;
 
 namespace Kmic.BuildingBlocks.Analyzers.Common;
 
-/// <summary>
-/// 诊断规则，一律是错误级别
-/// </summary>
 internal static class Rules
 {
     public const string DomainCategory = "Kmic.Domain";
     public const string GeneralCategory = "Kmic.General";
     public const string DataCategory = "Kmic.Data";
 
-    /// <summary>
-    /// 创建诊断规则
-    /// </summary>
-    /// <remarks>
-    /// message 写哪里错、怎么改，description 写原因
-    /// </remarks>
+    // 统一按 Error 级别创建：message 说明位置与修法，description 说明规则原因
     public static DiagnosticDescriptor Create(string id, string category, string title, string message, string description, params string[] customTags) =>
         new(id, title, message, category, DiagnosticSeverity.Error, isEnabledByDefault: true, description, customTags: customTags);
 
-    /// <summary>
-    /// 外部能增删元素的集合类型；只读接口、不可变集合、冻结集合不算
-    /// </summary>
+    // 排除只读接口、Immutable 与 Frozen 集合
     public static bool IsMutableCollection(ITypeSymbol type)
     {
         if (type is IArrayTypeSymbol)

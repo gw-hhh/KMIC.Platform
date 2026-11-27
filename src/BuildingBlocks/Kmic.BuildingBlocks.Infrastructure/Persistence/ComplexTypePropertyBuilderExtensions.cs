@@ -3,15 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 值对象成员的映射扩展
-/// </summary>
 public static class ComplexTypePropertyBuilderExtensions
 {
-    /// <summary>
-    /// 不限长度的文本列
-    /// </summary>
-    /// <exception cref="InvalidOperationException">不是字符串</exception>
+    /// <summary>映射为不限长度的文本列（仅限 string 成员）</summary>
     public static ComplexTypePropertyBuilder<TProperty> IsUnboundedText<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -19,10 +13,7 @@ public static class ComplexTypePropertyBuilderExtensions
         return builder.HasColumnType(ColumnTypes.UnboundedText);
     }
 
-    /// <summary>
-    /// 不区分大小写
-    /// </summary>
-    /// <exception cref="InvalidOperationException">不是字符串</exception>
+    /// <summary>启用不区分大小写排序规则（仅限 string 成员）</summary>
     public static ComplexTypePropertyBuilder<TProperty> IsCaseInsensitive<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -30,9 +21,7 @@ public static class ComplexTypePropertyBuilderExtensions
         return builder.UseCollation(Collations.CaseInsensitive);
     }
 
-    /// <summary>
-    /// 设置小数精度
-    /// </summary>
+    /// <summary>按预设配置小数精度</summary>
     public static ComplexTypePropertyBuilder<TProperty> HasPrecision<TProperty>(this ComplexTypePropertyBuilder<TProperty> builder, DecimalPrecision precision)
     {
         ArgumentNullException.ThrowIfNull(builder);

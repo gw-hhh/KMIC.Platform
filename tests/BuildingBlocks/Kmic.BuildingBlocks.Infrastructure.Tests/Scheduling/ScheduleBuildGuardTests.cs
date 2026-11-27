@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Scheduling;
 
-/// <summary>
-/// 滚动发布时旧版本的实例重启，不能把新版本同步的内容改回去
-/// </summary>
 public sealed class ScheduleBuildGuardTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private const string Added = "BuildingBlocks.AddedLater";
@@ -36,7 +33,7 @@ public sealed class ScheduleBuildGuardTests(ClassDatabase<ProbeTemplate> databas
         (await scheduler.GetJobDetail(new JobKey(Added, CommandJob.Group), Ct)).ShouldNotBeNull();
         (await scheduler.GetJobDetail(new JobKey(ProbeHarness.DailyStamp, CommandJob.Group), Ct)).ShouldNotBeNull().JobDataMap["kmic.build"].ShouldBe("2.0.0+abc");
 
-        // 同一个或更新的版本照常同步，删掉代码里已经没有的任务
+        // 同版本或更高版本应正常执行同步，并清理代码中已移除的任务
         await synchronizer.SyncAsync("2.0.0", Ct);
 
         (await scheduler.GetJobDetail(new JobKey(Added, CommandJob.Group), Ct)).ShouldBeNull();

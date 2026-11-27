@@ -8,9 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 数据权限过滤器
-/// </summary>
 internal static class DataScopeFilters
 {
     private static readonly MethodInfo _containsOrgUnit = typeof(Enumerable).GetMethods()
@@ -32,7 +29,7 @@ internal static class DataScopeFilters
     {
         var entity = Expression.Parameter(clrType, "e");
 
-        // EF 会把上下文实例换成执行查询的那个上下文，所以范围总是当前请求的
+        // EF Core 会将表达式中的上下文参数替换为实际执行查询的上下文实例，从而始终读取当前请求的数据范围
         var self = Expression.Constant(context);
         var scope = Expression.Call(self, nameof(ModuleDbContext.DataScopeFor), Type.EmptyTypes, Expression.Constant(scopeObject));
 

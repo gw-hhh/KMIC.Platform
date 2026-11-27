@@ -10,7 +10,7 @@ async function chooseLayout(page: Page, name: '垂直' | '双列菜单' | '混�
 const mainLeft = (page: Page): Promise<number> =>
   page.locator('div.main').evaluate((el) => Math.round(el.getBoundingClientRect().left));
 
-test('双列菜单：第二列打开页面、取消固定后悬停浮出、再固定', async ({ page }) => {
+test('双列菜单布局：第二列打开页面、取消固定后悬停展开及重新固定', async ({ page }) => {
   await loginToShell(page);
   await chooseLayout(page, '双列菜单');
 
@@ -37,7 +37,7 @@ test('双列菜单：第二列打开页面、取消固定后悬停浮出、再�
   await expect.poll(() => mainLeft(page)).toBe(80 + 224);
 });
 
-test('混合垂直：顶栏一级目录高亮，切换目录后侧栏换成它的菜单；窄屏改成抽屉', async ({ page }) => {
+test('混合垂直布局：顶栏一级目录高亮并联动侧栏子菜单，窄屏下改为抽屉式导航', async ({ page }) => {
   await loginToShell(page);
   await page.getByText('销售（示例）').click();
   await page.getByText('订单', { exact: true }).click();
@@ -57,7 +57,7 @@ test('混合垂直：顶栏一级目录高亮，切换目录后侧栏换成它�
   await expect(page.locator('aside .logo-text')).toBeVisible();
 });
 
-test('垂直布局折叠侧栏后宽 60', async ({ page }) => {
+test('垂直布局折叠侧栏后宽度收缩至 60px', async ({ page }) => {
   await loginToShell(page);
   await page.getByRole('button', { name: '展开/收起菜单' }).first().click();
   await page.mouse.move(800, 400);
@@ -67,7 +67,7 @@ test('垂直布局折叠侧栏后宽 60', async ({ page }) => {
     .toBeLessThanOrEqual(61);
 });
 
-test('偏好设置：整行和开关本身、空格键都只切换一次；方框能用键盘选', async ({ page }) => {
+test('偏好设置：点击整行、开关本身及空格键均只切换一次状态，模式按钮支持键盘选择', async ({ page }) => {
   await loginToShell(page);
   await openSettings(page, '外观');
   const toggle = page.getByRole('switch', { name: '色弱模式' });

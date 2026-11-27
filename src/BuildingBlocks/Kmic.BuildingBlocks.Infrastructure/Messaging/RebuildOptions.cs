@@ -1,25 +1,14 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 读模型重建配置
-/// </summary>
+/// <summary>读模型重建配置</summary>
 public sealed class RebuildOptions
 {
-    /// <summary>
-    /// 每页从源端读取的条数，也是每个事务写入的条数
-    /// </summary>
+    /// <summary>单页从源端读取与单事务写入的条数</summary>
     public int PageSize { get; set; } = 500;
 
-    /// <summary>
-    /// 收尾时源端找不到的行数不超过这个数，就直接置为终态
-    /// </summary>
+    /// <summary>收尾阶段允许直接置为终态的缺失行数阈值</summary>
     public int MaxMissingCount { get; set; } = 100;
 
-    /// <summary>
-    /// 收尾时源端找不到的行数比例上限，不超过就直接置为终态
-    /// </summary>
-    /// <remarks>
-    /// 和 MaxMissingCount 取大的那个，超过就暂停等运维确认
-    /// </remarks>
+    /// <summary>收尾阶段允许直接置为终态的缺失行数比例上限（与 MaxMissingCount 取较大值，超出后暂停等运维确认）</summary>
     public double MaxMissingRatio { get; set; } = 0.01;
 }

@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Presentation.Http;
 
 namespace Kmic.BuildingBlocks.Presentation.Limits;
 
-/// <summary>
-/// 按端点声明的并发限制放行请求
-/// </summary>
 internal sealed class ConcurrencyLimitMiddleware(RequestDelegate next, ConcurrencyLimiters limiters)
 {
     public async Task InvokeAsync(HttpContext context)
@@ -34,7 +31,7 @@ internal sealed class ConcurrencyLimitMiddleware(RequestDelegate next, Concurren
                 leases.Add(lease);
             }
 
-            // 许可一直持有到处理完，包括流式响应写完
+            // 并发许可须持有至请求处理完全结束（含流式响应写入完成）
             await next(context);
         }
         finally

@@ -1,25 +1,11 @@
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
-/// <summary>
-/// 带版本号的命令结果
-/// </summary>
-/// <remarks>
-/// 保存后会换成新版本号，处理器按当前值填即可
-/// </remarks>
+/// <summary>带并发版本号的命令结果；持久化后将自动替换为新版本号，处理器按当前值填充即可。</summary>
 public interface IHasConcurrencyVersion
 {
-    /// <summary>
-    /// 版本号所属的聚合根
-    /// </summary>
     Guid AggregateId { get; }
 
-    /// <summary>
-    /// 版本号
-    /// </summary>
     long ConcurrencyVersion { get; }
 
-    /// <summary>
-    /// 换成新版本号
-    /// </summary>
     IHasConcurrencyVersion WithConcurrencyVersion(long version);
 }

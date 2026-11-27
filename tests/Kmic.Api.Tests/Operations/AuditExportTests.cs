@@ -15,12 +15,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 审计导出：提交后台作业，Worker 把审计记录写成 CSV 交给 Files，登记完成后提交人下载，端到端
-/// </summary>
-/// <remarks>
-/// 宿主同时跑 Api 和 Worker；导出的行数上限调成 3，方便测超限
-/// </remarks>
 public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(
         database,
@@ -80,15 +74,15 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         var jobId = accepted.GetProperty("jobId").GetGuid();
         response.Headers.Location!.ToString().ShouldBe($"{Root}/{jobId}/file");
 
-        // 返回的模块名直接能用来查作业进度
+        // 返回的模块标识可直接用于后续查询作业进度
         var module = accepted.GetProperty("module").GetString();
         var job = await SendAsync(HttpMethod.Get, $"/api/v1/operations/my-jobs/{module}/{jobId}", token);
         job.StatusCode.ShouldBe(HttpStatusCode.OK);
         return jobId;
     }
 
-    // 作业要先跑完，文件再经发件箱、路由、收件箱登记，所以要等到不再是“还没好”的 409
-    // 半秒问一次：接口有限流，等待工具默认每 50 毫秒一次会被限流
+    // 作业完成后，文件需经发件箱、路由与收件箱完成登记，因此轮询等待直到响应不再返回表示未就绪的 409 状态
+    // 轮询间隔设为 500 毫秒，避免触发接口限流（默认 50 毫秒间隔易被限流）
     private async Task<HttpResponseMessage> DownloadWhenReadyAsync(string token, Guid jobId)
     {
         var deadline = TimeProvider.System.GetUtcNow().AddSeconds(40);
@@ -106,14 +100,14 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
                     $"""SELECT "Status"::text || ' ' || coalesce("ErrorCode", '') || ' ' || coalesce("ErrorMessage", '') || ' ' || coalesce("ResultFileId"::text, '') FROM "Operations"."BackgroundJob" WHERE "Id" = '{jobId}'""");
                 var file = await Seed.ScalarAsync<string>(
                     $"""SELECT "Status" FROM "Files"."StoredFile" WHERE "Id" = (SELECT "ResultFileId" FROM "Operations"."BackgroundJob" WHERE "Id" = '{jobId}')""");
-                throw new TimeoutException($"40 秒内没有做完。作业：{job}；文件：{file}；响应：{await response.Content.ReadAsStringAsync(Ct)}");
+                throw new TimeoutException($"40 秒内未完成导出。作业：{job}；文件：{file}；响应：{await response.Content.ReadAsStringAsync(Ct)}");
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(500), TimeProvider.System, Ct);
         }
     }
 
-    // 结束事件经发件箱、路由、收件箱交给 Notifications 后才生成站内消息
+    // 作业结束事件需经发件箱、路由与收件箱投递至 Notifications 后方生成站内消息
     private async Task<JsonElement> SiteMessageWhenSentAsync(string token, string title)
     {
         var deadline = TimeProvider.System.GetUtcNow().AddSeconds(40);
@@ -128,7 +122,7 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
 
             if (TimeProvider.System.GetUtcNow() > deadline)
             {
-                throw new TimeoutException($"40 秒内没有收到站内消息“{title}”。");
+                throw new TimeoutException($"40 秒内未收到站内消息“{title}”。");
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(500), TimeProvider.System, Ct);
@@ -138,7 +132,7 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
     private static async Task<string[]> LinesOfAsync(HttpResponseMessage response)
     {
         var bytes = await response.Content.ReadAsByteArrayAsync(Ct);
-        bytes[..3].ShouldBe([0xEF, 0xBB, 0xBF], "带 BOM 的 UTF-8，Excel 才会按 UTF-8 打开");
+        bytes[..3].ShouldBe([0xEF, 0xBB, 0xBF], "应输出带 UTF-8 BOM 的 CSV，以确保 Excel 正常识别编码");
         return Encoding.UTF8.GetString(bytes, 3, bytes.Length - 3).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
     }
 
@@ -160,11 +154,11 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         download.Content.Headers.ContentDisposition!.DispositionType.ShouldBe("attachment");
         download.Content.Headers.ContentDisposition.FileNameStar.ShouldStartWith("审计导出-");
         var lines = await LinesOfAsync(download);
-        lines.Length.ShouldBe(3, "表头加两条，别的模块的不在里面");
+        lines.Length.ShouldBe(3, "应包含表头及当前模块的两条记录，不包含其他模块数据");
         lines[0].ShouldStartWith("发生时间,模块,动作");
         lines[1].ShouldContain("Test.First");
         lines[1].ShouldContain("导出里的操作人");
-        lines[2].ShouldContain("\"'=SUM(1,1)\"", Case.Sensitive, "以等号开头的单元格前面补单引号，不会被当成公式");
+        lines[2].ShouldContain("\"'=SUM(1,1)\"", Case.Sensitive, "以等号开头的单元格应前置单引号转义，防止 CSV 公式注入");
 
         var notice = await SiteMessageWhenSentAsync(token, "审计导出已完成");
         notice.GetProperty("body").GetString().ShouldBe("后台作业“审计导出”已完成。");
@@ -210,7 +204,7 @@ public sealed class AuditExportTests(ClassDatabase<ApiTemplate> database, ApiTem
         (await JsonAsync(missing)).GetProperty("code").GetString().ShouldBe("Files.NotFound");
     }
 
-    // 已成功、带着结果文件 ID，但 Files 里还没有这个文件
+    // 模拟作业已成功且关联结果文件 ID，但 Files 模块中尚无对应文件记录的场景
     private async Task<Guid> InsertFinishedAsync(DateTimeOffset finished)
     {
         var job = Guid.CreateVersion7();

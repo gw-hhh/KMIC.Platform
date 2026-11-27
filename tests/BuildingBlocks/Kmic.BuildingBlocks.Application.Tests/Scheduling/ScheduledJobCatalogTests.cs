@@ -7,7 +7,7 @@ namespace Kmic.BuildingBlocks.Application.Tests.Scheduling;
 
 public sealed class ScheduledJobCatalogTests
 {
-    // 测试程序集推出的模块名是 BuildingBlocks
+    // 由测试程序集推断的模块名为 BuildingBlocks
     private const string Module = "BuildingBlocks";
 
     private static readonly UseCaseCatalog _useCases = UseCaseCatalog.Build([typeof(PurgeThingsCommand), typeof(RemindThingsCommand)]);

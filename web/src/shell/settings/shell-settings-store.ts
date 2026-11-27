@@ -19,9 +19,7 @@ const saveDelayMs = 1000;
 
 type Mode = ShellSettings['appearance']['mode'];
 
-/**
- * 外壳设置。修改即生效，1 秒后保存；本机另存一份，避免启动时闪默认主题
- */
+/** 外壳偏好状态管理：变更即时生效并防抖 1 秒同步至服务端；同时缓存于本地以消除首屏默认主题闪烁 */
 export const useShellSettingsStore = defineStore('shellSettings', () => {
   const api = useApi();
   const currentUser = useCurrentUserStore();
@@ -62,12 +60,12 @@ export const useShellSettingsStore = defineStore('shellSettings', () => {
       if (!(error instanceof KmicError)) {
         throw error;
       }
-      // 保存失败不回滚，只提示
+      // 持久化失败时不回滚当前预览状态，仅展示失败提示
       saveFailed.value = true;
     }
   }, saveDelayMs);
 
-  // 未登录时（登录页切深浅色）只存本机
+  // 未登录状态（如在登录页切换深浅模式）仅写入本地缓存
   function update(change: (draft: ShellSettings) => void): void {
     const draft = structuredClone(toRaw(settings.value));
     change(draft);
@@ -79,7 +77,7 @@ export const useShellSettingsStore = defineStore('shellSettings', () => {
     }
   }
 
-  /** 在深色和浅色之间切换，从点击位置圆形扩散 */
+  /** 切换深浅模式，并以点击坐标为圆心触发扩散过渡 */
   async function toggleMode(origin: { x: number; y: number }): Promise<void> {
     const next = resolvedMode.value === 'dark' ? 'light' : 'dark';
     await switchWithRipple(
@@ -104,14 +102,13 @@ export const useShellSettingsStore = defineStore('shellSettings', () => {
         writeCache(userId, settings.value);
       }
     } catch (error) {
-      // 读取失败时用本机缓存
+      // 远程读取失败时保留本地缓存配置
       if (!(error instanceof KmicError)) {
         throw error;
       }
     }
   }
 
-  /** 删除个人设置 */
   async function reset(): Promise<void> {
     await api.POST('/api/v1/configuration/preferences/me/{key}/reset', { params: { path: { key: preferenceKey } } });
     await load();
@@ -131,7 +128,7 @@ function readCache(userId: string | null): ShellSettings {
     raw = undefined;
   }
   const settings = parseShellSettings(raw);
-  // 登录页沿用上次的深浅色
+  // 未登录时沿用上次记录的主题模式
   return raw === undefined && userId === null
     ? { ...settings, appearance: { ...settings.appearance, mode: readLastMode() } }
     : settings;
@@ -141,7 +138,7 @@ function writeCache(userId: string | null, settings: ShellSettings): void {
   try {
     localStorage.setItem(cacheKey(userId), JSON.stringify(serializeShellSettings(settings)));
   } catch {
-    // 存储不可用时忽略
+    // 本地存储不可用时静默忽略
   }
 }
 
@@ -158,6 +155,6 @@ function writeLastMode(mode: Mode): void {
   try {
     localStorage.setItem(lastModeKey, mode);
   } catch {
-    // 存储不可用时忽略
+    // 本地存储不可用时静默忽略
   }
 }

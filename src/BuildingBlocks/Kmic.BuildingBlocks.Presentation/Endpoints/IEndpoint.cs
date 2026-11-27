@@ -1,15 +1,8 @@
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 一个接口一个端点类
-/// </summary>
-/// <remarks>
-/// 端点只绑定请求、发送消息、把 Result 转成 HTTP
-/// </remarks>
+/// <summary>API 端点契约：仅负责请求绑定、发送消息及将 Result 转为 HTTP 响应</summary>
 public interface IEndpoint
 {
-    /// <summary>
-    /// 把本端点映射到路由组上
-    /// </summary>
+    /// <summary>将当前端点映射到指定路由组</summary>
     void Map(IEndpointRouteBuilder group);
 }

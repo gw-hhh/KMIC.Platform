@@ -3,20 +3,18 @@ using System.Text.Json.Serialization;
 
 namespace Kmic.BuildingBlocks.Application.Serialization;
 
-/// <summary>
-/// 时刻的 JSON 转换，输出 UTC，输入必须带时区偏移
-/// </summary>
+// 统一输出为 UTC，反序列化输入须包含时区偏移
 internal sealed class UtcDateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
 {
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        // 内置的读取会把不带偏移的时刻当成服务器本地时间，这里拒绝。带偏移时 TryGetDateTime 返回的 Kind 不会是 Unspecified
+        // 默认读取器会将无偏移时间视为服务器本地时间，此处显式拒绝；含偏移时 TryGetDateTime 返回的 Kind 不为 Unspecified
         if (reader.TokenType != JsonTokenType.String
             || !reader.TryGetDateTimeOffset(out var value)
             || !reader.TryGetDateTime(out var dateTime)
             || dateTime.Kind == DateTimeKind.Unspecified)
         {
-            throw new JsonException("时刻要写成带时区偏移的 ISO 8601 格式，如 2026-11-04T08:30:00Z。");
+            throw new JsonException("时间须为带时区偏移的 ISO 8601 格式，如 2026-11-04T08:30:00Z。");
         }
 
         return value.ToUniversalTime();
@@ -26,7 +24,7 @@ internal sealed class UtcDateTimeOffsetJsonConverter : JsonConverter<DateTimeOff
     {
         ArgumentNullException.ThrowIfNull(writer);
 
-        // UTC 的 DateTime 按 Z 结尾输出，DateTimeOffset 会写成 +00:00
+        // 传入 UtcDateTime 以输出 Z 结尾格式（DateTimeOffset 直接输出会带 +00:00）
         writer.WriteStringValue(value.UtcDateTime);
     }
 }

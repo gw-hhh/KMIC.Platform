@@ -5,24 +5,15 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 加载好的签名密钥
-/// </summary>
-/// <remarks>
-/// 验证用全部密钥，签发用 <see cref="ActiveCredentials"/>
-/// </remarks>
+/// <summary>签名密钥存储（验签使用全部密钥，签发仅使用 ActiveCredentials）</summary>
 public sealed class SigningKeyStore : IDisposable
 {
-    /// <summary>
-    /// RSA 密钥的最小长度
-    /// </summary>
+    /// <summary>RSA 密钥最小位数</summary>
     public const int MinimumKeySize = 2048;
 
     private readonly List<RSA> _keys = [];
 
-    /// <summary>
-    /// 按配置加载，全部问题汇总后一次报出
-    /// </summary>
+    /// <summary>加载并校验密钥配置，汇总所有错误后统一抛出</summary>
     public SigningKeyStore(IOptions<KmicAuthOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -58,17 +49,12 @@ public sealed class SigningKeyStore : IDisposable
         ValidationKeys = validation;
     }
 
-    /// <summary>
-    /// 签发用的凭据
-    /// </summary>
+    /// <summary>当前活跃的签发凭据</summary>
     public SigningCredentials ActiveCredentials { get; } = null!;
 
-    /// <summary>
-    /// 验证用的全部密钥，含正在使用的
-    /// </summary>
+    /// <summary>用于验签的公钥集合（含当前活跃密钥）</summary>
     public IReadOnlyList<SecurityKey> ValidationKeys { get; } = [];
 
-    /// <inheritdoc />
     public void Dispose() => _keys.ForEach(k => k.Dispose());
 
     private RSA? Load(SigningKeyOptions key, List<string> problems)

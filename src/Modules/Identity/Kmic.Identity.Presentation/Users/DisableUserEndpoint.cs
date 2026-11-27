@@ -13,7 +13,7 @@ internal sealed class DisableUserEndpoint : IEndpoint
         group.MapPost("/users/{id}/disable", HandleAsync)
             .Sends<DisableUserCommand>()
             .WithSummary("禁用用户")
-            .WithDescription("禁用后，该用户的全部会话失效。不能禁用自己，也不能禁用最后一位可登录且持有已启用受保护角色的用户。");
+            .WithDescription("禁用后该用户全部会话失效；不可禁用自己或最后一位可登录的受保护角色持有人");
 
     private static async Task<IResult> HandleAsync([Description("用户 ID")] UserId id, DisableUserRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new DisableUserCommand(id, request.ExpectedVersion, request.Reason), ct)).ToOk();

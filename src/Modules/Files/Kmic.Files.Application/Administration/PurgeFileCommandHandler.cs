@@ -11,9 +11,6 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 标记文件为已彻底删除
-/// </summary>
 public sealed class PurgeFileCommandHandler(
     IStoredFileRepository files,
     ITransactionLocks locks,
@@ -22,7 +19,6 @@ public sealed class PurgeFileCommandHandler(
     TimeProvider time)
     : ICommandHandler<PurgeFileCommand, VersionedResponse<StoredFileId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<StoredFileId>>> Handle(PurgeFileCommand command, CancellationToken cancellationToken)
     {
         var loaded = await files.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);
@@ -37,7 +33,7 @@ public sealed class PurgeFileCommandHandler(
             return new VersionedResponse<StoredFileId>(file.Id);
         }
 
-        // 先取排他锁并探查未完成的关联请求；存在并发关联时返回暂时冲突，避免使已提交的关联请求失效
+        // 先获取排他锁并探查未完成的关联请求；若存在并发关联则返回临时冲突，避免已提交的关联请求失效
         var locked = await locks.TryAcquireExclusiveAsync(FileAttachments.LockScope, [file.Id.Value], cancellationToken);
         if (locked.Count == 0 || (await probe.FindSubjectsAsync(AttachFiles.MessageName, [file.Id.Value], cancellationToken)).Count > 0)
         {

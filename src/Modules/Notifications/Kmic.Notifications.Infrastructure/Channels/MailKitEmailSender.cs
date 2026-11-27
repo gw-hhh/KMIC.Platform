@@ -8,12 +8,6 @@ using MimeKit;
 
 namespace Kmic.Notifications.Infrastructure.Channels;
 
-/// <summary>
-/// 通过 MailKit 和 SMTP 发送邮件
-/// </summary>
-/// <remarks>
-/// Message-ID 由投递 ID 生成，重试时不变
-/// </remarks>
 internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> options) : IEmailSender
 {
     public async Task<SendResult> SendAsync(EmailMessage message, CancellationToken ct)
@@ -22,13 +16,13 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
 
         if (!options.Value.Senders.TryGetValue(message.SenderProfile, out var sender) || string.IsNullOrWhiteSpace(sender.Host))
         {
-            return SendResult.Permanent($"没有配置发件账号 {message.SenderProfile}");
+            return SendResult.Permanent($"未配置发件账号 {message.SenderProfile}");
         }
 
-        // 不加密的连接上认证，密码会明文过网络
+        // 禁止在未加密连接上认证，避免密码明文传输
         if (SecurityOf(sender.Security) == SecureSocketOptions.None && !string.IsNullOrEmpty(sender.Username))
         {
-            return SendResult.Permanent($"发件账号 {message.SenderProfile} 配置有误：不加密的连接不能带账号密码");
+            return SendResult.Permanent($"发件账号 {message.SenderProfile} 配置有误：未加密连接禁止配置认证凭据");
         }
 
         MimeMessage mime;
@@ -56,7 +50,7 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
         }
         catch (SmtpCommandException exception)
         {
-            // 4xx 是暂时的（邮箱忙、稍后再试），5xx 是永久的（邮箱不存在、被拒绝）
+            // 4xx 为暂时性错误（如邮箱繁忙，可稍后重试），5xx 为永久性错误（如邮箱不存在或被拒收）
             return (int)exception.StatusCode >= 500 ? SendResult.Permanent($"邮件服务器拒绝发送：{(int)exception.StatusCode}") : SendResult.Transient($"邮件服务器暂时拒绝发送：{(int)exception.StatusCode}");
         }
         catch (Exception exception) when (exception is AuthenticationException or SaslException or ProtocolException or ServiceNotConnectedException or ServiceNotAuthenticatedException or IOException or SocketException or TimeoutException or OperationCanceledException)
@@ -68,6 +62,7 @@ internal sealed class MailKitEmailSender(IOptions<NotificationsEmailOptions> opt
 
     private static MimeMessage Build(EmailMessage message, EmailSenderOptions sender)
     {
+        // Message-ID 固定由投递 ID 生成，保证重试时不变
         var mime = new MimeMessage { Subject = message.Subject, MessageId = $"{message.DeliveryId:D}@kmic" };
         mime.From.Add(new MailboxAddress(sender.DisplayName, sender.Address));
         var recipient = MailboxAddress.Parse(message.Address);

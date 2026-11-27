@@ -2,11 +2,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
-/// <summary>
-/// 不返回值的命令处理器
-/// </summary>
-/// <remarks>
-/// 只编排，不保存、不开事务
-/// </remarks>
+/// <summary>无返回值命令处理器；仅负责流程编排，不直接执行持久化或开启事务。</summary>
 public interface ICommandHandler<in TCommand> : Mediator.ICommandHandler<TCommand, Result>
     where TCommand : ICommand;

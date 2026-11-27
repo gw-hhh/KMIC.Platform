@@ -1,25 +1,12 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 
-/// <summary>
-/// 模块自己的积压量表
-/// </summary>
-/// <remarks>
-/// 查询要走后台池、只读未完成的行
-/// </remarks>
+/// <summary>模块自定义积压量表（查询应使用后台连接池，且仅统计未完成记录）</summary>
 public interface IBacklogGauges
 {
-    /// <summary>
-    /// 量表所属 Meter 的名称，如 Kmic.Notifications
-    /// </summary>
+    /// <summary>所属 Meter 名称，如 Kmic.Notifications</summary>
     string MeterName { get; }
 
-    /// <summary>
-    /// 量表定义
-    /// </summary>
     IReadOnlyList<BacklogGauge> Gauges { get; }
 
-    /// <summary>
-    /// 读取各量表的当前值
-    /// </summary>
     Task<IReadOnlyList<BacklogReading>> ReadAsync(CancellationToken ct);
 }

@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Domain.Users;
 
-/// <summary>
-/// 用户的角色授予，只能经 User 创建和修改，同一角色只有一条
-/// </summary>
+/// <summary>用户的角色授予，仅通过 <see cref="User" /> 创建和修改，同一角色至多一条。</summary>
 public sealed class UserRoleGrant : Entity<GrantId>
 {
     private readonly List<GrantAnchor> _anchors = [];

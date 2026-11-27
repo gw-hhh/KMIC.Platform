@@ -6,9 +6,6 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// <see cref="IModuleMessageStore" /> 的实现：直接读写一个模块的发件箱与收件箱表
-/// </summary>
 internal sealed class ModuleMessageStore(string module, ModuleFrameworkTables tables, DataSources dataSources, SubscriptionCatalog catalog) : IModuleMessageStore
 {
     private const int MaxBlockedKeys = 500;
@@ -61,7 +58,7 @@ internal sealed class ModuleMessageStore(string module, ModuleFrameworkTables ta
                 catalog.All.Any(s => s.IsOrdered && string.Equals(s.Name, subscription, StringComparison.Ordinal)) ? inboxReader.GetInt64(5) : 0);
         }
 
-        // 本实例声明了、但收件箱里还没有任何行的订阅也列出来：看板上才分得清“没有积压”和“没有这个订阅”
+        // 补全当前实例已声明但尚无收件箱记录的订阅，以便监控看板区分“无积压”与“订阅不存在”
         foreach (var declared in catalog.All.Where(s => string.Equals(s.Module, module, StringComparison.Ordinal)).Select(s => s.Name).Distinct(StringComparer.Ordinal))
         {
             rows.TryAdd(declared, new SubscriptionBacklogInfo(declared, 0, TimeSpan.Zero, 0, 0, 0));
@@ -189,7 +186,7 @@ internal sealed class ModuleMessageStore(string module, ModuleFrameworkTables ta
         ArgumentNullException.ThrowIfNull(ids);
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
-        // 收件箱的行没有单独的“放弃原因”列，原因连同原来的错误一起记进错误说明
+        // 收件箱未设独立的“放弃原因”列，放弃原因将连同历史错误一并记录至错误说明字段
         await using var command = Writes.CreateCommand(
             $"""
             UPDATE {Tables.Inbox}
@@ -234,7 +231,7 @@ internal sealed class ModuleMessageStore(string module, ModuleFrameworkTables ta
         return existing.Contains(id) ? MessageActionOutcome.WrongState : MessageActionOutcome.NotFound;
     }
 
-    // 先执行 UPDATE，没改到的再查一次是不存在还是状态不对
+    // 先执行 UPDATE，未更新到行时再查询确认是不存在还是状态不符
     private async Task<IReadOnlyList<MessageActionResult>> ResultsAsync(NpgsqlCommand update, string table, IReadOnlyCollection<Guid> ids, CancellationToken ct)
     {
         var done = new HashSet<Guid>();

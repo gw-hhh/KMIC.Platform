@@ -7,20 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
-/// <summary>
-/// 按角色注册后台处理
-/// </summary>
+/// <summary>后台处理组件 DI 注册</summary>
 public static class BackgroundProcessingServiceCollectionExtensions
 {
-    /// <summary>
-    /// 停机时等待进行中工作的总时长，宿主设到 HostOptions.ShutdownTimeout。容器的停止宽限期要比它长，部署模板里写 60 秒
-    /// </summary>
+    /// <summary>停机等待在途任务完成的超时时长（须赋给 HostOptions.ShutdownTimeout，容器停止宽限期应大于此值）</summary>
     public static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(45);
 
-    /// <summary>
-    /// 读取配置的角色，如 "Api,Worker"
-    /// </summary>
-    /// <exception cref="InvalidOperationException">没有配置或含有不认识的角色，宿主拒绝启动</exception>
+    /// <summary>解析实例角色配置（如 "Api,Worker"），未配置或包含未知角色时拒绝启动</summary>
     public static HostRoles ParseRoles(string? configured)
     {
         var roles = HostRoles.None;
@@ -30,22 +23,20 @@ public static class BackgroundProcessingServiceCollectionExtensions
             {
                 "Api" => HostRoles.Api,
                 "Worker" => HostRoles.Worker,
-                _ => throw new InvalidOperationException($"Kmic:Roles 里的“{name}”不认识，只能是 Api、Worker。"),
+                _ => throw new InvalidOperationException($"无法识别 Kmic:Roles 中的“{name}”，仅支持 Api 或 Worker。"),
             };
         }
 
-        return roles == HostRoles.None ? throw new InvalidOperationException("没有配置 Kmic:Roles，至少要有 Api 或 Worker 之一。") : roles;
+        return roles == HostRoles.None ? throw new InvalidOperationException("未配置 Kmic:Roles，至少须包含 Api 或 Worker 之一。") : roles;
     }
 
-    /// <summary>
-    /// 注册启动任务、调度器和本实例角色需要的后台组件
-    /// </summary>
+    /// <summary>注册启动任务、调度器及对应实例角色的后台处理组件</summary>
     public static IServiceCollection AddKmicBackgroundProcessing(this IServiceCollection services, HostRoles roles)
     {
         ArgumentNullException.ThrowIfNull(services);
         if (roles == HostRoles.None)
         {
-            throw new ArgumentException("至少要有 Api 或 Worker 之一。", nameof(roles));
+            throw new ArgumentException("至少须包含 Api 或 Worker 之一。", nameof(roles));
         }
 
         services.AddKmicStartupTasks();

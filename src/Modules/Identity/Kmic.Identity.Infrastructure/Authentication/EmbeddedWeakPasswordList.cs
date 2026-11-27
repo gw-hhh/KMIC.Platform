@@ -3,9 +3,6 @@ using Kmic.Identity.Application.Authentication;
 
 namespace Kmic.Identity.Infrastructure.Authentication;
 
-/// <summary>
-/// 随模块嵌入的常见弱密码清单
-/// </summary>
 internal sealed class EmbeddedWeakPasswordList : IWeakPasswordList
 {
     private const string ResourceName = "Kmic.Identity.Infrastructure.Authentication.weak-passwords.txt";

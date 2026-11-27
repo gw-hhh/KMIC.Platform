@@ -12,7 +12,7 @@ const problem = {
 };
 
 describe('KmicError', () => {
-  it('按 ProblemDetails 的字段转换，可选字段缺失时用默认值', () => {
+  it('按 ProblemDetails 字段转换，可选字段缺失时使用默认值', () => {
     const error = KmicError.fromProblem(problem, undefined, 'failed');
 
     expect([error.message, error.status, error.code, error.traceId, error.currentVersion, error.outcome]).toEqual([
@@ -26,7 +26,7 @@ describe('KmicError', () => {
     expect([error.errors, error.retryable, error.retryAfterSeconds]).toEqual([[], false, undefined]);
   });
 
-  it('不是 ProblemDetails 时按状态码归类，5xx 提示服务暂时不可用', () => {
+  it('非 ProblemDetails 响应按状态码归类，5xx 提示服务暂时不可用', () => {
     const gateway = KmicError.fromStatus(502, 'gw', undefined);
     const other = KmicError.fromStatus(404, undefined, undefined);
 

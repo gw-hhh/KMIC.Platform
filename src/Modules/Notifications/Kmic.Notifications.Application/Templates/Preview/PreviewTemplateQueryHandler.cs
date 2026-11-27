@@ -6,12 +6,8 @@ using Kmic.Notifications.Domain.Errors;
 
 namespace Kmic.Notifications.Application.Templates.Preview;
 
-/// <summary>
-/// 预览通知模板的渲染结果
-/// </summary>
 public sealed class PreviewTemplateQueryHandler(NotificationTemplateCatalog catalog, ITemplateRenderer renderer) : IQueryHandler<PreviewTemplateQuery, TemplatePreviewResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<TemplatePreviewResponse>> Handle(PreviewTemplateQuery query, CancellationToken cancellationToken)
     {
         var definition = catalog.Find(query.Key);

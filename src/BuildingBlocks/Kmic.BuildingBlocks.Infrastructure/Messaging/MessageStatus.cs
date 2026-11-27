@@ -1,11 +1,6 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// Outbox、Inbox 的状态取值
-/// </summary>
-/// <remarks>
-/// 存为 smallint，SQL 直接按数字写，取值不能改
-/// </remarks>
+// Outbox、Inbox 状态取值（存为 smallint，SQL 直接按数字写，取值不可改）
 internal static class MessageStatus
 {
     public const short Pending = 0;

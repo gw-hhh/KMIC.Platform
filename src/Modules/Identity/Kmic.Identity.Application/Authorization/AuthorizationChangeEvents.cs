@@ -5,14 +5,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Identity.Application.Authorization;
 
-/// <summary>
-/// 授权配置变更的安全事件，角色、授予和组织树的变更除审计外都写一条
-/// </summary>
+// 角色、授予及组织树变更除审计外均须记录授权配置变更安全事件
 internal static class AuthorizationChangeEvents
 {
-    /// <summary>
-    /// 变更成功时记录安全事件并返回版本响应，失败时原样返回错误
-    /// </summary>
     public static Result<VersionedResponse<TId>> Complete<TId>(ISecurityEventWriter writer, Result done, string resourceType, TId id, string change, IReadOnlyDictionary<string, string>? details = null)
         where TId : struct, IStronglyTypedId
     {
@@ -25,9 +20,7 @@ internal static class AuthorizationChangeEvents
         return new VersionedResponse<TId>(id);
     }
 
-    /// <summary>
-    /// 记录授权配置变更，change 为变更类型编码，如 PermissionsSet
-    /// </summary>
+    // change 为变更类型编码（如 PermissionsSet）
     public static void Write(ISecurityEventWriter writer, string resourceType, Guid resourceId, string change, IReadOnlyDictionary<string, string>? details = null)
     {
         ArgumentNullException.ThrowIfNull(writer);

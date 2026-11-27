@@ -46,8 +46,8 @@ public sealed class EndpointMappingTests
     [Fact]
     public async Task AnonymousEndpoint_NeedsNoLogin()
     {
-        // 校验要求匿名只在 Identity 模块，测试里的消息属于 BuildingBlocks，所以用只含一个匿名端点的模块并放宽不了校验：
-        // 这里直接不经校验地映射，只验证 AllowAnonymous 在路由组之上生效
+        // 启动校验要求匿名端点仅归属 Identity 模块，而测试消息属于 BuildingBlocks，即便仅映射单个匿名端点也无法通过校验；
+        // 此处跳过启动校验直接映射，仅验证 AllowAnonymous 在路由组之上生效
         await using var api = await ApiHost.StartAsync(
             [new ListedModule("Identity", typeof(AnonymousEndpoint))],
             skipValidation: true);

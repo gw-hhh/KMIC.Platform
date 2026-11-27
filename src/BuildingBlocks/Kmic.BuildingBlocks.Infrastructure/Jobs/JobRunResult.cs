@@ -1,37 +1,20 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// 执行一个作业的结果
-/// </summary>
 internal enum JobRunResult
 {
-    /// <summary>
-    /// 成功
-    /// </summary>
     Succeeded,
 
-    /// <summary>
-    /// 失败，原因写在作业行上
-    /// </summary>
+    // 错误信息已写入作业行
     Failed,
 
-    /// <summary>
-    /// 已取消
-    /// </summary>
     Cancelled,
 
-    /// <summary>
-    /// 停机时可续跑的作业放回队列，等别的实例续跑
-    /// </summary>
+    // 停机时将可续跑作业放回队列，等待其他实例接手
     Released,
 
-    /// <summary>
-    /// 占用已被别的执行者接管，本地停止，不写任何结果
-    /// </summary>
+    // 租约已被其他执行器接管，本地中止且不写结果
     TakenOver,
 
-    /// <summary>
-    /// 某一批或最终结果的提交结果未知，本地停止，等占用到期后由领取流程处理
-    /// </summary>
+    // 批次或最终状态提交结果未知，中止等待租约过期后接管
     OutcomeUnknown,
 }

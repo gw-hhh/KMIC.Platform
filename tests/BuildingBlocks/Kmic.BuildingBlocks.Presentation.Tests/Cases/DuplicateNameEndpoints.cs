@@ -3,9 +3,7 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 两个请求模型类名相同、所在位置不同：OpenAPI 架构名会冲突
-/// </summary>
+// 两个不同位置的同名请求模型，用于验证 OpenAPI 架构名冲突检测
 internal static class DuplicateNameEndpoints
 {
     public static readonly Type[] All = [typeof(FirstEndpoint), typeof(SecondEndpoint)];

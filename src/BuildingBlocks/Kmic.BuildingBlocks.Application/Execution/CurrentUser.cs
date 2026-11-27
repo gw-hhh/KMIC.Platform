@@ -3,49 +3,30 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Execution;
 
-/// <summary>
-/// 当前身份
-/// </summary>
 public sealed record CurrentUser : ICurrentUser
 {
     private CurrentUser()
     {
     }
 
-    /// <summary>
-    /// 匿名请求
-    /// </summary>
     public static CurrentUser Anonymous { get; } = new();
 
-    /// <inheritdoc />
     public UserId? UserId { get; private init; }
 
-    /// <inheritdoc />
     public RoleId? RoleId { get; private init; }
 
-    /// <inheritdoc />
     public bool IsSystem { get; private init; }
 
-    /// <inheritdoc />
     public bool IsImpersonating => ActualUserId is not null;
 
-    /// <inheritdoc />
     public UserId? ActualUserId { get; private init; }
 
-    /// <inheritdoc />
     public SessionId? SessionId { get; private init; }
 
-    /// <inheritdoc />
     public UserId? OnBehalfOf { get; private init; }
 
-    /// <summary>
-    /// 系统身份
-    /// </summary>
     public static CurrentUser System(UserId? onBehalfOf = null) => new() { IsSystem = true, OnBehalfOf = onBehalfOf };
 
-    /// <summary>
-    /// 用户身份
-    /// </summary>
     public static CurrentUser From(IAccessContext access)
     {
         ArgumentNullException.ThrowIfNull(access);

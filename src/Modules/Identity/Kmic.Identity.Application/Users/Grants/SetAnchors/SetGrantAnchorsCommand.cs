@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.Grants.SetAnchors;
 
-/// <summary>
-/// 替换角色授予的组织锚点，空列表表示用用户所属组织
-/// </summary>
+/// <summary>替换角色授予的组织锚点（空列表表示沿用用户所属组织）。</summary>
 /// <param name="Id">用户 ID</param>
 /// <param name="ExpectedVersion">用户的预期版本号</param>
 /// <param name="RoleId">角色 ID</param>

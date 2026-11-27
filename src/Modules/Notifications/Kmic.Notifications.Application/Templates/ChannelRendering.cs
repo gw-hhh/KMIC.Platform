@@ -5,9 +5,7 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates;
 
-/// <summary>
-/// 按渠道渲染通知主题和正文：邮件正文按 HTML，其余按纯文本
-/// </summary>
+// 邮件正文采用 HTML 转义，其余渠道输出纯文本
 internal static class ChannelRendering
 {
     public static async ValueTask<Result<ChannelContent>> RenderAsync(ITemplateRenderer renderer, TemplateChannel channel, string subject, string body, object model, bool strict, CancellationToken ct)

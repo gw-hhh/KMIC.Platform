@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 管道日志
-/// </summary>
 internal static partial class PipelineLog
 {
     [LoggerMessage(EventId = 2001, Level = LogLevel.Warning, Message = "After-commit action of {MessageName} failed")]

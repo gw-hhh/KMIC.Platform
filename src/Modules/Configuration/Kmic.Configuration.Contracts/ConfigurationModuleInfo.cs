@@ -1,15 +1,7 @@
 namespace Kmic.Configuration.Contracts;
 
-/// <summary>
-/// Configuration 模块的基本信息
-/// </summary>
-/// <remarks>
-/// 模块名不能改，它是 schema 名和各类编码的前缀
-/// </remarks>
+/// <summary>Configuration 模块标识（用作数据库 schema 名及编码前缀，不可变更）</summary>
 public static class ConfigurationModuleInfo
 {
-    /// <summary>
-    /// 模块名
-    /// </summary>
     public const string Name = "Configuration";
 }

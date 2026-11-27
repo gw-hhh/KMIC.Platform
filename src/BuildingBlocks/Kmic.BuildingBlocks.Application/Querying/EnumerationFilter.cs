@@ -4,18 +4,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 列表按枚举编码筛选：把请求里的编码换成枚举值
-/// </summary>
-/// <remarks>
-/// 查询里写 <c>values.Contains(x.Status)</c>
-/// </remarks>
+/// <summary>列表枚举筛选辅助工具，将编码列表转换为强类型枚举值后可直接用于 <c>values.Contains(x.Status)</c>。</summary>
 public static class EnumerationFilter
 {
-    /// <summary>
-    /// 把编码换成枚举值；没有给编码时得到空列表，表示不按这个字段筛选
-    /// </summary>
-    /// <typeparam name="TEnumeration">枚举类型</typeparam>
     public static Result<IReadOnlyList<TEnumeration>> Parse<TEnumeration>(IReadOnlyList<string>? codes, string field)
         where TEnumeration : Enumeration<TEnumeration>
     {

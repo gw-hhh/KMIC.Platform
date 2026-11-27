@@ -10,23 +10,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Configuration.Infrastructure.Operations;
 
-/// <summary>
-/// 运维命令的实现：写系统设置
-/// </summary>
-/// <remarks>
-/// 直接用运维连接执行，不经过命令管道。调用方给出设置的定义和值，键、校验和保存的 JSON 形状都由定义决定，与命令管道里保存设置的形状一致。值有变化时留一条变更记录；值没变只更新修改时间
-/// </remarks>
+/// <summary>运维端系统设置写入工具，通过独立运维连接直接写库</summary>
 public static class ConfigurationOperator
 {
-    /// <summary>
-    /// 保存一项系统设置，原来没有保存过就新建
-    /// </summary>
-    /// <param name="connectionString">运维账号的连接串</param>
-    /// <param name="definition">设置的定义</param>
-    /// <param name="value">值，类型要与定义的值类型一致</param>
-    /// <param name="reason">原因</param>
-    /// <param name="ct">取消</param>
-    /// <returns>值没有通过设置自己的校验时返回校验失败，不写库</returns>
+    /// <summary>保存系统设置（未保存过时新建记录；自定义校验失败时返回失败且不写库）</summary>
+    /// <param name="connectionString">运维账号数据库连接串</param>
+    /// <param name="definition">设置定义</param>
+    /// <param name="value">设置值，类型须与定义一致</param>
     public static async Task<Result> SetSettingAsync(string connectionString, SystemSettingDefinition definition, object value, string reason, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
@@ -47,7 +37,7 @@ public static class ConfigurationOperator
         var row = await db.Set<SystemSettingValue>().SingleOrDefaultAsync(v => v.Key == key, ct);
         if (row is not null && SameJson(row.Value, valueJson))
         {
-            // 值没变：定期写入的设置要让修改时间往前走（据此判断它有没有过期），变更记录不重复写
+            // 值未变化时仍需刷新修改时间（用于过期判定），但不重复记录变更历史
             db.Entry(row).Property(nameof(SystemSettingValue.Value)).IsModified = true;
             await db.SaveForToolAsync(ct);
             await transaction.CommitAsync(ct);
@@ -70,6 +60,6 @@ public static class ConfigurationOperator
         return Result.Success();
     }
 
-    // 库里是 jsonb，读出来的空白和写进去的不一样，要按内容比较
+    // 数据库采用 jsonb 存储，读取时的空白格式可能与写入时不同，需按语义比较
     private static bool SameJson(string saved, string value) => JsonNode.DeepEquals(JsonNode.Parse(saved), JsonNode.Parse(value));
 }

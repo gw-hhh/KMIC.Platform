@@ -7,10 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 读模型重建的管理接口：列表、触发、确认、放弃的授权与错误。现在没有模块声明重建方式，所以只测这些入口；
-/// 重建本身（暂停、确认收尾、放弃、手动触发）由框架测试在带重建订阅的测试模块上覆盖
-/// </summary>
 public sealed class RebuildManagementTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

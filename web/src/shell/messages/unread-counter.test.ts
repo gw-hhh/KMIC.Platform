@@ -7,7 +7,7 @@ import {
   type UnreadLocks,
 } from './unread-counter';
 
-// 同一个浏览器里的多个标签页：锁按名字互斥排队，频道广播给同名的其他标签页
+// 模拟同一浏览器下的多标签页环境：按锁名互斥排队，广播频道向同名其他标签页推送消息
 function createBrowser() {
   const holders = new Map<string, boolean>();
   const queues = new Map<string, (() => void)[]>();
@@ -109,7 +109,7 @@ describe('站内消息未读数', () => {
     vi.useRealTimers();
   });
 
-  it('打开时查一次，之后每 30 秒查一次', async () => {
+  it('启动时立即查询一次，随后每 30 秒轮询一次', async () => {
     const { environment } = createTab(createBrowser(), true);
     const counter = createUnreadCounter({ userId: 'u1', fetchCount, environment });
     await vi.advanceTimersByTimeAsync(0);
@@ -124,7 +124,7 @@ describe('站内消息未读数', () => {
     counter.stop();
   });
 
-  it('多个可见的标签页只有一个在轮询，结果分享给其他标签页', async () => {
+  it('多个可见标签页仅由一个负责轮询，并将结果同步至其余标签页', async () => {
     const browser = createBrowser();
     const a = createUnreadCounter({ userId: 'u1', fetchCount, environment: createTab(browser, true).environment });
     const b = createUnreadCounter({ userId: 'u1', fetchCount, environment: createTab(browser, true).environment });
@@ -140,7 +140,7 @@ describe('站内消息未读数', () => {
     b.stop();
   });
 
-  it('轮询的标签页不可见后，由另一个可见的接手', async () => {
+  it('当前轮询标签页不可见后，由另一个可见标签页接管轮询', async () => {
     const browser = createBrowser();
     const first = createTab(browser, true);
     const a = createUnreadCounter({ userId: 'u1', fetchCount, environment: first.environment });
@@ -157,7 +157,7 @@ describe('站内消息未读数', () => {
     b.stop();
   });
 
-  it('都不可见时不轮询', async () => {
+  it('所有标签页均不可见时停止轮询', async () => {
     const hidden = createTab(createBrowser(), false);
     const counter = createUnreadCounter({ userId: 'u1', fetchCount, environment: hidden.environment });
     await vi.advanceTimersByTimeAsync(0);
@@ -169,7 +169,7 @@ describe('站内消息未读数', () => {
     counter.stop();
   });
 
-  it('本标签页标了已读后直接更新，其他标签页同步', async () => {
+  it('本标签页更新未读数后立即生效，并同步广播至其他标签页', async () => {
     const browser = createBrowser();
     const a = createUnreadCounter({ userId: 'u1', fetchCount, environment: createTab(browser, true).environment });
     const b = createUnreadCounter({ userId: 'u1', fetchCount, environment: createTab(browser, false).environment });
@@ -182,7 +182,7 @@ describe('站内消息未读数', () => {
     b.stop();
   });
 
-  it('查询期间标了已读，返回的旧数不覆盖', async () => {
+  it('查询请求在途期间若已本地更新计数，过期响应不得覆盖最新值', async () => {
     const { environment } = createTab(createBrowser(), true);
     let release: (value: number) => void = () => undefined;
     let slow = false;
@@ -208,7 +208,7 @@ describe('站内消息未读数', () => {
     counter.stop();
   });
 
-  it('查询失败时保留原来的数', async () => {
+  it('查询失败时保留原未读计数', async () => {
     const { environment } = createTab(createBrowser(), true);
     let fail = false;
     const counter = createUnreadCounter({

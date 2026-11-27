@@ -5,17 +5,11 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 不区分大小写的排序规则
-/// </summary>
 public static class CaseInsensitiveCollation
 {
     private const string Locale = "und-u-ks-level2";
 
-    /// <summary>
-    /// 创建并核对 public."CaseInsensitive"
-    /// </summary>
-    /// <exception cref="InvalidOperationException">定义不对，或别的 schema 里有同名对象</exception>
+    /// <summary>创建并校验 public."CaseInsensitive" 排序规则，定义不符或存在同名冲突时抛出异常</summary>
     public static async Task EnsureAsync(NpgsqlConnection connection, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(connection);
@@ -59,10 +53,7 @@ public static class CaseInsensitiveCollation
         }
     }
 
-    /// <summary>
-    /// 核对不区分大小写的列，确认都绑定到 public."CaseInsensitive"
-    /// </summary>
-    /// <exception cref="InvalidOperationException">有列绑定到了别的排序规则</exception>
+    /// <summary>核对所有不区分大小写列是否均已绑定至 public."CaseInsensitive"</summary>
     public static async Task VerifyColumnsAsync(NpgsqlConnection connection, DbContext context, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(connection);

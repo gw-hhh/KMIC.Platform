@@ -11,7 +11,7 @@ internal sealed class ListMySessionsEndpoint : IEndpoint
         group.MapGet("/me/sessions", HandleAsync)
             .Sends<ListMySessionsQuery>()
             .WithSummary("查询我的登录设备")
-            .WithDescription("仅返回本人未作废且未到绝对到期时间的登录会话，不含模拟会话。");
+            .WithDescription("仅返回本人未作废且未过期的登录会话（不含模拟会话）");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListMySessionsQuery(), ct)).ToOk();

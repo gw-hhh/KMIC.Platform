@@ -5,14 +5,8 @@ using Kmic.Operations.Domain.Audit;
 
 namespace Kmic.Operations.Application.Audit;
 
-/// <summary>
-/// 审计列表和导出共用的筛选条件
-/// </summary>
 internal static class AuditFilters
 {
-    /// <summary>
-    /// 按指定条件筛选审计记录
-    /// </summary>
     public static IQueryable<AuditLog> Apply(
         IOperationsQueryDb db,
         DateTimeOffset from,

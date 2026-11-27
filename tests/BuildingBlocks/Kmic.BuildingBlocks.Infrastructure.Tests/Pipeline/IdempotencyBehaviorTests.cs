@@ -63,7 +63,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
         var number = TicketNumbers.Next();
         (await SendAsync(new OpenTicketCommand(number, OpenTicketCommand.RejectedTitle), key)).Result.ShouldBeFailure(TicketErrors.Rejected);
 
-        // 失败后记录已删除，同一个键可以再用
+        // 请求失败后幂等记录已清除，同一幂等键可再次使用
         (await SendAsync(new OpenTicketCommand(number, "修正后"), key)).Result.ShouldBeSuccess();
         _harness.Hooks.Handled.ShouldBe(2);
     }
@@ -84,7 +84,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
     [Fact]
     public async Task ProcessingWithExpiredLease_TakenOver()
     {
-        // 原来的请求在提交前崩溃了，只留下一条处理中的记录
+        // 模拟原请求在提交前异常中断，仅遗留一条租约已过期的处理中记录
         var key = NewKey();
         var command = new OpenTicketCommand(TicketNumbers.Next(), "接管");
         await InsertProcessingAsync(command, key, leaseExpiresAt: _harness.Time.GetUtcNow().AddSeconds(-1));
@@ -101,7 +101,7 @@ public sealed class IdempotencyBehaviorTests(ClassDatabase<ProbeTemplate> databa
         var number = TicketNumbers.Next();
         _harness.Hooks.OnBeforeReturn(async ct =>
         {
-            // 模拟处理器还在运行时，记录被另一个请求接管
+            // 模拟当前处理器执行期间，幂等记录租约被另一并发请求接管
             await using var command = database.DataSource.CreateCommand(
                 """UPDATE "Probe"."IdempotencyRecord" SET "LeaseToken" = $1 WHERE "Key" = $2""");
             command.Parameters.Add(new NpgsqlParameter { Value = Guid.CreateVersion7() });

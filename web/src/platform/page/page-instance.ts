@@ -24,16 +24,15 @@ export interface PageInstance {
   readonly key: string;
   readonly epoch: number;
   readonly title: Readonly<Ref<string | null>>;
-  /** 是不是当前标签 */
   readonly active: ComputedRef<boolean>;
   readonly leaveStatus: ComputedRef<LeaveStatus>;
   readonly signal: AbortSignal;
   setTitle(title: string | null): void;
-  /** 标签标题跟着数据变；返回空时用路由的标题 */
+  /** 动态绑定标签页标题；返回空值时回退至路由默认标题 */
   useTitle(title: () => string | null | undefined): void;
   /**
-   * 页面里的读取。不是当前标签时暂停：写入后的失效只让当前标签马上刷新，其他标签切回来时再在后台刷新
-   * @remarks `enabled` 只支持布尔值、ref 或无参的 getter
+   * 页面级查询：非活动标签页暂停请求；缓存失效时仅当前页立即刷新，其余标签页切回时再后台刷新
+   * @remarks `enabled` 仅支持布尔值、Ref 或无参 getter
    */
   useQuery<TQueryFnData, TError = Error, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey>(
     options: () => UseQueryOptions<TQueryFnData, TError, TData, TQueryFnData, TQueryKey>,
@@ -62,7 +61,7 @@ export function createPageInstance(options: { key: string; epoch: number; isActi
     return dirty.value.some((check) => check()) ? 'dirty' : 'free';
   });
 
-  // 组件卸载时自动撤销
+  // 作用域销毁（组件卸载）时自动注销
   function track(list: Ref<readonly (() => boolean)[]>, check: () => boolean): void {
     list.value = [...list.value, check];
     if (getCurrentScope()) {

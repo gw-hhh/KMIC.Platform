@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Application.Templates.List;
 
-/// <summary>
-/// 查询通知模板列表
-/// </summary>
 public sealed class ListTemplatesQueryHandler(INotificationsQueryDb db) : IQueryHandler<ListTemplatesQuery, TemplateListResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<TemplateListResponse>> Handle(ListTemplatesQuery query, CancellationToken cancellationToken)
     {
         var rows = await db.Templates

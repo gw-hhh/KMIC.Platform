@@ -3,45 +3,24 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Jobs;
 
-/// <summary>
-/// 作业执行时的进度、检查点与批次提交
-/// </summary>
+/// <summary>作业执行时的进度、检查点与批次提交上下文。</summary>
 public interface IJobContext
 {
-    /// <summary>
-    /// 作业 ID
-    /// </summary>
     Guid JobId { get; }
 
-    /// <summary>
-    /// 取消的原因，没有取消时为空
-    /// </summary>
+    /// <summary>取消原因，未取消时为空。</summary>
     JobCancellationReason? CancellationReason { get; }
 
-    /// <summary>
-    /// 上次提交的检查点，从头开始时为空
-    /// </summary>
+    /// <summary>获取上次提交的检查点，首次执行时为空。</summary>
     T? GetCheckpoint<T>()
         where T : class;
 
-    /// <summary>
-    /// 报告进度，最多每秒写一次
-    /// </summary>
-    /// <remarks>
-    /// 不和业务数据一起提交，给只读的作业用
-    /// </remarks>
+    /// <summary>上报执行进度（最高每秒写入一次）；独立更新，不与业务事务绑定。</summary>
     ValueTask ReportProgressAsync(long done, long? total = null, string? message = null);
 
-    /// <summary>
-    /// 发送一批命令，命令的业务数据、新检查点和进度在同一个事务里提交
-    /// </summary>
-    /// <remarks>
-    /// 提交结果未知时不要重试这一批，直接返回错误
-    /// </remarks>
+    /// <summary>批量发送命令，使业务数据、新检查点与进度在同一事务中提交；提交结果未知时禁止重试当前批次，应直接返回错误。</summary>
     ValueTask<Result<TResponse>> SendBatchAsync<TResponse>(ICommand<TResponse> command, object checkpoint, long done);
 
-    /// <summary>
-    /// 发送一批不返回值的命令，其余同上
-    /// </summary>
+    /// <summary>批量发送无返回值命令，事务语义同上。</summary>
     ValueTask<Result> SendBatchAsync(ICommand command, object checkpoint, long done);
 }

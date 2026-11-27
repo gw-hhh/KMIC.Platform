@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Application.Settings;
 
 namespace Kmic.Configuration.Application.Settings;
 
-/// <summary>
-/// 从设置的值类型读出成员清单
-/// </summary>
 internal static class SettingFields
 {
     public static IReadOnlyList<SettingFieldInfo> Of(Type valueType)

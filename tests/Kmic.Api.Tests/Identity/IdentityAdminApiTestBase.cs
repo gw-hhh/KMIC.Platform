@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 管理接口测试的共用部分：用带指定权限点的角色造一个操作者并登录，调用 /api/v1/identity 下的接口
-/// </summary>
 public abstract class IdentityAdminApiTestBase(ClassDatabase<ApiTemplate> database, ApiTemplate template, IReadOnlyDictionary<string, string>? settings = null)
     : IdentityApiTestBase(database, template, settings)
 {
@@ -19,9 +16,7 @@ public abstract class IdentityAdminApiTestBase(ClassDatabase<ApiTemplate> databa
     protected static string[] ActionsOf(JsonElement detail) =>
         [.. detail.GetProperty("allowedActions").EnumerateArray().Select(a => a.GetString()!).Order(StringComparer.Ordinal)];
 
-    /// <summary>
-    /// 造一个只带指定权限点的角色和一个拥有它的用户，登录，返回访问令牌
-    /// </summary>
+    /// <summary>创建仅含指定权限点的角色与用户，登录并返回访问令牌</summary>
     protected async Task<string> LoginAsOperatorAsync(string account, IReadOnlyCollection<string> permissions, bool isProtected = false)
     {
         var role = await Seed.RoleAsync("操作者-" + account, permissions, isProtected: isProtected);
@@ -30,9 +25,6 @@ public abstract class IdentityAdminApiTestBase(ClassDatabase<ApiTemplate> databa
         return (await LoginTokensAsync(account)).GetProperty("access_token").GetString()!;
     }
 
-    /// <summary>
-    /// 登录一个已有的账号，返回令牌响应
-    /// </summary>
     protected async Task<JsonElement> LoginTokensAsync(string account, string password = Password)
     {
         var login = await PostAsync(NewClient(), "/api/v1/identity/auth/login", new { account, password, clientType = "app" });
@@ -40,9 +32,7 @@ public abstract class IdentityAdminApiTestBase(ClassDatabase<ApiTemplate> databa
         return await JsonAsync(login);
     }
 
-    /// <summary>
-    /// 调用 Identity 的接口；写操作自带新的幂等键
-    /// </summary>
+    /// <summary>调用 Identity 管理接口，写操作自动附带新幂等键</summary>
     protected async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, string token, object? body = null)
     {
         using var request = new HttpRequestMessage(method, url.StartsWith("/api/", StringComparison.Ordinal) ? url : "/api/v1/identity" + url) { Content = body is null ? null : JsonContent.Create(body) };
@@ -55,9 +45,7 @@ public abstract class IdentityAdminApiTestBase(ClassDatabase<ApiTemplate> databa
         return await NewClient().SendAsync(request, Ct);
     }
 
-    /// <summary>
-    /// 等安全事件写进库：它们由后台循环批量写，不在请求线程里。返回满足条件的事件数
-    /// </summary>
+    /// <summary>轮询等待后台任务将匹配的安全事件落库并返回条数</summary>
     protected async Task<long> WaitForSecurityEventsAsync(string where, long atLeast = 1) =>
         await Eventually.UntilAsync(
             _ => Seed.CountAsync($"""SELECT count(*) FROM "Identity"."SecurityEvent" WHERE {where}"""),

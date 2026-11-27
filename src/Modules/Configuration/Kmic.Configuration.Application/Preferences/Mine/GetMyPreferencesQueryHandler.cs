@@ -6,16 +6,12 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
-/// <summary>
-/// 查询当前角色下生效的个人偏好
-/// </summary>
 public sealed class GetMyPreferencesQueryHandler(IExecutionContext execution, IPreferenceLayers layers, PreferenceCatalog catalog)
     : IQueryHandler<GetMyPreferencesQuery, MyPreferencesResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<MyPreferencesResponse>> Handle(GetMyPreferencesQuery query, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("查询个人偏好需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("查询个人偏好需要已登录的用户身份。");
         var stack = await layers.GetAsync(access.UserId, access.RoleId, cancellationToken);
 
         var items = new List<MyPreferenceItem>();

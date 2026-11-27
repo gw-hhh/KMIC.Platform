@@ -7,12 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 终结与重新激活订阅：能不能终结的各种拦截，放弃剩余消息，终结之后重新激活，端到端
-/// </summary>
-/// <remarks>
-/// 路由和收件箱的行直接写进库。订阅方借用 Sample 的收件箱
-/// </remarks>
 public sealed class RouteFinalizeTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -86,11 +80,11 @@ public sealed class RouteFinalizeTests(ClassDatabase<ApiTemplate> database, ApiT
         var token = await LoginAsOperatorAsync("route-fin-declared", _manage);
         var viewer = await LoginAsOperatorAsync("route-fin-declared-view", _view);
 
-        // 等宿主登记了心跳，再把它声明的订阅改成待终结
+        // 等待宿主完成心跳注册后，再将其声明的订阅标记为待终结
         await Eventually.UntilAsync(
             async _ => await Seed.CountAsync("""SELECT count(*) FROM "Operations"."MessagingInstance" WHERE "Subscriptions" @> '[{"subscription":"Operations.RecordAudit"}]'::jsonb"""),
             count => count > 0,
-            "宿主登记了心跳",
+            "宿主完成心跳注册",
             TimeSpan.FromSeconds(20),
             Ct);
         await Seed.SqlAsync("""UPDATE "Operations"."MessageRoute" SET "Status" = 1 WHERE "Subscription" = 'Operations.RecordAudit'""");
@@ -128,7 +122,7 @@ public sealed class RouteFinalizeTests(ClassDatabase<ApiTemplate> database, ApiT
         (await RouteStatusAsync(subscription)).ShouldBe((short)2);
         foreach (var id in new[] { processing, pending, dead })
         {
-            (await Seed.ScalarAsync<short>("""SELECT "Status" FROM "Sample"."InboxMessage" WHERE "Id" = @id""", ("id", id))).ShouldBe((short)4, "没处理完的都放弃了");
+            (await Seed.ScalarAsync<short>("""SELECT "Status" FROM "Sample"."InboxMessage" WHERE "Id" = @id""", ("id", id))).ShouldBe((short)4, "所有未处理完的消息均应被标记为已放弃");
         }
 
         (await Seed.ScalarAsync<string>("""SELECT "LastError" FROM "Sample"."InboxMessage" WHERE "Id" = @id""", ("id", dead))).ShouldBe("终结订阅时放弃：新版本已经全部上线；此前的错误：原来的错误");
@@ -150,7 +144,7 @@ public sealed class RouteFinalizeTests(ClassDatabase<ApiTemplate> database, ApiT
 
         finalized.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await JsonAsync(finalized)).GetProperty("abandoned").GetInt64().ShouldBe(0);
-        again.StatusCode.ShouldBe(HttpStatusCode.Conflict, "已经终结的不能再终结");
+        again.StatusCode.ShouldBe(HttpStatusCode.Conflict, "已终结的订阅不应允许再次终结");
         reactivated.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         (await RouteStatusAsync(subscription)).ShouldBe((short)0);
         (await Seed.ScalarAsync<bool>("""SELECT "FinalizedAt" IS NULL AND "FinalizedBy" IS NULL AND "RetiredReason" IS NULL FROM "Operations"."MessageRoute" WHERE "Subscription" = @subscription""", ("subscription", subscription))).ShouldBeTrue();

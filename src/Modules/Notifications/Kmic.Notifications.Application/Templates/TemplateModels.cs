@@ -6,9 +6,6 @@ using Kmic.Notifications.Domain.Errors;
 
 namespace Kmic.Notifications.Application.Templates;
 
-/// <summary>
-/// 把 JSON 读成模板声明的数据模型
-/// </summary>
 internal static class TemplateModels
 {
     public static Result<object> Read(NotificationTemplateDefinition definition, JsonElement json)

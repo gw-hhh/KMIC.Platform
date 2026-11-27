@@ -1,8 +1,5 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 执行记录的状态，存为 smallint
-/// </summary>
 internal static class ScheduledRunStatus
 {
     public const short Running = 0;
@@ -11,13 +8,9 @@ internal static class ScheduledRunStatus
 
     public const short Failed = 2;
 
-    /// <summary>
-    /// 命令提交时出错，不知道提交了没有
-    /// </summary>
+    // 提交阶段发生异常，无法确认是否已提交
     public const short Unknown = 3;
 
-    /// <summary>
-    /// 执行中进程没了，由清理任务标记
-    /// </summary>
+    // 执行期间进程意外终止，由后台清理任务标记
     public const short Abandoned = 4;
 }

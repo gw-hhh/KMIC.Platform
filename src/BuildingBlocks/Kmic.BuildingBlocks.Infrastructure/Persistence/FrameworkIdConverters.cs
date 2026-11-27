@@ -3,7 +3,7 @@ using Vogen;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-// 框架 ID 的转换器在这里声明一次，由 ModuleDbContext 统一注册，模块只声明自己的 ID
+// 框架级强类型 ID 的转换器在此集中声明并由 ModuleDbContext 统一注册，各模块仅需声明自身业务的 ID
 [EfCoreConverter<UserId>]
 [EfCoreConverter<RoleId>]
 [EfCoreConverter<SessionId>]

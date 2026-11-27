@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 查询文件详情及状态历史
-/// </summary>
 public sealed class GetFileQueryHandler(IFilesQueryDb db, IStateHistoryQuery history) : IQueryHandler<GetFileQuery, FileDetail>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<FileDetail>> Handle(GetFileQuery query, CancellationToken cancellationToken)
     {
         var file = await db.Files.FirstOrDefaultAsync(f => f.Id == query.Id, cancellationToken);

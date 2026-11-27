@@ -5,9 +5,6 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// <see cref="IModuleMessageStores" /> 的实现：每个注册了数据库的模块一个存储，用到时才建
-/// </summary>
 internal sealed class ModuleMessageStores(ModuleFrameworkTables tables, DataSources dataSources, SubscriptionCatalog catalog) : IModuleMessageStores
 {
     private readonly Lazy<FrozenDictionary<string, IModuleMessageStore>> _byModule = new(() => tables.Modules

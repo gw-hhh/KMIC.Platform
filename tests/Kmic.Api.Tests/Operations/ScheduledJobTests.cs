@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 定时任务管理：列表、预览 Cron、改开关与执行时间、恢复默认、立即执行、执行记录，端到端
-/// </summary>
 public sealed class ScheduledJobTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -78,7 +75,7 @@ public sealed class ScheduledJobTests(ClassDatabase<ApiTemplate> database, ApiTe
         var times = (await JsonAsync(ok)).GetProperty("nextFireTimes").EnumerateArray().Select(t => t.GetDateTimeOffset()).ToList();
         times.Count.ShouldBe(5);
         times.ShouldBe(times.Order());
-        times.ShouldAllBe(t => t.UtcDateTime.TimeOfDay == TimeSpan.FromHours(23), "业务时区是东八区，早上 7 点是前一天 23 点（UTC）");
+        times.ShouldAllBe(t => t.UtcDateTime.TimeOfDay == TimeSpan.FromHours(23), "业务时区为东八区（UTC+8），次日 07:00 对应前一日 23:00（UTC）");
         foreach (var refused in new[] { notCron, tooOften, never })
         {
             refused.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -117,7 +114,7 @@ public sealed class ScheduledJobTests(ClassDatabase<ApiTemplate> database, ApiTe
         running.GetProperty("activeCron").GetString().ShouldBe("0 15 4 * * ?");
         running.GetProperty("defaultCron").GetString().ShouldBe("0 30 3 * * ?");
         running.GetProperty("inSync").GetBoolean().ShouldBeTrue();
-        running.GetProperty("nextFireTime").GetDateTimeOffset().UtcDateTime.TimeOfDay.ShouldBe(new TimeSpan(20, 15, 0), "东八区 04:15 是前一天 20:15（UTC）");
+        running.GetProperty("nextFireTime").GetDateTimeOffset().UtcDateTime.TimeOfDay.ShouldBe(new TimeSpan(20, 15, 0), "东八区 04:15 对应前一日 20:15（UTC）");
 
         var restored = await CallAsync(HttpMethod.Post, $"/{Name}/restore-default", manager, new { expectedVersion = (await JsonAsync(moved)).GetProperty("version").GetInt64() });
 
@@ -127,7 +124,7 @@ public sealed class ScheduledJobTests(ClassDatabase<ApiTemplate> database, ApiTe
         back.GetProperty("activeCron").GetString().ShouldBe("0 30 3 * * ?");
         back.GetProperty("overrideEnabled").ValueKind.ShouldBe(JsonValueKind.Null);
         back.GetProperty("overrideCron").ValueKind.ShouldBe(JsonValueKind.Null);
-        back.GetProperty("overrideVersion").ValueKind.ShouldBe(JsonValueKind.Number, "设置行留着，便于追溯");
+        back.GetProperty("overrideVersion").ValueKind.ShouldBe(JsonValueKind.Number, "应保留配置覆写记录以便追溯");
         Actions(back).ShouldBe(["Edit", "RunNow"]);
         (await Seed.CountAsync($"""SELECT count(*) FROM "Operations"."ScheduledJobSetting" WHERE "JobName" = '{Name}'""")).ShouldBe(1);
     }
@@ -156,7 +153,7 @@ public sealed class ScheduledJobTests(ClassDatabase<ApiTemplate> database, ApiTe
         withoutVersion.StatusCode.ShouldBe(HttpStatusCode.Conflict);
         (await CodeOfAsync(withoutVersion)).ShouldBe("Common.VersionConflict");
         stale.StatusCode.ShouldBe(HttpStatusCode.Conflict);
-        neverChanged.StatusCode.ShouldBe(HttpStatusCode.Conflict, "没有设置行，调用方带的版本对不上");
+        neverChanged.StatusCode.ShouldBe(HttpStatusCode.Conflict, "无覆写配置记录时，调用方传入的版本号不匹配应返回冲突");
         (await JobAsync(manager, Name)).GetProperty("overrideEnabled").GetBoolean().ShouldBeTrue();
     }
 
@@ -195,7 +192,7 @@ public sealed class ScheduledJobTests(ClassDatabase<ApiTemplate> database, ApiTe
         unknown.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         (await CodeOfAsync(unknown)).ShouldBe("Operations.JobNotFound");
         forbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
-        // 这个测试宿主不运行调度器，触发请求只是写进了调度库
+        // 当前测试宿主未启用调度器，立即执行请求仅将触发记录写入调度数据库
         (await Seed.CountAsync($"""SELECT count(*) FROM "Operations".qrtz_triggers WHERE job_name = '{Name}' AND job_group = 'Kmic' AND trigger_type = 'SIMPLE'""")).ShouldBeGreaterThanOrEqualTo(1);
     }
 

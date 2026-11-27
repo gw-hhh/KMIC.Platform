@@ -29,7 +29,7 @@ public sealed class FileTypesTests
         FileTypes.Identify("a.png", _png)!.Code.ShouldBe(FileType.Png);
         FileTypes.Identify("a.webp", [.. "RIFF"u8, 0x24, 0x00, 0x00, 0x00, .. "WEBP"u8, .. "VP8 "u8])!.Code.ShouldBe(FileType.Webp);
         FileTypes.Identify("a.webp", [.. "RIFF"u8, 0x24, 0x00, 0x00, 0x00, .. "WAVE"u8, .. "fmt "u8]).ShouldBeNull("RIFF 容器里装的是音频");
-        FileTypes.Identify("a.webp", "RIFF"u8).ShouldBeNull("头不够长");
+        FileTypes.Identify("a.webp", "RIFF"u8).ShouldBeNull("文件头长度不足");
     }
 
     [Fact]
@@ -38,9 +38,9 @@ public sealed class FileTypesTests
         FileTypes.Identify("a.docx", Zip("word/document.xml"))!.Code.ShouldBe(FileType.Docx);
         FileTypes.Identify("a.xlsx", Zip("xl/workbook.xml"))!.Code.ShouldBe(FileType.Xlsx);
         FileTypes.Identify("a.pptx", Zip("ppt/presentation.xml"))!.Code.ShouldBe(FileType.Pptx);
-        FileTypes.Identify("a.docx", Zip("[Content_Types].xml"))!.Code.ShouldBe(FileType.Docx, "文件头里还没出现具体的目录名，由扩展名决定");
+        FileTypes.Identify("a.docx", Zip("[Content_Types].xml"))!.Code.ShouldBe(FileType.Docx, "文件头尚未出现具体目录名，按扩展名识别");
         FileTypes.Identify("a.zip", Zip("any.txt"))!.Code.ShouldBe(FileType.Zip);
-        FileTypes.Identify("a.docx", Zip("xl/workbook.xml")).ShouldBeNull("头里是 Excel 的目录，扩展名是改成 docx 的");
+        FileTypes.Identify("a.docx", Zip("xl/workbook.xml")).ShouldBeNull("文件头为 Excel 目录结构，扩展名被篡改为 docx");
         FileTypes.Identify("a.xlsx", Zip("word/document.xml")).ShouldBeNull();
         FileTypes.Identify("a.pptx", Zip("word/document.xml")).ShouldBeNull();
     }
@@ -79,7 +79,7 @@ public sealed class FileTypesTests
         FileTypes.Identify("a.csv", [0x68, 0x69, 0x01]).ShouldBeNull();
         FileTypes.Identify("a.txt", [0xC4, 0xE3, 0xBA, 0xC3, 0x0D, 0x0A]).ShouldNotBeNull("GBK 的“你好”");
         FileTypes.Identify("a.txt", [0xEF, 0xBB, 0xBF, 0x68, 0x69]).ShouldNotBeNull("UTF-8 带 BOM");
-        FileTypes.Identify("a.txt", [0xFF, 0xFE, 0x68, 0x00]).ShouldBeNull("UTF-16 里有空字节，这里不当文本收");
+        FileTypes.Identify("a.txt", [0xFF, 0xFE, 0x68, 0x00]).ShouldBeNull("UTF-16 包含空字节，不作为纯文本识别");
     }
 
     [Fact]

@@ -6,12 +6,7 @@ using Kmic.Identity.Domain.Errors;
 
 namespace Kmic.Identity.Domain.Roles;
 
-/// <summary>
-/// 角色：一组权限点加数据范围配置
-/// </summary>
-/// <remarks>
-/// 内置系统管理员角色不存权限点，加载时给全部权限
-/// </remarks>
+/// <summary>角色聚合，包含权限点与数据范围配置；内置系统管理员不持久化权限点行，加载时授予全部有效权限。</summary>
 public sealed class Role : AggregateRoot<RoleId>
 {
     private static readonly StateMachine<Role, RoleStatus, RoleAction> _machine =
@@ -89,9 +84,7 @@ public sealed class Role : AggregateRoot<RoleId>
     /// </summary>
     public bool IsBuiltIn => GrantsAllPermissions;
 
-    /// <summary>
-    /// 创建普通角色，没有任何权限点
-    /// </summary>
+    /// <summary>创建普通角色（初始无权限点）。</summary>
     public static Result<Role> Create(string? name, string? description, int sortOrder, RoleScopeLevel defaultScopeLevel, string? reason = null)
     {
         var fields = ReadFields(name, description);
@@ -105,9 +98,7 @@ public sealed class Role : AggregateRoot<RoleId>
         return role;
     }
 
-    /// <summary>
-    /// 创建内置的系统管理员角色：受保护、拥有全部权限点、数据范围全部
-    /// </summary>
+    /// <summary>创建内置系统管理员角色（受保护、全权限、全部数据范围）。</summary>
     public static Role CreateSystemAdministrator(string name = "系统管理员")
     {
         var role = new Role(RoleId.New(), name, "拥有全部权限点，管理此角色时须使用受保护角色", 0, RoleScopeLevel.All)
@@ -119,9 +110,6 @@ public sealed class Role : AggregateRoot<RoleId>
         return role;
     }
 
-    /// <summary>
-    /// 改名
-    /// </summary>
     public Result Rename(string? name)
     {
         var parsed = ReadFields(name, Description);
@@ -134,9 +122,6 @@ public sealed class Role : AggregateRoot<RoleId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 修改说明
-    /// </summary>
     public Result Describe(string? description)
     {
         var parsed = ReadFields(Name, description);
@@ -149,14 +134,9 @@ public sealed class Role : AggregateRoot<RoleId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 调整次序
-    /// </summary>
     public void Reorder(int sortOrder) => SortOrder = sortOrder;
 
-    /// <summary>
-    /// 整体替换权限点；调用方先确认这些权限点都在目录里且启用
-    /// </summary>
+    /// <summary>全量替换角色权限点。</summary>
     public Result SetPermissions(IEnumerable<string> permissionCodes)
     {
         ArgumentNullException.ThrowIfNull(permissionCodes);
@@ -176,9 +156,7 @@ public sealed class Role : AggregateRoot<RoleId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 按映射替换权限编码，已存在新编码时移除旧项；返回是否有改动
-    /// </summary>
+    /// <summary>按映射表替换权限编码，新编码已存在时移除旧项；返回是否发生变更。</summary>
     public bool RenamePermissions(IReadOnlyDictionary<string, string> renames)
     {
         ArgumentNullException.ThrowIfNull(renames);
@@ -202,9 +180,7 @@ public sealed class Role : AggregateRoot<RoleId>
         return changed;
     }
 
-    /// <summary>
-    /// 移除指定权限配置，返回是否有改动
-    /// </summary>
+    /// <summary>移除指定权限配置，返回是否发生变更。</summary>
     public bool RemovePermissions(IReadOnlyCollection<string> codes)
     {
         ArgumentNullException.ThrowIfNull(codes);
@@ -212,9 +188,7 @@ public sealed class Role : AggregateRoot<RoleId>
         return _permissions.RemoveAll(p => codes.Contains(p.PermissionCode, StringComparer.Ordinal)) > 0;
     }
 
-    /// <summary>
-    /// 移除指定数据范围配置，返回是否有改动
-    /// </summary>
+    /// <summary>移除指定数据范围覆盖配置，返回是否发生变更。</summary>
     public bool RemoveDataScopeOverrides(IReadOnlyCollection<string> scopeObjects)
     {
         ArgumentNullException.ThrowIfNull(scopeObjects);
@@ -222,9 +196,7 @@ public sealed class Role : AggregateRoot<RoleId>
         return _dataScopes.RemoveAll(s => scopeObjects.Contains(s.ScopeObject, StringComparer.Ordinal)) > 0;
     }
 
-    /// <summary>
-    /// 整体替换数据范围：默认等级和各范围对象的覆盖
-    /// </summary>
+    /// <summary>全量替换默认数据范围及各范围对象的覆盖配置。</summary>
     public Result SetDataScopes(RoleScopeLevel defaultLevel, IReadOnlyDictionary<string, RoleScopeLevel> overrides)
     {
         ArgumentNullException.ThrowIfNull(overrides);
@@ -251,20 +223,13 @@ public sealed class Role : AggregateRoot<RoleId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 停用；内置角色不能停用
-    /// </summary>
+    /// <summary>停用角色；内置角色不可停用。</summary>
     public Result Disable(string? reason = null) =>
         GrantsAllPermissions ? IdentityErrors.SystemRoleImmutable : _machine.Fire(this, RoleAction.Disable, reason);
 
-    /// <summary>
-    /// 启用
-    /// </summary>
     public Result Enable(string? reason = null) => _machine.Fire(this, RoleAction.Enable, reason);
 
-    /// <summary>
-    /// 全权限角色在权限点目录变化后同步哈希，让授权版本递增，已缓存的权限点集合随之失效
-    /// </summary>
+    /// <summary>同步全权限角色的目录指纹（保存时递增并发版本以使缓存失效）。</summary>
     public void SyncCatalog(string catalogHash)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(catalogHash);

@@ -3,18 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 属性映射扩展
-/// </summary>
 public static class PropertyBuilderExtensions
 {
-    /// <summary>
-    /// 不限长度的文本列
-    /// </summary>
-    /// <remarks>
-    /// 字符串属性要么设置最大长度，要么显式调用它
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">不是字符串</exception>
+    /// <summary>映射为不限长度的文本列（字符串属性须显式设最大长度或调用此方法，仅限 string）</summary>
     public static PropertyBuilder<TProperty> IsUnboundedText<TProperty>(this PropertyBuilder<TProperty> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -22,13 +13,7 @@ public static class PropertyBuilderExtensions
         return builder.HasColumnType(ColumnTypes.UnboundedText);
     }
 
-    /// <summary>
-    /// 不区分大小写，比较和唯一约束都忽略大小写
-    /// </summary>
-    /// <remarks>
-    /// 这类列不支持 ILIKE，模糊查询用 KmicFunctions
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">不是字符串</exception>
+    /// <summary>启用不区分大小写排序规则（仅限 string；模糊匹配须使用 KmicFunctions 而非直接 ILIKE）</summary>
     public static PropertyBuilder<TProperty> IsCaseInsensitive<TProperty>(this PropertyBuilder<TProperty> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -36,9 +21,7 @@ public static class PropertyBuilderExtensions
         return builder.UseCollation(Collations.CaseInsensitive);
     }
 
-    /// <summary>
-    /// 设置小数精度，如 Precisions.Amount
-    /// </summary>
+    /// <summary>按预设配置小数精度（如 Precisions.Amount）</summary>
     public static PropertyBuilder<TProperty> HasPrecision<TProperty>(this PropertyBuilder<TProperty> builder, DecimalPrecision precision)
     {
         ArgumentNullException.ThrowIfNull(builder);

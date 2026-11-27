@@ -3,16 +3,11 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
-/// <summary>
-/// 读取智能枚举的全部取值
-/// </summary>
 internal static class EnumerationSchemas
 {
     public static bool IsEnumeration(Type type) => Base(type) is not null;
 
-    /// <summary>
-    /// 全部取值，按声明顺序
-    /// </summary>
+    // 按声明顺序返回智能枚举的全部取值
     public static IReadOnlyList<IEnumeration> Members(Type type)
     {
         var all = Base(type)?.GetProperty("All", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
@@ -20,7 +15,7 @@ internal static class EnumerationSchemas
         return [.. ((System.Collections.IEnumerable)all.GetValue(null)!).Cast<IEnumeration>()];
     }
 
-    // 智能枚举派生自 Enumeration<TSelf>，取值表在这个泛型基类上
+    // 智能枚举均派生自 Enumeration<TSelf>，静态取值集合定义于该泛型基类中
     private static Type? Base(Type type)
     {
         for (var current = type; current is not null; current = current.BaseType)

@@ -4,12 +4,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Configuration.Application.Features;
 
-/// <summary>
-/// 查询已启用的功能开关
-/// </summary>
 public sealed class GetFeaturesQueryHandler(IFeatureFlags features) : IQueryHandler<GetFeaturesQuery, FeaturesResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<FeaturesResponse>> Handle(GetFeaturesQuery query, CancellationToken cancellationToken)
     {
         return new FeaturesResponse(await features.EnabledAsync(cancellationToken));

@@ -3,17 +3,13 @@ using System.Diagnostics.Metrics;
 
 namespace Kmic.BuildingBlocks.Testing.Metrics;
 
-/// <summary>
-/// 记录一个指标工厂创建的所有指标，供测试断言
-/// </summary>
+/// <summary>记录指定指标工厂创建的所有度量指标，供测试断言。</summary>
 public sealed class MetricRecorder : IDisposable
 {
     private readonly MeterListener _listener = new();
     private readonly ConcurrentQueue<RecordedMeasurement> _measurements = new();
 
-    /// <summary>
-    /// 开始记录这个工厂创建的指标
-    /// </summary>
+    /// <summary>开始监听并记录指定指标工厂创建的指标。</summary>
     public MetricRecorder(IMeterFactory factory)
     {
         ArgumentNullException.ThrowIfNull(factory);
@@ -30,28 +26,19 @@ public sealed class MetricRecorder : IDisposable
         _listener.Start();
     }
 
-    /// <summary>
-    /// 全部记录，按发生顺序
-    /// </summary>
+    /// <summary>按采集顺序返回全部度量记录。</summary>
     public IReadOnlyCollection<RecordedMeasurement> All => _measurements;
 
-    /// <summary>
-    /// 读取一遍所有量表（ObservableGauge 这类只在被读取时才产生数值），结果加入记录
-    /// </summary>
+    /// <summary>采集所有 ObservableGauge 指标并加入记录。</summary>
     public void Collect() => _listener.RecordObservableInstruments();
 
-    /// <summary>
-    /// 清空已有的记录，从头观察下一段操作
-    /// </summary>
+    /// <summary>清空已有记录，以便重新观察后续操作。</summary>
     public void Clear() => _measurements.Clear();
 
-    /// <summary>
-    /// 某个指标的记录
-    /// </summary>
+    /// <summary>获取指定指标名称的所有度量记录。</summary>
     public IReadOnlyList<RecordedMeasurement> Of(string instrument) =>
         [.. _measurements.Where(m => string.Equals(m.Instrument, instrument, StringComparison.Ordinal))];
 
-    /// <inheritdoc />
     public void Dispose() => _listener.Dispose();
 
     private void Add(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags) =>

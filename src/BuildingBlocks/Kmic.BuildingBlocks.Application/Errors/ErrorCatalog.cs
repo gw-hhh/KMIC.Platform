@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Errors;
 
-/// <summary>
-/// 错误目录：全部命名为 *Errors 的静态类里声明的错误
-/// </summary>
+/// <summary>汇总各 *Errors 静态类中声明的错误定义。</summary>
 public sealed class ErrorCatalog
 {
     private readonly FrozenDictionary<string, ErrorDefinition> _byCode;
@@ -14,23 +12,15 @@ public sealed class ErrorCatalog
     private ErrorCatalog(IEnumerable<ErrorDefinition> definitions) =>
         _byCode = definitions.ToFrozenDictionary(d => d.Code, StringComparer.Ordinal);
 
-    /// <summary>
-    /// 全部错误，按错误码排序
-    /// </summary>
+    /// <summary>全部错误定义，按错误码排序。</summary>
     public IReadOnlyCollection<ErrorDefinition> All => [.. _byCode.Values.OrderBy(d => d.Code, StringComparer.Ordinal)];
 
-    /// <summary>
-    /// 从程序集中读取
-    /// </summary>
     public static ErrorCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
         return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()));
     }
 
-    /// <summary>
-    /// 从给定类型中读取，问题汇总后一次报出
-    /// </summary>
     public static ErrorCatalog Build(IEnumerable<Type> types)
     {
         ArgumentNullException.ThrowIfNull(types);

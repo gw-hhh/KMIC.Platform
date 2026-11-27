@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Application.Messaging;
 
 namespace Kmic.Identity.Application.ContractQueries;
 
-/// <summary>
-/// 校验单批角色引用查询的 ID 数量
-/// </summary>
 internal sealed class GetRoleReferencesQueryValidator : AbstractValidator<GetRoleReferencesQuery>
 {
     public GetRoleReferencesQueryValidator() =>
@@ -13,5 +10,5 @@ internal sealed class GetRoleReferencesQueryValidator : AbstractValidator<GetRol
             .NotNull()
             .Must(ids => ids.Count <= ContractBatch.DefaultSize)
             .WithErrorCode("Range")
-            .WithMessage($"一次最多解析 {ContractBatch.DefaultSize} 个角色。");
+            .WithMessage($"一次最多解析 {ContractBatch.DefaultSize} 个角色");
 }

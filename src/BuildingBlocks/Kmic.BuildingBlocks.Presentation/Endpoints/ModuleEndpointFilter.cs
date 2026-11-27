@@ -2,9 +2,6 @@ using Kmic.BuildingBlocks.Application.Execution;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 模块路由组上的框架过滤器
-/// </summary>
 internal sealed class ModuleEndpointFilter : IEndpointFilter
 {
     public const string IdempotencyKeyHeader = "Idempotency-Key";
@@ -18,7 +15,7 @@ internal sealed class ModuleEndpointFilter : IEndpointFilter
         var http = context.HttpContext;
         var metadata = http.RequestServices.GetRequiredService<RequestMetadata>();
 
-        // 同名的头出现两次时无法确定哪个才是键，按没有有效的键处理，由幂等行为拒绝
+        // 同名请求头出现多次时无法确定有效键值，视作无效幂等键交由幂等管道拦截
         if (http.Request.Headers.TryGetValue(IdempotencyKeyHeader, out var values))
         {
             metadata.IdempotencyKey = values.Count == 1 ? values[0] : string.Empty;

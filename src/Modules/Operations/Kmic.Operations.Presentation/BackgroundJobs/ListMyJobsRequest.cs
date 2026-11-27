@@ -2,9 +2,6 @@ using System.ComponentModel;
 
 namespace Kmic.Operations.Presentation.BackgroundJobs;
 
-/// <summary>
-/// 查询个人后台作业的参数
-/// </summary>
 /// <param name="Status">状态编码：Queued、Running、Succeeded、Failed、Cancelling、Cancelled</param>
 /// <param name="After">上一页返回的游标，首页不传</param>
 /// <param name="Limit">每页数量</param>

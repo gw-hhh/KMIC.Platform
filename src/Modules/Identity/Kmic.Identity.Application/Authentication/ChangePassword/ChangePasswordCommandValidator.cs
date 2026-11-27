@@ -6,7 +6,7 @@ internal sealed class ChangePasswordCommandValidator : AbstractValidator<ChangeP
 {
     public ChangePasswordCommandValidator()
     {
-        // 长度规则由密码策略检查并给出统一的错误；这里只防超长输入拖慢哈希
+        // 具体长度规则由密码策略统一校验，此处仅限制上限以防超长输入拖慢哈希计算
         RuleFor(c => c.NewPassword).NotEmpty().MaximumLength(1024);
         RuleFor(c => c.OldPassword).MaximumLength(1024);
     }

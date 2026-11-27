@@ -2,9 +2,7 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.ScheduledJobs;
 
-/// <summary>
-/// 定时任务的一次执行
-/// </summary>
+/// <summary>定时任务执行记录项。</summary>
 /// <param name="Id">记录 ID</param>
 /// <param name="JobName">任务名</param>
 /// <param name="ScheduledFireTime">计划触发时间</param>

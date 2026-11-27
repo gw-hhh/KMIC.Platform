@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Domain.Organization;
 
-/// <summary>
-/// 组织单元，组织树上的节点，只能经 OrgTree 创建和修改
-/// </summary>
+/// <summary>组织单元，仅通过 <see cref="OrgTree" /> 创建和修改。</summary>
 public sealed class OrgUnit : Entity<OrgUnitId>
 {
     private OrgUnit(OrgUnitId id, OrgUnitId? parentId, string name, string? code, int sortOrder)

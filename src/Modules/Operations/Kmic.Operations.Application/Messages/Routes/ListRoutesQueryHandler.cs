@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Operations.Application.Messages.Routes;
 
-/// <summary>
-/// 查询消息订阅路由
-/// </summary>
 public sealed class ListRoutesQueryHandler(IOperationsQueryDb db, TimeProvider time) : IQueryHandler<ListRoutesQuery, IReadOnlyList<RouteItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<RouteItem>>> Handle(ListRoutesQuery query, CancellationToken cancellationToken)
     {
         var statuses = EnumerationFilter.Parse<MessageRouteStatus>(query.Status, "status");

@@ -11,25 +11,21 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Presentation;
 
-/// <summary>
-/// 接口层的服务注册与中间件
-/// </summary>
+/// <summary>接口层服务注册与中间件扩展</summary>
 public static class PresentationServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册接口层：JSON 选项、ProblemDetails、请求解析错误的转换、限流与并发限制、请求超时、端点声明的启动校验
-    /// </summary>
+    /// <summary>注册接口层基础服务（JSON、异常处理、限流、超时与端点校验）</summary>
     public static IServiceCollection AddKmicPresentation(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        // 部署配置在启动时就校验，不合法的值拒绝启动
+        // 启动时校验部署配置，存在非法值则拒绝启动
         services.AddOptions<KmicHttpOptions>()
             .BindConfiguration(KmicHttpOptions.Section)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // 只采信可信代理传来的客户端地址和协议；没配置可信代理时不处理转发头
+        // 仅采信可信代理传递的客户端地址与协议；未配置可信代理时不处理转发头
         services.AddOptions<ForwardedHeadersOptions>().Configure<IOptions<KmicHttpOptions>>((forwarded, http) =>
         {
             forwarded.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -42,20 +38,20 @@ public static class PresentationServiceCollectionExtensions
             }
         });
 
-        // 请求体默认不超过 1 MB，匿名接口也不能被大请求体拖垮；上传等端点在请求里自己放宽
+        // 请求体大小默认限制为 1 MB，防止大请求体耗尽匿名接口资源；上传等端点按需自行放宽
         services.AddOptions<KestrelServerOptions>().Configure<IOptions<KmicHttpOptions>>((kestrel, http) =>
         {
             kestrel.Limits.MaxRequestBodySize = http.Value.MaxRequestBodyBytes;
             kestrel.AddServerHeader = false;
         });
 
-        // ASP.NET Core 的默认值比框架约定宽松，要逐项覆盖
+        // ASP.NET Core 默认选项较框架约定宽松，需逐项显式覆盖
         services.ConfigureHttpJsonOptions(options => KmicJsonOptions.Configure(options.SerializerOptions));
 
-        // 请求体解析失败时抛 BadHttpRequestException，才能带着字段路径转成 400
+        // 请求体解析失败时抛出 BadHttpRequestException，以便提取字段路径并转换为 400 响应
         services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 
-        // 只保留我们的写出方：任何错误的输出格式都一样
+        // 仅保留自定义 ProblemDetails 写出器，确保所有错误响应格式一致
         services.AddProblemDetails();
         services.RemoveAll<IProblemDetailsWriter>();
         services.AddSingleton<IProblemDetailsWriter, KmicProblemDetailsWriter>();
@@ -64,7 +60,7 @@ public static class PresentationServiceCollectionExtensions
         services.AddRateLimiter(RateLimitPolicies.Configure);
         services.AddSingleton<ConcurrencyLimiters>();
 
-        // 请求超时后取消请求的令牌，处理器应当在等待中响应取消；没来得及写响应的返回 504
+        // 请求超时时触发取消令牌，处理器应在等待过程中响应取消；未及写入响应时返回 504
         services.AddRequestTimeouts();
         services.AddOptions<RequestTimeoutOptions>().Configure<IOptions<KmicHttpOptions>>((timeouts, http) =>
             timeouts.DefaultPolicy = new RequestTimeoutPolicy
@@ -77,27 +73,21 @@ public static class PresentationServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 最外层的错误处理：X-Trace-Id、未处理异常转 500、没有内容的 4xx 转 ProblemDetails
-    /// </summary>
-    /// <summary>
-    /// 只采信可信代理传来的客户端地址和协议，要放在管道最前面
-    /// </summary>
+    /// <summary>采信可信代理传递的客户端地址与协议（须置于管道最前端）</summary>
     public static IApplicationBuilder UseKmicForwardedHeaders(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);
         return app.UseForwardedHeaders();
     }
 
-    /// <summary>
-    /// 给所有响应加安全响应头，要放在错误处理之前，出错的响应也带
-    /// </summary>
+    /// <summary>写入安全响应头（须置于错误处理中间件之前）</summary>
     public static IApplicationBuilder UseKmicSecurityHeaders(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);
         return app.UseMiddleware<SecurityHeadersMiddleware>();
     }
 
+    /// <summary>最外层错误处理：注入 X-Trace-Id、兜底未处理异常并统一 4xx 错误响应</summary>
     public static IApplicationBuilder UseKmicErrorHandling(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -108,12 +98,7 @@ public static class PresentationServiceCollectionExtensions
         return app;
     }
 
-    /// <summary>
-    /// 限流、并发限制和请求超时
-    /// </summary>
-    /// <remarks>
-    /// 放在路由和认证之后、授权之前
-    /// </remarks>
+    /// <summary>启用限流、并发与超时控制（须置于路由与认证之后、授权之前）</summary>
     public static IApplicationBuilder UseKmicLimits(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);

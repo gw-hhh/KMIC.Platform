@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.ArchitectureTests;
 
-/// <summary>
-/// 依赖方向：编译器保证一部分，这里检查程序集实际引用的结果
-/// </summary>
 public sealed class DependencyRuleTests
 {
     [Fact]
@@ -21,7 +18,7 @@ public sealed class DependencyRuleTests
     [Fact]
     public void ProductAssemblies_IncludeTheFrameworkAndTheSampleModule()
     {
-        // 找不到程序集时上面的检查会空转通过：先确认真的扫到了
+        // 若未能扫描到程序集，上述校验将空跑通过；此处先确认扫描结果非空
         ProductAssemblies.Framework.Select(a => a.Layer).Distinct().Count().ShouldBe(5);
         ProductAssemblies.ModuleNames.ShouldContain("Sample", StringComparer.Ordinal);
         ProductAssemblies.Modules.Count(a => string.Equals(a.Module, "Sample", StringComparison.Ordinal)).ShouldBe(5);

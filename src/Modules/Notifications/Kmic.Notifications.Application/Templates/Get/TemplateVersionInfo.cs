@@ -1,8 +1,6 @@
 namespace Kmic.Notifications.Application.Templates.Get;
 
-/// <summary>
-/// 模板发布版本
-/// </summary>
+/// <summary>模板发布版本</summary>
 /// <param name="Version">版本号</param>
 /// <param name="Channel">渠道编码</param>
 /// <param name="Subject">主题</param>

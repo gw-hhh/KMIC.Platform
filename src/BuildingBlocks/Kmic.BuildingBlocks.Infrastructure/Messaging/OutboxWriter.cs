@@ -15,12 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 把本次命令发布的消息写进本模块的 Outbox
-/// </summary>
-/// <remarks>
-/// 在业务数据保存之后、提交之前调用
-/// </remarks>
+// 须在业务数据保存后、事务提交前调用，将待发消息写入所属模块的 Outbox
 internal sealed class OutboxWriter(
     IntegrationEventPublisher publisher,
     IExecutionContext execution,
@@ -36,16 +31,11 @@ internal sealed class OutboxWriter(
     public Task WriteAsync(ModuleDbContext context, string module, bool exemptFromSoftLine, CancellationToken ct) =>
         WriteAsync(context, module, publisher.TakePending(), exemptFromSoftLine ? AdmissionMode.ExemptFromSoftLine : AdmissionMode.Enforce, ct);
 
-    /// <summary>
-    /// 写入给定的消息，读审计这类不在命令里的写入用它
-    /// </summary>
+    // 供读取审计等非命令场景直接写入消息
     public Task WriteAsync(ModuleDbContext context, string module, IReadOnlyList<PendingMessage> pending, CancellationToken ct) =>
         WriteAsync(context, module, pending, AdmissionMode.Enforce, ct);
 
-    /// <summary>
-    /// 写入给定的消息，并按容量保护的状态放行或拒绝
-    /// </summary>
-    /// <exception cref="MessagingSuspendedException">被软线或硬线拒绝</exception>
+    // 触发容量保护且未配置 SkipWhenSuspended 时抛出 MessagingSuspendedException
     public async Task WriteAsync(ModuleDbContext context, string module, IReadOnlyList<PendingMessage> pending, AdmissionMode mode, CancellationToken ct)
     {
         if (pending.Count == 0)
@@ -70,7 +60,7 @@ internal sealed class OutboxWriter(
             if (size > limits.MaxPayloadBytes)
             {
                 throw new InvalidOperationException(
-                    $"{message.Type.Name} 的内容有 {size} 字节，超过上限 {limits.MaxPayloadBytes}。大块内容请存成文件，消息里只放文件 ID。");
+                    $"{message.Type.Name} 的消息体大小为 {size} 字节，超过上限 {limits.MaxPayloadBytes} 字节。大体积内容请转为文件存储，仅在消息中传递文件 ID。");
             }
 
             total += size;
@@ -95,16 +85,16 @@ internal sealed class OutboxWriter(
         if (total > limits.MaxOutboxBytesPerTransaction)
         {
             throw new InvalidOperationException(
-                $"这个命令要写入 Outbox {total} 字节，超过一个事务的上限 {limits.MaxOutboxBytesPerTransaction}。大批量的消息请拆到后台作业里分批发布。");
+                $"当前命令待写入 Outbox 的总数据量为 {total} 字节，超过单事务上限 {limits.MaxOutboxBytesPerTransaction} 字节。大批量消息请拆分为后台作业分批发布。");
         }
 
         await context.SaveChangesAsync(ct);
 
-        // 通知在提交时才送达，投递程序被唤醒时一定能读到这些消息
+        // 通知于事务提交后送达，确保投递程序唤醒时能够读取到这批消息
         await context.Database.ExecuteSqlAsync($"SELECT pg_notify({MessagingChannels.Outbox}, {module})", ct);
     }
 
-    // 返回 false 表示这批消息不写了（只有 SkipWhenSuspended）；其他被拒绝的情况抛异常，让业务事务回滚
+    // 返回 false 表示跳过写入（仅限 SkipWhenSuspended 模式）；其余拒绝情况均抛出异常以回滚业务事务
     private bool IsAdmitted(string module, int count, AdmissionMode mode)
     {
         if (admission.IsAllowed(execution.Origin, mode != AdmissionMode.Enforce))
@@ -119,7 +109,7 @@ internal sealed class OutboxWriter(
             return false;
         }
 
-        throw new MessagingSuspendedException($"数据库空间不足，已暂停消息写入（{admission.State}），{module} 模块要写入 {count} 条消息被拒绝。");
+        throw new MessagingSuspendedException($"数据库空间不足，已暂停消息写入（{admission.State}），{module} 模块本次写入 {count} 条消息的请求已被拒绝。");
     }
 
     private static MessageHeaders Headers(string module, ICurrentUser user, Guid? causationId)
@@ -135,7 +125,7 @@ internal sealed class OutboxWriter(
             Purged: false);
     }
 
-    // 同一个聚合根在一个命令里发布了多次快照，版本号相同，只留最后一次
+    // 同一聚合根在单次命令中多次发布同版本快照事件时，仅保留最后一次
     private static IEnumerable<PendingMessage> LatestSnapshots(IReadOnlyList<PendingMessage> pending)
     {
         var latest = new Dictionary<(string, int, Guid), int>();
@@ -169,5 +159,5 @@ internal sealed class OutboxWriter(
         versions.TryGetValue(sourceId, out var version)
             ? version
             : throw new InvalidOperationException(
-                $"{type.Name} 的 SourceId {sourceId} 在这次保存里找不到对应的聚合根。快照事件要和聚合根的修改在同一个命令里发布。");
+                $"{type.Name} 的 SourceId（{sourceId}）在本次保存中未匹配到对应聚合根。快照事件须与聚合根变更在同一命令中发布。");
 }

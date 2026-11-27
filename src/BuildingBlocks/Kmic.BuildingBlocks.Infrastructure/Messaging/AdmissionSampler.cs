@@ -12,12 +12,7 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 定期判断数据库空间是否紧张，并把结果写进共享状态表，各实例据此拒绝消息写入
-/// </summary>
-/// <remarks>
-/// Api 与 Worker 角色都运行（Worker 停止时也要能判断）。每个周期只有取到咨询锁的一个实例做判断
-/// </remarks>
+// 定期采样数据库空间并更新共享状态表（Api 与 Worker 均运行，每周期仅持咨询锁的实例采样）
 internal sealed class AdmissionSampler : BackgroundService
 {
     private readonly ModuleFrameworkTables _tables;
@@ -50,9 +45,7 @@ internal sealed class AdmissionSampler : BackgroundService
         metrics.ObserveAdmission(admission.Read);
     }
 
-    /// <summary>
-    /// 判断一次（本周期已经有别的实例判断过时跳过），再读一次共享状态
-    /// </summary>
+    // 执行一次采样判定并刷新本地状态
     public async Task CycleAsync(CancellationToken ct)
     {
         await EvaluateAsync(ct);
@@ -84,7 +77,7 @@ internal sealed class AdmissionSampler : BackgroundService
         }
         catch (Exception exception) when (exception is NpgsqlException or InvalidOperationException)
         {
-            // 数据库暂时不可用也要继续：读不到就保持原状态，过期的样本不能解除已有的熔断
+            // 数据库暂时不可用时继续运行，采样失败则保持原状态，避免用过期样本解除熔断
             MessagingLog.AdmissionSampleFailed(_logger, exception);
         }
     }
@@ -101,7 +94,7 @@ internal sealed class AdmissionSampler : BackgroundService
 
         var previous = await ReadRowAsync(connection, transaction, ct);
 
-        // 刚有别的实例判断过：同一个周期里算两次，连续低于低水位的周期数会多记
+        // 当前周期已由其他实例完成判定，跳过重复计算以避免多记连续低水位周期数
         if (previous is { SampleAge: { } age } && age < settings.SampleInterval * 0.9)
         {
             return;
@@ -123,7 +116,7 @@ internal sealed class AdmissionSampler : BackgroundService
         }
     }
 
-    // 容量的来源由声明容量设置的模块提供，不一定有登记；它依赖请求级服务，所以每次在新的作用域里取
+    // 容量来源由声明相关配置的模块提供（可能未注册）；因依赖请求级服务，每次须在独立作用域内解析
     private async Task<MessagingCapacity?> ReadCapacityAsync(CancellationToken ct)
     {
         await using var scope = _scopes.CreateScope(CallOrigin.Inbox, CurrentUser.System());
@@ -152,7 +145,7 @@ internal sealed class AdmissionSampler : BackgroundService
         return Convert.ToInt64(await command.ExecuteScalarAsync(ct), CultureInfo.InvariantCulture);
     }
 
-    // 未完成的消息：各模块 Outbox 与 Inbox 里待处理、处理中、死信的载荷字节数
+    // 未完成消息：各模块 Outbox 与 Inbox 中待处理、处理中及死信消息的载荷字节总和
     private async Task<long> UnfinishedBytesAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken ct)
     {
         var total = 0L;

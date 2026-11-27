@@ -5,14 +5,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Configuration.Application;
 
-/// <summary>
-/// 按声明类型转换和校验系统设置、偏好值
-/// </summary>
+// 按声明类型解析、校验与序列化系统设置及偏好值
 internal static class DeclaredValues
 {
-    /// <summary>
-    /// 按声明的值类型解析 JSON 并校验
-    /// </summary>
     public static Result<object> Parse(DeclaredValueDefinition definition, JsonElement json, Error invalid, Func<IReadOnlyList<FieldError>, Error> invalidWith)
     {
         ArgumentNullException.ThrowIfNull(definition);
@@ -43,9 +38,7 @@ internal static class DeclaredValues
         return value;
     }
 
-    /// <summary>
-    /// 读取已存储的值，解析或校验失败时返回 null，以兼容值类型后续变更
-    /// </summary>
+    // 读取已存储的值，反序列化或校验失败时返回 null 由调用方回退默认值
     public static object? TryRead(DeclaredValueDefinition definition, string json)
     {
         ArgumentNullException.ThrowIfNull(definition);
@@ -61,9 +54,7 @@ internal static class DeclaredValues
         }
     }
 
-    /// <summary>
-    /// 按声明的值类型序列化，避免保存类型定义之外的成员
-    /// </summary>
+    // 按声明的值类型序列化，过滤类型定义之外的多余字段
     public static string ToJson(DeclaredValueDefinition definition, object value)
     {
         ArgumentNullException.ThrowIfNull(definition);
@@ -71,14 +62,8 @@ internal static class DeclaredValues
         return JsonSerializer.Serialize(value, definition.ValueType, KmicJsonOptions.Stored);
     }
 
-    /// <summary>
-    /// 默认值的 JSON
-    /// </summary>
     public static JsonElement DefaultOf(DeclaredValueDefinition definition) => ElementOf(ToJson(definition, definition.DefaultValue));
 
-    /// <summary>
-    /// 将存储的 JSON 文本转换为响应中的 JSON 元素
-    /// </summary>
     public static JsonElement ElementOf(string json)
     {
         using var document = JsonDocument.Parse(json);

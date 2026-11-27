@@ -32,7 +32,7 @@ internal sealed class PreferenceValueConfiguration : IEntityTypeConfiguration<Pr
             .AreNullsDistinct(false)
             .MapsToError(CommonErrors.VersionConflict);
 
-        // 读取一个角色或一个用户的全部偏好
+        // 便于按角色或用户查询全部偏好
         builder.HasIndex(v => new { v.Layer, v.RoleId, v.UserId });
         builder.HasNoDataScope("偏好的用户层按用户 ID 显式读取，不是数据范围；系统层与角色层对所有登录用户一致，按权限点管理");
     }

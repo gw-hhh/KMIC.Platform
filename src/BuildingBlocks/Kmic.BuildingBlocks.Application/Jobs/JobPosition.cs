@@ -1,8 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Jobs;
 
-/// <summary>
-/// 作业列表里的位置：提交时间加 ID，跨模块归并翻页时用
-/// </summary>
-/// <param name="SubmittedAt">提交时间</param>
-/// <param name="Id">作业 ID</param>
+/// <summary>作业列表游标位置，由提交时间与 ID 组成，用于跨模块归并分页。</summary>
 public sealed record JobPosition(DateTimeOffset SubmittedAt, Guid Id);

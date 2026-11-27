@@ -3,73 +3,38 @@ using Kmic.BuildingBlocks.Domain.Errors;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 框架层的 HTTP 错误目录：认证、请求解析、限流和未处理的异常
-/// </summary>
+/// <summary>框架层 HTTP 错误目录，涵盖认证、请求解析、限流及未处理异常</summary>
 public static class FrameworkProblems
 {
-    /// <summary>
-    /// 没有登录，或登录已失效
-    /// </summary>
+    /// <summary>未登录或登录已失效</summary>
     public static readonly FrameworkProblem Unauthenticated = new("Common.Unauthenticated", StatusCodes.Status401Unauthorized, "请先登录");
 
-    /// <summary>
-    /// 用户的当前角色已被收回或停用，只有 me 和 switch-role 可用
-    /// </summary>
-    /// <remarks>
-    /// Identity 模块不要再声明同一个错误码
-    /// </remarks>
+    /// <summary>当前角色不可用，仅 me 与 switch-role 允许访问（Identity 模块不得重复声明）</summary>
     public static readonly FrameworkProblem CurrentRoleUnavailable = new("Identity.CurrentRoleUnavailable", StatusCodes.Status403Forbidden, "当前角色已不可用，请重新选择角色");
 
-    /// <summary>
-    /// 请求体无法解析、类型不符、有未知字段，或路由参数格式错误
-    /// </summary>
-    public static readonly FrameworkProblem MalformedRequest = new("Common.MalformedRequest", StatusCodes.Status400BadRequest, "请求的格式不正确");
+    /// <summary>请求体无法解析、类型不符、含未知字段或路由参数格式错误</summary>
+    public static readonly FrameworkProblem MalformedRequest = new("Common.MalformedRequest", StatusCodes.Status400BadRequest, "请求格式不正确");
 
-    /// <summary>
-    /// 请求体超过上限
-    /// </summary>
-    public static readonly FrameworkProblem PayloadTooLarge = new("Common.PayloadTooLarge", StatusCodes.Status413PayloadTooLarge, "请求的内容太大");
+    public static readonly FrameworkProblem PayloadTooLarge = new("Common.PayloadTooLarge", StatusCodes.Status413PayloadTooLarge, "请求内容过大");
 
-    /// <summary>
-    /// 请求的内容类型不是 application/json
-    /// </summary>
-    public static readonly FrameworkProblem UnsupportedMediaType = new("Common.UnsupportedMediaType", StatusCodes.Status415UnsupportedMediaType, "不支持这种内容类型，请使用 application/json");
+    public static readonly FrameworkProblem UnsupportedMediaType = new("Common.UnsupportedMediaType", StatusCodes.Status415UnsupportedMediaType, "不支持该内容类型，请使用 application/json");
 
-    /// <summary>
-    /// 按时间限流
-    /// </summary>
-    public static readonly FrameworkProblem TooManyRequests = new("Common.TooManyRequests", StatusCodes.Status429TooManyRequests, "请求太频繁，请稍后再试", Retryable: true);
+    /// <summary>触发时间窗口限流</summary>
+    public static readonly FrameworkProblem TooManyRequests = new("Common.TooManyRequests", StatusCodes.Status429TooManyRequests, "请求过于频繁，请稍后再试", Retryable: true);
 
-    /// <summary>
-    /// 重型接口的并发已满
-    /// </summary>
-    public static readonly FrameworkProblem TooBusy = new("Common.TooBusy", StatusCodes.Status429TooManyRequests, "系统正忙，请稍后再试", Retryable: true);
+    /// <summary>重型接口并发已达上限</summary>
+    public static readonly FrameworkProblem TooBusy = new("Common.TooBusy", StatusCodes.Status429TooManyRequests, "系统繁忙，请稍后再试", Retryable: true);
 
-    /// <summary>
-    /// 未处理的异常，不可重试
-    /// </summary>
-    public static readonly FrameworkProblem InternalError = new("Common.InternalError", StatusCodes.Status500InternalServerError, "系统出错了，请稍后再试");
+    public static readonly FrameworkProblem InternalError = new("Common.InternalError", StatusCodes.Status500InternalServerError, "系统异常，请稍后再试");
 
-    /// <summary>
-    /// 请求处理超过了请求超时，不可重试
-    /// </summary>
-    public static readonly FrameworkProblem RequestTimeout = new("Common.RequestTimeout", StatusCodes.Status504GatewayTimeout, "处理时间太长，请缩小范围后再试");
+    public static readonly FrameworkProblem RequestTimeout = new("Common.RequestTimeout", StatusCodes.Status504GatewayTimeout, "请求超时，请缩小范围后重试");
 
-    /// <summary>
-    /// 路由不存在
-    /// </summary>
     public static readonly FrameworkProblem RouteNotFound = new("Common.RouteNotFound", StatusCodes.Status404NotFound, "接口不存在");
 
-    /// <summary>
-    /// 路由存在，但不支持这种请求方法
-    /// </summary>
-    public static readonly FrameworkProblem MethodNotAllowed = new("Common.MethodNotAllowed", StatusCodes.Status405MethodNotAllowed, "不支持这种请求方法");
+    public static readonly FrameworkProblem MethodNotAllowed = new("Common.MethodNotAllowed", StatusCodes.Status405MethodNotAllowed, "不支持该请求方法");
 
-    /// <summary>
-    /// 没有列在上面的其他 4xx、5xx 状态码
-    /// </summary>
-    private static readonly FrameworkProblem _other = new("Common.HttpError", StatusCodes.Status400BadRequest, "请求没有成功");
+    // 其他未单独归类的 4xx/5xx 状态码
+    private static readonly FrameworkProblem _other = new("Common.HttpError", StatusCodes.Status400BadRequest, "请求失败");
 
     private static readonly FrozenDictionary<int, FrameworkProblem> _byStatus = new[]
     {
@@ -85,15 +50,9 @@ public static class FrameworkProblems
         new FrameworkProblem(CommonErrors.MissingPermission.Code, StatusCodes.Status403Forbidden, CommonErrors.MissingPermission.Message),
     }.ToFrozenDictionary(p => p.Status);
 
-    /// <summary>
-    /// 全部框架层错误，给错误码目录导出用
-    /// </summary>
     public static IReadOnlyCollection<FrameworkProblem> All { get; } =
         [Unauthenticated, CurrentRoleUnavailable, MalformedRequest, PayloadTooLarge, UnsupportedMediaType, TooManyRequests, TooBusy, InternalError, RequestTimeout, RouteNotFound, MethodNotAllowed, _other];
 
-    /// <summary>
-    /// 状态码对应的错误：中间件只设置了状态码、没有写内容时使用
-    /// </summary>
     internal static FrameworkProblem ForStatus(int status) =>
         _byStatus.TryGetValue(status, out var problem) ? problem : _other with { Status = status, Retryable = status is 502 or 503 };
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 交互照 Vben Admin 的 global-search（MIT）
+// 全局菜单搜索弹窗，交互参考 Vben Admin 的 global-search（MIT）
 import { useEventListener } from '@vueuse/core';
 import { Modal } from 'antdv-next';
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue';
@@ -25,7 +25,7 @@ const list = useTemplateRef<HTMLElement>('list');
 
 const keyword = ref('');
 const activeIndex = ref(0);
-// 按方向键滚动列表时，鼠标下面换了一项也不跟着改选中
+// 键盘方向键导航滚动列表时锁定鼠标悬停选中，避免指针被动触发高亮切换
 const keyboardMoving = ref(false);
 const matcher = shallowRef<Matcher>(matchInOrder);
 let pinyinRequested = false;
@@ -39,7 +39,7 @@ watch(
 );
 
 const entries = computed(() => toSearchEntries(nodes));
-// 最近访问里没权限或已下线的页面不显示
+// 过滤掉无访问权限或已下线的最近访问记录
 const recent = computed<SearchHit[]>(() =>
   history.value.flatMap((name) => {
     const entry = entries.value.find((item) => item.routeName === name);
@@ -60,7 +60,7 @@ watch(open, async (isOpen) => {
   }
   if (!pinyinRequested) {
     pinyinRequested = true;
-    // 拼音库加载失败时只按汉字和字母匹配
+    // 拼音库懒加载失败时降级为纯文本子序列匹配
     loadPinyinMatcher().then(
       (loaded) => {
         matcher.value = loaded;
@@ -72,7 +72,7 @@ watch(open, async (isOpen) => {
   input.value?.focus();
 });
 
-// Windows 上是 Ctrl K，Mac 上是 ⌘ K；同时挡住浏览器自己的 Ctrl K
+// 监听 Ctrl+K / ⌘+K，并阻止浏览器默认行为
 useEventListener(window, 'keydown', (event: KeyboardEvent) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault();
@@ -111,7 +111,7 @@ function remove(routeName: string): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
-  // 输入法选字时的回车和方向键交给输入法
+  // 输入法组合输入阶段（IME）忽略回车与方向键，交由输入法处理
   if (event.isComposing) {
     return;
   }
@@ -226,7 +226,7 @@ function segments(title: string, indices: readonly number[]): { text: string; hi
 </template>
 
 <style lang="scss">
-// 对话框挂在 body 下，只能用不带 scoped 的样式
+// 弹窗挂载于 body，需使用全局非 scoped 样式
 .kmic-search {
   .search-container {
     padding: 0;

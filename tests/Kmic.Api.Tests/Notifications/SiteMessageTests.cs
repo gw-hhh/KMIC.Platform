@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 站内消息：只有自己的；未读在前；已读、全部已读；别人的消息和不存在的一样
-/// </summary>
 public sealed class SiteMessageTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -93,7 +90,7 @@ public sealed class SiteMessageTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         first.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         second.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-        (await seed.ScalarAsync<DateTime>("""SELECT "ReadAt" FROM "Notifications"."SiteMessage" WHERE "Id" = @id""", ("id", id))).ShouldBe(readAt, "第二次不改已读时间");
+        (await seed.ScalarAsync<DateTime>("""SELECT "ReadAt" FROM "Notifications"."SiteMessage" WHERE "Id" = @id""", ("id", id))).ShouldBe(readAt, "重复标记已读不应变更原已读时间");
     }
 
     [Fact]
@@ -127,7 +124,7 @@ public sealed class SiteMessageTests(ClassDatabase<ApiTemplate> database, ApiTem
         (await JsonAsync(response)).GetProperty("count").GetInt32().ShouldBeGreaterThanOrEqualTo(2);
         (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."SiteMessage" WHERE "Id" IN ('{mine1}', '{mine2}') AND "ReadAt" IS NOT NULL""")).ShouldBe(2);
         (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."SiteMessage" WHERE "Id" = '{theirs}' AND "ReadAt" IS NULL""")).ShouldBe(1);
-        (await JsonAsync(await carol.PostAsync($"{Root}/read-all", null, Ct))).GetProperty("count").GetInt32().ShouldBe(0, "没有未读的了");
+        (await JsonAsync(await carol.PostAsync($"{Root}/read-all", null, Ct))).GetProperty("count").GetInt32().ShouldBe(0, "所有消息均已读，返回计数应为 0");
     }
 
     [Fact]

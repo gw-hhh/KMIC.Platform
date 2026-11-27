@@ -2,63 +2,31 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Access;
 
-/// <summary>
-/// 访问上下文，每个请求一份
-/// </summary>
+/// <summary>请求级访问上下文。</summary>
 public interface IAccessContext
 {
-    /// <summary>
-    /// 用户
-    /// </summary>
     UserId UserId { get; }
 
-    /// <summary>
-    /// 会话
-    /// </summary>
     SessionId SessionId { get; }
 
-    /// <summary>
-    /// 角色
-    /// </summary>
     RoleId RoleId { get; }
 
-    /// <summary>
-    /// 授权版本号
-    /// </summary>
     long AuthorizationVersion { get; }
 
-    /// <summary>
-    /// 权限点
-    /// </summary>
     IReadOnlySet<string> Permissions { get; }
 
-    /// <summary>
-    /// 所属组织
-    /// </summary>
     OrgUnitId? OrgUnitId { get; }
 
-    /// <summary>
-    /// 数据权限授予
-    /// </summary>
     DataScopeGrant DataScopeGrant { get; }
 
-    /// <summary>
-    /// 组织树
-    /// </summary>
     IOrgHierarchy OrgHierarchy { get; }
 
-    /// <summary>
-    /// 实际操作人
-    /// </summary>
+    /// <summary>代办或模拟登录时的实际操作人。</summary>
     UserId? ImpersonatorUserId { get; }
 
-    /// <summary>
-    /// 是否允许修改数据
-    /// </summary>
+    /// <summary>模拟登录期间是否允许写入。</summary>
     bool ImpersonationAllowsWrite { get; }
 
-    /// <summary>
-    /// 是否必须先修改密码
-    /// </summary>
+    /// <summary>是否必须先修改密码才能执行业务操作。</summary>
     bool PasswordChangeRequired { get; }
 }

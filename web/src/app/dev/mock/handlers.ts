@@ -2,8 +2,8 @@ import { http, HttpResponse } from 'msw';
 import type { PermissionCode } from '@/generated/permissions';
 import { inboxHandlers } from './inbox';
 
-// 假后端，状态存在 sessionStorage
-// 账号：admin（两个角色）、sales、viewer、newbie（要先改密码）、norole（当前角色失效）；密码任意，填 wrong 会登录失败
+// 本地 Mock 接口，会话状态持久化于 sessionStorage
+// 测试账号：admin（双角色）、sales、viewer、newbie（需首次修改密码）、norole（当前角色失效）；密码任意，输入 wrong 时返回登录失败
 
 interface Role {
   id: string;
@@ -84,7 +84,7 @@ export const handlers = [
     const role = roles[account.roleKeys[0] ?? 'viewer'];
     const state: MockState = {
       account: body.account,
-      // norole 的当前角色不在可选角色里
+      // 模拟当前角色已从可用角色列表中移除
       roleId: body.account === 'norole' ? 'r-gone' : (role?.id ?? 'r-viewer'),
       mustChangePassword: body.account === 'newbie',
       hasPassword: true,

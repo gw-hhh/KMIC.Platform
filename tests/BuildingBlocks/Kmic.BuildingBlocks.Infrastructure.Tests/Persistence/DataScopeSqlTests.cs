@@ -10,10 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 手写 SQL 的数据范围条件：在每种范围下，查到的行必须和 EF 查询过滤器查到的完全一样。
-/// 每个测试开始时在上海、杭州、广州各建一张单据，所有者分别是销售甲、乙、丙，断言按标题去重
-/// </summary>
 public sealed class DataScopeSqlTests(ClassDatabase<ProbeTemplate> database)
     : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
@@ -50,7 +46,7 @@ public sealed class DataScopeSqlTests(ClassDatabase<ProbeTemplate> database)
         var bySql = await TitlesBySqlAsync(work, "t.\"OwnerId\"", "t.\"OrgUnitId\"");
 
         bySql.ShouldBe(byFilter, ignoreOrder: true);
-        // 场景本身的预期也要对，不能只是两边相等
+        // 同时校验查询结果符合该场景的预期范围，避免两者同时出错而误判
         bySql.ShouldBe(Expected(scenario), ignoreOrder: true);
     }
 
@@ -63,10 +59,10 @@ public sealed class DataScopeSqlTests(ClassDatabase<ProbeTemplate> database)
         var orgOnly = await TitlesBySqlAsync(work, ownerColumn: null, "t.\"OrgUnitId\"");
         var neither = await TitlesBySqlAsync(work, null, null);
 
-        // 同事不是所有者：只看所有者列什么也看不到，只看组织列才能看到上海的单据
+        // 该用户非任何单据的所有者：仅依赖所有者列时无可见数据，仅依赖组织列时可查看上海单据
         ownerOnly.ShouldBeEmpty();
         orgOnly.ShouldBe(["上海"]);
-        neither.ShouldBeEmpty("既没有所有者列也没有组织列，没有任何可见范围");
+        neither.ShouldBeEmpty("未提供所有者列与组织列时，不应具备任何可见数据范围");
     }
 
     [Fact]
@@ -141,7 +137,7 @@ public sealed class DataScopeSqlTests(ClassDatabase<ProbeTemplate> database)
     private ProbeWork Begin(string scenario) => scenario switch
     {
         "self" => _harness.Begin(_shanghai.WithRole(r => r.Scope(ScopeLevel.Self))),
-        // 上海的同事：不是任何一张单据的所有者，只能靠所属组织看到上海的单据
+        // 上海同组织成员：非单据所有者，仅凭所属组织权限可见上海单据
         "orgUnit" => _harness.Begin(TestIdentity.User("上海同事").InTree(_org).InOrgUnit(_org["上海"]).WithRole(r => r.Scope(ScopeLevel.OrgUnit))),
         "orgUnitAndBelowFromAnchor" => _harness.Begin(
             TestIdentity.User("华东经理").InTree(_org).InOrgUnit(_org["总部"]).WithRole(r => r.Scope(ScopeLevel.OrgUnitAndBelow)).WithAnchors(_org["华东"])),

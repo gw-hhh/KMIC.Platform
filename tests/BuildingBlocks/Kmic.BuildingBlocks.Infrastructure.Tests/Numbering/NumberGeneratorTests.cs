@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Numbering;
 
-/// <summary>
-/// 每个测试用自己的规则周期（测试时钟指到不同的年份），同一个库里的计数互不影响。业务时区是上海（UTC+8）
-/// </summary>
 public sealed class NumberGeneratorTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -37,7 +34,7 @@ public sealed class NumberGeneratorTests(ClassDatabase<ProbeTemplate> database) 
     [Fact]
     public async Task BusinessTimeZoneMidnight_DecidesThePeriod()
     {
-        // UTC 15:59 在上海是 23:59，还在当天；UTC 16:00 已经是第二天
+        // UTC 15:59 对应上海时间 23:59（仍属当天）；UTC 16:00 对应上海时间次日 00:00
         _harness.Time.SetUtcNow(new DateTimeOffset(2032, 5, 31, 15, 59, 0, TimeSpan.Zero));
         (await TakeAsync(ProbeNumbers.Daily)).ShouldBe("DY320531-01");
 
@@ -106,7 +103,7 @@ public sealed class NumberGeneratorTests(ClassDatabase<ProbeTemplate> database) 
     {
         At(2037, 1, 1, 2);
 
-        // 命令里抛出的异常由管道转换成结果之外的异常，这里直接看分组键的校验
+        // 参数校验异常由管道直接向外传播，此处验证非法分组键被拒绝
         var thrown = await Should.ThrowAsync<ArgumentException>(async () => await TakeAsync(ProbeNumbers.Review, "a-b"));
 
         thrown.Message.ShouldContain("分组键");

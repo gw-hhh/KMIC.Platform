@@ -6,12 +6,8 @@ using Kmic.Notifications.Domain.Errors;
 
 namespace Kmic.Notifications.Application.Deliveries.Retry;
 
-/// <summary>
-/// 将失败的投递重新加入发送队列
-/// </summary>
 public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, NotificationTemplateCatalog catalog) : ICommandHandler<RetryDeliveryCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(RetryDeliveryCommand command, CancellationToken cancellationToken)
     {
         var loaded = await deliveries.GetForUpdateAsync(command.Id, null, cancellationToken);
@@ -25,7 +21,7 @@ public sealed class RetryDeliveryCommandHandler(IDeliveryRepository deliveries, 
             return NotificationsErrors.DeliveryNotRetryable;
         }
 
-        // 含密通知最终失败时正文和短信参数已经清空，重新排队也发不出正确内容；需要重发时由业务生成新凭据另发
+        // 敏感通知最终失败时已清空正文与参数，无法重发，须由业务重新生成凭据发送
         if (catalog.Find(loaded.Value.TemplateKey)?.CarriesSecret == true)
         {
             return NotificationsErrors.DeliverySecretNotRetryable;

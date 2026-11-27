@@ -71,7 +71,7 @@ import {
 } from '@lucide/vue';
 import type { Component } from 'vue';
 
-// 图标登记表，路由和页面只能用这里登记的图标
+// 图标注册表：路由与页面仅限使用此处登记的图标键
 export const icons = {
   'arrow-down': ArrowDown,
   'arrow-left-to-line': ArrowLeftToLine,

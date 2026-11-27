@@ -7,12 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Sample;
 
-/// <summary>
-/// 授权矩阵：范围等级 × 数据归属 × 出口，每个出口看到的数据完全一致，并且符合等级的定义
-/// </summary>
-/// <remarks>
-/// 标本只有列表和详情两个出口，没有导出、下拉和统计；模块以后有这些出口时，在同一张矩阵里加上
-/// </remarks>
 public sealed class SpecimenAuthorizationMatrixTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -36,7 +30,7 @@ public sealed class SpecimenAuthorizationMatrixTests(ClassDatabase<ApiTemplate> 
     [MemberData(nameof(Levels))]
     public async Task EveryExit_ShowsExactlyTheDataTheLevelAllows(ScopeLevel level, string[] expected)
     {
-        // 查看者在华东；四份数据分别由查看者本人、华东的同事、上海的下级、华南的人创建
+        // 查看者位于华东；四份测试数据分别由本人、华东同级同事、上海下级及华南人员创建
         var viewer = Member($"查看者-{level}", "华东", level, SamplePermissions.View, SamplePermissions.Create);
         var owners = new Dictionary<string, TestIdentity>(StringComparer.Ordinal)
         {
@@ -63,12 +57,12 @@ public sealed class SpecimenAuthorizationMatrixTests(ClassDatabase<ApiTemplate> 
         var list = await JsonAsync(await client.GetAsync($"{Root}?q={tag}&pageSize=100", Ct));
         var listed = list.GetProperty("items").EnumerateArray().Select(i => i.GetProperty("id").GetGuid()).ToHashSet();
         created.Where(c => listed.Contains(c.Value)).Select(c => c.Key).Order(StringComparer.Ordinal)
-            .ShouldBe(expected.Order(StringComparer.Ordinal), "列表");
+            .ShouldBe(expected.Order(StringComparer.Ordinal), "列表出口");
 
         foreach (var (owner, id) in created)
         {
             var detail = await client.GetAsync($"{Root}/{id}", Ct);
-            detail.StatusCode.ShouldBe(expected.Contains(owner) ? HttpStatusCode.OK : HttpStatusCode.NotFound, $"详情：{owner}");
+            detail.StatusCode.ShouldBe(expected.Contains(owner) ? HttpStatusCode.OK : HttpStatusCode.NotFound, $"详情出口：{owner}");
         }
     }
 

@@ -4,10 +4,10 @@
 // 按下方顺序执行，任一步失败即停止，并返回该步骤的退出码
 // 数据库测试和密钥扫描需要 Docker
 // 参数（本地用，CI 不加）：
-//   --fix-only  只修能自动修的（BOM、CRLF、summary 标签各占一行）然后退出，几秒钟
-//   --fix       先修，再跑全部检查
-//   --fast      只跑静态检查和单元测试（约一两分钟），跳过 .NET 测试、依赖漏洞、前端构建与端到端、密钥扫描、拼写
-// 依赖漏洞扫描在本地依赖锁文件未变时 24 小时内只扫一次，CI 每次都扫
+//   --fix-only  仅自动修复编码与换行（BOM、CRLF）后退出
+//   --fix       先自动修复编码与换行，再执行全部检查
+//   --fast      仅执行静态检查与单元测试，跳过 .NET 集成测试、依赖漏洞、前端构建与端到端、密钥扫描及拼写检查
+// 依赖漏洞扫描在本地依赖锁文件未变更时 24 小时内仅执行一次；CI 环境每次均执行
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -22,18 +22,15 @@ var fast = args.Contains("--fast", StringComparer.Ordinal);
 
 if (fixOnly)
 {
-    var encoding = CheckEncoding(root, fix: true);
-    var comments = CheckCommentStyle(root, fix: true);
-    return encoding == 0 && comments == 0 ? 0 : 1;
+    return CheckEncoding(root, fix: true);
 }
 
-// Fast：--fast 时也跑
+// Fast 为 true 时，--fast 模式下也会执行
 var steps = new (string Name, bool Fast, Func<int> Run)[]
 {
     ("编码与换行（UTF-8 无 BOM、LF）", true, () => CheckEncoding(root, fix)),
-    ("注释格式（summary 标签各占一行）", true, () => CheckCommentStyle(root, fix)),
-    ("用词（设计文档编号、不用的说法）", true, () => CheckWording(root)),
-    // 代码风格与分析器规则由编译检查（EnforceCodeStyleInBuild、警告即错误），这里只查编译不管的空白、文件末尾换行与 using 顺序
+    ("用词（设计文档编号、禁用表达）", true, () => CheckWording(root)),
+    // 代码风格与分析器规则由编译期检查（EnforceCodeStyleInBuild、警告即错误），此处仅检查空白、文件末尾换行与 using 顺序
     ("格式（空白与 using 顺序）", true, () => RunWhenProjectsExist(root, "dotnet", "format Kmic.slnx --verify-no-changes --diagnostics IMPORTS")),
     ("编译（警告即错误）", true, () => RunWhenProjectsExist(root, "dotnet", "build Kmic.slnx --nologo")),
     ("测试", false, () => RunWhenProjectsExist(root, "dotnet", "test --solution Kmic.slnx --no-build")),
@@ -68,7 +65,7 @@ foreach (var (name, _, run) in steps.Where(s => !fast || s.Fast))
 }
 
 Console.WriteLine(fast
-    ? $"== 快速检查通过（共 {Seconds(total.Elapsed)} 秒；提交前仍要跑一次完整检查）"
+    ? $"== 快速检查通过（共 {Seconds(total.Elapsed)} 秒；提交前仍需运行完整检查）"
     : $"== 全部通过（共 {Seconds(total.Elapsed)} 秒）");
 return 0;
 
@@ -82,7 +79,7 @@ static string FindRepositoryRoot()
         directory = directory.Parent;
     }
 
-    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录里运行。");
+    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录下运行。");
 }
 
 static int RunWhenProjectsExist(string root, string fileName, string arguments) =>
@@ -100,8 +97,8 @@ static int WhenProjectsExist(string root, Func<int> run)
     return run();
 }
 
-// dotnet list package --vulnerable 发现漏洞时退出码仍是 0，所以读它的 JSON 输出判断；扫描本身报告问题时同样判失败，避免没扫成也算通过。
-// 扫描要联网，约一分半：本地在依赖锁文件没变、上次扫描通过且不满 24 小时时跳过，CI 每次都扫
+// dotnet list package --vulnerable 检出漏洞时退出码仍为 0，需解析其 JSON 输出判断；扫描自身报错时同样判为失败，避免遗漏未完成扫描的情况
+// 漏洞扫描需联网执行，耗时较长：本地依赖锁文件未变更且 24 小时内已通过扫描时跳过，CI 环境每次均执行
 static int CheckVulnerabilities(string root)
 {
     var ci = string.Equals(Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
@@ -160,7 +157,7 @@ static int CheckVulnerabilities(string root)
     return 0;
 }
 
-// 上次扫描通过的时间；锁文件变了或没有记录时为空
+// 返回上次扫描通过的时间；锁文件已变更或无记录时返回 null
 static DateTimeOffset? LastPassedScan(string record, string fingerprint)
 {
     if (!File.Exists(record))
@@ -176,7 +173,7 @@ static DateTimeOffset? LastPassedScan(string record, string fingerprint)
             : null;
 }
 
-// 全部 packages.lock.json 的路径与内容的摘要，任何依赖的版本变化都会改变它
+// 计算所有 packages.lock.json 路径与内容的 SHA-256 摘要，任意依赖版本变更均会触发更新
 static string LockFilesFingerprint(string root)
 {
     using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -221,7 +218,7 @@ static int RunWeb(string root, string pnpmArguments)
     return Run(root, "npx", $"--yes pnpm@11.28.9 --dir web {pnpmArguments}");
 }
 
-// 浏览器装在用户目录，已装过时几乎不花时间；CI 的 Linux 执行机还要装系统依赖
+// 浏览器安装于用户目录，已安装时几乎不耗时；CI 的 Linux 环境需一并安装系统依赖
 static int RunEndToEnd(string root)
 {
     var ci = string.Equals(Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
@@ -320,14 +317,14 @@ static string[] ListFiles(string root)
     return files;
 }
 
-// 设计文档的节号、编号不写进代码：读代码的人不一定读过文档，文档改版后编号也会失效
+// 代码中禁止保留设计文档的节号与编号：阅读者未必查阅过原文档，且文档改版会导致编号失效
 static int CheckWording(string root)
 {
     string[] extensions = [".cs", ".ts", ".vue"];
     var problems = 0;
     foreach (var file in ListFiles(root))
     {
-        // 本脚本里的词表和正则就是规则本身，不检查
+        // 本脚本包含规则词表与正则定义本身，予以豁免
         if (!extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)
             || string.Equals(file, "scripts/check.cs", StringComparison.Ordinal))
         {
@@ -345,19 +342,19 @@ static int CheckWording(string root)
         {
             if (Kmic.Scripts.Patterns.DesignReference().Match(lines[i]) is { Success: true } reference)
             {
-                Console.WriteLine($"   {file}:{i + 1} 写了设计文档编号“{reference.Value}”，直接说明原因");
+                Console.WriteLine($"   {file}:{i + 1} 包含设计文档编号“{reference.Value}”，请直接说明原因");
                 problems++;
             }
 
             if (lines[i].Contains("【引用", StringComparison.Ordinal))
             {
-                Console.WriteLine($"   {file}:{i + 1} 不再使用临时【引用】，直接说明原因");
+                Console.WriteLine($"   {file}:{i + 1} 禁止使用临时【引用】标记，请直接说明原因");
                 problems++;
             }
 
             if (Kmic.Scripts.Patterns.AvoidedWording().Match(lines[i]) is { Success: true } wording)
             {
-                Console.WriteLine($"   {file}:{i + 1} “{wording.Value}”是设计文档里的说法或空话，换成直接的描述");
+                Console.WriteLine($"   {file}:{i + 1} “{wording.Value}”属于设计文档用语或空泛表述，请替换为具体说明");
                 problems++;
             }
         }
@@ -365,89 +362,6 @@ static int CheckWording(string root)
 
     Console.WriteLine($"   问题 {problems} 处");
     return problems == 0 ? 0 : 1;
-}
-
-// 只检查整行的 XML 注释：summary 的开始、结束标签各占一行。句号不检查。修复时按原缩进拆成多行
-static int CheckCommentStyle(string root, bool fix)
-{
-    var problems = 0;
-    var fixedFiles = 0;
-    foreach (var file in ListFiles(root).Where(f => f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
-    {
-        var path = Path.Combine(root, file);
-        if (!File.Exists(path))
-        {
-            continue;
-        }
-
-        var lines = File.ReadAllLines(path);
-        var output = new List<string>(lines.Length);
-        var changed = false;
-        for (var i = 0; i < lines.Length; i++)
-        {
-            if (!HasInlineSummaryTag(lines[i].Trim()))
-            {
-                output.Add(lines[i]);
-                continue;
-            }
-
-            if (!fix)
-            {
-                Console.WriteLine($"   {file}:{i + 1} summary 的开始、结束标签要各占一行");
-                problems++;
-                continue;
-            }
-
-            output.AddRange(SplitSummaryTags(lines[i]));
-            changed = true;
-        }
-
-        if (changed)
-        {
-            File.WriteAllText(path, string.Join('\n', output) + "\n", new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-            Console.WriteLine($"   已修复：{file}");
-            fixedFiles++;
-        }
-    }
-
-    Console.WriteLine(fix ? $"   已修复 {fixedFiles} 个文件" : $"   注释格式问题 {problems} 处");
-    return problems == 0 ? 0 : 1;
-}
-
-static bool HasInlineSummaryTag(string line)
-{
-    if (!line.StartsWith("///", StringComparison.Ordinal))
-    {
-        return false;
-    }
-
-    var text = line[3..].Trim();
-    return (text.StartsWith("<summary>", StringComparison.Ordinal) && text.Length > "<summary>".Length)
-        || (text.EndsWith("</summary>", StringComparison.Ordinal) && text.Length > "</summary>".Length);
-}
-
-// "/// <summary>文字</summary>" 拆成三行；只有开始或结束标签和文字挤在一行的，拆成两行
-static IEnumerable<string> SplitSummaryTags(string line)
-{
-    var indent = line[..line.IndexOf("///", StringComparison.Ordinal)];
-    var text = line.Trim()[3..].Trim();
-    var opens = text.StartsWith("<summary>", StringComparison.Ordinal);
-    var closes = text.EndsWith("</summary>", StringComparison.Ordinal);
-    var body = text[(opens ? "<summary>".Length : 0)..^(closes ? "</summary>".Length : 0)].Trim();
-    if (opens)
-    {
-        yield return $"{indent}/// <summary>";
-    }
-
-    if (body.Length > 0)
-    {
-        yield return $"{indent}/// {body}";
-    }
-
-    if (closes)
-    {
-        yield return $"{indent}/// </summary>";
-    }
 }
 
 namespace Kmic.Scripts

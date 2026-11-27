@@ -14,9 +14,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 
-/// <summary>
-/// 定期统计消息、作业、定时任务的积压，并读取模块登记的积压量表
-/// </summary>
 internal sealed class BacklogSampler : BackgroundService
 {
     private const int FreshIntervals = 3;
@@ -66,23 +63,16 @@ internal sealed class BacklogSampler : BackgroundService
         }
     }
 
-    /// <summary>
-    /// 最近一次采样，超过三个采样间隔没有更新就当作没有
-    /// </summary>
+    // 超过三个采样间隔未更新视为过期，避免上报陈旧指标
     public BacklogSnapshot? Latest => _latest is { } latest && IsFresh(latest.At) ? latest.Snapshot : null;
 
-    /// <summary>
-    /// 采样一次并保存结果
-    /// </summary>
     public async Task SampleAsync(CancellationToken ct)
     {
         var snapshot = await ReadAsync(ct);
         _latest = new Sample(snapshot, _time.GetUtcNow());
     }
 
-    /// <summary>
-    /// 读取一次各模块登记的量表，读取失败的模块保留上次读数
-    /// </summary>
+    // 单个模块采样失败时保留上次有效读数，不影响其他模块
     public async Task SampleModulesAsync(CancellationToken ct)
     {
         foreach (var module in _modules)
@@ -102,7 +92,7 @@ internal sealed class BacklogSampler : BackgroundService
     {
         try
         {
-            // 要等启动任务做完：迁移检查通过、路由表登记好之后，这些表才一定存在
+            // 等待启动任务完成（迁移检查通过且路由表注册完毕），确保相关表已就绪
             await _startup.WaitAsync(stoppingToken);
             var modules = _tables.Modules.Count();
             ObservabilityLog.BacklogSamplingStarted(_logger, _options.Value.BacklogSampleInterval.TotalSeconds, modules);
@@ -127,7 +117,7 @@ internal sealed class BacklogSampler : BackgroundService
         }
         catch (Exception exception) when (exception is NpgsqlException or InvalidOperationException)
         {
-            // 数据库暂时不可用也要继续：旧数据过期后量表自己停止输出
+            // 数据库短暂不可用时不中断采样循环；缓存过期后量表会自动停止输出
             ObservabilityLog.BacklogSampleFailed(_logger, exception);
         }
     }
@@ -234,7 +224,7 @@ internal sealed class BacklogSampler : BackgroundService
         return [.. rows.Values];
     }
 
-    // 顺序键只对有序订阅有意义：无序订阅里的死信不挡别的消息
+    // 顺序键仅对有序订阅有效；无序订阅中的死信不会阻塞其他消息
     private long BlockedKeys(string subscription, long deadKeys) =>
         _subscriptions.All.Any(s => s.IsOrdered && string.Equals(s.Name, subscription, StringComparison.Ordinal)) ? deadKeys : 0;
 

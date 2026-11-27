@@ -1,27 +1,17 @@
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 一个签名密钥的配置
-/// </summary>
+/// <summary>单个签名密钥配置</summary>
 public sealed class SigningKeyOptions
 {
-    /// <summary>
-    /// 密钥标识，写在令牌头的 kid 里，轮换时按它找到验证用的密钥
-    /// </summary>
+    /// <summary>密钥标识（写入令牌头 kid，轮换时据此匹配验证密钥）</summary>
     public string Kid { get; init; } = "";
 
-    /// <summary>
-    /// 用途
-    /// </summary>
+    /// <summary>密钥用途</summary>
     public SigningKeyStatus Status { get; init; }
 
-    /// <summary>
-    /// 私钥文件（PEM），用于签发的密钥必须有；文件放在密钥管理提供的位置，不进代码和镜像
-    /// </summary>
+    /// <summary>PEM 私钥文件路径（签发密钥必填，严禁打包进代码或镜像）</summary>
     public string? PrivateKeyPath { get; init; }
 
-    /// <summary>
-    /// 公钥文件（PEM），只用于验证的密钥必须有
-    /// </summary>
+    /// <summary>PEM 公钥文件路径（仅验证密钥必填）</summary>
     public string? PublicKeyPath { get; init; }
 }

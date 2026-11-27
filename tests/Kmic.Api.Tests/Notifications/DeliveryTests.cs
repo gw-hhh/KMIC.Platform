@@ -17,9 +17,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 投递队列：领取、发送、记录结果；暂时失败退避重试，永久失败不重试，含密通知有有效期、发完清空正文
-/// </summary>
 public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<ApiTemplate>>
 {
     private static readonly RecordingEmailSender _email = new();
@@ -72,7 +69,7 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         await Eventually.UntilAsync(
             _ => StatusAsync(seed, dedup),
             current => string.Equals(current, status, StringComparison.Ordinal),
-            $"投递变成 {status}",
+            $"投递状态变更为 {status}",
             TimeSpan.FromSeconds(30),
             Ct);
 
@@ -89,10 +86,10 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         await WaitForStatusAsync(seed, dedup, "Sent");
         await Eventually.UntilAsync(
             _ => Task.FromResult(metrics.Of("kmic.notifications.deliveries").Any(m => string.Equals(m.Tags["channel"], "Email", StringComparison.Ordinal) && string.Equals(m.Tags["result"], "sent", StringComparison.Ordinal))),
-            "记录投递结果",
+            "投递结果写入指标记录",
             ct: Ct);
         var mail = _email.Sent.Last(m => m.Subject.Contains("SP-1", StringComparison.Ordinal));
-        mail.Address.ShouldBe("now@example.com", "用户的邮箱在发送时向 Identity 取，不存进投递记录");
+        mail.Address.ShouldBe("now@example.com", "用户邮箱应在发送时实时从 Identity 获取，不冗余存储于投递记录");
         mail.Role.ShouldBe("To");
         mail.SenderProfile.ShouldBe("Default");
         (await seed.ScalarAsync<bool>($"""SELECT "Address" IS NULL AND "SentAt" IS NOT NULL AND "ProviderMessageId" = 'fake-email' AND "Attempts" = 1 FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBeTrue();
@@ -112,16 +109,16 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         await Eventually.UntilAsync(
             _ => seed.ScalarAsync<bool>($"""SELECT "Status" = 'Pending' AND "LastError" = '邮箱忙' AND "NextAttemptAt" > now() AND "Attempts" = 1 FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'"""),
             backedOff => backedOff,
-            "第一次暂时失败，放回队列并退避",
+            "首次暂时失败后放回队列并设置退避时间",
             TimeSpan.FromSeconds(30),
             Ct);
 
-        // 退避等待中的投递计入积压，最老积压按创建时间算
+        // 处于退避等待中的投递仍计入积压量，最早积压时间按记录创建时间计算
         await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "CreatedAt" = now() - interval '10 minutes' WHERE "DedupKey" = '{dedup}'""");
         var readings = await Factory.Services.GetServices<IBacklogGauges>().Single(g => string.Equals(g.MeterName, "Kmic.Notifications", StringComparison.Ordinal)).ReadAsync(Ct);
         readings.Single(r => string.Equals(r.Gauge, "kmic.notifications.pending", StringComparison.Ordinal) && Equals(r.Tags[0].Value, "Email")).Value.ShouldBeGreaterThanOrEqualTo(1);
         readings.Single(r => string.Equals(r.Gauge, "kmic.notifications.oldest_age", StringComparison.Ordinal) && Equals(r.Tags[0].Value, "Email")).Value.ShouldBeGreaterThanOrEqualTo(600);
-        readings.ShouldContain(r => r.Gauge == "kmic.notifications.pending" && Equals(r.Tags[0].Value, "Sms"), "没有积压的渠道也输出");
+        readings.ShouldContain(r => r.Gauge == "kmic.notifications.pending" && Equals(r.Tags[0].Value, "Sms"), "无积压的渠道也应输出积压指标");
         await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "NextAttemptAt" = now() WHERE "DedupKey" = '{dedup}'""");
 
         await WaitForStatusAsync(seed, dedup, "Sent");
@@ -158,14 +155,14 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
             await Eventually.UntilAsync(
                 _ => seed.ScalarAsync<bool>($"""SELECT "Status" = 'Pending' AND "Attempts" = {expected} FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'"""),
                 waiting => waiting,
-                $"第 {round} 次失败后退避",
+                $"第 {round} 次失败后放回队列并退避",
                 TimeSpan.FromSeconds(30),
                 Ct);
             await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "NextAttemptAt" = now() WHERE "DedupKey" = '{dedup}'""");
         }
 
         await WaitForStatusAsync(seed, dedup, "Failed");
-        (await seed.ScalarAsync<int>($"""SELECT "Attempts" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBe(3, "配置的最多 3 次");
+        (await seed.ScalarAsync<int>($"""SELECT "Attempts" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBe(3, "应达到配置的最大重试次数 3");
     }
 
     [Fact]
@@ -179,7 +176,7 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         await Eventually.UntilAsync(
             _ => seed.ScalarAsync<bool>($"""SELECT "Status" = 'Pending' AND "Attempts" = 1 FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'"""),
             waiting => waiting,
-            "第一次没发出去，在队列里等",
+            "首次发送失败，投递在队列中等待退避重试",
             TimeSpan.FromSeconds(30),
             Ct);
 
@@ -203,7 +200,7 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         var sms = _sms.Sent.Last(m => string.Equals(m.Phone, "+8613900000001", StringComparison.Ordinal));
         sms.TemplateKey.ShouldBe("Sample.SpecimenCode");
         sms.Parameters["code"].ShouldBe("654321");
-        (await seed.ScalarAsync<bool>($"""SELECT "Body" IS NULL AND "SmsParameters" IS NULL AND "Priority" = 'High' FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBeTrue("验证码发完就不再留在库里");
+        (await seed.ScalarAsync<bool>($"""SELECT "Body" IS NULL AND "SmsParameters" IS NULL AND "Priority" = 'High' FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBeTrue("验证码发送完成后应立即清空正文与参数");
     }
 
     [Fact]
@@ -217,7 +214,7 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         await Eventually.UntilAsync(
             _ => seed.ScalarAsync<bool>($"""SELECT "Status" = 'Pending' AND "Attempts" = 1 FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'"""),
             waiting => waiting,
-            "第一次没发出去，在队列里等",
+            "首次发送失败，投递在队列中等待退避重试",
             TimeSpan.FromSeconds(30),
             Ct);
         var calls = _sms.Sent.Count(m => string.Equals(m.Phone, "+8613900000002", StringComparison.Ordinal));
@@ -225,7 +222,7 @@ public sealed class DeliveryTests : ApiTestBase, IClassFixture<ClassDatabase<Api
         await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "SmsParameters" = NULL, "NextAttemptAt" = now() WHERE "DedupKey" = '{dedup}'""");
 
         await WaitForStatusAsync(seed, dedup, "Failed");
-        (await seed.ScalarAsync<string>($"""SELECT "LastError" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBe("含密通知内容已清除，未发送");
+        (await seed.ScalarAsync<string>($"""SELECT "LastError" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBe("敏感通知内容已清除，未发送");
         _sms.Sent.Count(m => string.Equals(m.Phone, "+8613900000002", StringComparison.Ordinal)).ShouldBe(calls);
     }
 }

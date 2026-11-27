@@ -2,7 +2,5 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 namespace Kmic.Files.Infrastructure.Persistence;
 
-/// <summary>
-/// 设计时创建上下文，dotnet ef 生成迁移用
-/// </summary>
+// 设计时数据库上下文工厂，供 dotnet ef 生成迁移使用
 internal sealed class FilesDbContextFactory : ModuleDesignTimeFactory<FilesDbContext>;

@@ -2,9 +2,6 @@ using System.Collections.Concurrent;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 按频道和模块分开的唤醒信号
-/// </summary>
 internal sealed class MessagingSignals
 {
     private readonly ConcurrentDictionary<(string Channel, string Module), AsyncSignal> _signals = new();

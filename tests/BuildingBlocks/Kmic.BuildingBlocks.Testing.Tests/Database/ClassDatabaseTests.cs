@@ -74,7 +74,7 @@ public sealed class ClassDatabaseTests(ProbeTemplate template)
         return (bool)(await command.ExecuteScalarAsync(cancellationToken))!;
     }
 
-    // 释放时记下克隆库还在不在
+    // 释放时记录克隆库是否仍然存在
     private sealed class SharedProbe(Func<Task<bool>> cloneExists) : IAsyncDisposable
     {
         public bool? CloneExistedWhenDisposed { get; private set; }

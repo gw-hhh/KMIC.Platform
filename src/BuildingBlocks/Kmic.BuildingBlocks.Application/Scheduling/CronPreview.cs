@@ -1,20 +1,13 @@
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 检查 Cron 表达式的结果
-/// </summary>
-/// <param name="Problem">写得不对时的说明，合法时为空</param>
-/// <param name="NextFireTimes">接下来的触发时刻，表达式合法但以后不会再触发时为空</param>
+/// <summary>Cron 表达式校验与触发时间预览结果。</summary>
+/// <param name="Problem">表达式错误说明，合法时为 null。</param>
+/// <param name="NextFireTimes">后续触发时刻列表，合法但不再触发时为空。</param>
 public sealed record CronPreview(string? Problem, IReadOnlyList<DateTimeOffset> NextFireTimes)
 {
-    /// <summary>
-    /// 写法是否合法
-    /// </summary>
     public bool IsValid => Problem is null;
 
-    /// <summary>
-    /// 相邻两次触发之间最短的间隔；少于两次触发时为空
-    /// </summary>
+    /// <summary>相邻两次触发的最短间隔，触发次数不足两次时为 null。</summary>
     public TimeSpan? MinimumGap
     {
         get

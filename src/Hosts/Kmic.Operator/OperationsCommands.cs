@@ -6,9 +6,6 @@ using Kmic.Operations.Application.MessagingCapacity;
 
 namespace Kmic.Operator;
 
-/// <summary>
-/// Operations 模块的运维命令
-/// </summary>
 internal static class OperationsCommands
 {
     public static Command Build(OperatorContext context) =>
@@ -19,10 +16,10 @@ internal static class OperationsCommands
 
     private static Command SetMessagingCapacity(OperatorContext context)
     {
-        var bytes = new Option<long>("--bytes") { Description = "数据库当前已分配的存储容量（字节）；0 表示不判断", Required = true };
+        var bytes = new Option<long>("--bytes") { Description = "数据库当前已分配的存储容量（字节）；设为 0 表示跳过容量判断", Required = true };
         var command = new Command(
             "set-messaging-capacity",
-            "写入数据库已分配的存储容量，消息写入的容量保护据此判断空间是否紧张。部署执行机读取 RDS 容量后定期调用，超过一天没更新会告警")
+            "更新数据库已分配的存储容量，供消息写入的容量保护判断可用空间；通常由部署执行机读取 RDS 容量后定期调用，超过 24 小时未更新将触发告警")
         {
             bytes,
         };
@@ -37,7 +34,7 @@ internal static class OperationsCommands
                 return 0;
             }
 
-            // 值没通过校验是参数问题，其余是执行失败
+            // 参数校验未通过归为参数错误（退出码 2），其余归为执行失败（退出码 1）
             var reasons = result.Error.FieldErrors.Count > 0 ? string.Join("；", result.Error.FieldErrors.Select(f => f.Message)) : result.Error.Message;
             await context.Output.WriteLineAsync($"失败：{reasons}");
             return result.Error.Type == ErrorType.Validation ? OperatorApp.UsageExitCode : 1;

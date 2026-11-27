@@ -7,7 +7,7 @@ export function providePage(page: PageInstance): void {
   provide(pageKey, page);
 }
 
-/** 不在页面里（如外壳的组件）时为 null */
+/** 注入当前页面实例；位于非页面环境（如外壳组件）时返回 null */
 export function injectPage(): PageInstance | null {
   return inject(pageKey, null);
 }
@@ -15,7 +15,7 @@ export function injectPage(): PageInstance | null {
 export function usePage(): PageInstance {
   const page = inject(pageKey, null);
   if (page === null) {
-    throw new Error('usePage 要在页面组件中调用');
+    throw new Error('usePage 必须在页面组件内部调用');
   }
   return page;
 }

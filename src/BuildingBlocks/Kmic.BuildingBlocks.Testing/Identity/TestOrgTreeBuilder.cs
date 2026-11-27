@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
-/// <summary>
-/// 测试组织树的一级
-/// </summary>
+/// <summary>测试组织树节点构建器。</summary>
 public sealed class TestOrgTreeBuilder
 {
     private readonly OrgUnitId? _parent;
@@ -20,9 +18,7 @@ public sealed class TestOrgTreeBuilder
 
     internal Dictionary<OrgUnitId, OrgUnitId?> Parents { get; }
 
-    /// <summary>
-    /// 添加组织
-    /// </summary>
+    /// <summary>添加下级组织单元。</summary>
     public TestOrgTreeBuilder Unit(string name, Action<TestOrgTreeBuilder>? children = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Application.Settings;
 
 namespace Kmic.Configuration.Application.Settings.Get;
 
-/// <summary>
-/// 合并设置定义与已存储的值，生成设置列表项
-/// </summary>
 internal static class SettingItems
 {
     public static SettingItem Build(SystemSettingDefinition definition, (string Value, long Version)? stored, IAllowedActions<SettingTarget> allowedActions) =>

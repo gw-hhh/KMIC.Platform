@@ -8,16 +8,12 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Attachments.Add;
 
-/// <summary>
-/// 为示例添加附件
-/// </summary>
 public sealed class AddSpecimenAttachmentCommandHandler(
     ISpecimenRepository specimens,
     IResourceAuthorizer<Specimen, SpecimenAction> authorizer,
     IFileAttachments files)
     : ICommandHandler<AddSpecimenAttachmentCommand, VersionedResponse<SpecimenId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(AddSpecimenAttachmentCommand command, CancellationToken cancellationToken)
     {
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

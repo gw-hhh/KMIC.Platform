@@ -3,18 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 索引映射扩展
-/// </summary>
 public static class IndexBuilderExtensions
 {
-    /// <summary>
-    /// 唯一索引重复时返回的错误
-    /// </summary>
-    /// <remarks>
-    /// 业务表的唯一索引都要指定
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">不是唯一索引</exception>
+    /// <summary>声明唯一索引冲突时映射的领域错误（业务表所有唯一索引均须指定）</summary>
     public static IndexBuilder<TEntity> MapsToError<TEntity>(this IndexBuilder<TEntity> builder, Error error)
     {
         ArgumentNullException.ThrowIfNull(builder);

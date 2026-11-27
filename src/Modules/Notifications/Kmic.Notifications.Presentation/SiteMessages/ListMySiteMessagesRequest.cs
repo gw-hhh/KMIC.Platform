@@ -1,8 +1,5 @@
 namespace Kmic.Notifications.Presentation.SiteMessages;
 
-/// <summary>
-/// 查询我的站内消息的参数
-/// </summary>
 /// <param name="Unread">是否未读，不传时返回全部</param>
 /// <param name="Category">消息类别筛选</param>
 /// <param name="Page">页码</param>

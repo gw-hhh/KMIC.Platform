@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Hosting.Tests;
 
-/// <summary>
-/// 模块注册的校验：配对、重复、环境、开关、依赖
-/// </summary>
 public sealed class ModuleSelectionTests
 {
     [Fact]
@@ -85,7 +82,7 @@ public sealed class ModuleSelectionTests
     [Fact]
     public void DisabledModule_DoesNotNeedItsOwnDependencies()
     {
-        // 被关掉的模块不参与依赖检查：它依赖的模块有没有启用都不影响
+        // 已禁用的模块不参与依赖校验：其依赖的模块是否启用均不影响启动
         var registered = new[] { Pair("Beta", dependsOn: "Missing"), Pair("Alpha") };
         var configuration = Config(("Modules:Beta:Enabled", "false"));
 

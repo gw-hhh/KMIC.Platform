@@ -9,9 +9,6 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.Update;
 
-/// <summary>
-/// 修改角色名称、说明和顺序
-/// </summary>
 public sealed class UpdateRoleCommandHandler(
     IRoleRepository roles,
     IIdentityCommandReads db,
@@ -19,7 +16,6 @@ public sealed class UpdateRoleCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<UpdateRoleCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<RoleId>>> ExecuteAsync(UpdateRoleCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await RoleAdminLoading.LoadForAsync(roles, db, authorizer, command.Id, command.ExpectedVersion, RoleAdminAction.Edit, access, cancellationToken);

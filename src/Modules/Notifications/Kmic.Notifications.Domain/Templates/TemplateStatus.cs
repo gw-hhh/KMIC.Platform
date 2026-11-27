@@ -2,20 +2,14 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 
 namespace Kmic.Notifications.Domain.Templates;
 
-/// <summary>
-/// 模板的状态
-/// </summary>
+/// <summary>模板状态</summary>
 public sealed class TemplateStatus : Enumeration<TemplateStatus>
 {
-    /// <summary>
-    /// 代码里还有这个模板，可以发送、可以改内容
-    /// </summary>
+    /// <summary>启用：代码中仍声明该模板，允许发送与修改</summary>
     public static readonly TemplateStatus Active = new("Active", "启用");
 
-    /// <summary>
-    /// 代码里已经删掉这个模板：版本记录保留，不能再发送和修改
-    /// </summary>
-    public static readonly TemplateStatus Retired = new("Retired", "已退役");
+    /// <summary>已废弃：代码声明已移除，保留历史版本但禁止发送与修改</summary>
+    public static readonly TemplateStatus Retired = new("Retired", "已废弃");
 
     private TemplateStatus(string code, string name)
         : base(code, name)

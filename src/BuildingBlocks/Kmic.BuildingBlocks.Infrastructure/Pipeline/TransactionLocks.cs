@@ -8,9 +8,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// <see cref="ITransactionLocks" /> 的实现：在当前命令所属模块的事务里取咨询锁
-/// </summary>
 internal sealed class TransactionLocks(IExecutionContext execution, CommandTransaction transaction, ModuleWriteContexts contexts) : ITransactionLocks
 {
     private const string TimeoutSetting = "lock_timeout";
@@ -21,7 +18,7 @@ internal sealed class TransactionLocks(IExecutionContext execution, CommandTrans
         ArgumentNullException.ThrowIfNull(ids);
         if (!execution.InCommand || transaction.Module is not { } module)
         {
-            throw new InvalidOperationException("事务级咨询锁只能在命令里取：它要随命令的事务释放。");
+            throw new InvalidOperationException("事务级咨询锁仅限在命令事务中获取，以随事务提交或回滚自动释放。");
         }
 
         if (ids.Count == 0)
@@ -32,7 +29,7 @@ internal sealed class TransactionLocks(IExecutionContext execution, CommandTrans
         var keys = ids.Distinct().Select(id => LockKeys.Of(scope, id)).Distinct().Order().ToList();
         var database = contexts.Get(module).Database;
 
-        // 等待上限只在取锁期间生效，取完恢复原值：同一个事务里后面的语句不该被我们改过的上限影响
+        // 超时设置仅在获取锁期间生效，取锁后立即恢复原值，避免影响同一事务内的后续语句
         var previous = (await database.SqlQuery<string>($"SELECT current_setting('lock_timeout') AS \"Value\"").ToListAsync(ct)).Single();
         await database.ExecuteSqlAsync($"SELECT set_config({TimeoutSetting}, {timeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture) + "ms"}, true)", ct);
         try
@@ -57,7 +54,7 @@ internal sealed class TransactionLocks(IExecutionContext execution, CommandTrans
         ArgumentNullException.ThrowIfNull(ids);
         if (!execution.InCommand || transaction.Module is not { } module)
         {
-            throw new InvalidOperationException("事务级咨询锁只能在命令里取：它要随命令的事务释放。");
+            throw new InvalidOperationException("事务级咨询锁仅限在命令事务中获取，以随事务提交或回滚自动释放。");
         }
 
         var database = contexts.Get(module).Database;
@@ -75,7 +72,7 @@ internal sealed class TransactionLocks(IExecutionContext execution, CommandTrans
         return acquired;
     }
 
-    // 55P03：lock_not_available，等锁超过了 lock_timeout
+    // 55P03（lock_not_available）：等待锁超时（超过 lock_timeout）
     private static bool IsLockTimeout(Exception exception) =>
         exception is PostgresException { SqlState: "55P03" } || exception.InnerException is PostgresException { SqlState: "55P03" };
 }

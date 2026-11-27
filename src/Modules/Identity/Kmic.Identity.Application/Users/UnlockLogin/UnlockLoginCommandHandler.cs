@@ -11,9 +11,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.UnlockLogin;
 
-/// <summary>
-/// 清除账号的登录失败计数
-/// </summary>
 public sealed class UnlockLoginCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -23,7 +20,6 @@ public sealed class UnlockLoginCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<UnlockLoginCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(UnlockLoginCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await UserAdminLoading.LoadForAsync(users, db, authorizer, command.Id, null, UserAdminAction.Unlock, access, cancellationToken);

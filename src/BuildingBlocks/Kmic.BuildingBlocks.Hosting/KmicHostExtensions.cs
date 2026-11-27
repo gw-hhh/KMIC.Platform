@@ -13,19 +13,12 @@ using Microsoft.Extensions.Hosting;
 
 namespace Kmic.BuildingBlocks.Hosting;
 
-/// <summary>
-/// 宿主的组装
-/// </summary>
+/// <summary>宿主装配与管道配置扩展。</summary>
 public static class KmicHostExtensions
 {
     private const string ReadyTag = "ready";
 
-    /// <summary>
-    /// 按配置的角色装配框架服务并注册模块
-    /// </summary>
-    /// <remarks>
-    /// 管道行为由宿主在 AddMediator 里声明，这里不注册
-    /// </remarks>
+    /// <summary>按配置的角色装配框架服务并注册模块（管道行为由宿主在 AddMediator 中显式声明）。</summary>
     public static WebApplicationBuilder AddKmicHost(this WebApplicationBuilder builder, Action<KmicHostBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -46,7 +39,7 @@ public static class KmicHostExtensions
 
         services.AddKmicApplication([.. modules.Select(m => m.Module.ApplicationAssembly)]);
         services.AddOptions<DatabaseOptions>()
-            .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectionString), $"{DatabaseOptions.Section}:ConnectionString 没有配置。")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectionString), $"{DatabaseOptions.Section}:ConnectionString 未配置。")
             .ValidateOnStart();
         services.AddKmicPersistence(options =>
         {
@@ -77,7 +70,7 @@ public static class KmicHostExtensions
                 services.AddSingleton(endpoints);
             }
 
-            // 没有访问上下文加载器，所有请求都无法确定是谁：由 Identity 模块提供
+            // 缺少访问上下文加载器将无法识别请求身份，该实现由 Identity 模块提供
             services.AddTransient<IStartupFilter, AccessContextLoaderFilter>();
         }
 
@@ -85,9 +78,7 @@ public static class KmicHostExtensions
         return builder;
     }
 
-    /// <summary>
-    /// 搭建请求管道并映射端点与健康检查
-    /// </summary>
+    /// <summary>搭建请求管道并映射端点与健康检查。</summary>
     public static WebApplication UseKmicHost(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -111,14 +102,14 @@ public static class KmicHostExtensions
             app.MapKmicEndpoints();
         }
 
-        // 存活只看进程能不能响应；就绪见 ReadinessHealthCheck。都匿名、只返回 Healthy / Unhealthy
+        // 存活探针仅检查进程响应能力，就绪探针见 ReadinessHealthCheck；均允许匿名访问且仅返回 Healthy / Unhealthy
         app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
         app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = registration => registration.Tags.Contains(ReadyTag) });
         DependencyEndpoint.Map(app);
         return app;
     }
 
-    // 就绪只放“没有它整个服务就无法工作”的条件；依赖检查列出全部依赖，模块要加自己的依赖就用 DependencyHealth.Tag 登记
+    // 就绪检查仅包含服务不可用时的必要条件；依赖检查汇总全部依赖项，模块自定义依赖需标记 DependencyHealth.Tag
     private static void AddHealthChecks(IServiceCollection services, HostRoles roles)
     {
         services.AddSingleton<DatabaseProbe>();

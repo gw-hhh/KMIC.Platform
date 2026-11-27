@@ -6,20 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.BuildingBlocks.Testing.Messaging;
 
-/// <summary>
-/// 在测试进程里跑完跨模块的消息
-/// </summary>
+/// <summary>测试进程内跨模块消息驱动辅助工具。</summary>
 public static class MessagingHarness
 {
     private const int MaxRounds = 20;
 
-    /// <summary>
-    /// 反复投递、处理，直到所有模块都没有可领取的消息
-    /// </summary>
-    /// <remarks>
-    /// 退避等待中的消息不算，测重试时要自己把下次时间改到现在
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">跑了很多轮还有新消息，订阅之间可能在互相触发</exception>
+    /// <summary>循环投递与处理消息直至全部模块清空（不含处于退避等待期的消息；超过最大轮次仍有新消息时抛出异常）。</summary>
     public static async Task DrainAsync(this IServiceProvider services, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -50,7 +42,7 @@ public static class MessagingHarness
             }
         }
 
-        throw new InvalidOperationException($"跑了 {MaxRounds} 轮还有新消息，订阅之间可能在互相触发。");
+        throw new InvalidOperationException($"已执行 {MaxRounds} 轮仍有新消息，可能存在订阅循环触发。");
     }
 
     private static async Task<int> RepeatAsync(Func<CancellationToken, Task<int>> batch, CancellationToken ct)

@@ -7,32 +7,18 @@ using Kmic.BuildingBlocks.Application.Settings;
 
 namespace Kmic.Configuration.Infrastructure.Settings;
 
-/// <summary>
-/// 已保存系统设置值的缓存快照
-/// </summary>
-/// <remarks>
-/// 调用方不能修改返回值
-/// </remarks>
+// 不可变的系统设置缓存快照，反序列化失败时回退默认值
 [ImmutableObject(true)]
 internal sealed class SettingsSnapshot(IReadOnlyDictionary<string, string> values)
 {
     private readonly ConcurrentDictionary<Type, object> _typed = new();
 
-    /// <summary>
-    /// 设置键到 JSON 值
-    /// </summary>
     public IReadOnlyDictionary<string, string> Values { get; } = values;
 
-    /// <summary>
-    /// 读取指定设置，未保存、JSON 解析失败或解析结果为 null 时使用代码默认值
-    /// </summary>
     public T Get<T>(string key)
         where T : class, ISystemSetting<T> =>
         (T)_typed.GetOrAdd(typeof(T), _ => Read<T>(key));
 
-    /// <summary>
-    /// 把保存的 JSON 读成设置值，解析失败或结果为 null 时使用代码默认值
-    /// </summary>
     public static T ParseOrDefault<T>(string json)
         where T : class, ISystemSetting<T>
     {

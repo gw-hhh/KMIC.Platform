@@ -2,12 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Kmic.BuildingBlocks.Application.Settings;
 
-/// <summary>
-/// 偏好族：一组键带后缀的偏好，后端不理解内容
-/// </summary>
-/// <remarks>
-/// 给纯前端的展示偏好用，如表格列设置
-/// </remarks>
+/// <summary>偏好族：键名带动态后缀的透传配置，后端不解析内容（用于纯前端界面偏好，如表格列配置）。</summary>
 public sealed partial class PreferenceFamily
 {
     private readonly Regex _keyPattern;
@@ -19,24 +14,14 @@ public sealed partial class PreferenceFamily
         _keyPattern = keyPattern;
     }
 
-    /// <summary>
-    /// 键的最大长度
-    /// </summary>
     public const int MaxKeyLength = 128;
 
-    /// <summary>
-    /// 族名，也是键的开头
-    /// </summary>
+    /// <summary>族名，同时作为键的前缀。</summary>
     public string Name { get; }
 
-    /// <summary>
-    /// 显示名称
-    /// </summary>
     public string DisplayName { get; }
 
-    /// <summary>
-    /// 键是否属于这个族：格式对、长度没超
-    /// </summary>
+    /// <summary>判断键名格式与长度是否符合当前偏好族。</summary>
     public bool Matches(string key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -44,14 +29,10 @@ public sealed partial class PreferenceFamily
         return key.Length <= MaxKeyLength && _keyPattern.IsMatch(key);
     }
 
-    /// <summary>
-    /// 外壳设置：主题、侧栏、标签页数量等，一个键
-    /// </summary>
+    // 界面外壳设置（主题、侧栏、标签页等），固定单键
     internal static PreferenceFamily Shell { get; } = new("Ui.Shell", "界面外壳设置", ShellKey());
 
-    /// <summary>
-    /// 表格设置：键是 Ui.Table.{模块}.{页面}.{表格}，每段只有字母和数字
-    /// </summary>
+    // 表格设置：键格式为 Ui.Table.{模块}.{页面}.{表格}，各段仅含字母与数字
     internal static PreferenceFamily Table { get; } = new("Ui.Table", "表格设置", TableKey());
 
     [GeneratedRegex(@"^Ui\.Shell$", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 100)]

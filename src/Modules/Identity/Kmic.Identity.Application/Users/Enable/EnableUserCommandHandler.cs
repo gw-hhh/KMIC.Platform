@@ -9,9 +9,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Enable;
 
-/// <summary>
-/// 启用用户
-/// </summary>
 public sealed class EnableUserCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -19,7 +16,6 @@ public sealed class EnableUserCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<EnableUserCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(EnableUserCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await UserAdminLoading.LoadForAsync(users, db, authorizer, command.Id, command.ExpectedVersion, UserAdminAction.Enable, access, cancellationToken);

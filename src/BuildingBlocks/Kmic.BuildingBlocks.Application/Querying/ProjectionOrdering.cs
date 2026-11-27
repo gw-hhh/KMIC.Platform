@@ -3,9 +3,7 @@ using System.Reflection;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 把排序放到投影之前执行
-/// </summary>
+// 将排序与筛选操作下推至投影之前执行
 internal static class ProjectionOrdering
 {
     private static readonly MethodInfo _select = Queryable("Select", lambdaParameters: 1);
@@ -28,9 +26,7 @@ internal static class ProjectionOrdering
         return query.Provider.CreateQuery<T>(OrderExpression(query.Expression, typeof(T), keys.Select(k => (k.Selector, k.Descending))));
     }
 
-    /// <summary>
-    /// 筛选条件同样按列表项成员写，同样换回投影里的表达式，先筛选再投影
-    /// </summary>
+    // 将基于列表项成员的筛选条件还原为投影前的源表达式，实现先筛选后投影
     public static IQueryable<T> Where<T>(IQueryable<T> query, Expression<Func<T, bool>> predicate)
     {
         if (query.Expression is MethodCallExpression { Method: { IsGenericMethod: true } method, Arguments: [var source, UnaryExpression { Operand: LambdaExpression { Parameters.Count: 1 } projection } quoted] }
@@ -64,7 +60,7 @@ internal static class ProjectionOrdering
         return current;
     }
 
-    // 排序键在列表项上取值，投影里写着列表项每个成员怎么算出来：把前者里的列表项换成后者
+    // 排序键基于列表项成员取值，将其替换为投影表达式中对应成员的源表达式
     private static LambdaExpression Rebase(LambdaExpression selector, LambdaExpression projection) =>
         Expression.Lambda(new MemberInliner(selector.Parameters[0], projection.Body).Visit(selector.Body), projection.Parameters);
 
@@ -84,7 +80,7 @@ internal static class ProjectionOrdering
             return inner is null ? node : Resolve(inner, node.Member) ?? node.Update(inner);
         }
 
-        // 成员取自一个刚构造出来的对象：直接取构造时给它的那个表达式
+        // 成员访问针对新建对象时，直接提取构造该成员的原始表达式
         private static Expression? Resolve(Expression source, MemberInfo member) => source switch
         {
             MemberInitExpression init =>
@@ -94,7 +90,7 @@ internal static class ProjectionOrdering
             _ => null,
         };
 
-        // 匿名类型带着成员信息；普通构造函数（如记录的主构造函数）按参数名与成员名对应，不区分大小写
+        // 匿名类型自带成员映射；常规构造函数（如记录主构造函数）按参数名与成员名忽略大小写匹配
         private static Expression? ArgumentFor(NewExpression created, MemberInfo member)
         {
             if (created.Members is { } members)

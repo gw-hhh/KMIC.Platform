@@ -24,14 +24,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 数据访问服务注册
-/// </summary>
 public static class PersistenceServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册数据访问服务
-    /// </summary>
+    /// <summary>注册数据访问、事务管道、消息队列与后台作业等持久化基础设施服务</summary>
     public static IServiceCollection AddKmicPersistence(this IServiceCollection services, Action<DatabaseOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -77,9 +72,7 @@ public static class PersistenceServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 注册模块的数据库上下文
-    /// </summary>
+    /// <summary>注册模块的写入与只读查询数据库上下文</summary>
     public static IServiceCollection AddModuleDbContexts<TContext, TQueryContext, TQueryDb>(this IServiceCollection services)
         where TContext : ModuleDbContext
         where TQueryContext : ModuleQueryDbContext, TQueryDb
@@ -91,8 +84,8 @@ public static class PersistenceServiceCollectionExtensions
             throw new InvalidOperationException($"{typeof(TContext).Name} 是查询上下文，写入上下文要直接继承 ModuleDbContext。");
         }
 
-        // 不用 DbContext 池：过滤器要读当前用户和他的数据权限，池里的实例没重置干净，就会拿上一个请求的权限去查。
-        // 第一次用到上下文时，按入口的来源选连接池
+        // 禁用 DbContext 池化：查询过滤器依赖当前用户及数据范围，若池化复用未彻底重置，可能导致跨请求权限上下文泄漏
+        // 首次获取数据库上下文时，依据执行入口来源选择对应的连接池
         services.AddDbContext<TContext>((provider, options) =>
             AddFrameworkExtensions(
                 provider, options.UseNpgsql(provider.GetRequiredService<DataSources>().Transactions(EntryOrigin(provider)))));
@@ -121,7 +114,7 @@ public static class PersistenceServiceCollectionExtensions
         options.AddInterceptors(provider.GetRequiredService<SlowQueryInterceptor>());
     }
 
-    // 给 Operations 的管理视图用：作业、消息、路由的汇总与运维操作，都是框架基础设施读写各模块框架表
+    // 供 Operations 模块管理视图使用：作业、消息与路由的汇总统计及运维操作均由框架层统一读写各模块框架表
     private static void AddOperationsAdminServices(this IServiceCollection services)
     {
         services.TryAddSingleton<IModuleJobStores, ModuleJobStores>();
@@ -131,8 +124,7 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<IReadModelRebuildAdmin, RebuildAdmin>();
     }
 
-    // 模块上下文的登记，以及依赖它们的业务历史查询。
-    // 历史查询用工厂注册：没有 Identity 的宿主（迁移程序等）用不到它，构建时不必检查 IActorReferences
+    // 注册模块上下文及依赖它们的业务历史查询；历史查询通过工厂注册，使不含 Identity 的宿主（如迁移程序）在构建容器时无需校验 IActorReferences
     private static void AddModuleContextRegistries(this IServiceCollection services)
     {
         services.TryAddScoped<ModuleWriteContexts>();

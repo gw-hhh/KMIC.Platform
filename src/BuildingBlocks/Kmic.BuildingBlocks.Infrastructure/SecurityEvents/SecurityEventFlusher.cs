@@ -9,9 +9,6 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 把队列里的安全事件批量写进数据库
-/// </summary>
 internal sealed class SecurityEventFlusher(
     SecurityEventQueue queue,
     DataSources dataSources,
@@ -29,9 +26,6 @@ internal sealed class SecurityEventFlusher(
 
     private SecurityEventOptions Options => options.Value;
 
-    /// <summary>
-    /// 把队列里现有的事件全部写完
-    /// </summary>
     public async Task FlushAsync()
     {
         var batch = new List<SecurityEventRecord>(Options.BatchSize);
@@ -57,7 +51,7 @@ internal sealed class SecurityEventFlusher(
         {
             while (await queue.Reader.WaitToReadAsync(stoppingToken))
             {
-                // 队列还不满一批就等一会儿，让一次写入带上更多的事件
+                // 若待写入队列尚未凑满整批，则短暂等待以聚合更多事件批量落库
                 if (queue.Reader.Count < Options.BatchSize)
                 {
                     await Task.Delay(Options.FlushInterval, stoppingToken);
@@ -70,7 +64,7 @@ internal sealed class SecurityEventFlusher(
         {
         }
 
-        // 停机时队列里剩下的也要写完
+        // 停机阶段须排空并持久化队列中剩余的全部安全事件
         await FlushAsync();
     }
 
@@ -96,7 +90,7 @@ internal sealed class SecurityEventFlusher(
         SecurityEventLog.GaveUp(logger, batch.Count);
     }
 
-    // 一批在同一个隐式事务里写入，要么都进去要么都不进去
+    // 单批次事件在同一隐式事务中写入，确保整批提交或整批失败
     private async Task WriteAsync(List<SecurityEventRecord> records)
     {
         await using var connection = await dataSources.Transactions(CallOrigin.BackgroundJob).OpenConnectionAsync();

@@ -13,7 +13,7 @@ internal sealed class GetAuditEndpoint : IEndpoint
         group.MapGet("/audit/{id}", HandleAsync)
             .Sends<GetAuditQuery>()
             .WithSummary("查询审计记录详情")
-            .WithDescription("包含字段变更和补充说明。操作人、角色名称实时查询，不存在时返回 null。查询本身也记录读取审计。");
+            .WithDescription("返回字段变更与补充说明（记录读取审计）；操作人与角色名实时查询，不存在时为 null");
 
     private static async Task<IResult> HandleAsync([Description("审计记录 ID")] AuditLogId id, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetAuditQuery(id), ct)).ToOk();

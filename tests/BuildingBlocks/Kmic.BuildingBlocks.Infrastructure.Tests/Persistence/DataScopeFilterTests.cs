@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 每个测试开始时在上海、杭州、广州各建一张单据，所有者分别是销售甲、乙、丙。同一个类的测试共用数据库，断言按标题去重
-/// </summary>
 public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
     : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
@@ -78,7 +75,7 @@ public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
     [Fact]
     public async Task WriteContext_AlsoFiltered()
     {
-        // 仓储通过写入上下文读取，范围外的数据同样读不到
+        // 仓储基于写入上下文执行查询时，同样受数据范围过滤器约束，无法读取越权数据
         await using var work = _harness.Begin(_shanghai);
 
         (await work.Db.Set<Ticket>().AnyAsync(t => t.Id == _tickets["广州"], Ct)).ShouldBeFalse();
@@ -107,7 +104,7 @@ public sealed class DataScopeFilterTests(ClassDatabase<ProbeTemplate> database)
         var manager = _shanghai.WithRole(r => r.Scope(ScopeLevel.OrgUnitAndBelow)).WithAnchors(_org["华东"]);
         await using var work = _harness.Begin(manager);
 
-        // 开头的注释行里有参数值，只检查语句本身
+        // 跳过 EF Core 生成 SQL 首部的参数注释行，仅校验 SQL 语句正文
         var sql = string.Join('\n', work.Query.Tickets.Select(t => t.Title).ToQueryString()
             .Split('\n')
             .Where(line => !line.StartsWith("--", StringComparison.Ordinal)));

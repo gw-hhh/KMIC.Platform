@@ -8,9 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// Worker 角色里的投递与处理
-/// </summary>
+// Worker 角色消息投递与消费托管服务
 internal sealed class MessagingWorker(
     MessagingSignals signals,
     OutboxDispatcher dispatcher,
@@ -29,7 +27,7 @@ internal sealed class MessagingWorker(
         // 订阅路由登记等启动任务完成后才开始投递
         await startup.WaitAsync(stoppingToken);
 
-        // 停机时先不再领取；进行中的处理给一段时间做完，超时才取消，事务回滚后由别的实例接管
+        // 停机时停止领取新消息，给予进行中的任务一定时间收尾；超时取消后事务回滚，待占用过期由其他实例接管
         using var processing = new CancellationTokenSource();
         await using var grace = stoppingToken.Register(() => processing.CancelAfter(options.Value.ShutdownGrace));
 

@@ -1,8 +1,8 @@
 #:property RestorePackagesWithLockFile=false
 
 // 测试覆盖率报告：dotnet run scripts/coverage.cs
-// 跑一遍全部测试并收集覆盖率，只出报告，不设门槛；需要 Docker
-// 报告在 artifacts/coverage/report（Summary.txt 与 index.html），生成代码（实体注释、日志方法、迁移）和测试项目不计入
+// 执行全部测试并生成覆盖率报告（不设覆盖率阈值，依赖 Docker）
+// 报告输出至 artifacts/coverage/report（Summary.txt 与 index.html），排除生成代码（实体注释、日志方法、迁移）及测试项目
 using System.Diagnostics;
 
 var root = FindRepositoryRoot();
@@ -41,5 +41,5 @@ static string FindRepositoryRoot()
         directory = directory.Parent;
     }
 
-    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库内运行。");
+    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录下运行。");
 }

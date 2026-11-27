@@ -6,13 +6,11 @@ import { isJobAccepted, jobsApi } from './jobs';
 import { useApi } from './use-api';
 
 export interface UseCommandOptions<Data> {
-  /** 成功后失效的查询；可以按响应计算 */
+  /** 成功后需失效的查询键列表，支持根据响应结果动态计算 */
   invalidates?: readonly QueryKey[] | ((data: Data) => readonly QueryKey[]);
 }
 
-/**
- * 页面里执行写操作。保存中、结果未知会登记到页面实例，关闭标签前会拦下（F03 第 6.2、7.5 节）
- */
+/** 在页面内执行写操作，自动将保存中与结果未知状态同步至当前页面实例，关闭或离开标签页前予以拦截确认 */
 export function useCommand<Input, Data>(
   def: CommandDef<Input, Data>,
   options: UseCommandOptions<Data> = {},
@@ -23,7 +21,7 @@ export function useCommand<Input, Data>(
     api: useApi(),
     onSucceeded(data) {
       const keys = typeof options.invalidates === 'function' ? options.invalidates(data) : (options.invalidates ?? []);
-      // 提交了后台作业，外壳的作业入口马上刷新并开始跟踪
+      // 若提交了后台作业，立即失效作业列表缓存以触发外壳作业面板刷新与状态跟踪
       const all = isJobAccepted(data) ? [...keys, jobsApi.myJobs.all] : keys;
       for (const queryKey of all) {
         void queryClient.invalidateQueries({ queryKey });

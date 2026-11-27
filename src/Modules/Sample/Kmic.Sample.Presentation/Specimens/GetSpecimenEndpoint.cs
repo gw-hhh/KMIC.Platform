@@ -13,7 +13,7 @@ internal sealed class GetSpecimenEndpoint : IEndpoint
         group.MapGet("/specimens/{id}", HandleAsync)
             .Sends<GetSpecimenDetailQuery>()
             .WithSummary("查询示例详情")
-            .WithDescription("返回示例信息、明细、附件、并发版本号和当前用户的可用操作。示例不存在或不在当前用户的数据范围内时返回 404。");
+            .WithDescription("返回示例信息、明细、附件、版本号及可用操作；不存在或不在数据范围内返回 404");
 
     private static async Task<IResult> HandleAsync([Description("示例 ID")] SpecimenId id, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetSpecimenDetailQuery(id), ct)).ToOk();

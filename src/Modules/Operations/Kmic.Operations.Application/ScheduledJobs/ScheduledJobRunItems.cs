@@ -3,14 +3,8 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.ScheduledJobs;
 
-/// <summary>
-/// 将定时任务执行记录转换为响应，并补充手动触发用户名称
-/// </summary>
 internal static class ScheduledJobRunItems
 {
-    /// <summary>
-    /// 收集手动触发用户 ID，供批量解析名称
-    /// </summary>
     public static IReadOnlyCollection<Guid> UsersOf(IEnumerable<ScheduledJobRunRow> rows) =>
         [.. rows.Select(r => r.TriggeredBy).OfType<Guid>().Distinct()];
 

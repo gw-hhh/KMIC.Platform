@@ -1,8 +1,5 @@
 namespace Kmic.Configuration.Presentation.Settings;
 
-/// <summary>
-/// 查询设置变更历史的参数
-/// </summary>
 /// <param name="Key">设置键筛选</param>
 /// <param name="From">起始时间</param>
 /// <param name="To">结束时间</param>

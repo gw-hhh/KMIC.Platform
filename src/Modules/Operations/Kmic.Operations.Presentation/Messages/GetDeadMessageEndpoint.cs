@@ -12,10 +12,10 @@ internal sealed class GetDeadMessageEndpoint : IEndpoint
         group.MapGet("/messages/dead/{module}/{box}/{id}", HandleAsync)
             .Sends<GetDeadMessageQuery>()
             .WithSummary("查看死信详情")
-            .WithDescription("返回原始消息内容和信封信息，也可查看已放弃的消息。内容可能含敏感信息，查看会记录读审计。");
+            .WithDescription("返回死信原始内容与信封信息（含已放弃消息，记录读取审计）");
 
     private static async Task<IResult> HandleAsync(
-        [Description("所在模块，如 Sample")] string module,
+        [Description("所属模块，如 Sample")] string module,
         [Description("Outbox 或 Inbox")] string box,
         [Description("行 ID，来自死信列表")] Guid id,
         IQuerySender sender,

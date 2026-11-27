@@ -4,12 +4,9 @@ using Kmic.BuildingBlocks.Application.Authorization;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// <see cref="IDataScopeSql"/> 的实现：和 <c>DataScopeFilters</c> 读同一个范围，逻辑一一对应
-/// </summary>
 internal sealed partial class DataScopeSql(IDataScope scope) : IDataScopeSql
 {
-    // 列或“别名.列”，各段可以带双引号；只接受标识符，防止把别的东西拼进 SQL
+    // 仅允许“列”或“别名.列”格式的标识符（各段可带双引号），防止 SQL 注入
     [GeneratedRegex(@"^(?:[A-Za-z_][A-Za-z0-9_]*|""[A-Za-z_][A-Za-z0-9_]*"")(?:\.(?:[A-Za-z_][A-Za-z0-9_]*|""[A-Za-z_][A-Za-z0-9_]*""))?$", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, matchTimeoutMilliseconds: 100)]
     private static partial Regex ColumnPattern();
 
@@ -19,7 +16,7 @@ internal sealed partial class DataScopeSql(IDataScope scope) : IDataScopeSql
         ValidateColumn(ownerColumn, nameof(ownerColumn));
         ValidateColumn(orgUnitColumn, nameof(orgUnitColumn));
 
-        // 和过滤器一样：不受限，或范围等级是全部，都不加限制
+        // 与实体过滤器保持一致：不受限或范围等级为“全部”时不附加过滤条件
         if (scope.Unrestricted || scope.For(scopeObject).All)
         {
             return FormattableStringFactory.Create("TRUE");
@@ -34,7 +31,7 @@ internal sealed partial class DataScopeSql(IDataScope scope) : IDataScopeSql
             arguments.Add(owner.Value);
         }
 
-        // 组织列总是加：范围里没有组织时数组为空，条件不成立，和过滤器的 Contains 一致
+        // 若指定了组织列则始终附加过滤条件：当范围中无可用组织时数组为空，条件恒为假，与实体过滤器的 Contains 语义一致
         if (orgUnitColumn is not null)
         {
             parts.Add($"{orgUnitColumn} = ANY({{{arguments.Count}}})");
@@ -50,7 +47,7 @@ internal sealed partial class DataScopeSql(IDataScope scope) : IDataScopeSql
     {
         if (column is not null && !ColumnPattern().IsMatch(column))
         {
-            throw new ArgumentException($"列写法不对：{column}。只能是“列”或“别名.列”，可以带双引号。", parameterName);
+            throw new ArgumentException($"列名格式无效：{column}，仅支持“列”或“别名.列”（可带双引号）。", parameterName);
         }
     }
 }

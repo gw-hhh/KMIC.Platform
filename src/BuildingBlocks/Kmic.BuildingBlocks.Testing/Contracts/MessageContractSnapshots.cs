@@ -7,24 +7,15 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 
 namespace Kmic.BuildingBlocks.Testing.Contracts;
 
-/// <summary>
-/// 集成消息的契约快照，每个消息一个 JSON Schema 文件
-/// </summary>
-/// <remarks>
-/// 兼容的改动更新快照即可，破坏性的改动要新建高一个版本的消息类
-/// </remarks>
+/// <summary>集成消息契约快照校验，每条消息对应一个 JSON Schema 文件（兼容变更直接更新快照，破坏性变更须新建更高版本消息）。</summary>
 public static class MessageContractSnapshots
 {
-    /// <summary>
-    /// 设为 1 时，检查会把快照文件改成当前契约，而不是报告差异
-    /// </summary>
+    /// <summary>设为 1 时，校验会将快照文件更新为当前契约而非报告差异。</summary>
     public const string UpdateVariable = "KMIC_UPDATE_SNAPSHOTS";
 
     private static readonly JsonSerializerOptions _writing = new() { WriteIndented = true, NewLine = "\n" };
 
-    /// <summary>
-    /// 从入口程序集出发，沿着 Kmic 程序集的引用找到全部契约程序集
-    /// </summary>
+    /// <summary>从入口程序集出发，沿 Kmic 引用链收集全部契约程序集。</summary>
     public static IReadOnlyList<Assembly> FindContractAssemblies(Assembly entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
@@ -53,15 +44,11 @@ public static class MessageContractSnapshots
         return contracts;
     }
 
-    /// <summary>
-    /// 把契约程序集里每个消息的 Schema 与快照目录对照，返回全部问题；没有问题时返回空列表
-    /// </summary>
+    /// <summary>将契约消息 Schema 与快照目录比对，返回差异列表。</summary>
     public static IReadOnlyList<string> Check(IEnumerable<Assembly> contractAssemblies, string directory) =>
         Check(contractAssemblies, directory, string.Equals(Environment.GetEnvironmentVariable(UpdateVariable), "1", StringComparison.Ordinal));
 
-    /// <summary>
-    /// 同 <see cref="Check(IEnumerable{Assembly}, string)" />，明确指定是更新快照还是对照
-    /// </summary>
+    /// <summary>同 <see cref="Check(IEnumerable{Assembly}, string)" />，显式指定更新快照或仅作比对。</summary>
     public static IReadOnlyList<string> Check(IEnumerable<Assembly> contractAssemblies, string directory, bool update)
     {
         ArgumentNullException.ThrowIfNull(contractAssemblies);
@@ -83,7 +70,7 @@ public static class MessageContractSnapshots
                 }
                 else
                 {
-                    problems.Add($"{file}：没有快照。新消息要把生成的快照一起提交（设环境变量 {UpdateVariable}=1 重跑测试生成）。");
+                    problems.Add($"{file}：没有快照。新增消息须一并提交生成的快照（设置环境变量 {UpdateVariable}=1 后重新运行测试生成）。");
                 }
 
                 continue;
@@ -103,8 +90,8 @@ public static class MessageContractSnapshots
 
             var breaking = BreakingChanges(saved, schema, "$").ToList();
             problems.Add(breaking.Count > 0
-                ? $"{file}：契约有破坏性变化（{string.Join("；", breaking)}）。版本号没变时不能这样改，新建 Version 更高的消息类，订阅方同时处理两个版本。"
-                : $"{file}：契约变了，是兼容的变化（新增了可空字段）。确认无误后设环境变量 {UpdateVariable}=1 重跑测试，更新快照并一起提交。");
+                ? $"{file}：契约存在破坏性变更（{string.Join("；", breaking)}）。版本号未升级时不得作此修改，请新建更高 Version 的消息类，并由订阅方同时兼容两个版本。"
+                : $"{file}：契约发生兼容变更（新增可空字段）。确认无误后设置环境变量 {UpdateVariable}=1 重新运行测试，更新快照并一并提交。");
         }
 
         foreach (var orphan in Directory.EnumerateFiles(directory, "*.json").Select(Path.GetFileName).OfType<string>().Where(f => !current.ContainsKey(f)))
@@ -115,16 +102,14 @@ public static class MessageContractSnapshots
             }
             else
             {
-                problems.Add($"{orphan}：代码里已经没有这个消息。旧版本消息在所有 Inbox 里处理完才能删除消息类，确认之后设环境变量 {UpdateVariable}=1 重跑测试删掉快照。");
+                problems.Add($"{orphan}：代码中已不存在该消息；须待旧版本消息在所有 Inbox 中处理完成后方可删除消息类，确认后设置环境变量 {UpdateVariable}=1 重新运行测试以清理快照。");
             }
         }
 
         return problems;
     }
 
-    /// <summary>
-    /// 当前代码里每个消息的 Schema，键是快照文件名
-    /// </summary>
+    // 提取当前代码中每条消息的 Schema，键为快照文件名
     private static SortedDictionary<string, JsonNode> Current(IEnumerable<Assembly> contractAssemblies)
     {
         var result = new SortedDictionary<string, JsonNode>(StringComparer.Ordinal);
@@ -145,7 +130,7 @@ public static class MessageContractSnapshots
 
     private static string Format(JsonNode schema) => schema.ToJsonString(_writing) + "\n";
 
-    // 只看旧消息能不能被新代码读出来：属性删除、类型改变、新增必填属性
+    // 仅检查旧消息能否被新代码反序列化：属性删除、类型变更、新增必填属性
     private static IEnumerable<string> BreakingChanges(JsonNode saved, JsonNode current, string path)
     {
         if (saved is not JsonObject oldObject || current is not JsonObject newObject)

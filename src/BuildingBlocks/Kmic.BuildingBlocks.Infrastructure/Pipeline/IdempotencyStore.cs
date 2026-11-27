@@ -5,12 +5,7 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 幂等记录读写
-/// </summary>
-/// <remarks>
-/// 每条改写都要带状态和令牌条件
-/// </remarks>
+// 所有改写均须附带状态与租约令牌条件
 internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table)
 {
     public const string Processing = "Processing";
@@ -65,7 +60,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         return await ReadSingleAsync(command, ct);
     }
 
-    // 占用已到期、令牌还是读到的那个才接管，两个请求同时接管只有一个能成功
+    // 仅当占用已到期且令牌未变时才允许接管，保证并发接管时只有一个请求能成功
     public async Task<bool> TryTakeOverAsync(IdempotencySnapshot existing, Guid newToken, DateTimeOffset leaseExpiresAt, DateTimeOffset now, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand($"""
@@ -80,7 +75,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         return await command.ExecuteNonQueryAsync(ct) == 1;
     }
 
-    // 正在提交的事务锁着这一行，删除会等它结束再判断，不会把正在提交误当成没提交
+    // 若事务正在提交，行锁会阻塞本次删除直至提交完成，从而避免将“正在提交”误判为“未提交”
     public async Task<bool> TryReleaseAsync(Guid id, Guid token, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand($"""DELETE FROM {table} WHERE "Id" = @id AND "Status" = '{Processing}' AND "LeaseToken" = @token""");
@@ -97,7 +92,7 @@ internal sealed class IdempotencyStore(NpgsqlDataSource dataSource, string table
         await command.ExecuteNonQueryAsync(ct);
     }
 
-    // 在业务事务里写完成标记。令牌不符说明已被别的请求接管，整个命令回滚
+    // 在业务事务内写入完成标记；若令牌不匹配则说明已被其他请求接管，触发整条命令回滚
     public async Task<bool> TryCompleteAsync(ModuleDbContext context, Guid id, Guid token, string? responseBody, DateTimeOffset now, CancellationToken ct)
     {
         var sql = $"""

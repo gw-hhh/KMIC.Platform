@@ -20,16 +20,11 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
-/// <summary>
-/// 按真实宿主的方式注册 Probe、Echo 两个模块，每个工作单元一个依赖注入作用域
-/// </summary>
+// 按真实宿主方式注册 Probe、Echo 模块，每个工作单元对应独立 DI 作用域
 internal sealed class ProbeHarness : IAsyncDisposable
 {
     public const string MirrorSubscription = "Echo.MirrorTicket";
 
-    /// <summary>
-    /// 每天业务时间 7 点执行的定时任务
-    /// </summary>
     public const string DailyStamp = "BuildingBlocks.DailyStamp";
 
     private readonly ServiceProvider _services;
@@ -72,7 +67,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
         collection.AddSingleton(Hooks);
         collection.AddLogging();
 
-        // 选项必须是编译期常量，源码生成器要读取。数组顺序就是执行顺序
+        // 选项需为编译期常量以供源码生成器读取，数组顺序即管道执行顺序
         collection.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
@@ -99,24 +94,12 @@ internal sealed class ProbeHarness : IAsyncDisposable
 
     public EchoHooks Echo { get; } = new();
 
-    /// <summary>
-    /// 外部合作方的客户端连到的假服务器，一直返回 200
-    /// </summary>
     public FakePartnerServer PartnerServer { get; } = new(System.Net.HttpStatusCode.OK);
 
-    /// <summary>
-    /// Echo 重建读模型时拉取快照的来源，数据由测试摆放
-    /// </summary>
     public FakeTicketSource TicketSource { get; } = new();
 
-    /// <summary>
-    /// 作业执行时按它重新加载提交人的身份
-    /// </summary>
     public TestAccessContextLoader Access { get; } = new();
 
-    /// <summary>
-    /// 宿主的服务，测试要直接取框架内部服务（如数据源）时用
-    /// </summary>
     public IServiceProvider Services => _services;
 
     private IExecutionScopeFactory Factory => _services.GetRequiredService<IExecutionScopeFactory>();
@@ -137,9 +120,7 @@ internal sealed class ProbeHarness : IAsyncDisposable
         return ticket;
     }
 
-    /// <summary>
-    /// 像宿主一样按注册顺序启动后台服务：先执行启动任务，再开始后台循环
-    /// </summary>
+    // 按注册顺序启动后台服务：先执行启动任务，再启动后台循环
     public async Task StartHostedServicesAsync(CancellationToken ct)
     {
         foreach (var service in _services.GetServices<IHostedService>())

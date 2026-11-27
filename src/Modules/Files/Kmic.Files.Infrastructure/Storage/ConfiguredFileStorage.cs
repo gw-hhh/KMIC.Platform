@@ -3,9 +3,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Infrastructure.Storage;
 
-/// <summary>
-/// 按部署配置选择本地或 S3 存储，并转发存储操作
-/// </summary>
 internal sealed class ConfiguredFileStorage : IFileStorage, IDisposable
 {
     private readonly IFileStorage _inner;

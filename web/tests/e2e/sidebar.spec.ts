@@ -3,17 +3,17 @@ import { expect, loginToShell, test } from './support';
 
 const mainLeft = (page: Page): Promise<number> =>
   page.locator('div.main').evaluate((el) => Math.round(el.getBoundingClientRect().left));
-// 拖动换算有 1 像素的取整误差
+// 拖拽宽度换算允许 1 像素的取整误差
 const offBy = async (page: Page, target: number): Promise<number> => Math.abs((await mainLeft(page)) - target);
 const sidebarWidth = (page: Page): Promise<number> =>
   page.locator('aside.sidebar').evaluate((el) => Math.round(el.getBoundingClientRect().width));
 
-test('拖动侧栏：拖动中只有线跟着走，松手才改宽度；拖到最窄折叠成图标；双击恢复默认宽度', async ({ page }) => {
+test('拖拽侧栏：拖拽过程仅预览线跟随，释放后更新宽度；拖至最窄折叠为图标，双击恢复默认宽度', async ({ page }) => {
   await loginToShell(page);
   const bar = page.locator('.drag-bar');
   const box = await bar.boundingBox();
   if (box === null) {
-    throw new Error('没有找到拖动线');
+    throw new Error('未找到侧栏拖拽分隔线');
   }
   const y = box.y + 300;
 
@@ -27,7 +27,7 @@ test('拖动侧栏：拖动中只有线跟着走，松手才改宽度；拖到�
 
   const box2 = await bar.boundingBox();
   if (box2 === null) {
-    throw new Error('没有找到拖动线');
+    throw new Error('未找到侧栏拖拽分隔线');
   }
   await page.mouse.move(box2.x + 1, y);
   await page.mouse.down();
@@ -47,12 +47,12 @@ test('拖动侧栏：拖动中只有线跟着走，松手才改宽度；拖到�
   await expect.poll(() => mainLeft(page)).toBe(224);
 });
 
-test('取消固定后悬停浮出、移开收回，再固定；顶栏按钮隐藏和显示整个侧栏', async ({ page }) => {
+test('侧栏取消固定后支持悬停展开与移开收起并可重新固定，顶栏按钮可切换侧栏显隐', async ({ page }) => {
   await loginToShell(page);
 
   await page.locator('aside.sidebar').hover();
   await page.getByRole('button', { name: '取消固定' }).click();
-  // 鼠标还在侧栏上：先保持展开，内容区不动
+  // 鼠标仍悬停在侧栏上时保持浮动展开，主内容区布局不变
   await expect.poll(() => mainLeft(page)).toBe(60);
   expect(await sidebarWidth(page)).toBeGreaterThan(150);
   await page.mouse.move(900, 400);

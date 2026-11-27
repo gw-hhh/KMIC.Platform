@@ -1,8 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Settings;
 
-/// <summary>
-/// 数据库的已分配容量
-/// </summary>
-/// <param name="Bytes">已分配的存储容量（字节）</param>
-/// <param name="UpdatedAt">最后一次更新的时间</param>
+/// <summary>数据库已分配存储容量（字节）及最后更新时间。</summary>
 public sealed record MessagingCapacity(long Bytes, DateTimeOffset UpdatedAt);

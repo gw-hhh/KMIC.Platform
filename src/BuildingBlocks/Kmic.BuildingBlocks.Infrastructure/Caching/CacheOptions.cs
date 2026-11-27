@@ -1,25 +1,13 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 
-/// <summary>
-/// 缓存配置
-/// </summary>
+/// <summary>缓存配置</summary>
 public sealed class CacheOptions
 {
-    /// <summary>
-    /// 配置节名称
-    /// </summary>
     public const string Section = "Kmic:Cache";
 
-    /// <summary>
-    /// 本地缓存的默认存活时间，只是兜底
-    /// </summary>
+    /// <summary>本地缓存默认过期时间</summary>
     public TimeSpan DefaultLocalExpiration { get; set; } = TimeSpan.FromMinutes(10);
 
-    /// <summary>
-    /// 一条失效广播最多带多少字节的标签，超过就分成几条
-    /// </summary>
-    /// <remarks>
-    /// 不能超过 PostgreSQL 通知的上限 8000 字节
-    /// </remarks>
+    /// <summary>单条失效广播最大标签字节数（须小于 PostgreSQL NOTIFY 的 8000 字节上限），超出时自动分批</summary>
     public int MaxNotifyBytes { get; set; } = 7000;
 }

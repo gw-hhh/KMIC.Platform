@@ -1,15 +1,6 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 信封里不单独成列的字段
-/// </summary>
-/// <param name="SourceModule">发布消息的模块</param>
-/// <param name="InitiatorUserId">发起这件事的用户</param>
-/// <param name="ActualUserId">模拟登录时的实际操作人</param>
-/// <param name="CausationId">引发它的消息 ID</param>
-/// <param name="TraceParent">发布时的追踪上下文</param>
-/// <param name="TraceState">发布时的追踪状态</param>
-/// <param name="Purged">快照事件</param>
+// 消息信封扩展字段（Purged 表示快照事件）
 internal sealed record MessageHeaders(
     string SourceModule,
     Guid? InitiatorUserId,

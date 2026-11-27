@@ -8,25 +8,22 @@ using Microsoft.OpenApi;
 
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
-/// <summary>
-/// 把端点发送的消息、废弃声明和排序声明写进操作，并补上统一格式的错误响应
-/// </summary>
 internal sealed class KmicOperationTransformer : IOpenApiOperationTransformer
 {
     public const string ProblemSchemaName = "KmicProblem";
     public const string IdempotencyKeyHeader = "Idempotency-Key";
 
-    // 每个操作都可能出现的错误响应：状态码与说明
+    // 所有操作通用的标准错误响应状态码及说明
     private static readonly (string Status, string Description)[] _problemResponses =
     [
-        ("400", "请求格式不正确，或者提交的数据没有通过校验，具体见 errors"),
-        ("401", "没有登录，或者登录已失效"),
-        ("403", "没有执行这个操作的权限"),
-        ("404", "数据不存在，或者当前用户看不到"),
-        ("409", "数据已被他人修改，或者与现有数据冲突，当前版本号见 currentVersion"),
-        ("422", "违反了业务规则，原因见 code 和 title"),
-        ("429", "请求太频繁，或者系统正忙，按 Retry-After 等待后再试"),
-        ("500", "系统出错了，原因没有写在响应里，报障时提供 traceId"),
+        ("400", "请求格式不正确，或提交的数据未通过校验，详见 errors"),
+        ("401", "未登录或登录已失效"),
+        ("403", "没有执行此操作的权限"),
+        ("404", "数据不存在或无权查看"),
+        ("409", "数据已被他人修改或与现有数据冲突，当前版本号见 currentVersion"),
+        ("422", "违反业务规则，原因见 code 和 title"),
+        ("429", "请求过于频繁或系统繁忙，请按 Retry-After 等待后重试"),
+        ("500", "系统内部错误，不返回具体原因，报障时请提供 traceId"),
     ];
 
     public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
@@ -61,7 +58,7 @@ internal sealed class KmicOperationTransformer : IOpenApiOperationTransformer
         return Task.CompletedTask;
     }
 
-    // 成功响应的类型由 Sends 声明，这里换上说明文字，并补上 201、202 的 Location 头
+    // 成功响应体类型由 Sends 声明，此处补充响应描述及 201/202 响应的 Location 响应头定义
     private static void DescribeSuccessResponse(OpenApiOperation operation, Type message)
     {
         var (status, _) = MessageResponse.Of(message);
@@ -91,7 +88,7 @@ internal sealed class KmicOperationTransformer : IOpenApiOperationTransformer
         }
     }
 
-    // 强类型 ID 绑定自路由或查询串，框架按 IParsable 生成的是普通字符串，这里补上 UUID 格式
+    // 绑定自路由或查询参数的强类型 ID 默认按 IParsable 生成为普通字符串，此处补充 uuid 格式标记
     private static void FixStronglyTypedIdParameters(OpenApiOperation operation, OpenApiOperationTransformerContext context)
     {
         foreach (var description in context.Description.ParameterDescriptions.Where(p => typeof(IStronglyTypedId).IsAssignableFrom(Nullable.GetUnderlyingType(p.Type) ?? p.Type)))
@@ -110,7 +107,7 @@ internal sealed class KmicOperationTransformer : IOpenApiOperationTransformer
             Extend(operation, "x-permission", JsonValue.Create(permission));
         }
 
-        // 匿名的端点不要求 Bearer：空的安全要求覆盖文档级的默认值
+        // 匿名端点无需 Bearer 认证：通过空安全要求列表覆盖文档级默认安全配置
         if (useCase.Requirement == AccessRequirement.Anonymous)
         {
             operation.Security = [];
@@ -125,7 +122,7 @@ internal sealed class KmicOperationTransformer : IOpenApiOperationTransformer
                 Name = IdempotencyKeyHeader,
                 In = ParameterLocation.Header,
                 Required = true,
-                Description = "幂等键，1 到 100 个字符，建议用 UUID。用户发起一次提交时生成，超时重试用同一个键，才不会重复执行；同一个键不能用于内容不同的请求",
+                Description = "幂等键，1～100 个字符，建议使用 UUID。发起提交时生成，超时重试须复用同一个键以防重复执行；同一键不可用于不同内容的请求",
                 Schema = new OpenApiSchema { Type = JsonSchemaType.String, MinLength = 1, MaxLength = 100 },
             });
         }

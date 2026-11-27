@@ -1,26 +1,12 @@
 namespace Kmic.BuildingBlocks.Application.ReadModels;
 
-/// <summary>
-/// 重建读模型时框架自己用的读写，模块代码不用
-/// </summary>
-/// <remarks>
-/// 要在调用方开好的事务里执行
-/// </remarks>
+// 读模型重建专用的框架内部读写接口，须在调用方开启的事务内执行，业务模块不应直接调用
 internal interface IReadModelMaintenance<T>
     where T : class, IReadModel
 {
-    /// <summary>
-    /// 读模型的总行数，包括终态的行
-    /// </summary>
     Task<long> CountAsync(CancellationToken ct);
 
-    /// <summary>
-    /// 按 ID 升序列出 after 之后的候选：不是终态，且最近一次扫描到它的不是这一轮
-    /// </summary>
     Task<IReadOnlyList<ReadModelCandidate>> ListCandidatesAsync(Guid runId, Guid? after, int size, CancellationToken ct);
 
-    /// <summary>
-    /// 把源端确认不存在的行置为终态，返回实际改动的行数
-    /// </summary>
     Task<int> MarkMissingAsync(IReadOnlyCollection<ReadModelCandidate> rows, CancellationToken ct);
 }

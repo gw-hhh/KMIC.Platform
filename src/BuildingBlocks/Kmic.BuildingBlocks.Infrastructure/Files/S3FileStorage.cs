@@ -6,9 +6,7 @@ using Amazon.S3.Model;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Files;
 
-/// <summary>
-/// S3 兼容的对象存储，生产是阿里云 OSS，开发和测试是 MinIO
-/// </summary>
+/// <summary>S3 兼容对象存储（生产环境用阿里云 OSS，开发与测试环境用 MinIO）</summary>
 public sealed class S3FileStorage : IFileStorage, IDisposable
 {
     private readonly AmazonS3Client _client;
@@ -17,9 +15,6 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
     private readonly TimeProvider _time;
     private readonly bool _plainHttp;
 
-    /// <summary>
-    /// 按配置创建
-    /// </summary>
     public S3FileStorage(S3FileStorageOptions options, TimeProvider time)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -42,7 +37,6 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
             });
     }
 
-    /// <inheritdoc />
     public async Task<StoredObject> WriteAsync(string key, Stream content, string contentType, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -60,7 +54,6 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         return await WriteMultipartAsync(key, content, contentType, first, ct);
     }
 
-    /// <inheritdoc />
     public async Task<Stream> OpenReadAsync(string key, CancellationToken ct)
     {
         try
@@ -70,15 +63,13 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         }
         catch (AmazonS3Exception exception) when (exception.StatusCode == HttpStatusCode.NotFound)
         {
-            throw new FileNotFoundException($"存储里没有 {key}。", key, exception);
+            throw new FileNotFoundException($"存储中不存在对象 {key}。", key, exception);
         }
     }
 
-    /// <inheritdoc />
     public async Task DeleteAsync(string key, CancellationToken ct) =>
         await _client.DeleteObjectAsync(_bucket, key, ct);
 
-    /// <inheritdoc />
     public async Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct)
     {
         try
@@ -92,7 +83,6 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         }
     }
 
-    /// <inheritdoc />
     public async Task<Uri> GetDownloadUrlAsync(string key, TimeSpan validFor, string downloadName, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(downloadName);
@@ -112,7 +102,6 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         return new Uri(url);
     }
 
-    /// <inheritdoc />
     public async IAsyncEnumerable<string> ListAsync(string prefix, [EnumeratorCancellation] CancellationToken ct)
     {
         string? token = null;
@@ -129,7 +118,6 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         while (token is not null);
     }
 
-    /// <inheritdoc />
     public void Dispose() => _client.Dispose();
 
     // 读满缓冲区或读到流结束，返回读到的字节数
@@ -179,13 +167,13 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
         }
         catch
         {
-            // 出错或取消时中止，免得未完成的分段一直占着空间
+            // 出错或取消时中止分段上传，释放未完成分片
             await _client.AbortMultipartUploadAsync(new AbortMultipartUploadRequest { BucketName = _bucket, Key = key, UploadId = initiated.UploadId }, CancellationToken.None);
             throw;
         }
     }
 
-    // 读到哪里、释放时一并释放响应，连接才会归还
+    // 释放读取流时同步释放 HTTP 响应，确保网络连接及时归还
     private sealed class ResponseStream(GetObjectResponse response) : Stream
     {
         private readonly Stream _inner = response.ResponseStream;

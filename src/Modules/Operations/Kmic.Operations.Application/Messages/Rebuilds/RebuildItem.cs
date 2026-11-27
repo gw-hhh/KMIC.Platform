@@ -2,14 +2,12 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
-/// <summary>
-/// 读模型重建记录
-/// </summary>
+/// <summary>读模型重建记录。</summary>
 /// <param name="Module">订阅方模块</param>
 /// <param name="RunId">轮次 ID</param>
 /// <param name="Subscription">订阅名</param>
 /// <param name="ReadModel">读模型类型名</param>
-/// <param name="JobId">执行这一轮的后台作业</param>
+/// <param name="JobId">关联的后台作业 ID</param>
 /// <param name="Status">状态</param>
 /// <param name="Scanned">已扫描的行数</param>
 /// <param name="Missing">源端不存在的行数</param>

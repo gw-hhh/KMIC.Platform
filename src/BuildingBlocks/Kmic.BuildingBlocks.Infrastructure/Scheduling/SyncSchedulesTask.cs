@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Infrastructure.Hosting;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 启动时把定时任务同步到 Quartz
-/// </summary>
 internal sealed class SyncSchedulesTask(ScheduleSynchronizer synchronizer) : IStartupTask
 {
     public string Name => "Framework.SyncSchedules";

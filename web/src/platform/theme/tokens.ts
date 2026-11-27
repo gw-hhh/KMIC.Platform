@@ -1,4 +1,4 @@
-// 初值取自 Vben Admin（MIT）的默认主题
+// 初始色板参考 Vben Admin（MIT）默认主题
 import type { Hsl } from './color';
 
 export type ThemeMode = 'light' | 'dark';
@@ -7,17 +7,17 @@ export interface ColorSet {
   background: Hsl;
   /** 内容区底色 */
   backgroundDeep: Hsl;
-  /** 浮层底色：下拉、弹出框、对话框 */
+  /** 浮层底色（下拉菜单、弹出框、对话框等） */
   popover: Hsl;
   foreground: Hsl;
   mutedForeground: Hsl;
-  /** 标签栏工具按钮等的悬停底色，比 accent 略深 */
+  /** 次级背景色（如标签栏工具按钮悬停底色），较 accent 略深 */
   muted: Hsl;
   /** 悬停底色 */
   accent: Hsl;
-  /** 悬停底色上的文字，比正文深一档 */
+  /** 悬停底色上的前景文字，对比度高于正文 */
   accentForeground: Hsl;
-  /** 已有悬停底色的元素（如侧栏底部按钮）再悬停时 */
+  /** 叠加悬停态底色（用于已有 accent 背景的元素二次悬停） */
   accentHover: Hsl;
   border: Hsl;
   success: Hsl;
@@ -64,7 +64,7 @@ export interface PrimaryPreset {
   color: Hsl;
 }
 
-// Vben 的 14 种主题色，白字对比度不足 4.5 的已调暗，按钮上的字要看得清
+// Vben 14 种预设主题色；对白色文本对比度不足 4.5 的色值已调暗，以保证按钮文字可读性
 export const primaryPresets: readonly PrimaryPreset[] = [
   { key: 'blue', name: '默认蓝', color: { h: 212, s: 100, l: 45 } },
   { key: 'violet', name: '紫罗兰', color: { h: 245, s: 82, l: 66 } },
@@ -100,7 +100,7 @@ export const shellSizes = {
   mixedColumnWidth: 80,
 } as const;
 
-/** 单位毫秒，减少动画时为 0 */
+/** 动效时长（毫秒）；开启减少动画偏好时置为 0 */
 export const motionDurations = { fast: 150, medium: 200, slow: 300, theme: 450 } as const;
 
 export const motionEasings = {

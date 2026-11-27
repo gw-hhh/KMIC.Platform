@@ -8,13 +8,9 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Enable;
 
-/// <summary>
-/// 启用组织单元
-/// </summary>
 public sealed class EnableOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<EnableOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<OrgTreeId>>> ExecuteAsync(EnableOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await trees.GetForUpdateAsync(OrgTreeId.Default, command.ExpectedVersion, cancellationToken);

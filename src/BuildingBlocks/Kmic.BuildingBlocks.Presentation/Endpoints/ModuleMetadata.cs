@@ -1,7 +1,4 @@
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 标记端点属于哪个模块，由模块路由组写入
-/// </summary>
-/// <param name="Module">模块名</param>
+/// <summary>端点所属模块元数据</summary>
 public sealed record ModuleMetadata(string Module);

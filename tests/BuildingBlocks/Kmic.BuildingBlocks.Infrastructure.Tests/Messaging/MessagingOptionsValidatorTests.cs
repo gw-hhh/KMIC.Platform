@@ -3,9 +3,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 容量保护配置的启动校验：互相矛盾的数值拒绝启动，并说明是哪一项
-/// </summary>
 public sealed class MessagingOptionsValidatorTests
 {
     private readonly MessagingOptionsValidator _validator = new();

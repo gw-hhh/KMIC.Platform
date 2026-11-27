@@ -1,6 +1,4 @@
-/**
- * 访问令牌和 epoch。令牌只放内存；身份变化时 epoch 加一，用来丢弃过期的响应
- */
+/** 会话令牌与代际（epoch）管理：令牌仅驻留内存；身份变更时递增 epoch，用于识别并丢弃过期请求的响应 */
 export interface Session {
   readonly token: string | null;
   readonly epoch: number;
@@ -8,7 +6,7 @@ export interface Session {
   changeIdentity(): void;
   expire(): void;
   onExpired(listener: () => void): () => void;
-  /** 登录、退出、切换角色、登录失效都会触发 */
+  /** 登录、注销、切换角色及会话失效时均会触发 */
   onEpochChanged(listener: () => void): () => void;
 }
 

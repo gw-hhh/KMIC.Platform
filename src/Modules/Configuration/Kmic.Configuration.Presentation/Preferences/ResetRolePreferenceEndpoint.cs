@@ -13,7 +13,7 @@ internal sealed class ResetRolePreferenceEndpoint : IEndpoint
         group.MapPost("/preferences/{key}/layers/roles/{roleId}/reset", HandleAsync)
             .Sends<ResetPreferenceLayerCommand>()
             .WithSummary("移除角色级偏好设置")
-            .WithDescription("仅移除指定角色的设置。允许且有效的个人设置仍优先，否则取允许的系统层有效值。均无可用值时，普通偏好使用代码默认值，个人偏好查询不再返回该偏好族键。");
+            .WithDescription("移除指定角色的偏好设置；存在有效个人设置时仍优先个人设置，否则顺延取系统层或默认值");
 
     private static async Task<IResult> HandleAsync([Description("偏好键")] string key, [Description("角色 ID")] RoleId roleId, ResetPreferenceLayerRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ResetPreferenceLayerCommand(key, roleId, request.ExpectedVersion), ct)).ToOk();

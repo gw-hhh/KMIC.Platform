@@ -6,17 +6,12 @@ using Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
 
-/// <summary>
-/// 敏感查询成功之后写审计事件
-/// </summary>
+// 在独立事务中将审计事件写入 Outbox（供敏感查询与作业结束复用）
 internal sealed class ReadAuditWriter(AuditRecorder recorder, IntegrationMessageCatalog messages, ModuleWriteContexts contexts, OutboxWriter outbox)
 {
     public Task WriteAsync(UseCase useCase, CancellationToken ct) =>
         WriteAsync(recorder.BuildForRead(useCase), useCase.Module, ct);
 
-    /// <summary>
-    /// 写一条已经生成好的审计事件，作业结束时的审计也用它
-    /// </summary>
     public async Task WriteAsync(AuditRecorded audit, string module, CancellationToken ct)
     {
         var context = contexts.Get(module);

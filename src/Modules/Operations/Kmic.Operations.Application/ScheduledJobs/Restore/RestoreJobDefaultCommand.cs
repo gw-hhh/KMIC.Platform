@@ -4,11 +4,9 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.ScheduledJobs.Restore;
 
-/// <summary>
-/// 恢复定时任务的默认设置
-/// </summary>
+/// <summary>恢复定时任务的默认设置</summary>
 /// <param name="JobName">任务名</param>
-/// <param name="ExpectedVersion">调用方看到的版本号</param>
+/// <param name="ExpectedVersion">预期版本号，用于并发控制</param>
 [RequirePermission(OperationsPermissions.JobsManage)]
 [Audited]
 [Idempotent]

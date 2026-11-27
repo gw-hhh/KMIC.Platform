@@ -9,9 +9,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.ResetPassword;
 
-/// <summary>
-/// 为用户生成临时密码
-/// </summary>
 public sealed class ResetUserPasswordCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -23,7 +20,6 @@ public sealed class ResetUserPasswordCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<ResetUserPasswordCommand, ResetUserPasswordResponse>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<ResetUserPasswordResponse>> ExecuteAsync(ResetUserPasswordCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await UserAdminLoading.LoadForAsync(users, db, authorizer, command.Id, null, UserAdminAction.ResetPassword, access, cancellationToken);

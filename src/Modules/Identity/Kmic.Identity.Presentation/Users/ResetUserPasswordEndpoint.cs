@@ -14,7 +14,7 @@ internal sealed class ResetUserPasswordEndpoint : IEndpoint
             .Sends<ResetUserPasswordCommand>()
             .NoStore()
             .WithSummary("重置用户密码")
-            .WithDescription("生成临时密码，仅在本次响应中返回。该用户的全部会话失效，下次登录必须修改密码。无需幂等键，重复提交会生成新密码，旧临时密码随即失效。目标用户持有受保护角色时，操作者的当前角色也必须受保护。");
+            .WithDescription("生成仅在本次响应返回的临时密码，全部会话失效且下次登录须改密（无需幂等键，重复提交将覆盖旧临时密码）；目标持受保护角色时操作者当前角色也须受保护");
 
     private static async Task<IResult> HandleAsync([Description("用户 ID")] UserId id, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ResetUserPasswordCommand(id), ct)).ToOk();

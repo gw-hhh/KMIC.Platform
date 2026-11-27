@@ -1,17 +1,11 @@
 namespace Kmic.BuildingBlocks.Presentation.Limits;
 
-/// <summary>
-/// 并发限制策略的名字
-/// </summary>
+/// <summary>内置并发限制策略名称</summary>
 public static class ConcurrencyPolicies
 {
-    /// <summary>
-    /// 每个实例同时最多处理 <see cref="KmicHttpOptions.HeavyConcurrency"/> 个
-    /// </summary>
+    /// <summary>单实例同时处理的重型请求总上限（见 KmicHttpOptions.HeavyConcurrency）</summary>
     public const string Heavy = "Heavy";
 
-    /// <summary>
-    /// 每个用户同时只处理 1 个，没有登录的按 IP 算
-    /// </summary>
+    /// <summary>单用户同时仅允许 1 个重型请求（匿名请求按客户端 IP 隔离）</summary>
     public const string HeavyPerUser = "HeavyPerUser";
 }

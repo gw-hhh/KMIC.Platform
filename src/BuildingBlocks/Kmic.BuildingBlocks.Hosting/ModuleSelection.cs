@@ -5,13 +5,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace Kmic.BuildingBlocks.Hosting;
 
-/// <summary>
-/// 从登记的模块里选出本次要运行的，并校验它们
-/// </summary>
 internal static class ModuleSelection
 {
-    // checkAssemblyNames 只给测试用：测试里的模块没法放进名为 Kmic.{模块}.Application 的程序集
-    // 参考模块只能在开发与测试环境注册，生产环境即使漏写 onlyIn 也不能带着它启动
+    // checkAssemblyNames 仅用于测试，因测试模块无法置于 Kmic.{模块}.Application 程序集中
+    // 参考模块仅限开发与测试环境注册，即使未声明 onlyIn 也禁止在生产环境启用
     private const string ReferenceModule = "Sample";
 
     public static IReadOnlyList<HostModule> Select(IReadOnlyList<HostModule> registered, IHostEnvironment environment, IConfiguration configuration, bool checkAssemblyNames = true)

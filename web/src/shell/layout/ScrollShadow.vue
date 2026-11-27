@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 可滚动区域：滚动后顶部出现渐变阴影和分隔线，提示上面还有内容，照 Vben Admin 的 scrollbar（MIT）
+// 可滚动容器：滚动时在顶部和底部显示渐变阴影与分隔线以提示可滚动内容，参考 Vben Admin 的 scrollbar（MIT）
 import { ref } from 'vue';
 
 const atTop = ref(true);
@@ -8,7 +8,7 @@ const atBottom = ref(false);
 function onScroll(event: Event): void {
   const box = event.target as HTMLElement;
   atTop.value = box.scrollTop <= 0;
-  // scrollTop 有小数，差 1px 以内算到底
+  // scrollTop 可能存在小数精度误差，距底部 1px 以内即视为触底
   atBottom.value = box.scrollTop + box.clientHeight >= box.scrollHeight - 1;
 }
 </script>

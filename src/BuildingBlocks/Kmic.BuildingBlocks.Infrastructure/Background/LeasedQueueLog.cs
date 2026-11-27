@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Background;
 
-/// <summary>
-/// 领取队列循环的日志
-/// </summary>
 internal static partial class LeasedQueueLog
 {
     [LoggerMessage(EventId = 2901, Level = LogLevel.Warning, Message = "Database unavailable while claiming from queue {Queue}, retrying in {DelaySeconds} s")]

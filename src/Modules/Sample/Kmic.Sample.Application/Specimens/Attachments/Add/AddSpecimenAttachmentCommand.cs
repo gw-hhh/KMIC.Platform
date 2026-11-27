@@ -5,12 +5,7 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Attachments.Add;
 
-/// <summary>
-/// 为示例添加附件
-/// </summary>
-/// <remarks>
-/// 文件要先上传
-/// </remarks>
+/// <summary>为示例添加附件（关联前须先上传文件）</summary>
 /// <param name="Id">示例 ID</param>
 /// <param name="FileId">上传得到的文件 ID</param>
 /// <param name="ExpectedVersion">读取时的版本号</param>

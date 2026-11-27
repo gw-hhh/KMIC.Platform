@@ -6,12 +6,8 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Application.Attachments;
 
-/// <summary>
-/// 解除文件与业务对象的关联
-/// </summary>
 public sealed class DetachFilesCommandHandler(IStoredFileRepository files, IOptions<FilesOptions> options, TimeProvider time) : ICommandHandler<DetachFilesCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(DetachFilesCommand command, CancellationToken cancellationToken)
     {
         var message = command.Message;

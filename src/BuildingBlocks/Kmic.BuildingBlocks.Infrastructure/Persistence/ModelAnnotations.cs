@@ -1,6 +1,6 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-// 框架在建模期间临时写在实体和索引上的标记，校验完就删掉，不会进迁移快照
+// 框架在模型构建期间临时附加于实体和索引的注解标记，校验完成后立即移除，不会进入迁移快照
 internal static class ModelAnnotations
 {
     public const string DataScope = "Kmic:DataScope";

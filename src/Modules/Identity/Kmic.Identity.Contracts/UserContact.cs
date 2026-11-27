@@ -1,11 +1,8 @@
 namespace Kmic.Identity.Contracts;
 
-/// <summary>
-/// 用户联系方式
-/// </summary>
 /// <param name="UserId">用户 ID</param>
 /// <param name="DisplayName">姓名</param>
-/// <param name="Email">邮箱，没有填写时为空</param>
-/// <param name="Mobile">手机号，没有填写时为空</param>
+/// <param name="Email">邮箱，未填写时为空</param>
+/// <param name="Mobile">手机号，未填写时为空</param>
 /// <param name="IsActive">用户是否启用</param>
 public sealed record UserContact(Guid UserId, string DisplayName, string? Email, string? Mobile, bool IsActive);

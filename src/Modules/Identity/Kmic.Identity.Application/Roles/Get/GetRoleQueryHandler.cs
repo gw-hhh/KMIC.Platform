@@ -8,9 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Roles.Get;
 
-/// <summary>
-/// 查询角色详情
-/// </summary>
 public sealed class GetRoleQueryHandler(
     IIdentityQueryDb db,
     IExecutionContext execution,
@@ -18,10 +15,9 @@ public sealed class GetRoleQueryHandler(
     DataScopeObjectCatalog scopeObjects,
     IAllowedActions<RoleTarget> allowedActions) : IQueryHandler<GetRoleQuery, RoleDetailResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<RoleDetailResponse>> Handle(GetRoleQuery query, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("查询角色需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("查询角色需要已登录的用户身份。");
         var found = await db.Roles
             .Where(r => r.Id == query.Id)
             .Select(r => new

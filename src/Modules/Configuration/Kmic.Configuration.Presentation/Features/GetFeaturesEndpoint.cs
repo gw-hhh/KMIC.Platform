@@ -11,7 +11,7 @@ internal sealed class GetFeaturesEndpoint : IEndpoint
         group.MapGet("/features", HandleAsync)
             .Sends<GetFeaturesQuery>()
             .WithSummary("查询当前开放的功能开关")
-            .WithDescription("登录后可查询已开启的功能开关，供前端控制入口显示。开关来自部署配置，只决定功能是否开放，不授予权限。");
+            .WithDescription("返回已开启的功能开关（来自部署配置，仅控制前端入口展示，不授予权限）");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetFeaturesQuery(), ct)).ToOk();

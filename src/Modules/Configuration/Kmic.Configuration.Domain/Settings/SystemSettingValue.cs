@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Configuration.Domain.Settings;
 
-/// <summary>
-/// 已保存的系统设置值，未保存时使用代码默认值
-/// </summary>
+/// <summary>已保存的系统设置值，未保存时使用代码默认值</summary>
 public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
 {
     private SystemSettingValue(SystemSettingValueId id, string key, string value)
@@ -24,9 +22,6 @@ public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
     /// </summary>
     public string Value { get; private set; }
 
-    /// <summary>
-    /// 创建设置值记录
-    /// </summary>
     public static SystemSettingValue Create(string key, string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -35,9 +30,6 @@ public sealed class SystemSettingValue : AggregateRoot<SystemSettingValueId>
         return new SystemSettingValue(SystemSettingValueId.New(), key, value);
     }
 
-    /// <summary>
-    /// 更新设置值
-    /// </summary>
     public void Set(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);

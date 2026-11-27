@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.External;
 
-/// <summary>
-/// 客户端的超时、重试和命令里的守卫。“在命令里”用一个真实的命令，处理器里调用客户端
-/// </summary>
 public sealed class ExternalCallTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

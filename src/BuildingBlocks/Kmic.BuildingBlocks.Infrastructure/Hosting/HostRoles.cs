@@ -1,23 +1,15 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
-/// <summary>
-/// 实例承担的角色，同一个镜像按配置 Kmic:Roles 决定
-/// </summary>
+/// <summary>实例运行角色（通过 Kmic:Roles 配置）</summary>
 [Flags]
 public enum HostRoles
 {
-    /// <summary>
-    /// 没有角色，不能启动
-    /// </summary>
+    /// <summary>未指定角色（禁止启动）</summary>
     None = 0,
 
-    /// <summary>
-    /// 接 HTTP 请求
-    /// </summary>
+    /// <summary>处理 HTTP 请求</summary>
     Api = 1,
 
-    /// <summary>
-    /// 投递和处理消息、执行后台作业和定时任务
-    /// </summary>
+    /// <summary>消息投递与消费、后台作业与定时调度</summary>
     Worker = 2,
 }

@@ -11,7 +11,7 @@ internal sealed class ExportAuditEndpoint : IEndpoint
         group.MapPost("/audit/exports", HandleAsync)
             .Sends<ExportAuditCommand>()
             .WithSummary("导出审计记录")
-            .WithDescription("将指定时间段的审计记录导出为 CSV，筛选条件与审计列表相同。提交后返回 202 和 jobId，Location 指向下载地址；作业未完成时下载返回 409，可稍后重试。行数超限时作业失败，请缩小时间范围后重新导出。");
+            .WithDescription("按列表相同条件异步导出 CSV，返回 202 与 jobId（Location 指向下载地址）；行超限时作业失败，须缩小时间范围");
 
     private static async Task<IResult> HandleAsync(ExportAuditRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(

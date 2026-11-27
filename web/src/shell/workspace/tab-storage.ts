@@ -5,7 +5,7 @@ export interface TabStorage {
   setItem(key: string, value: string): void;
 }
 
-/** 不含页面内容 */
+/** 持久化的标签页元数据（不含页面内部状态） */
 export interface StoredTab {
   routeName: string;
   params: Record<string, string>;
@@ -38,6 +38,6 @@ export function saveStoredTabs(storage: TabStorage, userId: string, tabs: readon
   try {
     storage.setItem(storageKey(userId), JSON.stringify(tabs));
   } catch {
-    // 存储不可用时忽略
+    // 本地存储不可用时静默忽略
   }
 }

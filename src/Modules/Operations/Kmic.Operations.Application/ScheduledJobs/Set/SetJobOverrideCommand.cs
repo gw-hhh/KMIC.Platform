@@ -4,12 +4,7 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.ScheduledJobs.Set;
 
-/// <summary>
-/// 设置定时任务开关和执行时间
-/// </summary>
-/// <remarks>
-/// 同步调度器失败不回滚已保存的设置
-/// </remarks>
+/// <summary>设置定时任务开关和执行时间；同步调度器失败时不回滚已保存的设置</summary>
 /// <param name="JobName">任务名</param>
 /// <param name="Enabled">是否启用</param>
 /// <param name="Cron">Cron 表达式</param>

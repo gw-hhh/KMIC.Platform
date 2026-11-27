@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 权限点与范围对象目录同步：启动同步、哈希跳过、改名、退役与恢复、全权限角色的指纹、定时清理
-/// </summary>
 public sealed class PermissionCatalogSyncTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -25,10 +22,10 @@ public sealed class PermissionCatalogSyncTests(ClassDatabase<ApiTemplate> databa
         return (await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(command, Ct)).ShouldBeSuccess();
     }
 
-    // 宿主在第一次用到服务时才启动，启动时会同步一次目录：改数据库之前先把它启动起来，免得启动同步把准备好的现场抹掉
+    // 宿主在首次访问服务时触发启动及初始目录同步：需先确保宿主完成启动，避免初始同步覆盖预置的数据库测试状态
     private void StartHost() => Factory.Services.ShouldNotBeNull();
 
-    // 让下一次同步认为目录变了
+    // 清除哈希使下次同步识别为目录变更
     private async Task MakeCatalogStaleAsync() =>
         await Seed.SqlAsync("""UPDATE "Identity"."CatalogState" SET "ContentHash" = 'stale'""");
 

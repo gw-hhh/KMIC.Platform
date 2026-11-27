@@ -4,9 +4,7 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Querying;
 
-/// <summary>
-/// 排序键要能还原到投影之前的表达式：EF 翻译不了对构造函数投影出的对象成员排序，所以排序放在投影之前
-/// </summary>
+// EF 无法翻译对构造函数投影成员的排序，因此排序须还原到投影之前
 public sealed class ProjectionOrderingTests
 {
     private static readonly Row[] _rows =

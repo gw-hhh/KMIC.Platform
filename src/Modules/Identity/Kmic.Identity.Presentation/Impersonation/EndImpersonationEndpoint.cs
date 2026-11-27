@@ -11,7 +11,7 @@ internal sealed class EndImpersonationEndpoint : IEndpoint
         group.MapDelete("/impersonation", HandleAsync)
             .Sends<EndImpersonationCommand>()
             .WithSummary("结束当前模拟会话")
-            .WithDescription("须使用模拟令牌调用，非模拟会话返回 422 Identity.NotImpersonating。只读模拟会话也可调用，结束后前端须丢弃模拟令牌。");
+            .WithDescription("仅限模拟令牌调用（非模拟会话返回 422 Identity.NotImpersonating），只读模拟也可调用；结束后前端须丢弃模拟令牌");
 
     private static async Task<IResult> HandleAsync(ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new EndImpersonationCommand(), ct)).ToNoContent();

@@ -4,15 +4,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Operations.Application.Messages.Rebuilds;
 
-/// <summary>
-/// 启动读模型重建
-/// </summary>
-/// <remarks>
-/// 不在 Operations 的命令事务里
-/// </remarks>
+// 直接委托框架重建管理接口，不纳入 Operations 本地事务
 public sealed class TriggerRebuildCommandHandler(IReadModelRebuildAdmin rebuilds) : ICommandHandler<TriggerRebuildCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(TriggerRebuildCommand command, CancellationToken cancellationToken)
     {
         return RebuildOutcomes.Of(await rebuilds.TriggerAsync(command.Subscription, cancellationToken));

@@ -13,7 +13,7 @@ internal sealed class SetRolePreferenceEndpoint : IEndpoint
         group.MapPut("/preferences/{key}/layers/roles/{roleId}", HandleAsync)
             .Sends<SetPreferenceLayerCommand>()
             .WithSummary("设置角色级偏好")
-            .WithDescription("允许且有效的个人设置优先于角色设置。角色必须存在，偏好声明须允许角色层设置。");
+            .WithDescription("角色须存在且偏好声明允许角色层设置；有效的个人设置仍优先");
 
     private static async Task<IResult> HandleAsync([Description("偏好键")] string key, [Description("角色 ID")] RoleId roleId, SetPreferenceLayerRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SetPreferenceLayerCommand(key, roleId, request.Value, request.ExpectedVersion), ct)).ToOk();

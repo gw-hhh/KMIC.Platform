@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Configuration.Application.Dictionaries.Admin;
 
-/// <summary>
-/// 查询字典类型及全部字典项
-/// </summary>
 public sealed class GetDictionaryTypeQueryHandler(IConfigurationQueryDb db) : IQueryHandler<GetDictionaryTypeQuery, DictionaryTypeDetail>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<DictionaryTypeDetail>> Handle(GetDictionaryTypeQuery query, CancellationToken cancellationToken)
     {
         var type = await db.DictionaryTypes

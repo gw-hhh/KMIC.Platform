@@ -1,17 +1,11 @@
 namespace Kmic.Notifications.Application.Rendering;
 
-/// <summary>
-/// 渲染结果的用途
-/// </summary>
+/// <summary>渲染输出格式</summary>
 public enum RenderFormat
 {
-    /// <summary>
-    /// 邮件 HTML 正文：默认转义变量值，避免将输入内容解释为 HTML
-    /// </summary>
+    /// <summary>邮件 HTML 正文（自动转义变量值）</summary>
     Html,
 
-    /// <summary>
-    /// 主题、短信、站内消息这类纯文本：变量的值原样输出
-    /// </summary>
+    /// <summary>主题、短信与站内消息纯文本（原样输出变量值）</summary>
     Text,
 }

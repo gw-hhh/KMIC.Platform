@@ -2,47 +2,31 @@ using System.Security.Cryptography;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Files;
 
-/// <summary>
-/// 交给存储写入的只读流：边读边算 SHA-256 和字节数，超过上限就中断
-/// </summary>
-/// <remarks>
-/// 只能顺序读一遍
-/// </remarks>
+// 单次顺序只读校验流：实时统计字节数并计算 SHA-256，超出上限立即中断
 internal sealed class UploadSourceStream(ReadOnlyMemory<byte> header, Stream rest, long maxBytes) : Stream
 {
     private readonly IncrementalHash _hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
     private int _headerRead;
 
-    /// <summary>
-    /// 到现在读了多少字节
-    /// </summary>
     public long BytesRead { get; private set; }
 
-    /// <inheritdoc />
     public override bool CanRead => true;
 
-    /// <inheritdoc />
     public override bool CanSeek => false;
 
-    /// <inheritdoc />
     public override bool CanWrite => false;
 
-    /// <inheritdoc />
     public override long Length => throw new NotSupportedException();
 
-    /// <inheritdoc />
     public override long Position
     {
         get => BytesRead;
         set => throw new NotSupportedException();
     }
 
-    /// <summary>
-    /// 读完之后的 SHA-256，小写十六进制；只能取一次
-    /// </summary>
+    // 返回小写十六进制 SHA-256 摘要并重置哈希器，仅可调用一次
     public string FinishHash() => Convert.ToHexStringLower(_hash.GetHashAndReset());
 
-    /// <inheritdoc />
     public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
         if (buffer.IsEmpty)
@@ -66,14 +50,11 @@ internal sealed class UploadSourceStream(ReadOnlyMemory<byte> header, Stream res
         return read;
     }
 
-    /// <inheritdoc />
     public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
         ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
 
-    /// <inheritdoc />
     public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
 
-    /// <inheritdoc />
     public override int Read(Span<byte> buffer)
     {
         if (buffer.IsEmpty)
@@ -97,21 +78,16 @@ internal sealed class UploadSourceStream(ReadOnlyMemory<byte> header, Stream res
         return read;
     }
 
-    /// <inheritdoc />
     public override void Flush()
     {
     }
 
-    /// <inheritdoc />
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
-    /// <inheritdoc />
     public override void SetLength(long value) => throw new NotSupportedException();
 
-    /// <inheritdoc />
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
-    /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
         if (disposing)

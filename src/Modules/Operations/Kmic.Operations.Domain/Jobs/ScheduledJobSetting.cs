@@ -2,12 +2,7 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Operations.Domain.Jobs;
 
-/// <summary>
-/// 定时任务的自定义启用状态和执行计划
-/// </summary>
-/// <remarks>
-/// 值为空时用代码默认值
-/// </remarks>
+/// <summary>定时任务的自定义启用状态与执行计划（为空时使用代码默认值）。</summary>
 public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
 {
     private ScheduledJobSetting(ScheduledJobSettingId id, string jobName)
@@ -33,9 +28,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
     /// </summary>
     public bool IsDefault => Enabled is null && Cron is null;
 
-    /// <summary>
-    /// 创建定时任务自定义设置
-    /// </summary>
+    /// <summary>创建定时任务自定义设置。</summary>
     public static ScheduledJobSetting Create(string jobName, bool? enabled, string? cron)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(jobName);
@@ -45,9 +38,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
         return setting;
     }
 
-    /// <summary>
-    /// 替换自定义设置，null 表示使用代码默认值
-    /// </summary>
+    /// <summary>替换自定义设置（null 表示使用代码默认值）。</summary>
     public void Apply(bool? enabled, string? cron)
     {
         if (cron is not null)
@@ -59,9 +50,7 @@ public sealed class ScheduledJobSetting : AggregateRoot<ScheduledJobSettingId>
         Cron = cron?.Trim();
     }
 
-    /// <summary>
-    /// 恢复默认设置，保留记录
-    /// </summary>
+    /// <summary>恢复默认设置（保留记录）。</summary>
     public void RestoreDefault()
     {
         Enabled = null;

@@ -5,13 +5,10 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.List;
 
-/// <summary>
-/// 查询用户列表
-/// </summary>
 /// <param name="Q">关键字</param>
 /// <param name="Status">状态编码</param>
-/// <param name="RoleId">只看拥有这个角色的用户</param>
-/// <param name="OrgUnitId">只看直接属于这个组织单元的用户</param>
+/// <param name="RoleId">筛选角色，仅返回拥有该角色的用户</param>
+/// <param name="OrgUnitId">组织单元 ID，仅筛选直属该单元的用户</param>
 /// <param name="Page">分页</param>
 /// <param name="Sort">排序</param>
 [RequirePermission(IdentityPermissions.UserView)]

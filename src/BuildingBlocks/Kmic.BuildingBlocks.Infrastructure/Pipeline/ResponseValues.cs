@@ -3,15 +3,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 读取和构造结果里的值
-/// </summary>
 internal static class ResponseValues<TResponse>
     where TResponse : Result
 {
-    /// <summary>
-    /// 值类型，Result 没有值时为空
-    /// </summary>
+    // 非泛型 Result 时为 null
     public static Type? ValueType { get; } = typeof(TResponse).IsGenericType ? typeof(TResponse).GetGenericArguments()[0] : null;
 
     public static object? Read(TResponse response) => Compiled.Read(response);
@@ -43,7 +38,7 @@ internal static class ResponseValues<TResponse>
         return Expression.Lambda<Func<object?, TResponse>>(response, value).Compile();
     }
 
-    // 放在嵌套类里，等外层的 ValueType 初始化后，第一次用到时才编译
+    // 置于嵌套类中，确保外层 ValueType 初始化完成并在首次使用时才编译委托
     private static class Compiled
     {
         public static readonly Func<TResponse, object?> Read = BuildRead();

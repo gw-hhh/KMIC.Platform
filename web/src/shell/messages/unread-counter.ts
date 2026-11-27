@@ -1,6 +1,5 @@
 import { readonly, ref, type Ref } from 'vue';
 
-/** 未读数的查询间隔 */
 export const unreadInterval = 30_000;
 
 export interface UnreadLocks {
@@ -14,7 +13,7 @@ export interface UnreadChannel {
 }
 
 export interface UnreadEnvironment {
-  /** 没有时（非 HTTPS）每个可见的标签页各自轮询 */
+  /** 锁不可用时（如非 HTTPS 环境），由各可见标签页各自轮询 */
   locks: UnreadLocks | null;
   openChannel: ((name: string) => UnreadChannel) | null;
   isVisible: () => boolean;
@@ -24,9 +23,9 @@ export interface UnreadEnvironment {
 
 export interface UnreadCounter {
   readonly count: Readonly<Ref<number | null>>;
-  /** 马上查一次并告诉其他标签页 */
+  /** 立即拉取最新未读数并广播至同源标签页 */
   refresh(): Promise<void>;
-  /** 本标签页标了已读后直接改，不等下一次轮询 */
+  /** 在本标签页执行已读操作后直接更新计数，无需等待下次轮询 */
   set(count: number): void;
   stop(): void;
 }
@@ -60,10 +59,7 @@ export function browserEnvironment(): UnreadEnvironment {
   };
 }
 
-/**
- * 站内消息未读数。多个标签页时只由一个可见的标签页轮询，结果分享给其他标签页；
- * 轮询的标签页不可见时让出，换另一个可见的接手
- */
+/** 站内消息未读数：多标签页间仅由单个可见页轮询并广播结果，不可见时自动让出 */
 export function createUnreadCounter(options: {
   userId: string;
   fetchCount: () => Promise<number>;
@@ -73,7 +69,7 @@ export function createUnreadCounter(options: {
   const name = `kmic-unread.${options.userId}`;
   const count = ref<number | null>(null);
   let lastAt = Number.NEGATIVE_INFINITY;
-  // 每次数字更新加一；查询返回时已经变过，说明结果旧了
+  // 单调递增版本号：若请求返回期间版本号已变更，则丢弃过时结果
   let version = 0;
   let stopped = false;
   let leading: AbortController | null = null;
@@ -91,7 +87,7 @@ export function createUnreadCounter(options: {
     version++;
     count.value = message.count;
     lastAt = message.at;
-    // 刚有人查过，轮询的标签页按新的时间重新排
+    // 收到更新后唤醒休眠中的主轮询循环，依据最新时间戳重算等待间隔
     wake?.();
   }
 
@@ -105,17 +101,17 @@ export function createUnreadCounter(options: {
     const started = version;
     try {
       const value = await fetchCount();
-      // 查询期间标了已读或收到其他标签页的结果，这次的数已经过时
+      // 若请求期间已发生本地已读操作或收到他页广播，则忽略本次过期响应
       if (version === started) {
         publish(value);
       }
     } catch {
-      // 查不到时保留原来的数，下一轮再查
+      // 查询失败时保留原计数，等待下轮重试
       lastAt = env.now();
     }
   }
 
-  // 拿到锁后一直轮询，直到不可见或停止
+  // 获取跨页互斥锁后持续轮询，直至页面不可见或计数器停止
   async function lead(signal: AbortSignal): Promise<void> {
     signal.addEventListener('abort', () => wake?.(), { once: true });
     while (!signal.aborted) {
@@ -140,7 +136,7 @@ export function createUnreadCounter(options: {
       leading = controller;
       const run = (): Promise<void> => lead(controller.signal);
       const started = env.locks === null ? run() : env.locks.request(name, { signal: controller.signal }, run);
-      // 排队时被取消会以 AbortError 结束
+      // 等锁期间若被中止，navigator.locks 将抛出 AbortError，此处安全忽略
       void Promise.resolve(started).catch(() => undefined);
     } else if (!shouldLead && leading !== null) {
       leading.abort();
@@ -149,7 +145,7 @@ export function createUnreadCounter(options: {
   }
 
   const stopWatching = env.onVisibilityChange(update);
-  // 先查一次再决定由谁轮询，新开的标签页不用等别人的下一轮
+  // 初始化时先立即查询一次再参与主控权竞争，避免新标签页等待首个轮询周期
   void refresh().finally(update);
 
   return {

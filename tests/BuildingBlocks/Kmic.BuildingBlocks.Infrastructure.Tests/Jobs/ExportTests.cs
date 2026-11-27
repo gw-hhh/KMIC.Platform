@@ -14,9 +14,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Jobs;
 
-/// <summary>
-/// 测试身份默认只能看自己的单据，导出的结果应当只有提交人自己的
-/// </summary>
 public sealed class ExportTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

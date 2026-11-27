@@ -22,18 +22,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Files.Infrastructure;
 
-/// <summary>
-/// Files 模块的服务端注册类
-/// </summary>
 public sealed class FilesModule : IModule
 {
-    /// <inheritdoc />
     public string Name => FilesModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(IFilesQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -57,7 +51,6 @@ public sealed class FilesModule : IModule
         services.AddKmicBacklogGauges<StorageIssueGauges>();
     }
 
-    /// <inheritdoc />
     public void AddWorkerServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -66,18 +59,16 @@ public sealed class FilesModule : IModule
         services.AddKmicLeasedWork<StoredFileDeletionWork, DeletionItem>();
     }
 
-    /// <inheritdoc />
     public void ConfigureMessaging(IMessagingBuilder messaging)
     {
         ArgumentNullException.ThrowIfNull(messaging);
 
-        // 订阅名存进收件箱，发布后不能改
+        // 订阅名会写入收件箱，发布后不可变更
         messaging.Subscribe<AttachFiles, AttachFilesCommand>("Files.Attach", (message, _) => new AttachFilesCommand(message));
         messaging.Subscribe<DetachFiles, DetachFilesCommand>("Files.Detach", (message, _) => new DetachFilesCommand(message));
         messaging.Subscribe<RegisterGeneratedFile, RegisterGeneratedFileCommand>("Files.RegisterGenerated", (message, _) => new RegisterGeneratedFileCommand(message));
     }
 
-    /// <inheritdoc />
     public void ConfigureScheduling(ISchedulingBuilder scheduling)
     {
         ArgumentNullException.ThrowIfNull(scheduling);

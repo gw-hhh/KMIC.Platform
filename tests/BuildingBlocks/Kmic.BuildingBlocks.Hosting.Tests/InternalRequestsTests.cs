@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Hosting.Tests;
 
-/// <summary>
-/// 依赖状态端点只给内网直连的请求看
-/// </summary>
 public sealed class InternalRequestsTests
 {
     [Theory]

@@ -7,9 +7,6 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 登记本实例声明的订阅路由
-/// </summary>
 internal sealed class RegisterMessageRoutesTask(SubscriptionCatalog subscriptions, DataSources dataSources) : IStartupTask
 {
     public string Name => "Framework.RegisterMessageRoutes";

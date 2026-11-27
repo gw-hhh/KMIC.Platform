@@ -1,10 +1,5 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 消息写入被软线熔断时仍可执行
-/// </summary>
-/// <remarks>
-/// 只给熔断期间也必须可用的命令：认证与会话、运维命令。硬线下仍然拒绝
-/// </remarks>
+/// <summary>消息容量软线熔断期间仍可放行的命令；硬线熔断时仍拒绝执行。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class ExemptFromMessagingSuspensionAttribute : Attribute;

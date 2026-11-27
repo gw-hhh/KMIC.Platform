@@ -7,9 +7,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 模型校验
-/// </summary>
 internal static class ModelValidator
 {
     private static readonly string[] _secretWords = ["Password", "Token", "Secret", "Hash"];
@@ -59,7 +56,7 @@ internal static class ModelValidator
 
         foreach (var navigation in entityType.GetDeclaredNavigations())
         {
-            // 先认出子实体指回父实体的导航：父实体可能就是聚合根，不能当成两个聚合根之间的导航
+            // 先识别子实体指向父实体的反向导航：父实体本身可能是聚合根，避免误判为聚合根之间的跨聚合导航
             if (navigation.IsOnDependent && navigation.Inverse is not null)
             {
                 problems.Add($"{name}.{navigation.Name}：导航只能从父实体指向子实体。");
@@ -86,7 +83,7 @@ internal static class ModelValidator
         }
     }
 
-    // 表注释是数据字典的入口，必须有；列注释不强制，属性写了 summary 会自动生成
+    // 表注释作为数据字典入口必须填写；列注释不作强制要求（属性 XML summary 会自动生成）
     private static void ValidateComments(IReadOnlyEntityType entityType, string name, List<string> problems)
     {
         if (entityType.GetComment() is null)
@@ -96,7 +93,7 @@ internal static class ModelValidator
     }
 
 
-    // 名字里有这些词的字段多半是密钥类数据，审计记录里不能出现它们的值，要明确标出来
+    // 属性名包含此类关键字通常涉及凭据或密钥数据，须显式标记分类以防止审计日志记录明文值
     private static void ValidateAuditMarks(IReadOnlyEntityType entityType, string name, List<string> problems)
     {
         foreach (var (path, property, _) in AllProperties(entityType, name, inJson: false))
@@ -110,7 +107,7 @@ internal static class ModelValidator
     }
     private static void ValidateProperty(string location, IReadOnlyProperty property, bool inJson, List<string> problems)
     {
-        // 按存储类型判断：单值值对象存的是它包装的原始值
+        // 按底层存储类型校验：单值值对象以所包装的原始类型参与判断
         var stored = property.GetValueConverter()?.ProviderClrType ?? property.ClrType;
         var type = Nullable.GetUnderlyingType(stored) ?? stored;
         if (type == typeof(float) || type == typeof(double))
@@ -123,7 +120,7 @@ internal static class ModelValidator
             problems.Add($"{location}：不能用 DateTime，请用 DateTimeOffset、DateOnly 或 TimeOnly。");
         }
 
-        // jsonb 里的成员没有列类型，长度和精度由值对象自己保证
+        // 映射为 jsonb 的值对象成员无独立数据库列类型，其长度与精度由值对象自身校验
         if (inJson)
         {
             return;
@@ -166,7 +163,7 @@ internal static class ModelValidator
 
         if (!isRoot || !hasOwnership)
         {
-            // 子实体只能通过聚合根访问，没有自己的过滤器。没有归属的数据无法判断范围
+            // 子实体仅能经由聚合根访问，无独立查询过滤器；无归属字段的实体无法判定数据权限范围
             problems.Add($"{name}：只有实现 IHasOwner 或 IHasOrgUnit 的聚合根能声明 HasDataScope。");
         }
 
@@ -180,7 +177,7 @@ internal static class ModelValidator
         }
     }
 
-    // 值对象的成员同样要满足规则，位置写成“实体.属性.成员”
+    // 复合值对象成员同样受上述规则约束，错误定位格式为“实体.属性.成员”
     private static IEnumerable<(string Path, IReadOnlyProperty Property, bool InJson)> AllProperties(IReadOnlyTypeBase type, string path, bool inJson) =>
         type.GetDeclaredProperties().Select(p => ($"{path}.{p.Name}", p, inJson))
             .Concat(type.GetDeclaredComplexProperties().SelectMany(c =>

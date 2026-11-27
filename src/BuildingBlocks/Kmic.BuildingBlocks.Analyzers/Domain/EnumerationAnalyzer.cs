@@ -5,37 +5,33 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
-/// <summary>
-/// KM0301：智能枚举要 sealed、构造函数私有、取值是 static readonly 字段
-/// </summary>
+/// <summary>KM0301：智能枚举必须声明为 sealed，构造函数私有，枚举值为 static readonly 字段。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EnumerationAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor NotSealed = Rules.Create(
         "KM0301",
         Rules.DomainCategory,
-        "智能枚举的取值只能由类型自身声明",
-        "智能枚举 {0} 要声明为 sealed",
-        "框架把类型里声明的静态字段当作全部取值。子类里的或在别处 new 出来的取值不在其中，按编码查不到。");
+        "智能枚举取值只能由类型自身声明",
+        "智能枚举 {0} 必须声明为 sealed",
+        "框架将类型内声明的静态字段视为全部枚举取值；子类或外部实例化的取值无法纳入注册表，按编码查找时将缺失。");
 
     internal static readonly DiagnosticDescriptor NonPrivateConstructor = Rules.Create(
         "KM0301",
         Rules.DomainCategory,
-        "智能枚举的取值只能由类型自身声明",
-        "智能枚举 {0} 的构造函数要改为 private",
-        "框架把类型里声明的静态字段当作全部取值。子类里的或在别处 new 出来的取值不在其中，按编码查不到。");
+        "智能枚举取值只能由类型自身声明",
+        "智能枚举 {0} 的构造函数必须为 private",
+        "框架将类型内声明的静态字段视为全部枚举取值；子类或外部实例化的取值无法纳入注册表，按编码查找时将缺失。");
 
     internal static readonly DiagnosticDescriptor MutableValue = Rules.Create(
         "KM0301",
         Rules.DomainCategory,
-        "智能枚举的取值只能由类型自身声明",
-        "智能枚举的取值 {0} 要声明为 static readonly 字段",
-        "框架把类型里声明的静态字段当作全部取值，字段不是只读的话，运行时可能被换掉。");
+        "智能枚举取值只能由类型自身声明",
+        "智能枚举的取值 {0} 必须声明为 static readonly 字段",
+        "框架将类型内声明的静态字段视为全部枚举取值；若字段非只读，运行时可能被篡改。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [NotSealed, NonPrivateConstructor, MutableValue];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

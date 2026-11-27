@@ -5,9 +5,6 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-/// <summary>
-/// 权限点目录
-/// </summary>
 public sealed partial class PermissionCatalog
 {
     private readonly FrozenDictionary<string, PermissionDefinition> _byCode;
@@ -15,23 +12,14 @@ public sealed partial class PermissionCatalog
     private PermissionCatalog(IEnumerable<PermissionDefinition> permissions) =>
         _byCode = permissions.ToFrozenDictionary(p => p.Code, StringComparer.Ordinal);
 
-    /// <summary>
-    /// 全部权限点
-    /// </summary>
     public IReadOnlyCollection<PermissionDefinition> All => _byCode.Values;
 
-    /// <summary>
-    /// 从程序集中读取
-    /// </summary>
     public static PermissionCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
         return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()).Where(t => t.IsDefined(typeof(PermissionGroupAttribute), inherit: false)));
     }
 
-    /// <summary>
-    /// 从分组类型中读取
-    /// </summary>
     public static PermissionCatalog Build(IEnumerable<Type> groupTypes)
     {
         ArgumentNullException.ThrowIfNull(groupTypes);
@@ -79,14 +67,9 @@ public sealed partial class PermissionCatalog
         return new PermissionCatalog(permissions);
     }
 
-    /// <summary>
-    /// 是否包含该权限点
-    /// </summary>
     public bool Contains(string code) => _byCode.ContainsKey(code);
 
-    /// <summary>
-    /// 核对权限点的使用
-    /// </summary>
+    /// <summary>核对用例与外部引用的权限点是否存在，并校验敏感权限是否已声明审计。</summary>
     public void Verify(UseCaseCatalog useCases, IEnumerable<PermissionReference> references)
     {
         ArgumentNullException.ThrowIfNull(useCases);
@@ -143,7 +126,7 @@ public sealed partial class PermissionCatalog
             var attribute = field.GetCustomAttribute<PermissionAttribute>();
             if (!field.IsLiteral || field.FieldType != typeof(string) || attribute is null)
             {
-                problems.Add($"{type.Name}.{field.Name}：权限点必须是标了 [Permission] 的 string 常量。");
+                problems.Add($"{type.Name}.{field.Name}：权限点必须是标注了 [Permission] 的 string 常量。");
                 continue;
             }
 

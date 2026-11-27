@@ -33,18 +33,12 @@ using Microsoft.Extensions.Hosting;
 
 namespace Kmic.Notifications.Infrastructure;
 
-/// <summary>
-/// Notifications 模块的服务端注册类
-/// </summary>
 public sealed class NotificationsModule : IModule
 {
-    /// <inheritdoc />
     public string Name => NotificationsModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(INotificationsQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -57,7 +51,7 @@ public sealed class NotificationsModule : IModule
         services.AddScoped<ITemplateRepository, TemplateRepository>();
         services.AddScoped<IStartupTask, SyncTemplateCatalogTask>();
         services.AddScoped<NotificationProcessor>();
-        // 捕获会把验证码、临时密码明文写进库，生产环境忘了关就会泄露，所以直接拒绝启动
+        // 捕获模式会明文记录验证码与临时密码，生产环境禁止开启
         services.AddKmicOptions<NotificationsCaptureOptions>(NotificationsCaptureOptions.Section)
             .Validate<IHostEnvironment>(
                 (options, environment) => !environment.IsProduction() || !options.Enabled,
@@ -72,7 +66,6 @@ public sealed class NotificationsModule : IModule
         services.AddKmicBacklogGauges<DeliveryBacklogGauges>();
     }
 
-    /// <inheritdoc />
     public void AddWorkerServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -81,12 +74,11 @@ public sealed class NotificationsModule : IModule
         services.AddKmicLeasedWork<DeliveryWork, DeliveryItem>();
     }
 
-    /// <inheritdoc />
     public void ConfigureMessaging(IMessagingBuilder messaging)
     {
         ArgumentNullException.ThrowIfNull(messaging);
 
-        // 订阅名存进收件箱，发布后不能改
+        // 订阅名已持久化到收件箱，发布后不可更改
         messaging.Subscribe<SendNotification, ProcessSendNotificationCommand>(
             "Notifications.Process", (message, envelope) => new ProcessSendNotificationCommand(message, envelope.MessageId, envelope.SourceModule, envelope.InitiatorUserId));
         messaging.Subscribe<SendSecretNotification, ProcessSendSecretNotificationCommand>(
@@ -95,7 +87,6 @@ public sealed class NotificationsModule : IModule
             "Notifications.NotifyJobFinished", (message, envelope) => new NotifyJobFinishedCommand(message, envelope.MessageId, envelope.SourceModule));
     }
 
-    /// <inheritdoc />
     public void ConfigureScheduling(ISchedulingBuilder scheduling)
     {
         ArgumentNullException.ThrowIfNull(scheduling);
@@ -103,6 +94,6 @@ public sealed class NotificationsModule : IModule
         scheduling.Schedule("Notifications.PurgeSiteMessages", "0 20 3 * * ?", run => new PurgeSiteMessagesCommand(run.ScheduledFireTime), o => o.DisplayName("清理过期的站内消息"));
         scheduling.Schedule("Notifications.PurgeDeliveries", "0 30 3 * * ?", run => new PurgeDeliveriesCommand(run.ScheduledFireTime), o => o.DisplayName("清理过期的投递记录"));
         scheduling.Schedule("Notifications.PurgeCaptured", "0 40 3 * * ?", run => new PurgeCapturedCommand(run.ScheduledFireTime), o => o.DisplayName("清理过期的捕获内容"));
-        scheduling.Schedule("Notifications.ClearSecretBodies", "0 10 * * * ?", run => new ClearSecretBodiesCommand(run.ScheduledFireTime), o => o.DisplayName("清空含密通知残留的正文"));
+        scheduling.Schedule("Notifications.ClearSecretBodies", "0 10 * * * ?", run => new ClearSecretBodiesCommand(run.ScheduledFireTime), o => o.DisplayName("清空敏感通知残留正文"));
     }
 }

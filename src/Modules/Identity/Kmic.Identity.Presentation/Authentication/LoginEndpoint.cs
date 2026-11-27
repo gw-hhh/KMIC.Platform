@@ -15,7 +15,7 @@ internal sealed class LoginEndpoint : IEndpoint
             .NoStore()
             .AllowAnonymous()
             .WithSummary("账号密码登录")
-            .WithDescription("成功返回访问令牌。网页客户端的刷新令牌存入 HttpOnly Cookie，响应体中的 refresh_token 为 null；移动端通过响应体获取。账号不存在、密码错误或账号禁用时统一返回 401；登录尝试受限时返回 429。");
+            .WithDescription("返回访问令牌：Web 端刷新令牌写入 HttpOnly Cookie（响应体为 null），移动端直接由响应体返回；凭据无效或禁用统一返回 401，触发限流返回 429");
 
     private static async Task<IResult> HandleAsync(LoginRequest request, HttpContext http, ICommandSender sender, IOptions<SessionLifetimeOptions> sessionOptions, TimeProvider time, CancellationToken ct)
     {

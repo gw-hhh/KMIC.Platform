@@ -8,9 +8,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Authentication.Refresh;
 
-/// <summary>
-/// 轮换刷新令牌并签发访问令牌
-/// </summary>
 public sealed class RefreshTokenCommandHandler(
     ISessionRepository sessions,
     IUserRepository users,
@@ -18,12 +15,11 @@ public sealed class RefreshTokenCommandHandler(
     IOptions<SessionLifetimeOptions> sessionOptions,
     TimeProvider time) : ICommandHandler<RefreshTokenCommand, AuthTokens>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<AuthTokens>> Handle(RefreshTokenCommand command, CancellationToken cancellationToken)
     {
         var presentedHash = RefreshTokens.Hash(command.RefreshToken);
 
-        // 锁定会话，使并发刷新依次执行，后到的请求按宽限期规则处理
+        // 锁定会话使并发刷新串行执行，后续请求按宽限期规则处理
         var session = await sessions.FindByRefreshTokenForUpdateAsync(presentedHash, cancellationToken);
         if (session is null)
         {

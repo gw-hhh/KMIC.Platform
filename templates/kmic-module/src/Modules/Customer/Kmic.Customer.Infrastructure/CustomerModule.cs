@@ -8,21 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Customer.Infrastructure;
 
-/// <summary>
-/// Customer 模块的服务端注册类
-/// </summary>
-/// <remarks>
-/// 处理器、校验器和 EF 配置自动发现，此处补充模块服务注册
-/// </remarks>
+/// <summary>注册 Customer 模块私有服务（处理器、校验器与 EF 配置会自动发现）</summary>
 public sealed class CustomerModule : IModule
 {
-    /// <inheritdoc />
     public string Name => CustomerModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(ICustomerQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

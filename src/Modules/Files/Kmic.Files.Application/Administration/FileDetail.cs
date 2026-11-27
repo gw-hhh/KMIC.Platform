@@ -4,16 +4,14 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 文件详情，不含内容或存储键
-/// </summary>
+/// <summary>文件详情，不含内容或存储键</summary>
 /// <param name="Id">文件 ID</param>
 /// <param name="Version">并发版本号</param>
 /// <param name="Name">显示文件名</param>
 /// <param name="FileType">文件类型编码</param>
 /// <param name="ContentType">内容类型</param>
 /// <param name="Size">字节数</param>
-/// <param name="Sha256">内容的 SHA-256</param>
+/// <param name="Sha256">内容 SHA-256</param>
 /// <param name="Profile">上传配置标识</param>
 /// <param name="UploadedBy">上传人或生成请求人 ID，可为空</param>
 /// <param name="UploadedAt">文件登记时间</param>
@@ -26,7 +24,7 @@ namespace Kmic.Files.Application.Administration;
 /// <param name="ObjectDeletedAt">对象删除登记时间</param>
 /// <param name="HistoryPurgedAt">历史版本清除登记时间</param>
 /// <param name="HistoryPurgeNote">历史版本清除记录</param>
-/// <param name="References">引用它的业务对象</param>
+/// <param name="References">关联的业务对象</param>
 /// <param name="History">状态流转记录</param>
 public sealed record FileDetail(
     StoredFileId Id,

@@ -3,9 +3,7 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 存储问题列表项
-/// </summary>
+/// <summary>存储问题列表项</summary>
 /// <param name="Id">存储问题 ID</param>
 /// <param name="FileId">文件 ID</param>
 /// <param name="FileName">文件名，文件记录不存在时为空</param>

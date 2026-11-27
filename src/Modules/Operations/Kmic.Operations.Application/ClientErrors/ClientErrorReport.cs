@@ -1,11 +1,6 @@
 namespace Kmic.Operations.Application.ClientErrors;
 
-/// <summary>
-/// 前端上报的一条错误
-/// </summary>
-/// <remarks>
-/// 有未知字段整次请求被拒
-/// </remarks>
+/// <summary>前端上报的单条错误（含未知字段时拒绝整次请求）。</summary>
 /// <param name="Type">错误类型</param>
 /// <param name="Message">错误消息</param>
 /// <param name="Stack">堆栈</param>

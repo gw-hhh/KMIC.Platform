@@ -24,20 +24,14 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Application;
 
-/// <summary>
-/// 应用层服务注册
-/// </summary>
 public static class ApplicationServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册应用层服务
-    /// </summary>
     public static IServiceCollection AddKmicApplication(this IServiceCollection services, IReadOnlyCollection<Assembly> applicationAssemblies)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(applicationAssemblies);
 
-        // 各目录在注册时互相核对，声明有误时宿主直接启动失败
+        // 各目录在注册时交叉校验，声明有误时阻止宿主启动
         var useCases = UseCaseCatalog.FromAssemblies(applicationAssemblies);
         var permissions = PermissionCatalog.FromAssemblies(applicationAssemblies);
         var settings = SystemSettingCatalog.FromAssemblies(applicationAssemblies);
@@ -69,9 +63,6 @@ public static class ApplicationServiceCollectionExtensions
         return services.AddKmicApplication(useCases, applicationAssemblies);
     }
 
-    /// <summary>
-    /// 登记一个模块的订阅
-    /// </summary>
     public static IServiceCollection AddKmicSubscriptions(this IServiceCollection services, string module, Action<IMessagingBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -84,9 +75,6 @@ public static class ApplicationServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 登记一个模块的定时任务
-    /// </summary>
     public static IServiceCollection AddKmicScheduling(this IServiceCollection services, string module, Action<ISchedulingBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -99,7 +87,7 @@ public static class ApplicationServiceCollectionExtensions
         return services;
     }
 
-    // 测试程序集里有故意写错声明的样例，所以测试只注册自己用到的消息
+    // 测试程序集包含刻意构造的错误声明样例，因此测试仅注册所需消息
     internal static IServiceCollection AddKmicApplication(
         this IServiceCollection services,
         UseCaseCatalog catalog,
@@ -142,7 +130,7 @@ public static class ApplicationServiceCollectionExtensions
         return services;
     }
 
-    // 错误声明在框架的 Domain 程序集和各模块的 Domain 程序集里（Application 引用着它们，按命名约定找），模块的 Application 里也可以有
+    // 错误声明位于框架与各模块的 Domain 程序集（由 Application 按命名约定查找），也可位于模块的 Application 程序集中
     private static IEnumerable<Assembly> ErrorAssemblies(IReadOnlyCollection<Assembly> applicationAssemblies) =>
     [
         typeof(Kmic.BuildingBlocks.Domain.Results.Error).Assembly,

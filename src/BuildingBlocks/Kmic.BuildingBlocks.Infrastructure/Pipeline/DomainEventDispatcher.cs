@@ -7,9 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 领域事件分发
-/// </summary>
 internal sealed class DomainEventDispatcher(IServiceProvider services)
 {
     private static readonly ConcurrentDictionary<Type, Func<IServiceProvider, IDomainEvent, CancellationToken, ValueTask<Result>>> _dispatchers = new();

@@ -10,9 +10,6 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Uploads.Start;
 
-/// <summary>
-/// 校验上传权限并创建上传记录
-/// </summary>
 public sealed class StartUploadCommandHandler(
     UploadProfileCatalog profiles,
     IResourceAuthorizer<UploadProfileTarget, UploadAction> authorizer,
@@ -21,7 +18,6 @@ public sealed class StartUploadCommandHandler(
     IExecutionContext execution,
     TimeProvider time) : ICommandHandler<StartUploadCommand, UploadStarted>
 {
-    /// <inheritdoc />
     public ValueTask<Result<UploadStarted>> Handle(StartUploadCommand command, CancellationToken cancellationToken)
     {
         if (profiles.Find(command.Profile) is not { } profile)

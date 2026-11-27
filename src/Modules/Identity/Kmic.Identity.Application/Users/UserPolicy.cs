@@ -5,22 +5,16 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users;
 
-/// <summary>
-/// 用户管理的操作限制
-/// </summary>
-/// <remarks>
-/// 不能禁用最后一个能登录的受保护角色持有人
-/// </remarks>
+/// <summary>用户管理的操作限制，禁止禁用最后一位可登录的受保护角色持有人。</summary>
 public sealed class UserPolicy : IResourcePolicy<UserTarget, UserAdminAction>
 {
-    /// <inheritdoc />
     public PolicyDecision Evaluate(IAccessContext access, UserTarget resource, UserAdminAction action)
     {
         ArgumentNullException.ThrowIfNull(access);
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(action);
 
-        // 禁止模拟自己、系统账号及受保护角色持有人，避免通过模拟身份绕过管理员凭据保护
+        // 禁止模拟系统账号、本人及受保护角色持有人，防止借模拟身份绕过凭据保护
         if (action == UserAdminAction.Impersonate || action == UserAdminAction.ImpersonateWrite)
         {
             return resource.User.Kind == UserKind.System || resource.User.Id == access.UserId || resource.HoldsProtectedRole

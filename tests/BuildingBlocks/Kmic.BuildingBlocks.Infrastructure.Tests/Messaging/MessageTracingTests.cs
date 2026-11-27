@@ -13,12 +13,7 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 异步环节的追踪：消息的处理不是原请求的一部分，开新的追踪并链接回发布它的请求
-/// </summary>
-/// <remarks>
-/// 活动监听器是进程范围的，别的测试类的活动也会进来，所以每个测试只认链接到自己请求的那一个
-/// </remarks>
+// ActivityListener 为进程级全局监听，按原请求 TraceId 精确匹配目标链路
 public sealed class MessageTracingTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const string TestSource = "Kmic.Tests.Tracing";
@@ -43,7 +38,7 @@ public sealed class MessageTracingTests(ClassDatabase<ProbeTemplate> database) :
         };
         ActivitySource.AddActivityListener(_listener);
 
-        // 订阅路由要先登记，发布的消息才会投递给 Echo
+        // 预先注册订阅路由，确保发布的消息能够投递至 Echo 模块
         var catalog = _harness.Services.GetRequiredService<SubscriptionCatalog>();
         await new MessageRoutes(database.DataSource).RegisterAsync([.. MessageRoutes.Declared(catalog)], [], "test", Ct);
     }
@@ -56,7 +51,7 @@ public sealed class MessageTracingTests(ClassDatabase<ProbeTemplate> database) :
         await DrainAsync();
 
         var inbox = InboxActivityLinkedTo(request);
-        inbox.ParentId.ShouldBeNull("处理消息是新的追踪，不挂在原请求下面");
+        inbox.ParentId.ShouldBeNull("消息消费应开启独立 Trace，不应作为原请求的子 Span");
         inbox.TraceId.ShouldNotBe(request.TraceId);
     }
 
@@ -78,7 +73,7 @@ public sealed class MessageTracingTests(ClassDatabase<ProbeTemplate> database) :
         await _harness.DisposeAsync();
     }
 
-    // 在一个测试自己的“请求”活动里发布消息，返回这个活动
+    // 在独立的测试请求 Activity 上下文中发布消息并返回该 Activity
     private async Task<Activity> PublishInRequestAsync(string title)
     {
         var ticket = await _harness.AddAsync(_alice, Ticket.Create(TicketNumbers.Next(), _alice.UserId, _org["总部"]));

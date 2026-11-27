@@ -7,9 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 角色授予与锚点：授予、收回、改锚点，以及不能改自己的授予、受保护角色只能由受保护角色的持有人授予这些规则，端到端
-/// </summary>
 public sealed class GrantAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

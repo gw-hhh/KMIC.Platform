@@ -1,16 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 探查哪些对象还在未完成的消息里
-/// </summary>
-/// <remarks>
-/// 只能在命令里用
-/// </remarks>
+/// <summary>未完成消息探针，用于检查指定对象是否仍被在途消息引用；仅限在命令处理器中调用。</summary>
 public interface IUnfinishedMessageProbe
 {
-    /// <summary>
-    /// 找出被某类未完成的消息提到的对象
-    /// </summary>
-    /// <returns>有未完成消息提到的那些 ID</returns>
+    /// <summary>查询仍被指定类型未完成消息引用的对象 ID 集合。</summary>
     Task<IReadOnlySet<Guid>> FindSubjectsAsync(string messageType, IReadOnlyCollection<Guid> subjectIds, CancellationToken ct);
 }

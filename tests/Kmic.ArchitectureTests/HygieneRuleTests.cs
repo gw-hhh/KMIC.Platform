@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.ArchitectureTests;
 
-/// <summary>
-/// 写法上的禁忌与消息、注入、聚合、Contracts 的内容规则
-/// </summary>
 public sealed class HygieneRuleTests
 {
     private static readonly Type[] _bad = [.. typeof(BadSamples).GetNestedTypes(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)];
@@ -95,7 +92,7 @@ public sealed class HygieneRuleTests
             var application = ProductAssemblies.Modules.SingleOrDefault(a => string.Equals(a.Module, module, StringComparison.Ordinal) && a.Layer == Layer.Application);
             var domain = ProductAssemblies.Modules.SingleOrDefault(a => string.Equals(a.Module, module, StringComparison.Ordinal) && a.Layer == Layer.Domain);
 
-            // 只有 Contracts 的模块（别的模块先引用了它的契约，实现还没开始）没有消息可检查
+            // 仅包含 Contracts 的模块（契约已被引用但尚未开始实现）无消息类型可检查
             if (application is null || domain is null)
             {
                 continue;
@@ -128,7 +125,7 @@ public sealed class HygieneRuleTests
     [Fact]
     public void Violation_InternalsVisibleToAnotherModulesTests_IsReported()
     {
-        // 本测试程序集有 InternalsVisibleTo 吗？没有就用样例检查：给它当“Sample”模块，期望的是 Kmic.Sample.*Tests
+        // 测试程序集本身未必声明 InternalsVisibleTo，此处将其模拟为“Sample”模块校验（期望目标为 Kmic.Sample.*Tests）
         var allowed = HygieneRules.VisibleTo(typeof(NamingRuleTests).Assembly, "Sample");
 
         allowed.ShouldBeEmpty();
@@ -177,13 +174,13 @@ public sealed class HygieneRuleTests
     [Fact]
     public void Violation_CommandHoldingADomainEntity_IsReported()
     {
-        // 样例类型都在测试程序集里，把它当作“Domain 程序集”来检查
+        // 样例类型均位于测试程序集中，将其模拟为“Domain 程序集”进行校验
         var problems = MessageContentRules.NoDomainTypes(_bad, typeof(BadSamples).Assembly);
 
         problems.ShouldContain(p => p.Contains("LeakyCommand", StringComparison.Ordinal) && p.Contains("FakeAggregate", StringComparison.Ordinal));
     }
 
-    // 样例类型都在测试程序集里，把它当作“某个业务模块的程序集”来检查
+    // 样例类型均位于测试程序集中，将其模拟为业务模块程序集进行校验
     private static ProductAssembly[] BadModule => [new(typeof(BadSamples).Assembly, "Orders", Layer.Application)];
 
     [Fact]

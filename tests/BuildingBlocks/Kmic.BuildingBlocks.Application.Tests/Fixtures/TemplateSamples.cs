@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Contracts.Notifications;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
-/// <summary>
-/// 通知模板的声明，有对的也有故意写错的，交给 NotificationTemplateCatalog 校验
-/// </summary>
+// 含合法与故意错误声明的通知模板样例，供 NotificationTemplateCatalog 校验
 public static class TemplateSamples
 {
     [NotificationTemplate("BuildingBlocks.Approved", "已审批", Channels = NotificationChannels.Email | NotificationChannels.InApp)]

@@ -4,12 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Infrastructure.Sending;
 
-/// <summary>
-/// 投递队列存储
-/// </summary>
-/// <remarks>
-/// 结果更新要匹配本次领取令牌
-/// </remarks>
+// 更新投递状态时校验本次领取令牌，防止租约过期后的并发覆盖
 internal sealed class DeliveryStore(NotificationsDbContext context)
 {
     private static readonly string _pending = DeliveryStatus.Pending.Code;
@@ -48,7 +43,7 @@ internal sealed class DeliveryStore(NotificationsDbContext context)
             WHERE "Id" = {item.Id} AND "LeaseToken" = {token} AND "Status" = {_sending}
             """, ct);
 
-    // 暂时失败：放回队列，按尝试次数退避（30 秒、1 分钟、2 分钟……最长 1 小时）
+    // 暂时失败：重新入队，按尝试次数退避（30 秒、1 分钟、2 分钟……最长 1 小时）
     public async Task RetryLaterAsync(DeliveryItem item, Guid token, string error, CancellationToken ct) =>
         await context.Database.ExecuteSqlAsync(
             $"""

@@ -7,7 +7,7 @@ namespace Kmic.Identity.Application.Tests.Roles;
 
 public sealed class RoleScopeLevelTests
 {
-    // 角色上的等级由基础设施层按编码转成框架的 ScopeLevel（存进角色快照的是数值），两边必须一一对应
+    // 角色作用域等级由基础设施层按编码映射为框架的 ScopeLevel（角色快照中存储其数值），两者须保持严格一一对应
     [Fact]
     public void EveryRoleLevel_HasAFrameworkScopeLevelWithTheSameName()
     {

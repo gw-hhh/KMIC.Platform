@@ -8,14 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Application.ContractQueries;
 
-/// <summary>
-/// 批量查询示例的引用信息
-/// </summary>
 [BypassesDataScope("解析调用方已保存的引用，仅返回 ID、编号、名称和状态，不受调用方数据范围限制")]
 public sealed class GetSpecimenReferencesQueryHandler(ISampleQueryDb db)
     : IQueryHandler<GetSpecimenReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetSpecimenReferencesQuery query, CancellationToken cancellationToken)
     {
         var rows = await db.Specimens

@@ -2,29 +2,23 @@ using System.Globalization;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Files;
 
-/// <summary>
-/// 存储键的写法
-/// </summary>
+/// <summary>文件存储键构造与解析</summary>
 public static class FileStorageKeys
 {
-    /// <summary>
-    /// 按环境、年月和文件 ID 生成存储键：{环境}/{yyyy}/{MM}/{fileId}
-    /// </summary>
+    /// <summary>生成存储键：{环境}/{yyyy}/{MM}/{fileId}</summary>
     public static string For(string environment, Guid fileId, DateTimeOffset at)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(environment);
         if (environment.Contains('/', StringComparison.Ordinal) || environment.Contains('.', StringComparison.Ordinal))
         {
-            throw new ArgumentException($"环境名不能含“/”或“.”：“{environment}”。", nameof(environment));
+            throw new ArgumentException($"环境名称不能包含“/”或“.”：“{environment}”。", nameof(environment));
         }
 
         var utc = at.ToUniversalTime();
         return string.Create(CultureInfo.InvariantCulture, $"{environment}/{utc:yyyy}/{utc:MM}/{fileId:N}");
     }
 
-    /// <summary>
-    /// 从存储键取出文件 ID，不是这个写法的键（别的程序放进来的对象）返回 false
-    /// </summary>
+    /// <summary>从存储键解析文件 ID</summary>
     public static bool TryGetFileId(string key, string environment, out Guid fileId)
     {
         fileId = Guid.Empty;
@@ -36,9 +30,7 @@ public static class FileStorageKeys
             && Guid.TryParseExact(id, "N", out fileId);
     }
 
-    /// <summary>
-    /// 文件 ID 里的创建时间：文件 ID 是 UUID v7，前 48 位是毫秒时间戳。不是 v7 的 ID 返回空
-    /// </summary>
+    /// <summary>从 UUID v7 文件 ID 提取创建时间</summary>
     public static DateTimeOffset? CreatedAt(Guid fileId)
     {
         if (fileId.Version != 7)

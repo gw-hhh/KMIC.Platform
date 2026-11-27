@@ -9,13 +9,9 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Create;
 
-/// <summary>
-/// 添加组织单元
-/// </summary>
 public sealed class CreateOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<CreateOrgUnitCommand, CreatedResponse<OrgUnitId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<CreatedResponse<OrgUnitId>>> ExecuteAsync(CreateOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await trees.GetForUpdateAsync(OrgTreeId.Default, command.ExpectedVersion, cancellationToken);

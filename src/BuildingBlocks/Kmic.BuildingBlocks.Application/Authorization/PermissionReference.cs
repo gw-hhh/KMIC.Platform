@@ -1,8 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-/// <summary>
-/// 用例以外对权限点的引用
-/// </summary>
-/// <param name="Permission">权限点编码</param>
-/// <param name="Source">引用方</param>
+/// <summary>用例以外（如资源动作、系统设置等）对权限点的引用。</summary>
 public sealed record PermissionReference(string Permission, string Source);

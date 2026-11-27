@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Infrastructure.Tests.Probe;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence.InvalidModel;
 
-/// <summary>
-/// 故意写错的子实体：实现了软删除，还保留了指回父实体的导航
-/// </summary>
+// 故意违规的子实体：实现了软删除，且保留指向父实体的导航
 internal sealed class GadgetPart : Entity<TicketLineId>, ISoftDeletable
 {
     private GadgetPart(TicketLineId id)

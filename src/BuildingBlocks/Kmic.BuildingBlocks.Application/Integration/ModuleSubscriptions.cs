@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 一个模块声明的订阅，校验放在订阅目录里统一做
-/// </summary>
 internal sealed class ModuleSubscriptions(string module) : IMessagingBuilder
 {
     private readonly List<DeclaredSubscription> _subscriptions = [];

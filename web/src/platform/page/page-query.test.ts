@@ -23,7 +23,7 @@ function setup(options: { active: boolean; enabled?: () => boolean }) {
     ),
   );
   if (query === undefined) {
-    throw new Error('查询没有创建');
+    throw new Error('页面查询实例未创建');
   }
   return { queryClient, active, page, fetcher, query, scope };
 }
@@ -35,7 +35,7 @@ async function settle(): Promise<void> {
 }
 
 describe('页面查询', () => {
-  it('当前标签：写入后失效立即重新获取', async () => {
+  it('当前激活标签页在查询失效后立即重新获取数据', async () => {
     const { queryClient, fetcher, query } = setup({ active: true });
     await settle();
     expect(fetcher).toHaveBeenCalledTimes(1);
@@ -47,7 +47,7 @@ describe('页面查询', () => {
     expect(query.data.value).toBe(2);
   });
 
-  it('其他标签：失效时不请求，切回来才在后台刷新，期间旧数据保留', async () => {
+  it('非激活标签页在查询失效时不发起请求，切回激活后在后台刷新并保留旧数据', async () => {
     const { queryClient, active, fetcher, query } = setup({ active: true });
     await settle();
     active.value = false;
@@ -65,7 +65,7 @@ describe('页面查询', () => {
     expect(query.data.value).toBe(2);
   });
 
-  it('页面自己关掉的查询，当前标签也不请求', async () => {
+  it('页面主动禁用查询时，即使处于激活状态也不发起请求', async () => {
     const enabled = ref(false);
     const { fetcher } = setup({ active: true, enabled: () => enabled.value });
     await settle();
@@ -79,7 +79,7 @@ describe('页面查询', () => {
 });
 
 describe('页面标题', () => {
-  it('跟着数据变，没有数据时退回路由标题', async () => {
+  it('随数据响应式更新标题，无数据时回退为默认路由标题', async () => {
     const page: PageInstance = createPageInstance({ key: 'a', epoch: 0 });
     const number = ref<string | null>(null);
     const scope = effectScope();

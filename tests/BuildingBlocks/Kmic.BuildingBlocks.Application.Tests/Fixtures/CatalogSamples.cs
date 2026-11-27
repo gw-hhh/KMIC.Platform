@@ -7,9 +7,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
-/// <summary>
-/// 故意写错声明的消息，只交给 UseCaseCatalog.Build 校验。Mediator 要求每个消息都有处理器，所以也一并提供
-/// </summary>
+// 故意写错声明的消息（含配套处理器以满足 Mediator 要求），供 UseCaseCatalog.Build 校验
 public static class CatalogSamples
 {
     private static readonly Error _notFound = Error.NotFound("Test.NotFound", "测试");

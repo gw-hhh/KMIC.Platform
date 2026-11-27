@@ -3,14 +3,9 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Testing.Assertions;
 
-/// <summary>
-/// Result 断言
-/// </summary>
+/// <summary>Result 断言扩展。</summary>
 public static class ResultAssertions
 {
-    /// <summary>
-    /// 断言成功
-    /// </summary>
     public static void ShouldBeSuccess(this Result result)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -20,18 +15,13 @@ public static class ResultAssertions
         }
     }
 
-    /// <summary>
-    /// 断言成功并返回值
-    /// </summary>
     public static T ShouldBeSuccess<T>(this Result<T> result)
     {
         ((Result)result).ShouldBeSuccess();
         return result.Value;
     }
 
-    /// <summary>
-    /// 断言失败且错误码、错误类型都符合，返回实际的错误
-    /// </summary>
+    /// <summary>断言失败且错误码与错误类型均匹配，返回实际错误。</summary>
     public static Error ShouldBeFailure(this Result result, Error expected)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -49,9 +39,7 @@ public static class ResultAssertions
         return result.Error;
     }
 
-    /// <summary>
-    /// 断言失败且错误类型符合，不管错误码
-    /// </summary>
+    /// <summary>断言失败且错误类型匹配（不校验错误码），返回实际错误。</summary>
     public static Error ShouldBeFailure(this Result result, ErrorType expectedType)
     {
         ArgumentNullException.ThrowIfNull(result);

@@ -12,9 +12,6 @@ using Serilog.Core;
 
 namespace Kmic.ServiceDefaults.Tests;
 
-/// <summary>
-/// 套用了默认配置的最小应用：几个端点、内存里的日志接收器和导出器
-/// </summary>
 internal sealed class TestApp : IAsyncDisposable
 {
     private static readonly Action<ILogger, Exception?> _noteWritten =
@@ -86,10 +83,10 @@ internal sealed class TestApp : IAsyncDisposable
         await _app.DisposeAsync();
     }
 
-    // 请求日志在响应送出之后才记，测试客户端可能先拿到响应：等到指定数量的摘要出现
+    // 请求日志在响应发送后异步记录，测试客户端可能先行收到响应，因此需轮询等待指定数量的摘要出现
     public Task WaitForRequestSummariesAsync(int count) => Eventually.UntilAsync(
         _ => Task.FromResult(Logs.Events.Count(e => e.IsRequestSummary()) >= count),
-        $"等到 {count} 条请求摘要",
+        $"等待 {count} 条请求摘要记录完成",
         ct: TestContext.Current.CancellationToken);
 
     public static Counter<long> NewCounter(string meterName, string name) => new Meter(meterName).CreateCounter<long>(name);

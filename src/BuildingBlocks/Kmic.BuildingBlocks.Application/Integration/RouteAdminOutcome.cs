@@ -1,47 +1,26 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 路由运维操作的结果
-/// </summary>
 public enum RouteAdminOutcome
 {
-    /// <summary>
-    /// 做完了
-    /// </summary>
     Done,
 
-    /// <summary>
-    /// 没有这条路由
-    /// </summary>
     NotFound,
 
-    /// <summary>
-    /// 路由当前的状态不能做这个操作：终结要待终结的，重新激活要已终结的
-    /// </summary>
+    /// <summary>路由当前状态不允许该操作。</summary>
     WrongStatus,
 
-    /// <summary>
-    /// 还有运行中的实例在声明这个订阅
-    /// </summary>
+    /// <summary>仍有运行中的实例正在声明该订阅。</summary>
     StillDeclared,
 
-    /// <summary>
-    /// 收件箱里有正在处理的消息，占用还没到期
-    /// </summary>
+    /// <summary>收件箱中仍有处理中的消息且占用尚未到期。</summary>
     InFlight,
 
-    /// <summary>
-    /// 还有没处理完的消息，而没有选择放弃
-    /// </summary>
+    /// <summary>仍存在未处理完成的消息，且未选择强制放弃。</summary>
     HasUnfinished,
 
-    /// <summary>
-    /// 来源模块没有注册
-    /// </summary>
+    /// <summary>来源模块未注册。</summary>
     UnknownSourceModule,
 
-    /// <summary>
-    /// 区间里的消息太多，一次补不完
-    /// </summary>
+    /// <summary>指定区间内消息数量超出单次补投上限。</summary>
     TooManyRows,
 }

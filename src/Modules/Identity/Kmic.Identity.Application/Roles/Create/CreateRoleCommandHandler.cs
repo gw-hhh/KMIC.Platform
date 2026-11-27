@@ -8,13 +8,9 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.Create;
 
-/// <summary>
-/// 创建角色
-/// </summary>
 public sealed class CreateRoleCommandHandler(IRoleRepository roles, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<CreateRoleCommand, CreatedResponse<RoleId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override ValueTask<Result<CreatedResponse<RoleId>>> ExecuteAsync(CreateRoleCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var created = Role.Create(command.Name, command.Description, command.SortOrder, command.DefaultScopeLevel);

@@ -63,7 +63,7 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-color-foreground': formatHsl(colors.foreground),
     '--kmic-color-muted-foreground': formatHsl(colors.mutedForeground),
     '--kmic-color-muted': formatHsl(colors.muted),
-    // 当前标签：浅色主题主色字、主色淡底；深色主题白字、灰底，和 Vben 一致
+    // 活动标签页：浅色主题为主色文字配淡色底，深色主题为白字配灰底
     '--kmic-tab-active-color': runtime.resolvedMode === 'dark' ? formatHsl(colors.accentForeground) : primary,
     '--kmic-tab-active-background':
       runtime.resolvedMode === 'dark' ? formatHsl(colors.accent) : `color-mix(in srgb, ${primary} 15%, transparent)`,
@@ -78,24 +78,24 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-color-primary-foreground': 'hsl(0 0% 100%)',
     '--kmic-color-primary-soft': `color-mix(in srgb, ${primary} 15%, transparent)`,
     '--kmic-sidebar-background': formatHsl(sidebar.background),
-    // 双列布局左边的图标栏：深色时比侧栏再深一档
+    // 双列布局左侧图标栏：深色模式下比侧栏再深一阶
     '--kmic-sidebar-deep-background': formatHsl(sidebarDark ? dark.backgroundDeep : sidebar.background),
     '--kmic-sidebar-foreground': formatHsl(sidebar.foreground),
     '--kmic-sidebar-accent': formatHsl(sidebar.accent),
     '--kmic-sidebar-accent-hover': formatHsl(sidebar.accentHover),
-    // 浅色侧栏：选中项主色字、主色淡底；深色侧栏：选中项白字、灰底，和 Vben 一致
+    // 侧栏选中项：浅色模式下为主色文字配淡色底，深色模式下为白字配灰底
     '--kmic-sidebar-item-color': sidebarDark
       ? formatHslAlpha(sidebar.foreground, 80)
       : formatHsl(sidebar.accentForeground),
     '--kmic-sidebar-item-hover-color': formatHsl(sidebar.accentForeground),
-    // 侧栏底部按钮这类次要图标
+    // 侧栏底部按钮等次要图标颜色
     '--kmic-sidebar-muted-color': formatHslAlpha(sidebar.foreground, 60),
     '--kmic-sidebar-item-active-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
     '--kmic-sidebar-item-active-background': sidebarDark
       ? formatHsl(sidebar.accent)
       : `color-mix(in srgb, ${primary} 15%, transparent)`,
     '--kmic-sidebar-group-active-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
-    // 图标栏的项：浅色时选中项主色实底，深色时和悬停一样灰底白字，和 Vben 一致
+    // 图标栏菜单项：浅色模式下选中为主色实底，深色模式下与悬停态一致为灰底白字
     '--kmic-column-item-hover-color': sidebarDark ? formatHsl(sidebar.accentForeground) : primary,
     '--kmic-column-item-hover-background': formatHsl(sidebarDark ? sidebar.accent : sidebar.accentHover),
     '--kmic-column-item-active-background': sidebarDark ? formatHsl(sidebar.accent) : primary,
@@ -108,7 +108,7 @@ export function buildCssVariables(appearance: Appearance, runtime: ThemeRuntime)
     '--kmic-radius': px(appearance.radius),
     '--kmic-radius-md': radius(2),
     '--kmic-radius-sm': radius(4),
-    // 两端整圆的胶囊形，不随圆角设置变
+    // 胶囊形圆角固定，不受全局圆角配置影响
     '--kmic-radius-pill': '9999px',
     '--kmic-font-size': px(appearance.fontSize),
     '--kmic-header-height': px(shellSizes.headerHeight),

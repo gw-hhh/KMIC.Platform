@@ -11,9 +11,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Configuration.Application.Settings.Set;
 
-/// <summary>
-/// 保存系统设置
-/// </summary>
 public sealed class SetSettingCommandHandler(
     SystemSettingCatalog catalog,
     ISystemSettingRepository settings,
@@ -21,7 +18,6 @@ public sealed class SetSettingCommandHandler(
     IOptions<SettingOptions> options,
     IAfterCommit afterCommit) : ICommandHandler<SetSettingCommand, VersionedResponse<SystemSettingValueId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SystemSettingValueId>>> Handle(SetSettingCommand command, CancellationToken cancellationToken)
     {
         var definition = catalog.Find(command.Key);

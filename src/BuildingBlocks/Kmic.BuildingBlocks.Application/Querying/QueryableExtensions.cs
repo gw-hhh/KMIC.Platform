@@ -2,17 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 查询扩展
-/// </summary>
 public static class QueryableExtensions
 {
-    /// <summary>
-    /// 不按数据权限过滤，软删除过滤仍然生效
-    /// </summary>
-    /// <remarks>
-    /// 处理器要标 [BypassesDataScope] 写明原因
-    /// </remarks>
+    /// <summary>跳过数据权限过滤（软删除过滤保持生效）；调用此方法的处理器须标注 [BypassesDataScope] 并说明原因。</summary>
     public static IQueryable<T> WithoutDataScope<T>(this IQueryable<T> query)
         where T : class
     {

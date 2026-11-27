@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// 后台作业的日志
-/// </summary>
 internal static partial class JobsLog
 {
     [LoggerMessage(EventId = 2301, Level = LogLevel.Warning, Message = "Background job {JobId} ({JobType}) failed with {ErrorCode}")]

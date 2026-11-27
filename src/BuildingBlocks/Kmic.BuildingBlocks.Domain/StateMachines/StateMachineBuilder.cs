@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
-/// <summary>
-/// 状态机声明
-/// </summary>
+/// <summary>状态机构建器。</summary>
 public sealed class StateMachineBuilder<TAggregate, TState, TAction>
     where TAggregate : class, IAggregateRoot
     where TState : notnull
@@ -15,7 +13,7 @@ public sealed class StateMachineBuilder<TAggregate, TState, TAction>
     private readonly Func<TAggregate, TState> _getState;
     private readonly Action<TAggregate, TState> _setState;
     private readonly List<Transition<TAggregate, TState, TAction>> _transitions = [];
-    // 普通枚举的默认值也是合法状态，所以另外记录是否设置过
+    // 普通枚举的 default 值本身可能是合法状态，因此单独记录是否显式设置了初始状态
     private TState? _initial;
     private bool _hasInitial;
     private Error? _onInvalid;
@@ -29,9 +27,7 @@ public sealed class StateMachineBuilder<TAggregate, TState, TAction>
 
     private string MachineName => $"{typeof(TAggregate).Name}.{_stateName}";
 
-    /// <summary>
-    /// 设置初始状态
-    /// </summary>
+    /// <summary>设置初始状态。</summary>
     public StateMachineBuilder<TAggregate, TState, TAction> Initial(TState state)
     {
         ArgumentNullException.ThrowIfNull(state);
@@ -40,9 +36,7 @@ public sealed class StateMachineBuilder<TAggregate, TState, TAction>
         return this;
     }
 
-    /// <summary>
-    /// 动作不允许时返回的错误
-    /// </summary>
+    /// <summary>设置非法状态流转时返回的默认错误。</summary>
     public StateMachineBuilder<TAggregate, TState, TAction> OnInvalid(Error error)
     {
         ArgumentNullException.ThrowIfNull(error);
@@ -50,9 +44,7 @@ public sealed class StateMachineBuilder<TAggregate, TState, TAction>
         return this;
     }
 
-    /// <summary>
-    /// 声明一条流转
-    /// </summary>
+    /// <summary>声明一条状态流转规则。</summary>
     public StateMachineBuilder<TAggregate, TState, TAction> Permit(
         TState from,
         TAction action,
@@ -66,17 +58,15 @@ public sealed class StateMachineBuilder<TAggregate, TState, TAction>
         return this;
     }
 
-    /// <summary>
-    /// 生成状态机，声明有误时抛异常
-    /// </summary>
+    /// <summary>校验声明完整性并构建状态机实例。</summary>
     public StateMachine<TAggregate, TState, TAction> Build()
     {
         if (!_hasInitial || _initial is not { } initial)
         {
-            throw new InvalidOperationException($"状态机 {MachineName} 没有调用 Initial。");
+            throw new InvalidOperationException($"状态机 {MachineName} 尚未调用 Initial 设置初始状态。");
         }
 
-        var onInvalid = _onInvalid ?? throw new InvalidOperationException($"状态机 {MachineName} 没有调用 OnInvalid。");
+        var onInvalid = _onInvalid ?? throw new InvalidOperationException($"状态机 {MachineName} 尚未调用 OnInvalid 设置默认错误。");
 
         var duplicated = _transitions
             .GroupBy(t => (t.FromCode, t.ActionCode))
@@ -91,7 +81,7 @@ public sealed class StateMachineBuilder<TAggregate, TState, TAction>
         if (unreachable.Count > 0)
         {
             throw new InvalidOperationException(
-                $"状态机 {MachineName} 中这些状态无法从初始状态到达：{string.Join("、", unreachable)}。");
+                $"状态机 {MachineName} 存在无法从初始状态到达的状态：{string.Join("、", unreachable)}。");
         }
 
         return new StateMachine<TAggregate, TState, TAction>(

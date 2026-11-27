@@ -5,14 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Presentation.Limits;
 
-/// <summary>
-/// 按时间限流的策略
-/// </summary>
 internal static class RateLimitPolicies
 {
-    /// <summary>
-    /// 模块路由组的默认策略：已登录的按用户，没有登录的按 IP，各有各的限额
-    /// </summary>
+    // 已认证请求按用户限流，匿名请求按 IP 限流
     public const string Default = "Default";
 
     public static void Configure(RateLimiterOptions options)

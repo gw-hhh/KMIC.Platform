@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Domain.Sessions;
 
-/// <summary>
-/// 会话：一次登录的服务端记录；作废后请求立即被拒，不用等令牌过期
-/// </summary>
+/// <summary>会话聚合；作废后请求立即被拒绝，无需等待令牌过期。</summary>
 public sealed class Session : AggregateRoot<SessionId>
 {
     private readonly List<RefreshToken> _refreshTokens = [];
@@ -103,9 +101,7 @@ public sealed class Session : AggregateRoot<SessionId>
     /// </summary>
     public bool IsImpersonation => ImpersonatorUserId is not null;
 
-    /// <summary>
-    /// 创建普通会话，保存首个刷新令牌的哈希
-    /// </summary>
+    /// <summary>创建普通会话，并保存首个刷新令牌哈希。</summary>
     public static Session Start(
         UserId userId,
         RoleId roleId,
@@ -132,9 +128,7 @@ public sealed class Session : AggregateRoot<SessionId>
         return session;
     }
 
-    /// <summary>
-    /// 创建模拟会话，不签发刷新令牌，按指定时长到期失效
-    /// </summary>
+    /// <summary>创建模拟会话，不签发刷新令牌，按指定时长到期。</summary>
     public static Session StartImpersonation(
         UserId targetUserId,
         RoleId roleId,
@@ -162,17 +156,10 @@ public sealed class Session : AggregateRoot<SessionId>
         };
     }
 
-    /// <summary>
-    /// 会话未作废，且当前时间早于绝对到期时间
-    /// </summary>
+    /// <summary>判断会话是否未作废且尚未达到绝对到期时间。</summary>
     public bool IsUsable(DateTimeOffset now) => Status == SessionStatus.Active && now < AbsoluteExpiresAt;
 
-    /// <summary>
-    /// 用刷新令牌换新令牌
-    /// </summary>
-    /// <remarks>
-    /// 超出宽限期重用旧令牌会作废会话
-    /// </remarks>
+    /// <summary>使用刷新令牌轮换签发新令牌；超出宽限期重用旧令牌会作废会话。</summary>
     public Rotation Rotate(string presentedHash, string newHash, DateTimeOffset now, TimeSpan refreshLifetime, TimeSpan grace)
     {
         ArgumentNullException.ThrowIfNull(presentedHash);
@@ -209,10 +196,7 @@ public sealed class Session : AggregateRoot<SessionId>
         return Rotation.Rotated(replacement);
     }
 
-    /// <summary>
-    /// 核实刷新令牌被重用后作废会话
-    /// </summary>
-    /// <returns>本次作废会话时返回 true，否则返回 false</returns>
+    /// <summary>核实旧刷新令牌在宽限期外被重用时作废会话，本次作废返回 true。</summary>
     public bool RevokeIfReused(string presentedHash, DateTimeOffset now, TimeSpan grace)
     {
         ArgumentNullException.ThrowIfNull(presentedHash);
@@ -227,14 +211,9 @@ public sealed class Session : AggregateRoot<SessionId>
         return true;
     }
 
-    /// <summary>
-    /// 切换当前角色；角色是否可切换由调用方先确认
-    /// </summary>
     public void SwitchRole(RoleId roleId) => CurrentRoleId = roleId;
 
-    /// <summary>
-    /// 作废会话；已作废时保留原原因和时间
-    /// </summary>
+    /// <summary>作废会话；已作废时保留原原因和时间。</summary>
     public void Revoke(RevokeReason reason, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(reason);

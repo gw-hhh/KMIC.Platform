@@ -7,15 +7,9 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 
-/// <summary>
-/// 请求取消本人提交的后台作业
-/// </summary>
-/// <remarks>
-/// 不在 Operations 的命令事务里
-/// </remarks>
+// 直接操作目标模块作业存储，不纳入 Operations 本地事务
 public sealed class CancelMyJobCommandHandler(IModuleJobStores stores, IExecutionContext execution) : ICommandHandler<CancelMyJobCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(CancelMyJobCommand command, CancellationToken cancellationToken)
     {
         var job = await MyJobs.FindAsync(execution, stores, command.Module, command.JobId, cancellationToken);

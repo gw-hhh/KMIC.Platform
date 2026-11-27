@@ -3,39 +3,20 @@ using Kmic.BuildingBlocks.Contracts.Snapshots;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 订阅的可选设置
-/// </summary>
 public sealed class SubscriptionOptions
 {
-    /// <summary>
-    /// 是否按顺序键依次处理
-    /// </summary>
     public bool IsOrdered { get; private set; }
 
     internal IReadModelRebuild? Rebuild { get; private set; }
 
-    /// <summary>
-    /// 同一个顺序键的消息按发布顺序处理
-    /// </summary>
-    /// <remarks>
-    /// 前一条进死信时，同一个键后面的消息会一直等着
-    /// </remarks>
+    /// <summary>启用顺序消费，同一顺序键的消息按发布顺序依次处理；前驱进入死信时后续消息将阻塞等待。</summary>
     public SubscriptionOptions Ordered()
     {
         IsOrdered = true;
         return this;
     }
 
-    /// <summary>
-    /// 从源模块拉取全部快照重建读模型
-    /// </summary>
-    /// <remarks>
-    /// 映射要和同步命令用同一份
-    /// </remarks>
-    /// <typeparam name="TSource">源模块提供的快照来源接口</typeparam>
-    /// <typeparam name="TSnapshot">快照类型</typeparam>
-    /// <typeparam name="TRow">本模块的读模型</typeparam>
+    /// <summary>配置从源模块全量拉取快照重建读模型的策略；快照映射逻辑须与增量同步命令保持一致。</summary>
     public SubscriptionOptions RebuildWith<TSource, TSnapshot, TRow>(Func<SnapshotItem<TSnapshot>, TRow> toRow)
         where TSource : class, ISnapshotSource<TSnapshot>
         where TRow : class, IReadModel

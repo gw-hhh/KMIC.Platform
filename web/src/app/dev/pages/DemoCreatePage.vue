@@ -10,6 +10,6 @@ usePage().trackDirty(() => name.value !== '');
 
 <template>
   <Card title="新建示例">
-    <Input v-model:value="name" placeholder="随便输入，然后关闭标签试试" />
+    <Input v-model:value="name" placeholder="随便输入内容后尝试关闭标签页" />
   </Card>
 </template>

@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 令牌验证通过之后，为每个请求加载访问上下文并设置当前身份
-/// </summary>
 internal sealed class AccessContextMiddleware(RequestDelegate next)
 {
     public const string AuthorizationVersionHeader = "X-Authz-Version";
@@ -23,7 +20,7 @@ internal sealed class AccessContextMiddleware(RequestDelegate next)
         var claims = ReadClaims(context.User);
         if (claims is null)
         {
-            // 令牌本身有效、但缺用户、会话或角色：同样按没有登录处理，否则授权会放过它
+            // 令牌有效但缺少用户、会话或角色声明时同样按未登录处理，避免授权阶段误放行
             if (context.User.Identity is { IsAuthenticated: true })
             {
                 context.User = new ClaimsPrincipal(new ClaimsIdentity());
@@ -46,7 +43,7 @@ internal sealed class AccessContextMiddleware(RequestDelegate next)
 
         execution.Initialize(CallOrigin.Http, CurrentUser.From(access), access);
 
-        // 前端发现授权版本变了，重新拉取自己的权限；所有已认证的响应都带，包括出错的
+        // 前端检测到授权版本变化时重新拉取权限；所有已认证响应（含错误响应）均需携带
         context.Response.OnStarting(
             static state =>
             {
@@ -65,7 +62,7 @@ internal sealed class AccessContextMiddleware(RequestDelegate next)
         await next(context);
     }
 
-    // 令牌必须带用户、会话和角色，并且都是合法的 ID，缺任何一个都按没有登录处理
+    // 令牌须包含有效的用户、会话与角色 ID，缺少任一声明均按未登录处理
     private static (UserId User, SessionId Session, RoleId Role)? ReadClaims(ClaimsPrincipal principal)
     {
         if (principal.Identity is not { IsAuthenticated: true })
@@ -80,7 +77,7 @@ internal sealed class AccessContextMiddleware(RequestDelegate next)
                 : null;
     }
 
-    // 匿名端点（登录、刷新）和声明了放行的端点（me、switch-role）不受影响
+    // 允许匿名的端点（如登录、刷新）及显式放行端点（如 me、switch-role）不受此限制
     private static bool IsAllowed(Endpoint? endpoint) =>
         endpoint?.Metadata.GetMetadata<AllowWhenRoleUnavailableMetadata>() is not null
         || endpoint?.Metadata.GetMetadata<IAllowAnonymous>() is not null;

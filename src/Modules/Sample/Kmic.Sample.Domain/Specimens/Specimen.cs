@@ -67,9 +67,7 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
     /// </summary>
     public IReadOnlyList<SpecimenAttachment> Attachments => _attachments;
 
-    /// <summary>
-    /// 创建草稿并记录初始状态
-    /// </summary>
+    /// <summary>创建草稿并记录初始状态</summary>
     public static Specimen Create(string number, string title, UserId ownerId, OrgUnitId orgUnitId, string? reason = null)
     {
         var specimen = new Specimen(SpecimenId.New(), number, title, ownerId, orgUnitId);
@@ -77,9 +75,7 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         return specimen;
     }
 
-    /// <summary>
-    /// 为草稿添加明细
-    /// </summary>
+    /// <summary>为草稿添加明细</summary>
     public Result<SpecimenItem> AddItem(string name, int quantity)
     {
         if (Status != SpecimenStatus.Draft)
@@ -92,17 +88,10 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         return item;
     }
 
-    /// <summary>
-    /// 是否允许增删附件，关闭后不允许
-    /// </summary>
+    /// <summary>校验当前状态是否允许增删附件（已关闭后不允许）</summary>
     public Result CanEditAttachments() => Status == SpecimenStatus.Closed ? SampleErrors.InvalidState : Result.Success();
 
-    /// <summary>
-    /// 添加附件
-    /// </summary>
-    /// <remarks>
-    /// 调用前要先经 IFileAttachments 检查
-    /// </remarks>
+    /// <summary>添加附件；调用前须先经 IFileAttachments 校验文件可用性</summary>
     public Result<SpecimenAttachment> AddAttachment(StoredFileId fileId, string fileName, long size, string fileType)
     {
         var editable = CanEditAttachments();
@@ -121,10 +110,7 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         return attachment;
     }
 
-    /// <summary>
-    /// 移除附件
-    /// </summary>
-    /// <returns>成功时返回被移除的附件，供调用方解除文件关联</returns>
+    /// <summary>移除附件，成功时返回被移除的附件供调用方解除文件关联</summary>
     public Result<SpecimenAttachment> RemoveAttachment(SpecimenAttachmentId attachmentId)
     {
         var editable = CanEditAttachments();
@@ -143,9 +129,7 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         return attachment;
     }
 
-    /// <summary>
-    /// 提交示例，至少要有一项明细
-    /// </summary>
+    /// <summary>提交示例，至少须包含一项明细</summary>
     public Result Submit(string? reason = null)
     {
         if (_items.Count == 0)
@@ -162,13 +146,8 @@ public sealed class Specimen : AggregateRoot<SpecimenId>, ISoftDeletable, IHasOw
         return fired;
     }
 
-    /// <summary>
-    /// 关闭
-    /// </summary>
     public Result Close(string? reason = null) => _machine.Fire(this, SpecimenAction.Close, reason);
 
-    /// <summary>
-    /// 当前状态是否允许执行指定动作
-    /// </summary>
+    /// <summary>当前状态是否允许执行指定动作</summary>
     public Result CanFire(SpecimenAction action) => _machine.CanFire(this, action);
 }

@@ -13,9 +13,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 审计汇总与查询：落库、幂等、筛选、游标翻页、详情，端到端
-/// </summary>
 public sealed class AuditTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

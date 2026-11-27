@@ -2,25 +2,16 @@ using Kmic.BuildingBlocks.Application.Settings;
 
 namespace Kmic.Configuration.Application.Preferences;
 
-/// <summary>
-/// 用户在当前角色下的三层偏好，按键保存 JSON 值
-/// </summary>
-/// <remarks>
-/// 按本人、角色、系统的顺序取值
-/// </remarks>
+/// <summary>用户在当前角色下的三层偏好值，按个人、角色、系统优先级顺序取值</summary>
 public sealed class LayeredPreferences(
     IReadOnlyDictionary<string, string> system,
     IReadOnlyDictionary<string, string> role,
     IReadOnlyDictionary<string, string> user)
 {
-    /// <summary>
-    /// 任何一层上有值的全部键
-    /// </summary>
+    /// <summary>任一层级已设值的全部键</summary>
     public IEnumerable<string> Keys => user.Keys.Concat(role.Keys).Concat(system.Keys).Distinct(StringComparer.Ordinal);
 
-    /// <summary>
-    /// 按优先级返回指定键在允许层级中的值，调用方选择首个解析和校验成功的值
-    /// </summary>
+    /// <summary>按优先级返回指定键在允许层级中的候选值，由调用方选用首个解析和校验通过的值</summary>
     public IEnumerable<(PreferenceSource Source, string Json)> Candidates(string key, PreferenceLayers allowed)
     {
         ArgumentNullException.ThrowIfNull(key);

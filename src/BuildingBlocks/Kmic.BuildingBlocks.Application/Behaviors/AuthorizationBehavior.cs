@@ -8,12 +8,7 @@ using Mediator;
 
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
-/// <summary>
-/// 权限点检查
-/// </summary>
-/// <remarks>
-/// 只查权限点，数据权限和资源策略在处理器里查
-/// </remarks>
+/// <summary>用例访问与权限点校验管道；数据权限与资源策略由处理器内部自行校验。</summary>
 public sealed class AuthorizationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     IExecutionContext context,
@@ -22,7 +17,6 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
 {
-    /// <inheritdoc />
     public ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);
@@ -42,7 +36,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
         var user = context.User;
         if (user.IsSystem)
         {
-            // 系统身份执行了只给用户用的用例，是代码写错了，比如定时任务发错了命令
+            // 系统身份调用了仅限用户的用例，属于编码错误
             return useCase.AllowSystem || useCase.Requirement == AccessRequirement.SystemOnly
                 ? null
                 : throw new InvalidOperationException($"{useCase.Name} 没有声明 [AllowSystem]，不能以系统身份执行。");
@@ -58,7 +52,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
             return null;
         }
 
-        // 认证中间件已经拒绝了匿名请求，这里是兜底。ErrorType 没有 401，按无权限处理
+        // 认证中间件已拦截匿名请求，此处作为兜底按无权限处理
         var access = context.Access;
         if (access is null)
         {
@@ -87,7 +81,7 @@ public sealed class AuthorizationBehavior<TMessage, TResponse>(
     {
         if (context.Origin != CallOrigin.ModuleCall)
         {
-            // 端点不能绑定 Contracts 查询，HTTP 请求走到这里按无权限处理，其他来源是代码写错了
+            // Contracts 查询不允许经 HTTP 暴露，HTTP 请求按无权限处理，其余来源视为编码错误
             return context.Origin == CallOrigin.Http
                 ? Deny(useCase, CommonErrors.MissingPermission, "ContractQueryOutsideModuleCall")
                 : throw new InvalidOperationException($"{useCase.Name} 是 Contracts 查询，只能经 IContractQuerySender 调用。");

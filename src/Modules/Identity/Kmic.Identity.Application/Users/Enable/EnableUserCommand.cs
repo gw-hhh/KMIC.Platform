@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.Enable;
 
-/// <summary>
-/// 启用用户
-/// </summary>
 /// <param name="Id">用户 ID</param>
 /// <param name="ExpectedVersion">预期版本号</param>
 [RequirePermission(IdentityPermissions.UserManage)]

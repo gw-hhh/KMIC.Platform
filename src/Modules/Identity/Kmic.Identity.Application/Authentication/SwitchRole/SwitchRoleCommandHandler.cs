@@ -11,9 +11,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Authentication.SwitchRole;
 
-/// <summary>
-/// 切换会话角色并签发访问令牌
-/// </summary>
 public sealed class SwitchRoleCommandHandler(
     IUserRepository users,
     ISessionRepository sessions,
@@ -23,10 +20,9 @@ public sealed class SwitchRoleCommandHandler(
     ISecurityEventWriter securityEvents,
     TimeProvider time) : ICommandHandler<SwitchRoleCommand, AuthTokens>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<AuthTokens>> Handle(SwitchRoleCommand command, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("切换角色需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("切换角色需要已登录的用户身份。");
         var loadedSession = await sessions.GetForUpdateAsync(access.SessionId, null, cancellationToken);
         var loadedUser = await users.GetForUpdateAsync(access.UserId, null, cancellationToken);
         if (loadedSession.IsFailure || loadedUser.IsFailure)

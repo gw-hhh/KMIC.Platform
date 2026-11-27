@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 结构、尺寸、交互照 Vben Admin 的偏好设置抽屉（MIT）
+// 结构、尺寸与交互参考 Vben Admin 的偏好设置抽屉（MIT）
 import { Alert, Drawer, InputNumber, Popconfirm, Segmented, Select } from 'antdv-next';
 import { computed, ref } from 'vue';
 import { fontSizes, primaryPresets, radiusSteps } from '@/platform/theme';
@@ -38,7 +38,7 @@ const densityOptions = computed(() => [
 const tabStyleOptions = computed(() => tabStyles.map((value) => ({ label: t.layout.styles[value], value })));
 const effectOptions = computed(() => transitionEffects.map((value) => ({ label: t.general.effects[value], value })));
 
-// 开关行：一行就是一个开关，点整行都能切换
+// 开关配置项定义：点击整行均可切换对应布尔状态
 interface SwitchRow {
   label: string;
   get: (settings: ShellSettings) => boolean;
@@ -368,7 +368,7 @@ function change(change: (draft: ShellSettings) => void): void {
 </template>
 
 <style lang="scss">
-// 抽屉挂在 body 下：标题区和内容区的内边距照 Vben
+// 抽屉挂载于 body，需使用全局非 scoped 样式
 .settings-drawer {
   .ant-drawer-header {
     padding: 12px 16px;
@@ -464,7 +464,7 @@ function change(change: (draft: ShellSettings) => void): void {
   }
 }
 
-// 细描边方框；悬停时主色描边从中间展开，选中后描边加粗变主色
+// 细描边选项框：悬停时主色描边自中心向四周展开，选中后保留加粗主色描边
 .outline-box {
   position: relative;
   display: flex;

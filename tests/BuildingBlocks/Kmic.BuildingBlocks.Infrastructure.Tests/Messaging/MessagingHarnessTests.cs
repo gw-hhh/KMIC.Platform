@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 模块测试的标准写法：发布方命令 → DrainAsync → 断言订阅方的结果
-/// </summary>
 public sealed class MessagingHarnessTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

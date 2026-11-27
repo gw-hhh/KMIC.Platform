@@ -3,12 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Files.Application.Uploads.Start;
 
-/// <summary>
-/// 登记上传并返回文件 ID 和存储键，供端点流式写入文件
-/// </summary>
-/// <remarks>
-/// 写存储时不持有事务
-/// </remarks>
+/// <summary>登记上传并返回文件 ID 与存储键供流式写入（写入期间不持有数据库事务）</summary>
 /// <param name="Profile">上传配置标识</param>
 /// <param name="FileName">客户端文件名</param>
 /// <param name="DeclaredSize">客户端声明的大小</param>

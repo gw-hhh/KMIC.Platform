@@ -5,9 +5,6 @@ using Kmic.Notifications.Application.Templates.Sync;
 
 namespace Kmic.Notifications.Infrastructure.Templates;
 
-/// <summary>
-/// 启动任务：迁移之后、接收请求之前，把代码里声明的通知模板同步进数据库
-/// </summary>
 internal sealed class SyncTemplateCatalogTask(ICommandSender sender) : IStartupTask
 {
     public string Name => "Notifications.SyncTemplateCatalog";

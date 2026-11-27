@@ -7,15 +7,11 @@ using Kmic.Identity.Domain.Sessions;
 
 namespace Kmic.Identity.Application.Impersonation.End;
 
-/// <summary>
-/// 结束当前身份模拟会话
-/// </summary>
 public sealed class EndImpersonationCommandHandler(ISessionRepository sessions, IExecutionContext execution, ISecurityEventWriter securityEvents, TimeProvider time) : ICommandHandler<EndImpersonationCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(EndImpersonationCommand command, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("结束模拟身份需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("结束模拟身份需要已登录的用户身份。");
         if (access.ImpersonatorUserId is null)
         {
             return IdentityErrors.NotImpersonating;

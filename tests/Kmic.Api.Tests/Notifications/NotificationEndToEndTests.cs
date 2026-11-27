@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 整条链路：业务命令在事务里写发送请求，发件箱投递、路由、收件箱处理，最后生成投递与站内消息
-/// </summary>
 public sealed class NotificationEndToEndTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template, new Dictionary<string, string>(StringComparer.Ordinal) { ["Kmic:Roles"] = "Api,Worker" }),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -27,7 +24,7 @@ public sealed class NotificationEndToEndTests(ClassDatabase<ApiTemplate> databas
         await Eventually.UntilAsync(
             _ => seed.CountAsync($"""SELECT count(*) FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}' AND "Status" = 'Captured' AND "AddressMasked" = 'o***@example.com'"""),
             count => count == 1,
-            "邮件经发件箱、路由、收件箱处理，成为一条被捕获的投递",
+            "邮件经发件箱、路由与收件箱处理后生成已捕获的投递记录",
             TimeSpan.FromSeconds(30),
             Ct);
         (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."SiteMessage" WHERE "RecipientUserId" = '{Alice.UserId.Value}' AND "Link" = '/sample/specimens/{specimen}'""")).ShouldBe(1);

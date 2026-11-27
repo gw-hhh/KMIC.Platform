@@ -54,7 +54,7 @@ function run(action: 'changePassword' | 'logout'): void {
 </template>
 
 <style lang="scss">
-// 浮层挂在 body 下：宽 240、无内边距，底部留 4px，照 Vben 的用户菜单
+// 浮层挂载于 body，需使用全局非 scoped 样式
 .user-menu .ant-popover-container {
   min-width: 240px;
   padding: 0 0 4px;
@@ -105,7 +105,6 @@ function run(action: 'changePassword' | 'logout'): void {
   color: var(--kmic-color-foreground);
 }
 
-// 角色标签：浅灰底绿字
 .role {
   padding: 0 6px;
   font-size: 12px;
@@ -148,7 +147,6 @@ function run(action: 'changePassword' | 'logout'): void {
   }
 }
 
-// 图标放在 32px 的圆里，和 Vben 一样
 .item-icon {
   display: flex;
   align-items: center;

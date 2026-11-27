@@ -10,12 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Operations.Application.Audit.Get;
 
-/// <summary>
-/// 查询审计记录详情
-/// </summary>
 public sealed class GetAuditQueryHandler(IOperationsQueryDb db, IUserReferences users, IRoleReferences roles) : IQueryHandler<GetAuditQuery, AuditDetail>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<AuditDetail>> Handle(GetAuditQuery query, CancellationToken cancellationToken)
     {
         var entry = await db.AuditLogs

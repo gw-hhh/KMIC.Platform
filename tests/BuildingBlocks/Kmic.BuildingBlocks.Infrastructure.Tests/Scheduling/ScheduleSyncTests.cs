@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Scheduling;
 
-/// <summary>
-/// 同步只改 Quartz 里的内容，不需要启动调度器
-/// </summary>
 public sealed class ScheduleSyncTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string Build = "1.0.0";
@@ -33,7 +30,7 @@ public sealed class ScheduleSyncTests(ClassDatabase<ProbeTemplate> database) : I
         trigger.TimeZone.Id.ShouldBe("Asia/Shanghai");
         trigger.MisfireInstruction.ShouldBe(CronTriggerMisfireInstruction.FireAndProceed);
 
-        // 业务时间早上 7 点就是 UTC 前一天 23 点
+        // 业务时区 07:00 对应 UTC 前一日 23:00
         trigger.GetFireTimeAfter(trigger.StartTimeUtc).ShouldNotBeNull().UtcDateTime.TimeOfDay.ShouldBe(TimeSpan.FromHours(23));
     }
 

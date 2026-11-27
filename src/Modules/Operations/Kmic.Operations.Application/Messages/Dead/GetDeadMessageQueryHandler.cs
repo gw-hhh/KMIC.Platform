@@ -7,12 +7,8 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages.Dead;
 
-/// <summary>
-/// 查询死信或已放弃消息的详情
-/// </summary>
 public sealed class GetDeadMessageQueryHandler(IModuleMessageStores stores, IntegrationMessageCatalog messages) : IQueryHandler<GetDeadMessageQuery, DeadMessageDetailItem>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<DeadMessageDetailItem>> Handle(GetDeadMessageQuery query, CancellationToken cancellationToken)
     {
         if (!MessageBoxKind.TryFromCode(query.Box, out var kind))

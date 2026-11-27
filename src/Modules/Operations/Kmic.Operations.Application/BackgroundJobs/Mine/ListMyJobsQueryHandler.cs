@@ -8,16 +8,12 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 
-/// <summary>
-/// 查询本人提交的后台作业
-/// </summary>
 public sealed class ListMyJobsQueryHandler(IExecutionContext execution, IModuleJobStores stores, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListMyJobsQuery, CursorPage<BackgroundJobItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CursorPage<BackgroundJobItem>>> Handle(ListMyJobsQuery query, CancellationToken cancellationToken)
     {
-        // 登录的请求一定有用户；没有时（系统身份）没有“我的作业”
+        // 已登录请求必定关联用户；系统身份无归属的“我的作业”
         if (execution.User.UserId is not { } me)
         {
             return new CursorPage<BackgroundJobItem>([], null);

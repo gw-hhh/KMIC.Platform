@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
 
-/// <summary>
-/// 按 <see cref="SenderScript"/> 的预设应答的发送器
-/// </summary>
 internal sealed class FakeSender(SenderScript script, RequestMetadata metadata) : ICommandSender, IQuerySender
 {
     public ValueTask<Result> SendAsync(ICommand command, CancellationToken ct) =>

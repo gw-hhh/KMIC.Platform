@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 文件的一生：上传、关联、下载、解除关联，关联与解除关联的请求消息由 Worker 真的处理
-/// </summary>
 public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(database, template, withWorker: true), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -75,7 +72,7 @@ public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiT
 
         var response = await alice.GetAsync($"{Root}/{specimen}/attachments/{attachment}/content?inline=true", Ct);
 
-        response.Content.Headers.ContentDisposition!.DispositionType.ShouldBe("attachment", "只有 PDF 和图片能直接打开");
+        response.Content.Headers.ContentDisposition!.DispositionType.ShouldBe("attachment", "仅 PDF 与图片支持内联预览，其余类型应作为附件下载");
     }
 
     [Fact]
@@ -100,7 +97,7 @@ public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiT
         using var alice = ClientFor(Alice);
         var (specimen, _, attachment) = await AttachedAsync(alice);
 
-        // 乙看得到全部数据；丙只看自己的
+        // 乙的数据范围为全部；丙仅能访问本人数据
         using var bob = ClientFor(Bob);
         using var carol = ClientFor(Carol);
         (await bob.GetAsync($"{Root}/{specimen}/attachments/{attachment}/content", Ct)).StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -136,7 +133,7 @@ public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiT
         await Eventually.UntilAsync(
             _ => seed.CountAsync("""SELECT count(*) FROM "Operations"."AuditLog" WHERE "Action" = 'Sample.GetSpecimenAttachmentContent'"""),
             count => count > before,
-            "下载留下审计记录，经发件箱汇总到 Operations",
+            "下载操作生成审计记录并经由发件箱汇总至 Operations",
             ct: Ct);
     }
 
@@ -181,10 +178,10 @@ public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiT
 
         await WaitForAsync(fileId, "Detached");
         await using var seed = NewSeed();
-        (await IsNullAsync(seed, fileId, "ExpiresAt")).ShouldBeFalse("没有引用的文件保留一段时间后清理");
+        (await IsNullAsync(seed, fileId, "ExpiresAt")).ShouldBeFalse("无引用的文件应在保留期过后清理");
         (await seed.CountAsync($"""SELECT count(*) FROM "Files"."FileReference" WHERE "StoredFileId" = '{fileId}'""")).ShouldBe(0);
 
-        // 保留期内可以重新关联，重新关联之后又是已关联、不再有到期时间
+        // 保留期内支持重新关联，重新关联后恢复为已关联状态并清除过期时间
         var current = (await JsonAsync(await alice.GetAsync($"{Root}/{specimen}", Ct))).GetProperty("version").GetInt64();
         (await AddAttachmentAsync(alice, specimen, fileId, current)).StatusCode.ShouldBe(HttpStatusCode.OK);
         await WaitForAsync(fileId, "Attached");
@@ -207,7 +204,7 @@ public sealed class FileLifecycleTests(ClassDatabase<ApiTemplate> database, ApiT
         await Eventually.UntilAsync(
             _ => ColumnAsync<string>(seed, fileId, "Status"),
             current => string.Equals(current, status, StringComparison.Ordinal),
-            $"Files 处理关联请求，文件变成 {status}",
+            $"Files 模块处理关联请求，文件状态变更为 {status}",
             TimeSpan.FromSeconds(20),
             Ct);
     }

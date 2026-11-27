@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.ContractQueries;
 
-/// <summary>
-/// 批量查询用户联系方式
-/// </summary>
 public sealed class GetUserContactsQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetUserContactsQuery, IReadOnlyDictionary<Guid, UserContact>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, UserContact>>> Handle(GetUserContactsQuery query, CancellationToken cancellationToken)
     {
         var rows = await db.Users

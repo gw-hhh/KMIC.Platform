@@ -3,12 +3,8 @@ using Kmic.Configuration.Contracts;
 
 namespace Kmic.Configuration.Application.ContractQueries;
 
-/// <summary>
-/// 通过查询管道读取字典快照并检查字典项是否可选
-/// </summary>
 public sealed class DictionaryLookup(IContractQuerySender sender) : IDictionaries
 {
-    /// <inheritdoc />
     public async Task<DictionarySnapshot?> GetAsync(string typeCode, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeCode);
@@ -17,7 +13,6 @@ public sealed class DictionaryLookup(IContractQuerySender sender) : IDictionarie
         return result.IsSuccess ? result.Value : throw new InvalidOperationException($"读取字典 {typeCode} 失败：{result.Error.Code}。");
     }
 
-    /// <inheritdoc />
     public async Task<bool> IsSelectableAsync(string typeCode, string itemCode, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(itemCode);

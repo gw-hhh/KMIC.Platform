@@ -12,10 +12,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.SecurityEvents;
 
-/// <summary>
-/// 每个测试用自己的事件类型，同一个库里的事件互不干扰。写入器走真实的队列；
-/// 大部分测试直接调用写库的方法，一个测试启动后台服务验证循环和停机
-/// </summary>
 public sealed class SecurityEventTests(ClassDatabase<ProbeTemplate> database, ProbeTemplate template) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -62,9 +58,9 @@ public sealed class SecurityEventTests(ClassDatabase<ProbeTemplate> database, Pr
         await flusher.StartAsync(Ct);
 
         await WriteManyAsync(harness, 3);
-        await Eventually.UntilAsync(_ => RowsAsync(), rows => rows.Count == 3, "后台循环把事件写进数据库", ct: Ct);
+        await Eventually.UntilAsync(_ => RowsAsync(), rows => rows.Count == 3, "后台刷盘循环已将安全事件写入数据库", ct: Ct);
 
-        // 停机时队列里剩下的在退出前写完：停机和写入之间不留间隔
+        // 写入后立即触发停机，验证退出前将队列剩余事件全部排空落库
         await WriteManyAsync(harness, 2);
         await flusher.StopAsync(Ct);
 
@@ -153,7 +149,7 @@ public sealed class SecurityEventTests(ClassDatabase<ProbeTemplate> database, Pr
                 });
                 s.AddKmicSecurityEvents();
 
-                // 换掉测试默认的记录用写入器，走真实的队列
+                // 替换测试默认的内存记录写入器，改用接入真实队列的写入器
                 s.AddScoped<ISecurityEventWriter, SecurityEventWriter>();
             });
         _harnesses.Add(harness);

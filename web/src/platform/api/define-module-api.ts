@@ -8,7 +8,7 @@ import { apiOf } from './query-client';
 type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 export type CommandMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-/** 有这个方法的路径 */
+/** 支持指定 HTTP 方法的接口路径联合类型 */
 export type PathOf<M extends Method> = {
   [P in keyof paths]: [NonNullable<paths[P][M]>] extends [never] ? never : P;
 }[keyof paths];
@@ -24,14 +24,14 @@ type DataOf<Op> =
       : never
     : never;
 
-/** 没有必填参数时可以不传 */
+/** 无必填参数时允许省略入参 */
 export type ArgsOf<Input> = object extends Input ? [input?: Input] : [input: Input];
 
 export type QueryInput<P extends PathOf<'get'>> = ParamsOption<Operation<'get', P>>;
-// GET 总有响应体；openapi-fetch 的成功类型里带着 undefined，去掉
+// GET 请求必有响应体，剔除 openapi-fetch 成功类型中附带的 undefined
 export type QueryData<P extends PathOf<'get'>> = Exclude<DataOf<Operation<'get', P>>, undefined>;
 
-// 幂等键由 useCommand 按提交意图生成，调用方不传
+// 幂等键由 useCommand 按提交意图统一生成，禁止调用方手动传入
 type WithoutIdempotencyKey<Op> = Op extends { parameters: infer Params }
   ? Omit<Op, 'parameters'> & { parameters: Omit<Params, 'header'> & { header?: never } }
   : Op;
@@ -46,12 +46,12 @@ export interface CommandDef<Input, Data> {
   readonly module: string;
   readonly method: CommandMethod;
   readonly path: string;
-  /** OpenAPI 里标了 x-idempotent，提交时要带同一个幂等键直到有确定结果 */
+  /** OpenAPI 中标记为 x-idempotent，重试或确认时需复用同一幂等键直至获得明确结果 */
   readonly idempotent: boolean;
   send(api: ApiClient, input: Input, options?: { idempotencyKey?: string }): Promise<Data>;
 }
 
-// 生成的客户端按路径推断类型，泛型路径下推不出来；类型在 defineModuleApi 的签名上保证
+// 生成的客户端按具体路径字面量推断类型，泛型路径下无法推导，类型安全由 defineModuleApi 签名约束
 interface LooseClient {
   request(method: string, url: string, init: Record<string, unknown>): Promise<{ data?: unknown }>;
 }
@@ -69,11 +69,9 @@ function createQuery<P extends PathOf<'get'>>(module: string, path: P) {
 
   return {
     path,
-    /** 这个查询的所有参数组合，失效时用 */
+    /** 该查询下所有参数组合的前缀键，用于批量失效缓存 */
     all,
-    /** 一组具体参数 */
     key,
-    /** 交给 useQuery 的选项 */
     options: (...args: ArgsOf<QueryInput<P>>) =>
       queryOptions({
         queryKey: key(...args),
@@ -109,18 +107,14 @@ function createCommand<M extends CommandMethod, P extends PathOf<Lowercase<M>>>(
 }
 
 export interface ModuleApiBuilder {
-  /** 只有 GET 是查询 */
   query: <P extends PathOf<'get'>>(path: P) => ReturnType<typeof createQuery<P>>;
-  /** 其余方法都是命令，经 useCommand 执行 */
   command: <M extends CommandMethod, P extends PathOf<Lowercase<M>>>(
     method: M,
     path: P,
   ) => CommandDef<CommandInput<M, P>, CommandData<M, P>>;
 }
 
-/**
- * 一个模块的查询与命令，路径、参数、响应类型都从生成的 paths 推断
- */
+/** 定义模块的查询与命令集合，路径、入参及响应类型均从生成的 paths 自动推导 */
 export function defineModuleApi<T>(module: string, build: (builder: ModuleApiBuilder) => T): T {
   return build({
     query: (path) => createQuery(module, path),

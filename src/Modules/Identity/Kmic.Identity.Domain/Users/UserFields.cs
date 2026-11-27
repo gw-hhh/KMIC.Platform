@@ -4,9 +4,6 @@ using Kmic.Identity.Domain.Errors;
 
 namespace Kmic.Identity.Domain.Users;
 
-/// <summary>
-/// 用户资料字段的规范化与校验
-/// </summary>
 internal static class UserFields
 {
     public static Result<string> Account(string? input)

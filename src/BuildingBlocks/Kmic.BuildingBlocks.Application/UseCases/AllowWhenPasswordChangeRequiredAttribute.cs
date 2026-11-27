@@ -1,10 +1,5 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 需要改密码时仍可执行，如修改密码、退出登录
-/// </summary>
-/// <remarks>
-/// 只能和 [AllowAuthenticated] 一起用
-/// </remarks>
+/// <summary>允许在强制修改密码状态下执行（如修改密码、退出登录），仅可与 [AllowAuthenticated] 组合使用。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class AllowWhenPasswordChangeRequiredAttribute : Attribute;

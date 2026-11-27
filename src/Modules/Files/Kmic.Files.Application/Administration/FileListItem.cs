@@ -3,9 +3,7 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 文件列表项，不含存储键
-/// </summary>
+/// <summary>文件列表项，不含存储键</summary>
 /// <param name="Id">文件 ID</param>
 /// <param name="Name">显示文件名</param>
 /// <param name="FileType">文件类型编码，未登记写入结果时为空</param>

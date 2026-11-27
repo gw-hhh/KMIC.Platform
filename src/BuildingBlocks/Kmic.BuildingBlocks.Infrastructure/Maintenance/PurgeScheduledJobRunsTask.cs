@@ -7,9 +7,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
-/// <summary>
-/// 每天把停在“执行中”太久的执行记录标为中断，删除过了保留期的记录
-/// </summary>
 internal sealed class PurgeScheduledJobRunsTask(DataSources dataSources, IOptions<PurgeOptions> options, ILogger<PurgeScheduledJobRunsTask> logger) : IFrameworkTask
 {
     public string Name => "Framework.PurgeScheduledJobRuns";

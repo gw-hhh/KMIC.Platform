@@ -3,19 +3,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 放弃死信前的检查，由接收方模块注册
-/// </summary>
-/// <remarks>
-/// 放弃后会留下半截状态的消息要注册
-/// </remarks>
-/// <typeparam name="TMessage">被放弃的消息类型，通常是请求型消息</typeparam>
+/// <summary>放弃死信前的前置检查策略（由接收方模块注册）；若放弃消息会遗留中间状态，须实现并注册本策略。</summary>
 public interface IAbandonPolicy<in TMessage>
     where TMessage : IIntegrationMessage
 {
-    /// <summary>
-    /// 这条消息现在能不能放弃
-    /// </summary>
-    /// <returns>成功表示可以放弃；失败的错误说明就是不能放弃的原因</returns>
+    /// <summary>判断消息当前是否允许放弃；失败结果中的错误说明不可放弃的原因。</summary>
     ValueTask<Result> CheckAsync(TMessage message, CancellationToken ct);
 }

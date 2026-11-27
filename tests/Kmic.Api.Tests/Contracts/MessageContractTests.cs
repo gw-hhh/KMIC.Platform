@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Contracts;
 
-/// <summary>
-/// 宿主引用的每个模块（和框架）对外的集成消息，契约都有快照，改动要经过确认
-/// </summary>
 public sealed class MessageContractTests
 {
     [Fact]
@@ -19,6 +16,6 @@ public sealed class MessageContractTests
         problems.ShouldBeEmpty(string.Join(Environment.NewLine, problems));
     }
 
-    // 快照要写回源码目录，所以用源文件的位置，不用输出目录
+    // 快照文件需保存至源码目录，因此使用源文件路径而非构建输出目录
     private static string SnapshotDirectory([CallerFilePath] string source = "") => Path.Combine(Path.GetDirectoryName(source)!, "Snapshots");
 }

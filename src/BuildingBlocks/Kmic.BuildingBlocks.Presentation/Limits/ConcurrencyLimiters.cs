@@ -3,14 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Presentation.Limits;
 
-/// <summary>
-/// 并发限制：每个实例一个总量限制，每个请求方一个单并发限制
-/// </summary>
 internal sealed class ConcurrencyLimiters(IOptions<KmicHttpOptions> options) : IDisposable
 {
     private readonly ConcurrencyLimiter _heavy = new(new ConcurrencyLimiterOptions { PermitLimit = options.Value.HeavyConcurrency, QueueLimit = 0 });
 
-    // 分区空闲后由限流器自己回收
+    // 空闲分区由限流器内部自动回收
     private readonly PartitionedRateLimiter<string> _perUser = PartitionedRateLimiter.Create<string, string>(
         key => RateLimitPartition.GetConcurrencyLimiter(key, _ => new ConcurrencyLimiterOptions { PermitLimit = 1, QueueLimit = 0 }));
 
@@ -18,7 +15,7 @@ internal sealed class ConcurrencyLimiters(IOptions<KmicHttpOptions> options) : I
     {
         ConcurrencyPolicies.Heavy => _heavy.AttemptAcquire(),
         ConcurrencyPolicies.HeavyPerUser => _perUser.AttemptAcquire(ClientKey.Of(http)),
-        _ => throw new InvalidOperationException($"没有名为“{policy}”的并发限制策略。"),
+        _ => throw new InvalidOperationException($"未找到名为“{policy}”的并发限制策略。"),
     };
 
     public void Dispose()

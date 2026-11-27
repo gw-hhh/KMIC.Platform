@@ -8,12 +8,7 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// 作业行的读写
-/// </summary>
-/// <remarks>
-/// 记录结果的写入都要带令牌条件
-/// </remarks>
+// 作业行读写存储（状态与结果写入均校验 LeaseToken）
 internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSources)
 {
     private const string Owned = """
@@ -30,7 +25,7 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
     {
         var jobs = tables.For(module).Jobs;
 
-        // 排队的按提交顺序领；运行中或取消中但占用已到期的，说明执行者失联了，也领回来处理
+        // 排队作业按提交顺序领取，占用已过期的运行中或取消中作业一并回收
         await using var command = Database.CreateCommand(
             $"""
             WITH c AS (
@@ -72,9 +67,6 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
         return claimed;
     }
 
-    /// <summary>
-    /// 续期，返回续期后的状态和已经运行的时长；占用已被接管时返回空
-    /// </summary>
     public async Task<(short Status, TimeSpan Elapsed)?> RenewAsync(string module, Guid id, Guid token, TimeSpan lease, CancellationToken ct)
     {
         await using var command = Database.CreateCommand(
@@ -103,9 +95,7 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
         return await command.ExecuteNonQueryAsync(ct) == 1;
     }
 
-    /// <summary>
-    /// 在批次命令的事务里写检查点和进度，和业务数据一起提交
-    /// </summary>
+    // 在批次命令事务内更新检查点与进度，随业务数据一起提交
     public async Task<bool> SaveCheckpointAsync(ModuleDbContext db, string module, Guid id, Guid token, string checkpoint, long done, CancellationToken ct)
     {
         var sql = $"""
@@ -118,9 +108,7 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
             ct) == 1;
     }
 
-    /// <summary>
-    /// 写入结果；占用已被接管时返回空
-    /// </summary>
+    // 写入最终结果；占用已被其他执行器接管时返回 null
     public Task<UpdatedJob?> FinishAsync(
         ModuleDbContext db, string module, Guid id, Guid token, short status, Error? error, Guid? resultFileId, string? summary, TimeSpan retention, CancellationToken ct) =>
         UpdateAsync(
@@ -144,9 +132,6 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
             ],
             ct);
 
-    /// <summary>
-    /// 停机时把可续跑的作业放回队列，期间已请求取消的直接标为已取消；占用已被接管时返回空
-    /// </summary>
     public Task<UpdatedJob?> ReleaseAsync(ModuleDbContext db, string module, Guid id, Guid token, TimeSpan retention, CancellationToken ct) =>
         UpdateAsync(
             db,
@@ -162,9 +147,6 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
             [new NpgsqlParameter("retention", retention), new NpgsqlParameter("id", id), new NpgsqlParameter("token", token)],
             ct);
 
-    /// <summary>
-    /// 请求取消：排队中的直接取消，运行中的改为取消中，执行器在下次续期时停下；作业已结束时返回空
-    /// </summary>
     public Task<UpdatedJob?> RequestCancelAsync(ModuleDbContext db, string module, Guid id, Guid? by, TimeSpan retention, CancellationToken ct) =>
         UpdateAsync(
             db,
@@ -184,7 +166,7 @@ internal sealed class JobStore(ModuleFrameworkTables tables, DataSources dataSou
             ],
             ct);
 
-    // 用调用方已开始的事务执行，调用方再按返回的行决定要不要在同一事务里发结束事件
+    // 复用调用方已开启的事务执行更新，由调用方根据返回行决定是否在同一事务中发布结束事件
     private static async Task<UpdatedJob?> UpdateAsync(ModuleDbContext db, string sql, NpgsqlParameter[] parameters, CancellationToken ct)
     {
         var transaction = db.Database.CurrentTransaction?.GetDbTransaction()

@@ -7,7 +7,7 @@ interface CrumbPage {
   icon?: IconName;
 }
 
-/** 面包屑的一级，目录带上它下面的页面，用于下拉切换 */
+/** 面包屑节点视图：目录节点附带下属页面列表，用于面包屑下拉切换 */
 export interface CrumbView extends Crumb {
   pages: readonly CrumbPage[];
 }
@@ -16,7 +16,7 @@ function contains(node: MenuNode, routeName: string): boolean {
   return node.routeName === routeName || node.children.some((child) => contains(child, routeName));
 }
 
-/** 页面所在的一级目录 */
+/** 查找指定路由所属的一级菜单目录 */
 export function rootOf(nodes: readonly MenuNode[], routeName: string | null): MenuNode | undefined {
   return routeName === null ? undefined : nodes.find((node) => contains(node, routeName));
 }

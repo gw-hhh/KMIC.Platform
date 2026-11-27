@@ -67,7 +67,7 @@ public sealed class OutboxWriteTests(ClassDatabase<ProbeTemplate> database) : IC
         await using var work = _harness.Begin(_alice);
         (await work.Sender.SendAsync(new ShareTicketCommand(ticket.Id, ["不该发出"], Fail: true), Ct)).ShouldBeFailure(TicketErrors.Rejected);
 
-        // 同一个作用域里接着成功的命令，只写它自己发布的消息
+        // 在同一作用域内后续执行成功的命令，应仅写入其自身发布的消息
         (await work.Sender.SendAsync(new ShareTicketCommand(ticket.Id, ["应该发出"]), Ct)).ShouldBeSuccess();
         Read<TicketChanged>((await OutboxForAsync(ticket.Id)).ShouldHaveSingleItem()).Ticket.Title.ShouldBe("应该发出");
     }

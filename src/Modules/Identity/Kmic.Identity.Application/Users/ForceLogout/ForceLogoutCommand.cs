@@ -4,10 +4,8 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.ForceLogout;
 
-/// <summary>
-/// 结束用户的指定会话或全部会话，包括相关的模拟会话
-/// </summary>
-/// <param name="Id">用户</param>
+/// <summary>强制结束用户的指定或全部会话（含相关模拟会话）。</summary>
+/// <param name="Id">用户 ID</param>
 /// <param name="SessionId">目标会话 ID</param>
 [RequirePermission(IdentityPermissions.UserForceLogout)]
 [Audited]

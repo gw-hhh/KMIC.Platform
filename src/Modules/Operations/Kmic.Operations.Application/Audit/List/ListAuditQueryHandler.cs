@@ -9,13 +9,9 @@ using Kmic.Operations.Domain.Audit;
 
 namespace Kmic.Operations.Application.Audit.List;
 
-/// <summary>
-/// 查询审计记录列表
-/// </summary>
 public sealed class ListAuditQueryHandler(IOperationsQueryDb db, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListAuditQuery, CursorPage<AuditListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CursorPage<AuditListItem>>> Handle(ListAuditQuery query, CancellationToken cancellationToken)
     {
         var audits = AuditFilters.Apply(db, query.From, query.To, query.ActorUserId, query.ActualUserId, query.Module, query.Action, query.ResourceType, query.ResourceId);

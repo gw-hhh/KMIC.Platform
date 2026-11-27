@@ -7,9 +7,6 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 调用命令行程序的入口并收集输出
-/// </summary>
 internal static class ToolHarness
 {
     public static readonly DateTimeOffset Now = new(2030, 6, 15, 8, 0, 0, TimeSpan.Zero);

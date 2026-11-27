@@ -2,14 +2,9 @@ using System.Text;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 路由段的写法
-/// </summary>
 internal static class RouteNames
 {
-    /// <summary>
-    /// 模块名转路由段：全小写，多个单词用连字符（AfterSales → after-sales）
-    /// </summary>
+    // 将 PascalCase 模块名转换为全小写连字符路由段（如 AfterSales → after-sales）
     public static string Segment(string module)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(module);

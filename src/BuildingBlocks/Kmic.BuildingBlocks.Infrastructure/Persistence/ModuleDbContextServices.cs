@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.Security;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 模块上下文依赖的框架服务
-/// </summary>
+/// <summary>模块数据库上下文依赖的框架服务</summary>
 public sealed class ModuleDbContextServices(
     IExecutionContext execution,
     IDataScope dataScope,

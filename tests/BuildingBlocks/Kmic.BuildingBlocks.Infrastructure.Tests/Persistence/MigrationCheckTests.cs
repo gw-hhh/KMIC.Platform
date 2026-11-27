@@ -55,7 +55,7 @@ public sealed class MigrationCheckTests(ProbeTemplate template) : IAsyncLifetime
 
         (await ModuleMigrator.PendingAsync(harness.Services, ConnectionString, Ct)).ShouldBeEmpty();
 
-        // 再检查一次（不自动迁移）也通过
+        // 再次执行非自动迁移模式的检查，同样应顺利通过
         (await Task(harness, autoMigrate: false).ExecuteAsync(Ct)).IsSuccess.ShouldBeTrue();
     }
 
@@ -64,7 +64,7 @@ public sealed class MigrationCheckTests(ProbeTemplate template) : IAsyncLifetime
     {
         await using var harness = new ProbeHarness(ConnectionString);
 
-        // 运行账号连不上这个库的结构变更：自动迁移必须走迁移账号的连接串
+        // 运行账号无权执行 DDL 变更，验证自动迁移必须使用迁移账号连接串
         var runtime = template.RuntimeConnectionString(_empty!);
         var task = new MigrationCheckTask(
             harness.Services,

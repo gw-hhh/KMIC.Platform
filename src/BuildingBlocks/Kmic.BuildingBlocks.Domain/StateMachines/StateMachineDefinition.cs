@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
-/// <summary>
-/// 状态机定义
-/// </summary>
 internal sealed record StateMachineDefinition<TAggregate, TState, TAction>(
     string StateName,
     Func<TAggregate, TState> GetState,

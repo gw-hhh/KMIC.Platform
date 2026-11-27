@@ -21,7 +21,7 @@ public sealed class SiteMessageTests
 
         created.IsSuccess.ShouldBeTrue();
         created.Value.RecipientUserId.ShouldBe(recipient);
-        created.Value.Title.ShouldBe("审批通过", "两端的空白去掉");
+        created.Value.Title.ShouldBe("审批通过", "应自动去除标题两端空白");
         created.Value.ReadAt.ShouldBeNull();
         created.Value.SentAt.ShouldBe(_now);
     }

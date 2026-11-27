@@ -1,29 +1,14 @@
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-/// <summary>
-/// 权限点
-/// </summary>
+/// <summary>声明权限点元数据。</summary>
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
 public sealed class PermissionAttribute(string displayName) : Attribute
 {
-    /// <summary>
-    /// 显示名称
-    /// </summary>
     public string DisplayName { get; } = displayName;
 
-    /// <summary>
-    /// 是否敏感
-    /// </summary>
-    /// <remarks>
-    /// 物理删除、模拟登录、全量导出这类要标
-    /// </remarks>
+    /// <summary>是否属于高风险敏感操作（如物理删除、模拟登录、全量导出等）。</summary>
     public bool Sensitive { get; init; }
 
-    /// <summary>
-    /// 改名前的编码
-    /// </summary>
-    /// <remarks>
-    /// 所有环境都启动同步过一次后才能删
-    /// </remarks>
+    /// <summary>改名前的旧编码，须待所有环境完成一次启动同步后方可移除。</summary>
     public string? RenamedFrom { get; init; }
 }

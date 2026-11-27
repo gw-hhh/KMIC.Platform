@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Files.Domain.Files;
 
-/// <summary>
-/// 对账发现的存储问题：库里有记录，存储里的对象找不到
-/// </summary>
+/// <summary>对账发现的存储异常</summary>
 public sealed class StorageIssue : AggregateRoot<StorageIssueId>
 {
     private StorageIssue(StorageIssueId id, StoredFileId fileId, StorageIssueKind kind, string? objectVersionId, DateTimeOffset foundAt)
@@ -58,15 +56,10 @@ public sealed class StorageIssue : AggregateRoot<StorageIssueId>
     /// </summary>
     public string? ResolutionNote { get; private set; }
 
-    /// <summary>
-    /// 记录一个新发现的问题
-    /// </summary>
     public static StorageIssue Found(StoredFileId fileId, StorageIssueKind kind, string? objectVersionId, DateTimeOffset now) =>
         new(StorageIssueId.New(), fileId, kind, objectVersionId, now);
 
-    /// <summary>
-    /// 标为已解决；已解决时保留原处理记录并返回成功
-    /// </summary>
+    /// <summary>标记为已解决；若已解决则保留原处理记录并返回成功</summary>
     public Result Resolve(string note, UserId by, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(note);

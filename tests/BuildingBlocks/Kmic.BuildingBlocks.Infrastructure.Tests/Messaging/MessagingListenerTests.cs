@@ -13,9 +13,7 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 监听线程刚连上时会唤醒全部信号一次，每个测试先建好信号再启动，并等掉这一次
-/// </summary>
+// 监听线程建连后会触发一次全量信号唤醒，测试需先注册信号并消耗该初始唤醒
 public sealed class MessagingListenerTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private static readonly TimeSpan _long = TimeSpan.FromMinutes(5);
@@ -63,7 +61,7 @@ public sealed class MessagingListenerTests(ClassDatabase<ProbeTemplate> database
             await kill.ExecuteNonQueryAsync(Ct);
         }
 
-        // 重连后先补查一次，再照常收通知
+        // 断线重连后先触发一次补偿唤醒，随后恢复正常通知接收
         (await signal.WaitAsync(_patience, Ct)).ShouldBeTrue();
         await NotifyAsync(MessagingChannels.Outbox, "Probe");
         (await signal.WaitAsync(_patience, Ct)).ShouldBeTrue();

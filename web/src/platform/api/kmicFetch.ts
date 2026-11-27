@@ -13,23 +13,19 @@ export interface RefreshLocks {
 
 export interface KmicFetchOptions {
   session: Session;
-  /** 默认用全局 fetch */
   fetch?: typeof fetch;
-  /** 默认用当前页面的 origin */
   origin?: string;
   refreshUrl?: string;
-  /** 请求超时，比后端的 30 秒略长 */
+  /** 单次请求超时时间（毫秒），略长于后端 30 秒超时阈值 */
   timeoutMs?: number;
-  /** 刷新令牌的跨标签页锁 */
+  /** 用于多标签页间互斥刷新令牌的锁实现 */
   locks?: RefreshLocks | null;
   newId?: () => string;
 }
 
 const authPaths = ['/auth/login', '/auth/refresh'];
 
-/**
- * 给 openapi-fetch 用的 fetch：令牌、401 刷新、幂等键、epoch 检查、错误转换
- */
+/** 供 openapi-fetch 使用的请求包装器：负责注入令牌、401 自动刷新、幂等键透传、epoch 校验与错误归一化 */
 export function createKmicFetch(options: KmicFetchOptions): (request: Request) => Promise<Response> {
   const session = options.session;
   const send = options.fetch ?? globalThis.fetch.bind(globalThis);
@@ -51,7 +47,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
     let response = await attempt(pristine, request);
     if (response.status === 401 && !isAuthRequest(request.url)) {
       if (await refresh()) {
-        // 用同一个幂等键重放，不会重复执行
+        // 复用原幂等键重放请求，避免重复执行
         response = await attempt(pristine, request);
       } else {
         session.expire();
@@ -59,7 +55,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
       }
     }
 
-    // 身份已变，丢弃结果（登录失效除外）
+    // 会话身份已变更时丢弃过期响应（登录失效场景除外）
     if (!expired && session.epoch !== epoch) {
       throw new KmicError({ kind: 'aborted', message: '身份已变化，请求结果已丢弃' });
     }
@@ -80,7 +76,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
         headers.set('Idempotency-Key', idempotencyKey);
       }
 
-      // 请求对象只能用一次
+      // Request 流不可复用，每次发送需重新构造
       const outgoing = new Request(source.clone(), { headers, signal: signalOf(original.signal) });
       try {
         return await send(outgoing);
@@ -94,7 +90,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
     return AbortSignal.any([caller, AbortSignal.timeout(timeoutMs)]);
   }
 
-  // 同一标签页共用一次刷新，跨标签页用锁排队
+  // 同标签页并发请求共享单次刷新，跨标签页通过互斥锁串行化
   function refresh(): Promise<boolean> {
     refreshing ??= (locks === null ? doRefresh() : locks.request('kmic-refresh', doRefresh)).finally(() => {
       refreshing = null;
@@ -105,7 +101,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
   async function doRefresh(): Promise<boolean> {
     let response: Response;
     try {
-      // 刷新也要超时：挂住的话，所有等刷新的请求和别的标签页都会跟着卡住
+      // 限制刷新超时，避免阻塞等待中的请求及其他标签页
       response = await send(
         new Request(refreshUrl, {
           method: 'POST',
@@ -127,7 +123,7 @@ export function createKmicFetch(options: KmicFetchOptions): (request: Request) =
   }
 }
 
-// 非 HTTPS 下没有 navigator.locks
+// 非安全上下文（如非 HTTPS）下不提供 navigator.locks
 function defaultLocks(): RefreshLocks | null {
   return 'locks' in globalThis.navigator ? globalThis.navigator.locks : null;
 }
@@ -174,7 +170,7 @@ async function toError(response: Response, isWrite: boolean): Promise<KmicError>
     : KmicError.fromProblem(problem, retryAfter, outcome);
 }
 
-// 500 和“结果未知”的 503，不确定是否已生效
+// 500 与标记为 Common.ResultUnknown 的 503 无法确认服务端是否已生效
 function outcomeOf(status: number, code: string | undefined): KmicOutcome {
   return status === 500 || (status === 503 && code === 'Common.ResultUnknown') ? 'unknown' : 'failed';
 }

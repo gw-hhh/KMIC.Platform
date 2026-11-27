@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.ContractQueries;
 
-/// <summary>
-/// 批量查询组织单元引用信息
-/// </summary>
 public sealed class GetOrgUnitReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetOrgUnitReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetOrgUnitReferencesQuery query, CancellationToken cancellationToken)
     {
         var rows = await db.OrgTrees

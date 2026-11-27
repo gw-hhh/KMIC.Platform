@@ -15,9 +15,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 投递管理：列表与详情、重试、放弃，以及过期投递和含密通知残留正文的清理。关闭了捕获，投递停在待发送，状态由测试直接改
-/// </summary>
 public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(
         database,
@@ -63,7 +60,7 @@ public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database,
         result.ShouldBeSuccess();
     }
 
-    // 手机号和邮箱在用户表里唯一，每个用户给不同的
+    // 手机号与邮箱在用户表具有唯一约束，需为每个测试用户分配唯一值
     private static async Task<Guid> UserAsync(IdentitySeed seed)
     {
         var number = Interlocked.Increment(ref _users);
@@ -208,7 +205,7 @@ public sealed class DeliveryManagementTests(ClassDatabase<ApiTemplate> database,
         var left = await seed.ScalarAsync<string>($"""SELECT string_agg("DedupKey", ',' ORDER BY "DedupKey") FROM "Notifications"."Delivery" WHERE "DedupKey" LIKE 'purge-%-{tag}'""");
         left.ShouldBe($"{keys[1]},{keys[3]}");
         var notifications = await seed.ScalarAsync<string>($"""SELECT string_agg("DedupKey", ',' ORDER BY "DedupKey") FROM "Notifications"."Notification" WHERE "DedupKey" LIKE 'purge-%-{tag}'""");
-        notifications.ShouldBe($"{keys[1]},{keys[3]}", "发送请求记录在它的投递都删完之后才删");
+        notifications.ShouldBe($"{keys[1]},{keys[3]}", "仅当关联的投递记录全部清理后，才可删除发送请求主记录");
     }
 
     [Fact]

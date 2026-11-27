@@ -4,35 +4,23 @@ using System.Text.RegularExpressions;
 
 namespace Kmic.BuildingBlocks.Application.Numbering;
 
-/// <summary>
-/// 编号规则目录
-/// </summary>
 public sealed partial class NumberRuleCatalog
 {
-    // 和计数表 Rule 列的长度一致
+    // 与计数表 Rule 字段长度保持一致
     private const int MaxNameLength = 100;
 
     private readonly FrozenDictionary<string, NumberRule> _byName;
 
     private NumberRuleCatalog(IEnumerable<NumberRule> rules) => _byName = rules.ToFrozenDictionary(r => r.Name, StringComparer.Ordinal);
 
-    /// <summary>
-    /// 全部规则
-    /// </summary>
     public IReadOnlyCollection<NumberRule> All => _byName.Values;
 
-    /// <summary>
-    /// 从程序集中读取
-    /// </summary>
     public static NumberRuleCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
         return Build(assemblies.Distinct().SelectMany(a => a.GetTypes()));
     }
 
-    /// <summary>
-    /// 从给定类型中读取
-    /// </summary>
     public static NumberRuleCatalog Build(IEnumerable<Type> types)
     {
         ArgumentNullException.ThrowIfNull(types);
@@ -60,9 +48,6 @@ public sealed partial class NumberRuleCatalog
             : new NumberRuleCatalog(rules);
     }
 
-    /// <summary>
-    /// 按名称取规则，不存在时抛异常
-    /// </summary>
     public NumberRule Get(string name) =>
         _byName.TryGetValue(name, out var rule) ? rule : throw new InvalidOperationException($"编号规则 {name} 不存在。");
 

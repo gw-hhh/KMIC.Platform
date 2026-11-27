@@ -4,12 +4,9 @@ using Kmic.BuildingBlocks.Domain.Errors;
 
 namespace Kmic.Configuration.Application.Settings;
 
-/// <summary>
-/// 按设置声明的权限点授权修改及恢复默认操作
-/// </summary>
+/// <summary>按设置声明的权限点授权修改与恢复默认</summary>
 public sealed class SettingPolicy : IResourcePolicy<SettingTarget, SettingAction>
 {
-    /// <inheritdoc />
     public PolicyDecision Evaluate(IAccessContext access, SettingTarget resource, SettingAction action)
     {
         ArgumentNullException.ThrowIfNull(access);

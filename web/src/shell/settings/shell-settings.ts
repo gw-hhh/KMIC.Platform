@@ -4,26 +4,23 @@ import { defaultAppearance, fontSizes, primaryPresets, radiusSteps, type Appeara
 export const layoutModes = ['vertical', 'mixed-column', 'mixed-vertical'] as const;
 export type LayoutMode = (typeof layoutModes)[number];
 
-/** 谷歌、卡片、朴素、轻快 */
 export const tabStyles = ['chrome', 'card', 'plain', 'brisk'] as const;
 export type TabStyle = (typeof tabStyles)[number];
 
 export const transitionEffects = ['fade-slide', 'fade', 'fade-up', 'fade-down'] as const;
 export type TransitionEffect = (typeof transitionEffects)[number];
 
-/** 个人偏好 `Ui.Shell` 的内容 */
+/** 个人偏好 `Ui.Shell` 的结构定义 */
 export interface ShellSettings {
   appearance: Appearance;
   layout: LayoutMode;
   sidebar: {
     collapsed: boolean;
-    /** 单位 px */
     width: number;
     accordion: boolean;
     showCollapsedTitle: boolean;
-    /** 折叠后悬停时展开整个侧栏（浮在内容上）；关闭时只弹出所在目录的子菜单，和 Vben 默认一致 */
+    /** 折叠态悬停时是否展开整个侧栏；关闭时仅在右侧弹出当前目录子菜单 */
     hoverExpandAll: boolean;
-    /** 顶栏按钮把侧栏整个隐藏 */
     hidden: boolean;
   };
   breadcrumb: { show: boolean; showIcon: boolean };
@@ -105,7 +102,7 @@ const shellSettingsSchema = z.object({
   ),
 });
 
-/** 不合法的字段用默认值 */
+/** 解析外壳设置，对缺失或非法字段自动回退为默认值 */
 export function parseShellSettings(raw: unknown): ShellSettings {
   return shellSettingsSchema.parse(typeof raw === 'object' && raw !== null ? raw : {});
 }

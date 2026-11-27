@@ -4,12 +4,9 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Identity.Application.ContractQueries;
 
-/// <summary>
-/// 通过查询管道分批解析用户联系方式
-/// </summary>
+/// <summary>通过查询管道分批解析用户联系方式</summary>
 public sealed class UserContacts(IContractQuerySender sender) : IUserContacts
 {
-    /// <inheritdoc />
     public async Task<IReadOnlyDictionary<Guid, UserContact>> GetAsync(IReadOnlyCollection<Guid> userIds, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(userIds);
@@ -21,6 +18,6 @@ public sealed class UserContacts(IContractQuerySender sender) : IUserContacts
             ct);
         return resolved.IsSuccess
             ? resolved.Value
-            : throw new InvalidOperationException($"取用户联系方式失败：{resolved.Error.Code}。");
+            : throw new InvalidOperationException($"获取用户联系方式失败：{resolved.Error.Code}。");
     }
 }

@@ -6,12 +6,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Settings;
 
-/// <summary>
-/// 设置声明的校验规则
-/// </summary>
 internal static partial class DeclaredValueRules
 {
-    // 限制成员类型，序列化结果才稳定，管理界面才能直接编辑
+    // 限制属性成员类型，以保证序列化结构稳定并支持管理界面直接编辑
     private static readonly FrozenSet<Type> _scalars = new[]
     {
         typeof(bool), typeof(int), typeof(long), typeof(decimal), typeof(double), typeof(string), typeof(Guid),
@@ -60,7 +57,7 @@ internal static partial class DeclaredValueRules
         }
     }
 
-    // 不用 MakeGenericType 构造接口再比较：类型不满足约束时它会直接抛异常
+    // 避免使用 MakeGenericType 构造泛型接口进行比较，因不满足类型约束时会直接抛出异常
     public static bool ImplementsSelf(Type type, Type interfaceDefinition) =>
         type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceDefinition && i.GenericTypeArguments[0] == type);
 

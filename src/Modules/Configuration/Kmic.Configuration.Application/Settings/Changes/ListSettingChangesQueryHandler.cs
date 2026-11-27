@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Configuration.Application.Settings.Changes;
 
-/// <summary>
-/// 分页查询系统设置变更记录
-/// </summary>
 public sealed class ListSettingChangesQueryHandler(IConfigurationQueryDb db, IUserReferences users) : IQueryHandler<ListSettingChangesQuery, PagedResult<SettingChangeItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SettingChangeItem>>> Handle(ListSettingChangesQuery query, CancellationToken cancellationToken)
     {
         var changes = db.SettingChanges.AsQueryable();

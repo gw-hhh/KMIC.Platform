@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Application.Specimens.List;
 
-/// <summary>
-/// 查询示例列表
-/// </summary>
 public sealed class ListSpecimensQueryHandler(ISampleQueryDb db) : IQueryHandler<ListSpecimensQuery, PagedResult<SpecimenListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SpecimenListItem>>> Handle(ListSpecimensQuery query, CancellationToken cancellationToken)
     {
         var specimens = db.Specimens.AsQueryable();

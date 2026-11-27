@@ -14,10 +14,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// Probe 发布单据快照，Echo 有序处理。每个测试用自己的单据，顺序键互不影响；
-/// 处理执行了几次，看 Echo 的 Outbox 里有几条 TicketMirrored
-/// </summary>
 public sealed class InboxProcessingTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const string Unknown = "Echo.NotInThisBuild";
@@ -35,7 +31,7 @@ public sealed class InboxProcessingTests(ClassDatabase<ProbeTemplate> database) 
     {
         var catalog = _harness.Services.GetRequiredService<SubscriptionCatalog>();
 
-        // 另登记一个本实例代码里没有的订阅，模拟新版本才有的订阅
+        // 额外注册一个当前实例代码中尚未声明的订阅，以模拟新版本引入的订阅路由
         await new MessageRoutes(database.DataSource).RegisterAsync(
             [.. MessageRoutes.Declared(catalog), new RouteDeclaration(new MessageRoute("BuildingBlocks.TicketChanged", Unknown, "Echo"), false)],
             [],
@@ -118,7 +114,7 @@ public sealed class InboxProcessingTests(ClassDatabase<ProbeTemplate> database) 
     {
         var (ticket, messageId) = await PublishAsync("容量不足");
 
-        // 超过最多尝试次数也不能进死信：消息本身没有问题，等容量恢复再处理（失败设置用一次就清掉，每轮重设）
+        // 即使超过最大重试次数也不得转入死信：因容量受限属于暂时性保护，需保留待容量恢复后继续处理（模拟故障每次触发后自动重置，故每轮需重新配置）
         for (var round = 0; round < new MessagingOptions().MaxAttempts + 2; round++)
         {
             _harness.Echo.Failures["容量不足"] = CommonErrors.MessagingSuspended;
@@ -168,7 +164,7 @@ public sealed class InboxProcessingTests(ClassDatabase<ProbeTemplate> database) 
         var claimed = (await Processor.ClaimAsync("Echo", 100, token, Ct)).Single(m => m.MessageId == messageId);
         (await Processor.ProcessAsync("Echo", claimed, token, Ct)).ShouldBe(InboxResult.Processed);
 
-        // 提交成功了，处理程序却以为失败：带条件的记录影响 0 行，重新读出来是已处理
+        // 模拟事务已提交但调用方误判为失败的场景：条件更新影响 0 行，重读后应识别为已处理状态
         (await Processor.RecordFailureAsync("Echo", claimed, token, "连接断开", dead: false, null, Ct)).ShouldBe(InboxResult.Processed);
 
         (await InboxAsync(messageId, ProbeHarness.MirrorSubscription)).Status.ShouldBe(MessageStatus.Done);
@@ -190,7 +186,7 @@ public sealed class InboxProcessingTests(ClassDatabase<ProbeTemplate> database) 
         (await InboxAsync(second, ProbeHarness.MirrorSubscription)).Status.ShouldBe(MessageStatus.Pending);
         (await MirroredAsync(other)).ShouldHaveSingleItem();
 
-        // 人工处理掉死信之后，同一个键后面的消息接着处理
+        // 人工放弃该死信消息后，同一顺序键下的后续待处理消息应恢复消费
         await ExecuteAsync("""UPDATE "Echo"."InboxMessage" SET "Status" = 4 WHERE "MessageId" = @id""", first);
         await DrainAsync();
 

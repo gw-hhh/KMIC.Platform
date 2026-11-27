@@ -1,8 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 死信列表里的位置：发生时间加 ID，跨模块归并翻页时用
-/// </summary>
-/// <param name="OccurredAt">发生时间</param>
-/// <param name="Id">行 ID</param>
+/// <summary>死信列表游标位置，由发生时间与行 ID 组成，用于跨模块归并分页。</summary>
 public sealed record MessagePosition(DateTimeOffset OccurredAt, Guid Id);

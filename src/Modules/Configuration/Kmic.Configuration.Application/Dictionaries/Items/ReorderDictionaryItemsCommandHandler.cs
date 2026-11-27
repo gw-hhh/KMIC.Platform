@@ -5,13 +5,9 @@ using Kmic.Configuration.Domain.Dictionaries;
 
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
-/// <summary>
-/// 调整同级字典项顺序
-/// </summary>
 public sealed class ReorderDictionaryItemsCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<ReorderDictionaryItemsCommand, VersionedResponse<DictionaryTypeId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(ReorderDictionaryItemsCommand command, CancellationToken cancellationToken)
     {
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);

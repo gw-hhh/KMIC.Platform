@@ -2,16 +2,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Jobs;
 
-/// <summary>
-/// 提交后台作业
-/// </summary>
-/// <remarks>
-/// 只能在命令里调用，和业务数据同一个事务提交
-/// </remarks>
+/// <summary>后台作业提交入口，仅可在命令中调用，与业务数据在同一事务中提交。</summary>
 public interface IBackgroundJobs
 {
-    /// <summary>
-    /// 排队一个作业，返回作业 ID 和所在模块；同一用户这种作业排队和运行中的数量到上限时返回 Common.TooManyJobs
-    /// </summary>
+    /// <summary>将后台作业加入队列；同用户同类作业数达上限时返回 Common.TooManyJobs。</summary>
     Task<Result<JobAccepted>> EnqueueAsync(IBackgroundJob job, CancellationToken ct);
 }

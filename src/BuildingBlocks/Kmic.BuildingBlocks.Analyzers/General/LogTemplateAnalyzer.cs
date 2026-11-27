@@ -7,9 +7,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
-/// <summary>
-/// KM9008：日志模板不能用 {@对象} 把整个对象写进日志
-/// </summary>
+/// <summary>KM9008：日志模板禁止使用 {@对象} 解构记录整个对象。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class LogTemplateAnalyzer : DiagnosticAnalyzer
 {
@@ -18,14 +16,12 @@ public sealed class LogTemplateAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9008",
         Rules.GeneralCategory,
-        "日志模板不能解构整个对象",
-        "日志模板里的“{0}”会把整个对象写进日志，改成逐个写需要的属性",
-        "整个对象里可能带着手机号、令牌这类敏感数据，日志里只写需要的、不敏感的属性。");
+        "日志模板禁止解构整个对象",
+        "日志模板中的“{0}”会序列化整个对象，请改为显式记录所需的具体属性",
+        "完整对象可能包含手机号、令牌等敏感信息，日志应仅记录必要且非敏感的属性。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

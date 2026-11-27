@@ -5,9 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Operations.Infrastructure.ClientErrors;
 
-/// <summary>
-/// 按用户的固定窗口限流，窗口一分钟；每个实例各自计数
-/// </summary>
+// 按用户执行 1 分钟固定窗口限流，各实例独立计数
 internal sealed class ClientErrorLimiter : IClientErrorLimiter, IDisposable
 {
     private readonly PartitionedRateLimiter<Guid> _limiter;

@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Operations.Application.Messages.Retry;
 
-/// <summary>
-/// 重试死信，单条或批量
-/// </summary>
+/// <summary>单条或批量重试死信。</summary>
 /// <param name="Messages">要重试的消息</param>
 [RequirePermission(OperationsPermissions.MessagesManage)]
 [Audited]

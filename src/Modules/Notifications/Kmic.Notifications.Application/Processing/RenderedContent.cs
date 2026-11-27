@@ -2,15 +2,10 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 一次发送请求渲染出的内容：与收件人无关，每个渠道一份
-/// </summary>
-/// <param name="Channels">模板声明的各个渠道的内容</param>
-/// <param name="CodeHash">发送时的模板声明及默认内容哈希</param>
+/// <summary>单次请求渲染出的各渠道内容（与收件人无关）</summary>
+/// <param name="Channels">各渠道渲染内容</param>
+/// <param name="CodeHash">模板声明与默认内容哈希</param>
 public sealed record RenderedContent(IReadOnlyDictionary<TemplateChannel, ChannelContent> Channels, string CodeHash)
 {
-    /// <summary>
-    /// 某个渠道的内容
-    /// </summary>
     public ChannelContent For(TemplateChannel channel) => Channels[channel];
 }

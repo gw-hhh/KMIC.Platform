@@ -17,12 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 处理通知发送请求，按收件人和渠道生成投递记录或站内消息
-/// </summary>
-/// <remarks>
-/// 不调外部渠道，只生成投递记录
-/// </remarks>
+/// <summary>按收件人与渠道处理通知发送请求，生成投递记录或站内消息（不直接调用外部渠道）</summary>
 public sealed class NotificationProcessor(
     NotificationTemplateCatalog catalog,
     ITemplateRenderer renderer,
@@ -35,9 +30,6 @@ public sealed class NotificationProcessor(
     IOptions<NotificationsCaptureOptions> capture,
     TimeProvider time)
 {
-    /// <summary>
-    /// 处理一次发送请求
-    /// </summary>
     public async Task<Result> ProcessAsync(NotificationRequest request, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -106,7 +98,7 @@ public sealed class NotificationProcessor(
         return new RenderedContent(channels, TemplateHash.Of(definition));
     }
 
-    // 本次各渠道实际用的版本号，0 表示代码里的默认内容
+    // 记录各渠道实际使用的版本号，0 表示使用代码默认内容
     private static string VersionsOf(RenderedContent content) =>
         JsonSerializer.Serialize(content.Channels.ToDictionary(pair => pair.Key.Code, pair => pair.Value.Version, StringComparer.Ordinal));
 
@@ -130,7 +122,7 @@ public sealed class NotificationProcessor(
 
     private void AddSiteMessage(UserId userId, FanOut context)
     {
-        // 约定读取模型的 Link 字符串属性；链接无效时移除链接重建消息，避免因此中断通知
+        // 按约定读取模型的 Link 字符串属性；链接无效时剔除链接后重建消息，避免中断通知流程
         var link = context.ModelType.GetProperty("Link")?.GetValue(context.Model) as string;
         var content = context.Content.For(TemplateChannel.InApp);
         var created = SiteMessage.Create(userId, context.NotificationId, content.Subject, content.Body, link, context.Definition.Module, context.Now);

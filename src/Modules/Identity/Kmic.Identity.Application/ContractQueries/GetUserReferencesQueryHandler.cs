@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.ContractQueries;
 
-/// <summary>
-/// 批量查询用户引用信息
-/// </summary>
 public sealed class GetUserReferencesQueryHandler(IIdentityQueryDb db) : IQueryHandler<GetUserReferencesQuery, IReadOnlyDictionary<Guid, ReferenceInfo>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyDictionary<Guid, ReferenceInfo>>> Handle(GetUserReferencesQuery query, CancellationToken cancellationToken)
     {
         var rows = await db.Users

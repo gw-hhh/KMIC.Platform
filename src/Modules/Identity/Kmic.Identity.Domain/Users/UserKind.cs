@@ -2,19 +2,11 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 
 namespace Kmic.Identity.Domain.Users;
 
-/// <summary>
-/// 用户类型
-/// </summary>
 public sealed class UserKind : Enumeration<UserKind>
 {
-    /// <summary>
-    /// 普通用户账号
-    /// </summary>
     public static readonly UserKind Normal = new("Normal", "普通用户");
 
-    /// <summary>
-    /// 代表“系统”的账号：不能登录、不能授予角色、不能修改
-    /// </summary>
+    /// <summary>系统内置账号：不可登录、不可授予角色、不可修改。</summary>
     public static readonly UserKind System = new("System", "系统账号");
 
     private UserKind(string code, string name)

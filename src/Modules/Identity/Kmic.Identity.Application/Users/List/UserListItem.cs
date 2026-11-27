@@ -4,9 +4,7 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.List;
 
-/// <summary>
-/// 用户列表项
-/// </summary>
+/// <summary>用户列表项。</summary>
 /// <param name="Id">用户 ID</param>
 /// <param name="Account">登录名</param>
 /// <param name="DisplayName">姓名</param>

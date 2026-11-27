@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Testing.Identity;
 
-/// <summary>
-/// 测试身份，直接构造访问上下文
-/// </summary>
+/// <summary>测试身份构建器，直接构造访问上下文。</summary>
 /// <example>
 /// <code>
 /// var actor = TestIdentity.User("销售甲")
@@ -18,77 +16,55 @@ public sealed record TestIdentity : IAccessContext
 {
     private TestIdentity(string displayName) => DisplayName = displayName;
 
-    /// <summary>
-    /// 显示名称
-    /// </summary>
     public string DisplayName { get; }
 
-    /// <inheritdoc />
     public UserId UserId { get; init; } = UserId.New();
 
-    /// <inheritdoc />
     public SessionId SessionId { get; init; } = SessionId.New();
 
-    /// <inheritdoc />
     public RoleId RoleId { get; init; } = RoleId.New();
 
-    /// <inheritdoc />
     public long AuthorizationVersion { get; init; } = 1;
 
-    /// <inheritdoc />
     public IReadOnlySet<string> Permissions { get; init; } = new HashSet<string>(StringComparer.Ordinal);
 
-    /// <inheritdoc />
     public OrgUnitId? OrgUnitId { get; init; }
 
-    /// <inheritdoc />
     public DataScopeGrant DataScopeGrant { get; init; } = new(
         ScopeLevel.Self,
         new Dictionary<string, ScopeLevel>(StringComparer.Ordinal),
         [],
         new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal));
 
-    /// <inheritdoc />
     public IOrgHierarchy OrgHierarchy { get; init; } = TestOrgTree.Empty;
 
-    /// <inheritdoc />
     public UserId? ImpersonatorUserId { get; init; }
 
-    /// <inheritdoc />
     public bool ImpersonationAllowsWrite { get; init; } = true;
 
-    /// <inheritdoc />
     public bool PasswordChangeRequired { get; init; }
 
-    /// <summary>
-    /// 新用户，没有权限点，只能看本人数据，不属于任何组织
-    /// </summary>
+    /// <summary>创建新用户（默认无权限点、仅本人数据范围且不属于任何组织）。</summary>
     public static TestIdentity User(string displayName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
         return new TestIdentity(displayName);
     }
 
-    /// <summary>
-    /// 使用的组织树
-    /// </summary>
+    /// <summary>指定关联的组织树。</summary>
     public TestIdentity InTree(IOrgHierarchy tree)
     {
         ArgumentNullException.ThrowIfNull(tree);
         return this with { OrgHierarchy = tree };
     }
 
-    /// <summary>
-    /// 所属组织，必须在当前组织树里
-    /// </summary>
+    /// <summary>指定所属组织单元（须位于当前组织树内）。</summary>
     public TestIdentity InOrgUnit(OrgUnitId orgUnit) =>
         OrgHierarchy.Exists(orgUnit)
             ? this with { OrgUnitId = orgUnit }
-            : throw new ArgumentException("组织单元不在当前测试组织树中，先调用 InTree。", nameof(orgUnit));
+            : throw new ArgumentException("组织单元不在当前测试组织树中，请先调用 InTree。", nameof(orgUnit));
 
-    /// <summary>
-    /// 换成新角色，角色 ID 和授权版本号随之变化，起点组织保留
-    /// </summary>
+    /// <summary>切换为新角色，自动更新角色 ID 与授权版本号，并保留原有范围起点。</summary>
     public TestIdentity WithRole(Action<TestRoleBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);
@@ -104,26 +80,18 @@ public sealed record TestIdentity : IAccessContext
         };
     }
 
-    /// <summary>
-    /// 数据权限的起点组织，代替所属组织
-    /// </summary>
+    /// <summary>指定数据权限的范围起点组织（覆盖默认所属组织）。</summary>
     public TestIdentity WithAnchors(params IEnumerable<OrgUnitId> anchors) =>
         this with { DataScopeGrant = DataScopeGrant with { Anchors = [.. anchors] } };
 
-    /// <summary>
-    /// 模拟登录
-    /// </summary>
+    /// <summary>配置模拟登录（代管）状态。</summary>
     public TestIdentity ImpersonatedBy(UserId impersonator, bool allowWrite = false) =>
         this with { ImpersonatorUserId = impersonator, ImpersonationAllowsWrite = allowWrite };
 
-    /// <summary>
-    /// 需要先修改密码
-    /// </summary>
+    /// <summary>标记用户必须先修改密码。</summary>
     public TestIdentity MustChangePassword() => this with { PasswordChangeRequired = true };
 
-    /// <summary>
-    /// 没有角色权限的版本：当前角色被收回后，用户自己的上下文
-    /// </summary>
+    /// <summary>返回清空角色权限后的身份副本，用于模拟当前角色被收回后的用户上下文。</summary>
     public TestIdentity WithoutRolePrivileges() =>
         this with
         {
@@ -135,6 +103,5 @@ public sealed record TestIdentity : IAccessContext
                 new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal)),
         };
 
-    /// <inheritdoc />
     public override string ToString() => DisplayName;
 }

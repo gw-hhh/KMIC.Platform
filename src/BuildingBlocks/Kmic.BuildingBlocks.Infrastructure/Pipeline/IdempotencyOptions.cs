@@ -1,25 +1,12 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 幂等配置
-/// </summary>
 public sealed class IdempotencyOptions
 {
-    /// <summary>
-    /// 配置节名称
-    /// </summary>
     public const string Section = "Kmic:Idempotency";
 
-    /// <summary>
-    /// 处理中记录的占用时长
-    /// </summary>
-    /// <remarks>
-    /// 进程崩溃后要等它到期，同一个键的请求才能接管
-    /// </remarks>
+    /// <summary>处理中记录的占用时长（处理进程崩溃时需等占用过期后才允许接管）</summary>
     public TimeSpan LeaseDuration { get; set; } = TimeSpan.FromMinutes(2);
 
-    /// <summary>
-    /// 记录保留时长，过期后同一个键按新请求处理
-    /// </summary>
+    /// <summary>幂等记录保留时长，过期后同一幂等键视为新请求</summary>
     public TimeSpan Retention { get; set; } = TimeSpan.FromHours(24);
 }

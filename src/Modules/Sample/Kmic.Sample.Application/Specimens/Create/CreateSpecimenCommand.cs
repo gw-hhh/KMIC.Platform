@@ -4,9 +4,7 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Create;
 
-/// <summary>
-/// 创建示例
-/// </summary>
+/// <summary>创建示例</summary>
 /// <param name="Title">标题</param>
 /// <param name="Items">明细</param>
 [RequirePermission(SamplePermissions.Create)]

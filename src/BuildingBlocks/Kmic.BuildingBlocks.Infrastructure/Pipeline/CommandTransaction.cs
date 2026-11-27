@@ -5,9 +5,6 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 命令事务
-/// </summary>
 internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
 {
     private readonly List<Func<ModuleDbContext, object?, CancellationToken, Task<Error?>>> _beforeCommit = [];
@@ -15,9 +12,7 @@ internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
     private readonly HashSet<string> _tags = new(StringComparer.Ordinal);
     private bool _invalidationQueued;
 
-    /// <summary>
-    /// 当前命令所在的模块，只有这个模块的写入上下文会被保存
-    /// </summary>
+    // 仅保存当前命令所属模块的写入上下文
     public string? Module { get; set; }
 
     public void Enqueue(Func<CancellationToken, ValueTask> action)
@@ -26,7 +21,7 @@ internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
         _afterCommit.Add(action);
     }
 
-    // 提交成功之后才失效：提交前清掉的话，并发的请求会用旧数据把缓存重新填上。同一事务登记的标签合并去重
+    // 仅在提交成功后失效缓存：若在提交前清除，并发请求可能将旧数据重新回填缓存；同一事务内登记的标签会合并去重
     public void InvalidateTags(params IEnumerable<string> tags)
     {
         ArgumentNullException.ThrowIfNull(tags);
@@ -45,12 +40,7 @@ internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
         });
     }
 
-    /// <summary>
-    /// 登记提交前的动作
-    /// </summary>
-    /// <remarks>
-    /// 在业务事务里执行，返回错误时整个命令回滚
-    /// </remarks>
+    // 在业务事务内执行，返回错误时触发整个命令回滚
     public void BeforeCommit(Func<ModuleDbContext, object?, CancellationToken, Task<Error?>> hook)
     {
         ArgumentNullException.ThrowIfNull(hook);
@@ -78,7 +68,7 @@ internal sealed class CommandTransaction(CacheInvalidator cache) : IAfterCommit
         return actions;
     }
 
-    // 回滚时丢弃，失败的命令不该留下提交后的动作
+    // 事务回滚时丢弃，避免失败的命令触发提交后动作
     public void Discard()
     {
         _beforeCommit.Clear();

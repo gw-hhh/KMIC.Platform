@@ -7,13 +7,9 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Operations.Application.BackgroundJobs.List;
 
-/// <summary>
-/// 汇总各模块的后台作业
-/// </summary>
 public sealed class ListBackgroundJobsQueryHandler(IModuleJobStores stores, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListBackgroundJobsQuery, CursorPage<BackgroundJobItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CursorPage<BackgroundJobItem>>> Handle(ListBackgroundJobsQuery query, CancellationToken cancellationToken)
     {
         BackgroundJobState? state = null;

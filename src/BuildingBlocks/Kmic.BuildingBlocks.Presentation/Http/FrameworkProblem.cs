@@ -1,10 +1,4 @@
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 不经过 Result、由中间件或框架产生的错误
-/// </summary>
-/// <param name="Code">错误码</param>
-/// <param name="Status">HTTP 状态码</param>
-/// <param name="Title">提示文字</param>
-/// <param name="Retryable">原样重试是否可能成功</param>
+/// <summary>不经过 Result 通道、由框架或中间件直接返回的 HTTP 错误定义</summary>
 public sealed record FrameworkProblem(string Code, int Status, string Title, bool Retryable = false);

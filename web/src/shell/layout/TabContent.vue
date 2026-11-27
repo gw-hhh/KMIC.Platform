@@ -13,7 +13,7 @@ const { workspace, catalog, settings } = defineProps<{
 
 const scroller = useTemplateRef<HTMLElement>('scroller');
 
-// KeepAlive 按组件名缓存，所以按标签键包一层
+// KeepAlive 依赖组件名进行实例缓存，按标签键生成独立包装组件
 const wrappers = new Map<string, Component>();
 
 function idOf(tab: Tab): string {
@@ -39,7 +39,7 @@ const included = computed(() => workspace.tabs.value.map(idOf));
 const animated = computed(() => settings.transition.enabled);
 const transitionName = computed(() => `page-${settings.transition.effect}`);
 
-// 页面元素随 KeepAlive 一直保留，关闭标签后跟着回收，所以按元素记
+// 页面 DOM 随 KeepAlive 缓存复用并在关闭标签后回收，使用 WeakMap 按元素记录状态
 interface PageMemory {
   scrollTop: number;
   focused: HTMLElement | null;
@@ -58,7 +58,7 @@ function trackFocus(event: FocusEvent): void {
   }
 }
 
-// 还在离场的页面；新的切换开始时立即结束，同一时刻最多一出一进，快速切换时不会几层页面叠在一起
+// 追踪离场过渡中的页面：新切换开始时立即强制收尾，防止快速连续切换引发多层叠加
 const leaving = new Map<HTMLElement, () => void>();
 
 function finishLeaving(): void {
@@ -85,7 +85,7 @@ function onLeave(el: Element, done: () => void): void {
     finish();
     return;
   }
-  // 离场的样式在两帧之后才加上，那时过渡才开始；减少动画时没有过渡，直接结束
+  // Vue 需延迟两帧挂载离场过渡类，待过渡正式启动后再等待其全部动画结束
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       void Promise.allSettled(page.getAnimations().map((animation) => animation.finished)).then(finish);
@@ -93,13 +93,13 @@ function onLeave(el: Element, done: () => void): void {
   });
 }
 
-// 新页面插入后、画出来之前恢复滚动位置，入场时就在原来的位置
+// 在新页面挂载后、首帧绘制前恢复滚动条位置，避免入场后发生视觉跳变
 function onEnter(el: Element): void {
   const box = scroller.value;
   if (box) {
     const before = box.scrollTop;
     box.scrollTop = memories.get(el)?.scrollTop ?? 0;
-    // 离场的页面浮在上方，跟着挪回原处，看上去不动
+    // 同步偏移绝对定位的离场页面，抵消容器 scrollTop 变化以维持视觉静止
     const shift = box.scrollTop - before;
     for (const page of leaving.keys()) {
       page.style.top = `${String((Number.parseFloat(page.style.top) || 0) + shift)}px`;
@@ -108,7 +108,7 @@ function onEnter(el: Element): void {
   restoreFocus(el);
 }
 
-// 用键盘在标签栏、菜单里操作时不抢焦点
+// 若用户正通过键盘在标签栏或菜单中导航，则不抢占当前焦点
 function restoreFocus(page: Element): void {
   const focused = memories.get(page)?.focused;
   const current = document.activeElement;
@@ -146,7 +146,7 @@ function restoreFocus(page: Element): void {
   min-height: 100%;
 }
 
-// 淡出的页面不占位，避免跳动
+// 离场页面脱离文档流避免挤压布局引发跳动
 .tab-stage > .page-fade-slide-leave-active,
 .tab-stage > .page-fade-leave-active,
 .tab-stage > .page-fade-up-leave-active,

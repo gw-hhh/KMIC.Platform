@@ -7,19 +7,15 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.ScheduledJobs.Set;
 
-/// <summary>
-/// 保存定时任务的自定义设置
-/// </summary>
 public sealed class SetJobOverrideCommandHandler(
     IScheduledJobControl control,
     IScheduledJobSettingRepository settings,
     TimeProvider time,
     IAfterCommit afterCommit) : ICommandHandler<SetJobOverrideCommand, VersionedResponse<ScheduledJobSettingId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<ScheduledJobSettingId>>> Handle(SetJobOverrideCommand command, CancellationToken cancellationToken)
     {
-        // 已经从代码里删除的任务只剩设置行，改了也没有触发器可同步
+        // 已从代码中移除的任务仅保留配置记录，修改后无对应触发器需要同步
         if (!control.IsDeclared(command.JobName))
         {
             return OperationsErrors.JobNotFound;

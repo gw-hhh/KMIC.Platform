@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
-/// <summary>
-/// 请求日志的日志方法
-/// </summary>
 internal static partial class LoggingBehaviorLog
 {
     [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Message {MessageName} handled with {Outcome} in {ElapsedMs:0.0} ms (user {UserId}, role {RoleId})")]

@@ -5,9 +5,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 令牌验证与访问上下文的测试端点：回报请求里的当前身份
-/// </summary>
 internal static class AuthEndpoints
 {
     public static readonly Type[] All = [typeof(WhoAmIEndpoint), typeof(RoleUnavailableOkEndpoint), typeof(PublicWhoAmIEndpoint)];
@@ -32,7 +29,7 @@ internal static class AuthEndpoints
         private static Identity Handle(IExecutionContext execution) => Describe(execution);
     }
 
-    // 匿名端点（对应登录、刷新）：带着令牌的请求也能进来
+    // 匿名端点（对应登录、刷新）：携带令牌的请求也可正常访问
     internal sealed class PublicWhoAmIEndpoint : IEndpoint
     {
         public void Map(IEndpointRouteBuilder group) =>

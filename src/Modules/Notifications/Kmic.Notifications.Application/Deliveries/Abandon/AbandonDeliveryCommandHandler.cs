@@ -5,12 +5,8 @@ using Kmic.Notifications.Domain.Errors;
 
 namespace Kmic.Notifications.Application.Deliveries.Abandon;
 
-/// <summary>
-/// 放弃失败的投递
-/// </summary>
 public sealed class AbandonDeliveryCommandHandler(IDeliveryRepository deliveries, TimeProvider time) : ICommandHandler<AbandonDeliveryCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(AbandonDeliveryCommand command, CancellationToken cancellationToken)
     {
         var loaded = await deliveries.GetForUpdateAsync(command.Id, null, cancellationToken);

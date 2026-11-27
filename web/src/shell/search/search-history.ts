@@ -2,14 +2,13 @@ import { z } from 'zod';
 
 export type HistoryStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
-/** 最多记几条 */
 export const historyLimit = 8;
 
 const historySchema = z.array(z.string());
 
 const storageKey = (userId: string): string => `kmic.search-history.${userId}`;
 
-/** 只存路由名，标题和权限按当前菜单算 */
+/** 仅持久化路由名称，显示标题与权限校验以当前菜单树为准 */
 export function loadSearchHistory(storage: HistoryStorage, userId: string): string[] {
   try {
     const text = storage.getItem(storageKey(userId));
@@ -24,11 +23,11 @@ export function saveSearchHistory(storage: HistoryStorage, userId: string, route
   try {
     storage.setItem(storageKey(userId), JSON.stringify(routeNames.slice(0, historyLimit)));
   } catch {
-    // 存储不可用时忽略
+    // 本地存储不可用时静默忽略
   }
 }
 
-/** 最近打开的排在最前 */
+/** 将指定路由移至或插入历史记录首位，并按上限截断 */
 export function addToHistory(history: readonly string[], routeName: string): string[] {
   return [routeName, ...history.filter((name) => name !== routeName)].slice(0, historyLimit);
 }

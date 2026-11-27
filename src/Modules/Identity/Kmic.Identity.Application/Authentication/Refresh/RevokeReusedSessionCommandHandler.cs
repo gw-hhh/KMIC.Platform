@@ -6,16 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Application.Authentication.Refresh;
 
-/// <summary>
-/// 作废发生刷新令牌重用的会话
-/// </summary>
 public sealed class RevokeReusedSessionCommandHandler(
     ISessionRepository sessions,
     IOptions<SessionLifetimeOptions> sessionOptions,
     ISecurityEventWriter securityEvents,
     TimeProvider time) : ICommandHandler<RevokeReusedSessionCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(RevokeReusedSessionCommand command, CancellationToken cancellationToken)
     {
         var hash = RefreshTokens.Hash(command.RefreshToken);

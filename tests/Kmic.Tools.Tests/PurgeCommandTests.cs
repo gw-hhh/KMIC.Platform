@@ -3,9 +3,7 @@ using Shouldly;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 安全事件表属于 Identity 模块，这里还没有，用框架测试库建一张同结构的
-/// </summary>
+// 安全事件表归属 Identity 模块，此处在测试库中建同结构表模拟清理
 public sealed class PurgeCommandTests(ToolsTemplate template) : IAsyncLifetime
 {
     private readonly ClassDatabase<ToolsTemplate> _database = new(template);

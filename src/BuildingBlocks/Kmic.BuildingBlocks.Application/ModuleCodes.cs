@@ -3,14 +3,9 @@ using System.Text.RegularExpressions;
 
 namespace Kmic.BuildingBlocks.Application;
 
-/// <summary>
-/// 读取“模块.名称”格式的编码常量
-/// </summary>
+// 读取并校验“模块.名称”格式的常量声明
 internal static partial class ModuleCodes
 {
-    /// <summary>
-    /// 读取分组类型里标了 TAttribute 的常量，格式不对或不属于本模块的记为问题
-    /// </summary>
     public static IEnumerable<(string Code, TAttribute Attribute)> Read<TAttribute>(Type group, string module, string kind, List<string> problems)
         where TAttribute : Attribute
     {
@@ -19,7 +14,7 @@ internal static partial class ModuleCodes
             var attribute = field.GetCustomAttribute<TAttribute>();
             if (!field.IsLiteral || field.FieldType != typeof(string) || attribute is null)
             {
-                problems.Add($"{group.Name}.{field.Name}：{kind}必须是标了 [{typeof(TAttribute).Name[..^"Attribute".Length]}] 的 string 常量。");
+                problems.Add($"{group.Name}.{field.Name}：{kind}必须是标注了 [{typeof(TAttribute).Name[..^"Attribute".Length]}] 的 string 常量。");
                 continue;
             }
 
@@ -38,14 +33,8 @@ internal static partial class ModuleCodes
         }
     }
 
-    /// <summary>
-    /// 功能开关名是不是“模块.功能”格式
-    /// </summary>
     public static bool IsValidFeatureName(string name) => Pattern().IsMatch(name);
 
-    /// <summary>
-    /// 编码全系统唯一，显示名称在模块内唯一
-    /// </summary>
     public static void CheckUnique<T>(IReadOnlyList<T> items, Func<T, string> code, Func<T, (string Module, string DisplayName)> name, string kind, List<string> problems)
     {
         foreach (var duplicated in items.GroupBy(code, StringComparer.Ordinal).Where(g => g.Count() > 1))

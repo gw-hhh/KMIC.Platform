@@ -13,12 +13,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Infrastructure.Operations;
 
-/// <summary>
-/// 运维命令的实现：首个管理员初始化、应急重置管理员密码
-/// </summary>
-/// <remarks>
-/// 直接用运维连接执行，不经过命令管道
-/// </remarks>
+/// <summary>运维命令执行器（首次初始化及应急重置密码），直接连接数据库而不经过命令管道。</summary>
 public sealed class IdentityBootstrapper
 {
     private const string DefaultRootUnitName = "总部";
@@ -26,12 +21,7 @@ public sealed class IdentityBootstrapper
     private readonly PasswordService _passwords = new();
     private readonly PasswordPolicy _policy = new(Options.Create(new PasswordOptions()), new EmbeddedWeakPasswordList());
 
-    /// <summary>
-    /// 初始化首个管理员、系统管理员角色、角色授予及组织树根单元
-    /// </summary>
-    /// <remarks>
-    /// 只能在没有普通用户时执行
-    /// </remarks>
+    /// <summary>创建首个系统管理员、内置角色、授予及组织树根单元，仅在尚无普通用户时可执行。</summary>
     public async Task<Result> BootstrapAsync(string connectionString, string account, string displayName, string password, string? rootUnitName, DateTimeOffset now, CancellationToken ct)
     {
         await using var db = StandaloneContexts.Create<IdentityDbContext>(connectionString);
@@ -73,12 +63,7 @@ public sealed class IdentityBootstrapper
         return Result.Success();
     }
 
-    /// <summary>
-    /// 应急重置：为持有受保护角色的账号设置新密码，作废它的全部会话，清零登录限制
-    /// </summary>
-    /// <remarks>
-    /// 不会启用已禁用的账号
-    /// </remarks>
+    /// <summary>应急重置受保护角色持有人的密码，作废其全部会话并清零登录限制（不启用已禁用账号）。</summary>
     public async Task<Result> ResetAdministratorPasswordAsync(string connectionString, string account, string password, DateTimeOffset now, CancellationToken ct)
     {
         await using var db = StandaloneContexts.Create<IdentityDbContext>(connectionString);

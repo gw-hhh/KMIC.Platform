@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { defaultShellSettings, parseShellSettings, serializeShellSettings } from './shell-settings';
 
-describe('外壳设置的读取', () => {
-  it('没有保存过时用默认值', () => {
+describe('外壳设置读取与解析', () => {
+  it('未保存过设置或为空对象时返回默认值', () => {
     expect(parseShellSettings(undefined)).toEqual(defaultShellSettings);
     expect(parseShellSettings({})).toEqual(defaultShellSettings);
   });
 
-  it('保存的值读回来不变', () => {
+  it('序列化后再解析应完整保留各配置项', () => {
     const settings = {
       ...defaultShellSettings,
       layout: 'mixed-column' as const,
@@ -18,7 +18,7 @@ describe('外壳设置的读取', () => {
     expect(parseShellSettings(serializeShellSettings(settings))).toEqual(settings);
   });
 
-  it('不合法的字段取默认值，其余字段照常读', () => {
+  it('非法字段回退为默认值，其余合法字段正常解析', () => {
     const parsed = parseShellSettings({
       layout: 'hologram',
       appearance: { mode: 'dark', primary: 'no-such-color', radius: 5 },
@@ -36,14 +36,14 @@ describe('外壳设置的读取', () => {
     expect(parsed.tabs.style).toBe('card');
   });
 
-  it('未知字段忽略', () => {
+  it('忽略未定义的未知字段', () => {
     const parsed = parseShellSettings({ futureFeature: { enabled: true }, layout: 'mixed-vertical' });
 
     expect(parsed.layout).toBe('mixed-vertical');
     expect(parsed).not.toHaveProperty('futureFeature');
   });
 
-  it('不是对象时用默认值', () => {
+  it('输入非对象类型时回退为默认值', () => {
     expect(parseShellSettings('oops')).toEqual(defaultShellSettings);
     expect(parseShellSettings(null)).toEqual(defaultShellSettings);
   });

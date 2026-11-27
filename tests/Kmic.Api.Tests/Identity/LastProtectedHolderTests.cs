@@ -5,9 +5,7 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// “系统里至少保留一个启用的系统管理员”：这条规则数的是整个库里的持有人，所以这几个测试独占一个数据库
-/// </summary>
+// 统计范围覆盖全库，本测试类独占数据库
 public sealed class LastProtectedHolderTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

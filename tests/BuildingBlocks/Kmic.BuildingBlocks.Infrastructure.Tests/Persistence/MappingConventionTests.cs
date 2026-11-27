@@ -97,7 +97,7 @@ public sealed class MappingConventionTests(ClassDatabase<ProbeTemplate> database
         var number = $"dup-{TicketNumbers.Next()}";
         await _harness.AddAsync(_alice, Ticket.Create(number, _alice.UserId, _org["总部"]));
 
-        // 编号不区分大小写，只差大小写也算重复
+        // 单据编号采用大小写不敏感排序规则，仅大小写不同仍视为唯一约束冲突
         var error = await Should.ThrowAsync<DbUpdateException>(() =>
             _harness.AddAsync(_alice, Ticket.Create(number.ToUpperInvariant(), _alice.UserId, _org["总部"])));
 
@@ -115,7 +115,7 @@ public sealed class MappingConventionTests(ClassDatabase<ProbeTemplate> database
         var error = await Should.ThrowAsync<DbUpdateException>(() =>
             _harness.AddAsync(_alice, Ticket.Create(number, _alice.UserId, _org["总部"])));
 
-        // 记日志时写进去的就是异常的完整文本；Npgsql 默认把错误详情替换成一句说明，里面不会有重复的那个值
+        // 日志记录会输出完整异常文本；Npgsql 默认已脱敏错误详情，异常信息中不得泄露重复的字段值
         var postgres = error.InnerException.ShouldBeOfType<PostgresException>();
         postgres.Detail.ShouldNotBeNull().ShouldNotContain(number);
         error.ToString().ShouldNotContain(number);

@@ -6,12 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 补投：只补已经投递过的、序号落在区间里的消息；订阅收到过的不重复写入；订阅已终结、来源或订阅不对时拒绝，端到端
-/// </summary>
-/// <remarks>
-/// 发件箱的行直接写进 Sample 的发件箱，订阅方也借用 Sample 的收件箱
-/// </remarks>
 public sealed class RedeliverTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -69,11 +63,11 @@ public sealed class RedeliverTests(ClassDatabase<ApiTemplate> database, ApiTempl
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await JsonAsync(response);
-        body.GetProperty("candidates").GetInt64().ShouldBe(2, "区间里还没投递的不补");
+        body.GetProperty("candidates").GetInt64().ShouldBe(2, "区间内尚未投递的消息不应纳入补投范围");
         body.GetProperty("written").GetInt64().ShouldBe(2);
-        (await JsonAsync(again)).GetProperty("written").GetInt64().ShouldBe(0, "订阅已经收到过的不再写");
+        (await JsonAsync(again)).GetProperty("written").GetInt64().ShouldBe(0, "订阅方已接收过的消息不应重复写入");
         (await InboxRowsAsync(subscription)).ShouldBe(2);
-        (await Seed.CountAsync($"""SELECT count(*) FROM "Sample"."InboxMessage" WHERE "Subscription" = '{subscription}' AND "Status" = {Pending} AND "SourceModule" = 'Sample' AND "Seq" IN ({first}, {second})""")).ShouldBe(2, "序号沿用来源的序号，等处理程序领取");
+        (await Seed.CountAsync($"""SELECT count(*) FROM "Sample"."InboxMessage" WHERE "Subscription" = '{subscription}' AND "Status" = {Pending} AND "SourceModule" = 'Sample' AND "Seq" IN ({first}, {second})""")).ShouldBe(2, "补投消息应沿用原消息序号并等待处理器领取");
         outside.ShouldBeGreaterThan(notDelivered);
     }
 

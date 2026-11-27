@@ -11,7 +11,7 @@ internal sealed class CreateSpecimenEndpoint : IEndpoint
         group.MapPost("/specimens", HandleAsync)
             .Sends<CreateSpecimenCommand>()
             .WithSummary("创建示例")
-            .WithDescription("创建草稿，负责人为当前用户。必须提供幂等键，超时重试时使用同一个键。成功返回 201，Location 指向新建示例的地址。");
+            .WithDescription("创建草稿（负责人为当前用户），须携带幂等键；成功返回 201 及 Location");
 
     private static async Task<IResult> HandleAsync(CreateSpecimenRequest request, ICommandSender sender, CancellationToken ct)
     {

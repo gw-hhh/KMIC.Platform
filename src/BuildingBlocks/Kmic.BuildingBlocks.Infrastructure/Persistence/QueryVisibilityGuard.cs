@@ -6,9 +6,6 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 查询可见性检查
-/// </summary>
 internal sealed class QueryVisibilityGuard(ExecutionScope execution, ModuleWriteContexts writeContexts) : DbCommandInterceptor
 {
     public override InterceptionResult<DbDataReader> ReaderExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result)

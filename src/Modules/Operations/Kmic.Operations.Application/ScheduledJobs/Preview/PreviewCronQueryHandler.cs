@@ -4,12 +4,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Operations.Application.ScheduledJobs.Preview;
 
-/// <summary>
-/// 校验 Cron 并预览触发时间
-/// </summary>
 public sealed class PreviewCronQueryHandler(IScheduledJobControl control, TimeProvider time) : IQueryHandler<PreviewCronQuery, CronPreviewResponse>
 {
-    /// <inheritdoc />
     public ValueTask<Result<CronPreviewResponse>> Handle(PreviewCronQuery query, CancellationToken cancellationToken)
     {
         var preview = control.Preview(query.Cron.Trim(), time.GetUtcNow(), CronRules.PreviewCount);

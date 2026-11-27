@@ -1,20 +1,11 @@
 namespace Kmic.BuildingBlocks.Application.Events;
 
-/// <summary>
-/// 提交后执行的动作
-/// </summary>
-/// <remarks>
-/// 只用于失败了也没关系的动作，必须送达的走 Outbox
-/// </remarks>
+/// <summary>事务提交后回调，仅用于允许失败的轻量动作；需可靠送达的逻辑请使用 Outbox。</summary>
 public interface IAfterCommit
 {
-    /// <summary>
-    /// 登记动作，执行失败只记警告
-    /// </summary>
+    /// <summary>注册提交后动作，执行失败时仅记录警告日志。</summary>
     void Enqueue(Func<CancellationToken, ValueTask> action);
 
-    /// <summary>
-    /// 提交后清除这些标签的缓存
-    /// </summary>
+    /// <summary>提交后失效指定标签的缓存。</summary>
     void InvalidateTags(params IEnumerable<string> tags);
 }

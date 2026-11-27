@@ -4,12 +4,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Operations.Application.Messages.Summary;
 
-/// <summary>
-/// 汇总各模块的消息积压
-/// </summary>
 public sealed class GetMessageSummaryQueryHandler(IModuleMessageStores stores) : IQueryHandler<GetMessageSummaryQuery, MessageSummaryResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<MessageSummaryResponse>> Handle(GetMessageSummaryQuery query, CancellationToken cancellationToken)
     {
         var retiring = await stores.GetRetiringSubscriptionsAsync(cancellationToken);

@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 用户管理：新建、改资料、禁用启用、重置密码、解锁、强制下线，以及列表、详情、选人下拉，端到端
-/// </summary>
 public sealed class UserAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -40,7 +37,7 @@ public sealed class UserAdministrationTests(ClassDatabase<ApiTemplate> database,
 
     private static async Task<string> CodeOfAsync(HttpResponseMessage response) => (await JsonAsync(response)).GetProperty("code").GetString()!;
 
-    // 造一个带密码、拥有普通角色的用户，用来被管理
+    // 创建带有初始密码和普通角色的目标用户，用于后续管理操作测试
     private async Task<Guid> SeedMemberAsync(string account, string? mobile = null, bool protectedRole = false)
     {
         var role = await Seed.RoleAsync("成员-" + account, [IdentityPermissions.RoleView], isProtected: protectedRole);
@@ -253,7 +250,7 @@ public sealed class UserAdministrationTests(ClassDatabase<ApiTemplate> database,
         login.GetProperty("passwordChangeRequired").GetBoolean().ShouldBeTrue();
         (await GetAsync(NewClient(), "/api/v1/identity/users", login.GetProperty("access_token").GetString())).StatusCode.ShouldBe(HttpStatusCode.Forbidden);
 
-        // 临时密码不留在任何地方：幂等记录、安全事件里都找不到它，重置本身有一条安全事件
+        // 临时密码不得持久化留存：幂等记录与安全事件中均不应包含明文密码，仅记录密码重置事件本身
         (await WaitForSecurityEventsAsync($"\"Type\" = 'PasswordReset' AND \"ResourceId\" = '{target}'")).ShouldBe(1);
         (await Seed.CountAsync($"""SELECT count(*) FROM "Identity"."IdempotencyRecord" WHERE "ResponseBody"::text LIKE '%{temporary}%'""")).ShouldBe(0);
         (await Seed.CountAsync($"""SELECT count(*) FROM "Identity"."SecurityEvent" WHERE "Details"::text LIKE '%{temporary}%' OR "Reason" LIKE '%{temporary}%'""")).ShouldBe(0);

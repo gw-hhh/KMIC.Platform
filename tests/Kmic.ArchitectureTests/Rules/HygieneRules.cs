@@ -6,16 +6,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace Kmic.ArchitectureTests.Rules;
 
-/// <summary>
-/// 写法上的禁忌：可变静态字段、异常类型、后台组件、并发原语、对测试以外的可见性
-/// </summary>
 internal static class HygieneRules
 {
     private const BindingFlags AllMembers = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
-    /// <summary>
-    /// 没有可变的静态字段：进程内共享的可变状态在多用户下一定出问题
-    /// </summary>
+    // 禁止可变静态字段，避免多请求并发竞态
     public static IReadOnlyList<string> MutableStatics(IEnumerable<Type> types) =>
     [
         .. types.Where(t => !IsCompilerGenerated(t) && IsOurs(t))
@@ -24,9 +19,7 @@ internal static class HygieneRules
             .Select(f => $"{f.DeclaringType!.FullName}.{f.Name}：静态字段不能可变，要用 static readonly。"),
     ];
 
-    /// <summary>
-    /// 带密码、令牌的 record 要自己写 ToString：编译器生成的会把每个属性的值都打出来，一旦被拼进日志或异常消息就泄露了
-    /// </summary>
+    // 含密码或令牌字段的 record 须自定义 ToString，防止默认实现将敏感信息输出到日志
     public static IReadOnlyList<string> SecretsInToString(IEnumerable<Type> types)
     {
         var secretName = new System.Text.RegularExpressions.Regex("password|refreshtoken|accesstoken|^token$|secret|credential", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
@@ -42,21 +35,15 @@ internal static class HygieneRules
         ];
     }
 
-    /// <summary>
-    /// 模块里不定义异常类型：业务失败用 Result，异常类型只在框架里
-    /// </summary>
+    // 业务模块禁止定义异常类型，业务失败统一返回 Result
     public static IReadOnlyList<string> ExceptionTypes(IEnumerable<Type> types) =>
         [.. types.Where(t => typeof(Exception).IsAssignableFrom(t)).Select(t => $"{t.FullName}：模块里不定义异常类型，业务失败返回 Result。")];
 
-    /// <summary>
-    /// 模块不注册后台组件：后台处理由框架提供
-    /// </summary>
+    // 模块不直接注册后台服务，后台处理由框架托管
     public static IReadOnlyList<string> HostedServices(IEnumerable<Type> types) =>
         [.. types.Where(t => !t.IsInterface && typeof(IHostedService).IsAssignableFrom(t)).Select(t => $"{t.FullName}：模块不自己实现后台组件，用框架的作业、定时任务和订阅。")];
 
-    /// <summary>
-    /// 模块里不用锁和信号量处理业务并发：业务并发靠数据库的版本、行锁和唯一约束
-    /// </summary>
+    // 业务模块禁止用锁或信号量控制并发，应依赖数据库版本号、行锁与唯一约束
     public static IReadOnlyList<string> ConcurrencyPrimitives(IEnumerable<Type> types)
     {
         var forbidden = new[] { typeof(SemaphoreSlim), typeof(Mutex), typeof(Lock), typeof(ReaderWriterLockSlim) };
@@ -69,9 +56,7 @@ internal static class HygieneRules
         ];
     }
 
-    /// <summary>
-    /// InternalsVisibleTo 只给本模块自己的测试项目
-    /// </summary>
+    // InternalsVisibleTo 仅允许授予本模块的测试项目
     public static IReadOnlyList<string> VisibleTo(Assembly assembly, string module)
     {
         var allowed = new System.Text.RegularExpressions.Regex($@"^Kmic\.{module}\.[A-Za-z.]*Tests$", System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
@@ -83,9 +68,7 @@ internal static class HygieneRules
         ];
     }
 
-    /// <summary>
-    /// 聚合根的属性不能是另一个聚合根，聚合之间只按 ID 引用；只有聚合根可以软删除
-    /// </summary>
+    // 聚合根之间仅按 ID 引用，且只有聚合根可软删除
     public static IReadOnlyList<string> Aggregates(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -102,9 +85,7 @@ internal static class HygieneRules
         return problems;
     }
 
-    /// <summary>
-    /// Contracts 里没有领域类型：实体、领域事件、强类型 ID 都不出模块
-    /// </summary>
+    // Contracts 不得暴露实体、领域事件与强类型 ID
     public static IReadOnlyList<string> ContractsContent(IEnumerable<Type> types) =>
     [
         .. types.Where(t => IsEntity(t) || typeof(IDomainEvent).IsAssignableFrom(t) || typeof(IStronglyTypedId).IsAssignableFrom(t))
@@ -128,7 +109,7 @@ internal static class HygieneRules
         typeof(IAggregateRoot).IsAssignableFrom(type)
         || type.GetInterfaces().Concat([type]).Where(i => i.IsGenericType).SelectMany(i => i.GetGenericArguments()).Any(a => typeof(IAggregateRoot).IsAssignableFrom(a));
 
-    // 源码生成器（如 OpenAPI 的 XML 注释支持）放在 Microsoft.* 命名空间的生成代码不归我们管
+    // 排除源码生成器（如 OpenAPI 的 XML 注释支持）在 Microsoft.* 命名空间下生成的类型
     private static bool IsOurs(Type type) => type.Namespace?.StartsWith("Kmic.", StringComparison.Ordinal) == true;
 
     private static bool IsCompilerGenerated(Type type) =>

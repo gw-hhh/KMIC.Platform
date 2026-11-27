@@ -8,9 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
-/// <summary>
-/// 请求日志，不记录消息内容
-/// </summary>
+/// <summary>记录请求日志与耗时指标，不记录消息载荷。</summary>
 public sealed class LoggingBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     IExecutionContext context,
@@ -21,7 +19,6 @@ public sealed class LoggingBehavior<TMessage, TResponse>(
     where TMessage : IMessage
     where TResponse : Result
 {
-    /// <inheritdoc />
     public async ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);
@@ -57,8 +54,8 @@ public sealed class LoggingBehavior<TMessage, TResponse>(
         }
     }
 
-    // 处理这条消息期间的所有日志都带这些字段（Serilog 把日志作用域里的键值当作属性输出），业务代码不用自己传。
-    // 只放 ID 和有限取值，不放姓名等个人信息
+    // 将消息上下文写入日志作用域，便于期间所有日志自动附带这些属性
+    // 仅记录标识与有限枚举值，避免记录姓名等个人敏感信息
     private Dictionary<string, object?> LogProperties(UseCase useCase)
     {
         var user = context.User;

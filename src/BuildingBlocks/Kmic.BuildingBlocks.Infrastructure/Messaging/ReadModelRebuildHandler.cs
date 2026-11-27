@@ -10,9 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 重建读模型：先扫描源端的全部快照，再向源端确认本地多出来的行
-/// </summary>
+// 读模型重建处理器：先全量扫描源端快照，再核对并标记本地多余行
 internal sealed class ReadModelRebuildHandler(
     SubscriptionCatalog subscriptions,
     RebuildRunStore runs,
@@ -25,16 +23,16 @@ internal sealed class ReadModelRebuildHandler(
     {
         ArgumentNullException.ThrowIfNull(job);
 
-        // 框架作业的上下文都是 JobContext，没有别的实现
-        var pages = context as JobContext ?? throw new InvalidOperationException("重建作业要由框架的作业执行器运行。");
+        // 框架内置作业上下文固定为 JobContext
+        var pages = context as JobContext ?? throw new InvalidOperationException("读模型重建作业必须由框架作业执行器运行。");
         var definition = subscriptions.All.FirstOrDefault(s => string.Equals(s.Name, job.Subscription, StringComparison.Ordinal) && s.Rebuild is not null);
         if (definition?.Rebuild is not { } rebuild)
         {
-            return CommonErrors.JobFailed.WithDetail($"本实例没有声明订阅 {job.Subscription} 的重建方式。");
+            return CommonErrors.JobFailed.WithDetail($"当前实例未声明订阅 {job.Subscription} 的读模型重建方式。");
         }
 
         var settings = options.Value.Rebuild;
-        // 运维确认收尾的作业不再扫描：扫描在前一次作业里已经做完
+        // 运维确认收尾的作业跳过全量扫描阶段（扫描已在前序作业中完成）
         var state = job.ConfirmMissing
             ? new RebuildCheckpoint(true, null, job.Scanned)
             : context.GetCheckpoint<RebuildCheckpoint>() ?? new RebuildCheckpoint(false, null, 0);
@@ -72,7 +70,7 @@ internal sealed class ReadModelRebuildHandler(
         var limit = job.ConfirmMissing ? long.MaxValue : Math.Max(settings.MaxMissingCount, (long)(total * settings.MaxMissingRatio));
         var done = new RebuildCheckpoint(true, null, scanned);
 
-        // 候选里源端还有的，按重建写入处理；没有的先记下来，数量不超限才置终态
+        // 候选项若在源端仍存在则按重建逻辑覆盖写入；若源端已缺失则先行记录，待确认未超阈值后再统一置为终态
         var missing = new List<ReadModelCandidate>();
         Guid? last = null;
         while (missing.Count <= limit)
@@ -120,7 +118,7 @@ internal sealed class ReadModelRebuildHandler(
         return new JobOutcome(Summary: new RebuildSummary(scanned, marked, missing.Count, AwaitingConfirmation: false));
     }
 
-    // 终态的行不修改。源端还返回它说明终态可能是误标，只记日志，由运维核实
+    // 已处于终态的记录不作覆盖；若源端仍返回该记录，可能存在终态误标，仅记录日志交由运维核实
     private async Task ScanAsync(IServiceProvider scope, IReadModelRebuild rebuild, IReadOnlyList<IReadModel> rows, ReadModelRebuildJob job, string module, CancellationToken ct)
     {
         var skipped = 0;

@@ -18,9 +18,6 @@ using static Kmic.BuildingBlocks.Application.Access.ScopeLevel;
 
 namespace Kmic.Api.Tests.Sample;
 
-/// <summary>
-/// 其他模块解析标本引用：按 ID 批量、不受调用方权限和数据范围限制、自动分批
-/// </summary>
 public sealed class SpecimenReferencesTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -67,7 +64,7 @@ public sealed class SpecimenReferencesTests(ClassDatabase<ApiTemplate> database,
     {
         var draft = await CreateAsync(Alice, "草稿");
         var closed = await CreateAsync(Alice, "已关闭");
-        // 每个作用域一个幂等键，两个命令要分开
+        // 单个执行作用域仅分配一个幂等键，两个命令需在各自独立的作用域中执行
         long version;
         await using (var submit = As(Alice))
         {

@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 后台作业汇总：跨模块列表与翻页、筛选、我的作业、管理员取消，端到端。作业行直接写进各模块的作业表
-/// </summary>
 public sealed class BackgroundJobTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -92,20 +89,20 @@ public sealed class BackgroundJobTests(ClassDatabase<ApiTemplate> database, ApiT
         var all = await WalkAsync(viewer.Token, "/background-jobs?submittedBy=" + owner, limit: 2);
         var single = await WalkAsync(viewer.Token, "/background-jobs", limit: 200);
 
-        all.Count.ShouldBe(5, "提交人筛选下的 5 个");
+        all.Count.ShouldBe(5, "按提交人筛选应返回 5 条记录");
         all.Select(j => j.GetProperty("id").GetGuid()).Distinct().Count().ShouldBe(5);
         var mine = single.Where(j => ids.Contains(j.GetProperty("id").GetGuid())).ToList();
-        mine.Count.ShouldBe(6, "同一时间的三个作业、分属三个模块，翻页时一个也不能漏");
+        mine.Count.ShouldBe(6, "同一时间戳分属三个模块的作业在分页遍历中不应遗漏");
         var times = mine.Select(j => j.GetProperty("submittedAt").GetDateTimeOffset()).ToList();
         times.ShouldBe(times.OrderByDescending(t => t));
         var walked = await WalkAsync(viewer.Token, "/background-jobs", limit: 2);
-        walked.Select(j => j.GetProperty("id").GetGuid()).ShouldBe(single.Select(j => j.GetProperty("id").GetGuid()), "每页两条翻完，和一次取完的顺序一样，没有重复也没有遗漏");
+        walked.Select(j => j.GetProperty("id").GetGuid()).ShouldBe(single.Select(j => j.GetProperty("id").GetGuid()), "按每页两条游标分页的结果顺序与全量查询应完全一致，无重复或遗漏");
         var failed = mine.Single(j => string.Equals(j.GetProperty("status").GetString(), "Failed", StringComparison.Ordinal));
         failed.GetProperty("module").GetString().ShouldBe("Configuration");
         failed.GetProperty("errorCode").GetString().ShouldBe("Test.Failure");
         failed.GetProperty("submittedByName").GetString().ShouldBe("提交作业的人");
         mine.Single(j => j.GetProperty("resultSummary").ValueKind == JsonValueKind.Object).GetProperty("resultSummary").GetProperty("rows").GetInt32().ShouldBe(40);
-        mine.Where(j => j.TryGetProperty("args", out _)).ShouldBeEmpty("作业参数不对外");
+        mine.Where(j => j.TryGetProperty("args", out _)).ShouldBeEmpty("列表接口不应暴露作业参数");
         JsonSerializer.Serialize(mine).ShouldNotContain("筛选条件");
     }
 
@@ -179,7 +176,7 @@ public sealed class BackgroundJobTests(ClassDatabase<ApiTemplate> database, ApiT
         foreach (var refused in new[] { other, bySystem, unknownJob, unknownModule })
         {
             refused.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-            CodeOf(await JsonAsync(refused)).ShouldBe("Operations.BackgroundJobNotFound", "别人的和不存在的一样，不暴露它存在");
+            CodeOf(await JsonAsync(refused)).ShouldBe("Operations.BackgroundJobNotFound", "访问他人作业应与不存在时表现一致，避免泄露资源存在性");
         }
 
         unauthenticated.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -213,7 +210,7 @@ public sealed class BackgroundJobTests(ClassDatabase<ApiTemplate> database, ApiT
         states[running].GetProperty("cancelRequestedBy").GetGuid().ShouldBe(me);
         states[finished].GetProperty("status").GetString().ShouldBe("Succeeded");
         var stillQueued = await Seed.ScalarAsync<short>($"""SELECT "Status" FROM "Sample"."BackgroundJob" WHERE "Id" = '{others}'""");
-        stillQueued.ShouldBe((short)0, "别人的作业没有被动过");
+        stillQueued.ShouldBe((short)0, "他人作业状态不应被修改");
     }
 
     [Fact]

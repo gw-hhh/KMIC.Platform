@@ -10,23 +10,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Operations.Infrastructure.Persistence;
 
-/// <summary>
-/// Operations 模块的查询上下文，不跟踪实体
-/// </summary>
 internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), IOperationsQueryDb
 {
-    /// <inheritdoc />
     public override string Module => OperationsModuleInfo.Name;
 
-    /// <inheritdoc />
     public IQueryable<AuditLog> AuditLogs => Set<AuditLog>();
 
-    /// <inheritdoc />
     public IQueryable<ScheduledJobSetting> ScheduledJobSettings => Set<ScheduledJobSetting>();
 
     // 执行记录由框架调度器维护，不纳入模块 EF 模型
-    /// <inheritdoc />
     public IQueryable<ScheduledJobRunRow> ScheduledJobRuns => Database.SqlQuery<ScheduledJobRunRow>(
         $"""
         SELECT "Id", "JobName", "ScheduledFireTime", "StartedAt", "FinishedAt", "DurationMs",
@@ -36,7 +29,6 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
         FROM "Operations"."ScheduledJobRun"
         """);
 
-    /// <inheritdoc />
     public IQueryable<ScheduledJobRunRow> LatestScheduledJobRuns => Database.SqlQuery<ScheduledJobRunRow>(
         $"""
         SELECT DISTINCT ON ("JobName") "Id", "JobName", "ScheduledFireTime", "StartedAt", "FinishedAt", "DurationMs",
@@ -48,7 +40,6 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
         """);
 
     // 路由和心跳由框架维护，不纳入模块 EF 模型
-    /// <inheritdoc />
     public IQueryable<MessageRouteRow> MessageRoutes => Database.SqlQuery<MessageRouteRow>(
         $"""
         SELECT "MessageType", "Subscription", "Module",
@@ -57,14 +48,12 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
         FROM "Operations"."MessageRoute"
         """);
 
-    /// <inheritdoc />
     public IQueryable<MessagingInstanceRow> MessagingInstances => Database.SqlQuery<MessagingInstanceRow>(
         $"""
         SELECT "Id", "Host", "Roles", "Build", "Subscriptions"::text AS "Subscriptions", "StartedAt", "HeartbeatAt"
         FROM "Operations"."MessagingInstance"
         """);
 
-    /// <inheritdoc />
     public IQueryable<AuditLog> WithTarget(IQueryable<AuditLog> audits, string targetsJson)
     {
         ArgumentNullException.ThrowIfNull(audits);
@@ -72,10 +61,8 @@ internal sealed class OperationsQueryDbContext(DbContextOptions<OperationsQueryD
         return audits.Where(a => EF.Functions.JsonContains(a.Targets, targetsJson));
     }
 
-    /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
         configurationBuilder.RegisterAllInOperationsIdConverters();
 
-    /// <inheritdoc />
     protected override void ConfigureModel(ModelBuilder modelBuilder) => OperationsModel.Configure(modelBuilder);
 }

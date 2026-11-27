@@ -2,14 +2,9 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Operations.Application.ClientErrors;
 
-/// <summary>
-/// 按用户和分钟限制前端错误上报请求数
-/// </summary>
+/// <summary>按用户与时间窗口限制前端错误上报频率。</summary>
 public interface IClientErrorLimiter
 {
-    /// <summary>
-    /// 判断是否允许用户本次上报
-    /// </summary>
-    /// <returns>允许时返回 null；超限时返回建议等待时长</returns>
+    /// <summary>判断是否允许本次上报；允许返回 null，超限返回建议等待时长。</summary>
     TimeSpan? TryAcquire(UserId user);
 }

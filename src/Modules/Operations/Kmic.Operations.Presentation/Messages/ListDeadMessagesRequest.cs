@@ -2,11 +2,8 @@ using System.ComponentModel;
 
 namespace Kmic.Operations.Presentation.Messages;
 
-/// <summary>
-/// 查询死信的参数
-/// </summary>
 /// <param name="Module">模块筛选</param>
-/// <param name="Box">Outbox 或 Inbox</param>
+/// <param name="Box">消息箱：Outbox 或 Inbox</param>
 /// <param name="Subscription">订阅名</param>
 /// <param name="MessageType">消息名称</param>
 /// <param name="After">上一页返回的游标，首页不传</param>

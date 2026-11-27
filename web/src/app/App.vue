@@ -10,10 +10,10 @@ import { useShellSettingsStore } from '@/shell/settings/shell-settings-store';
 const route = useRoute();
 const shellSettings = useShellSettingsStore();
 
-// 两个汉字的按钮不插空格（“登录”而不是“登 录”），和 Vben 一致
+// 禁止两字按钮自动插入空格（如保持“登录”而非“登 录”）
 const button = { autoInsertSpace: false };
 
-// 静态方法（Modal.confirm 等）不在组件树里，主题和按钮设置要单独给
+// 静态方法（如 Modal.confirm）脱离组件树渲染，需单独注入主题与按钮配置
 watchEffect(() => {
   ConfigProvider.config({
     theme: shellSettings.antdTheme,

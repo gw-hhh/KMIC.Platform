@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 启动时加载签名密钥，配置有问题就拒绝启动
-/// </summary>
+// 启动时预加载签名密钥，配置异常时拒绝启动
 internal sealed class SigningKeyValidationFilter : IStartupFilter
 {
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)

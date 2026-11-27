@@ -1,4 +1,4 @@
-// 可以直接从组件库导入的纯展示与布局组件，其余交互组件都要经 platform，新增要由框架负责人决定
+// 允许直接从组件库导入的纯展示与布局组件；其余交互组件须通过 platform 封装引入，新增项由框架负责人审定
 const displayComponents = [
   'Row',
   'Col',
@@ -21,12 +21,12 @@ const displayComponents = [
 ];
 
 /**
- * 业务模块里的限制
+ * 业务模块代码约束
  *
- * 业务模块只写业务：不直接发请求、不碰浏览器存储与定时器、不直接用组件库的交互组件。
- * 这些能力由 platform 封装，封装里统一处理令牌、幂等、页面失活、业务时区等问题
+ * 业务模块仅聚焦业务逻辑，禁止直接发起网络请求、操作浏览器存储与定时器，或直接使用组件库的交互组件。
+ * 这些能力统一由 platform 封装，并在其中处理令牌、幂等、页面失活及业务时区等通用问题。
  *
- * @param {string} modulesGlob 业务模块所在的文件匹配，如 src/modules/**
+ * @param {string} modulesGlob 业务模块的文件匹配模式，如 src/modules/**
  */
 export function moduleRestrictions(modulesGlob) {
   return [
@@ -46,27 +46,31 @@ export function moduleRestrictions(modulesGlob) {
             'Intl',
           ].map((name) => ({
             name,
-            message: '业务模块不直接使用它，请经 platform 提供的封装',
+            message: '业务模块禁止直接使用该全局 API，请通过 platform 提供的封装访问',
           })),
         ],
         'no-restricted-imports': [
           'error',
           {
             paths: [
-              { name: 'openapi-fetch', message: '业务模块不直接发请求：读经模块的 api.ts，写经 useCommand' },
-              { name: 'vxe-table', message: '表格经 @/platform/table 使用，vxe-table 只在适配层内部出现' },
-              { name: 'dayjs', message: '日期与时刻经 @/platform/format、@/platform/time' },
-              { name: 'big.js', message: '金额与数量运算经 @/platform/format/decimal' },
-              { name: 'pinia', importNames: ['defineStore'], message: '页面状态不放全局 store，用页面实例或查询缓存' },
+              { name: 'openapi-fetch', message: '业务模块禁止直接发请求：查询请经模块 api.ts，写入请经 useCommand' },
+              { name: 'vxe-table', message: '表格须经 @/platform/table 使用，vxe-table 仅限适配层内部引用' },
+              { name: 'dayjs', message: '日期与时刻须经 @/platform/format、@/platform/time 处理' },
+              { name: 'big.js', message: '金额与数量运算须经 @/platform/format/decimal 处理' },
+              {
+                name: 'pinia',
+                importNames: ['defineStore'],
+                message: '页面状态不应放入全局 store，请使用页面实例或查询缓存',
+              },
               {
                 name: '@tanstack/vue-query',
                 importNames: ['useMutation'],
-                message: '写入经 useCommand，它负责幂等、版本和结果未知',
+                message: '写入请使用 useCommand，由其统一处理幂等、版本并发与结果未知状态',
               },
               {
                 name: '@tanstack/vue-query',
                 importNames: ['useQuery'],
-                message: '读取经 page.useQuery，页面不是当前标签时它会暂停，切回来再刷新',
+                message: '读取请使用 page.useQuery，非当前标签页时自动暂停并在切回后刷新',
               },
             ],
             patterns: [
@@ -74,17 +78,17 @@ export function moduleRestrictions(modulesGlob) {
                 group: ['antdv-next', 'antdv-next/*'],
                 allowImportNames: displayComponents,
                 message:
-                  '交互组件经 @/platform/ui 使用；只有名单里的展示组件才能直接导入（名单在 eslint/restrictions.js）',
+                  '交互组件须通过 @/platform/ui 使用；仅名单内的纯展示组件可直接导入（详见 eslint/restrictions.js）',
               },
             ],
           },
         ],
         'no-restricted-syntax': [
           'error',
-          { selector: "NewExpression[callee.name='Date']", message: '时刻与日期经 @/platform/time，按业务时区处理' },
+          { selector: "NewExpression[callee.name='Date']", message: '时刻与日期须经 @/platform/time 按业务时区处理' },
           {
             selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
-            message: '时刻与日期经 @/platform/time，按业务时区处理',
+            message: '时刻与日期须经 @/platform/time 按业务时区处理',
           },
         ],
       },

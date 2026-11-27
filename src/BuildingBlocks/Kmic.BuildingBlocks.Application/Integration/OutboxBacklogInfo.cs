@@ -1,9 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 发件箱的积压
-/// </summary>
-/// <param name="Pending">还没投递完的条数</param>
-/// <param name="OldestAge">最老的一条已经发布了多久</param>
-/// <param name="Dead">死信条数</param>
+/// <summary>发件箱积压概况；<paramref name="OldestAge"/> 为最早滞留时长（自待投递消息进入起算）。</summary>
 public sealed record OutboxBacklogInfo(long Pending, TimeSpan OldestAge, long Dead);

@@ -6,12 +6,6 @@ using Kmic.Sample.Domain.Specimens.Events;
 
 namespace Kmic.Sample.Application.Specimens.EventHandlers;
 
-/// <summary>
-/// 示例提交后通知负责人，演示业务模块发送通知
-/// </summary>
-/// <remarks>
-/// 事务回滚就不发
-/// </remarks>
 internal sealed class NotifyOwnerOfSubmission(IIntegrationEventPublisher publisher) : IDomainEventHandler<SpecimenSubmitted>
 {
     public ValueTask<Result> HandleAsync(SpecimenSubmitted domainEvent, CancellationToken ct)

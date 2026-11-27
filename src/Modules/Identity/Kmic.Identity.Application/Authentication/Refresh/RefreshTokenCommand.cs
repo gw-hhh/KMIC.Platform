@@ -3,12 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Identity.Application.Authentication.Refresh;
 
-/// <summary>
-/// 用刷新令牌换新的访问令牌与刷新令牌
-/// </summary>
-/// <remarks>
-/// 超出宽限期重用旧令牌会作废会话
-/// </remarks>
+/// <summary>使用刷新令牌换发新令牌（超出宽限期重用旧令牌将作废会话）</summary>
 /// <param name="RefreshToken">客户端出示的刷新令牌</param>
 /// <param name="ClientIp">客户端 IP</param>
 [AllowAnonymous]
@@ -17,6 +12,6 @@ namespace Kmic.Identity.Application.Authentication.Refresh;
 [ExemptFromMessagingSuspension]
 public sealed record RefreshTokenCommand(string RefreshToken, string? ClientIp) : ICommand<AuthTokens>
 {
-    // 不用编译器生成的：它会把密码、令牌的值也打出来
+    // 禁用编译器生成的 ToString 实现，避免在日志中输出令牌明文
     public override string ToString() => nameof(RefreshTokenCommand);
 }

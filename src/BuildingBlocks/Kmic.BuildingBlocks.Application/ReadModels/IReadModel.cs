@@ -2,51 +2,25 @@ using Kmic.BuildingBlocks.Contracts.References;
 
 namespace Kmic.BuildingBlocks.Application.ReadModels;
 
-/// <summary>
-/// 读模型：别的模块数据在本模块的副本
-/// </summary>
-/// <remarks>
-/// 只能通过 IReadModelWriter 写入
-/// </remarks>
+/// <summary>跨模块只读副本（读模型）；仅允许通过 IReadModelWriter 更新。</summary>
 public interface IReadModel
 {
-    /// <summary>
-    /// ID，等于源数据的 ID
-    /// </summary>
+    /// <summary>实体 ID，与源数据 ID 一致。</summary>
     Guid Id { get; }
 
-    /// <summary>
-    /// 来源版本
-    /// </summary>
     long SourceVersion { get; }
 
-    /// <summary>
-    /// 状态
-    /// </summary>
     ReferenceStatus Status { get; }
 
-    /// <summary>
-    /// 是否终态
-    /// </summary>
     bool IsTerminal { get; }
 
-    /// <summary>
-    /// 成为终态的原因
-    /// </summary>
     ReadModelTerminalReason? TerminalReason { get; }
 
-    /// <summary>
-    /// 成为终态的时间
-    /// </summary>
     DateTimeOffset? TerminalAt { get; }
 
-    /// <summary>
-    /// 最近一次扫描到本行的重建轮次
-    /// </summary>
+    /// <summary>最近一次扫描到本行的重建轮次。</summary>
     Guid? RebuildRunId { get; }
 
-    /// <summary>
-    /// 同步时间，只用于显示和排查
-    /// </summary>
+    /// <summary>最近同步时间，仅用于界面展示与问题排查。</summary>
     DateTimeOffset SyncedAt { get; }
 }

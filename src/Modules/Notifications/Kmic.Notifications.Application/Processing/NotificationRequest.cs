@@ -3,9 +3,7 @@ using Kmic.Notifications.Contracts;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 普通通知和含密通知共用的内部发送请求
-/// </summary>
+/// <summary>普通通知与敏感通知共用的内部发送请求</summary>
 public sealed record NotificationRequest(
     string TemplateKey,
     IReadOnlyList<Recipient> To,

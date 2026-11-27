@@ -2,9 +2,6 @@ using Shouldly;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 运维命令现在只有骨架，测入口和退出码；命令加进来时各自补测试
-/// </summary>
 public sealed class OperatorTests
 {
     [Fact]

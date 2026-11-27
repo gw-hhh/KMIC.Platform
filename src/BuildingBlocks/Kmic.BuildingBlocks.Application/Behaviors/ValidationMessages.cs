@@ -7,12 +7,7 @@ using FluentValidation.Resources;
 
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
-/// <summary>
-/// 校验提示的中文：属性名用编译时收集的中文名，常用规则用短句
-/// </summary>
-/// <remarks>
-/// 提示自带属性名，表单顶部汇总、导入结果、直接调接口时都看得懂；规则写了 WithName 或 WithMessage 的不受影响
-/// </remarks>
+// 中文化校验提示配置：属性名取自编译期收集的 DisplayNames，显式指定 WithName 或 WithMessage 时优先使用自定义文案
 internal static class ValidationMessages
 {
     private const string GeneratedTypeName = "Kmic.Generated.DisplayNames";
@@ -25,9 +20,6 @@ internal static class ValidationMessages
         options.DisplayNameResolver = (_, member, _) => DisplayName(member);
     }
 
-    /// <summary>
-    /// 属性的中文名；没有时返回 null，FluentValidation 退回用属性名
-    /// </summary>
     public static string? DisplayName(MemberInfo? member)
     {
         if (member?.DeclaringType is not { } type)

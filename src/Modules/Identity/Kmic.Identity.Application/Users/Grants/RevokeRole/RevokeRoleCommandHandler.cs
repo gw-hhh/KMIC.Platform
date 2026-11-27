@@ -10,9 +10,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Grants.RevokeRole;
 
-/// <summary>
-/// 收回用户角色
-/// </summary>
 public sealed class RevokeRoleCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -21,7 +18,6 @@ public sealed class RevokeRoleCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<RevokeRoleCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(RevokeRoleCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await GrantLoading.LoadForAsync(users, db, authorizer, command.Id, command.ExpectedVersion, command.RoleId, GrantAction.Revoke, access, cancellationToken);

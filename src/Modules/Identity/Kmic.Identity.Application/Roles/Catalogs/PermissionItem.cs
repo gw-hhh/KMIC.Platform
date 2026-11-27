@@ -1,8 +1,6 @@
 namespace Kmic.Identity.Application.Roles.Catalogs;
 
-/// <summary>
-/// 权限点目录项
-/// </summary>
+/// <summary>权限点目录项。</summary>
 /// <param name="Code">编码</param>
 /// <param name="Module">所属模块</param>
 /// <param name="Group">分组</param>

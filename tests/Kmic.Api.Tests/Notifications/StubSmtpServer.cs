@@ -5,13 +5,7 @@ using System.Text;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 测试用的最小 SMTP 服务器，记下收到的邮件
-/// </summary>
-/// <remarks>
-/// 监听本机随机端口，不加密、不认证，也不声明任何扩展，所以 MailKit 会把正文编码成 7 位安全的格式。
-/// 只认 EHLO、MAIL、RCPT、DATA、RSET、NOOP、QUIT；对收件人的回复由 <see cref="RcptReply" /> 指定，用来模拟拒收和暂时不可用
-/// </remarks>
+/// <summary>轻量级测试 SMTP 服务器：监听本机随机端口，支持无加密基础命令，可通过 <see cref="RcptReply"/> 模拟拒收或故障</summary>
 public sealed class StubSmtpServer : IAsyncDisposable
 {
     private static readonly UTF8Encoding _utf8 = new(encoderShouldEmitUTF8Identifier: false);
@@ -22,46 +16,29 @@ public sealed class StubSmtpServer : IAsyncDisposable
     private readonly Task _accepting;
     private volatile string _rcptReply = "250 OK";
 
-    /// <summary>
-    /// 开始监听
-    /// </summary>
     public StubSmtpServer()
     {
         _listener.Start();
         _accepting = AcceptAsync();
     }
 
-    /// <summary>
-    /// 监听的端口
-    /// </summary>
     public int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
 
-    /// <summary>
-    /// 收到的邮件，按收到的先后排列
-    /// </summary>
     public ConcurrentQueue<ReceivedMail> Mails { get; } = new();
 
-    /// <summary>
-    /// 对每个收件人的回复，以三位状态码开头；默认接受
-    /// </summary>
+    /// <summary>RCPT 阶段响应行（须以三位状态码开头），默认为接受</summary>
     public string RcptReply
     {
         get => _rcptReply;
         set => _rcptReply = value;
     }
 
-    /// <summary>
-    /// 清掉收到的邮件，收件人回复恢复为接受
-    /// </summary>
     public void Reset()
     {
         Mails.Clear();
         _rcptReply = "250 OK";
     }
 
-    /// <summary>
-    /// 停止监听，结束还没断开的会话
-    /// </summary>
     public async ValueTask DisposeAsync()
     {
         await _stopping.CancelAsync();
@@ -96,7 +73,7 @@ public sealed class StubSmtpServer : IAsyncDisposable
         }
         catch (OperationCanceledException)
         {
-            // 关闭服务器时结束监听
+            // 服务器关闭时正常退出监听循环
         }
     }
 
@@ -131,7 +108,7 @@ public sealed class StubSmtpServer : IAsyncDisposable
             }
             catch (Exception exception) when (exception is IOException or ObjectDisposedException or OperationCanceledException)
             {
-                // 客户端断开或服务器关闭，会话到此为止
+                // 客户端断开连接或服务器关闭时结束当前会话
             }
         }
     }
@@ -181,7 +158,7 @@ public sealed class StubSmtpServer : IAsyncDisposable
         var data = new StringBuilder();
         while (await reader.ReadLineAsync(ct) is { } line && !string.Equals(line, ".", StringComparison.Ordinal))
         {
-            // 行首的 . 在传输时多写了一个，这里还原
+            // 按 SMTP 透明规则还原行首转义的句点
             data.Append(line.StartsWith("..", StringComparison.Ordinal) ? line[1..] : line).Append("\r\n");
         }
 
@@ -190,9 +167,7 @@ public sealed class StubSmtpServer : IAsyncDisposable
         await ReplyAsync(writer, "250 OK queued", ct);
     }
 
-    /// <summary>
-    /// 一次邮件事务：MAIL 开始，RCPT 累加收件人，DATA 结束
-    /// </summary>
+    // 单次邮件传输事务状态（MAIL -> RCPT -> DATA）
     private sealed class Transaction
     {
         public string From { get; private set; } = string.Empty;

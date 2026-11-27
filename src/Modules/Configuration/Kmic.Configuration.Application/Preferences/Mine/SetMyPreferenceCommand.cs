@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
-/// <summary>
-/// 保存当前用户在当前角色下的个人偏好
-/// </summary>
+/// <summary>保存当前用户在当前角色下的个人偏好</summary>
 /// <param name="Key">偏好键</param>
 /// <param name="Value">值</param>
 [AllowAuthenticated]

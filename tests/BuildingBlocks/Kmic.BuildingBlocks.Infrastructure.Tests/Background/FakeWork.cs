@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Infrastructure.Background;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Background;
 
-/// <summary>
-/// 内存队列，测试用：领取就是从队列里取，处理交给测试给的委托
-/// </summary>
 internal sealed class FakeWork(int parallelism, TimeSpan poll) : ILeasedWork<int>
 {
     private readonly ConcurrentQueue<int> _queue = new();
@@ -19,9 +16,7 @@ internal sealed class FakeWork(int parallelism, TimeSpan poll) : ILeasedWork<int
 
     public Func<int, CancellationToken, Task> Handler { get; set; } = (_, _) => Task.CompletedTask;
 
-    /// <summary>
-    /// 失败的领取到其后第一次领到条目之间的间隔；还没有这两次领取时为空
-    /// </summary>
+    // 首次失败领取到其后首次成功领取的时间间隔；尚未同时发生时为 null
     public TimeSpan? DelayAfterFailure
     {
         get
@@ -46,7 +41,7 @@ internal sealed class FakeWork(int parallelism, TimeSpan poll) : ILeasedWork<int
         }
     }
 
-    // 接下来的几次领取抛数据库不可用的异常
+    // 后续指定次数的领取抛出数据库不可用异常
     public void FailNextClaims(int times) => _failClaims = times;
 
     public Task<IReadOnlyList<int>> ClaimAsync(int max, Guid token, CancellationToken ct)

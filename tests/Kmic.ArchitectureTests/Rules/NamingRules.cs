@@ -8,14 +8,9 @@ using Kmic.BuildingBlocks.Presentation.Endpoints;
 
 namespace Kmic.ArchitectureTests.Rules;
 
-/// <summary>
-/// 命名与形态：命令、查询、处理器、校验器、端点、领域事件、强类型 ID、错误目录
-/// </summary>
 internal static class NamingRules
 {
-    /// <summary>
-    /// 命令以 Command 结尾，查询以 Query 结尾，都是 sealed record
-    /// </summary>
+    // 命令以 Command 结尾，查询以 Query 结尾，且均为 sealed record
     public static IReadOnlyList<string> Messages(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -41,9 +36,7 @@ internal static class NamingRules
         return problems;
     }
 
-    /// <summary>
-    /// 命令、查询处理器是 public sealed，名字以 Handler 结尾；Mediator 在宿主里生成的分发代码要直接引用它们，所以不能是 internal
-    /// </summary>
+    // 处理器须为 public sealed 且以 Handler 结尾（Mediator 生成的分发代码需直接引用）
     public static IReadOnlyList<string> Handlers(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -63,9 +56,7 @@ internal static class NamingRules
         return problems;
     }
 
-    /// <summary>
-    /// 校验器、端点是 internal sealed，名字分别以 Validator、Endpoint 结尾
-    /// </summary>
+    // 校验器与端点须为 internal sealed，分别以 Validator、Endpoint 结尾
     public static IReadOnlyList<string> InternalParts(IEnumerable<Type> types)
     {
         var problems = new List<string>();
@@ -91,27 +82,21 @@ internal static class NamingRules
         return problems;
     }
 
-    /// <summary>
-    /// 领域事件是 sealed record
-    /// </summary>
+    // 领域事件须为 sealed record
     public static IReadOnlyList<string> DomainEvents(IEnumerable<Type> types) =>
     [
         .. types.Where(t => IsConcrete(t) && typeof(IDomainEvent).IsAssignableFrom(t) && (!t.IsSealed || !IsRecord(t)))
             .Select(t => $"{t.FullName}：领域事件要写成 sealed record。"),
     ];
 
-    /// <summary>
-    /// 强类型 ID 的名字以 Id 或 Ref 结尾
-    /// </summary>
+    // 强类型 ID 须以 Id 或 Ref 结尾
     public static IReadOnlyList<string> Identifiers(IEnumerable<Type> types) =>
     [
         .. types.Where(t => t.IsValueType && typeof(IStronglyTypedId).IsAssignableFrom(t) && !t.Name.EndsWith("Id", StringComparison.Ordinal) && !t.Name.EndsWith("Ref", StringComparison.Ordinal))
             .Select(t => $"{t.FullName}：强类型 ID 的名字要以 Id 或 Ref 结尾。"),
     ];
 
-    /// <summary>
-    /// 声明 Error 的静态类叫 *Errors，错误码以模块名开头（框架是 Common）
-    /// </summary>
+    // 声明 Error 的静态类须命名为 *Errors，错误码以模块名（框架为 Common）开头
     public static IReadOnlyList<string> Errors(IEnumerable<Type> types, string module)
     {
         var problems = new List<string>();

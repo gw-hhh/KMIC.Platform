@@ -5,13 +5,9 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Operations.Application.ScheduledJobs.Runs;
 
-/// <summary>
-/// 分页查询定时任务执行记录
-/// </summary>
 public sealed class ListScheduledJobRunsQueryHandler(IOperationsQueryDb db, ICursorProtector protector, IUserReferences users)
     : IQueryHandler<ListScheduledJobRunsQuery, CursorPage<ScheduledJobRunItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CursorPage<ScheduledJobRunItem>>> Handle(ListScheduledJobRunsQuery query, CancellationToken cancellationToken)
     {
         var page = await db.ScheduledJobRuns

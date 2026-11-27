@@ -1,15 +1,8 @@
 namespace Kmic.BuildingBlocks.Contracts.Messaging;
 
-/// <summary>
-/// 快照事件
-/// </summary>
-/// <remarks>
-/// 来源版本号在消息信封上，不在事件里
-/// </remarks>
+/// <summary>快照事件（来源版本号位于消息信封中，不包含在事件载荷内）。</summary>
 public interface ISnapshotEvent : IIntegrationEvent
 {
-    /// <summary>
-    /// 快照对应的 ID
-    /// </summary>
+    /// <summary>源数据 ID。</summary>
     Guid SourceId { get; }
 }

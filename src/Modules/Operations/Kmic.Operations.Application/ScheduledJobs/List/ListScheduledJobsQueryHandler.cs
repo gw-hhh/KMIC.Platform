@@ -8,9 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Operations.Application.ScheduledJobs.List;
 
-/// <summary>
-/// 查询定时任务及调度状态
-/// </summary>
 public sealed class ListScheduledJobsQueryHandler(
     IOperationsQueryDb db,
     IScheduledJobControl control,
@@ -19,7 +16,6 @@ public sealed class ListScheduledJobsQueryHandler(
 {
     private const bool DefaultEnabled = true;
 
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<ScheduledJobItem>>> Handle(ListScheduledJobsQuery query, CancellationToken cancellationToken)
     {
         var declared = await control.ListAsync(cancellationToken);

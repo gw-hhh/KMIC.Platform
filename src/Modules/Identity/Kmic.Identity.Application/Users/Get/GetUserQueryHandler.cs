@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Users.Get;
 
-/// <summary>
-/// 查询用户详情
-/// </summary>
 public sealed class GetUserQueryHandler(
     IIdentityQueryDb db,
     IExecutionContext execution,
@@ -19,10 +16,9 @@ public sealed class GetUserQueryHandler(
     ILoginThrottleStore throttle,
     TimeProvider time) : IQueryHandler<GetUserQuery, UserDetailResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<UserDetailResponse>> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("查询用户需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("查询用户需要已登录的用户身份。");
         var found = await db.Users
             .Where(u => u.Id == query.Id)
             .Select(u => new

@@ -5,12 +5,7 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Move;
 
-/// <summary>
-/// 移动组织单元及其下级
-/// </summary>
-/// <remarks>
-/// 已有业务数据的所属组织不跟着改
-/// </remarks>
+/// <summary>移动组织单元及其下级（历史业务数据归属组织不变）</summary>
 /// <param name="ExpectedVersion">组织树的预期版本号</param>
 /// <param name="Id">要移动的组织单元</param>
 /// <param name="NewParentId">新的上级</param>

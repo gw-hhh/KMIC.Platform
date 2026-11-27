@@ -4,12 +4,9 @@ using Kmic.Identity.Domain.Errors;
 
 namespace Kmic.Identity.Application.Roles;
 
-/// <summary>
-/// 角色管理操作目录，用于计算详情中的可用操作
-/// </summary>
+/// <summary>角色管理操作目录，用于计算详情中的可用操作。</summary>
 public sealed class RoleActions : ResourceActionCatalog<RoleTarget, RoleAdminAction>
 {
-    /// <inheritdoc />
     protected override void Define(IResourceActionBuilder<RoleTarget, RoleAdminAction> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

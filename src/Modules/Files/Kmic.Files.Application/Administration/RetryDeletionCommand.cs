@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 重置文件删除重试次数，排除存储故障后用
-/// </summary>
+/// <summary>重置文件删除重试次数，供排除存储故障后人工恢复重试</summary>
 [RequirePermission(FilesPermissions.FileManage)]
 [Audited]
 public sealed record RetryDeletionCommand(StoredFileId Id) : ICommand;

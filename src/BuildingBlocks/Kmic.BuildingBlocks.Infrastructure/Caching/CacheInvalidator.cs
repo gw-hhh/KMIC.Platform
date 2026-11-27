@@ -11,21 +11,13 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Caching;
 
-/// <summary>
-/// 按标签让缓存失效
-/// </summary>
+// 基于标签的分布式缓存失效器（本地移除后经 PG NOTIFY 广播）
 internal sealed class CacheInvalidator(
     HybridCache cache, DataSources dataSources, IOptions<CacheOptions> options, FrameworkMetrics metrics, ILogger<CacheInvalidator> logger)
 {
-    // 标签之间的分隔符，标签本身不会含换行
     private const char Separator = '\n';
-
-    // HybridCache 里表示“全部标签”的通配符
     private const string AllTags = "*";
 
-    /// <summary>
-    /// 本实例失效，再通知其他实例
-    /// </summary>
     public async ValueTask InvalidateAsync(IReadOnlyCollection<string> tags, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(tags);
@@ -37,10 +29,8 @@ internal sealed class CacheInvalidator(
         await BroadcastAsync(tags, ct);
     }
 
-    /// <summary>
-    /// 收到别的实例发来的失效通知，在后台线程上处理，不占用监听线程
-    /// </summary>
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "监听线程的回调不能抛异常，失效失败时靠缓存过期兜底，只记警告")]
+    // 投递到后台线程池，避免阻塞 PG 监听连接
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "监听回调不允许向外抛出异常，失效失败仅记录警告并依赖缓存过期兜底")]
     public void OnNotification(string payload)
     {
         ArgumentNullException.ThrowIfNull(payload);
@@ -60,10 +50,8 @@ internal sealed class CacheInvalidator(
         });
     }
 
-    /// <summary>
-    /// 监听连接重连后，断开期间的通知收不到，清空本实例全部缓存
-    /// </summary>
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "同上")]
+    // 断连期间可能漏掉通知，重连后清空全部标签兜底
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "监听重连回调不允许向外抛出异常，失效失败仅记录警告并依赖缓存过期兜底")]
     public void OnReconnected() =>
         _ = Task.Run(async () =>
         {
@@ -95,7 +83,7 @@ internal sealed class CacheInvalidator(
         }
     }
 
-    // 标签多时分成几条通知，每条不超过上限
+    // 标签过多时分批发送通知，确保单条不超过长度上限
     private static IEnumerable<string> Split(IReadOnlyCollection<string> tags, int maxBytes)
     {
         var current = new StringBuilder();
@@ -103,7 +91,7 @@ internal sealed class CacheInvalidator(
         {
             if (tag.Contains(Separator, StringComparison.Ordinal))
             {
-                throw new ArgumentException($"缓存标签里不能有换行：“{tag}”。", nameof(tags));
+                throw new ArgumentException($"缓存标签不能包含换行符：“{tag}”。", nameof(tags));
             }
 
             if (current.Length > 0 && Encoding.UTF8.GetByteCount(current.ToString()) + 1 + Encoding.UTF8.GetByteCount(tag) > maxBytes)

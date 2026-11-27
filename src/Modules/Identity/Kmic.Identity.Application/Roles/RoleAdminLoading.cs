@@ -7,14 +7,9 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles;
 
-/// <summary>
-/// 角色管理命令共用的加载与授权检查
-/// </summary>
+// 角色管理命令共用的乐观锁加载与资源策略鉴权
 internal static class RoleAdminLoading
 {
-    /// <summary>
-    /// 加载目标角色并校验版本，再按资源策略授权操作
-    /// </summary>
     public static async Task<Result<Role>> LoadForAsync(
         IRoleRepository roles,
         IIdentityReads db,

@@ -12,12 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
 
-/// <summary>
-/// 从变更跟踪器采集这次保存改了什么
-/// </summary>
-/// <remarks>
-/// 要在保存之前采集
-/// </remarks>
+// 须在保存前调用：从变更跟踪器采集本次数据变更
 internal static class AuditChanges
 {
     private static readonly HashSet<string> _skipped =
@@ -30,7 +25,7 @@ internal static class AuditChanges
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        // 离开集合的子实体要检测之后才变成删除
+        // 移出集合的子实体需触发变更检测后才会标记为删除
         context.ChangeTracker.DetectChanges();
         var entries = context.ChangeTracker.Entries()
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted && EntityKinds.IsBusinessEntity(e.Metadata.ClrType))
@@ -132,7 +127,7 @@ internal static class AuditChanges
         var old = added ? null : Format(property.OriginalValue, converter);
         var current = Format(property.CurrentValue, converter);
 
-        // 新增时没有值的字段不记；修改时原值和现值相同（如改了又改回去）也不记
+        // 新增时忽略空值字段；修改时忽略原值与现值相同的字段（如改后又改回原值）
         if ((added && current is null) || string.Equals(old, current, StringComparison.Ordinal))
         {
             return;
@@ -172,7 +167,7 @@ internal static class AuditChanges
         AuditValues.Format(value is null || converter is null ? value : converter.ConvertToProvider(value));
 
 
-    // 值对象集合映射的是私有字段 _watchers，对外的名字是属性 Watchers
+    // 值对象集合映射私有字段 _watchers，对外暴露为属性 Watchers
     private static string PropertyNameOf(string name) =>
         name.Length > 1 && name[0] == '_' ? char.ToUpperInvariant(name[1]) + name[2..] : name;
     private static string? Json(object? value) => value is null ? null : JsonSerializer.Serialize(value, value.GetType(), KmicJsonOptions.Stored);

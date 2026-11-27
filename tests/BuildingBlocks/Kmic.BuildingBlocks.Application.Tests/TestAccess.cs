@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Tests;
 
-/// <summary>
-/// 测试用的访问上下文
-/// </summary>
 internal sealed record TestAccess : IAccessContext
 {
     public UserId UserId { get; init; } = UserId.New();

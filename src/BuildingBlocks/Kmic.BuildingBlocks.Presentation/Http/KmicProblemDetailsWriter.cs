@@ -3,9 +3,6 @@ using HttpJsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// ProblemDetails 的唯一写出方
-/// </summary>
 internal sealed class KmicProblemDetailsWriter(IOptions<HttpJsonOptions> json) : IProblemDetailsWriter
 {
     private const string ContentType = "application/problem+json";

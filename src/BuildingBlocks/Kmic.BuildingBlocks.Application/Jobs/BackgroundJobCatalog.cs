@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Application.Authorization;
 
 namespace Kmic.BuildingBlocks.Application.Jobs;
 
-/// <summary>
-/// 后台作业目录
-/// </summary>
 public sealed class BackgroundJobCatalog
 {
     private readonly FrozenDictionary<Type, BackgroundJobType> _byType;
@@ -21,22 +18,15 @@ public sealed class BackgroundJobCatalog
             .ToFrozenDictionary(g => g.Key, g => g.MaxBy(j => j.Version)!.Attribute.DisplayName, StringComparer.Ordinal);
     }
 
-    /// <summary>
-    /// 没有任何作业的目录
-    /// </summary>
     public static BackgroundJobCatalog Empty { get; } = new([]);
 
-    /// <summary>
-    /// 作业声明里引用的权限点，交给权限点目录核对
-    /// </summary>
+    /// <summary>作业声明引用的权限点，供权限点目录校验。</summary>
     public IEnumerable<PermissionReference> PermissionReferences =>
         _byType.Values.Where(j => j.Attribute.Permission.Length > 0).Select(j => new PermissionReference(j.Attribute.Permission, $"后台作业 {j.Name}"));
 
     internal IEnumerable<BackgroundJobType> All => _byType.Values;
 
-    /// <summary>
-    /// 从各模块的 Application 程序集中读取作业和处理器
-    /// </summary>
+    /// <summary>从各模块 Application 程序集加载作业与处理器声明。</summary>
     public static BackgroundJobCatalog FromAssemblies(IEnumerable<Assembly> assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
@@ -69,13 +59,11 @@ public sealed class BackgroundJobCatalog
 
     internal BackgroundJobType Describe(Type jobType) =>
         _byType.GetValueOrDefault(jobType)
-            ?? throw new InvalidOperationException($"{jobType.FullName} 不在后台作业目录中，检查它是否标了 [BackgroundJob]、所在模块是否已注册。");
+            ?? throw new InvalidOperationException($"{jobType.FullName} 不在后台作业目录中，请检查其是否已标注 [BackgroundJob] 且所属模块已注册。");
 
     internal BackgroundJobType? Find(string name, int version) => _byName.GetValueOrDefault((name, version));
 
-    /// <summary>
-    /// 按作业类型名取显示名称，代码里已没有这种作业时原样返回类型名
-    /// </summary>
+    /// <summary>按作业类型名获取显示名称；未定义该作业时原样返回类型名。</summary>
     public string DisplayNameOf(string jobType)
     {
         ArgumentNullException.ThrowIfNull(jobType);
@@ -86,7 +74,7 @@ public sealed class BackgroundJobCatalog
     {
         if (type.GetCustomAttribute<BackgroundJobAttribute>() is not { } attribute)
         {
-            problems.Add($"{type.FullName} 实现了 IBackgroundJob，但没有标 [BackgroundJob]。");
+            problems.Add($"{type.FullName} 实现了 IBackgroundJob，但未标注 [BackgroundJob]。");
             return null;
         }
 
@@ -94,30 +82,30 @@ public sealed class BackgroundJobCatalog
         var module = ModuleNames.Of(type);
         if (!name.StartsWith(module + ".", StringComparison.Ordinal) || name.Length == module.Length + 1)
         {
-            problems.Add($"{type.Name} 的作业名称“{name}”要以“{module}.”开头。");
+            problems.Add($"{type.Name} 的作业名称“{name}”须以“{module}.”开头。");
         }
 
         if (string.IsNullOrWhiteSpace(attribute.DisplayName))
         {
-            problems.Add($"作业 {name} 要写显示名称。");
+            problems.Add($"作业 {name} 须指定显示名称。");
         }
 
         if (!attribute.Audited && name.Contains("Export", StringComparison.Ordinal))
         {
-            problems.Add($"作业 {name} 是导出作业，必须声明 Audited = true，谁导出了什么要留下记录。");
+            problems.Add($"作业 {name} 为导出作业，必须声明 Audited = true 以保留导出审计记录。");
         }
 
         if (attribute.Version < 1 || attribute.MaxConcurrentPerUser < 1)
         {
-            problems.Add($"作业 {name} 的版本号和每人同时运行的上限都要从 1 开始。");
+            problems.Add($"作业 {name} 的版本号与单用户并发上限均须大于等于 1。");
         }
 
         if ((attribute.Permission.Length > 0) == attribute.SystemOnly)
         {
-            problems.Add($"作业 {name} 要么写 Permission（用户提交），要么写 SystemOnly = true（只能系统提交），只能选一个。");
+            problems.Add($"作业 {name} 须指定 Permission（用户提交）或设置 SystemOnly = true（仅系统提交），两者只能选一个。");
         }
 
-        // 框架自己的作业，处理器在基础设施层，由那边注册
+        // 框架内置作业的处理器位于基础设施层，由基础设施层负责注册
         if (type.Assembly == typeof(BackgroundJobCatalog).Assembly)
         {
             return new BackgroundJobType(name, attribute.Version, type, module, null, attribute);
@@ -125,13 +113,13 @@ public sealed class BackgroundJobCatalog
 
         if (handlers.Count != 1)
         {
-            problems.Add($"作业 {name} 要有且只有一个处理器，现在有 {handlers.Count} 个。");
+            problems.Add($"作业 {name} 必须有且只有一个处理器，当前为 {handlers.Count} 个。");
             return null;
         }
 
         if (!string.Equals(ModuleNames.Of(handlers[0]), module, StringComparison.Ordinal))
         {
-            problems.Add($"作业 {name} 的处理器 {handlers[0].Name} 要在 {module} 模块里。");
+            problems.Add($"作业 {name} 的处理器 {handlers[0].Name} 须位于 {module} 模块中。");
         }
 
         return new BackgroundJobType(name, attribute.Version, type, module, handlers[0], attribute);

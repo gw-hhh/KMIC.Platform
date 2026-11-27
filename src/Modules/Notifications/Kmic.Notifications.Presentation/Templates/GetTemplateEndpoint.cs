@@ -12,7 +12,7 @@ internal sealed class GetTemplateEndpoint : IEndpoint
         group.MapGet("/templates/{key}", HandleAsync)
             .Sends<GetTemplateQuery>()
             .WithSummary("查询通知模板详情")
-            .WithDescription("返回各渠道内容、代码默认内容、可用变量、示例数据及已发布版本。已移除代码声明的模板不提供默认内容、变量和示例数据。发布或恢复默认内容时，须将响应中的 version 作为预期版本号提交。");
+            .WithDescription("返回渠道内容、代码默认内容、变量、示例数据与已发布版本（已移除声明的模板不含默认值与变量）；发布或恢复时须回传 version");
 
     private static async Task<IResult> HandleAsync([Description("模板键，如 Sample.SpecimenSubmitted")] string key, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new GetTemplateQuery(key), ct)).ToOk();

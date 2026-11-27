@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Application.Messaging;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 消息成功时的 HTTP 响应：状态码和响应体类型
-/// </summary>
+// 根据消息返回类型推断成功时的 HTTP 状态码与响应体类型
 internal static class MessageResponse
 {
     public static (int Status, Type? Body) Of(Type message)

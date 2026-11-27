@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 每个测试用自己的消息名和订阅名，同一个库里的路由互不干扰
-/// </summary>
 public sealed class MessageRouteTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>
 {
     private readonly MessageRoutes _routes = new(database.DataSource);

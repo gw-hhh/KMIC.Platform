@@ -5,12 +5,8 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Attachments;
 
-/// <summary>
-/// 登记系统生成的文件
-/// </summary>
 public sealed class RegisterGeneratedFileCommandHandler(IStoredFileRepository files, TimeProvider time) : ICommandHandler<RegisterGeneratedFileCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(RegisterGeneratedFileCommand command, CancellationToken cancellationToken)
     {
         var message = command.Message;

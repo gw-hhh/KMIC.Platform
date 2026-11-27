@@ -7,18 +7,16 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.Data;
 
-/// <summary>
-/// KM2001：查询里不能用 ToLower、ToUpper、Contains、StartsWith、EndsWith 匹配文本
-/// </summary>
+/// <summary>KM2001：禁止在查询中使用 ToLower、ToUpper、Contains、StartsWith、EndsWith 进行文本匹配。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TextMatchingAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM2001",
         Rules.DataCategory,
-        "查询里不能用字符串方法匹配文本",
-        "查询里不能用 string.{0} 匹配文本，模糊匹配改用 KmicFunctions.ContainsText 或 StartsWithText，忽略大小写的等值比较把列声明为 IsCaseInsensitive()",
-        "这些写法要么用不上索引，要么在不区分大小写的列上直接报错。只检查会翻译成 SQL 的查询，内存里的 LINQ 不受影响。");
+        "禁止在查询中使用字符串方法匹配文本",
+        "禁止在查询中使用 string.{0} 匹配文本；模糊匹配请改用 KmicFunctions.ContainsText 或 StartsWithText，忽略大小写的等值比较请将列声明为 IsCaseInsensitive()",
+        "此类写法无法命中索引，或会在不区分大小写的列上报错。仅检查会翻译为 SQL 的查询，内存中的 LINQ 不受影响。");
 
     private static readonly ImmutableHashSet<string> _methods = ImmutableHashSet.Create(
         StringComparer.Ordinal,
@@ -30,10 +28,8 @@ public sealed class TextMatchingAnalyzer : DiagnosticAnalyzer
         "StartsWith",
         "EndsWith");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

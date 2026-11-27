@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 捕获会明文保存验证码和临时密码，生产环境不允许开着
-/// </summary>
 public sealed class CaptureConfigurationTests
 {
     private static IOptions<NotificationsCaptureOptions> Resolve(string environment, bool? enabled)

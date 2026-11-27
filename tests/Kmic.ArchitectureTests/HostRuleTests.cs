@@ -5,12 +5,9 @@ using Shouldly;
 
 namespace Kmic.ArchitectureTests;
 
-/// <summary>
-/// 宿主与仓库层面的约定：管道行为的顺序、模块都登记了（宿主与迁移程序）、只有根目录有 .editorconfig
-/// </summary>
 public sealed partial class HostRuleTests
 {
-    // 管道行为的执行顺序，宿主在 AddMediator 里照抄
+    // 管道行为的执行顺序，宿主在 AddMediator 中按此顺序注册
     private static readonly string[] _expectedBehaviors =
     [
         "LoggingBehavior", "ExceptionTranslationBehavior", "FeatureGateBehavior", "ValidationBehavior", "AuthorizationBehavior",
@@ -38,7 +35,7 @@ public sealed partial class HostRuleTests
         modules.ShouldNotBeEmpty();
         foreach (var module in modules)
         {
-            ProgramText.ShouldContain($"AddModule<{module},", Case.Sensitive, $"{module} 没有在 Kmic.Api 的 Program.cs 里注册。");
+            ProgramText.ShouldContain($"AddModule<{module},", Case.Sensitive, $"{module} 未在 Kmic.Api 的 Program.cs 中注册。");
         }
     }
 
@@ -55,7 +52,7 @@ public sealed partial class HostRuleTests
         modules.ShouldNotBeEmpty();
         foreach (var module in modules)
         {
-            program.ShouldContain($".Add<{module}>(", Case.Sensitive, $"{module} 没有在 Kmic.MigrationRunner 的 Program.cs 里登记。");
+            program.ShouldContain($".Add<{module}>(", Case.Sensitive, $"{module} 未在 Kmic.MigrationRunner 的 Program.cs 中注册。");
         }
     }
 

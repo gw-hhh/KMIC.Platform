@@ -1,18 +1,12 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Files;
 
-/// <summary>
-/// 本地磁盘存储，开发和测试用
-/// </summary>
-/// <remarks>
-/// 根目录不能放在站点目录里
-/// </remarks>
+/// <summary>本地磁盘文件存储，仅用于开发与测试环境（根目录不得位于站点发布目录内）</summary>
 public sealed class LocalFileStorage(string root) : IFileStorage
 {
     private const string TempSuffix = ".writing";
 
     private readonly string _root = Path.GetFullPath(root);
 
-    /// <inheritdoc />
     public async Task<StoredObject> WriteAsync(string key, Stream content, string contentType, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(content);
@@ -38,31 +32,26 @@ public sealed class LocalFileStorage(string root) : IFileStorage
         return new StoredObject(key, null);
     }
 
-    /// <inheritdoc />
     public Task<Stream> OpenReadAsync(string key, CancellationToken ct)
     {
         var path = PathOf(key);
         return File.Exists(path)
             ? Task.FromResult<Stream>(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true))
-            : throw new FileNotFoundException($"存储里没有 {key}。", path);
+            : throw new FileNotFoundException($"存储中不存在对象 {key}。", path);
     }
 
-    /// <inheritdoc />
     public Task DeleteAsync(string key, CancellationToken ct)
     {
         File.Delete(PathOf(key));
         return Task.CompletedTask;
     }
 
-    /// <inheritdoc />
     public Task<bool> ExistsAsync(string key, string? versionId, CancellationToken ct) =>
         Task.FromResult(File.Exists(PathOf(key)));
 
-    /// <inheritdoc />
     public Task<Uri> GetDownloadUrlAsync(string key, TimeSpan validFor, string downloadName, CancellationToken ct) =>
-        throw new NotSupportedException("本地存储不能生成下载地址，由应用转发文件。");
+        throw new NotSupportedException("本地存储不支持生成直链下载地址，请通过应用接口转发文件。");
 
-    /// <inheritdoc />
     public async IAsyncEnumerable<string> ListAsync(string prefix, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
     {
         await Task.CompletedTask;
@@ -92,12 +81,12 @@ public sealed class LocalFileStorage(string root) : IFileStorage
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         if (key.StartsWith('/') || key.Contains("..", StringComparison.Ordinal) || key.Contains('\\', StringComparison.Ordinal) || key.Contains(':', StringComparison.Ordinal))
         {
-            throw new ArgumentException($"存储键不合法：“{key}”。", nameof(key));
+            throw new ArgumentException($"无效的存储键：“{key}”。", nameof(key));
         }
 
         var path = Path.GetFullPath(Path.Combine(_root, key));
         return path.StartsWith(_root + Path.DirectorySeparatorChar, StringComparison.Ordinal)
             ? path
-            : throw new ArgumentException($"存储键指到了根目录之外：“{key}”。", nameof(key));
+            : throw new ArgumentException($"存储键越界访问根目录之外的路径：“{key}”。", nameof(key));
     }
 }

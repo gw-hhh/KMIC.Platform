@@ -4,9 +4,7 @@ using Kmic.Configuration.Domain.Dictionaries;
 
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
-/// <summary>
-/// 调整字典项的父项
-/// </summary>
+/// <summary>调整字典项的父项</summary>
 /// <param name="TypeCode">字典类型编码</param>
 /// <param name="ExpectedVersion">字典类型的预期版本号</param>
 /// <param name="Code">字典项编码</param>

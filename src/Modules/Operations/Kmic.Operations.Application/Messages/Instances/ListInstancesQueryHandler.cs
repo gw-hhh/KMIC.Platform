@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Operations.Application.Messages.Instances;
 
-/// <summary>
-/// 查询消息处理实例及其心跳状态
-/// </summary>
 public sealed class ListInstancesQueryHandler(IOperationsQueryDb db, TimeProvider time) : IQueryHandler<ListInstancesQuery, IReadOnlyList<InstanceItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<InstanceItem>>> Handle(ListInstancesQuery query, CancellationToken cancellationToken)
     {
         var rows = await db.MessagingInstances.OrderByDescending(i => i.HeartbeatAt).ThenBy(i => i.Id).ToListAsync(cancellationToken);

@@ -20,9 +20,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Jobs;
 
-/// <summary>
-/// 作业每一批给单据加一行“第 N 批”。占用设得很短，续期每 100 毫秒一次，取消、超时、接管都能很快被发现
-/// </summary>
 public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string Module = "BuildingBlocks";
@@ -84,9 +81,9 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
 
         await _harness.Services.RunJobsAsync(Ct);
 
-        // 监听器是进程范围的，别的测试的作业也会进来，按作业 ID 挑出这一个
+        // ActivityListener 为进程级全局监听，会捕获其他测试的作业活动，需按作业 ID 筛选目标根 Span
         var root = started.Single(a => a.OperationName.StartsWith("job ", StringComparison.Ordinal) && string.Equals(a.GetTagItem("kmic.job.id") as string, jobId.ToString(), StringComparison.Ordinal));
-        root.ParentId.ShouldBeNull("每次执行是一个根 span，不挂在领取它的循环下面");
+        root.ParentId.ShouldBeNull("每次作业执行应创建独立的根 Span，不应归属于领取循环之下");
         started.Count(a => string.Equals(a.OperationName, "job batch", StringComparison.Ordinal) && a.ParentSpanId == root.SpanId).ShouldBe(3);
     }
 
@@ -152,7 +149,7 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
 
         await _harness.Services.RunJobsAsync(Ct);
 
-        // 结束通知只是提醒：写不进去不能让作业一直停在运行中
+        // 结束事件仅作通知用途：写入受阻时不应阻碍作业正常结束并更新状态
         (await JobAsync(jobId)).Status.ShouldBe(JobStatus.Succeeded);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批", "第 2 批"]);
         (await FinishedEventsAsync(jobId)).ShouldBeEmpty();
@@ -184,7 +181,7 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.CancelRequestedBy.ShouldBe(_user.UserId.Value);
         (await LinesAsync(ticket)).ShouldBeEmpty();
 
-        var finished = (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem("排队中直接取消也算结束");
+        var finished = (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem("处于排队状态的作业被取消时也应发布结束事件");
         finished.Result.ShouldBe(BackgroundJobResult.Cancelled);
         finished.CancelRequestedBy.ShouldBe(_user.UserId.Value);
     }
@@ -212,7 +209,7 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
     [Fact]
     public async Task RunningTooLong_FailedAsTimedOut()
     {
-        // 超时上限留足余量，确保机器忙时第 1 批也能在超时前提交
+        // 为超时上限预留充足余量，确保负载较高时第 1 批仍可在超时前完成提交
         await using var harness = NewHarness(o => o.MaxRunTime = TimeSpan.FromSeconds(2));
         var (ticket, jobId) = await SubmitAsync(batches: 2, harness);
         harness.Hooks.BeforeJobBatch = async (batch, ct) =>
@@ -270,9 +267,9 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         job.Status.ShouldBe(JobStatus.Running);
         job.LeaseToken.ShouldBe(other);
         (await LinesAsync(ticket)).ShouldBe(["第 1 批"]);
-        (await FinishedEventsAsync(jobId)).ShouldBeEmpty("没写入结果就不发布结束事件");
+        (await FinishedEventsAsync(jobId)).ShouldBeEmpty("批次结果未成功写入时不应发布结束事件");
 
-        // 收尾：不让这条运行中的记录过期后被同一个库里后面的测试领走
+        // 清理状态：避免该运行中记录在租约过期后被同库后续测试误领取
         await ExecuteAsync("""UPDATE "Probe"."BackgroundJob" SET "Status" = 3, "LeaseToken" = NULL WHERE "Id" = @id""", jobId);
     }
 
@@ -308,7 +305,7 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         var (ticket, resumable) = await SubmitAsync(batches: 3);
         var (_, export) = await SubmitAsync(batches: 1, export: true);
 
-        // 两个作业都被领走后执行者失联：一个做完了两批，一个还没开始
+        // 模拟两个作业在被领取后执行节点失联：可续跑作业已完成两批，不可续跑作业尚未执行任何批次
         var lost = Guid.CreateVersion7();
         (await Executor.ClaimAsync(Module, 2, lost, Ct)).Count.ShouldBe(2);
         await using (var work = _harness.Begin(_user))
@@ -364,7 +361,7 @@ public sealed class JobExecutionTests : IClassFixture<ClassDatabase<ProbeTemplat
         var job = await JobAsync(jobId);
         job.Status.ShouldBe(JobStatus.Cancelled);
         job.FinishedAt.ShouldNotBeNull();
-        job.ExpiresAt.ShouldNotBeNull("没有过期时间的作业行不会被清理");
+        job.ExpiresAt.ShouldNotBeNull("已取消的作业应设置过期时间，以便后续自动清理");
         (await FinishedEventsAsync(jobId)).ShouldHaveSingleItem().Result.ShouldBe(BackgroundJobResult.Cancelled);
     }
 

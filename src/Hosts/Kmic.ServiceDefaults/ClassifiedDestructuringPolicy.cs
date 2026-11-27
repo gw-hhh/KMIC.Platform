@@ -8,9 +8,6 @@ using Serilog.Events;
 
 namespace Kmic.ServiceDefaults;
 
-/// <summary>
-/// 按数据分类脱敏日志属性
-/// </summary>
 internal sealed class ClassifiedDestructuringPolicy : IDestructuringPolicy
 {
     private static readonly ConcurrentDictionary<Type, ClassifiedType?> _types = new();
@@ -41,7 +38,7 @@ internal sealed class ClassifiedDestructuringPolicy : IDestructuringPolicy
         return true;
     }
 
-    // 只处理有标注的普通对象；字符串、集合、枚举这些交给默认解构
+    // 仅处理标注了数据分类的普通对象；基元类型、字符串、集合与枚举交由默认解构策略处理
     private static ClassifiedType? Read(Type type)
     {
         if (type.IsPrimitive || type.IsEnum || type == typeof(string) || type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))

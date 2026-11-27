@@ -1,22 +1,13 @@
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 请求马上执行一个定时任务的结果
-/// </summary>
 public enum ScheduledJobTriggerOutcome
 {
-    /// <summary>
-    /// 已交给调度器
-    /// </summary>
+    /// <summary>已提交至调度器。</summary>
     Triggered = 0,
 
-    /// <summary>
-    /// 调度库里没有这个任务
-    /// </summary>
+    /// <summary>调度器中不存在该任务。</summary>
     NotFound = 1,
 
-    /// <summary>
-    /// 这个任务正在执行、即将按计划执行，或已有手动触发在排队
-    /// </summary>
+    /// <summary>任务正在执行、即将按计划触发，或已有手动触发在排队。</summary>
     AlreadyRunning = 2,
 }

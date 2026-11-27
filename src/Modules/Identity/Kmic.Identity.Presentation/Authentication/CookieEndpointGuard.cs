@@ -6,9 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Presentation.Authentication;
 
-/// <summary>
-/// 刷新 Cookie 的 CSRF 防护：校验可信 Origin 和自定义请求头
-/// </summary>
+// 刷新 Cookie 的 CSRF 防护：校验可信 Origin 和自定义请求头
 internal sealed class CookieEndpointGuard(IOptions<TrustedOriginsOptions> options) : IEndpointFilter
 {
     public const string RequiredHeader = "X-Requested-With";

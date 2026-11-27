@@ -3,9 +3,7 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Get;
 
-/// <summary>
-/// 组织单元列表项
-/// </summary>
+/// <summary>组织单元列表项</summary>
 /// <param name="Id">组织单元 ID</param>
 /// <param name="ParentId">上级组织单元 ID，根单元为空</param>
 /// <param name="Name">名称</param>

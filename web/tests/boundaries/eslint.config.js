@@ -3,7 +3,7 @@ import vueParser from 'vue-eslint-parser';
 import { boundariesConfig } from '../../eslint/boundaries.js';
 import { moduleRestrictions } from '../../eslint/restrictions.js';
 
-// 边界样例专用的检查配置：和正式配置共用同一套规则，只换 src 的位置；样例只需要语法解析，不做类型检查
+// 边界测试样例专用 ESLint 配置：复用正式规则集并替换 src 根目录；样例仅需语法解析，不做类型检查
 const sets = ['legal', 'violations'];
 
 export default [

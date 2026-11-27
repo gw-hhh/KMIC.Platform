@@ -3,9 +3,6 @@ using Serilog.Events;
 
 namespace Kmic.ServiceDefaults.Tests;
 
-/// <summary>
-/// 把日志事件收集在内存里
-/// </summary>
 internal sealed class CollectingSink : ILogEventSink
 {
     private readonly List<LogEvent> _events = [];

@@ -4,9 +4,7 @@ using Npgsql;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 命令行程序测试的模板库：只有运行账号的角色，结构由被测的迁移程序自己建立
-/// </summary>
+/// <summary>仅预置运行账号角色，表结构由被测迁移程序自行建立</summary>
 public sealed class ToolsTemplate : PostgresTemplateDatabase
 {
     protected override async Task InitializeTemplateAsync(string connectionString, CancellationToken ct)

@@ -11,7 +11,7 @@ internal sealed class ListInstancesEndpoint : IEndpoint
         group.MapGet("/messages/instances", HandleAsync)
             .Sends<ListInstancesQuery>()
             .WithSummary("查询消息处理实例")
-            .WithDescription("列出实例的构建号、角色、心跳和订阅，按最近心跳倒序。包含心跳已过期的记录，供诊断订阅声明情况。");
+            .WithDescription("按最近心跳倒序返回实例构建号、角色、心跳与订阅（含过期记录，用于核对订阅声明）");
 
     private static async Task<IResult> HandleAsync(IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ListInstancesQuery(), ct)).ToOk();

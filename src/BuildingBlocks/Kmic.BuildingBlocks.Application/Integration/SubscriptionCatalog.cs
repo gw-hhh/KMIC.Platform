@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 订阅目录
-/// </summary>
 public sealed class SubscriptionCatalog
 {
     private readonly FrozenDictionary<(string Name, int Version), SubscriptionDefinition> _byVersion;
@@ -49,7 +46,7 @@ public sealed class SubscriptionCatalog
         var name = declared.Name;
         if (!name.StartsWith(module + ".", StringComparison.Ordinal) || name.Length == module.Length + 1)
         {
-            problems.Add($"订阅名“{name}”要以“{module}.”开头。");
+            problems.Add($"订阅名“{name}”须以“{module}.”开头。");
         }
 
         if (messages.Find(declared.MessageType) is not { } message)
@@ -61,11 +58,11 @@ public sealed class SubscriptionCatalog
         var useCase = useCases.Find(declared.CommandType);
         if (useCase is null || useCase.Kind != MessageKind.Command || !string.Equals(useCase.Module, module, StringComparison.Ordinal))
         {
-            problems.Add($"订阅 {name} 映射的 {declared.CommandType.Name} 要是 {module} 模块的命令。");
+            problems.Add($"订阅 {name} 映射的 {declared.CommandType.Name} 必须是 {module} 模块的命令。");
         }
         else if (!useCase.AllowSystem && useCase.Requirement != AccessRequirement.SystemOnly)
         {
-            problems.Add($"订阅 {name} 映射的 {declared.CommandType.Name} 以系统身份执行，要标 [SystemOnly] 或 [AllowSystem]。");
+            problems.Add($"订阅 {name} 映射的 {declared.CommandType.Name} 以系统身份执行，须标注 [SystemOnly] 或 [AllowSystem]。");
         }
 
         if (message.IsRequest && !string.Equals(message.Module, module, StringComparison.Ordinal))
@@ -74,36 +71,36 @@ public sealed class SubscriptionCatalog
         }
         else if (!message.IsRequest && string.Equals(message.Module, module, StringComparison.Ordinal))
         {
-            problems.Add($"订阅 {name} 订阅了本模块自己发布的 {message.Name}，模块内部要用领域事件。");
+            problems.Add($"订阅 {name} 订阅了本模块自己发布的 {message.Name}，模块内部请使用领域事件。");
         }
 
         if (declared.Options.Rebuild is { } rebuild && !string.Equals(ModuleNames.Of(rebuild.ReadModel), module, StringComparison.Ordinal))
         {
-            problems.Add($"订阅 {name} 重建的读模型 {rebuild.ReadModel.Name} 要在 {module} 模块里。");
+            problems.Add($"订阅 {name} 重建的读模型 {rebuild.ReadModel.Name} 须位于 {module} 模块中。");
         }
 
         return new SubscriptionDefinition(name, module, message, declared.CommandType, declared.Map, declared.Options.IsOrdered, declared.Options.Rebuild);
     }
 
-    // 同一个订阅可以分别处理同一种消息的几个版本，但不能混订不同的消息
+    // 同一订阅可分别处理同一消息的多个版本，但不可混订不同消息
     private static void CheckNames(List<SubscriptionDefinition> subscriptions, List<string> problems)
     {
         foreach (var group in subscriptions.GroupBy(s => s.Name, StringComparer.Ordinal))
         {
             if (group.Select(s => s.Message.Name).Distinct(StringComparer.Ordinal).Count() > 1)
             {
-                problems.Add($"订阅名“{group.Key}”用在了不同的消息上：{string.Join("、", group.Select(s => s.Message.Name).Distinct(StringComparer.Ordinal))}。");
+                problems.Add($"订阅名“{group.Key}”同时用于不同的消息：{string.Join("、", group.Select(s => s.Message.Name).Distinct(StringComparer.Ordinal))}。");
             }
             else if (group.GroupBy(s => s.Message.Version).Any(v => v.Count() > 1))
             {
                 problems.Add($"订阅“{group.Key}”对同一个消息版本声明了两次。");
             }
 
-            // 重建按订阅名排队，几个消息版本都写了重建的话，读模型和来源要是同一个
+            // 重建按订阅名称排队，若多个版本均声明了重建方式，其读模型与来源须保持一致
             var rebuilds = group.Select(s => s.Rebuild).OfType<IReadModelRebuild>().ToList();
             if (rebuilds.Select(r => (r.ReadModel, r.Source)).Distinct().Count() > 1)
             {
-                problems.Add($"订阅“{group.Key}”的几个消息版本声明了不同的重建方式，要写成同一个读模型和同一个来源。");
+                problems.Add($"订阅“{group.Key}”的多个消息版本声明了不同的重建方式，须保持读模型和来源一致。");
             }
         }
     }
@@ -115,7 +112,7 @@ public sealed class SubscriptionCatalog
             var count = subscriptions.Count(s => s.Message == request);
             if (count != 1)
             {
-                problems.Add($"请求型消息 {request.Name} 版本 {request.Version} 要有且只有一个订阅，现在有 {count} 个。");
+                problems.Add($"请求型消息 {request.Name} 版本 {request.Version} 必须且只能有一个订阅，当前有 {count} 个。");
             }
         }
     }
@@ -126,18 +123,18 @@ public sealed class SubscriptionCatalog
         {
             if (!item.Name.StartsWith(item.Module + ".", StringComparison.Ordinal))
             {
-                problems.Add($"退役的订阅“{item.Name}”要以“{item.Module}.”开头。");
+                problems.Add($"已退役的订阅“{item.Name}”须以“{item.Module}.”开头。");
             }
 
             if (subscriptions.Any(s => string.Equals(s.Name, item.Name, StringComparison.Ordinal)))
             {
-                problems.Add($"订阅“{item.Name}”声明了退役，就不能同时再订阅。");
+                problems.Add($"订阅“{item.Name}”已声明退役，不能同时保留订阅。");
             }
         }
 
         foreach (var duplicate in retired.GroupBy(r => r.Name, StringComparer.Ordinal).Where(g => g.Count() > 1))
         {
-            problems.Add($"订阅“{duplicate.Key}”的退役声明写了两次。");
+            problems.Add($"订阅“{duplicate.Key}”重复声明了退役。");
         }
     }
 }

@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 安全事件的日志
-/// </summary>
 internal static partial class SecurityEventLog
 {
     [LoggerMessage(EventId = 2601, Level = LogLevel.Warning, Message = "Security event queue is full, dropped {Type} ({Severity}): {Reason}")]

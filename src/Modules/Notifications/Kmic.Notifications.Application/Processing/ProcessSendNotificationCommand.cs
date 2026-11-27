@@ -4,9 +4,7 @@ using Kmic.Notifications.Contracts;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 处理普通通知发送请求，生成投递记录或站内消息
-/// </summary>
+/// <summary>处理普通通知发送请求，生成投递记录或站内消息</summary>
 /// <param name="Message">请求</param>
 /// <param name="SourceMessageId">来源消息的 ID</param>
 /// <param name="SourceModule">发出请求的模块</param>

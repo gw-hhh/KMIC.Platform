@@ -12,7 +12,7 @@ internal sealed class SetSettingEndpoint : IEndpoint
         group.MapPut("/settings/{key}", HandleAsync)
             .Sends<SetSettingCommand>()
             .WithSummary("修改系统设置")
-            .WithDescription("需要查看设置权限及该设置声明的修改权限，可通过列表中的可用操作判断。值按声明类型解析并校验。");
+            .WithDescription("需同时具备查看权限与该设置的修改权限，值按声明类型解析校验");
 
     private static async Task<IResult> HandleAsync([Description("设置键")] string key, SetSettingRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SetSettingCommand(key, request.Value, request.Reason, request.ExpectedVersion), ct)).ToOk();

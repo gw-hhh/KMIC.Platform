@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Roles.Enable;
 
-/// <summary>
-/// 启用已停用的角色
-/// </summary>
+/// <summary>启用已停用的角色。</summary>
 /// <param name="Id">角色 ID</param>
 /// <param name="ExpectedVersion">预期版本号</param>
 [RequirePermission(IdentityPermissions.RoleManage)]

@@ -2,23 +2,11 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Settings;
 
-/// <summary>
-/// 偏好
-/// </summary>
-/// <remarks>
-/// 只影响使用体验，不能用来控制权限
-/// </remarks>
-/// <typeparam name="TSelf">值类型自身</typeparam>
+/// <summary>用户偏好契约；仅用于个人使用体验偏好，不得用于权限控制。</summary>
 public interface IPreference<TSelf>
     where TSelf : class, IPreference<TSelf>
 {
-    /// <summary>
-    /// 默认值
-    /// </summary>
     static abstract TSelf Default { get; }
 
-    /// <summary>
-    /// 校验
-    /// </summary>
     static abstract Result Validate(TSelf value);
 }

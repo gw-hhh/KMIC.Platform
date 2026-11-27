@@ -15,12 +15,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 邮件附件：投递记录里存文件 ID，发送时向 Files 取内容；读不到的、太大的按暂时或永久失败记在投递上
-/// </summary>
-/// <remarks>
-/// 邮件渠道换成记录用的，文件走真实的上传和本地存储。附件总大小的上限调成 1 MB，方便测超限
-/// </remarks>
 public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<ClassDatabase<ApiTemplate>>
 {
     private static readonly RecordingEmailSender _email = new();
@@ -87,10 +81,10 @@ public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<Cl
 
         await SendAsync(Notice(user, dedup, first, second, first));
 
-        await WaitForAsync(seed, dedup, "Sent", "带附件的邮件发出去了");
+        await WaitForAsync(seed, dedup, "Sent", "带附件的邮件完成发送");
         var deliveryId = await seed.ScalarAsync<Guid>($"""SELECT "Id" FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}' AND "Channel" = 'Email'""");
         var attachments = _email.AttachmentsOf(deliveryId);
-        attachments.Select(a => a.Name).ShouldBe(["合同.pdf", "补充.pdf"], "重复的文件 ID 只附一次");
+        attachments.Select(a => a.Name).ShouldBe(["合同.pdf", "补充.pdf"], "重复的文件 ID 应去重，仅附加一次");
         attachments.Select(a => a.ContentType).ShouldAllBe(type => type == "application/pdf");
         attachments[0].Content.ShouldBe(Pdf("第一份"));
         attachments[1].Content.ShouldBe(Pdf("第二份"));
@@ -106,8 +100,8 @@ public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<Cl
 
         await SendAsync(Notice(user, dedup, Guid.CreateVersion7()));
 
-        await WaitForAsync(seed, dedup, "Failed", "附件不存在，投递失败");
-        (await ErrorAsync(seed, dedup)).ShouldBe("附件不存在或已经被删除");
+        await WaitForAsync(seed, dedup, "Failed", "附件不存在，投递标记为失败");
+        (await ErrorAsync(seed, dedup)).ShouldBe("附件不存在或已删除");
         _email.Sent.Skip(before).ShouldNotContain(m => m.Subject.Contains("SP-ATT", StringComparison.Ordinal));
     }
 
@@ -122,7 +116,7 @@ public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<Cl
 
         await SendAsync(Notice(user, dedup, big, another));
 
-        await WaitForAsync(seed, dedup, "Failed", "附件加起来超过上限，投递失败");
+        await WaitForAsync(seed, dedup, "Failed", "附件总大小超出上限，投递标记为失败");
         (await ErrorAsync(seed, dedup)).ShouldBe("附件总大小超过 1 MB");
     }
 
@@ -138,14 +132,14 @@ public sealed class DeliveryAttachmentTests : FilesApiTestBase, IClassFixture<Cl
         await SendAsync(Notice(user, dedup, file));
 
         await Eventually.UntilAsync(
-            _ => seed.ScalarAsync<bool>($"""SELECT "Status" = 'Pending' AND "LastError" = '附件暂时读不到' AND "NextAttemptAt" > now() FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}' AND "Channel" = 'Email'"""),
+            _ => seed.ScalarAsync<bool>($"""SELECT "Status" = 'Pending' AND "LastError" = '附件暂时无法读取' AND "NextAttemptAt" > now() FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}' AND "Channel" = 'Email'"""),
             backedOff => backedOff,
-            "附件还没准备好，投递放回队列并退避",
+            "附件暂不可读，投递放回队列并设置退避时间",
             TimeSpan.FromSeconds(30),
             Ct);
         await seed.SqlAsync("""UPDATE "Files"."StoredFile" SET "Status" = 'Available' WHERE "Id" = @id""", ("id", file));
         await seed.SqlAsync($"""UPDATE "Notifications"."Delivery" SET "NextAttemptAt" = now() WHERE "DedupKey" = '{dedup}'""");
 
-        await WaitForAsync(seed, dedup, "Sent", "附件准备好之后发出去了");
+        await WaitForAsync(seed, dedup, "Sent", "附件就绪后邮件完成发送");
     }
 }

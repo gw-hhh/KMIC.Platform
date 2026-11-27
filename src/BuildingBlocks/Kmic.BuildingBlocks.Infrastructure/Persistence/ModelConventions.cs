@@ -8,9 +8,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 框架的模型约定
-/// </summary>
 internal static class ModelConventions
 {
     private static readonly string _notDeleted = $"\"{SoftDeleteColumns.IsDeleted}\" = false";
@@ -21,20 +18,20 @@ internal static class ModelConventions
         {
             var entity = modelBuilder.Entity(entityType.ClrType);
 
-            // 关掉数据库生成：ID 由程序生成，不关的话 EF 会把带着 ID 的新子实体当成已有的行去更新
+            // 禁用数据库值生成：主键值由应用层生成，否则 EF Core 会将已赋 ID 的新子实体误判为存量记录并执行更新
             entity.Property(nameof(Entity<>.Id)).ValueGeneratedNever();
             AddAuditColumns(entity);
 
             if (EntityKinds.IsAggregateRoot(entityType.ClrType))
             {
-                // 领域事件和状态流转只在内存里传递，不映射到表
+                // 领域事件与状态流转仅用于内存传递，不映射至数据库表
                 entity.Ignore(nameof(IAggregateRoot.DomainEvents));
                 entity.Ignore(nameof(IAggregateRoot.StateTransitions));
                 entity.Property(nameof(IAggregateRoot.ConcurrencyVersion))
                     .IsConcurrencyToken()
                     .HasComment("并发版本号");
 
-                // 列表默认按创建时间排序，所以要有索引
+                // 业务列表默认按创建时间排序，因此自动为其建立索引
                 entity.HasIndex(AuditColumns.CreatedAt);
             }
 
@@ -58,7 +55,7 @@ internal static class ModelConventions
         }
     }
 
-    // 列注释默认取属性的 XML 注释，配置里写了 HasComment 的不覆盖
+    // 列注释默认取属性的 XML 注释，配置中已显式调用 HasComment 的不予覆盖
     private static void AddColumnComments(IMutableEntityType entityType)
     {
         foreach (var property in entityType.GetDeclaredProperties().Where(p => p.GetComment() is null))
@@ -74,7 +71,7 @@ internal static class ModelConventions
         }
     }
 
-    // 值对象的列注释是“属性注释：成员注释”，如“预算：金额”
+    // 复合值对象的列注释格式为“属性注释：成员注释”（例如“预算：金额”）
     private static void CommentValueObjectColumns(IMutableComplexProperty complexProperty, string? owner)
     {
         foreach (var property in complexProperty.ComplexType.GetDeclaredProperties().Where(p => p.GetComment() is null))
@@ -96,7 +93,7 @@ internal static class ModelConventions
             ? $"{foreignKey.PrincipalEntityType.ClrType.Name} ID"
             : null;
 
-    // 值对象的列名是属性名加成员名，如 BudgetAmount。存成 jsonb 的值对象只有一列，不用处理
+    // 复合值对象展开后的列名格式为“属性名 + 成员名”（如 BudgetAmount）；映射为 jsonb 的值对象仅占单列，无需处理
     private static void NameValueObjectColumns(IMutableComplexProperty complexProperty, string prefix)
     {
         if (complexProperty.IsCollection || complexProperty.ComplexType.IsMappedToJson())
@@ -115,7 +112,7 @@ internal static class ModelConventions
         }
     }
 
-    // 枚举列只能存已定义的编码，新增取值时迁移里会出现约束变更
+    // 为枚举列添加 CHECK 约束以限制仅可存储已定义的编码值；后续新增枚举值时将在迁移中生成约束变更
     private static void AddCodeChecks(IMutableEntityType entityType)
     {
         var table = entityType.GetTableName();
@@ -142,13 +139,13 @@ internal static class ModelConventions
     {
         if (foreignKey.PrincipalToDependent is not null && !EntityKinds.IsAggregateRoot(foreignKey.DeclaringEntityType.ClrType))
         {
-            // 外键可空的话，子实体离开集合时 EF 只会把外键置空，行还留在表里
+            // 若外键允许为空，子实体从集合移除时 EF Core 仅将外键置空而不会删除记录
             foreignKey.IsRequired = true;
             foreignKey.DeleteBehavior = DeleteBehavior.Cascade;
         }
         else if (EntityKinds.IsAggregateRoot(foreignKey.PrincipalEntityType.ClrType))
         {
-            // 聚合根还被别的数据引用时，不允许物理删除
+            // 聚合根被其他数据外键引用时禁止物理删除
             foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
         }
     }
@@ -168,7 +165,7 @@ internal static class ModelConventions
         entity.Property<UserId?>(SoftDeleteColumns.DeletedBy).HasComment("删除人");
         entity.HasQueryFilter(QueryFilters.SoftDelete, NotDeleted(entityType.ClrType));
 
-        // 唯一约束只管没删除的行，删除后才能新建同编号的数据
+        // 唯一索引仅约束未软删除的记录，确保记录软删除后仍可重建相同键值的业务数据
         foreach (var index in entityType.GetIndexes().Where(i => i.IsUnique))
         {
             index.SetFilter(index.GetFilter() is { } existing ? $"({existing}) AND {_notDeleted}" : _notDeleted);

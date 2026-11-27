@@ -4,9 +4,7 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 请求模型里同时有不可空和可空的 JsonElement：它们是同一个“任意 JSON 值”，不能占用同一个架构名两次
-/// </summary>
+// 请求模型同时包含可空与非空 JsonElement，验证二者共用同一 OpenAPI 架构名而不冲突
 internal static class AnyJsonEndpoints
 {
     public static readonly Type[] All = [typeof(AnyJsonEndpoint)];

@@ -7,9 +7,6 @@ using Microsoft.OpenApi;
 
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
-/// <summary>
-/// 强类型 ID 和智能枚举在文档里按它们实际的 JSON 形式描述
-/// </summary>
 internal sealed class KmicSchemaTransformer : IOpenApiSchemaTransformer
 {
     public const string EnumLabelsKey = "x-kmic-enum";
@@ -18,7 +15,7 @@ internal sealed class KmicSchemaTransformer : IOpenApiSchemaTransformer
     {
         var underlying = Nullable.GetUnderlyingType(context.JsonTypeInfo.Type);
         var type = underlying ?? context.JsonTypeInfo.Type;
-        // 带自定义转换器的值类型，框架不给类型，可空只能从 Nullable<T> 看出来
+        // 具备自定义 JSON 转换器的值类型不会自动生成 schema.Type，需结合 Nullable<T> 判断可空性
         var nullable = underlying is not null || (schema.Type is { } existing && existing.HasFlag(JsonSchemaType.Null));
         MarkDictionaryField(schema, context.JsonPropertyInfo);
         if (type.IsValueType && typeof(IStronglyTypedId).IsAssignableFrom(type))
@@ -28,7 +25,7 @@ internal sealed class KmicSchemaTransformer : IOpenApiSchemaTransformer
         }
         else if (type == typeof(DateTimeOffset))
         {
-            // 带自定义转换器的类型，框架只给出格式，没有类型
+            // 具备自定义转换器的类型仅生成格式而缺失类型声明，需显式补充 string 类型
             AsString(schema, nullable);
             schema.Format = "date-time";
         }
@@ -44,7 +41,7 @@ internal sealed class KmicSchemaTransformer : IOpenApiSchemaTransformer
         return Task.CompletedTask;
     }
 
-    // 其余描述对象形状的内容都去掉
+    // 清除用于描述复杂对象结构的残余字段
     private static void AsString(OpenApiSchema schema, bool nullable)
     {
         schema.Type = nullable ? JsonSchemaType.String | JsonSchemaType.Null : JsonSchemaType.String;
@@ -54,7 +51,7 @@ internal sealed class KmicSchemaTransformer : IOpenApiSchemaTransformer
         schema.Items = null;
     }
 
-    // 存字典编码的属性标了 [Dictionary]，前端据此把编码显示成字典里的名称。位置参数上的特性在构造函数参数里，也要看
+    // 标记 [Dictionary] 的属性用于前端字典编码翻译；对于主构造函数位置参数，特性位于关联构造函数参数上，需一并读取
     private static void MarkDictionaryField(OpenApiSchema schema, JsonPropertyInfo? property)
     {
         var declared = property?.AttributeProvider?.GetCustomAttributes(typeof(DictionaryAttribute), inherit: false)

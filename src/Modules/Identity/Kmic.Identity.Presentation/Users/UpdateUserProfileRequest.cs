@@ -1,8 +1,5 @@
 namespace Kmic.Identity.Presentation.Users;
 
-/// <summary>
-/// 修改用户资料的请求
-/// </summary>
 /// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="Account">登录名</param>
 /// <param name="DisplayName">姓名</param>

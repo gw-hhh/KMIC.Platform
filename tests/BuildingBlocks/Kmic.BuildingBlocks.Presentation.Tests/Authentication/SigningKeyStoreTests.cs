@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Authentication;
 
-/// <summary>
-/// 签名密钥的启动校验：恰好一个 Active、RSA 不小于 2048、文件存在且是有效的 PEM
-/// </summary>
 public sealed class SigningKeyStoreTests : IDisposable
 {
     private readonly TokenFactory _tokens = new();

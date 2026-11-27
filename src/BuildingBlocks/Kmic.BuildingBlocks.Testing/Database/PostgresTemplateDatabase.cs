@@ -4,23 +4,16 @@ using Xunit;
 
 namespace Kmic.BuildingBlocks.Testing.Database;
 
-/// <summary>
-/// 模板数据库：程序集级夹具，启动容器并建好模板库
-/// </summary>
-/// <remarks>
-/// 派生类用 [assembly: AssemblyFixture(typeof(派生类))] 注册
-/// </remarks>
+/// <summary>PostgreSQL 模板数据库夹具（程序集级），派生类通过 [assembly: AssemblyFixture(typeof(派生类))] 注册。</summary>
 public abstract class PostgresTemplateDatabase : IAsyncLifetime
 {
-    /// <summary>
-    /// 和生产环境的 PostgreSQL 小版本保持一致
-    /// </summary>
+    /// <summary>与生产环境的 PostgreSQL 次版本号保持一致。</summary>
     public const string Image = "postgres:18.6";
 
     private const string TemplateName = "kmic_template";
 
-    // 测试类并行运行，每个带 Worker 角色的宿主要开前台、后台各两个连接池；默认的 100 个连接会被用光，
-    // 表现是个别测试随机报“剩余连接槽位留给超级用户”。测试库的上限放宽，生产的连接预算按运维手册的公式另算
+    // 测试类并行执行时，每个含 Worker 角色的宿主会同时开启前台与后台连接池，默认 100 连接上限易耗尽
+    // （表现为个别测试随机报“剩余连接槽位留给超级用户”）；此处放宽测试库连接上限，生产环境按运维预算公式配置
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder(Image)
         .WithName(TestContainerNames.For("postgres"))
         .WithLabel(TestContainerNames.GroupLabel, TestContainerNames.Group)
@@ -28,27 +21,23 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
         .WithCommand("-c", "max_connections=500")
         .Build();
 
-    /// <inheritdoc />
     public async ValueTask InitializeAsync()
     {
         var ct = TestContext.Current.CancellationToken;
         await _container.StartAsync(ct);
         await ExecuteAsync($"CREATE DATABASE {TemplateName}", ct);
 
-        // 不用连接池：池里空闲的连接也会让克隆失败
+        // 禁用连接池：池中残留空闲连接会导致数据库克隆失败
         await InitializeTemplateAsync(ConnectionString(TemplateName, pooling: false), ct);
     }
 
-    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         await _container.DisposeAsync();
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// 克隆数据库，返回库名
-    /// </summary>
+    /// <summary>从模板库克隆新数据库并返回库名。</summary>
     public async Task<string> CloneAsync(CancellationToken ct)
     {
         var database = $"test_{Guid.CreateVersion7():N}";
@@ -56,9 +45,7 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
         return database;
     }
 
-    /// <summary>
-    /// 建一个空库并返回库名，用来测试迁移本身
-    /// </summary>
+    /// <summary>创建空数据库并返回库名，用于迁移逻辑测试。</summary>
     public async Task<string> CreateEmptyAsync(CancellationToken ct)
     {
         var database = $"test_{Guid.CreateVersion7():N}";
@@ -66,24 +53,15 @@ public abstract class PostgresTemplateDatabase : IAsyncLifetime
         return database;
     }
 
-    /// <summary>
-    /// 删除克隆库，有连接时强制断开
-    /// </summary>
+    /// <summary>删除指定克隆库（存在活跃连接时强制断开）。</summary>
     public Task DropAsync(string database, CancellationToken ct) =>
         ExecuteAsync($"DROP DATABASE IF EXISTS \"{database}\" WITH (FORCE)", ct);
 
-    /// <summary>
-    /// 连接串
-    /// </summary>
+    /// <summary>获取指定数据库的连接字符串。</summary>
     public string ConnectionString(string database, bool pooling = true) =>
         new NpgsqlConnectionStringBuilder(_container.GetConnectionString()) { Database = database, Pooling = pooling }.ConnectionString;
 
-    /// <summary>
-    /// 建立模板库的结构，如执行迁移
-    /// </summary>
-    /// <remarks>
-    /// 连接串不用连接池，不要另外建池化的连接
-    /// </remarks>
+    /// <summary>初始化模板库结构（如执行迁移）；传入的连接已禁用连接池，请勿额外创建池化连接。</summary>
     protected abstract Task InitializeTemplateAsync(string connectionString, CancellationToken ct);
 
     private async Task ExecuteAsync(string sql, CancellationToken ct)

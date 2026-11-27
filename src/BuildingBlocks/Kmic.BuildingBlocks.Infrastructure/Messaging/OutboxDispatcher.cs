@@ -8,9 +8,7 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 把一个模块 Outbox 里的消息复制到各订阅方模块的 Inbox
-/// </summary>
+// Outbox 分发器：将发件箱消息投递至各订阅方模块的 Inbox
 internal sealed class OutboxDispatcher(
     ModuleFrameworkTables tables,
     DataSources dataSources,
@@ -19,9 +17,6 @@ internal sealed class OutboxDispatcher(
 {
     private NpgsqlDataSource Database => dataSources.Transactions(CallOrigin.Inbox);
 
-    /// <summary>
-    /// 领取一批并投递，返回领取到的条数
-    /// </summary>
     public async Task<int> DeliverBatchAsync(string module, CancellationToken ct)
     {
         var token = Guid.CreateVersion7();
@@ -94,7 +89,7 @@ internal sealed class OutboxDispatcher(
             .ToList();
         if (targets.FirstOrDefault(t => !tables.Contains(t.Key)) is { } unknown)
         {
-            return await RecordFailureAsync(module, message, token, $"订阅方模块 {unknown.Key} 没有在本实例注册。", null, ct);
+            return await RecordFailureAsync(module, message, token, $"订阅方模块 {unknown.Key} 未在当前实例注册。", null, ct);
         }
 
         try
@@ -113,7 +108,7 @@ internal sealed class OutboxDispatcher(
             return await RecordFailureAsync(module, message, token, exception.Message, exception, ct);
         }
 
-        // 没有订阅方的消息也走到这里，直接标记已投递
+        // 无订阅方的消息亦走统一确认流程，直接标记为已投递
         return await MarkDeliveredAsync(module, message, token, ct) ? DeliveryResult.Delivered : DeliveryResult.TakenOver;
     }
 
@@ -122,7 +117,7 @@ internal sealed class OutboxDispatcher(
         await using var connection = await Database.OpenConnectionAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
 
-        // 锁到提交：复核通过之后，这一行不会被接管、标记或清理
+        // 行锁持续至事务提交，确保复核通过后该记录不会被其他实例接管、标记或清理
         await using (var recheck = new NpgsqlCommand(
             $"""
             SELECT 1 FROM {tables.For(module).Outbox}

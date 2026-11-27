@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Pipeline;
 
-/// <summary>
-/// 事务级咨询锁：共享锁与排他锁互斥、共享锁之间不互相等、等锁超时是暂时冲突、锁随命令的事务释放
-/// </summary>
 public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -25,7 +22,7 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
 
     public ValueTask DisposeAsync() => _harness.DisposeAsync();
 
-    // 另一个连接上尝试取排他锁：取到了立刻释放，只回答“现在取不取得到”
+    // 在独立连接上尝试非阻塞获取排他锁并立即释放，用于探测当前锁是否可用
     private async Task<bool> ExclusiveTryLockSucceedsAsync(Guid id)
     {
         await using var connection = await database.DataSource.OpenConnectionAsync(Ct);
@@ -35,7 +32,7 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
         return (bool)(await command.ExecuteScalarAsync(Ct))!;
     }
 
-    // 命令取到锁之后停在处理器里：先放起来，返回“已经停住”的信号和“放行”的开关
+    // 使命令在获取锁后暂停于处理器中，并返回已就绪信号与放行开关
     private (Task Reached, TaskCompletionSource Release) HoldCommandsAfterTheyLock()
     {
         var reached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -62,8 +59,8 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
         (await command).ShouldBeSuccess();
         var afterCommit = await ExclusiveTryLockSucceedsAsync(id);
 
-        whileHeld.ShouldBeFalse("共享锁还在命令的事务里，清理一方取不到排他锁");
-        afterCommit.ShouldBeTrue("命令提交之后锁已经释放");
+        whileHeld.ShouldBeFalse("命令事务尚未提交且持有共享锁时，清理方不应获取到排他锁");
+        afterCommit.ShouldBeTrue("命令事务提交后，咨询锁应已释放");
     }
 
     [Fact]
@@ -87,7 +84,7 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
         var firstTask = first.Sender.SendAsync(new LockThingsCommand([id], TimeSpan.FromSeconds(5)), Ct).AsTask();
         var secondTask = second.Sender.SendAsync(new LockThingsCommand([id], TimeSpan.FromSeconds(5)), Ct).AsTask();
 
-        // 两个都取到了共享锁、停在处理器里；要是共享锁互相等，永远等不到“两个都到了”
+        // 若共享锁之间互斥阻塞，将无法同时抵达此处信号点
         await bothArrived.Task.WaitAsync(TimeSpan.FromSeconds(30), Ct);
         (await firstTask).ShouldBeSuccess();
         (await secondTask).ShouldBeSuccess();
@@ -133,7 +130,7 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
 
         release.SetResult();
         (await command).ShouldBeSuccess();
-        held.ShouldAllBe(h => !h, "每一个都被锁住了，重复的 ID 只锁一次");
+        held.ShouldAllBe(h => !h, "去重后的每个目标 ID 均应已被锁定，且重复 ID 不应导致死锁");
         _harness.Hooks.OnBeforeReturn(null);
         await using var empty = _harness.Begin(_user);
         (await empty.Sender.SendAsync(new LockThingsCommand([], TimeSpan.FromSeconds(1)), Ct)).ShouldBeSuccess();
@@ -163,9 +160,9 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
         var idleAfterCommit = await ExclusiveTryLockSucceedsAsync(idle);
         await businessTransaction.RollbackAsync(Ct);
 
-        taken.Ids.ShouldBe([idle], "业务命令持有共享锁的那个这次跳过，没人持有的取到，重复的 ID 只锁一次");
-        idleWhileHeld.ShouldBeFalse("取到的排他锁在清理的事务里一直持有");
-        idleAfterCommit.ShouldBeTrue("清理的事务提交之后锁释放");
+        taken.Ids.ShouldBe([idle], "应跳过已被业务命令持有共享锁的 ID，仅锁定空闲且去重后的 ID");
+        idleWhileHeld.ShouldBeFalse("清理事务结束前，已获取的排他锁应持续持有");
+        idleAfterCommit.ShouldBeTrue("清理事务提交后，排他锁应已释放");
     }
 
     [Fact]
@@ -197,7 +194,7 @@ public sealed class TransactionLocksTests(ClassDatabase<ProbeTemplate> database)
         LockKeys.Of("Files", id).ShouldBe(LockKeys.Of("Files", id));
         LockKeys.Of("Files", id).ShouldNotBe(LockKeys.Of("Things", id));
         LockKeys.Of("Files", id).ShouldNotBe(LockKeys.Of("Files", Guid.Parse("6f2a0f6e-0f64-4d8e-9a53-3a2b45c0b7ab")));
-        // 写死一个值：规则变了，清理和业务两边没同步改，互斥就悄悄失效，这条测试要报出来
+        // 固定校验哈希值：确保业务端与清理端计算锁键的规则保持一致，若规则变更未同步则立即失败
         LockKeys.Of("Files", id).ShouldBe(-470_533_028_823_510_044L);
     }
 }

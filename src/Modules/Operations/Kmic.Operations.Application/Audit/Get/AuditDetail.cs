@@ -2,9 +2,7 @@ using System.Text.Json;
 
 namespace Kmic.Operations.Application.Audit.Get;
 
-/// <summary>
-/// 审计记录的详情
-/// </summary>
+/// <summary>审计记录详情。</summary>
 /// <param name="Id">审计记录 ID</param>
 /// <param name="OccurredAt">操作发生时间</param>
 /// <param name="ReceivedAt">审计汇总接收时间</param>
@@ -12,11 +10,11 @@ namespace Kmic.Operations.Application.Audit.Get;
 /// <param name="Action">操作名</param>
 /// <param name="Origin">请求来源</param>
 /// <param name="ActorUserId">操作人 ID</param>
-/// <param name="ActorName">操作人的名称，用户已经不存在时为空</param>
-/// <param name="ActualUserId">模拟身份时的实际操作人 ID</param>
-/// <param name="ActualName">实际操作人的名称</param>
+/// <param name="ActorName">操作人名称，用户已不存在时为空</param>
+/// <param name="ActualUserId">实际操作人 ID（模拟身份时）</param>
+/// <param name="ActualName">实际操作人名称</param>
 /// <param name="RoleId">操作时使用的角色 ID</param>
-/// <param name="RoleName">角色名称，角色已经不存在时为空</param>
+/// <param name="RoleName">角色名称，角色已不存在时为空</param>
 /// <param name="SessionId">会话 ID</param>
 /// <param name="OnBehalfOfUserId">发起原始请求的用户</param>
 /// <param name="ClientIp">客户端 IP</param>

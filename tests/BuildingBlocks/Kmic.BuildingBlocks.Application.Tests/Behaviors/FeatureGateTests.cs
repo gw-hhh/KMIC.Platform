@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Behaviors;
 
-/// <summary>
-/// 功能开关：关闭时用例不执行，对谁都是“不存在”；打开后照常授权
-/// </summary>
 public sealed class FeatureGateTests : IAsyncLifetime
 {
     private readonly TestHost _host = new();
@@ -54,7 +51,7 @@ public sealed class FeatureGateTests : IAsyncLifetime
     [Fact]
     public async Task AFeatureThatIsOff_HidesTheUseCaseEvenFromSomeoneWhoWouldBeRefusedAnyway()
     {
-        // 匿名也是“不存在”，不是“没有权限”：关闭的功能不暴露自己存在
+        // 匿名访问同样返回“不存在”而非“无权限”：已关闭的功能不暴露其存在性
         var result = await SendAsync(CallOrigin.Http, CurrentUser.Anonymous, access: null);
 
         result.Error.ShouldBeSameAs(CommonErrors.FeatureDisabled);
@@ -78,7 +75,7 @@ public sealed class FeatureGateTests : IAsyncLifetime
     {
         _host.Features.On.Add(GatedThingQuery.Feature);
 
-        // 开关开了，但匿名仍然没有权限：开关不授予权限
+        // 功能开关已开启，但匿名用户仍无权访问：开关本身不授予权限
         var result = await SendAsync(CallOrigin.Http, CurrentUser.Anonymous, access: null);
 
         result.Error.ShouldBeSameAs(CommonErrors.MissingPermission);

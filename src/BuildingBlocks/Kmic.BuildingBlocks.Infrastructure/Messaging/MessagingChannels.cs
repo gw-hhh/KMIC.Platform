@@ -1,8 +1,6 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 唤醒投递、处理和作业执行的通知频道，通知内容是模块名
-/// </summary>
+// PG LISTEN/NOTIFY 频道名（Outbox、Inbox、Jobs 频道的载荷均为模块名）
 internal static class MessagingChannels
 {
     public const string Outbox = "kmic_outbox";

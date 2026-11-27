@@ -4,9 +4,6 @@ using System.Reflection;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 编译时生成的实体属性注释
-/// </summary>
 internal static class GeneratedComments
 {
     private const string TypeName = "Kmic.Generated.EntityComments";

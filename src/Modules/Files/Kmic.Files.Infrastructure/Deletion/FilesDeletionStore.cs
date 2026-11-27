@@ -4,12 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Infrastructure.Deletion;
 
-/// <summary>
-/// 文件删除队列存储
-/// </summary>
-/// <remarks>
-/// 结果更新要匹配本次领取令牌
-/// </remarks>
+// 文件删除队列存储；更新结果时须匹配本次领取令牌
 internal sealed class FilesDeletionStore(FilesDbContext context)
 {
     private static readonly string _deleting = StoredFileStatus.Deleting.Code;
@@ -51,7 +46,7 @@ internal sealed class FilesDeletionStore(FilesDbContext context)
             """, ct);
     }
 
-    // 删除失败：放回队列，按尝试次数退避（1、2、4……分钟，最长 1 小时）
+    // 删除失败：重新入队，按尝试次数退避（1、2、4……分钟，最长 1 小时）
     public async Task FailAsync(DeletionItem item, Guid token, CancellationToken ct) =>
         await context.Database.ExecuteSqlAsync(
             $"""

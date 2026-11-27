@@ -2,9 +2,6 @@ using Kmic.BuildingBlocks.Application.Messaging;
 
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 一个模块声明的定时任务，校验放在定时任务目录里统一做
-/// </summary>
 internal sealed class ModuleSchedules(string module) : ISchedulingBuilder
 {
     private readonly List<DeclaredSchedule> _schedules = [];

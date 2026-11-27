@@ -4,12 +4,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Domain.StateMachines;
 
-/// <summary>
-/// 状态机
-/// </summary>
-/// <remarks>
-/// 声明为聚合根的 private static readonly 字段
-/// </remarks>
+/// <summary>状态机（应在聚合根中声明为 private static readonly 字段）。</summary>
 public sealed class StateMachine<TAggregate, TState, TAction>
     where TAggregate : class, IAggregateRoot
     where TState : notnull
@@ -24,9 +19,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
         _byKey = definition.Transitions.ToDictionary(t => (t.FromCode, t.ActionCode));
     }
 
-    /// <summary>
-    /// 在工厂方法里设置初始状态
-    /// </summary>
+    /// <summary>在工厂方法中初始化起始状态并记录初始流转。</summary>
     public void Start(TAggregate aggregate, string? reason)
     {
         ArgumentNullException.ThrowIfNull(aggregate);
@@ -34,12 +27,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
         Record(aggregate, null, StateCodes.Of(_definition.Initial), StateTransition.CreateActionCode, reason);
     }
 
-    /// <summary>
-    /// 执行动作
-    /// </summary>
-    /// <remarks>
-    /// 不发布领域事件，聚合根的方法自己 Raise
-    /// </remarks>
+    /// <summary>执行状态流转动作（仅变更状态并记录流转，不自动发布领域事件，需由聚合根自行调用 Raise）。</summary>
     public Result Fire(TAggregate aggregate, TAction action, string? reason)
     {
         ArgumentNullException.ThrowIfNull(aggregate);
@@ -57,9 +45,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 当前能否执行该动作
-    /// </summary>
+    /// <summary>检查当前状态是否允许执行指定动作。</summary>
     public Result CanFire(TAggregate aggregate, TAction action)
     {
         ArgumentNullException.ThrowIfNull(aggregate);
@@ -69,9 +55,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
         return found.IsSuccess ? Result.Success() : found.Error;
     }
 
-    /// <summary>
-    /// 当前可执行的动作，按声明顺序
-    /// </summary>
+    /// <summary>按声明顺序返回当前状态下可执行的全部动作。</summary>
     public IReadOnlyList<TAction> PermittedActions(TAggregate aggregate)
     {
         ArgumentNullException.ThrowIfNull(aggregate);
@@ -86,9 +70,7 @@ public sealed class StateMachine<TAggregate, TState, TAction>
         ];
     }
 
-    /// <summary>
-    /// 导出 Mermaid 状态图
-    /// </summary>
+    /// <summary>导出 Mermaid 状态图。</summary>
     public string ToMermaid()
     {
         var builder = new StringBuilder();
@@ -116,9 +98,9 @@ public sealed class StateMachine<TAggregate, TState, TAction>
 
     private string CurrentCode(TAggregate aggregate)
     {
-        // 状态为空说明工厂方法漏调了 Start
+        // 当前状态为空通常说明工厂方法遗漏了 Start 调用
         var current = _definition.GetState(aggregate)
-            ?? throw new InvalidOperationException($"{typeof(TAggregate).Name}.{_definition.StateName} 没有初始值，工厂方法里要先调用 Start。");
+            ?? throw new InvalidOperationException($"{typeof(TAggregate).Name}.{_definition.StateName} 尚未初始化，请在工厂方法中先调用 Start。");
         return StateCodes.Of(current);
     }
 

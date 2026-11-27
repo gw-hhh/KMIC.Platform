@@ -1,15 +1,15 @@
-// 从后端导出的 OpenAPI 文档生成 src/generated/ 下的文件，禁止手改：
-//   api.d.ts            请求层用的路径、参数、响应类型
+// 根据后端导出的 OpenAPI 文档生成 src/generated/ 下的文件，禁止手工修改：
+//   api.d.ts            请求层使用的路径、参数与响应类型
 //   permissions.ts      权限点（x-kmic-permissions）
 //   error-codes.ts      错误码（x-kmic-error-codes）
 //   dictionary-types.ts 字典类型（x-kmic-dictionary-types）
-//   enum-labels.ts      智能枚举的显示名（x-kmic-enums）
-//   upload-profiles.ts  上传档案（x-kmic-upload-profiles）
-//   operations.ts       要带幂等键的写操作（x-idempotent）
+//   enum-labels.ts      智能枚举显示名（x-kmic-enums）
+//   upload-profiles.ts  上传配置（x-kmic-upload-profiles）
+//   operations.ts       需要携带幂等键的写操作（x-idempotent）
 //
-// 文档由 Kmic.Api.Tests 里的 OpenApiDocumentTests 导出到 artifacts/openapi/openapi.v1.json，
-// 所以要先跑一次后端测试。也可以传文件路径：pnpm generate:api -- <路径>
-// 加 --check 只比对不写入，生成的内容和已提交的不一样时失败，CI 用它
+// 文档由 Kmic.Api.Tests 中的 OpenApiDocumentTests 导出至 artifacts/openapi/openapi.v1.json，
+// 因此需先运行后端测试；也可直接传入文件路径：pnpm generate:api -- <路径>
+// 传入 --check 时仅比对不写入，内容与当前文件不一致时退出失败（供 CI 校验）
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -41,7 +41,7 @@ for (const [name, content] of Object.entries(files)) {
   if (check) {
     const current = await readFile(target, 'utf8').catch(() => '');
     if (current !== generated) {
-      console.error(`src/generated/${name} 和 OpenAPI 文档不一致`);
+      console.error(`src/generated/${name} 与 OpenAPI 文档不一致`);
       stale = true;
     }
   } else {
@@ -63,7 +63,7 @@ function union(values) {
   return values.length === 0 ? 'never' : values.map(literal).join(' | ');
 }
 
-/** `A.B.C` 拆成嵌套对象，叶子是完整编码：Permissions.Sample.Specimen.View === 'Sample.Specimen.View' */
+/** 将 A.B.C 拆分为嵌套对象，叶节点为完整编码（例如 Permissions.Sample.Specimen.View === 'Sample.Specimen.View'） */
 function codesFile(typeName, constName, items, label) {
   const codes = items.map((item) => item.code).sort();
   const tree = {};
@@ -72,12 +72,12 @@ function codesFile(typeName, constName, items, label) {
     let node = tree;
     parts.forEach((part, index) => {
       if (!/^[A-Za-z][A-Za-z0-9]*$/.test(part)) {
-        throw new Error(`${label} ${code} 的“${part}”不能作为属性名`);
+        throw new Error(`${label} ${code} 中的“${part}”不可作为属性名`);
       }
       const last = index === parts.length - 1;
       const existing = node[part];
       if (last ? existing !== undefined : typeof existing === 'string') {
-        throw new Error(`${label} ${code} 和另一个编码的前缀冲突`);
+        throw new Error(`${label} ${code} 与其他编码存在前缀冲突`);
       }
       node[part] = last ? code : (existing ?? {});
       node = node[part];
@@ -108,7 +108,7 @@ function dictionaryTypesFile(items) {
   );
 }
 
-// 选项按后端声明的顺序，前端不另排
+// 保持后端声明的选项顺序，前端不做重排
 function enumLabelsFile(enums) {
   const names = Object.keys(enums).sort();
   const entries = names

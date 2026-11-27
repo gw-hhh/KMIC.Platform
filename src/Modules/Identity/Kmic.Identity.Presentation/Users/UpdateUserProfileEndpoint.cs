@@ -13,7 +13,7 @@ internal sealed class UpdateUserProfileEndpoint : IEndpoint
         group.MapPut("/users/{id}", HandleAsync)
             .Sends<UpdateUserProfileCommand>()
             .WithSummary("修改用户资料")
-            .WithDescription("整体提交资料字段。修改账号或手机号时，若目标用户持有受保护角色，操作者的当前角色也必须受保护。");
+            .WithDescription("全量覆盖资料字段；修改账号或手机号时，若目标持受保护角色则操作者当前角色也须受保护");
 
     private static async Task<IResult> HandleAsync([Description("用户 ID")] UserId id, UpdateUserProfileRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new UpdateUserProfileCommand(id, request.ExpectedVersion, request.Account, request.DisplayName, request.EnglishName, request.EmployeeNo, request.Mobile, request.Email), ct)).ToOk();

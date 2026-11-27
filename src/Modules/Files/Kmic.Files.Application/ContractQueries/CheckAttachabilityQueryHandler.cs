@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Application.ContractQueries;
 
-/// <summary>
-/// 查询可关联的文件并返回文件信息
-/// </summary>
 public sealed class CheckAttachabilityQueryHandler(IFilesQueryDb db) : IQueryHandler<CheckAttachabilityQuery, IReadOnlyList<FileSnapshot>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<FileSnapshot>>> Handle(CheckAttachabilityQuery query, CancellationToken cancellationToken)
     {
         var ids = query.FileIds.Select(StoredFileId.From).ToList();

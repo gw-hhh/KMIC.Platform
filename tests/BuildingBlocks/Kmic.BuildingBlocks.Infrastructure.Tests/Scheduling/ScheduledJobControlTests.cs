@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Scheduling;
 
-/// <summary>
-/// 给 Operations 用的运行控制：看状态、预览 Cron、同步覆盖值、马上执行（含正在运行时的拒绝）
-/// </summary>
 public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -32,7 +29,7 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
         var preview = Control.Preview("0 0 7 * * ?", after, 3);
 
         preview.IsValid.ShouldBeTrue();
-        // 业务时区是东八区，早上 7 点就是前一天 23 点（UTC）
+        // 业务时区为东八区，每日 07:00 对应 UTC 前一日 23:00
         preview.NextFireTimes.ShouldBe([
             new DateTimeOffset(2026, 11, 10, 23, 0, 0, TimeSpan.Zero),
             new DateTimeOffset(2026, 11, 11, 23, 0, 0, TimeSpan.Zero),
@@ -137,16 +134,16 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
         {
             var control = worker.Services.GetRequiredService<IScheduledJobControl>();
             (await control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBe(ScheduledJobTriggerOutcome.Triggered);
-            await Eventually.UntilAsync(ct => Task.FromResult(!worker.Hooks.ScheduledFires.IsEmpty), "任务开始执行", TimeSpan.FromSeconds(30), Ct);
+            await Eventually.UntilAsync(ct => Task.FromResult(!worker.Hooks.ScheduledFires.IsEmpty), "定时任务已开始执行", TimeSpan.FromSeconds(30), Ct);
 
-            // 任务停在命令里：这时再点“立即执行”要被拒绝，而不是排在后面再跑一遍
+            // 任务正阻塞于命令处理中：此时再次触发“立即执行”应直接拒绝，而非排队重复执行
             (await control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBe(ScheduledJobTriggerOutcome.AlreadyRunning);
 
             release.SetResult();
-            await Eventually.UntilAsync(async ct => await RunningCountAsync(ct) == 0, "任务执行完", TimeSpan.FromSeconds(30), Ct);
+            await Eventually.UntilAsync(async ct => await RunningCountAsync(ct) == 0, "定时任务执行完成", TimeSpan.FromSeconds(30), Ct);
             await Eventually.UntilAsync(
                 async ct => await control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, ct) == ScheduledJobTriggerOutcome.Triggered,
-                "执行完之后可以再次执行",
+                "任务执行完成后可再次触发执行",
                 TimeSpan.FromSeconds(30),
                 Ct);
         }
@@ -165,7 +162,7 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
         await RemoveManualTriggersAsync();
         try
         {
-            // 这个宿主没有启动调度器，触发会一直排在队里
+            // 当前宿主未启动调度器工作线程，首次手动触发将保留在队列中
             (await Control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBe(ScheduledJobTriggerOutcome.Triggered);
 
             (await Control.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBe(ScheduledJobTriggerOutcome.AlreadyRunning);
@@ -186,7 +183,7 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
         var controls = new[] { Control, second.Services.GetRequiredService<IScheduledJobControl>() };
         try
         {
-            // 两个实例各发四个请求，模拟不同管理员同时点“立即执行”
+            // 由两个实例并发发送共 8 次触发请求，模拟多管理员同时操作“立即执行”
             var outcomes = await Task.WhenAll(Enumerable.Range(0, 8)
                 .Select(i => Task.Run(() => controls[i % 2].TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct), Ct)));
 
@@ -212,7 +209,7 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
 
         await worker.StopHostedServicesAsync(CancellationToken.None);
 
-        // 第二次停机时调度器已经关了：不应该再去取它
+        // 二次停机时调度器已关闭，不应再次尝试访问或停止调度器
         await Should.NotThrowAsync(async () => await worker.StopHostedServicesAsync(CancellationToken.None));
     }
 
@@ -224,7 +221,7 @@ public sealed class ScheduledJobControlTests(ClassDatabase<ProbeTemplate> databa
         return (long)(await command.ExecuteScalarAsync(ct))!;
     }
 
-    // 手动触发是 Quartz 为任务另建的一次性触发器，任务自己的 Cron 触发器与任务同名
+    // 手动触发会由 Quartz 生成独立的一次性触发器，而任务默认的 Cron 触发器与任务同名
     private async Task<IReadOnlyList<TriggerKey>> ManualTriggersAsync()
     {
         var scheduler = await _harness.Services.GetRequiredService<ISchedulerFactory>().GetScheduler(Ct);

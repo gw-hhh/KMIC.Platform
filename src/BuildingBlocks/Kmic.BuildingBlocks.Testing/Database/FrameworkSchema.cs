@@ -6,14 +6,10 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Testing.Database;
 
-/// <summary>
-/// 测试模板库里的框架表
-/// </summary>
+/// <summary>测试模板库中的框架基础表结构。</summary>
 public static class FrameworkSchema
 {
-    /// <summary>
-    /// 建 Operations、Identity 两个 schema 里框架要用的表
-    /// </summary>
+    /// <summary>创建 Operations 与 Identity 两个 Schema 下的框架基础表。</summary>
     public static async Task CreateAsync(string connectionString, CancellationToken ct, bool identityHasMigrations = false, bool operationsHasMigrations = false)
     {
         await using var connection = new NpgsqlConnection(connectionString);

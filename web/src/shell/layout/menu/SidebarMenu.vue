@@ -17,7 +17,6 @@ const emit = defineEmits<{ select: [routeName: string] }>();
 const rootRef = useTemplateRef<HTMLElement>('root');
 const openKeys = ref<ReadonlySet<string>>(new Set());
 
-// 每个节点的上级
 const parents = computed(() => {
   const map = new Map<string, string | null>();
   const walk = (nodes: readonly MenuNode[], parent: string | null): void => {
@@ -38,7 +37,7 @@ const activeAncestors = computed(() => {
   return chain;
 });
 
-// 自动展开当前页面所在目录；等展开动画走完再把当前项平滑滚到中间
+// 自动展开当前页面所属目录，待展开动画完成后将活动菜单项平滑滚动至可视区居中
 const scrollDelay = 320;
 let scrollTimer: ReturnType<typeof setTimeout> | undefined;
 

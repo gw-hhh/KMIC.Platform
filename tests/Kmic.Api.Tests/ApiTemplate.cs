@@ -10,24 +10,13 @@ using Npgsql;
 
 namespace Kmic.Api.Tests;
 
-/// <summary>
-/// API 测试的模板库：各模块和生产一样通过迁移建立结构，另建一个运行账号，宿主用它连接
-/// </summary>
+/// <summary>API 测试模板库：各模块通过迁移建表，并单独创建运行账号供宿主连接</summary>
 public sealed class ApiTemplate : PostgresTemplateDatabase
 {
-    /// <summary>
-    /// 运行账号的登录名
-    /// </summary>
     public const string RuntimeLogin = "kmic_app";
 
-    /// <summary>
-    /// 运行账号的密码，每次启动容器时随机生成，不写进代码
-    /// </summary>
     public string RuntimePassword { get; } = Guid.CreateVersion7().ToString("N");
 
-    /// <summary>
-    /// 运行账号的连接串
-    /// </summary>
     public string RuntimeConnectionString(string database) =>
         new NpgsqlConnectionStringBuilder(ConnectionString(database, pooling: true)) { Username = RuntimeLogin, Password = RuntimePassword }.ConnectionString;
 
@@ -44,7 +33,7 @@ public sealed class ApiTemplate : PostgresTemplateDatabase
             await roles.ExecuteNonQueryAsync(ct);
         }
 
-        // 每个模块的 AddServices 登记了它的 DbContext，迁移不用认识具体类型；Identity 与 Operations 的框架表由它们自己的迁移建
+        // 各模块的 AddServices 已注册其 DbContext，迁移过程无需感知具体类型；Identity 与 Operations 的框架表由各自迁移创建
         var modules = new ServiceCollection();
         new ConfigurationModule().AddServices(modules);
         new FilesModule().AddServices(modules);

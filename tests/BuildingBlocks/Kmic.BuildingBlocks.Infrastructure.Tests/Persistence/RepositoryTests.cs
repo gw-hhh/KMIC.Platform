@@ -127,7 +127,7 @@ public sealed class RepositoryTests(ClassDatabase<ProbeTemplate> database) : ICl
         ticket.Fund(100m);
         await _harness.AddAsync(_alice, ticket);
 
-        // 两个事务同时扣 70：后一个等前一个提交后重新判断条件，扣不成
+        // 两个并发事务同时尝试扣减 70：后提交事务在前一事务提交后重新评估条件，因余额不足而扣减失败
         var results = await Task.WhenAll(DeductAsync(ticket.Id, 70m), DeductAsync(ticket.Id, 70m));
 
         results.Count(deducted => deducted).ShouldBe(1);

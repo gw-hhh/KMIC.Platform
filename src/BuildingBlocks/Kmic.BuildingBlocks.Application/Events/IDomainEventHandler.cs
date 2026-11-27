@@ -4,18 +4,10 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Events;
 
-/// <summary>
-/// 领域事件处理器
-/// </summary>
-/// <remarks>
-/// 和命令同一个事务，返回失败整个命令就失败
-/// </remarks>
-[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "处理的是领域事件，不是 .NET 的 event 委托")]
+/// <summary>领域事件处理器；与所属命令共享同一数据库事务，任一处理器返回失败将导致整个命令回滚。</summary>
+[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "处理领域事件而非 .NET event 委托")]
 public interface IDomainEventHandler<in TEvent>
     where TEvent : IDomainEvent
 {
-    /// <summary>
-    /// 处理事件
-    /// </summary>
     ValueTask<Result> HandleAsync(TEvent domainEvent, CancellationToken ct);
 }

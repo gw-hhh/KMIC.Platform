@@ -9,9 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Auditing;
 
-/// <summary>
-/// 一次命令的审计：收集命令补充的信息，保存前生成审计事件，和业务数据一起写进 Outbox
-/// </summary>
+// 保存前采集变更并生成审计事件，随业务数据一并写入 Outbox
 internal sealed class AuditRecorder(
     IExecutionContext execution,
     IntegrationEventPublisher publisher,
@@ -34,12 +32,7 @@ internal sealed class AuditRecorder(
         _details[key] = AuditValues.Truncate(value, options.Value.MaxValueLength)!;
     }
 
-    /// <summary>
-    /// 采集这次保存的变更，生成审计事件交给发布器
-    /// </summary>
-    /// <remarks>
-    /// 在保存之前调用
-    /// </remarks>
+    // 须在 SaveChanges 前调用，未保存前的变更跟踪状态才完整
     public void Publish(ModuleDbContext context, UseCase useCase)
     {
         var (changes, targets) = AuditChanges.Collect(context, options.Value.MaxValueLength);
@@ -47,9 +40,6 @@ internal sealed class AuditRecorder(
         Clear();
     }
 
-    /// <summary>
-    /// 敏感查询成功之后的审计事件：没有数据变更，查询条件等由查询用 IAuditContext 补充
-    /// </summary>
     public AuditRecorded BuildForRead(UseCase useCase)
     {
         var audit = Build(useCase, [], []);
@@ -57,14 +47,9 @@ internal sealed class AuditRecorder(
         return audit;
     }
 
-    /// <summary>
-    /// 命令回滚时丢弃已收集的补充信息
-    /// </summary>
     public void Discard() => Clear();
 
-    /// <summary>
-    /// 作业结束时的审计事件，作业名作为动作，说明由调用方通过 Add 补充
-    /// </summary>
+    // 以作业名为动作，补充信息由调用方通过 Add 添加
     public AuditRecorded BuildForJob(string module, string jobName)
     {
         var audit = Build(module, jobName, [], []);

@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Users.List;
 
-/// <summary>
-/// 分页查询用户列表
-/// </summary>
 public sealed class ListUsersQueryHandler(IIdentityQueryDb db) : IQueryHandler<ListUsersQuery, PagedResult<UserListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<UserListItem>>> Handle(ListUsersQuery query, CancellationToken cancellationToken)
     {
         var statuses = EnumerationFilter.Parse<UserStatus>(query.Status, "status");
@@ -21,7 +17,7 @@ public sealed class ListUsersQueryHandler(IIdentityQueryDb db) : IQueryHandler<L
             return statuses.Error;
         }
 
-        // 系统账号用于记录系统操作，不作为普通用户展示
+        // 过滤掉系统操作账号，仅展示普通用户
         var users = db.Users.Where(u => u.Kind == UserKind.Normal);
         if (!string.IsNullOrWhiteSpace(query.Q))
         {
@@ -54,7 +50,7 @@ public sealed class ListUsersQueryHandler(IIdentityQueryDb db) : IQueryHandler<L
         return page.IsFailure ? page.Error : await WithNamesAsync(page.Value, cancellationToken);
     }
 
-    // 角色和组织单元名按本页的用户批量取，不放进分页的排序查询里
+    // 仅对当前页用户批量补全角色与组织名称，避免在分页排序前联表
     private async Task<PagedResult<UserListItem>> WithNamesAsync(PagedResult<UserListItem> page, CancellationToken ct)
     {
         if (page.Items.Count == 0)

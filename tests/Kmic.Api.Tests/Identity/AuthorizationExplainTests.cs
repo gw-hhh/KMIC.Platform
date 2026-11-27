@@ -7,9 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 组织树：总部下有华东、华南，华东下有上海；数据直接写进 Identity 的表
-/// </summary>
 public sealed class AuthorizationExplainTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -25,12 +22,12 @@ public sealed class AuthorizationExplainTests(ClassDatabase<ApiTemplate> databas
         var east = await UnitAsync(root, "华东");
         var south = await UnitAsync(root, "华南");
         await UnitAsync(east, "上海");
-        // 加载器按组织树的版本号取缓存，版本号为 0 时当作没有组织树
+        // 访问上下文加载器按组织树版本号读取缓存，版本号为 0 时视为无组织树
         await Seed.SqlAsync("""UPDATE "Identity"."OrgTree" SET "ConcurrencyVersion" = "ConcurrencyVersion" + 1""");
         return (east, south);
     }
 
-    // 同一个类的测试共用一个库，组织单元已经建过就直接用
+    // 同一测试类共用一个数据库，若组织单元已存在则直接复用
     private async Task<Guid> UnitAsync(Guid parent, string name)
     {
         var existing = await Seed.ScalarAsync<Guid?>("""SELECT "Id" FROM "Identity"."OrgUnit" WHERE "ParentId" = @parent AND "Name" = @name""", ("parent", parent), ("name", name));
@@ -100,10 +97,10 @@ public sealed class AuthorizationExplainTests(ClassDatabase<ApiTemplate> databas
         scope.GetProperty("scopeObject").GetString().ShouldBe(SampleScopes.Specimen);
         scope.GetProperty("displayName").GetString().ShouldBe("示例");
         scope.GetProperty("level").GetString().ShouldBe("OrgUnitAndBelow");
-        scope.GetProperty("levelOverridden").GetBoolean().ShouldBeTrue("角色默认是本人，为示例单独设成了本组织及下级");
-        NamesOf(scope.GetProperty("anchors")).ShouldBe(["华东"], "授予上设了锚点，不用所属的华南");
+        scope.GetProperty("levelOverridden").GetBoolean().ShouldBeTrue("角色默认数据范围为本人，但为示例模块单独覆盖为本组织及下级");
+        NamesOf(scope.GetProperty("anchors")).ShouldBe(["华东"], "角色授予已指定锚点，应使用锚点华东而非用户所属的华南");
         scope.GetProperty("anchorsFromGrant").GetBoolean().ShouldBeTrue();
-        scope.GetProperty("orgUnitCount").GetInt32().ShouldBe(2, "华东和下级上海");
+        scope.GetProperty("orgUnitCount").GetInt32().ShouldBe(2, "应包含华东及其下级上海共 2 个组织单元");
         (await JsonAsync(withoutScope)).GetProperty("dataScope").ValueKind.ShouldBe(JsonValueKind.Null);
     }
 
@@ -170,7 +167,7 @@ public sealed class AuthorizationExplainTests(ClassDatabase<ApiTemplate> databas
         await Seed.SetRoleStatusAsync(role, active: false);
         reasons.Add((await JsonAsync(await ExplainAsync(token, active, role))).GetProperty("unusableReason").GetString());
 
-        reasons.ShouldBe(["用户已禁用", "用户没有被授予这个角色", "角色已停用"]);
+        reasons.ShouldBe(["用户已禁用", "用户未被授予该角色", "角色已停用"]);
     }
 
     [Fact]

@@ -7,9 +7,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Http;
 
-/// <summary>
-/// 带 ETag 的查询：第一次返回内容和 ETag，带着 ETag 再问没变就是 304
-/// </summary>
 public sealed class ConditionalGetTests : IAsyncLifetime
 {
     private ApiHost _api = null!;

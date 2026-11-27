@@ -11,9 +11,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Application.Cleanup;
 
-/// <summary>
-/// 将到期文件加入删除队列
-/// </summary>
 public sealed class PurgeExpiredFilesCommandHandler(
     IStoredFileRepository files,
     ITransactionLocks locks,
@@ -23,7 +20,6 @@ public sealed class PurgeExpiredFilesCommandHandler(
     TimeProvider time)
     : ICommandHandler<PurgeExpiredFilesCommand, ScheduledJobOutcome>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(PurgeExpiredFilesCommand command, CancellationToken cancellationToken)
     {
         var now = time.GetUtcNow();

@@ -7,14 +7,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 列表允许排序的字段
-/// </summary>
-/// <remarks>
-/// 列表项类型要有 Id 属性
-/// </remarks>
-/// <typeparam name="T">列表项类型，排序在投影之后的列表项上做</typeparam>
-[SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "声明写法是 SortMap<列表项>.Field(...)，类型参数写在左边，调用处不用再写一遍")]
+/// <summary>列表允许排序的字段映射（基于投影后的列表项定义，且列表项类型须包含 Id 属性）。</summary>
+[SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "采用 SortMap<TItem>.Field(...) 声明语法，由外层泛型类固定列表项类型，避免调用处重复指定类型参数")]
 public sealed class SortMap<T>
 {
     private readonly FrozenDictionary<string, LambdaExpression> _fields;
@@ -32,25 +26,15 @@ public sealed class SortMap<T>
             error => throw new DeclarationException($"{typeof(T).Name} 的默认排序“{defaultSort}”不合法：{error.FieldErrors[0].Message}"));
     }
 
-    /// <summary>
-    /// 登记的字段名，按声明顺序，OpenAPI 文档里列出来给前端
-    /// </summary>
+    /// <summary>可排序字段名列表，按声明顺序排列。</summary>
     public IReadOnlyList<string> Fields { get; }
 
-    /// <summary>
-    /// 请求没有给排序时使用的排序
-    /// </summary>
     public string DefaultSort { get; }
 
-    /// <summary>
-    /// 开始声明：登记第一个可排序的字段
-    /// </summary>
+    /// <summary>开始构建排序映射并注册首个可排序字段。</summary>
     public static SortMapBuilder<T> Field<TKey>(string name, Expression<Func<T, TKey>> selector) =>
         new SortMapBuilder<T>().Field(name, selector);
 
-    /// <summary>
-    /// 解析请求里的排序表达式，空表示默认排序
-    /// </summary>
     internal Result<SortTerm[]> Parse(string? sort)
     {
         if (string.IsNullOrWhiteSpace(sort))
@@ -87,7 +71,7 @@ public sealed class SortMap<T>
 
     internal IQueryable<T> Apply(IQueryable<T> query, IReadOnlyList<SortTerm> terms)
     {
-        // 最后按 Id 排，同值的记录在页与页之间的先后才固定
+        // 末尾追加 Id 排序，确保排序值相同的记录在分页间顺序稳定
         SortKey[] keys = [.. terms.Select(t => new SortKey(_fields[t.Name], t.Descending)), new SortKey(_tieBreaker, Descending: false)];
         return ProjectionOrdering.Order(query, keys);
     }
@@ -98,7 +82,7 @@ public sealed class SortMap<T>
     private static LambdaExpression IdSelector()
     {
         var property = typeof(T).GetProperty("Id", BindingFlags.Public | BindingFlags.Instance)
-            ?? throw new DeclarationException($"{typeof(T).Name} 没有 Id 属性。排序要在最后追加 Id，同值的记录才不会在分页之间漂移。");
+            ?? throw new DeclarationException($"{typeof(T).Name} 缺少 Id 属性。排序末尾须追加 Id 作为决胜键，以防排序值相同时分页顺序漂移。");
         var parameter = Expression.Parameter(typeof(T), "x");
         return Expression.Lambda(Expression.Property(parameter, property), parameter);
     }

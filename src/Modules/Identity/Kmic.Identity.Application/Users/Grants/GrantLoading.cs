@@ -10,9 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Users.Grants;
 
-/// <summary>
-/// 授予类命令共用的加载与授权检查
-/// </summary>
+// 授予类命令共用的加锁加载与资源策略鉴权
 internal static class GrantLoading
 {
     public static async Task<Result<GrantContext>> LoadForAsync(
@@ -26,7 +24,7 @@ internal static class GrantLoading
         IAccessContext access,
         CancellationToken ct)
     {
-        // 收回角色前串行检查受保护角色持有人，避免并发操作移除最后一位可登录的持有人
+        // 收回前加串行锁，防止并发移除最后一位可登录的受保护角色持有人
         if (action == GrantAction.Revoke)
         {
             await users.LockProtectedHolderChecksAsync(ct);
@@ -52,7 +50,7 @@ internal static class GrantLoading
         return allowed.IsFailure ? allowed.Error : new GrantContext(user, roleIsActive);
     }
 
-    // 仅当目标用户可登录、将失去最后一个已启用受保护角色，且无其他可登录持有人时返回 true
+    // 仅当用户可登录且收回后全库再无其他可登录的受保护持有人时返回 true
     private static async Task<bool> RemovesLastHolderAsync(IIdentityReads db, User user, RoleId revoked, CancellationToken ct)
     {
         if (!user.CanLogin)
@@ -65,9 +63,6 @@ internal static class GrantLoading
         return !stillHolder && !await ProtectedHolders.EnabledHolders(db.Users, db.Roles).AnyAsync(u => u.Id != user.Id, ct);
     }
 
-    /// <summary>
-    /// 生成安全事件中的角色标识
-    /// </summary>
     public static IReadOnlyDictionary<string, string> RoleDetails(RoleId roleId) =>
         new Dictionary<string, string>(StringComparer.Ordinal) { ["roleId"] = roleId.Value.ToString() };
 }

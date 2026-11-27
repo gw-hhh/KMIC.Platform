@@ -13,27 +13,19 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 仓储基类
-/// </summary>
+/// <summary>EF Core 仓储基类</summary>
 public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) : IRepository<TAggregate, TId>
     where TContext : ModuleDbContext
     where TAggregate : AggregateRoot<TId>
     where TId : struct, IStronglyTypedId
 {
-    /// <summary>
-    /// 写入上下文
-    /// </summary>
     protected TContext Context => context;
 
-    /// <summary>
-    /// 找不到时返回的错误，如 SampleErrors.NotFound
-    /// </summary>
+    /// <summary>未找到聚合时返回的错误（如 SampleErrors.NotFound）</summary>
     protected abstract Error NotFound { get; }
 
     private DbSet<TAggregate> Set => context.Set<TAggregate>();
 
-    /// <inheritdoc />
     public async Task<Result<TAggregate>> GetForUpdateAsync(TId id, long? expectedVersion, CancellationToken ct)
     {
         var aggregate = await Aggregate(Set).AsSplitQuery().SingleOrDefaultAsync(HasId(id), ct);
@@ -46,35 +38,25 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
         return CheckVersion(aggregate, expectedVersion);
     }
 
-    /// <inheritdoc />
-    /// <exception cref="InvalidOperationException">不在事务里</exception>
     public async Task<Result<TAggregate>> GetForUpdateLockedAsync(TId id, long? expectedVersion, CancellationToken ct)
     {
         await LockAsync(id, ct);
         return await GetForUpdateAsync(id, expectedVersion, ct);
     }
 
-    /// <inheritdoc />
     public void Add(TAggregate aggregate)
     {
         ArgumentNullException.ThrowIfNull(aggregate);
         Set.Add(aggregate);
     }
 
-    /// <inheritdoc />
     public void Remove(TAggregate aggregate)
     {
         ArgumentNullException.ThrowIfNull(aggregate);
         Set.Remove(aggregate);
     }
 
-    /// <summary>
-    /// 恢复已删除的数据
-    /// </summary>
-    /// <remarks>
-    /// 模块仓储接口要恢复功能时声明同名方法即可
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">不支持软删除</exception>
+    /// <summary>恢复已软删除的聚合（模块仓储接口声明同名方法即可暴露；聚合未实现 ISoftDeletable 时抛异常）</summary>
     public async Task<Result<TAggregate>> RestoreAsync(TId id, long? expectedVersion, CancellationToken ct)
     {
         if (!typeof(ISoftDeletable).IsAssignableFrom(typeof(TAggregate)))
@@ -101,18 +83,10 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
         return checkedVersion;
     }
 
-    /// <summary>
-    /// 读取时要包含的子实体，默认只读聚合根
-    /// </summary>
+    /// <summary>配置读取时包含的子实体导航，默认只读聚合根</summary>
     protected virtual IQueryable<TAggregate> Aggregate(IQueryable<TAggregate> set) => set;
 
-    /// <summary>
-    /// 按条件直接更新，返回更新的行数
-    /// </summary>
-    /// <remarks>
-    /// 同一个命令里不要再经仓储读取并修改同一条数据，跟踪的实体是旧值
-    /// </remarks>
-    /// <exception cref="InvalidOperationException">不在事务里</exception>
+    /// <summary>按条件直接批量更新（须在事务内调用；同命令内勿随后再经仓储读写同一记录，以免跟踪实体持有旧值）</summary>
     protected async Task<int> UpdateWhereAsync(
         Expression<Func<TAggregate, bool>> condition,
         Action<UpdateSettersBuilder<TAggregate>> setters,
@@ -164,7 +138,7 @@ public abstract class EfRepository<TContext, TAggregate, TId>(TContext context) 
     {
         EnsureInTransaction(nameof(GetForUpdateLockedAsync));
 
-        // 这里不经过过滤器：锁的只是这一行，能不能看到在接下来的读取里判断
+        // 此处绕过查询过滤器以直接锁定目标行，数据可见性由随后的实体读取负责校验
         var entityType = context.Model.FindEntityType(typeof(TAggregate))
             ?? throw new InvalidOperationException($"{typeof(TAggregate).Name} 不在 {context.Module} 模块的模型中。");
         var idColumn = entityType.FindProperty(nameof(Entity<>.Id))!.GetColumnName();

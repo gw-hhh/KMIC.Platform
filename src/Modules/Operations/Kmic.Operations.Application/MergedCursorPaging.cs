@@ -5,17 +5,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Operations.Application;
 
-/// <summary>
-/// 跨模块游标分页，各模块结果和合并结果都按时间、ID 倒序
-/// </summary>
+// 跨模块游标分页：各模块与合并结果均按时间、ID 倒序，fetch 须按同一顺序查询
 internal static class MergedCursorPaging
 {
-    /// <summary>
-    /// 合并各模块查询结果并生成下一页游标
-    /// </summary>
-    /// <remarks>
-    /// fetch 要按时间、ID 倒序查询
-    /// </remarks>
     public static async Task<Result<(IReadOnlyList<T> Items, string? NextCursor)>> PageAsync<TStore, T>(
         IEnumerable<TStore> stores,
         CursorRequest request,

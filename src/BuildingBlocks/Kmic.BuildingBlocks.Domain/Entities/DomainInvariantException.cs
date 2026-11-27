@@ -1,31 +1,17 @@
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
-/// <summary>
-/// 领域不变量被破坏
-/// </summary>
-/// <remarks>
-/// 只用于程序缺陷，业务失败返回 Result
-/// </remarks>
+/// <summary>领域不变量被破坏时抛出的异常（仅用于程序缺陷，业务失败应返回 Result）。</summary>
 public sealed class DomainInvariantException : Exception
 {
-    /// <summary>
-    /// 无说明的实例
-    /// </summary>
     public DomainInvariantException()
     {
     }
 
-    /// <summary>
-    /// 带说明的实例
-    /// </summary>
     public DomainInvariantException(string message)
         : base(message)
     {
     }
 
-    /// <summary>
-    /// 带说明与内部异常的实例
-    /// </summary>
     public DomainInvariantException(string message, Exception innerException)
         : base(message, innerException)
     {

@@ -11,18 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Sample.Infrastructure;
 
-/// <summary>
-/// Sample 模块的服务端注册类
-/// </summary>
 public sealed class SampleModule : IModule
 {
-    /// <inheritdoc />
     public string Name => SampleModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(ISampleQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

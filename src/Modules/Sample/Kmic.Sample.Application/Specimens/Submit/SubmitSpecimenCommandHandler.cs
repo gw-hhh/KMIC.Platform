@@ -5,13 +5,9 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Submit;
 
-/// <summary>
-/// 提交示例
-/// </summary>
 public sealed class SubmitSpecimenCommandHandler(ISpecimenRepository specimens, IResourceAuthorizer<Specimen, SpecimenAction> authorizer)
     : ICommandHandler<SubmitSpecimenCommand, VersionedResponse<SpecimenId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(SubmitSpecimenCommand command, CancellationToken cancellationToken)
     {
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

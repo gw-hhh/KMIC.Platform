@@ -4,10 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.UpdateProfile;
 
-/// <summary>
-/// 修改用户资料
-/// </summary>
-/// <param name="Id">用户</param>
+/// <param name="Id">用户 ID</param>
 /// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="Account">登录名</param>
 /// <param name="DisplayName">姓名</param>

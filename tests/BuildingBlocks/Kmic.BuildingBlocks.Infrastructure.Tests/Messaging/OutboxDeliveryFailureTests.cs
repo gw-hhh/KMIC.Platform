@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// TicketClosedNotice 路由到一个本实例没有注册的模块，投递一定失败
-/// </summary>
 public sealed class OutboxDeliveryFailureTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -48,7 +45,7 @@ public sealed class OutboxDeliveryFailureTests(ClassDatabase<ProbeTemplate> data
             (await later.ExecuteScalarAsync(Ct)).ShouldBe(true);
         }
 
-        // 不等退避，直接让它到期
+        // 跳过退避等待，直接将下次重试时间置为立即到期
         await using (var due = database.DataSource.CreateCommand("""UPDATE "Probe"."OutboxMessage" SET "NextAttemptAt" = clock_timestamp() WHERE "Id" = @id"""))
         {
             due.Parameters.AddWithValue("id", afterFirst.Id);

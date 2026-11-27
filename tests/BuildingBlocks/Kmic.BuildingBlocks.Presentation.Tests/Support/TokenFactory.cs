@@ -6,9 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
 
-/// <summary>
-/// 生成测试用的 RSA 密钥（PEM 文件）和访问令牌
-/// </summary>
 internal sealed class TokenFactory : IDisposable
 {
     public const string Issuer = "kmic-test";
@@ -19,9 +16,6 @@ internal sealed class TokenFactory : IDisposable
 
     public TokenFactory() => Directory.CreateDirectory(_directory);
 
-    /// <summary>
-    /// 新建一个密钥，返回它的私钥文件和公钥文件
-    /// </summary>
     public (string PrivatePath, string PublicPath) AddKey(string kid, int size = 2048)
     {
         var rsa = RSA.Create(size);
@@ -33,9 +27,6 @@ internal sealed class TokenFactory : IDisposable
         return (privatePath, publicPath);
     }
 
-    /// <summary>
-    /// 配置：一个 Active 密钥，可选一个 ValidationOnly 密钥
-    /// </summary>
     public Dictionary<string, string?> Configuration(string activeKid, string? validationOnlyKid = null)
     {
         var configuration = new Dictionary<string, string?>(StringComparer.Ordinal)
@@ -56,9 +47,6 @@ internal sealed class TokenFactory : IDisposable
         return configuration;
     }
 
-    /// <summary>
-    /// 签发令牌：默认值是一个合法的、刚签发的令牌，测试改其中要检验的那一项
-    /// </summary>
     public string Create(
         TestIdentity identity,
         string kid,
@@ -96,9 +84,7 @@ internal sealed class TokenFactory : IDisposable
         return new JsonWebTokenHandler().CreateToken(descriptor);
     }
 
-    /// <summary>
-    /// 用对称密钥签发（HS256）：验证必须拒绝
-    /// </summary>
+    // 使用 HS256 对称密钥签发，验证时应被拒绝
     public static string CreateSymmetric(TestIdentity identity)
     {
         var secret = new SymmetricSecurityKey(RandomNumberGenerator.GetBytes(64)) { KeyId = "symmetric" };

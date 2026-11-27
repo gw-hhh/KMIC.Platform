@@ -16,9 +16,7 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Scheduling;
 
-/// <summary>
-/// 真正运行调度器的测试换成系统时钟：注入的测试时钟是固定的，调度器永远等不到触发时间
-/// </summary>
+// 真实调度器依赖系统时钟推进，不可使用固定测试时钟
 public sealed class ScheduledRunTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string EverySecond = "BuildingBlocks.EverySecond";
@@ -65,14 +63,14 @@ public sealed class ScheduledRunTests(ClassDatabase<ProbeTemplate> database) : I
 
         (await _harness.Services.FireAsync(ProbeHarness.DailyStamp, _sevenAm, Ct)).ShouldBeSuccess();
 
-        // 监听器是进程范围的，别的测试类也会触发同名的任务，所以按执行记录里的追踪 ID 找这一次
+        // ActivityListener 为进程级全局监听，可能捕获其他测试触发的同名任务，因此按执行记录的 TraceId 精确筛选
         await using var command = database.DataSource.CreateCommand(
             $"""SELECT "TraceId" FROM {SchedulingTables.Runs} WHERE "JobName" = @job ORDER BY "Id" DESC LIMIT 1""");
         command.Parameters.AddWithValue("job", ProbeHarness.DailyStamp);
         var traceId = (string)(await command.ExecuteScalarAsync(Ct))!;
         var span = started.Single(a => string.Equals(a.TraceId.ToString(), traceId, StringComparison.Ordinal) && a.ParentId is null);
         span.OperationName.ShouldBe($"scheduled {ProbeHarness.DailyStamp}");
-        started.ShouldContain(a => a.ParentSpanId == span.SpanId, "命令的 span 在这次执行之下");
+        started.ShouldContain(a => a.ParentSpanId == span.SpanId, "定时任务内部命令的 Span 应关联于本次执行根 Span 之下");
     }
 
     [Fact]
@@ -102,7 +100,7 @@ public sealed class ScheduledRunTests(ClassDatabase<ProbeTemplate> database) : I
         {
             await Eventually.UntilAsync(
                 async ct => await CountAsync($"""SELECT count(*) FROM {SchedulingTables.Runs} WHERE "JobName" = '{EverySecond}' AND "Status" = 1""", ct) >= 5,
-                "每秒的任务执行了 5 次",
+                "每秒调度的任务已完成至少 5 次执行",
                 TimeSpan.FromSeconds(30),
                 Ct);
         }
@@ -130,8 +128,8 @@ public sealed class ScheduledRunTests(ClassDatabase<ProbeTemplate> database) : I
         await worker.StartHostedServicesAsync(Ct);
         try
         {
-            // 没注册执行的实例只写触发请求，由运行调度器的实例执行。
-            // 触发时刻取写入实例的时钟，用固定的测试时钟会写成过去的时间，被当成错过的触发
+            // 未启用调度器的待命实例仅写入触发请求，由运行中的工作实例负责执行。
+            // 触发时间取自写入实例的时钟；使用固定测试时钟会导致写入过期时间而被判定为错过触发
             var standby = standbyHost.Services.GetRequiredService<ScheduleSynchronizer>();
             (await standby.TriggerAsync("BuildingBlocks.Missing", _user.UserId, Ct)).ShouldBeFalse();
             (await standby.TriggerAsync(ProbeHarness.DailyStamp, _user.UserId, Ct)).ShouldBeTrue();
@@ -140,7 +138,7 @@ public sealed class ScheduledRunTests(ClassDatabase<ProbeTemplate> database) : I
                 async ct => await CountAsync(
                     $"""SELECT count(*) FROM {SchedulingTables.Runs} WHERE "JobName" = '{ProbeHarness.DailyStamp}' AND "Trigger" = 1 AND "TriggeredBy" = '{_user.UserId.Value}' AND "Status" = 1""",
                     ct) == 1,
-                "手动执行完成",
+                "待命实例触发的手动任务执行完成",
                 TimeSpan.FromSeconds(30),
                 Ct);
         }

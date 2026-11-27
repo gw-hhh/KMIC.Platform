@@ -2,10 +2,8 @@ import type { components } from '@/generated/api';
 
 type Problem = components['schemas']['KmicProblem'];
 
-/** 失败类型 */
 export type KmicErrorKind = 'problem' | 'network' | 'timeout' | 'aborted' | 'client';
 
-/** 写请求的结果 */
 export type KmicOutcome = 'failed' | 'unknown';
 
 export interface KmicFieldError {
@@ -29,9 +27,7 @@ export interface KmicErrorInit {
   cause?: unknown;
 }
 
-/**
- * 统一的错误类型，按 code 判断，不按文字
- */
+/** 平台统一错误类型；业务逻辑应依据 code 判断，而非匹配错误文案 */
 export class KmicError extends Error {
   readonly kind: KmicErrorKind;
   readonly status: number | undefined;
@@ -59,7 +55,6 @@ export class KmicError extends Error {
     this.outcome = init.outcome;
   }
 
-  /** 服务端返回的错误 */
   static fromProblem(
     problem: Problem,
     retryAfterSeconds: number | undefined,
@@ -80,7 +75,6 @@ export class KmicError extends Error {
     });
   }
 
-  /** 非 ProblemDetails 响应，按状态码判断 */
   static fromStatus(status: number, traceId: string | undefined, outcome: KmicOutcome | undefined): KmicError {
     return new KmicError({
       kind: 'problem',

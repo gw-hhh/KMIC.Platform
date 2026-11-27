@@ -15,12 +15,7 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Pipeline;
 
-/// <summary>
-/// 把并发冲突、唯一约束冲突这类数据库异常转成错误结果
-/// </summary>
-/// <remarks>
-/// 要放在事务外层，提交时的异常才能转换
-/// </remarks>
+/// <summary>将并发冲突、唯一约束等数据库异常转换为统一错误结果，须注册在事务行为外层</summary>
 public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
     UseCaseCatalog catalog,
     IExecutionContext execution,
@@ -29,7 +24,6 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);
@@ -52,7 +46,7 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         }
         catch (CommitOutcomeUnknownException exception)
         {
-            // 幂等命令能走到这里，说明内层已确认没有提交，可以用原键重试。非幂等命令提示刷新后确认
+            // 幂等命令执行至此说明内层已确认未提交，可使用原幂等键重试；非幂等命令则提示刷新后确认
             metrics.CommitOutcomeUnknown(execution.Origin.ToString());
             PipelineLog.CommitOutcomeUnknown(logger, exception, typeof(TMessage).Name);
             return TResponse.Fail(CommonErrors.ResultUnknown.WithMetadata(ErrorMetadataKeys.Retryable, catalog.Get(typeof(TMessage)).Idempotent));
@@ -72,7 +66,7 @@ public sealed class ExceptionTranslationBehavior<TMessage, TResponse>(
         return null;
     }
 
-    // 错误里带上聚合根的当前版本号，数据已被删除时不带
+    // 若聚合根仍存在，则在错误元数据中附带其当前版本号
     private static async Task<Error> VersionConflictAsync(DbUpdateConcurrencyException exception)
     {
         if (exception.Entries.FirstOrDefault(e => e.Entity is IAggregateRoot) is not { } root

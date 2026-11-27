@@ -10,9 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// 提交后台作业：作业行加进本模块的写入上下文，随命令事务提交
-/// </summary>
+// 后台作业提交器：写入当前模块的写入上下文并随命令事务提交
 internal sealed class BackgroundJobs(
     BackgroundJobCatalog catalog,
     IExecutionContext execution,
@@ -25,12 +23,12 @@ internal sealed class BackgroundJobs(
         ArgumentNullException.ThrowIfNull(job);
         if (!execution.InCommand)
         {
-            throw new InvalidOperationException("后台作业只能在命令里提交，要和业务数据一起提交。");
+            throw new InvalidOperationException("后台作业仅限在命令中提交，须与业务数据在同一事务中落库。");
         }
 
         var type = catalog.Describe(job.GetType());
 
-        // 只有命令所在模块的上下文会被保存，别的模块的作业行加进去也不会落库
+        // 仅保存当前命令所属模块的写入上下文，跨模块写入无法随事务落库
         if (!string.Equals(transaction.Module, type.Module, StringComparison.Ordinal))
         {
             throw new InvalidOperationException($"作业 {type.Name} 属于 {type.Module} 模块，只能由该模块的命令提交。");
@@ -42,7 +40,7 @@ internal sealed class BackgroundJobs(
             throw new InvalidOperationException($"作业 {type.Name} 只能由系统身份提交。");
         }
 
-        // 提交命令自己也会声明权限点，这里再按作业的权限点查一次，执行时同样要有
+        // 提交命令自身已声明权限点，此处再校验一次作业所需权限点，执行阶段亦会复核
         if (!user.IsSystem && execution.Access?.Permissions.Contains(type.Attribute.Permission) != true)
         {
             return CommonErrors.MissingPermission;
@@ -78,7 +76,7 @@ internal sealed class BackgroundJobs(
         return new JobAccepted(record.Id, type.Module);
     }
 
-    // 通知在提交时才送达，执行器被唤醒时一定能读到作业行。同一事务里重复的通知数据库会合并
+    // 通知于事务提交后送达，确保执行器唤醒时作业记录已可见；同事务内重复通知由数据库自动合并
     private void RegisterNotify(string module) =>
         transaction.BeforeCommit(async (db, _, ct) =>
         {

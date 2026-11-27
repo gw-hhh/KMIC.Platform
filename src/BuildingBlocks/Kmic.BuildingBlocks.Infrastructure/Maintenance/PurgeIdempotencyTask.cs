@@ -6,9 +6,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
-/// <summary>
-/// 每小时删除各模块已过期的幂等记录
-/// </summary>
 internal sealed class PurgeIdempotencyTask(ModuleFrameworkTables tables, DataSources dataSources, IOptions<PurgeOptions> options) : IFrameworkTask
 {
     public string Name => "Framework.PurgeIdempotency";

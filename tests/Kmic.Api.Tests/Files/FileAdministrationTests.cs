@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 文件管理：列表、详情、彻底删除、登记历史版本清除、重试删除；权限与结果
-/// </summary>
 public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(database, template, withWorker: true), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -32,7 +29,7 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
 
     private static async Task<HttpResponseMessage> PurgeAsync(HttpClient client, Guid id, object body) => await PostActionAsync(client, $"{Root}/{id}/purge", body);
 
-    // 建一个标本、上传并关联一个文件，等 Worker 把文件处理成“已关联”
+    // 创建标本并上传关联文件，等待 Worker 将文件状态处理为已关联
     private async Task<(Guid Specimen, Guid File)> AttachedAsync(string name = "合同.pdf")
     {
         using var alice = ClientFor(Alice);
@@ -49,7 +46,7 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
         await Eventually.UntilAsync(
             _ => ColumnAsync<string>(seed, fileId, "Status"),
             current => string.Equals(current, status, StringComparison.Ordinal),
-            $"文件变成 {status}",
+            $"文件状态变更为 {status}",
             TimeSpan.FromSeconds(20),
             Ct);
     }
@@ -69,7 +66,7 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
         item.GetProperty("id").GetGuid().ShouldBe(fileId);
         item.GetProperty("name").GetString().ShouldBe("列表里的.pdf");
         item.GetProperty("status").GetString().ShouldBe("Attached");
-        item.TryGetProperty("storageKey", out _).ShouldBeFalse("管理员也看不到存储键");
+        item.TryGetProperty("storageKey", out _).ShouldBeFalse("管理员同样不应看到存储键");
         byReference.GetProperty("items").EnumerateArray().Single().GetProperty("id").GetGuid().ShouldBe(fileId);
     }
 
@@ -143,7 +140,7 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
         await Eventually.UntilAsync(
             _ => IsNullAsync(seed, fileId, "ObjectDeletedAt"),
             isNull => !isNull,
-            "删除工作器删掉对象并记下时间",
+            "删除 Worker 完成对象删除并记录时间",
             TimeSpan.FromSeconds(20),
             Ct);
         File.Exists(StoragePathOf(key)).ShouldBeFalse();
@@ -232,7 +229,7 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
         using var admin = ClientFor(Admin());
         var (_, fileId) = await AttachedAsync();
         await using var seed = NewSeed();
-        // 没有进删除队列的文件没有什么可重试
+        // 未进入删除队列的文件不可触发重试
         var nothing = await PostActionAsync(admin, $"{Root}/{fileId}/retry-deletion", new { });
         nothing.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
@@ -241,17 +238,17 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
         await Eventually.UntilAsync(
             _ => IsNullAsync(seed, fileId, "ObjectDeletedAt"),
             isNull => !isNull,
-            "对象先被删掉",
+            "存储对象已被删除",
             TimeSpan.FromSeconds(20),
             Ct);
 
-        // 对象已经删了、不在队列里：同样没有可重试的
+        // 存储对象已删除且不在删除队列中的文件同样不可重试
         (await PostActionAsync(admin, $"{Root}/{fileId}/retry-deletion", new { })).StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        // 模拟“尝试次数用完”的文件：把对象删除时间清空、次数拉满，工作器不再领取；重试之后清零
+        // 模拟重试次数耗尽的文件：清空对象删除时间并将重试次数设为上限，Worker 不再领取；触发重试后次数归零
         await seed.SqlAsync("""UPDATE "Files"."StoredFile" SET "ObjectDeletedAt" = NULL, "DeleteAttempts" = 8 WHERE "Id" = @id""", ("id", fileId));
         await Task.Delay(TimeSpan.FromSeconds(1), TimeProvider.System, Ct);
-        (await seed.ScalarAsync<int>("""SELECT "DeleteAttempts" FROM "Files"."StoredFile" WHERE "Id" = @id""", ("id", fileId))).ShouldBe(8, "用完次数的文件不再被领取");
+        (await seed.ScalarAsync<int>("""SELECT "DeleteAttempts" FROM "Files"."StoredFile" WHERE "Id" = @id""", ("id", fileId))).ShouldBe(8, "达到重试上限的文件不应再被 Worker 领取");
 
         var retried = await PostActionAsync(admin, $"{Root}/{fileId}/retry-deletion", new { });
 
@@ -259,7 +256,7 @@ public sealed class FileAdministrationTests(ClassDatabase<ApiTemplate> database,
         await Eventually.UntilAsync(
             _ => IsNullAsync(seed, fileId, "ObjectDeletedAt"),
             isNull => !isNull,
-            "重试之后删除工作器重新领取并完成",
+            "触发重试后，删除 Worker 重新领取并完成删除",
             TimeSpan.FromSeconds(20),
             Ct);
     }

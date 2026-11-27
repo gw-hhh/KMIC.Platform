@@ -3,9 +3,7 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.GetDetail;
 
-/// <summary>
-/// 示例的详情
-/// </summary>
+/// <summary>示例详情</summary>
 /// <param name="Id">示例 ID</param>
 /// <param name="Version">并发版本号</param>
 /// <param name="Number">编号</param>

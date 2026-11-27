@@ -3,14 +3,10 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Configuration.Domain.Preferences;
 
-/// <summary>
-/// 分层保存的偏好值
-/// </summary>
+/// <summary>分层保存的偏好值</summary>
 public sealed class PreferenceValue : AggregateRoot<PreferenceValueId>
 {
-    /// <summary>
-    /// 键的最大长度，与偏好族的键长上限一致
-    /// </summary>
+    /// <summary>键的最大长度，与偏好族键长上限一致</summary>
     public const int MaxKeyLength = 128;
 
     private PreferenceValue(PreferenceValueId id, string key, PreferenceLayer layer, RoleId? roleId, UserId? userId, string value)
@@ -48,27 +44,15 @@ public sealed class PreferenceValue : AggregateRoot<PreferenceValueId>
     /// </summary>
     public string Value { get; private set; }
 
-    /// <summary>
-    /// 系统层的值
-    /// </summary>
     public static PreferenceValue ForSystem(string key, string value) =>
         Create(key, PreferenceLayer.System, null, null, value);
 
-    /// <summary>
-    /// 角色层的值
-    /// </summary>
     public static PreferenceValue ForRole(string key, RoleId roleId, string value) =>
         Create(key, PreferenceLayer.Role, roleId, null, value);
 
-    /// <summary>
-    /// 用户在某个角色下的值
-    /// </summary>
     public static PreferenceValue ForUserRole(string key, RoleId roleId, UserId userId, string value) =>
         Create(key, PreferenceLayer.UserRole, roleId, userId, value);
 
-    /// <summary>
-    /// 更新偏好值
-    /// </summary>
     public void Set(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);

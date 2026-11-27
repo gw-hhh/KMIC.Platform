@@ -6,9 +6,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Limits;
 
-/// <summary>
-/// 按时间限流：已登录的按用户，没有登录的按 IP，各有各的限额
-/// </summary>
 public sealed class RateLimitTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -26,7 +23,7 @@ public sealed class RateLimitTests
             statuses.Add(last.StatusCode);
         }
 
-        // 没有登录的请求前两次被认证拦下（401），也都算进限额
+        // 匿名请求前两次虽被认证拦截（401），仍计入限流配额
         statuses.ShouldBe([HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized, HttpStatusCode.TooManyRequests]);
         var body = await last!.ShouldBeProblemAsync(429, "Common.TooManyRequests");
         body.GetProperty("retryable").GetBoolean().ShouldBeTrue();
@@ -58,7 +55,7 @@ public sealed class RateLimitTests
 
         alice.ShouldBe([HttpStatusCode.OK, HttpStatusCode.OK, HttpStatusCode.TooManyRequests]);
 
-        // 另一个用户有自己的额度
+        // 不同用户拥有独立的限流配额
         (await bob.GetAsync("/api/v1/samples/me", Ct)).StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 

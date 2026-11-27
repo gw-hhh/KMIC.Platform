@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 本类的单据都由同一个专用用户创建，只查这个用户的数据，其他测试类的数据不会混进来
-/// </summary>
 public sealed class KmicFunctionsTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

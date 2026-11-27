@@ -1,17 +1,12 @@
 namespace Kmic.BuildingBlocks.Analyzers.Common;
 
-/// <summary>
-/// 按程序集名判断所在的模块和层
-/// </summary>
 internal static class KmicProject
 {
     public const string DomainLayer = "Domain";
 
     private static readonly string[] _layers = ["Domain", "Application", "Infrastructure", "Presentation", "Contracts"];
 
-    /// <summary>
-    /// 模块的层，如 Kmic.Sample.Domain 返回 Domain；框架和测试项目返回 null
-    /// </summary>
+    // 从程序集名称提取模块分层（如 Kmic.Sample.Domain -> Domain）
     public static string? ModuleLayer(string? assemblyName)
     {
         if (assemblyName?.Split('.') is not ["Kmic", var module, var layer]

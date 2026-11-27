@@ -1,10 +1,10 @@
 <script setup lang="ts">
-// 深浅色切换按钮：太阳与月亮互相变形，移植自 Vben Admin 的 theme-button（MIT）
+// 深浅主题切换按钮（日月变形动效），移植自 Vben Admin 的 theme-button（MIT）
 const { dark } = defineProps<{ dark: boolean }>();
 </script>
 
 <template>
-  <!-- 和 Vben 一样显示要切换到的模式：深色时显示太阳，浅色时显示月亮 -->
+  <!-- 图标指示目标模式：当前深色时显示太阳，浅色时显示月亮 -->
   <span class="theme-toggle" :class="dark ? 'is-light' : 'is-dark'">
     <svg aria-hidden="true" height="18" viewBox="0 0 24 24" width="18">
       <mask id="kmic-theme-toggle-moon" class="moon">
@@ -27,7 +27,7 @@ const { dark } = defineProps<{ dark: boolean }>();
 </template>
 
 <style scoped lang="scss">
-// is-light 显示小太阳和光芒；is-dark 月亮的缺口移进来、光芒淡出
+// is-light 呈现太阳与光芒；is-dark 移入月牙遮罩并淡出光芒
 .theme-toggle {
   display: flex;
 }

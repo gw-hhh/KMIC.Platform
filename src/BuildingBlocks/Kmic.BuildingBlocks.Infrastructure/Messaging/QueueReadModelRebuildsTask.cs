@@ -6,9 +6,6 @@ using Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 给还没初始化的订阅排队重建读模型
-/// </summary>
 internal sealed class QueueReadModelRebuildsTask(SubscriptionCatalog subscriptions, RebuildRunStore runs, DataSources dataSources) : IStartupTask
 {
     public string Name => "Framework.QueueReadModelRebuilds";

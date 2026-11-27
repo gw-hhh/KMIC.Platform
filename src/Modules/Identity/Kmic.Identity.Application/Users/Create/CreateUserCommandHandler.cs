@@ -8,13 +8,9 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Create;
 
-/// <summary>
-/// 创建用户
-/// </summary>
 public sealed class CreateUserCommandHandler(IUserRepository users, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<CreateUserCommand, CreatedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override ValueTask<Result<CreatedResponse<UserId>>> ExecuteAsync(CreateUserCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var created = User.Create(command.Account, command.DisplayName, command.EnglishName, command.EmployeeNo, command.Mobile, command.Email);

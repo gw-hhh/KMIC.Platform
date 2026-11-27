@@ -6,34 +6,22 @@ using Kmic.Notifications.Domain.Errors;
 
 namespace Kmic.Notifications.Domain.Templates;
 
-/// <summary>
-/// 通知模板及各渠道的发布版本
-/// </summary>
+/// <summary>通知模板及其各渠道发布版本</summary>
 public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
 {
-    /// <summary>
-    /// 模板键最大长度
-    /// </summary>
+    /// <summary>模板键最大长度</summary>
     public const int KeyMaxLength = 200;
 
-    /// <summary>
-    /// 显示名最大长度
-    /// </summary>
+    /// <summary>显示名最大长度</summary>
     public const int DisplayNameMaxLength = 100;
 
-    /// <summary>
-    /// 模块名最大长度
-    /// </summary>
+    /// <summary>模块名最大长度</summary>
     public const int ModuleMaxLength = 50;
 
-    /// <summary>
-    /// 发件账号名最大长度
-    /// </summary>
+    /// <summary>发件账号名最大长度</summary>
     public const int SenderProfileMaxLength = 50;
 
-    /// <summary>
-    /// 渠道清单最大长度
-    /// </summary>
+    /// <summary>渠道清单最大长度</summary>
     public const int ChannelsMaxLength = 50;
 
     private readonly List<TemplateVersion> _versions = [];
@@ -102,9 +90,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     /// </summary>
     public IReadOnlyList<TemplateVersion> Versions => _versions;
 
-    /// <summary>
-    /// 登记一个新声明的模板
-    /// </summary>
+    /// <summary>登记新声明的模板</summary>
     public static NotificationTemplate Create(string key, string displayName, string ownerModule, IEnumerable<TemplateChannel> channels, string senderProfile, bool carriesSecret, string codeHash)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -120,27 +106,21 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
     /// </summary>
     public IReadOnlyList<TemplateChannel> ChannelList => [.. TemplateChannel.All.Where(Supports)];
 
-    /// <summary>
-    /// 是否支持指定渠道
-    /// </summary>
+    /// <summary>是否支持指定渠道</summary>
     public bool Supports(TemplateChannel channel)
     {
         ArgumentNullException.ThrowIfNull(channel);
         return Channels.Split(',').Contains(channel.Code, StringComparer.Ordinal);
     }
 
-    /// <summary>
-    /// 指定渠道选用的发布版本号；未选用时为空
-    /// </summary>
+    /// <summary>指定渠道选用的发布版本号，未选用时返回 null</summary>
     public int? ActiveVersionOf(TemplateChannel channel)
     {
         ArgumentNullException.ThrowIfNull(channel);
         return ParseActiveVersions(ActiveVersions).TryGetValue(channel.Code, out var version) ? version : null;
     }
 
-    /// <summary>
-    /// 把代码里的声明同步过来；之前退役的模板重新出现，恢复启用
-    /// </summary>
+    /// <summary>同步代码中的模板声明（已废弃模板重新出现时恢复启用）</summary>
     public void Synchronize(string displayName, IEnumerable<TemplateChannel> channels, string senderProfile, bool carriesSecret, string codeHash)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -153,22 +133,15 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
         CodeHash = codeHash;
         Status = TemplateStatus.Active;
 
-        // 代码里不再发往的渠道，发布过的版本留着，但不再生效
+        // 移除已不再支持的渠道启用记录，历史发布版本仍保留
         var active = ParseActiveVersions(ActiveVersions).Where(pair => Channels.Split(',').Contains(pair.Key, StringComparer.Ordinal)).ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
         ActiveVersions = JsonSerializer.Serialize(active);
     }
 
-    /// <summary>
-    /// 将已移除声明的模板标为退役
-    /// </summary>
+    /// <summary>标记为已废弃（代码声明已移除）</summary>
     public void Retire() => Status = TemplateStatus.Retired;
 
-    /// <summary>
-    /// 发布新版本并设为该渠道的生效版本
-    /// </summary>
-    /// <remarks>
-    /// 站内消息里主题就是标题
-    /// </remarks>
+    /// <summary>发布新版本并设为该渠道当前生效版本（站内消息的 <paramref name="subject" /> 即消息标题）</summary>
     public Result<TemplateVersion> Publish(TemplateChannel channel, string subject, string body, UserId publishedBy, string? remark, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(channel);
@@ -191,9 +164,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
         return version;
     }
 
-    /// <summary>
-    /// 恢复某个渠道的默认内容；历史版本保留
-    /// </summary>
+    /// <summary>将指定渠道恢复为代码默认内容，保留历史发布版本</summary>
     public Result RevertToDefault(TemplateChannel channel)
     {
         ArgumentNullException.ThrowIfNull(channel);
@@ -213,9 +184,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 解析各渠道选用的发布版本号
-    /// </summary>
+    /// <summary>解析各渠道选用的发布版本号</summary>
     public static IReadOnlyDictionary<string, int> ParseActiveVersions(string json) =>
         JsonSerializer.Deserialize<Dictionary<string, int>>(json) ?? [];
 
@@ -225,9 +194,7 @@ public sealed class NotificationTemplate : AggregateRoot<NotificationTemplateId>
         return string.Join(',', TemplateChannel.All.Where(set.Contains).Select(c => c.Code));
     }
 
-    /// <summary>
-    /// 检查渠道内容是否可修改；模板已退役或未声明该渠道时返回错误
-    /// </summary>
+    /// <summary>检查指定渠道是否允许修改</summary>
     public Result CanChange(TemplateChannel channel)
     {
         ArgumentNullException.ThrowIfNull(channel);

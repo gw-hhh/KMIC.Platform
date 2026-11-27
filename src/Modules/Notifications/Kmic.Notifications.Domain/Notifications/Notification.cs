@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Notifications.Domain.Notifications;
 
-/// <summary>
-/// 通知发送请求记录，创建后不再修改
-/// </summary>
+/// <summary>通知发送请求记录，创建后只读</summary>
 public sealed class Notification : AggregateRoot<NotificationId>
 {
     private Notification(NotificationId id, string templateKey, string templateVersions, string dedupKey, Guid sourceMessageId, string sourceModule, UserId? initiatorUserId)
@@ -49,9 +47,6 @@ public sealed class Notification : AggregateRoot<NotificationId>
     /// </summary>
     public UserId? InitiatorUserId { get; private set; }
 
-    /// <summary>
-    /// 记录一次发送请求
-    /// </summary>
     public static Notification Create(string templateKey, string templateVersions, string dedupKey, Guid sourceMessageId, string sourceModule, UserId? initiatorUserId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateKey);

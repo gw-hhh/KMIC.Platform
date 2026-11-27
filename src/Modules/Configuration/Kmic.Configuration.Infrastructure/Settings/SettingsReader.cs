@@ -9,9 +9,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Kmic.Configuration.Infrastructure.Settings;
 
-/// <summary>
-/// 通过统一缓存读取已保存的系统设置，按标签失效，缺少值时使用代码默认值
-/// </summary>
+// 整库缓存已保存的系统设置并按标签失效，缺失时使用代码默认值
 internal sealed class SettingsReader(IQueryScopeFactory queries, HybridCache cache, SystemSettingCatalog catalog) : ISettings
 {
     // 定期过期，避免失效通知丢失后一直读取旧值

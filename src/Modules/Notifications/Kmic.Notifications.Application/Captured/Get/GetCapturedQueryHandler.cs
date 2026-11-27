@@ -6,12 +6,8 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Application.Captured.Get;
 
-/// <summary>
-/// 查询捕获内容详情
-/// </summary>
 public sealed class GetCapturedQueryHandler(INotificationsQueryDb db, IOptions<NotificationsCaptureOptions> capture) : IQueryHandler<GetCapturedQuery, CapturedDetailResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CapturedDetailResponse>> Handle(GetCapturedQuery query, CancellationToken cancellationToken)
     {
         if (!capture.Value.Enabled)

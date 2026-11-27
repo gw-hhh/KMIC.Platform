@@ -17,9 +17,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Observability;
 
-/// <summary>
-/// 积压采样与量表。每个测试开始前清空消息、作业、执行记录和路由，数据库时间用 SQL 直接改，年龄才可以断言
-/// </summary>
 public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const string Mirror = ProbeHarness.MirrorSubscription;
@@ -183,7 +180,7 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
         await Sampler.SampleAsync(Ct);
         Collect().ShouldNotBeEmpty();
 
-        // 默认采样间隔 30 秒，超过三个间隔没有更新就当作失效
+        // 默认采样间隔为 30 秒，超过三个采样周期未更新则视为样本过期
         _harness.Time.Advance(TimeSpan.FromSeconds(91));
         Sampler.Latest.ShouldBeNull();
         Collect().ShouldBeEmpty();
@@ -200,16 +197,16 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
         await Sampler.StartAsync(Ct);
         try
         {
-            await Eventually.UntilAsync(_ => Task.FromResult(Sampler.Latest is not null), "启动后立即采样一次", ct: Ct);
+            await Eventually.UntilAsync(_ => Task.FromResult(Sampler.Latest is not null), "后台服务启动后应立即执行首次采样", ct: Ct);
 
-            // 把 Echo 的 Inbox 改名：下一轮采样会失败，要记一条警告，循环继续
+            // 临时重命名 Echo 的 Inbox 表以触发下一轮采样失败，验证系统记录警告日志且采样循环不中断
             await ExecuteAsync("ALTER TABLE \"Echo\".\"InboxMessage\" RENAME TO \"InboxMessageMoved\"");
             try
             {
                 _harness.Time.Advance(interval);
                 await Eventually.UntilAsync(
                     _ => Task.FromResult(_harness.Services.GetFakeLogCollector().GetSnapshot().Any(r => r.Id.Id == 2802)),
-                    "采样失败要记警告",
+                    "采样失败后应记录对应的警告日志",
                     ct: Ct);
             }
             finally
@@ -221,7 +218,7 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
             _harness.Time.Advance(interval);
             await Eventually.UntilAsync(
                 _ => Task.FromResult(Sampler.Latest?.Outbox.Single(o => string.Equals(o.Module, "BuildingBlocks", StringComparison.Ordinal)).Pending == 1),
-                "恢复后的下一轮采样要反映新数据",
+                "恢复表名后的下一轮采样应反映最新积压数据",
                 ct: Ct);
         }
         finally
@@ -271,7 +268,7 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
 
     private IReadOnlyList<RecordedMeasurement> Collect()
     {
-        // 登记量表的是采样器，先取一次让它建起来
+        // 触发采样器初始化以确保相关指标量表完成注册
         _ = Sampler;
         _metrics.Clear();
         _metrics.Collect();
@@ -295,7 +292,7 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
         (await work.Sender.SendAsync(new StartRecountCommand(ticket.Id, 1), Ct)).ShouldBeSuccess();
     }
 
-    // 只投递到 Inbox，不处理：处理了就不再积压
+    // 仅将消息投递至 Inbox 而不消费处理，以保留 Inbox 积压状态
     private async Task DeliverAsync()
     {
         var subscriptions = _harness.Services.GetRequiredService<SubscriptionCatalog>();
@@ -319,7 +316,7 @@ public sealed class BacklogSamplerTests(ClassDatabase<ProbeTemplate> database) :
         await command.ExecuteNonQueryAsync(Ct);
     }
 
-    // 模块量表的替身：Next 为空时读取失败
+    // 模块指标量表测试替身：当 Next 为 null 时模拟读取异常
     private sealed class QueueGauges : IBacklogGauges
     {
         public const string Name = "kmic.test.queue";

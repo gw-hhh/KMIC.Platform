@@ -8,31 +8,29 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
-/// <summary>
-/// KM0401：状态属性只能由状态机修改
-/// </summary>
+/// <summary>KM0401：状态属性仅允许由状态机修改。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
 {
     internal const string DiagnosticId = "KM0401";
 
-    private const string Title = "状态属性只能由状态机改写";
-    private const string Reason = "直接赋值会跳过状态机对状态变化的检查，也不会记下这次变化。";
+    private const string Title = "状态属性只能由状态机修改";
+    private const string Reason = "直接赋值会绕过状态机的流转校验，且无法记录状态流转。";
     private const string DefineMethodName = "Define";
 
     internal static readonly DiagnosticDescriptor DirectAssignment = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "状态属性 {0} 不能直接赋值，改为调用状态机的 Start 或 Fire",
+        "禁止直接为状态属性 {0} 赋值，请改用状态机的 Start 或 Fire",
         Reason);
 
-    // 要等整个编译结束才能和 Define 对上，IDE 默认不实时显示，构建时一定会报
+    // 需待编译结束才能与 Define 匹配，IDE 默认不实时提示，构建时生效
     internal static readonly DiagnosticDescriptor AssignmentOutsideAggregate = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "状态属性 {0} 不能在其他类型里赋值，改为调用状态机的 Start 或 Fire",
+        "禁止在其他类型中为状态属性 {0} 赋值，请改用状态机的 Start 或 Fire",
         Reason,
         WellKnownDiagnosticTags.CompilationEnd);
 
@@ -40,35 +38,33 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "状态属性 {0} 的 setter 要改为 private",
+        "状态属性 {0} 的 setter 必须为 private",
         Reason);
 
     internal static readonly DiagnosticDescriptor NotAutoProperty = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "状态属性 {0} 要写成自动属性",
-        "有自己的字段时，类型里的代码可以绕过属性直接改字段，检查就拦不住。");
+        "状态属性 {0} 必须声明为自动属性",
+        "若存在显式支持字段，类型内部代码可能绕过属性直接修改字段，导致静态检查失效。");
 
     internal static readonly DiagnosticDescriptor InvalidGetter = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "Define 的第一个参数只能直接返回聚合根的一个属性，如 s => s.Status",
-        "分析器按这个参数认出哪个属性是状态，写成别的表达式就认不出来。");
+        "Define 的首个参数只能直接返回聚合根的状态属性（如 s => s.Status）",
+        "分析器依赖该表达式识别状态属性，使用其他形式将无法正确识别。");
 
     internal static readonly DiagnosticDescriptor InvalidSetter = Rules.Create(
         DiagnosticId,
         Rules.DomainCategory,
         Title,
-        "Define 的第二个参数只能给第一个参数里的属性赋值，如 (s, v) => s.Status = v",
-        "状态机通过这个参数写入状态，在里面改别的属性，就绕过了业务方法。");
+        "Define 的第二个参数只能向首个参数指定的属性赋值（如 (s, v) => s.Status = v）",
+        "状态机仅通过该委托写入状态值；若在其中修改其他属性，将绕过业务方法约束。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         [DirectAssignment, AssignmentOutsideAggregate, SetterNotPrivate, NotAutoProperty, InvalidGetter, InvalidSetter];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -95,8 +91,8 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         });
     }
 
-    // 绝大多数赋值写在聚合根自己的类型里，按类型分析，IDE 里就能马上提示。
-    // 按类型分析不包括嵌套类型，类型之外的赋值留到编译结束再判断
+    // 绝大多数赋值位于聚合根自身类型内部，按类型粒度分析即可在 IDE 中实时提示；
+    // 跨类型（含嵌套类型）的赋值则延后至编译结束统一匹配检查
     private static void AnalyzeType(
         SymbolStartAnalysisContext context,
         INamedTypeSymbol stateMachine,
@@ -149,7 +145,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
             return null;
         }
 
-        // 按参数位置取，不按书写顺序：调用方可能用命名参数调换了顺序
+        // 按参数位置而非实参书写顺序匹配，兼容调用方使用命名参数调换顺序的情况
         var getter = invocation.Arguments.FirstOrDefault(a => a.Parameter?.Ordinal == 0)?.Value;
         var setter = invocation.Arguments.FirstOrDefault(a => a.Parameter?.Ordinal == 1)?.Value;
         if (getter is null || setter is null)
@@ -192,7 +188,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
             reference.GetSyntax(ct) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }
             && accessors.Accessors.All(a => a is { Body: null, ExpressionBody: null }));
 
-    // s => s.Status：只接受直接返回参数的某个属性。这个参数是表达式树，lambda 外面还包着一层转换
+    // 仅接受直接访问参数属性的表达式（如 s => s.Status）；因参数类型为表达式树，Lambda 外层包裹了一层转换操作
     private static IPropertySymbol? FindDefinedProperty(IOperation getter) =>
         AsLambda(getter) is { Symbol.Parameters: [var entity] } lambda
         && ExplicitStatements(lambda) is [IReturnOperation { ReturnedValue: { } returned }]
@@ -201,7 +197,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
             ? reference.Property.OriginalDefinition
             : null;
 
-    // (s, v) => s.Status = v：只接受把第二个参数赋给同一个属性
+    // 仅接受将第二个参数直接赋给目标属性，如 (s, v) => s.Status = v
     private static bool AssignsOnly(IAnonymousFunctionOperation setter, IPropertySymbol property) =>
         setter.Symbol.Parameters is [var entity, var value]
         && ExplicitStatements(setter) is [IExpressionStatementOperation { Operation: ISimpleAssignmentOperation assignment }]
@@ -210,7 +206,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         && IsParameter(target.Instance, entity)
         && IsParameter(assignment.Value, value);
 
-    // 表达式体 lambda 里编译器会补一个隐式 return，比较前先去掉
+    // 表达式体 Lambda 会由编译器生成隐式 return 操作，匹配前先予过滤
     private static IOperation[] ExplicitStatements(IAnonymousFunctionOperation lambda) =>
         [.. lambda.Body.Operations.Where(o => o is not IReturnOperation { ReturnedValue: null, IsImplicit: true })];
 
@@ -241,7 +237,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
     {
         switch (operation)
         {
-            // = null! 只是给 EF 用的占位，不算设置状态
+            // = null! 仅作 EF 占位，不视为状态赋值
             case IPropertyInitializerOperation initializer when IsPlaceholder(initializer.Value):
                 break;
 
@@ -253,7 +249,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
 
                 break;
 
-            // 解构赋值也是 IAssignmentOperation，要先于下一个分支判断
+            // 解构赋值同样实现 IAssignmentOperation，需先于通用赋值分支匹配
             case IDeconstructionAssignmentOperation deconstruction:
                 CollectTupleTargets(deconstruction.Target, add);
                 break;
@@ -293,7 +289,7 @@ public sealed class StateMachineAssignmentAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    // 给已注册的状态属性赋值，并且不在它的 Define setter 里
+    // 匹配向已注册状态属性赋值且位于对应 Define setter 之外的操作
     private static IEnumerable<Assignment> FindViolations(IEnumerable<Registration> registrations, IEnumerable<Assignment> assignments)
     {
         var settersByProperty = registrations.ToLookup(r => r.Property, SymbolEqualityComparer.Default);

@@ -6,15 +6,11 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Application.Cleanup;
 
-/// <summary>
-/// 将超时未完成的上传标记为被拒绝
-/// </summary>
 public sealed class ResetStaleUploadsCommandHandler(IStoredFileRepository files, IOptions<FilesOptions> options, TimeProvider time)
     : ICommandHandler<ResetStaleUploadsCommand, ScheduledJobOutcome>
 {
     private const string Reason = "上传超时未完成";
 
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(ResetStaleUploadsCommand command, CancellationToken cancellationToken)
     {
         var now = time.GetUtcNow();

@@ -5,13 +5,9 @@ using Kmic.Configuration.Domain.Dictionaries;
 
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
-/// <summary>
-/// 修改字典项名称
-/// </summary>
 public sealed class RenameDictionaryItemCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<RenameDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(RenameDictionaryItemCommand command, CancellationToken cancellationToken)
     {
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);

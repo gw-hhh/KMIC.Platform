@@ -4,12 +4,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Operations.Application.Messages.Blocked;
 
-/// <summary>
-/// 汇总被死信阻塞的顺序键
-/// </summary>
 public sealed class ListBlockedKeysQueryHandler(IModuleMessageStores stores) : IQueryHandler<ListBlockedKeysQuery, IReadOnlyList<BlockedKeyItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<BlockedKeyItem>>> Handle(ListBlockedKeysQuery query, CancellationToken cancellationToken)
     {
         IEnumerable<IModuleMessageStore> selected = stores.All;

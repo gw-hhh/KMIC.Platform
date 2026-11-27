@@ -3,14 +3,9 @@ using Kmic.BuildingBlocks.Contracts.Files;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 文件下载响应
-/// </summary>
 public static class FileResults
 {
-    /// <summary>
-    /// 把文件流式写成响应，支持 ETag 和 Range（存储给出的流能随机读取时）
-    /// </summary>
+    /// <summary>以流式方式写入文件响应，支持 ETag 协商与 Range 分段下载</summary>
     public static IResult Stream(FileDownload file, bool inline = false)
     {
         ArgumentNullException.ThrowIfNull(file);

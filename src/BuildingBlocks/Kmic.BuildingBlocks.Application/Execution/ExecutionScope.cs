@@ -2,49 +2,31 @@ using Kmic.BuildingBlocks.Application.Access;
 
 namespace Kmic.BuildingBlocks.Application.Execution;
 
-/// <summary>
-/// 执行上下文
-/// </summary>
-/// <remarks>
-/// Initialize 只给框架入口调用
-/// </remarks>
+/// <summary>执行上下文；Initialize 仅限框架入口调用。</summary>
 public sealed class ExecutionScope : IExecutionContext
 {
-    // 按异步调用链生效，同一作用域里并行的其他调用不受影响
+    // 按异步调用链隔离，同一作用域内并行的其他调用互不影响
     private static readonly AsyncLocal<int> _moduleCallDepth = new();
     private static readonly AsyncLocal<int> _commandDepth = new();
 
     private CallOrigin? _origin;
 
-    /// <inheritdoc />
     public CallOrigin Origin => _moduleCallDepth.Value > 0 ? CallOrigin.ModuleCall : EntryOrigin;
 
-    /// <summary>
-    /// 入口的来源
-    /// </summary>
-    /// <remarks>
-    /// Contracts 调用期间也不变，Origin 会变成 ModuleCall
-    /// </remarks>
+    /// <summary>入口调用来源；跨模块 Contracts 调用期间保持不变（此时 Origin 为 ModuleCall）。</summary>
     public CallOrigin EntryOrigin =>
         _origin ?? throw new InvalidOperationException("执行上下文尚未初始化，入口应先调用 ExecutionScope.Initialize。");
 
-    /// <inheritdoc />
     public ICurrentUser User { get; private set; } = CurrentUser.Anonymous;
 
-    /// <inheritdoc />
     public IAccessContext? Access { get; private set; }
 
-    /// <inheritdoc />
     public bool InCommand => _commandDepth.Value > 0;
 
-    /// <summary>
-    /// 当前这条异步调用链是否正在执行命令
-    /// </summary>
+    /// <summary>当前异步调用链是否处于命令执行中。</summary>
     public static bool CurrentlyInCommand => _commandDepth.Value > 0;
 
-    /// <summary>
-    /// 设置来源和身份，每个作用域只能设置一次
-    /// </summary>
+    /// <summary>初始化请求来源与身份信息，每个作用域仅允许调用一次。</summary>
     public void Initialize(CallOrigin origin, ICurrentUser user, IAccessContext? access = null)
     {
         ArgumentNullException.ThrowIfNull(user);
@@ -64,7 +46,7 @@ public sealed class ExecutionScope : IExecutionContext
     {
         if (InCommand)
         {
-            throw new InvalidOperationException("命令里不能再发命令。要复用的逻辑放进领域服务，要别的模块改数据就发集成事件。");
+            throw new InvalidOperationException("命令中不可嵌套发送命令；复用逻辑请抽至领域服务，跨模块写操作请发布集成事件。");
         }
 
         return new DepthMarker(_commandDepth);

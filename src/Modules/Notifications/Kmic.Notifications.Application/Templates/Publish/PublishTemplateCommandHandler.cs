@@ -8,9 +8,6 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates.Publish;
 
-/// <summary>
-/// 校验并发布通知模板的新版本
-/// </summary>
 public sealed class PublishTemplateCommandHandler(
     ITemplateRepository templates,
     NotificationTemplateCatalog catalog,
@@ -18,7 +15,6 @@ public sealed class PublishTemplateCommandHandler(
     IExecutionContext execution,
     TimeProvider time) : ICommandHandler<PublishTemplateCommand, VersionedResponse<NotificationTemplateId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<NotificationTemplateId>>> Handle(PublishTemplateCommand command, CancellationToken cancellationToken)
     {
         var loaded = await templates.GetByKeyForUpdateAsync(command.Key, command.ExpectedVersion, cancellationToken);
@@ -46,7 +42,7 @@ public sealed class PublishTemplateCommandHandler(
             return rendered.Error;
         }
 
-        var by = (execution.Access ?? throw new InvalidOperationException("发布模板需要已登录的访问上下文。")).UserId;
+        var by = (execution.Access ?? throw new InvalidOperationException("发布模板需要已登录的用户身份。")).UserId;
         var published = template.Publish(command.Channel, command.Subject, command.Body, by, command.Remark, time.GetUtcNow());
         return published.IsFailure ? published.Error : new VersionedResponse<NotificationTemplateId>(template.Id);
     }

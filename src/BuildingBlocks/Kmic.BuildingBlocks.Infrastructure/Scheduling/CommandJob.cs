@@ -5,25 +5,15 @@ using Quartz;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 框架唯一的 Quartz 作业：按任务名找到声明，发送它的命令或执行框架任务
-/// </summary>
 [DisallowConcurrentExecution]
 internal sealed class CommandJob(ScheduledTasks tasks, ScheduledCommandRunner runner, ILogger<CommandJob> logger) : IJob
 {
-    /// <summary>
-    /// 框架任务在 Quartz 里的分组
-    /// </summary>
     public const string Group = "Kmic";
 
-    /// <summary>
-    /// 手动执行时放在触发数据里，值是操作人，系统发起时为空字符串
-    /// </summary>
+    // 手动触发时记录触发人，系统自动调度时为空字符串
     public const string TriggeredByKey = "kmic.triggeredBy";
 
-    /// <summary>
-    /// 实际触发晚于计划这么久就算补执行，与调度器的错过阈值一致
-    /// </summary>
+    // 实际触发延迟超过此阈值判定为补执行（与调度器 misfire 阈值一致）
     public static readonly TimeSpan MisfireThreshold = TimeSpan.FromMinutes(1);
 
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default)
@@ -31,7 +21,7 @@ internal sealed class CommandJob(ScheduledTasks tasks, ScheduledCommandRunner ru
         var name = context.JobDetail.Key.Name;
         if (!tasks.Contains(name))
         {
-            // 滚动发布时新旧实例声明的任务不一样，交给认识它的实例执行
+            // 滚动发布期间新旧版本实例声明的任务可能存在差异，若当前实例未识别则由其他兼容实例接手执行
             SchedulingLog.UnknownJob(logger, name);
             return;
         }

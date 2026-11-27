@@ -5,12 +5,8 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 查询文件列表
-/// </summary>
 public sealed class ListFilesQueryHandler(IFilesQueryDb db) : IQueryHandler<ListFilesQuery, PagedResult<FileListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<FileListItem>>> Handle(ListFilesQuery query, CancellationToken cancellationToken)
     {
         var statuses = EnumerationFilter.Parse<StoredFileStatus>(query.Status, "status");

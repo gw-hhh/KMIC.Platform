@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.Authorization;
 
 namespace Kmic.Identity.Application.Catalog;
 
-/// <summary>
-/// 代码里声明的权限点与范围对象：要同步进数据库的内容
-/// </summary>
+/// <summary>代码声明的权限点与范围对象（待同步至数据库）</summary>
 public sealed class CatalogContent
 {
     private CatalogContent(IReadOnlyList<PermissionDefinition> permissions, IReadOnlyList<DataScopeObjectDefinition> scopeObjects)
@@ -15,19 +13,12 @@ public sealed class CatalogContent
         ScopeObjects = scopeObjects;
     }
 
-    /// <summary>
-    /// 权限点，按编码排序
-    /// </summary>
+    /// <summary>按编码排序的权限点列表</summary>
     public IReadOnlyList<PermissionDefinition> Permissions { get; }
 
-    /// <summary>
-    /// 范围对象，按编码排序
-    /// </summary>
+    /// <summary>按编码排序的范围对象列表</summary>
     public IReadOnlyList<DataScopeObjectDefinition> ScopeObjects { get; }
 
-    /// <summary>
-    /// 从两个目录读出
-    /// </summary>
     public static CatalogContent From(PermissionCatalog permissions, DataScopeObjectCatalog scopeObjects)
     {
         ArgumentNullException.ThrowIfNull(permissions);
@@ -38,9 +29,7 @@ public sealed class CatalogContent
             [.. scopeObjects.All.OrderBy(s => s.Code, StringComparer.Ordinal)]);
     }
 
-    /// <summary>
-    /// 用于比较目录变化的 SHA-256，返回小写十六进制
-    /// </summary>
+    /// <summary>计算用于比对目录变化的 SHA-256（小写十六进制）</summary>
     public string Hash()
     {
         var text = new StringBuilder();

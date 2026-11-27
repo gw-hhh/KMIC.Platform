@@ -27,7 +27,7 @@ internal sealed class ReadModelRebuild<TSource, TSnapshot, TRow>(Func<SnapshotIt
             var row = toRow(item);
             if (row.Id != id)
             {
-                throw new InvalidOperationException($"{typeof(TRow).Name} 的映射给出的 ID 是 {row.Id}，快照来源返回的是 {id}，两者要一致。");
+                throw new InvalidOperationException($"{typeof(TRow).Name} 映射生成的 ID（{row.Id}）与快照来源返回的 ID（{id}）不一致。");
             }
 
             rows.Add(row);

@@ -14,7 +14,7 @@ public sealed class CacheKeyTests
         var previous = CultureInfo.CurrentCulture;
         try
         {
-            // 小数点是逗号的区域设置下，键也不能变
+            // 在小数点为逗号的区域设置下，生成的缓存键仍保持一致
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
 
             CacheKey.Of("Identity", "RoleSnapshot", roleId, 42L).ShouldBe("Identity:RoleSnapshot:0f8fad5b-d9cb-469f-a165-70867728950e:42");

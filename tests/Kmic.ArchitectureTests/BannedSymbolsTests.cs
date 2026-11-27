@@ -5,10 +5,7 @@ using Shouldly;
 
 namespace Kmic.ArchitectureTests;
 
-/// <summary>
-/// 禁用 API 清单本身的检查：清单里每一条都要能解析成唯一的符号，并且清单已经接入构建。
-/// 方法 ID 写错一个字符、少写一个重载，分析器不报错，只是那一条悄悄不生效，所以在这里逐条核对
-/// </summary>
+// 逐条校验禁用 API 清单中的符号可解析且已接入构建，防止拼写有误或漏写重载时条目静默失效
 public sealed class BannedSymbolsTests
 {
     private static readonly Lazy<CSharpCompilation> _compilation = new(CreateCompilation);
@@ -70,7 +67,7 @@ public sealed class BannedSymbolsTests
                 return separator < 0 ? (line, "") : (line[..separator], line[(separator + 1)..]);
             });
 
-    // 当前进程能加载的全部程序集：框架、EF、ASP.NET Core 都在里面，清单里的符号都能找到
+    // 当前进程已加载的全部程序集：涵盖框架、EF 与 ASP.NET Core，确保清单中的符号均可解析
     private static CSharpCompilation CreateCompilation() => CSharpCompilation.Create(
         "BannedSymbolsProbe",
         references: ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator).Select(path => MetadataReference.CreateFromFile(path)));

@@ -1,7 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Files;
 
-/// <summary>
-/// 看文件头是不是这种类型：只读开头的几 KB，不能把整个文件读进来
-/// </summary>
-/// <param name="header">文件开头的字节，最多 <see cref="FileTypes.HeaderLength" /> 个</param>
+/// <summary>基于文件头部字节（不超过 <see cref="FileTypes.HeaderLength" /> 字节）校验文件类型。</summary>
 public delegate bool FileHeaderCheck(ReadOnlySpan<byte> header);

@@ -1,16 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 不需要幂等
-/// </summary>
-/// <remarks>
-/// Create、Submit、Approve 这类命令不需要幂等时用它写明原因
-/// </remarks>
+/// <summary>声明命令无需幂等校验（如 Create、Submit、Approve 等）并说明原因。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class NotIdempotentAttribute(string reason) : Attribute
 {
-    /// <summary>
-    /// 原因
-    /// </summary>
     public string Reason { get; } = reason;
 }

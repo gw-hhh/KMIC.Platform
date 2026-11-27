@@ -1,17 +1,11 @@
 namespace Kmic.BuildingBlocks.Hosting;
 
-/// <summary>
-/// 模块在哪些环境里注册
-/// </summary>
+/// <summary>模块允许注册的运行环境范围。</summary>
 public enum KmicEnvironments
 {
-    /// <summary>
-    /// 所有环境
-    /// </summary>
+    /// <summary>所有环境。</summary>
     Any,
 
-    /// <summary>
-    /// 只在开发与测试环境，生产环境不注册：参考模块 Sample 用
-    /// </summary>
+    /// <summary>仅在开发与测试环境注册，生产环境不注册（供参考模块 Sample 使用）。</summary>
     NonProduction,
 }

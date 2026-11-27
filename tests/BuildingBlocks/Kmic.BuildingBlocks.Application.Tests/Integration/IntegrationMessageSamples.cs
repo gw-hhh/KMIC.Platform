@@ -5,9 +5,7 @@ using Kmic.BuildingBlocks.Contracts.Snapshots;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Integration;
 
-/// <summary>
-/// 消息目录的样例，有的故意写错，只交给 IntegrationMessageCatalog.Build 校验
-/// </summary>
+// 含故意错误声明的消息样例，供 IntegrationMessageCatalog.Build 校验
 internal static class IntegrationMessageSamples
 {
     [IntegrationMessage("BuildingBlocks.ThingChanged")]

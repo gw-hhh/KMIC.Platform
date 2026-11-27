@@ -3,9 +3,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Testing.Tests.Database;
 
-/// <summary>
-/// 本测试项目的模板库，只有一张探测表
-/// </summary>
 public sealed class ProbeTemplate : PostgresTemplateDatabase
 {
     protected override async Task InitializeTemplateAsync(string connectionString, CancellationToken ct)

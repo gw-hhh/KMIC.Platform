@@ -3,9 +3,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 容量保护的状态判断，容量取 1000 字节，软线 0.8、硬线 0.9，软线要求队列不少于 100、低水位 20
-/// </summary>
 public sealed class AdmissionPolicyTests
 {
     private static readonly AdmissionOptions _options = new() { SoftRatio = 0.8, HardRatio = 0.9, MinUnfinishedBytes = 100, LowWaterBytes = 20 };
@@ -61,7 +58,7 @@ public sealed class AdmissionPolicyTests
     [Fact]
     public void Soft_DoesNotRequireSpaceToFall_OnlyTheQueue()
     {
-        // 表膨胀让已用空间一直高于软线时，队列排空就能恢复
+        // 即使因表膨胀导致已用空间持续高于软限流阈值，只要未完成队列排空至低水位，仍可恢复正常状态
         var decision = Next(AdmissionState.Soft, 1, database: 890, unfinished: 0);
 
         decision.State.ShouldBe(AdmissionState.Normal);

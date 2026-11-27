@@ -12,9 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Infrastructure.Sending;
 
-/// <summary>
-/// 处理投递队列，在数据库事务之外调用发送渠道，再按领取令牌记录结果
-/// </summary>
+// 在数据库事务外调用发送渠道，再按领取令牌回写结果
 internal sealed class DeliveryWork(
     IExecutionScopeFactory scopes,
     NotificationTemplateCatalog catalog,
@@ -47,21 +45,21 @@ internal sealed class DeliveryWork(
         var definition = catalog.Find(item.TemplateKey);
         if (definition is null)
         {
-            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "模板已经不存在", clearSecret: true, ct), ct);
+            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "模板不存在", clearSecret: true, ct), ct);
             return;
         }
 
         var secret = definition.CarriesSecret;
         if (secret && time.GetUtcNow() - item.CreatedAt > _secretLifetime)
         {
-            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "含密通知已过期，未发送", clearSecret: true, ct), ct);
+            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "敏感通知已过期，未发送", clearSecret: true, ct), ct);
             return;
         }
 
-        // 含密通知只走短信，参数已清除时不交给网关，避免发出没有验证码的短信
+        // 敏感通知仅通过短信发送，参数已清除时不提交给网关，避免发出不含验证码的短信
         if (secret && item.SmsParameters is null)
         {
-            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "含密通知内容已清除，未发送", clearSecret: true, ct), ct);
+            await RecordAsync(item, Failed, store => store.FailedAsync(item, token, "敏感通知内容已清除，未发送", clearSecret: true, ct), ct);
             return;
         }
 

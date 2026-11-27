@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Testing.Tests.Contracts;
 
-/// <summary>
-/// 用框架自己的契约（审计记录）验证快照检查
-/// </summary>
 public sealed class MessageContractSnapshotsTests : IDisposable
 {
     private const string SnapshotFile = "Framework.AuditRecorded.v1.json";
@@ -39,7 +36,7 @@ public sealed class MessageContractSnapshotsTests : IDisposable
     [Fact]
     public void FieldAddedAsRequired_IsBreaking()
     {
-        // 快照里没有 module，相当于代码后来新增了一个必填字段：旧消息里没有它，读不出来
+        // 快照中缺失 module，相当于代码新增了必填字段：旧消息不含该字段，反序列化将无法读取
         EditSnapshot(schema =>
         {
             ((JsonObject)schema["properties"]!).Remove("module");

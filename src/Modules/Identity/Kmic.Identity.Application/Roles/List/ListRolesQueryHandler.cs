@@ -5,12 +5,8 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.List;
 
-/// <summary>
-/// 分页查询角色列表
-/// </summary>
 public sealed class ListRolesQueryHandler(IIdentityQueryDb db) : IQueryHandler<ListRolesQuery, PagedResult<RoleListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<RoleListItem>>> Handle(ListRolesQuery query, CancellationToken cancellationToken)
     {
         var roles = db.Roles.AsQueryable();

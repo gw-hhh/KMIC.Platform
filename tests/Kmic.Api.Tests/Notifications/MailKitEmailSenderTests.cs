@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 邮件渠道（MailKit）：邮件怎么发出去，各种失败怎么分成暂时和永久。SMTP 服务器用测试里的假服务器
-/// </summary>
 public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDatabase<ApiTemplate>>, IClassFixture<StubSmtpServer>
 {
     private readonly StubSmtpServer _smtp;
@@ -24,7 +21,7 @@ public sealed class MailKitEmailSenderTests : ApiTestBase, IClassFixture<ClassDa
 
     private IEmailSender Sender => Factory.Services.GetRequiredService<IEmailSender>();
 
-    // Default 连假服务器；Down 指向一个没有人监听的端口，用来模拟连不上
+    // Default 指向模拟 SMTP 服务器；Down 指向未监听端口，用于模拟连接失败
     private static Dictionary<string, string> Settings(StubSmtpServer smtp) =>
         new(StringComparer.Ordinal)
         {

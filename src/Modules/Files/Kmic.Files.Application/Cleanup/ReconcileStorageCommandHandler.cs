@@ -10,9 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Application.Cleanup;
 
-/// <summary>
-/// 核对文件记录与存储对象并处理差异
-/// </summary>
 public sealed class ReconcileStorageCommandHandler(
     IStorageInventory storage,
     IStoredFileRepository files,
@@ -24,7 +21,6 @@ public sealed class ReconcileStorageCommandHandler(
 {
     private const string LostReason = "对象丢失";
 
-    /// <inheritdoc />
     public async ValueTask<Result<ScheduledJobOutcome>> Handle(ReconcileStorageCommand command, CancellationToken cancellationToken)
     {
         var now = time.GetUtcNow();
@@ -48,7 +44,7 @@ public sealed class ReconcileStorageCommandHandler(
         var recorded = await RecordMissingAsync(missing.Files, now, cancellationToken);
         return new ScheduledJobOutcome(
             scan.Orphans.Count + recorded,
-            $"检查了 {scan.Present.Count} 个对象、{missing.Examined} 个文件；删除存储里多出的对象 {scan.Orphans.Count} 个，记录存储问题 {recorded} 个");
+            $"已核对 {scan.Present.Count} 个对象、{missing.Examined} 个文件；清理冗余存储对象 {scan.Orphans.Count} 个，记录存储问题 {recorded} 个");
     }
 
     private async Task<StorageScan> ScanStorageAsync(DateTimeOffset cutoff, CancellationToken ct)

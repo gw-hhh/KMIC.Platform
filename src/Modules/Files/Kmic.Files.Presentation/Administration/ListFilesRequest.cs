@@ -2,9 +2,6 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Files.Presentation.Administration;
 
-/// <summary>
-/// 查询文件列表的参数
-/// </summary>
 /// <param name="Q">文件名搜索关键字</param>
 /// <param name="Status">状态编码</param>
 /// <param name="Profile">上传配置标识</param>

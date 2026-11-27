@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Features;
 
-/// <summary>
-/// 功能开关：值来自 Kmic:Features，开关名里带点（模块.功能）也能读到；没有配置的按关闭处理
-/// </summary>
 public sealed class FeatureFlagsTests
 {
     private static ServiceProvider Build(Dictionary<string, string?> settings)

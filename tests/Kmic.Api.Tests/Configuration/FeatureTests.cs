@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Configuration;
 
-/// <summary>
-/// 功能开关：值来自部署配置 Kmic:Features，登录就能查当前开放的开关，端到端
-/// </summary>
 public sealed class FeatureTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(
         database,

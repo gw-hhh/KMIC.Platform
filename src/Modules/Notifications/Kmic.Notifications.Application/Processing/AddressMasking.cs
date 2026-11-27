@@ -3,23 +3,16 @@ using System.Text;
 
 namespace Kmic.Notifications.Application.Processing;
 
-/// <summary>
-/// 联系方式的脱敏与去重键
-/// </summary>
 internal static class AddressMasking
 {
-    /// <summary>
-    /// 保留手机号的前 3 个和后 4 个字符，中间用星号替换；不超过 7 个字符时全部隐藏
-    /// </summary>
+    // 保留前 3 位与后 4 位；不足 8 位时全部脱敏
     public static string Phone(string phone)
     {
         var digits = phone.Trim();
         return digits.Length <= 7 ? new string('*', digits.Length) : digits[..3] + new string('*', digits.Length - 7) + digits[^4..];
     }
 
-    /// <summary>
-    /// 邮箱仅保留 @ 前的首字符和域名，如 a***@example.com
-    /// </summary>
+    // 仅保留 @ 前首字符与域名，如 a***@example.com
     public static string Email(string email)
     {
         var address = email.Trim();
@@ -27,14 +20,9 @@ internal static class AddressMasking
         return at <= 0 ? new string('*', address.Length) : address[0] + "***" + address[at..];
     }
 
-    /// <summary>
-    /// 地址去重键：去除首尾空白、转小写后计算 SHA-256，以 a: 开头
-    /// </summary>
+    // 去重键统一规范为去空白小写后的 SHA-256，前缀 a:
     public static string KeyOfAddress(string address) =>
         "a:" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(address.Trim().ToLowerInvariant())));
 
-    /// <summary>
-    /// 用户的去重键
-    /// </summary>
     public static string KeyOfUser(Guid userId) => "u:" + userId.ToString("D");
 }

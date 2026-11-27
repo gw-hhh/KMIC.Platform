@@ -9,10 +9,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations;
 
 namespace Kmic.BuildingBlocks.Infrastructure.History;
 
-/// <summary>
-/// 建只追加的表之后，收回运行账号的修改和删除权限
-/// </summary>
-[SuppressMessage("Usage", "EF1001:Internal EF Core API usage", Justification = "Npgsql 的 SQL 生成器构造函数要这个内部类型，替换它没有公开的写法")]
+// 只追加表建表后回收运行账号的 UPDATE/DELETE 权限
+[SuppressMessage("Usage", "EF1001:Internal EF Core API usage", Justification = "Npgsql 的 SQL 生成器构造函数依赖此内部类型，暂无公开替代方式")]
 internal sealed class AppendOnlyMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions options)
     : NpgsqlMigrationsSqlGenerator(dependencies, options)
 {

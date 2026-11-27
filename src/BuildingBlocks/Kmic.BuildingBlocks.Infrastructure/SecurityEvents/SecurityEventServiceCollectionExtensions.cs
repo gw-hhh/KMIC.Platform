@@ -4,14 +4,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 安全事件的服务注册
-/// </summary>
 public static class SecurityEventServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册安全事件的队列、写入器和后台写库，Api、Worker 两种角色都要调用
-    /// </summary>
+    /// <summary>注册安全事件队列、写入器及后台刷盘服务（Api 与 Worker 均需调用）</summary>
     public static IServiceCollection AddKmicSecurityEvents(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

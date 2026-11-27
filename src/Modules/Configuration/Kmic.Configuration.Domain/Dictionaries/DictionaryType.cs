@@ -5,9 +5,7 @@ using Kmic.Configuration.Domain.Errors;
 
 namespace Kmic.Configuration.Domain.Dictionaries;
 
-/// <summary>
-/// 字典类型和它的全部字典项
-/// </summary>
+/// <summary>字典类型聚合，包含其全部字典项</summary>
 public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
 {
     private const int SortStep = 10;
@@ -54,9 +52,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
     /// </summary>
     public IReadOnlyList<DictionaryItem> Items => _items;
 
-    /// <summary>
-    /// 登记代码中新增的字典类型
-    /// </summary>
+    /// <summary>登记代码中新增的字典类型</summary>
     public static DictionaryType Register(string code, string ownerModule, string displayName, bool isHierarchical)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
@@ -66,9 +62,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return new DictionaryType(DictionaryTypeId.New(), code, ownerModule, displayName, isHierarchical);
     }
 
-    /// <summary>
-    /// 按代码声明同步显示名和层级属性，恢复重新声明的退役类型，返回是否发生变化
-    /// </summary>
+    /// <summary>按代码声明同步显示名、层级属性及启用状态，返回是否有变更</summary>
     public bool Synchronize(string displayName, bool isHierarchical)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -80,9 +74,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return changed;
     }
 
-    /// <summary>
-    /// 将代码中已移除的类型标为退役并保留数据，返回是否发生变化
-    /// </summary>
+    /// <summary>将代码中已移除的类型标记为已废弃（保留历史数据），返回是否有变更</summary>
     public bool Retire()
     {
         if (Status == DictionaryTypeStatus.Retired)
@@ -94,20 +86,13 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return true;
     }
 
-    /// <summary>
-    /// 按编码找字典项，不区分大小写
-    /// </summary>
+    /// <summary>按编码查找字典项（不区分大小写）</summary>
     public DictionaryItem? FindItem(string? code) => code is null ? null : _items.Find(i => string.Equals(i.Code, code, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>
-    /// 指定编码的字典项是否存在且启用
-    /// </summary>
+    /// <summary>检查字典项是否存在且已启用</summary>
     public bool IsSelectable(string? code) => FindItem(code)?.Status == DictionaryItemStatus.Active;
 
-    /// <summary>
-    /// 添加字典项
-    /// </summary>
-    /// <param name="parentCode">父项编码；不分层的字典必须为空</param>
+    /// <summary>添加字典项（非层级字典的 parentCode 须为空）</summary>
     public Result<DictionaryItem> AddItem(string? code, string? name, string? parentCode, int? sortOrder, int maxItems)
     {
         var active = EnsureActive();
@@ -149,9 +134,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return item;
     }
 
-    /// <summary>
-    /// 改显示名
-    /// </summary>
+    /// <summary>修改字典项显示名</summary>
     public Result RenameItem(string? code, string? name)
     {
         var found = Find(code);
@@ -170,9 +153,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 变更字典项父项时排在新同级末尾，未指定新父项时移至顶层
-    /// </summary>
+    /// <summary>变更父项并排在新同级末尾；未指定新父项时移至顶层</summary>
     public Result MoveItem(string? code, string? newParentCode)
     {
         var found = Find(code);
@@ -197,12 +178,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 调整同级字典项的顺序
-    /// </summary>
-    /// <remarks>
-    /// 列表要包含全部同级项，不能重复
-    /// </remarks>
+    /// <summary>调整同级字典项顺序（须包含全部同级项且不可重复）</summary>
     public Result ReorderItems(string? parentCode, IReadOnlyList<string> orderedCodes)
     {
         ArgumentNullException.ThrowIfNull(orderedCodes);
@@ -228,9 +204,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 停用字典项；存在启用的子项时拒绝
-    /// </summary>
+    /// <summary>停用字典项（存在启用子项时拒绝）</summary>
     public Result DisableItem(string? code)
     {
         var found = Find(code);
@@ -254,9 +228,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 启用字典项；有父项时，父项须已启用
-    /// </summary>
+    /// <summary>启用字典项（有父项时父项须已启用）</summary>
     public Result EnableItem(string? code)
     {
         var found = Find(code);
@@ -302,7 +274,7 @@ public sealed partial class DictionaryType : AggregateRoot<DictionaryTypeId>
         return FindItem(code) is { } item ? item : ConfigurationErrors.DictionaryItemNotFound;
     }
 
-    // 父项为空表示顶层；不空时字典必须分层，父项存在且启用，而且不能是自己或自己的后代
+    // 父项为空表示顶层；非空时字典须支持层级，且父项须已启用且非自身或后代
     private Result<DictionaryItem?> CheckParent(string? parentCode, DictionaryItem? self)
     {
         if (string.IsNullOrWhiteSpace(parentCode))

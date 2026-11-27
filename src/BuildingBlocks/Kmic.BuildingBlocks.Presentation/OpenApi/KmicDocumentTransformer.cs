@@ -10,9 +10,6 @@ using Microsoft.OpenApi;
 
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
-/// <summary>
-/// 文档级的内容：Bearer 认证、错误响应的架构、匿名端点清单，以及给前端生成代码用的各种目录
-/// </summary>
 internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
 {
     public const string BearerScheme = "Bearer";
@@ -31,7 +28,7 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
             BearerFormat = "JWT",
-            Description = "登录后得到的访问令牌，放在 Authorization 请求头里：Bearer {令牌}",
+            Description = "登录后获取的访问令牌，放在 Authorization 请求头中：Bearer {令牌}",
         };
         document.Security = [new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference(BearerScheme, document)] = [] }];
 
@@ -41,7 +38,7 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
         Set(document, "x-kmic-dictionary-types", DictionaryTypes(services.GetService<DictionaryTypeCatalog>()));
         Set(document, "x-kmic-enums", EnumLabels(document));
 
-        // 上传档案由文件模块声明，模块就绪之前是空的
+        // 上传配置由文件模块声明，模块就绪前为空
         Set(document, "x-kmic-upload-profiles", new JsonObject());
         return Task.CompletedTask;
     }
@@ -49,23 +46,23 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
     private static OpenApiSchema ProblemSchema() => new()
     {
         Type = JsonSchemaType.Object,
-        Description = "统一的错误响应，格式是 RFC 9457 的 ProblemDetails 加上几个固定的扩展字段",
+        Description = "统一错误响应，遵循 RFC 9457 ProblemDetails 并附带固定扩展字段",
         Required = new HashSet<string>(["type", "title", "status", "code", "traceId", "retryable"], StringComparer.Ordinal),
         Properties = new Dictionary<string, IOpenApiSchema>(StringComparer.Ordinal)
         {
             ["type"] = Text("错误类型，urn:kmic:error:{code}，与 code 一一对应"),
-            ["title"] = Text("给用户看的提示文字"),
+            ["title"] = Text("面向用户的错误提示"),
             ["status"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "HTTP 状态码" },
-            ["detail"] = Text("补充说明，没有时不输出"),
+            ["detail"] = Text("补充说明，无补充时不输出"),
             ["instance"] = Text("出错的请求路径，不含查询参数"),
-            ["code"] = Text("稳定的错误码，如 Sample.NotOwner；前端按它判断，不按文字判断"),
+            ["code"] = Text("稳定错误码（如 Sample.NotOwner）；前端按错误码而非提示文案判断"),
             ["traceId"] = Text("链路追踪 ID，与响应头 X-Trace-Id 相同，用户报障时提供"),
             ["retryable"] = new OpenApiSchema { Type = JsonSchemaType.Boolean, Description = "原样重试是否可能成功" },
-            ["currentVersion"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int64", Description = "数据的当前版本号，只在并发冲突时输出" },
+            ["currentVersion"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int64", Description = "数据当前版本号，仅在并发冲突时输出" },
             ["errors"] = new OpenApiSchema
             {
                 Type = JsonSchemaType.Array,
-                Description = "字段错误，校验失败时输出，每条对应请求中的一个字段",
+                Description = "字段校验错误列表，校验失败时输出，每项对应请求中的一个字段",
                 Items = new OpenApiSchema
                 {
                     Type = JsonSchemaType.Object,
@@ -74,7 +71,7 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
                     {
                         ["path"] = Text("字段路径，与请求体里的写法一致，如 items[2].quantity"),
                         ["code"] = Text("校验规则，如 Required、Range、Format"),
-                        ["message"] = Text("给用户看的提示文字"),
+                        ["message"] = Text("面向用户的错误提示"),
                     },
                 },
             },
@@ -86,7 +83,7 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
     private static void Set(OpenApiDocument document, string key, JsonNode value) =>
         document.Extensions![key] = new JsonNodeExtension(value);
 
-    // 每个匿名端点一行：方法 + 路径。清单变化必须在代码评审中看得到，所以排序后输出
+    // 按“方法 路径”格式输出匿名端点清单并固定排序，确保代码评审时可清晰追踪变更
     private static JsonArray AnonymousEndpoints(OpenApiDocumentTransformerContext context, UseCaseCatalog? catalog)
     {
         var anonymous = context.DescriptionGroups
@@ -108,7 +105,7 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
             ["sensitive"] = p.Sensitive,
         })]);
 
-    // 框架层的错误（认证、限流、解析等）不经过 Result，不在错误目录里，一并输出
+    // 认证、限流与请求解析等框架层错误不经由 Result 返回且不在业务错误目录中，需一并合并导出
     private static JsonArray ErrorCodes(ErrorCatalog? catalog)
     {
         var business = (catalog?.All ?? []).Select(e => (JsonNode)new JsonObject { ["code"] = e.Code, ["type"] = e.Type.ToString(), ["message"] = e.Message });
@@ -125,7 +122,7 @@ internal sealed class KmicDocumentTransformer : IOpenApiDocumentTransformer
             ["hierarchical"] = d.IsHierarchical,
         })]);
 
-    // 智能枚举的显示名：从架构上取出并汇总成“架构名 → 取值列表”，架构上不留这个临时扩展
+    // 将各 Schema 上的智能枚举显示名汇总为“架构名 → 取值列表”并挂载到文档扩展，同时清理架构上的临时扩展属性
     private static JsonObject EnumLabels(OpenApiDocument document)
     {
         var labels = new JsonObject();

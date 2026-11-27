@@ -3,18 +3,12 @@ using System.Net.Sockets;
 
 namespace Kmic.BuildingBlocks.Testing;
 
-/// <summary>
-/// 为测试容器挑本机端口，避开 Windows 的临时端口段
-/// </summary>
+// 分配本机可用端口，避开 Windows 动态临时端口段
 internal static class TestPorts
 {
     private const int First = 20000;
     private const int Last = 40000;
 
-    /// <summary>
-    /// 随机挑一个当前没人占用的端口
-    /// </summary>
-    /// <exception cref="InvalidOperationException">试了很多次都没有可用的端口</exception>
     public static int Free()
     {
         for (var attempt = 0; attempt < 200; attempt++)
@@ -28,10 +22,10 @@ internal static class TestPorts
             }
             catch (SocketException)
             {
-                // 被占用或系统保留了这个端口，换一个
+                // 该端口已被占用或受系统保留，继续尝试下一个
             }
         }
 
-        throw new InvalidOperationException($"在 {First} 到 {Last} 之间找不到可用的端口。");
+        throw new InvalidOperationException($"在 {First} 至 {Last} 范围内未找到可用端口。");
     }
 }

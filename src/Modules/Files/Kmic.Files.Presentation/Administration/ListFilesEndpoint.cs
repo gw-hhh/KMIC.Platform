@@ -13,7 +13,7 @@ internal sealed class ListFilesEndpoint : IEndpoint
             .Sends<ListFilesQuery>()
             .Sortable(FileSort.Map)
             .WithSummary("查询文件列表")
-            .WithDescription("分页查询文件元数据和状态，不含内容或存储键。支持按文件名、状态、上传配置、上传人或生成请求人、登记时间及引用文件的业务对象筛选。");
+            .WithDescription("分页查询文件元数据和状态（不含内容与存储键），支持按名称、状态、上传配置、人员、时间及业务引用筛选");
 
     private static async Task<IResult> HandleAsync([AsParameters] ListFilesRequest request, IQuerySender sender, CancellationToken ct) =>
         (await sender.SendAsync(

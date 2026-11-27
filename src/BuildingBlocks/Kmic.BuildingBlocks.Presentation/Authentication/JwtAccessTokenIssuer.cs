@@ -7,9 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 用 RS256 签发访问令牌，和验证用同一套签名密钥与签发者、受众配置
-/// </summary>
 internal sealed class JwtAccessTokenIssuer(SigningKeyStore keys, IOptions<KmicAuthOptions> options) : IAccessTokenIssuer
 {
     private readonly JsonWebTokenHandler _handler = new();

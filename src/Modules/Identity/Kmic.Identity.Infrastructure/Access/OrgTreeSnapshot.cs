@@ -4,11 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Infrastructure.Access;
 
-/// <summary>
-/// 组织树快照：按树版本缓存，内容不可变
-/// </summary>
-/// <param name="Version">组织树的并发版本号</param>
-/// <param name="Nodes">全部单元（含已停用），根单元的上级为空</param>
+// 按组织树并发版本缓存的不可变快照（含已停用单元）
 [ImmutableObject(true)]
 internal sealed record OrgTreeSnapshot(long Version, IReadOnlyList<OrgNode> Nodes) : IOrgHierarchy
 {

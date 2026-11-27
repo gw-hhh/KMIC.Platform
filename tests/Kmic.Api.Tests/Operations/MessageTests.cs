@@ -17,9 +17,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 消息管理：积压汇总、死信列表与内容、被挡住的键、重试与放弃（含接收方的放弃检查），端到端。死信行直接写进各模块的收件箱与发件箱
-/// </summary>
 public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>,
@@ -32,7 +29,7 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
     private const short Dead = 3;
     private const short Abandoned = 4;
 
-    // 目录里的普通消息，载荷可以显示
+    // 契约目录中注册的普通消息应允许展示载荷
     private const string PlainType = "Sample.SpecimenSubmitted";
 
     private static readonly string[] _view = [OperationsPermissions.MessagesView];
@@ -114,7 +111,7 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
         activeItem.GetProperty("oldestAgeSeconds").GetInt64().ShouldBeGreaterThan(2 * 3600);
         activeItem.GetProperty("isRetiring").GetBoolean().ShouldBeFalse();
         sample.GetProperty("subscriptions").EnumerateArray().Single(s => string.Equals(s.GetProperty("subscription").GetString(), retiring, StringComparison.Ordinal))
-            .GetProperty("isRetiring").GetBoolean().ShouldBeTrue("待终结订阅的积压是预期内的，要带标记");
+            .GetProperty("isRetiring").GetBoolean().ShouldBeTrue("待终结订阅的积压属于预期现象，应携带对应标记");
         modules.Single(m => string.Equals(m.GetProperty("module").GetString(), "Configuration", StringComparison.Ordinal)).GetProperty("outbox").GetProperty("dead").GetInt64().ShouldBeGreaterThanOrEqualTo(1);
         modules.Any(m => string.Equals(m.GetProperty("module").GetString(), "Operations", StringComparison.Ordinal)).ShouldBeTrue();
     }
@@ -142,18 +139,18 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
         var badBox = await GetAsync(viewer, "/dead?box=Sideways");
         var forbidden = await GetAsync(plain, "/dead");
 
-        all.Count.ShouldBe(4, "只有死信：待处理的、已放弃的都不在里面");
+        all.Count.ShouldBe(4, "列表应仅包含死信消息，排除待处理与已放弃消息");
         all.Select(m => m.GetProperty("occurredAt").GetDateTimeOffset()).ShouldBe(all.Select(m => m.GetProperty("occurredAt").GetDateTimeOffset()).OrderByDescending(t => t));
-        walked.Select(m => m.GetProperty("id").GetGuid()).ShouldBe(all.Select(m => m.GetProperty("id").GetGuid()), "每页一条翻完，和一次取完一样，同一时间的两条一条也不能漏");
+        walked.Select(m => m.GetProperty("id").GetGuid()).ShouldBe(all.Select(m => m.GetProperty("id").GetGuid()), "逐条分页与全量查询结果应完全一致，同一时间戳的多条记录不应遗漏");
         all.Select(m => m.GetProperty("id").GetGuid()).ShouldBe(
             [.. new[] { sampleOutbox, configurationInbox }.OrderByDescending(id => id.ToByteArray(bigEndian: true), ByteOrder.Instance), configurationOutbox, sampleInbox],
-            "同一时间按数据库的 uuid 次序，大的在前");
+            "同时间戳下按数据库 UUID 降序排列");
         inboxOnly.Select(m => m.GetProperty("id").GetGuid()).ShouldBe([.. new[] { configurationInbox, sampleInbox }.OrderByDescending(id => id.ToByteArray(bigEndian: true), ByteOrder.Instance)]);
         configurationOnly.Select(m => m.GetProperty("module").GetString()).ShouldAllBe(m => string.Equals(m, "Configuration", StringComparison.Ordinal));
         bySubscription.Select(m => m.GetProperty("id").GetGuid()).ShouldBe([sampleInbox]);
         all.Single(m => m.GetProperty("id").GetGuid() == sampleInbox).GetProperty("lastError").GetString().ShouldBe("第一个错误");
         all.Single(m => m.GetProperty("id").GetGuid() == sampleInbox).GetProperty("box").GetString().ShouldBe("Inbox");
-        all.Where(m => m.TryGetProperty("payload", out _)).ShouldBeEmpty("列表里没有载荷");
+        all.Where(m => m.TryGetProperty("payload", out _)).ShouldBeEmpty("死信列表接口不应返回消息载荷");
         badBox.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         (await JsonAsync(badBox)).GetProperty("errors")[0].GetProperty("path").GetString().ShouldBe("box");
         forbidden.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -310,7 +307,7 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
         receipts[4].GetProperty("reason").GetString().ShouldBe(CommonErrors.MessagePayloadUnreadable.Message);
         (await StatusOfAsync("Sample", "Inbox", plainDead)).ShouldBe(Abandoned);
         (await StatusOfAsync("Sample", "Inbox", pending)).ShouldBe(Pending);
-        (await StatusOfAsync("Operations", "Inbox", guarded)).ShouldBe(Dead, "接收方不让放弃，状态没动");
+        (await StatusOfAsync("Operations", "Inbox", guarded)).ShouldBe(Dead, "接收方校验拒绝放弃时，消息状态应保持不变");
         (await StatusOfAsync("Operations", "Inbox", allowed)).ShouldBe(Abandoned);
         (await StatusOfAsync("Operations", "Inbox", unreadable)).ShouldBe(Dead);
         var recorded = await Seed.ScalarAsync<string>($"""SELECT "LastError" FROM "Sample"."InboxMessage" WHERE "Id" = '{plainDead}'""");
@@ -341,7 +338,7 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
             },
             KmicJsonOptions.Stored);
 
-    // 接收方的放弃检查是各模块自己注册的；这里的宿主里没有模块注册，所以给审计消息配一个按动作拒绝的
+    // 放弃前置校验由各接收模块自行注册；因当前宿主中未注册此类检查，故为审计消息注入按动作拒绝的测试校验器
     private HttpClient ClientWithPolicy(string token)
     {
         _withPolicy ??= Factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
@@ -381,7 +378,7 @@ public sealed class MessageTests(ClassDatabase<ApiTemplate> database, ApiTemplat
             ValueTask.FromResult(string.Equals(message.Action, action, StringComparison.Ordinal) ? Result.Failure(Error.BusinessRule("Test.StillAttached", "引用的文件还没有归属，只能重试")) : Result.Success());
     }
 
-    // 数据库比较 uuid 是逐字节的
+    // 数据库对 UUID 采用逐字节排序比较
     private sealed class ByteOrder : IComparer<byte[]>
     {
         public static ByteOrder Instance { get; } = new();

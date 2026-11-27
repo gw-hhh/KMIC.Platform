@@ -8,9 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Background;
 
-/// <summary>
-/// 一个 <see cref="ILeasedWork{TItem}" /> 的领取循环，只在 Worker 角色上运行
-/// </summary>
+// ILeasedWork 领取循环（仅在 Worker 角色运行）
 internal sealed class LeasedQueueRunner<TItem>(ILeasedWork<TItem> queue, StartupState startup, ILogger<LeasedQueueRunner<TItem>> logger) : BackgroundService
 {
     private static readonly TimeSpan _maxDatabaseDelay = TimeSpan.FromSeconds(60);
@@ -72,11 +70,11 @@ internal sealed class LeasedQueueRunner<TItem>(ILeasedWork<TItem> queue, Startup
             }
         }
 
-        // 停机：不再领取，等进行中的处理收尾
+        // 停机时停止领取新任务，等待进行中的任务处理完成
         await Task.WhenAll(_running.Values);
     }
 
-    // 等到至少有一个空闲槽位，并把当前所有空闲的槽位一起占下，返回占了几个；等不到或停机返回 0
+    // 等待并批量占用当前所有空闲槽位，超时或停机返回 0
     private async Task<int> EnterAsync(SemaphoreSlim slots, CancellationToken stopping)
     {
         try
@@ -100,7 +98,7 @@ internal sealed class LeasedQueueRunner<TItem>(ILeasedWork<TItem> queue, Startup
         return taken;
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "一条处理失败不能让整个循环停下来，异常记成错误日志")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "单条处理失败不应中断整个领取循环，异常记录为错误日志")]
     private async Task RunAsync(Guid id, TItem item, Guid token, SemaphoreSlim slots, CancellationToken stopping)
     {
         try
@@ -109,7 +107,7 @@ internal sealed class LeasedQueueRunner<TItem>(ILeasedWork<TItem> queue, Startup
         }
         catch (OperationCanceledException) when (stopping.IsCancellationRequested)
         {
-            // 停机时被取消：领取到期后会被重新领取
+            // 停机取消后，待占用过期即可由其他实例重新领取
         }
         catch (Exception exception)
         {

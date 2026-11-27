@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.StateMachines;
 
 namespace Kmic.BuildingBlocks.Domain.Tests.Fakes;
 
-/// <summary>
-/// 测试用的订单：有明细才能提交
-/// </summary>
+// 测试用订单：有明细才能提交
 internal sealed class Order : AggregateRoot<OrderId>, IHasRevision
 {
     // 公开成属性，测试才能直接调用 CanFire、PermittedActions。业务代码里写成 private static readonly 字段

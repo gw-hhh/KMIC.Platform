@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.ArchitectureTests;
 
-/// <summary>
-/// 命令响应、处理器引用、领域事件处理器、服务注册、聚合初始化
-/// </summary>
 public sealed class StructureRuleTests
 {
     private static readonly Type[] _bad = [.. typeof(BadSamples).GetNestedTypes(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)];

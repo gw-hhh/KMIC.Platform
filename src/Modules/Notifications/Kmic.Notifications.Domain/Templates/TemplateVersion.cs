@@ -3,27 +3,16 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Notifications.Domain.Templates;
 
-/// <summary>
-/// 模板在某个渠道发布过的一个版本
-/// </summary>
-/// <remarks>
-/// 只增不改
-/// </remarks>
+/// <summary>模板在指定渠道的已发布版本（只增不改）</summary>
 public sealed class TemplateVersion : Entity<TemplateVersionId>
 {
-    /// <summary>
-    /// 主题字符数上限
-    /// </summary>
+    /// <summary>主题字符数上限</summary>
     public const int SubjectMaxLength = 200;
 
-    /// <summary>
-    /// 正文字符数上限
-    /// </summary>
+    /// <summary>正文字符数上限</summary>
     public const int BodyMaxLength = 20000;
 
-    /// <summary>
-    /// 备注字符数上限
-    /// </summary>
+    /// <summary>备注字符数上限</summary>
     public const int RemarkMaxLength = 500;
 
     private TemplateVersion(

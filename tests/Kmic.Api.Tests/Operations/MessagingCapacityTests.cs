@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 消息容量保护：容量设置的修改与读取，宿主启动后写出状态
-/// </summary>
 public sealed class MessagingCapacityTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -20,7 +17,7 @@ public sealed class MessagingCapacityTests(ClassDatabase<ApiTemplate> database, 
 
     private static readonly string[] _manage = [ConfigurationPermissions.SettingView, OperationsPermissions.MessagingCapacityManage];
 
-    // 同一个类的测试共用一个库，设置已经保存过时要带上当前版本
+    // 同一测试类共用一个数据库，若配置已存在则需携带当前版本号更新
     private async Task<HttpResponseMessage> SetAsync(string token, long bytes, string reason)
     {
         var current = await JsonAsync(await SendAsync(HttpMethod.Get, Path, token));
@@ -80,7 +77,7 @@ public sealed class MessagingCapacityTests(ClassDatabase<ApiTemplate> database, 
         await Eventually.UntilAsync(
             _ => Seed.CountAsync("""SELECT count(*) FROM "Operations"."MessagingAdmission" """),
             count => count == 1,
-            "宿主启动后第一个周期就写出容量保护状态",
+            "宿主启动后在首个周期内输出容量保护状态",
             ct: Ct);
 
         (await Seed.CountAsync("""SELECT count(*) FROM "Operations"."MessagingAdmission" WHERE "State" = 0""")).ShouldBe(1);

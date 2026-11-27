@@ -7,16 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Configuration.Application.Preferences.Mine;
 
-/// <summary>
-/// 保存当前角色下的个人偏好
-/// </summary>
 public sealed class SetMyPreferenceCommandHandler(
     PreferenceCatalog catalog,
     IPreferenceRepository preferences,
     IExecutionContext execution,
     IOptions<PreferenceOptions> options) : ICommandHandler<SetMyPreferenceCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(SetMyPreferenceCommand command, CancellationToken cancellationToken)
     {
         var found = PreferenceSubject.Find(catalog, command.Key);
@@ -38,7 +34,7 @@ public sealed class SetMyPreferenceCommandHandler(
             return json.Error;
         }
 
-        var access = execution.Access ?? throw new InvalidOperationException("保存个人偏好需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("保存个人偏好需要已登录的用户身份。");
         var row = await preferences.FindForUpdateAsync(subject.Key, PreferenceLayer.UserRole, access.RoleId, access.UserId, cancellationToken);
         if (row is null)
         {

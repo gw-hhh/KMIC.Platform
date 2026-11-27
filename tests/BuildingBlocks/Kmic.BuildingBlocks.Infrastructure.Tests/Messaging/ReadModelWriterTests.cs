@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 每个测试用自己的 ID
-/// </summary>
 public sealed class ReadModelWriterTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private readonly ProbeHarness _harness = new(database.ConnectionString);

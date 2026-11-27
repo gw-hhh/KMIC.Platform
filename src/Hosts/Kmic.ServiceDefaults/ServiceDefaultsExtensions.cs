@@ -18,9 +18,6 @@ using Serilog.Formatting.Compact;
 
 namespace Kmic.ServiceDefaults;
 
-/// <summary>
-/// 宿主的日志、追踪和指标配置
-/// </summary>
 public static class ServiceDefaultsExtensions
 {
     private const string OtlpEndpointKey = "OTEL_EXPORTER_OTLP_ENDPOINT";
@@ -29,12 +26,7 @@ public static class ServiceDefaultsExtensions
 
     private const int MaxUserAgentLength = 200;
 
-    /// <summary>
-    /// 配置日志、追踪与指标
-    /// </summary>
-    /// <remarks>
-    /// 配了 OTEL_EXPORTER_OTLP_ENDPOINT 才导出
-    /// </remarks>
+    /// <summary>配置结构化日志、追踪与指标（存在 OTEL_EXPORTER_OTLP_ENDPOINT 时开启 OTLP 导出）</summary>
     public static WebApplicationBuilder AddKmicServiceDefaults(this WebApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -52,12 +44,7 @@ public static class ServiceDefaultsExtensions
         return builder;
     }
 
-    /// <summary>
-    /// 记录请求完成日志，只记路由模板
-    /// </summary>
-    /// <remarks>
-    /// 要在错误处理中间件之前注册
-    /// </remarks>
+    /// <summary>注册 HTTP 请求摘要日志（仅记录路由模板）；须置于全局异常处理中间件之前以确保 500 异常也能记录</summary>
     public static WebApplication UseKmicRequestLogging(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -76,7 +63,7 @@ public static class ServiceDefaultsExtensions
                 diagnostics.Set("RoutePattern", (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText ?? "(unmatched)");
                 diagnostics.Set("ClientIp", context.Connection.RemoteIpAddress?.ToString());
 
-                // 中间件在请求结束时才记日志，访问上下文那时已经建好；匿名请求（含认证失败）身份为空
+                // 请求日志在响应结束后写入，此时用户身份上下文已构建完成；匿名请求或认证失败时用户身份为空
                 var user = context.RequestServices.GetService<IExecutionContext>()?.User;
                 diagnostics.Set("UserId", user?.UserId?.Value);
                 diagnostics.Set("RoleId", user?.RoleId?.Value);
@@ -90,7 +77,7 @@ public static class ServiceDefaultsExtensions
     {
         var development = builder.Environment.IsDevelopment();
 
-        // 清除默认控制台提供程序以免重复输出；保留向其他提供程序转发，供启用 OTLP 后收集日志
+        // 清除默认控制台提供程序以避免重复输出，并保留向 ILoggerProvider 转发以支持 OTLP 日志收集
         builder.Logging.ClearProviders();
         builder.Services.AddSerilog(
             (services, logger) =>

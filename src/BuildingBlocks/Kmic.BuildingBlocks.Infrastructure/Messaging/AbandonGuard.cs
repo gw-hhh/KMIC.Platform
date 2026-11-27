@@ -9,12 +9,7 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// <see cref="IAbandonGuard" /> 的实现：按消息名找到类型，在系统身份的作用域里取接收方注册的放弃检查并执行
-/// </summary>
-/// <remarks>
-/// 消息不在目录里或载荷还原不出来都不能放弃
-/// </remarks>
+// 按消息名称解析策略并校验是否允许放弃（未注册或载荷损坏时拒绝）
 internal sealed class AbandonGuard(IntegrationMessageCatalog messages, IExecutionScopeFactory scopes) : IAbandonGuard
 {
     private static readonly ConcurrentDictionary<Type, (Type Policy, MethodInfo Check)> _policies = new();

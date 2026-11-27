@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 设置面板里的布局缩略图，图形移植自 Vben Admin 偏好设置的布局图标（MIT）
+// 偏好设置中的布局模式缩略图，图形移植自 Vben Admin（MIT）
 import type { LayoutMode } from '../settings/shell-settings';
 
 const { mode } = defineProps<{ mode: LayoutMode }>();
@@ -9,7 +9,7 @@ const { mode } = defineProps<{ mode: LayoutMode }>();
   <svg class="thumb" fill="none" height="66" width="104" aria-hidden="true">
     <rect fill="currentColor" fill-opacity="0.02" height="66" rx="4" width="104" />
 
-    <!-- 垂直：左侧主色侧栏，右边顶栏和内容块 -->
+    <!-- 垂直布局：左侧主色侧栏，右侧顶栏与内容区 -->
     <template v-if="mode === 'vertical'">
       <path class="primary" d="M0 4a4 4 0 0 1 4-4h22v66H4a4 4 0 0 1-4-4z" />
       <rect fill="#ffffff" height="9.7" rx="2" width="9.8" x="8.8" y="5.9" />
@@ -27,7 +27,7 @@ const { mode } = defineProps<{ mode: LayoutMode }>();
       <rect fill="currentColor" fill-opacity="0.08" height="21.7" rx="2" width="72.5" x="29" y="39.5" />
     </template>
 
-    <!-- 双列菜单：窄的主色图标列加浅色子菜单列 -->
+    <!-- 双列菜单布局：窄幅主色图标列配合浅色子菜单列 -->
     <template v-else-if="mode === 'mixed-column'">
       <path class="primary" d="M0 4a2 4 0 0 1 2-4h8v66H2a2 4 0 0 1-2-4z" />
       <rect fill="#ffffff" height="7.7" rx="2" width="8.2" x="0.6" y="1.4" />
@@ -46,7 +46,7 @@ const { mode } = defineProps<{ mode: LayoutMode }>();
       <rect fill="currentColor" fill-opacity="0.08" height="21.7" rx="2" width="75.1" x="26.3" y="39.7" />
     </template>
 
-    <!-- 混合垂直：主色顶栏放一级菜单，左侧浅色侧栏放下级 -->
+    <!-- 混合垂直布局：主色顶栏承载一级菜单，左侧浅色侧栏承载下级菜单 -->
     <template v-else>
       <rect class="primary" height="9.1" width="104" x="0" y="0" />
       <rect fill="#ffffff" height="7.1" rx="2" width="7.8" x="1.5" y="0.9" />

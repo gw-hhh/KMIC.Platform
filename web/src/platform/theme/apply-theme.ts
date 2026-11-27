@@ -9,7 +9,7 @@ export function applyTheme(root: HTMLElement, appearance: Appearance, runtime: T
   root.style.colorScheme = runtime.resolvedMode;
 }
 
-/** 从点击位置圆形扩散切换深浅色 */
+/** 以点击坐标为圆心，通过圆形扩散动画切换深浅主题 */
 export async function switchWithRipple(
   origin: { x: number; y: number },
   change: () => Promise<void> | void,

@@ -10,13 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Authorization.Explain;
 
-/// <summary>
-/// 授权诊断
-/// </summary>
 public sealed class ExplainAuthorizationQueryHandler(IIdentityQueryDb db, IAccessContextLoader loader, DataScopeObjectCatalog scopeObjects)
     : IQueryHandler<ExplainAuthorizationQuery, AuthorizationExplanation>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<AuthorizationExplanation>> Handle(ExplainAuthorizationQuery query, CancellationToken cancellationToken)
     {
         var scopeObject = query.ScopeObject is { } code ? scopeObjects.All.FirstOrDefault(s => string.Equals(s.Code, code, StringComparison.Ordinal)) : null;
@@ -43,13 +39,13 @@ public sealed class ExplainAuthorizationQueryHandler(IIdentityQueryDb db, IAcces
             return IdentityErrors.RoleNotFound;
         }
 
-        // 先查明不能登录的原因；能登录时再按实际的加载方式取访问上下文
+        // 先核查不可用原因；可用时按常规登录流程加载访问上下文
         var reason = UnusableReason(user.Status, user.Kind, user.Granted, role.Status);
         var access = reason is null ? await loader.LoadForJobAsync(query.UserId, query.RoleId, cancellationToken) : null;
         if (access is null)
         {
             return new AuthorizationExplanation(
-                query.UserId, user.DisplayName, query.RoleId, role.Name, role.ConcurrencyVersion, false, reason ?? "访问上下文加载失败，请稍后重试", [], null);
+                query.UserId, user.DisplayName, query.RoleId, role.Name, role.ConcurrencyVersion, false, reason ?? "用户权限加载失败，请稍后重试", [], null);
         }
 
         return new AuthorizationExplanation(
@@ -64,7 +60,7 @@ public sealed class ExplainAuthorizationQueryHandler(IIdentityQueryDb db, IAcces
             scopeObject is null ? null : await ExplainAsync(access, scopeObject, cancellationToken));
     }
 
-    // 与访问上下文加载器的判断一致：普通用户、已启用、有这个角色的授予、角色已启用
+    // 与访问上下文加载器的判断一致：普通用户、已启用、已获授该角色、角色已启用
     private static string? UnusableReason(UserStatus status, UserKind kind, bool granted, RoleStatus roleStatus)
     {
         if (kind != UserKind.Normal)
@@ -79,7 +75,7 @@ public sealed class ExplainAuthorizationQueryHandler(IIdentityQueryDb db, IAcces
 
         if (!granted)
         {
-            return "用户没有被授予这个角色";
+            return "用户未被授予该角色";
         }
 
         return roleStatus == RoleStatus.Active ? null : "角色已停用";

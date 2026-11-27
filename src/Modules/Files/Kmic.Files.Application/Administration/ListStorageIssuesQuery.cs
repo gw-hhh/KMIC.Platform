@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 查询存储问题列表
-/// </summary>
+/// <summary>查询存储问题列表</summary>
 /// <param name="Status">状态编码</param>
 /// <param name="Page">分页</param>
 /// <param name="Sort">排序</param>

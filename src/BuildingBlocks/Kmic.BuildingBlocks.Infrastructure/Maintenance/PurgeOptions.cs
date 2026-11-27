@@ -1,35 +1,19 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
-/// <summary>
-/// 框架清理任务的配置
-/// </summary>
-/// <remarks>
-/// 保留天数还没和业务确认
-/// </remarks>
+/// <summary>框架清理任务配置</summary>
 public sealed class PurgeOptions
 {
-    /// <summary>
-    /// 配置节名称
-    /// </summary>
     public const string Section = "Kmic:Purge";
 
-    /// <summary>
-    /// 每批删除的行数，批与批之间各自提交，不长时间锁表
-    /// </summary>
+    /// <summary>单批删除行数（每批独立提交，避免长时间锁表）</summary>
     public int BatchSize { get; set; } = 5000;
 
-    /// <summary>
-    /// 补投窗口：已投递的 Outbox 消息保留多久，期间可以补投给新订阅或回滚后的订阅
-    /// </summary>
+    /// <summary>补投窗口：已投递 Outbox 消息的保留时长，支持向新增或回滚后的订阅补投</summary>
     public TimeSpan RedeliveryWindow { get; set; } = TimeSpan.FromDays(7);
 
-    /// <summary>
-    /// 定时任务执行记录保留多久
-    /// </summary>
+    /// <summary>定时任务执行记录保留时长</summary>
     public TimeSpan ScheduledRunRetention { get; set; } = TimeSpan.FromDays(30);
 
-    /// <summary>
-    /// 执行记录停在“执行中”超过这么久，就当执行它的进程已经没了
-    /// </summary>
+    /// <summary>执行记录处于运行中超过此时长后视为实例中断</summary>
     public TimeSpan AbandonRunningAfter { get; set; } = TimeSpan.FromHours(24);
 }

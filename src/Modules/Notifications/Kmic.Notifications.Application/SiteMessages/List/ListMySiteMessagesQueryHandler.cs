@@ -5,16 +5,12 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Notifications.Application.SiteMessages.List;
 
-/// <summary>
-/// 查询本人的站内消息
-/// </summary>
 public sealed class ListMySiteMessagesQueryHandler(INotificationsQueryDb db, IExecutionContext execution)
     : IQueryHandler<ListMySiteMessagesQuery, PagedResult<SiteMessageItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SiteMessageItem>>> Handle(ListMySiteMessagesQuery query, CancellationToken cancellationToken)
     {
-        var me = (execution.Access ?? throw new InvalidOperationException("查询我的站内消息需要已登录的访问上下文。")).UserId;
+        var me = (execution.Access ?? throw new InvalidOperationException("查询我的站内消息需要已登录的用户身份。")).UserId;
         var messages = db.SiteMessages.Where(m => m.RecipientUserId == me);
         if (query.Unread is { } unread)
         {

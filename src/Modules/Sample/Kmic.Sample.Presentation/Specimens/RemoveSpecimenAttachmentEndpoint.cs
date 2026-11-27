@@ -14,7 +14,7 @@ internal sealed class RemoveSpecimenAttachmentEndpoint : IEndpoint
         group.MapDelete("/specimens/{id}/attachments/{attachmentId}", HandleAsync)
             .Sends<RemoveSpecimenAttachmentCommand>()
             .WithSummary("移除示例附件")
-            .WithDescription("只有负责人可以移除附件，示例关闭后不能移除。文件的全部引用解除后进入保留期，期间可以重新关联。");
+            .WithDescription("仅负责人可从非关闭示例移除附件；文件无引用后进入保留期，期间可重新关联");
 
     private static async Task<IResult> HandleAsync(
         [Description("示例 ID")] SpecimenId id,

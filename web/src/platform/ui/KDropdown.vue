@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 下拉菜单：细边框、紧凑行高、图标次要色，样式照 Vben Admin 的下拉菜单（MIT）
+// 下拉菜单：细边框、紧凑行高与次要图标色，样式参考 Vben Admin（MIT）
 import { Dropdown, type DropdownProps } from 'antdv-next';
 
 const {
@@ -20,7 +20,7 @@ const {
 </template>
 
 <style lang="scss">
-// 浮层挂在 body 下，只能用不带 scoped 的样式
+// 浮层挂载于 body，需使用全局非 scoped 样式
 .k-menu .ant-dropdown-menu {
   min-width: 128px;
   padding: 4px;

@@ -7,19 +7,12 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Configuration.Application.Preferences.Layers;
 
-/// <summary>
-/// 管理命令操作的系统层或指定角色层偏好
-/// </summary>
+// 管理系统层或指定角色层偏好的目标对象
 internal readonly record struct PreferenceLayerTarget(PreferenceLayer Layer, RoleId? RoleId)
 {
-    /// <summary>
-    /// 当前层级的缓存失效标签
-    /// </summary>
     public string CacheTag => RoleId is { } role ? ConfigurationCacheKeys.PreferencesRole(role) : ConfigurationCacheKeys.PreferencesSystem;
 
-    /// <summary>
-    /// 未指定角色时选择系统层，否则选择角色层；角色须存在，允许已停用角色
-    /// </summary>
+    // 未传角色时定位系统层，否则定位角色层；角色须存在（允许已停用角色）
     public static async Task<Result<PreferenceLayerTarget>> ResolveAsync(RoleId? roleId, PreferenceSubject subject, IRoleReferences roles, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(subject);
@@ -40,9 +33,7 @@ internal readonly record struct PreferenceLayerTarget(PreferenceLayer Layer, Rol
         return target;
     }
 
-    /// <summary>
-    /// 校验预期版本；未指定版本时要求当前无值，指定版本时要求当前记录版本一致
-    /// </summary>
+    // 未指定预期版本时要求当前尚未保存记录；指定版本时须与现有记录版本一致
     public static Result CheckVersion(PreferenceValue? row, long? expectedVersion) =>
         (row, expectedVersion) switch
         {

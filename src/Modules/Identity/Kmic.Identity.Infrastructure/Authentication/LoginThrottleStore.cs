@@ -5,9 +5,7 @@ using Npgsql;
 
 namespace Kmic.Identity.Infrastructure.Authentication;
 
-/// <summary>
-/// 登录失败计数的存储：每次操作用独立事务提交，登录命令回滚也不影响
-/// </summary>
+// 每次操作均在独立事务中提交，不受外层登录命令回滚影响
 internal sealed class LoginThrottleStore(IIndependentDatabase database, LoginThrottlePolicy policy) : ILoginThrottleStore
 {
     private const string Select = """

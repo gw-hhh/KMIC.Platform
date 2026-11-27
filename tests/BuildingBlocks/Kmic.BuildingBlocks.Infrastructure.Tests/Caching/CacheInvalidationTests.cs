@@ -15,9 +15,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Caching;
 
-/// <summary>
-/// 每个测试用自己的键和标签。“另一个实例”是同一个库上的第二套服务，只启动它的监听
-/// </summary>
 public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -82,7 +79,7 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
             await ListeningAsync();
             var first = await StableValueAsync(other);
 
-            // 订阅好通道之前发出的通知收不到，所以每次探测都再发一次，直到另一个实例的缓存被清掉
+            // 通道订阅就绪前发出的通知无法接收，因此每次轮询均重新触发失效命令，直至另一实例的本地缓存被清除
             await Eventually.UntilAsync(
                 async _ =>
                 {
@@ -91,7 +88,7 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
                     return await GetAsync(other);
                 },
                 value => value > first,
-                "另一个实例的本地缓存被广播清掉",
+                "另一实例的本地缓存经广播通知后已清除",
                 ct: Ct);
         }
         finally
@@ -125,7 +122,7 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
                     return GetAsync(harness).AsTask();
                 },
                 value => value > first,
-                "重连之后清空本地缓存",
+                "监听重连后本地缓存已清空",
                 ct: Ct);
         }
         finally
@@ -158,7 +155,7 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
         return harness;
     }
 
-    // 本地缓存里的值每次重新生成都加一，值变大就说明缓存被清过
+    // 缓存值每次重新生成时递增，数值增大即表明本地缓存已被清除
     private async ValueTask<int> GetAsync(ProbeHarness harness) =>
         await harness.Services.GetRequiredService<HybridCache>().GetOrCreateAsync(
             Key,
@@ -166,7 +163,7 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
             tags: [Tag],
             cancellationToken: Ct);
 
-    // 监听刚连上时会清一次全部缓存，等它过去，连续两次读到同一个值才算稳定
+    // 监听连接建立初期会触发一次全量缓存清空，等待该阶段结束并连续两次读取到相同值即视为稳定
     private async Task<int> StableValueAsync(ProbeHarness harness)
     {
         var previous = await GetAsync(harness);
@@ -180,12 +177,12 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
                 return (current, stable);
             },
             probe => probe.stable,
-            "监听连上后的清空已经结束",
+            "监听建立初期的缓存清空已完成",
             ct: Ct);
         return result.current;
     }
 
-    // 监听连接建立好才发通知，否则通知会丢
+    // 确保监听连接建立后再发送通知，避免通知丢失
     private async Task ListeningAsync() =>
         await Eventually.UntilAsync(
             async _ =>
@@ -196,6 +193,6 @@ public sealed class CacheInvalidationTests(ClassDatabase<ProbeTemplate> database
                 return (long)(await count.ExecuteScalarAsync(Ct))!;
             },
             connections => connections >= 1,
-            "监听连接已经建立",
+            "PostgreSQL 监听连接已建立",
             ct: Ct);
 }

@@ -3,9 +3,6 @@ using Serilog.Events;
 
 namespace Kmic.ServiceDefaults;
 
-/// <summary>
-/// 按属性名兜底脱敏
-/// </summary>
 internal sealed class SensitivePropertyMasker : ILogEventEnricher
 {
     private const string Mask = "***";
@@ -33,7 +30,7 @@ internal sealed class SensitivePropertyMasker : ILogEventEnricher
     public static bool IsSensitive(string name) =>
         _sensitiveNames.Any(sensitive => name.Contains(sensitive, StringComparison.OrdinalIgnoreCase));
 
-    // 没有需要遮盖的内容就原样返回同一个对象，调用方据此判断要不要更新属性
+    // 若无需脱敏则原样返回原对象引用，调用方据此跳过属性重写
     private static LogEventPropertyValue Visit(LogEventPropertyValue value)
     {
         switch (value)

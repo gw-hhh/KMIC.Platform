@@ -1,13 +1,9 @@
 namespace Kmic.BuildingBlocks.Application.Observability;
 
-/// <summary>
-/// 部分遮盖：保留能认出来的头尾，中间换成星号
-/// </summary>
+/// <summary>部分脱敏工具，保留首尾字符并用星号遮盖中间部分。</summary>
 public static class PartialMask
 {
-    /// <summary>
-    /// 保留前 3 位和后 4 位，太短的整个遮住，如 138****5678
-    /// </summary>
+    /// <summary>保留前 3 位与后 4 位（如 138****5678），过短时全量遮盖。</summary>
     public static string Middle(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -19,9 +15,7 @@ public static class PartialMask
             : value[..Head] + new string('*', value.Length - Head - Tail) + value[^Tail..];
     }
 
-    /// <summary>
-    /// 保留邮箱的第 1 个字符和域名，如 z***@example.com；不是邮箱的整个遮住
-    /// </summary>
+    /// <summary>保留邮箱首字符与域名（如 z***@example.com），非邮箱格式全量遮盖。</summary>
     public static string Email(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -30,9 +24,7 @@ public static class PartialMask
         return at <= 0 ? new string('*', value.Length) : value[0] + "***" + value[at..];
     }
 
-    /// <summary>
-    /// 按内容判断：含 @ 的当邮箱，其余按手机号、证件号处理
-    /// </summary>
+    /// <summary>按内容自动识别：含 @ 按邮箱处理，其余按手机号或证件号处理。</summary>
     public static string Of(string value)
     {
         ArgumentNullException.ThrowIfNull(value);

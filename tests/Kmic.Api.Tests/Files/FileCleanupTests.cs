@@ -16,10 +16,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 定时清理与删除工作器：到期的文件被标记并删除对象和行，业务正在关联的、还有关联请求在路上的不动，
-/// 上传中断的被拒绝，删除失败的退避，运维重试之后删掉
-/// </summary>
 public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(database, template, withWorker: true), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -45,7 +41,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
         await Eventually.UntilAsync(
             _ => seed.CountAsync($"""SELECT count(*) FROM "Files"."StoredFile" WHERE "Id" = '{id}'"""),
             count => count == 0,
-            "删除工作器删除对象之后把行也删了",
+            "删除 Worker 删除存储对象并清理数据库记录",
             TimeSpan.FromSeconds(20),
             Ct);
 
@@ -60,7 +56,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         marked.ShouldBeGreaterThanOrEqualTo(1);
         await WaitForRowGoneAsync(seed, id);
-        File.Exists(StoragePathOf(key)).ShouldBeFalse("先删对象，再删行");
+        File.Exists(StoragePathOf(key)).ShouldBeFalse("应先删除存储对象，再删除数据库记录");
     }
 
     [Fact]
@@ -82,7 +78,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
         var (id, _) = await ExpiredTemporaryFileAsync(seed);
         using var metrics = new MetricRecorder(Factory.Services.GetRequiredService<IMeterFactory>());
 
-        // 业务命令正在关联这个文件：持有它的共享锁，清理取不到排他锁，这次跳过
+        // 业务命令正在关联该文件并持有共享锁，清理任务无法获取排他锁时应跳过本轮
         await using var data = NpgsqlDataSource.Create(ConnectionString);
         await using (var business = await data.OpenConnectionAsync(Ct))
         await using (var transaction = await business.BeginTransactionAsync(Ct))
@@ -94,7 +90,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
             }
 
             await RunAsync(Purge());
-            (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "共享锁还在，清理跳过");
+            (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "共享锁尚未释放，清理任务应跳过");
             metrics.Of("kmic.files.purge_skipped").ShouldContain(m => m.Tags["reason"] == "locked");
             await transaction.RollbackAsync(Ct);
         }
@@ -109,7 +105,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
         await using var seed = NewSeed();
         var (id, _) = await ExpiredTemporaryFileAsync(seed);
 
-        // 一条关联请求还停在发件箱里（死信不会被自动重试，用它模拟“还在路上”）：这时清理，请求之后落到被清掉的文件上
+        // 存在滞留于发件箱的关联请求（以死信消息模拟在途请求，因其不会被自动重试）：此时清理会导致后续请求指向已删除文件
         var message = Guid.CreateVersion7();
         await seed.SqlAsync(
             """
@@ -120,7 +116,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         using var metrics = new MetricRecorder(Factory.Services.GetRequiredService<IMeterFactory>());
         await RunAsync(Purge());
-        (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "有未完成的关联请求，不能清理");
+        (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "存在未完成的关联请求，不应清理");
         metrics.Of("kmic.files.purge_skipped").ShouldContain(m => m.Tags["reason"] == "attaching");
 
         await seed.SqlAsync("""UPDATE "Sample"."OutboxMessage" SET "Status" = 2 WHERE "Id" = @message""", ("message", message));
@@ -165,7 +161,7 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
         await using var seed = NewSeed();
         var (id, key) = await ExpiredTemporaryFileAsync(seed);
 
-        // 在对象的位置放一个目录：删文件会失败，模拟存储暂时出问题
+        // 在对象路径放置同名目录使文件删除失败，以此模拟存储服务临时异常
         var path = StoragePathOf(key);
         File.Delete(path);
         Directory.CreateDirectory(path);
@@ -174,16 +170,16 @@ public sealed class FileCleanupTests(ClassDatabase<ApiTemplate> database, ApiTem
         await Eventually.UntilAsync(
             _ => seed.ScalarAsync<int>("""SELECT "DeleteAttempts" FROM "Files"."StoredFile" WHERE "Id" = @id""", ("id", id)),
             attempts => attempts >= 1,
-            "删除工作器领取并尝试了一次",
+            "删除 Worker 领取任务并完成首次删除尝试",
             TimeSpan.FromSeconds(20),
             Ct);
         await Eventually.UntilAsync(
             _ => seed.ScalarAsync<bool>("""SELECT "LeaseToken" IS NULL AND "NextAttemptAt" > now() FROM "Files"."StoredFile" WHERE "Id" = @id""", ("id", id)),
             backedOff => backedOff,
-            "失败之后放回队列并退避",
+            "删除失败后重新入队并计算退避时间",
             TimeSpan.FromSeconds(20),
             Ct);
-        (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Deleting", "对象没删掉，行不能删");
+        (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Deleting", "存储对象尚未删除成功，不应删除数据库记录");
 
         Directory.Delete(path);
         await seed.SqlAsync("""UPDATE "Files"."StoredFile" SET "NextAttemptAt" = now() WHERE "Id" = @id""", ("id", id));

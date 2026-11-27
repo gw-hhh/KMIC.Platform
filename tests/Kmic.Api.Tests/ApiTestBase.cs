@@ -8,13 +8,7 @@ using Kmic.Sample.Application;
 
 namespace Kmic.Api.Tests;
 
-/// <summary>
-/// API 测试的公共部分：每个测试类一个数据库、一个宿主，以及三个身份
-/// </summary>
-/// <remarks>
-/// 组织：总部下有华东、华南。甲在华东，有 Sample 的全部权限，数据范围只看自己；
-/// 乙同在华东，有提交和查看权限，数据范围是全部；丙在华南，有查看和创建权限，范围只看自己
-/// </remarks>
+// 组织架构：总部下设华东、华南。甲（华东，Sample 全权限，仅本人）；乙（华东，提交+查看，全部）；丙（华南，查看+创建，仅本人）
 public abstract class ApiTestBase(
     ClassDatabase<ApiTemplate> database,
     ApiTemplate template,
@@ -39,14 +33,11 @@ public abstract class ApiTestBase(
 
     protected ApiFactory Factory { get; private set; } = null!;
 
-    /// <summary>
-    /// 宿主用的运行账号连接串，测试直接查库时也用它
-    /// </summary>
     protected string ConnectionString => template.RuntimeConnectionString(database.Name);
 
     public ValueTask InitializeAsync()
     {
-        // 宿主随类的数据库一起建、一起关；每个测试的三个身份 ID 不同，登记进同一个加载器互不影响
+        // 宿主随测试类数据库一并创建与销毁；各测试实例的三个身份 ID 互不相同，注册到同一加载器互不干扰
         Factory = database.Shared(() => new ApiFactory(ConnectionString, extraSettings: extraSettings, configureServices: configureServices));
         foreach (var identity in new[] { Alice, Bob, Carol })
         {
@@ -62,9 +53,7 @@ public abstract class ApiTestBase(
         return ValueTask.CompletedTask;
     }
 
-    /// <summary>
-    /// 以某个身份登录的客户端，不传身份就是没有登录
-    /// </summary>
+    /// <summary>创建指定身份的客户端，未传入时匿名</summary>
     protected HttpClient ClientFor(TestIdentity? identity = null)
     {
         var client = Factory.CreateClient();
@@ -83,9 +72,6 @@ public abstract class ApiTestBase(
         return document.RootElement.Clone();
     }
 
-    /// <summary>
-    /// 创建示例并返回 ID 和版本号
-    /// </summary>
     protected static async Task<(Guid Id, long Version)> CreateAsync(HttpClient client, string title = "第一个示例", params (string Name, int Quantity)[] items)
     {
         var body = new
@@ -101,9 +87,7 @@ public abstract class ApiTestBase(
         return (created.GetProperty("id").GetGuid(), created.GetProperty("version").GetInt64());
     }
 
-    /// <summary>
-    /// 以 POST 调用一个带 [Idempotent] 的动作接口，每次换一个新的幂等键
-    /// </summary>
+    /// <summary>调用带 [Idempotent] 的动作接口，每次自动生成新幂等键</summary>
     protected static async Task<HttpResponseMessage> PostActionAsync(HttpClient client, string url, object body)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body) };

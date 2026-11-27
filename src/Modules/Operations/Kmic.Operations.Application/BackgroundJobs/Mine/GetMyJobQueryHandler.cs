@@ -7,13 +7,9 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.BackgroundJobs.Mine;
 
-/// <summary>
-/// 查询本人提交的后台作业详情
-/// </summary>
 public sealed class GetMyJobQueryHandler(IExecutionContext execution, IModuleJobStores stores, IUserReferences users)
     : IQueryHandler<GetMyJobQuery, BackgroundJobItem>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<BackgroundJobItem>> Handle(GetMyJobQuery query, CancellationToken cancellationToken)
     {
         var job = await MyJobs.FindAsync(execution, stores, query.Module, query.JobId, cancellationToken);

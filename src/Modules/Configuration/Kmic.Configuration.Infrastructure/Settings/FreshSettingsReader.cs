@@ -8,9 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Configuration.Infrastructure.Settings;
 
-/// <summary>
-/// 每次读库得到设置的最新值和保存时间，不经缓存
-/// </summary>
+// 直接读库获取最新设置值及保存时间（不走缓存）
 internal sealed class FreshSettingsReader(IQueryScopeFactory queries, SystemSettingCatalog catalog) : IFreshSettings
 {
     public async ValueTask<FreshSetting<T>> GetAsync<T>(CancellationToken ct)

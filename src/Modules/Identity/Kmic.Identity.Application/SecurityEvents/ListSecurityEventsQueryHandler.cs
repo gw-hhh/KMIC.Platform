@@ -6,12 +6,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Identity.Application.SecurityEvents;
 
-/// <summary>
-/// 查询安全事件列表
-/// </summary>
 public sealed class ListSecurityEventsQueryHandler(IIdentityQueryDb db) : IQueryHandler<ListSecurityEventsQuery, PagedResult<SecurityEventItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<SecurityEventItem>>> Handle(ListSecurityEventsQuery query, CancellationToken cancellationToken)
     {
         var events = db.SecurityEvents.Where(e => e.OccurredAt >= query.From && e.OccurredAt < query.To);

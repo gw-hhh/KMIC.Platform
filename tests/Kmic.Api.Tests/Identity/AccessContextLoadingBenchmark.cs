@@ -7,14 +7,7 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 访问上下文加载耗时的参考测量：在较大的数据量上反复加载，输出分位数
-/// </summary>
-/// <remarks>
-/// 设计的目标是状态查询一次不到 2 毫秒。这里测的是整个加载（状态查询加缓存查找），数据在本机 Docker 的 PostgreSQL 上，
-/// 只作参考，不替代测试环境的压测。平时不跑（Explicit），要测的时候：
-/// dotnet test --project tests/Kmic.Api.Tests --filter-class "*AccessContextLoadingBenchmark" --explicit on
-/// </remarks>
+// 手动基准测试（Explicit）：dotnet test --project tests/Kmic.Api.Tests --filter-class "*AccessContextLoadingBenchmark" --explicit on
 public sealed class AccessContextLoadingBenchmark(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -57,7 +50,7 @@ public sealed class AccessContextLoadingBenchmark(ClassDatabase<ApiTemplate> dat
         var rows = await ReadSessionsAsync();
         rows.Count.ShouldBe(Users);
 
-        // 先跑一轮预热：加载器的缓存、连接池、查询计划
+        // 执行预热轮次，以初始化加载器缓存、数据库连接池及查询计划
         foreach (var row in rows.Take(500))
         {
             (await Loader.LoadForRequestAsync(UserId.From(row.User), SessionId.From(row.Session), RoleId.From(row.Role), Ct)).Status.ShouldBe(AccessLoadStatus.Loaded);
@@ -66,7 +59,7 @@ public sealed class AccessContextLoadingBenchmark(ClassDatabase<ApiTemplate> dat
         var sequential = await MeasureAsync(rows, parallelism: 1);
         var concurrent = await MeasureAsync(rows, parallelism: 16);
 
-        // 测试输出不一定显示，同时写一份到临时目录
+        // 测试控制台输出可能被截断，因此同步将结果写入临时目录文件
         var report = $"访问上下文加载，{Users} 个用户、{Samples} 次：顺序 {sequential}；16 路并发 {concurrent}";
         TestContext.Current.SendDiagnosticMessage(report);
         await File.WriteAllTextAsync(Path.Combine(Path.GetTempPath(), "kmic-access-benchmark.txt"), report, Ct);

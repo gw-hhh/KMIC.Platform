@@ -6,17 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Infrastructure.Persistence;
 
-/// <summary>
-/// 从写上下文读取命令判断所需数据，与仓储共用连接和事务，不跟踪实体
-/// </summary>
+// 复用写上下文连接与事务执行不跟踪查询，供命令校验使用
 internal sealed class IdentityCommandReads(IdentityDbContext context) : IIdentityCommandReads
 {
-    /// <inheritdoc />
     public IQueryable<User> Users => context.Set<User>().AsNoTracking();
 
-    /// <inheritdoc />
     public IQueryable<Role> Roles => context.Set<Role>().AsNoTracking();
 
-    /// <inheritdoc />
     public IQueryable<OrgTree> OrgTrees => context.Set<OrgTree>().AsNoTracking();
 }

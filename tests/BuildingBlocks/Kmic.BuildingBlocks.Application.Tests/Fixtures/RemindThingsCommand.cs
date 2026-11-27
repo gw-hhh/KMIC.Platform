@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Fixtures;
 
-/// <summary>
-/// 允许系统执行但不是系统专用，不能用作定时任务
-/// </summary>
+// 允许系统执行但非系统专用，不能用作定时任务
 [RequirePermission("BuildingBlocks.Thing.Remind")]
 [AllowSystem]
 [NotAudited("测试")]

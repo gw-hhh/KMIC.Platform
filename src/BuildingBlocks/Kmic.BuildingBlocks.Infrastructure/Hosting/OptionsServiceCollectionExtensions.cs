@@ -3,18 +3,10 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
-/// <summary>
-/// 部署配置的注册
-/// </summary>
+/// <summary>部署配置 DI 注册</summary>
 public static class OptionsServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册部署配置类：绑定配置节，启动时校验
-    /// </summary>
-    /// <remarks>
-    /// 要在运行中调整的参数做成系统设置
-    /// </remarks>
-    /// <typeparam name="TOptions">配置类，用 sealed class，属性 init</typeparam>
+    /// <summary>注册部署配置类，绑定配置节并在启动时校验（需运行时动态调整的参数请使用系统设置）</summary>
     public static OptionsBuilder<TOptions> AddKmicOptions<TOptions>(this IServiceCollection services, string section)
         where TOptions : class
     {

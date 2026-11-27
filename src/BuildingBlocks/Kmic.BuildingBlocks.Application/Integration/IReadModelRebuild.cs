@@ -2,34 +2,17 @@ using Kmic.BuildingBlocks.Application.ReadModels;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 订阅声明的读模型重建方式
-/// </summary>
 internal interface IReadModelRebuild
 {
-    /// <summary>
-    /// 读模型的类型
-    /// </summary>
     Type ReadModel { get; }
 
-    /// <summary>
-    /// 快照来源的接口类型
-    /// </summary>
     Type Source { get; }
 
-    /// <summary>
-    /// 从源端读一页快照
-    /// </summary>
     Task<RebuildPage> GetPageAsync(IServiceProvider services, Guid? after, int size, CancellationToken ct);
 
-    /// <summary>
-    /// 按 ID 向源端确认，返回仍然存在的行
-    /// </summary>
     Task<IReadOnlyList<IReadModel>> GetRowsAsync(IServiceProvider services, IReadOnlyCollection<Guid> ids, CancellationToken ct);
 
-    /// <summary>
-    /// 重建扫描写入一行，终态的行不修改，返回 false
-    /// </summary>
+    // 写入重建扫描行；若目标行已处于终态则跳过更新并返回 false
     Task<bool> ScanAsync(IServiceProvider services, IReadModel row, Guid runId, CancellationToken ct);
 
     Task<long> CountAsync(IServiceProvider services, CancellationToken ct);

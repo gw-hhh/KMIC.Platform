@@ -3,7 +3,7 @@ import { primaryColor, type Appearance, type ThemeRuntime } from './appearance';
 import { formatHsl } from './color';
 import { colorSets } from './tokens';
 
-// 组件库要用具体色值，不能传 var()。几种底色照 Vben 直接给定，不让深色算法从 colorBgBase 推（推出来偏蓝）
+// 组件库需传入具体色值，不支持 CSS 变量（var()）；底色直接采用 Vben 色板，避免深色算法基于 colorBgBase 推导导致偏蓝
 export function buildAntdTheme(appearance: Appearance, runtime: ThemeRuntime): ThemeConfig {
   const colors = colorSets[runtime.resolvedMode];
   const algorithm = [runtime.resolvedMode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm];

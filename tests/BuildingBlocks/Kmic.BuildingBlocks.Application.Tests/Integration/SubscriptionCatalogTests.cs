@@ -9,7 +9,7 @@ namespace Kmic.BuildingBlocks.Application.Tests.Integration;
 
 public sealed class SubscriptionCatalogTests
 {
-    // 测试程序集推出的模块名是 BuildingBlocks；框架消息 AuditRecorded 属于 Framework，可以订阅
+    // 由测试程序集推断的模块名为 BuildingBlocks；框架消息 AuditRecorded 归属 Framework，允许订阅
     private const string Module = "BuildingBlocks";
 
     private static readonly UseCaseCatalog _useCases = UseCaseCatalog.Build([typeof(SyncThingCommand), typeof(ChangePasswordCommand)]);

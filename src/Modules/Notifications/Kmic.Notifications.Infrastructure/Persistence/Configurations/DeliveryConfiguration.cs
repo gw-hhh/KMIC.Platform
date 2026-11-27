@@ -8,7 +8,7 @@ namespace Kmic.Notifications.Infrastructure.Persistence.Configurations;
 
 internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
 {
-    // 投递队列和结果使用影子属性，由工作器和管理用例按条件更新
+    // 投递队列与结果使用影子属性，由后台投递任务与管理用例按条件更新
     public const string Attempts = DeliveryColumns.Attempts;
     public const string NextAttemptAt = DeliveryColumns.NextAttemptAt;
     public const string LeaseToken = DeliveryColumns.LeaseToken;

@@ -7,23 +7,19 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace Kmic.BuildingBlocks.Analyzers.General;
 
-/// <summary>
-/// KM9005：主构造函数的参数不能重新赋值
-/// </summary>
+/// <summary>KM9005：禁止对主构造函数参数重新赋值。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PrimaryConstructorParameterAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM9005",
         Rules.GeneralCategory,
-        "主构造函数参数不能重新赋值",
-        "主构造函数参数 {0} 不能重新赋值，需要变化的值另建字段或局部变量",
-        "主构造函数参数在整个类型里都能用，被改过之后，读代码的人没法确定它在某处的值。");
+        "禁止对主构造函数参数重新赋值",
+        "禁止对主构造函数参数 {0} 重新赋值，需要变更的值请另行声明字段或局部变量",
+        "主构造函数参数在整个类型作用域内可见，重新赋值会导致阅读代码时难以推断其当前值。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

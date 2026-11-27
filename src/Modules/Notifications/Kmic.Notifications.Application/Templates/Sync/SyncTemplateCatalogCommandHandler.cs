@@ -6,15 +6,11 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Application.Templates.Sync;
 
-/// <summary>
-/// 同步代码声明的通知模板目录
-/// </summary>
 public sealed class SyncTemplateCatalogCommandHandler(NotificationTemplateCatalog catalog, ITemplateRepository templates, ITransactionLocks locks)
     : ICommandHandler<SyncTemplateCatalogCommand, TemplateSyncResult>
 {
     private static readonly Guid _lockId = new("5f0f4a54-3b3e-4d6e-9c55-6d2d0c8f7a11");
 
-    /// <inheritdoc />
     public async ValueTask<Result<TemplateSyncResult>> Handle(SyncTemplateCatalogCommand command, CancellationToken cancellationToken)
     {
         if ((await locks.TryAcquireExclusiveAsync("Notifications.TemplateSync", [_lockId], cancellationToken)).Count == 0)

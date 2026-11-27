@@ -5,15 +5,9 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.Messages.Routes;
 
-/// <summary>
-/// 按序号范围重新投递消息
-/// </summary>
-/// <remarks>
-/// 不在 Operations 的命令事务里
-/// </remarks>
+// 直接委托框架路由管理接口，不纳入 Operations 本地事务
 public sealed class RedeliverCommandHandler(IMessageRouteAdmin routes) : ICommandHandler<RedeliverCommand, RedeliverResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<RedeliverResponse>> Handle(RedeliverCommand command, CancellationToken cancellationToken)
     {
         var result = await routes.RedeliverAsync(command.SourceModule, command.MessageType, command.Subscription, command.FromSeq, command.ToSeq, cancellationToken);

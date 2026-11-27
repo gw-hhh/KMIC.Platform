@@ -1,15 +1,7 @@
 namespace Kmic.Sample.Contracts;
 
-/// <summary>
-/// Sample 模块的基本信息
-/// </summary>
-/// <remarks>
-/// 模块名不能改，它是 schema 名和各类编码的前缀
-/// </remarks>
+/// <summary>Sample 模块标识；模块名用作数据库 schema 及各类编码前缀，不可更改</summary>
 public static class SampleModuleInfo
 {
-    /// <summary>
-    /// 模块名
-    /// </summary>
     public const string Name = "Sample";
 }

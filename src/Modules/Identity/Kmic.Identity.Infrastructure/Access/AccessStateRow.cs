@@ -1,8 +1,6 @@
 namespace Kmic.Identity.Infrastructure.Access;
 
-/// <summary>
-/// 访问状态查询结果，一次读取会话、用户、授予及角色和组织树版本
-/// </summary>
+// 一次读取会话、用户、授予及角色和组织树并发版本号
 internal sealed class AccessStateRow
 {
     public Guid? SessionUserId { get; init; }

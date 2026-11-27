@@ -3,9 +3,6 @@ using Shouldly;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 结构用迁移程序自己建立，和部署顺序一致：先迁移，再导入数据、抬高计数
-/// </summary>
 public sealed class NumbersCommandTests(ToolsTemplate template) : IAsyncLifetime
 {
     private const string Rule = "Sample.Specimen";
@@ -37,16 +34,16 @@ public sealed class NumbersCommandTests(ToolsTemplate template) : IAsyncLifetime
     {
         var first = await ToolHarness.RunnerAsync(_database.ConnectionString, false, "numbers", "ensure-at-least", "--rule", Rule, "--value", "57", "--date", "2030-05-02");
         first.ExitCode.ShouldBe(0, first.Output);
-        first.Output.ShouldContain("现在是 57");
-        first.Output.ShouldContain("下一个序号是 58");
+        first.Output.ShouldContain("当前计数为 57");
+        first.Output.ShouldContain("下一个序号为 58");
         (await CounterAsync("203005")).ShouldBe(57);
 
         var lower = await ToolHarness.RunnerAsync(_database.ConnectionString, false, "numbers", "ensure-at-least", "--rule", Rule, "--value", "10", "--date", "2030-05-20");
         lower.ExitCode.ShouldBe(0, lower.Output);
-        lower.Output.ShouldContain("现在是 57");
+        lower.Output.ShouldContain("当前计数为 57");
         (await CounterAsync("203005")).ShouldBe(57);
 
-        // 别的周期不受影响
+        // 其他周期的序列计数不受影响
         (await CounterAsync("203006")).ShouldBeNull();
     }
 

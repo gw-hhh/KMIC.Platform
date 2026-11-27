@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Identity.Application.SecurityEvents;
 
-/// <summary>
-/// 查询登录失败、越权访问、授权变更和模拟身份等安全事件
-/// </summary>
+/// <summary>查询登录失败、越权访问、授权变更和模拟身份等安全事件。</summary>
 /// <param name="From">起始时间</param>
 /// <param name="To">结束时间</param>
 /// <param name="Type">按类型筛选</param>

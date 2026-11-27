@@ -16,9 +16,6 @@ using static Kmic.BuildingBlocks.Application.Access.ScopeLevel;
 
 namespace Kmic.Api.Tests.Sample;
 
-/// <summary>
-/// 处理器的集成测试：以某个身份建立执行作用域，消息走完整管道（校验、授权、幂等、事务）落到真实数据库，不经过 HTTP
-/// </summary>
 public sealed class SpecimenCommandTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -50,7 +47,7 @@ public sealed class SpecimenCommandTests(ClassDatabase<ApiTemplate> database, Ap
             failed.ShouldBeFailure(SampleErrors.NoOrgUnit);
         }
 
-        // 失败的命令整个回滚，号码没有被消耗
+        // 失败的命令触发完整事务回滚，序号未被消耗
         var after = await CreateAsync(Alice);
         Sequence(after.Number).ShouldBe(Sequence(before.Number) + 1);
     }
@@ -104,7 +101,7 @@ public sealed class SpecimenCommandTests(ClassDatabase<ApiTemplate> database, Ap
 
     private static long Sequence(string number) => long.Parse(number[^4..], System.Globalization.CultureInfo.InvariantCulture);
 
-    // 每个作用域带一个新的幂等键：带 [Idempotent] 的命令要求有键，没有这个属性的命令不看它
+    // 为每个执行作用域分配新的幂等键：标记 [Idempotent] 的命令校验该键，未标记的命令则忽略
     private HandlerScope As(TestIdentity identity)
     {
         var scope = new HandlerScope(Factory.Services.As(identity));

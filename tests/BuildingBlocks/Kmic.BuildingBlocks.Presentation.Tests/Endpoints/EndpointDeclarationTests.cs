@@ -8,9 +8,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Endpoints;
 
-/// <summary>
-/// 端点声明的启动校验：每一条都要在宿主启动时拒绝，而不是到请求时才发现
-/// </summary>
 public sealed class EndpointDeclarationTests
 {
     [Fact]
@@ -61,7 +58,7 @@ public sealed class EndpointDeclarationTests
     {
         var problem = await StartFailsAsync(new ListedModule("Broken", typeof(ProtectedEndpointForAnonymousMessage)));
 
-        problem.ShouldContain("PublicQuery 标了 [AllowAnonymous]，端点也要 .AllowAnonymous()");
+        problem.ShouldContain("PublicQuery 标注了 [AllowAnonymous]，端点也须调用 .AllowAnonymous()");
     }
 
     [Fact]
@@ -69,7 +66,7 @@ public sealed class EndpointDeclarationTests
     {
         var problem = await StartFailsAsync(new ListedModule("Broken", typeof(AnonymousEndpointForProtectedMessage)));
 
-        problem.ShouldContain("端点 .AllowAnonymous()，但 MeQuery 没有标 [AllowAnonymous]");
+        problem.ShouldContain("端点调用了 .AllowAnonymous()，但 MeQuery 未标注 [AllowAnonymous]");
     }
 
     [Fact]

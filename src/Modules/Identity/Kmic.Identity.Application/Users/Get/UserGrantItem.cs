@@ -2,9 +2,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.Get;
 
-/// <summary>
-/// 用户的角色授予信息
-/// </summary>
+/// <summary>用户的角色授予信息。</summary>
 /// <param name="RoleId">角色 ID</param>
 /// <param name="RoleName">角色名称</param>
 /// <param name="RoleIsActive">角色是否启用</param>

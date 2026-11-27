@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 安全事件列表：时间范围必填、按类型账号筛选、权限，端到端
-/// </summary>
 public sealed class SecurityEventListTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

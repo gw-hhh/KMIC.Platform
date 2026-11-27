@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Identity.Application.Maintenance;
 
-/// <summary>
-/// 清理到期或撤销后超过保留期的会话及刷新令牌
-/// </summary>
+/// <summary>清理到期或撤销后超过保留期的会话及刷新令牌</summary>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]
 [NotAudited("定时清理，结果记入作业运行记录")]

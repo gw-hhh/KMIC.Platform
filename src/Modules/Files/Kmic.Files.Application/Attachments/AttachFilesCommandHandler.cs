@@ -5,12 +5,8 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Attachments;
 
-/// <summary>
-/// 将文件关联到业务对象
-/// </summary>
 public sealed class AttachFilesCommandHandler(IStoredFileRepository files, TimeProvider time) : ICommandHandler<AttachFilesCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(AttachFilesCommand command, CancellationToken cancellationToken)
     {
         var message = command.Message;

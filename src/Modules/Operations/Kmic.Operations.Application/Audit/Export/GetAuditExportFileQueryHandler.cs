@@ -9,16 +9,12 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.Audit.Export;
 
-/// <summary>
-/// 获取审计导出文件的下载信息
-/// </summary>
 public sealed class GetAuditExportFileQueryHandler(IModuleJobStores stores, IFileDownloads downloads, IExecutionContext execution, TimeProvider time)
     : IQueryHandler<GetAuditExportFileQuery, FileDownload>
 {
-    // 文件登记请求一般几秒内处理完；超过这个时间还查不到，按文件不存在返回
+    // 文件登记请求通常在数秒内完成；超时仍未查到时按文件不存在处理
     private static readonly TimeSpan _registrationWindow = TimeSpan.FromMinutes(5);
 
-    /// <inheritdoc />
     public async ValueTask<Result<FileDownload>> Handle(GetAuditExportFileQuery query, CancellationToken cancellationToken)
     {
         var store = stores.Find(OperationsModuleInfo.Name);
@@ -38,14 +34,14 @@ public sealed class GetAuditExportFileQueryHandler(IModuleJobStores stores, IFil
             return OperationsErrors.AuditExportNotReady;
         }
 
-        // 作业完成时只发出了登记请求，Files 处理完之前查不到这个文件
+        // 作业完成时仅发出了异步登记命令，Files 模块落库前暂不可查
         var download = await downloads.GetAsync(fileId, cancellationToken);
         return download.IsFailure && download.Error.Type == ErrorType.NotFound && time.GetUtcNow() - job.FinishedAt < _registrationWindow
             ? OperationsErrors.AuditExportNotReady
             : download;
     }
 
-    // 提交导出的人，或者有管理作业权限的人
+    // 允许导出提交人或具备作业管理权限的用户访问
     private bool CanSee(JobView job) =>
         (execution.User.UserId is { } user && job.SubmittedBy == user.Value)
         || execution.Access?.Permissions.Contains(OperationsPermissions.JobsManage) == true;

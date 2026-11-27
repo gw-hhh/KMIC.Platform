@@ -14,7 +14,7 @@ const nodes: MenuNode[] = [
 ];
 
 describe('菜单搜索', () => {
-  it('按菜单顺序列出页面，带上级目录，目录本身不算', () => {
+  it('按菜单顺序提取页面条目并附带所属目录路径，目录节点本身不作为结果', () => {
     expect(toSearchEntries(nodes).map((entry) => [entry.routeName, entry.folders])).toEqual([
       ['orders', ['销售']],
       ['ar-aging', ['销售', '报表']],
@@ -22,24 +22,24 @@ describe('菜单搜索', () => {
     ]);
   });
 
-  it('字依次出现即命中，不要求相邻，不分大小写', () => {
+  it('按字符顺序依次出现即命中，不要求相邻且忽略大小写', () => {
     expect(matchInOrder('订单列表', '订表')).toEqual([0, 3]);
     expect(matchInOrder('AR 账龄', 'ar')).toEqual([0, 1]);
     expect(matchInOrder('订单列表', '表订')).toBeNull();
   });
 
-  it('连续命中的排在前面，忽略关键字里的空格', () => {
+  it('连续命中项优先排序，并忽略关键字中的空格', () => {
     const hits = searchMenu(toSearchEntries(nodes), ' 订 单 ', matchInOrder);
 
     expect(hits.map((hit) => hit.entry.routeName)).toEqual(['orders', 'list-orders']);
     expect(hits[0]?.indices).toEqual([0, 1]);
   });
 
-  it('关键字为空时没有结果', () => {
+  it('关键字为空白时返回空结果', () => {
     expect(searchMenu(toSearchEntries(nodes), '  ', matchInOrder)).toEqual([]);
   });
 
-  it('拼音全拼、首字母都能命中，也照常按汉字匹配', async () => {
+  it('同时支持拼音全拼、首字母及汉字原字匹配', async () => {
     const match = await loadPinyinMatcher();
 
     expect(match('订单列表', 'ddlb')).toEqual([0, 1, 2, 3]);

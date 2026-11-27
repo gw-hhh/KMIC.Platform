@@ -7,9 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
-/// <summary>
-/// 宿主启动时按顺序执行全部启动任务
-/// </summary>
+// 宿主启动时按 Order 顺序执行全部启动任务
 internal sealed class StartupTaskRunner(
     IExecutionScopeFactory scopes,
     StartupState state,
@@ -32,7 +30,7 @@ internal sealed class StartupTaskRunner(
         Validate(tasks);
         foreach (var (name, _) in tasks)
         {
-            // 每个任务一个作用域：任务里发送的命令各自独立，前一个任务留下的状态不会影响后一个
+            // 每个启动任务使用独立作用域，避免命令执行状态在任务间相互污染
             await using var scope = scopes.CreateScope(CallOrigin.Startup, CurrentUser.System());
             var task = scope.ServiceProvider.GetServices<IStartupTask>().Single(t => string.Equals(t.Name, name, StringComparison.Ordinal));
             var started = time.GetTimestamp();
@@ -63,7 +61,7 @@ internal sealed class StartupTaskRunner(
         {
             if (name.StartsWith(FrameworkPrefix, StringComparison.Ordinal) != order < 0)
             {
-                problems.Add($"启动任务 {name} 的顺序是 {order}：框架任务（Framework. 开头）要小于 0，模块任务要从 0 开始。");
+                problems.Add($"启动任务 {name} 的执行顺序（{order}）无效：框架任务（以 Framework. 开头）须小于 0，模块任务须大于或等于 0。");
             }
         }
 

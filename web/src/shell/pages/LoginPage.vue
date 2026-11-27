@@ -21,7 +21,7 @@ async function submit(): Promise<void> {
   errorMessage.value = '';
   try {
     await auth.login(form.account.trim(), form.password);
-    // 跳转到哪由路由守卫决定
+    // 目标路由由导航守卫根据当前会话状态决定
     const redirect = route.query['redirect'];
     await router.replace(
       typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/',

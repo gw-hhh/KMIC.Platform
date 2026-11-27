@@ -6,13 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
-/// <summary>
-/// 添加字典项
-/// </summary>
 public sealed class AddDictionaryItemCommandHandler(IDictionaryTypeRepository types, IOptions<DictionaryOptions> options, IAfterCommit afterCommit)
     : ICommandHandler<AddDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(AddDictionaryItemCommand command, CancellationToken cancellationToken)
     {
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);

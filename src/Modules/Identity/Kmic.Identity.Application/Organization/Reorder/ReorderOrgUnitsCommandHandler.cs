@@ -8,13 +8,9 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Reorder;
 
-/// <summary>
-/// 调整直属下级的顺序
-/// </summary>
 public sealed class ReorderOrgUnitsCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<ReorderOrgUnitsCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<OrgTreeId>>> ExecuteAsync(ReorderOrgUnitsCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await trees.GetForUpdateAsync(OrgTreeId.Default, command.ExpectedVersion, cancellationToken);

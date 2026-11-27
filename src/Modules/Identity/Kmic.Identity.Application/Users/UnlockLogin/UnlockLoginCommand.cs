@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Users.UnlockLogin;
 
-/// <summary>
-/// 清除账号的登录失败计数
-/// </summary>
+/// <summary>清除账号的登录失败计数。</summary>
 [RequirePermission(IdentityPermissions.UserUnlock)]
 [Audited]
 [Idempotent]

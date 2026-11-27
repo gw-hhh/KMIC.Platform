@@ -10,9 +10,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 对账发现的差异超过上限时整个放弃，什么也不删
-/// </summary>
 public sealed class FileReconciliationGuardTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(
         database,

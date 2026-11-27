@@ -9,9 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Jobs;
 
-/// <summary>
-/// Worker 角色里的作业执行
-/// </summary>
+// Worker 角色后台作业托管服务
 internal sealed class JobWorker(
     JobExecutor executor,
     ModuleFrameworkTables tables,
@@ -32,7 +30,7 @@ internal sealed class JobWorker(
         using var slots = new SemaphoreSlim(options.Value.Parallelism);
         await Task.WhenAll(tables.Modules.Select(module => ClaimLoopAsync(module, slots, stoppingToken)));
 
-        // 停机时等进行中的作业放回队列或标记中断，宿主的停机超时兜底
+        // 停机时等待进行中的作业重新入队或标记中断，由宿主停机超时机制兜底
         await Task.WhenAll(_running.Values);
     }
 

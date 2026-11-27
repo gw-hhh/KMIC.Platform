@@ -5,9 +5,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Identity.Infrastructure.Authentication;
 
-/// <summary>
-/// 基于 ASP.NET Core 的密码哈希服务
-/// </summary>
 internal sealed class PasswordService : IPasswordService
 {
     // PBKDF2-HMAC-SHA512，迭代次数取 OWASP 的建议值；旧哈希的迭代次数更低时，登录成功后会自动重新哈希

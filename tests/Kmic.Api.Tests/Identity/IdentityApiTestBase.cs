@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// Identity 认证流程的测试基础：真实的访问上下文加载器、真实签发的令牌，数据直接造在 Identity 的表里
-/// </summary>
 public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, ApiTemplate template, IReadOnlyDictionary<string, string>? settings = null) : IAsyncLifetime
 {
     protected const string Origin = "https://app.test";
@@ -29,7 +26,7 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
             merged[key] = value;
         }
 
-        // 宿主随类的数据库一起建、一起关
+        // 宿主随测试类数据库一并创建与销毁
         Factory = database.Shared(() => new ApiFactory(ConnectionString, realIdentity: true, merged));
         Seed = new IdentitySeed(ConnectionString);
         return ValueTask.CompletedTask;
@@ -41,9 +38,7 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// 不自动处理 Cookie 的客户端：刷新令牌 Cookie 带 Secure，而测试走的是 http，自己读 Set-Cookie 再手工带上更直接
-    /// </summary>
+    /// <summary>禁用自动 Cookie 管理的客户端（刷新 Cookie 带 Secure，HTTP 测试需手动透传）</summary>
     protected HttpClient NewClient() => Factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
 
     protected static async Task<JsonElement> JsonAsync(HttpResponseMessage response)
@@ -86,9 +81,6 @@ public abstract class IdentityApiTestBase(ClassDatabase<ApiTemplate> database, A
         return await client.SendAsync(request, Ct);
     }
 
-    /// <summary>
-    /// 从响应的 Set-Cookie 里取刷新令牌 Cookie 的“名=值”，没有时为空
-    /// </summary>
     protected static string? RefreshCookieOf(HttpResponseMessage response) =>
         response.Headers.TryGetValues("Set-Cookie", out var values)
             ? values.Select(v => v.Split(';')[0]).FirstOrDefault(v => v.StartsWith("__Host-kmic-rt=", StringComparison.Ordinal) && v.Length > "__Host-kmic-rt=".Length)

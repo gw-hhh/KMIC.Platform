@@ -6,9 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kmic.Api.Tests;
 
-/// <summary>
-/// 生成测试用的 RSA 密钥（PEM 文件）和访问令牌
-/// </summary>
 public sealed class TokenFactory : IDisposable
 {
     public const string Issuer = "kmic-api-test";
@@ -26,9 +23,6 @@ public sealed class TokenFactory : IDisposable
 
     public string PrivateKeyPath => Path.Combine(_directory, Kid + ".pem");
 
-    /// <summary>
-    /// 访问令牌：用户、会话、角色三个声明
-    /// </summary>
     public string Create(TestIdentity identity)
     {
         ArgumentNullException.ThrowIfNull(identity);
@@ -51,9 +45,6 @@ public sealed class TokenFactory : IDisposable
         return new JsonWebTokenHandler().CreateToken(descriptor);
     }
 
-    /// <summary>
-    /// 宿主要的认证配置
-    /// </summary>
     public IReadOnlyDictionary<string, string?> Settings() => new Dictionary<string, string?>(StringComparer.Ordinal)
     {
         ["Kmic:Auth:Issuer"] = Issuer,

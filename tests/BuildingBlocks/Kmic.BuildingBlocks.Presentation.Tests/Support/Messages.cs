@@ -5,14 +5,9 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
 
-/// <summary>
-/// 框架测试用的消息：声明只为让用例目录接受它们，处理逻辑由 FakeSender 的预设应答替代
-/// </summary>
+// 框架测试消息：仅用于满足用例目录声明，实际执行由 FakeSender 预设应答替代
 internal static class Messages
 {
-    /// <summary>
-    /// 用例目录默认包含的全部测试消息
-    /// </summary>
     public static readonly Type[] All =
     [
         typeof(GetThingQuery), typeof(CreateThingCommand), typeof(DeleteThingCommand), typeof(StartExportCommand),

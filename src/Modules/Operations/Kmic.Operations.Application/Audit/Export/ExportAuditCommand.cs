@@ -5,12 +5,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Operations.Application.Audit.Export;
 
-/// <summary>
-/// 提交审计 CSV 导出作业
-/// </summary>
-/// <remarks>
-/// 行数超过上限时作业失败
-/// </remarks>
+/// <summary>提交审计 CSV 导出作业（行数超过上限时作业失败）。</summary>
 /// <param name="From">起始时间</param>
 /// <param name="To">结束时间</param>
 /// <param name="ActorUserId">操作人</param>

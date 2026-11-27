@@ -5,23 +5,19 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
-/// <summary>
-/// KM0501：领域事件不能带实体对象
-/// </summary>
+/// <summary>KM0501：领域事件禁止携带实体对象。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class DomainEventAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Rule = Rules.Create(
         "KM0501",
         Rules.DomainCategory,
-        "领域事件不能带实体对象",
-        "领域事件 {0} 的属性 {1} 带了实体 {2}，改为带它的 ID",
-        "事件处理器拿到实体就能直接改它，绕过它的业务方法。");
+        "领域事件禁止携带实体对象",
+        "领域事件 {0} 的属性 {1} 携带了实体 {2}，请改为传递其 ID",
+        "事件处理器若直接持有实体实例，可能绕过业务方法直接修改实体状态。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -57,7 +53,7 @@ public sealed class DomainEventAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    // 集合、可空、元组里的实体同样不允许
+    // 集合、可空类型或元组中包含的实体同样禁止
     private static ITypeSymbol? FindEntity(ITypeSymbol type, INamedTypeSymbol entity)
     {
         if (KnownTypes.InheritsFrom(type, entity))

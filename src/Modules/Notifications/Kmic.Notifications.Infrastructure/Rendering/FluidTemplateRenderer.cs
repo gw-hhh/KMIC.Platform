@@ -12,9 +12,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Infrastructure.Rendering;
 
-/// <summary>
-/// 使用 Fluid 渲染 Liquid 通知模板
-/// </summary>
 internal sealed class FluidTemplateRenderer(IOptions<NotificationsRenderOptions> options, TimeProvider time) : ITemplateRenderer
 {
     private static readonly FluidParser _parser = new();

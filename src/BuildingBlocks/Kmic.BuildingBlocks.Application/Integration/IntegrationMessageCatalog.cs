@@ -4,9 +4,6 @@ using Kmic.BuildingBlocks.Contracts.Messaging;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 集成消息目录
-/// </summary>
 public sealed class IntegrationMessageCatalog
 {
     private static readonly Assembly _frameworkContracts = typeof(IIntegrationMessage).Assembly;
@@ -20,14 +17,9 @@ public sealed class IntegrationMessageCatalog
         _byName = types.ToFrozenDictionary(t => (t.Name, t.Version));
     }
 
-    /// <summary>
-    /// 没有任何消息的目录
-    /// </summary>
     public static IntegrationMessageCatalog Empty { get; } = new([]);
 
-    /// <summary>
-    /// 从各模块的 Application 程序集及其引用的 Contracts 程序集中读取
-    /// </summary>
+    /// <summary>从各模块的 Application 程序集及其引用的 Contracts 程序集中读取集成消息定义。</summary>
     public static IntegrationMessageCatalog FromAssemblies(IEnumerable<Assembly> applicationAssemblies)
     {
         ArgumentNullException.ThrowIfNull(applicationAssemblies);
@@ -58,17 +50,12 @@ public sealed class IntegrationMessageCatalog
         return problems.Count > 0 ? throw new DeclarationException("集成消息声明", problems) : new IntegrationMessageCatalog(messages);
     }
 
-    /// <summary>
-    /// 管理界面能否显示这种消息的载荷
-    /// </summary>
-    /// <remarks>
-    /// 含密的和找不到类型的都不显示
-    /// </remarks>
+    /// <summary>判断管理视图是否允许展示指定消息载荷；敏感消息及未识别类型均不显示。</summary>
     public bool CanShowPayload(string name, int version) => Find(name, version) is { CarriesSecret: false };
 
     internal IntegrationMessageType Describe(Type messageType) =>
         _byType.GetValueOrDefault(messageType)
-            ?? throw new InvalidOperationException($"{messageType.FullName} 不在集成消息目录中，检查它是否标了 [IntegrationMessage]、所在模块是否已注册。");
+            ?? throw new InvalidOperationException($"{messageType.FullName} 未收录于集成消息目录，请检查是否已标注 [IntegrationMessage] 且所属模块已注册。");
 
     internal IntegrationMessageType? Find(string name, int version) => _byName.GetValueOrDefault((name, version));
 
@@ -83,7 +70,7 @@ public sealed class IntegrationMessageCatalog
     {
         if (type.GetCustomAttribute<IntegrationMessageAttribute>() is not { } attribute)
         {
-            problems.Add($"{type.FullName} 实现了集成消息接口，但没有标 [IntegrationMessage]。");
+            problems.Add($"{type.FullName} 实现了集成消息接口，但未标注 [IntegrationMessage]。");
             return null;
         }
 
@@ -92,19 +79,19 @@ public sealed class IntegrationMessageCatalog
         var isRequest = type.IsAssignableTo(typeof(IIntegrationRequest));
         if (isEvent == isRequest)
         {
-            problems.Add($"{name} 要么实现 IIntegrationEvent（事件），要么实现 IIntegrationRequest（请求型消息），只能选一个。");
+            problems.Add($"{name} 必须且只能实现 IIntegrationEvent（事件）或 IIntegrationRequest（请求型消息）之一。");
             return null;
         }
 
         var module = type.Assembly == _frameworkContracts ? "Framework" : ModuleNames.Of(type);
         if (!name.StartsWith(module + ".", StringComparison.Ordinal) || name.Length == module.Length + 1)
         {
-            problems.Add($"{type.Name} 的消息名称“{name}”要以“{module}.”开头。");
+            problems.Add($"{type.Name} 的消息名称“{name}”须以“{module}.”开头。");
         }
 
         if (attribute.Version < 1)
         {
-            problems.Add($"{name} 的版本号要从 1 开始。");
+            problems.Add($"{name} 的版本号须从 1 开始。");
         }
 
         if (isRequest && !PlatformModules.Names.Contains(module))
@@ -129,7 +116,7 @@ public sealed class IntegrationMessageCatalog
         {
             if (attribute.SecretLifetimeSeconds != 0)
             {
-                problems.Add($"{name} 写了凭据有效期，但没有声明 CarriesSecret。");
+                problems.Add($"{name} 已设置凭据有效期，但没有声明 CarriesSecret。");
             }
 
             return null;
@@ -143,7 +130,7 @@ public sealed class IntegrationMessageCatalog
 
         if (attribute.SecretLifetimeSeconds is < 1 or > IntegrationMessageAttribute.MaxSecretLifetimeSeconds)
         {
-            problems.Add($"{name} 声明了 CarriesSecret，凭据有效期 SecretLifetimeSeconds 要写在 1 到 {IntegrationMessageAttribute.MaxSecretLifetimeSeconds} 秒之间。");
+            problems.Add($"{name} 声明了 CarriesSecret，凭据有效期 SecretLifetimeSeconds 须位于 1 到 {IntegrationMessageAttribute.MaxSecretLifetimeSeconds} 秒之间。");
             return null;
         }
 
@@ -159,7 +146,7 @@ public sealed class IntegrationMessageCatalog
 
         if (!isRequest)
         {
-            problems.Add($"{name} 是事件，不能标 [MessageSubjects]，只有请求型消息可以。");
+            problems.Add($"{name} 是事件，不可标注 [MessageSubjects]，只有请求型消息可以。");
             return null;
         }
 
@@ -182,7 +169,7 @@ public sealed class IntegrationMessageCatalog
 
         if (isRequest)
         {
-            problems.Add($"{name} 是请求型消息，不能标 [OrderingKey]，只有事件可以。");
+            problems.Add($"{name} 是请求型消息，不可标注 [OrderingKey]，只有事件可以。");
             return null;
         }
 

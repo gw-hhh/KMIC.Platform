@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Configuration.Application.Settings.Get;
 
-/// <summary>
-/// 查询系统设置详情
-/// </summary>
 public sealed class GetSettingQueryHandler(IConfigurationQueryDb db, SystemSettingCatalog catalog, IAllowedActions<SettingTarget> allowedActions) : IQueryHandler<GetSettingQuery, SettingItem>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<SettingItem>> Handle(GetSettingQuery query, CancellationToken cancellationToken)
     {
         var definition = catalog.Find(query.Key);

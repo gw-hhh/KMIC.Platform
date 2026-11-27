@@ -8,9 +8,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Serialization;
 
-/// <summary>
-/// 请求与响应的 JSON 约定：回显端点把请求体原样交给命令再原样返回
-/// </summary>
 public sealed class RequestJsonTests : IAsyncLifetime
 {
     private const string Id = "0192f3a0-7c1e-7d3a-9b3e-5a4f2c1d8e90";

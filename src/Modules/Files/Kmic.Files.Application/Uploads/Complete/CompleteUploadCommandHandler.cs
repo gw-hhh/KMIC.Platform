@@ -8,13 +8,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Application.Uploads.Complete;
 
-/// <summary>
-/// 登记上传结果并将文件标记为可用
-/// </summary>
 public sealed class CompleteUploadCommandHandler(IStoredFileRepository files, IExecutionContext execution, IOptions<FilesOptions> options, TimeProvider time)
     : ICommandHandler<CompleteUploadCommand, UploadCompleted>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<UploadCompleted>> Handle(CompleteUploadCommand command, CancellationToken cancellationToken)
     {
         var loaded = await files.GetForUpdateAsync(StoredFileId.From(command.FileId), null, cancellationToken);

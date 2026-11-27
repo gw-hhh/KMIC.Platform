@@ -5,12 +5,12 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-/** 接口里的时刻（带偏移的 ISO 字符串）按业务时区显示到分钟 */
+/** 将接口返回的 ISO 时间戳（含偏移量）按指定业务时区格式化至分钟 */
 export function formatDateTime(value: string, timeZone: string): string {
   return dayjs(value).tz(timeZone).format('YYYY-MM-DD HH:mm');
 }
 
-/** 浏览器所在时区和业务时区在这个时刻的偏移不同时，返回“UTC+8”这样的标注 */
+/** 当浏览器时区与业务时区在该时刻的偏移量不一致时，返回如“UTC+8”的时区标注 */
 export function timeZoneNote(value: string, timeZone: string, browserTimeZone: string): string | null {
   const at = dayjs(value);
   const offset = at.tz(timeZone).utcOffset();

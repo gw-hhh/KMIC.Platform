@@ -1,9 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Observability;
 
-/// <summary>
-/// 一个模块 Outbox 里还没投递完的消息
-/// </summary>
-/// <param name="Module">模块名</param>
-/// <param name="Pending">条数</param>
-/// <param name="OldestAge">最老一条产生至今</param>
+/// <summary>模块 Outbox 中的待投递消息积压概况。</summary>
 public sealed record OutboxBacklog(string Module, long Pending, TimeSpan OldestAge);

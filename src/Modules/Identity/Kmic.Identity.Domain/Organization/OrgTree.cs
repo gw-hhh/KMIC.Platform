@@ -5,12 +5,7 @@ using Kmic.Identity.Domain.Errors;
 
 namespace Kmic.Identity.Domain.Organization;
 
-/// <summary>
-/// 组织树，整棵树是一个聚合
-/// </summary>
-/// <remarks>
-/// 按不超过几千个单元设计
-/// </remarks>
+/// <summary>组织树聚合，适用于数千个单元以内的组织规模。</summary>
 public sealed class OrgTree : AggregateRoot<OrgTreeId>
 {
     private const int SortStep = 10;
@@ -32,9 +27,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
     /// </summary>
     public OrgUnit Root => _units.Find(u => u.ParentId is null) ?? throw new InvalidOperationException("组织树没有根单元。");
 
-    /// <summary>
-    /// 创建组织树和它的根单元
-    /// </summary>
+    /// <summary>创建组织树及其根单元。</summary>
     public static Result<OrgTree> Create(string? rootName, string? rootCode = null)
     {
         var name = Name(rootName);
@@ -49,14 +42,9 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return tree;
     }
 
-    /// <summary>
-    /// 按 ID 查找单元
-    /// </summary>
     public OrgUnit? Find(OrgUnitId id) => _units.Find(u => u.Id == id);
 
-    /// <summary>
-    /// 自身及全部下级，含已停用的
-    /// </summary>
+    /// <summary>获取指定单元自身及全部下级（含已停用）。</summary>
     public IReadOnlySet<OrgUnitId> SelfAndDescendants(OrgUnitId id)
     {
         var result = new HashSet<OrgUnitId>();
@@ -82,9 +70,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return result;
     }
 
-    /// <summary>
-    /// 全部上级，由近到远
-    /// </summary>
+    /// <summary>获取指定单元的全部上级，按由近及远排序。</summary>
     public IReadOnlyList<OrgUnitId> Ancestors(OrgUnitId id)
     {
         var ancestors = new List<OrgUnitId>();
@@ -98,9 +84,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return ancestors;
     }
 
-    /// <summary>
-    /// 在某个启用的单元下添加下级
-    /// </summary>
+    /// <summary>在已启用的上级单元下添加下级。</summary>
     public Result<OrgUnit> AddUnit(OrgUnitId parentId, string? name, string? code = null)
     {
         var parsedName = Name(name);
@@ -132,9 +116,6 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return unit;
     }
 
-    /// <summary>
-    /// 改名
-    /// </summary>
     public Result Rename(OrgUnitId id, string? name)
     {
         var parsed = Name(name);
@@ -158,9 +139,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 修改编码，传空清除
-    /// </summary>
+    /// <summary>修改组织单元编码；传入空值时清除。</summary>
     public Result ChangeCode(OrgUnitId id, string? code)
     {
         var parsed = Code(code);
@@ -179,9 +158,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 移到另一个启用的单元之下；不能移到自己或自己的下级之下，根不能移动
-    /// </summary>
+    /// <summary>将组织单元移至另一已启用单元下；根单元不可移动，且不可移至自身或下级。</summary>
     public Result Move(OrgUnitId id, OrgUnitId newParentId)
     {
         var unit = Find(id);
@@ -220,12 +197,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 调整直属下级的顺序
-    /// </summary>
-    /// <remarks>
-    /// 列表要包含全部直属下级，不能重复
-    /// </remarks>
+    /// <summary>调整直属下级排序，列表须包含全部直属下级且不可重复。</summary>
     public Result Reorder(OrgUnitId parentId, IReadOnlyList<OrgUnitId> orderedChildren)
     {
         ArgumentNullException.ThrowIfNull(orderedChildren);
@@ -249,9 +221,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 停用；下面有启用的下级或启用的用户时拒绝，根不能停用
-    /// </summary>
+    /// <summary>停用组织单元；根单元或存在启用下级/所属用户时拒绝。</summary>
     public Result Disable(OrgUnitId id, bool hasEnabledUsers)
     {
         var unit = Find(id);
@@ -279,9 +249,7 @@ public sealed class OrgTree : AggregateRoot<OrgTreeId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 启用；上级必须是启用的
-    /// </summary>
+    /// <summary>启用组织单元；上级单元须处于启用状态。</summary>
     public Result Enable(OrgUnitId id)
     {
         var unit = Find(id);

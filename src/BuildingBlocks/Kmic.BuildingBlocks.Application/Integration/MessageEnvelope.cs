@@ -1,17 +1,9 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 收到的消息的信封
-/// </summary>
-/// <param name="MessageId">消息 ID</param>
-/// <param name="MessageType">消息名称</param>
-/// <param name="SchemaVersion">消息版本</param>
-/// <param name="SourceModule">发布消息的模块</param>
-/// <param name="OccurredAt">发生时间</param>
-/// <param name="SourceId">快照对应的 ID，不是快照事件时为空</param>
-/// <param name="SourceVersion">快照的来源版本，不是快照事件时为空</param>
-/// <param name="Purged">快照事件</param>
-/// <param name="InitiatorUserId">发起这件事的用户</param>
+/// <summary>集成消息信封元数据。</summary>
+/// <param name="SourceId">快照对应的实体 ID；非快照事件时为 null。</param>
+/// <param name="SourceVersion">快照来源版本号；非快照事件时为 null。</param>
+/// <param name="Purged">是否为物理删除快照事件。</param>
 public sealed record MessageEnvelope(
     Guid MessageId,
     string MessageType,

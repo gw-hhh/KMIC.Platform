@@ -33,7 +33,7 @@ export function confirmLeave(reports: readonly LeaveReport[]): Promise<boolean> 
     'ul',
     reports.map((report) => h('li', `${report.title}：${t.leave[report.status]}`)),
   );
-  // 保存中不能离开，只提示
+  // 存在保存中的操作时禁止离开，仅作提示
   if (reports.some((report) => report.status === 'saving')) {
     return ask({ title: t.leave.title, content: list, ok: t.leave.understood }).then(() => false);
   }

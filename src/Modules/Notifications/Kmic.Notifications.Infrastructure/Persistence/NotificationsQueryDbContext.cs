@@ -9,34 +9,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Infrastructure.Persistence;
 
-/// <summary>
-/// Notifications 模块的查询上下文，不跟踪实体
-/// </summary>
 internal sealed class NotificationsQueryDbContext(DbContextOptions<NotificationsQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), INotificationsQueryDb
 {
-    /// <inheritdoc />
     public override string Module => NotificationsModuleInfo.Name;
 
-    /// <inheritdoc />
     public IQueryable<SiteMessage> SiteMessages => Set<SiteMessage>();
 
-    /// <inheritdoc />
     public IQueryable<NotificationTemplate> Templates => Set<NotificationTemplate>();
 
-    /// <inheritdoc />
     public IQueryable<TemplateVersion> TemplateVersions => Set<TemplateVersion>();
 
-    /// <inheritdoc />
     public IQueryable<Delivery> Deliveries => Set<Delivery>();
 
-    /// <inheritdoc />
     public IQueryable<CapturedMessage> CapturedMessages => Set<CapturedMessage>();
 
-    /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder) =>
         configurationBuilder.RegisterAllInNotificationsIdConverters();
 
-    /// <inheritdoc />
     protected override void ConfigureModel(ModelBuilder modelBuilder) => NotificationsModel.Configure(modelBuilder);
 }

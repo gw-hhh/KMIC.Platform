@@ -1,9 +1,7 @@
 namespace Kmic.Configuration.Application.Settings;
 
-/// <summary>
-/// 设置值里的一个成员：管理页据此生成编辑控件
-/// </summary>
-/// <param name="Name">属性名转为 camelCase 后的名称</param>
+/// <summary>设置值字段定义，供管理页生成对应编辑控件</summary>
+/// <param name="Name">字段名称（camelCase）</param>
 /// <param name="Type">类型：bool、int、long、decimal、double、string、guid、date、time、dateTime、timeSpan</param>
 /// <param name="DisplayName">显示名</param>
 /// <param name="Unit">单位</param>

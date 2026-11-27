@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Application.Deliveries.Get;
 
-/// <summary>
-/// 查询投递详情
-/// </summary>
 public sealed class GetDeliveryQueryHandler(INotificationsQueryDb db) : IQueryHandler<GetDeliveryQuery, DeliveryDetailResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<DeliveryDetailResponse>> Handle(GetDeliveryQuery query, CancellationToken cancellationToken)
     {
         var delivery = await db.Deliveries

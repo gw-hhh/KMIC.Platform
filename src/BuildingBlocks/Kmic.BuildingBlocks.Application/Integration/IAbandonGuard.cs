@@ -2,14 +2,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 放弃之前找出接收方注册的检查并执行
-/// </summary>
+/// <summary>放弃死信前的守卫校验器，负责调度接收方注册的检查策略。</summary>
 public interface IAbandonGuard
 {
-    /// <summary>
-    /// 这条收件箱里的死信现在能不能放弃
-    /// </summary>
-    /// <returns>没有注册检查，或检查通过时成功；检查不通过时是它给的错误；载荷还原不了、消息不在目录里时也失败，不当作可以放弃</returns>
+    /// <summary>校验指定收件箱死信当前是否允许放弃；未注册策略或校验通过时返回成功，反序列化失败或未注册消息返回失败。</summary>
     Task<Result> CheckAsync(DeadMessageDetail message, CancellationToken ct);
 }

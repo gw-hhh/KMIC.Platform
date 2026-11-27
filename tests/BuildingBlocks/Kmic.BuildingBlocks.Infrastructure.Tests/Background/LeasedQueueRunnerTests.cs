@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Background;
 
-/// <summary>
-/// 领取队列的后台循环：等启动任务、并行上限、单条失败不停循环、数据库不可用时退避、停机等进行中的处理
-/// </summary>
 public sealed class LeasedQueueRunnerTests : IAsyncDisposable
 {
     private readonly StartupState _startup = new();
@@ -40,10 +37,10 @@ public sealed class LeasedQueueRunnerTests : IAsyncDisposable
         queue.Enqueue(1, 2);
 
         await Task.Delay(TimeSpan.FromMilliseconds(300), TimeProvider.System, Ct);
-        queue.Processed.ShouldBeEmpty("启动任务还没完成，不能领取");
+        queue.Processed.ShouldBeEmpty("启动任务尚未完成前不应领取条目");
 
         _startup.Complete();
-        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 2, "启动完成后领取并处理", ct: Ct);
+        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 2, "启动任务完成后领取并处理条目", ct: Ct);
     }
 
     [Fact]
@@ -63,14 +60,14 @@ public sealed class LeasedQueueRunnerTests : IAsyncDisposable
         };
 
         queue.Enqueue(1, 2, 3, 4, 5, 6);
-        await Eventually.UntilAsync(_ => Task.FromResult(Volatile.Read(ref running)), count => count == 3, "占满三个槽位", ct: Ct);
+        await Eventually.UntilAsync(_ => Task.FromResult(Volatile.Read(ref running)), count => count == 3, "占用全部三个并发槽位", ct: Ct);
         await Task.Delay(TimeSpan.FromMilliseconds(200), TimeProvider.System, Ct);
-        Volatile.Read(ref running).ShouldBe(3, "第四条要等有槽位空出来才会被领取");
+        Volatile.Read(ref running).ShouldBe(3, "第四条需等待空闲槽位释放后才能被领取");
 
         release.SetResult();
-        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 6, "全部处理完", ct: Ct);
+        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 6, "全部条目处理完成", ct: Ct);
         Volatile.Read(ref peak).ShouldBe(3);
-        queue.ClaimSizes.ShouldAllBe(size => size <= 3, "一次最多领空闲槽位那么多条");
+        queue.ClaimSizes.ShouldAllBe(size => size <= 3, "单次领取数量不应超过当前空闲槽位数");
     }
 
     [Fact]
@@ -81,10 +78,10 @@ public sealed class LeasedQueueRunnerTests : IAsyncDisposable
         queue.Handler = (item, _) => item == 2 ? throw new InvalidOperationException("这一条处理失败") : Task.CompletedTask;
 
         queue.Enqueue(1, 2, 3);
-        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 3, "失败的一条之外的也处理了", ct: Ct);
+        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 3, "除失败条目外的其余条目均已处理", ct: Ct);
 
         queue.Enqueue(4);
-        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 4, "出错之后循环还在", ct: Ct);
+        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 4, "发生异常后后台循环仍继续处理新条目", ct: Ct);
     }
 
     [Fact]
@@ -95,8 +92,8 @@ public sealed class LeasedQueueRunnerTests : IAsyncDisposable
         queue.FailNextClaims(1);
         queue.Enqueue(1);
 
-        // 第一次领取失败后至少退避 1 秒，恢复后领取到。间隔在替身里按两次领取的时间计算，不受测试线程调度影响
-        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 1, "数据库恢复后继续", TimeSpan.FromSeconds(10), Ct);
+        // 首次领取失败后至少退避 1 秒，待数据库恢复后重新领取。间隔在测试替身内部按两次领取时间戳计算，不受测试线程调度影响
+        await Eventually.UntilAsync(_ => Task.FromResult(queue.Processed.Count), count => count == 1, "数据库恢复后继续领取并处理条目", TimeSpan.FromSeconds(10), Ct);
         queue.DelayAfterFailure.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(900));
     }
 
@@ -117,7 +114,7 @@ public sealed class LeasedQueueRunnerTests : IAsyncDisposable
 
         var stopping = _runner!.StopAsync(CancellationToken.None);
         await Task.Delay(TimeSpan.FromMilliseconds(300), TimeProvider.System, Ct);
-        stopping.IsCompleted.ShouldBeFalse("进行中的处理没做完，停机要等");
+        stopping.IsCompleted.ShouldBeFalse("存在进行中的任务时，停机应等待其完成");
 
         release.SetResult();
         await stopping.WaitAsync(TimeSpan.FromSeconds(10), Ct);

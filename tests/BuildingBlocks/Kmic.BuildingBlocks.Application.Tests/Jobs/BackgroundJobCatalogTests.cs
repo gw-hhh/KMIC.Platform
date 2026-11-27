@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Jobs;
 
-/// <summary>
-/// 样例故意写错，只交给 BackgroundJobCatalog.Build 校验
-/// </summary>
 public sealed class BackgroundJobCatalogTests
 {
     [Fact]

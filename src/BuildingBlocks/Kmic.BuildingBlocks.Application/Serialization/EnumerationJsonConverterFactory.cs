@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Enumerations;
 
 namespace Kmic.BuildingBlocks.Application.Serialization;
 
-/// <summary>
-/// 智能枚举的 JSON 转换，读写编码
-/// </summary>
+// 按编码字符串序列化与反序列化智能枚举
 internal sealed class EnumerationJsonConverterFactory : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert) =>
@@ -22,13 +20,13 @@ internal sealed class EnumerationJsonConverterFactory : JsonConverterFactory
         {
             if (reader.TokenType != JsonTokenType.String)
             {
-                throw new JsonException($"{typeof(T).Name} 要写成编码字符串。");
+                throw new JsonException($"{typeof(T).Name} 须为编码字符串。");
             }
 
             var code = reader.GetString();
             return Enumeration<T>.TryFromCode(code, out var value)
                 ? value
-                : throw new JsonException($"{typeof(T).Name} 没有编码为“{code}”的取值。");
+                : throw new JsonException($"{typeof(T).Name} 不存在编码为“{code}”的取值。");
         }
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) =>

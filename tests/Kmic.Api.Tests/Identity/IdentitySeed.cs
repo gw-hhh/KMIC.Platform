@@ -4,19 +4,14 @@ using Npgsql;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 直接往 Identity 的表里造测试数据：管理用例还没有接进来之前，认证流程的测试用它准备用户、角色和授予
-/// </summary>
-/// <remarks>
-/// 密码哈希用和产品代码同一套哈希器（PBKDF2，ASP.NET Core 的 PasswordHasher），所以登录时能被识别
-/// </remarks>
+// 直接向 Identity 表预置测试数据，使用与业务一致的 PasswordHasher（PBKDF2）
 internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
 {
     private static readonly Guid _system = new("00000000-0000-0000-0000-000000000001");
 
-    // 一个测试只开一个连接池：每次造数据都新建连接池，连接用完即关，测试多了会把本机的临时端口用光
+    // 每个测试实例复用单个连接池：若每次写入均重建连接池并关闭，大量测试连续运行会耗尽本机临时端口
     private readonly NpgsqlDataSource _data = NpgsqlDataSource.Create(connectionString);
-    // 迭代次数固定为较低的旧值：登录时产品代码会把它升级到现行值，测试据此验证重新哈希
+    // 故意固定较低的旧版迭代次数，以便在登录时触发业务代码的密码哈希自动升级逻辑
     internal const int SeedIterationCount = 100_000;
 
     private readonly PasswordHasher<object> _hasher = new(Options.Create(new PasswordHasherOptions { IterationCount = SeedIterationCount }));
@@ -72,9 +67,6 @@ internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
             ("id", Guid.CreateVersion7()), ("role", roleId), ("user", userId), ("system", _system));
     }
 
-    /// <summary>
-    /// 建好组织树和根单元（已经有就不动），返回根单元的 ID
-    /// </summary>
     public async Task<Guid> OrgTreeAsync(string rootName = "总部")
     {
         await ExecuteAsync(
@@ -114,14 +106,8 @@ internal sealed class IdentitySeed(string connectionString) : IAsyncDisposable
         return (long)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken) ?? 0L);
     }
 
-    /// <summary>
-    /// 执行一条任意 SQL（造数据或改数据）
-    /// </summary>
     public async Task SqlAsync(string sql, params (string Name, object Value)[] parameters) => await ExecuteAsync(_data, sql, parameters);
 
-    /// <summary>
-    /// 读一个值
-    /// </summary>
     public async Task<T?> ScalarAsync<T>(string sql, params (string Name, object Value)[] parameters)
     {
         await using var command = _data.CreateCommand(sql);

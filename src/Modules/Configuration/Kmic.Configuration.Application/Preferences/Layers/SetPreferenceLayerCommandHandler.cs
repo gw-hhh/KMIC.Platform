@@ -8,9 +8,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Configuration.Application.Preferences.Layers;
 
-/// <summary>
-/// 保存系统或角色层的偏好设置
-/// </summary>
 public sealed class SetPreferenceLayerCommandHandler(
     PreferenceCatalog catalog,
     IPreferenceRepository preferences,
@@ -18,7 +15,6 @@ public sealed class SetPreferenceLayerCommandHandler(
     IOptions<PreferenceOptions> options,
     IAfterCommit afterCommit) : ICommandHandler<SetPreferenceLayerCommand, VersionedResponse<PreferenceValueId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<PreferenceValueId>>> Handle(SetPreferenceLayerCommand command, CancellationToken cancellationToken)
     {
         var found = PreferenceSubject.Find(catalog, command.Key);

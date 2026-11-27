@@ -29,9 +29,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Kmic.ArchitectureTests.Violations;
 
-/// <summary>
-/// 故意违规的样例：每条架构规则至少有一个，规则对它们必须报出违规，证明规则不会写错之后永远通过
-/// </summary>
+// 为每条架构规则提供故意违规样例，验证规则能检出违规而非恒真通过
 internal static class BadSamples
 {
     // 带密码的 record 用了编译器生成的 ToString
@@ -87,7 +85,7 @@ internal static class BadSamples
         public Guid Value => Guid.Empty;
     }
 
-    // 错误：静态类不叫 *Errors，错误码前缀不是模块名（KM0101 只许 *Errors 类调用 Error 的工厂方法，这里是故意违规）
+    // 错误定义违规：静态类未以 Errors 结尾，且错误码前缀非模块名（KM0101 仅允许 *Errors 类调用 Error 工厂方法，此处为故意违规样例）
     [SuppressMessage("Usage", "KM0101", Justification = "故意违规的样例，验证架构测试会失败")]
     internal static class ErrorHolder
     {
@@ -160,7 +158,7 @@ internal static class BadSamples
         public static string Customer(Guid id) => CacheKey.Of("Customer", "Profile", id);
     }
 
-    // 在 CacheKeys 类之外拼缓存键
+    // 在 CacheKeys 类之外构造缓存键
     internal sealed class KeyBuildingService
     {
         public static string Key(Guid id) => CacheKey.Of("Orders", "Thing", id);
@@ -186,7 +184,7 @@ internal static class BadSamples
             ValueTask.FromResult<Result<Guid>>(Guid.Empty);
     }
 
-    // 运维的“管理”命令没有声明熔断时仍可执行
+    // 运维“管理”类命令未声明在消息写入熔断时仍可执行
     [RequirePermission("Operations.Bad.Manage")]
     internal sealed record RestartEverythingSampleCommand : ICommand;
 
@@ -222,7 +220,7 @@ internal static class BadSamples
         public ValueTask<Result> Handle(ViewSampleCommand command, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
     }
 
-    // 匿名用例出现在 Identity 之外
+    // Identity 模块之外出现匿名访问用例
     [Kmic.BuildingBlocks.Application.UseCases.AllowAnonymous]
     internal sealed record OpenDoorCommand : ICommand;
 
@@ -353,7 +351,7 @@ internal static class BadSamples
     // 创建类命令既没有 [Idempotent] 也没有 [NotIdempotent]
     internal sealed record CreateThingCommand(string Name) : ICommand;
 
-    // 豁免要写明原因
+    // 豁免幂等校验须说明原因
     [NotIdempotent("天然幂等")]
     internal sealed record SubmitThingAgainCommand(string Name) : ICommand;
 
@@ -365,7 +363,7 @@ internal static class BadSamples
         public IThingReferences References => references;
     }
 
-    // 绕过数据范围：处理器没有标 [BypassesDataScope]，调用藏在 async 方法的状态机里
+    // 绕过数据范围：处理器未标注 [BypassesDataScope]，且调用位于 async 方法生成的状态机内
     internal sealed record CountAllQuery(IQueryable<FakeAggregate> Source) : IQuery<int>;
 
     public sealed class UnmarkedBypassHandler : IQueryHandler<CountAllQuery, int>

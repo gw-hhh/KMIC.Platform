@@ -5,15 +5,9 @@ using Kmic.Operations.Domain.Messages;
 
 namespace Kmic.Operations.Application.Messages.Abandon;
 
-/// <summary>
-/// 检查并放弃收件箱死信
-/// </summary>
-/// <remarks>
-/// 不在 Operations 的命令事务里
-/// </remarks>
+// 直接操作各模块消息存储，不纳入 Operations 本地事务
 public sealed class AbandonMessagesCommandHandler(IModuleMessageStores stores, IAbandonGuard guard) : ICommandHandler<AbandonMessagesCommand, MessageReceipts>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<MessageReceipts>> Handle(AbandonMessagesCommand command, CancellationToken cancellationToken)
     {
         var reason = command.Reason.Trim();

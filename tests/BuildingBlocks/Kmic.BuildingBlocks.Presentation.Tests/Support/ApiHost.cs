@@ -12,12 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
 
-/// <summary>
-/// 内存里的测试宿主：接口层 + 假发送器 + 测试认证
-/// </summary>
-/// <remarks>
-/// 不连数据库、不跑真正的处理器，只检验接口层自己的行为
-/// </remarks>
+// 内存测试宿主：接口层 + 假发送器 + 测试认证，不连数据库
 internal sealed class ApiHost : IAsyncDisposable
 {
     private ApiHost(WebApplication app, SenderScript script)
@@ -30,24 +25,13 @@ internal sealed class ApiHost : IAsyncDisposable
 
     public SenderScript Script { get; }
 
-    /// <summary>
-    /// 令牌验证模式下登记身份用的加载器
-    /// </summary>
     public TestAccessContextLoader Loader => App.Services.GetRequiredService<TestAccessContextLoader>();
 
-    /// <summary>
-    /// 已登录的客户端
-    /// </summary>
     public HttpClient Client { get; private set; } = null!;
 
-    /// <summary>
-    /// 没有登录的客户端
-    /// </summary>
     public HttpClient Anonymous { get; private set; } = null!;
 
-    /// <summary>
-    /// 建好但不启动：校验失败的测试要看启动时抛什么
-    /// </summary>
+    // 构建但不启动宿主，用于验证启动校验失败
     public static ApiHost Create(ModuleEndpoints[] modules, Type[]? messages = null, string environment = "Production", Action<IServiceCollection>? services = null, Action<WebApplication>? beforeEndpoints = null, bool skipValidation = false, IReadOnlyDictionary<string, string?>? configuration = null, bool jwt = false)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = environment, ContentRootPath = AppContext.BaseDirectory });
@@ -120,9 +104,6 @@ internal sealed class ApiHost : IAsyncDisposable
         Client.DefaultRequestHeaders.Add(TestAuthHandler.Header, "alice");
     }
 
-    /// <summary>
-    /// 以另一个用户登录的客户端，由测试释放
-    /// </summary>
     public HttpClient ClientFor(string user)
     {
         var client = App.GetTestClient();

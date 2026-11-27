@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Sample;
 
-/// <summary>
-/// Sample 参考模块的端点：路由、状态码、错误格式、认证、权限、数据范围、并发版本、幂等
-/// </summary>
 public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -141,7 +138,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         (await PostActionAsync(alice, $"{Root}/{id}/submit", new { expectedVersion = version })).EnsureSuccessStatusCode();
 
-        // 事件和提交在同一个事务里写进本模块的 Outbox，不需要等投递
+        // 集成事件与业务提交在同一事务内写入本模块 Outbox，无需等待后台投递
         var payloads = await OutboxPayloadsAsync("Sample.SpecimenSubmitted", Ct);
         var payload = payloads.Where(p => p.Contains(id.ToString(), StringComparison.OrdinalIgnoreCase)).ShouldHaveSingleItem();
         using var message = JsonDocument.Parse(payload);
@@ -171,7 +168,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         using var bob = ClientFor(Bob);
         var (id, version) = await CreateAsync(alice, "负责人测试");
 
-        // 乙的数据范围是全部，看得到，也有提交权限，但不是负责人
+        // 乙的数据范围为全部且拥有提交权限，可查看标本但非该标本负责人
         var response = await PostActionAsync(bob, $"{Root}/{id}/submit", new { expectedVersion = version });
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -200,9 +197,9 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         (await carol.GetAsync($"{Root}/{id}", Ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        // 安全事件由后台循环批量写库，不在请求线程里，所以要等
+        // 安全事件由后台任务批量落库，不阻塞请求线程，因此需轮询等待
         var recorded = await Eventually.UntilAsync(
-            ct => CountOutOfScopeEventsAsync(id, ct), count => count > 0, "范围外访问的安全事件写入数据库", ct: Ct);
+            ct => CountOutOfScopeEventsAsync(id, ct), count => count > 0, "越权访问安全事件写入数据库", ct: Ct);
         recorded.ShouldBe(1);
     }
 
@@ -331,7 +328,7 @@ public sealed class SpecimenApiTests(ClassDatabase<ApiTemplate> database, ApiTem
         return (long)(await command.ExecuteScalarAsync(ct))!;
     }
 
-    // 同一个类的测试共用一个库，库里有别的测试提交的标本，所以取同类型的全部载荷，由调用方挑自己的
+    // 同一测试类共用一个数据库，Outbox 中可能包含其他测试写入的事件，因此返回同类型全部载荷由调用方筛选
     private async Task<List<string>> OutboxPayloadsAsync(string messageType, CancellationToken ct)
     {
         await using var connection = new NpgsqlConnection(ConnectionString);

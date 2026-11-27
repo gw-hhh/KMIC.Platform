@@ -2,16 +2,12 @@ using System.Text.Json;
 
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
-/// <summary>
-/// OpenAPI 文档的完整性检查：接口摘要和智能枚举显示名
-/// </summary>
+/// <summary>OpenAPI 文档完整性校验器（校验接口摘要与智能枚举显示名）</summary>
 public static class OpenApiCompleteness
 {
     private static readonly string[] _methods = ["get", "put", "post", "delete", "options", "head", "patch", "trace"];
 
-    /// <summary>
-    /// 返回全部问题，没有问题时为空
-    /// </summary>
+    /// <summary>校验文档完整性并返回问题列表</summary>
     public static IReadOnlyList<string> Check(JsonElement document)
     {
         var problems = new List<string>();
@@ -39,7 +35,7 @@ public static class OpenApiCompleteness
         }
     }
 
-    // 智能枚举的每个值都要有显示名，并且和架构里的取值一致
+    // 智能枚举的每个取值均须具备非空显示名，且枚举键集合须与 Schema 定义保持一致
     private static void CheckEnumLabels(JsonElement document, List<string> problems)
     {
         if (!document.TryGetProperty("x-kmic-enums", out var labels))

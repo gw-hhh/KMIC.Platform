@@ -27,7 +27,7 @@ export const enumLabels = {
     { code: "Bcc", name: "密送" },
   ],
   DeliverySkipReason: [
-    { code: "NoAddress", name: "没有地址" },
+    { code: "NoAddress", name: "无收件地址" },
     { code: "UserDisabled", name: "用户已禁用" },
     { code: "UnknownUser", name: "用户不存在" },
   ],
@@ -41,7 +41,7 @@ export const enumLabels = {
   ],
   DictionaryTypeStatus: [
     { code: "Active", name: "使用中" },
-    { code: "Retired", name: "已退役" },
+    { code: "Retired", name: "已废弃" },
   ],
   JobRunStatus: [
     { code: "Running", name: "执行中" },
@@ -62,7 +62,7 @@ export const enumLabels = {
   MessageReceiptStatus: [
     { code: "Done", name: "已处理" },
     { code: "NotFound", name: "不存在" },
-    { code: "WrongState", name: "状态不对" },
+    { code: "WrongState", name: "状态不符" },
     { code: "Refused", name: "被拒绝" },
   ],
   MessageRouteStatus: [
@@ -89,7 +89,7 @@ export const enumLabels = {
     { code: "AwaitingConfirmation", name: "等待确认" },
     { code: "Completed", name: "已完成" },
     { code: "Abandoned", name: "已放弃" },
-    { code: "Failed", name: "已失败" },
+    { code: "Failed", name: "失败" },
   ],
   RoleScopeLevel: [
     { code: "Self", name: "仅本人" },
@@ -107,8 +107,8 @@ export const enumLabels = {
     { code: "Closed", name: "已关闭" },
   ],
   StorageIssueKind: [
-    { code: "RestorableMissing", name: "可以还原" },
-    { code: "LostMissing", name: "已经丢失" },
+    { code: "RestorableMissing", name: "可还原" },
+    { code: "LostMissing", name: "已丢失" },
   ],
   StorageIssueStatus: [
     { code: "Open", name: "待处理" },
@@ -117,7 +117,7 @@ export const enumLabels = {
   StoredFileStatus: [
     { code: "Uploading", name: "上传中" },
     { code: "Scanning", name: "扫描中" },
-    { code: "Available", name: "临时" },
+    { code: "Available", name: "待关联" },
     { code: "Attached", name: "已关联" },
     { code: "Detached", name: "已解除关联" },
     { code: "Rejected", name: "被拒绝" },

@@ -65,7 +65,7 @@ public sealed class StateMachineAssignmentAnalyzerTests
     [Fact]
     public async Task PlaceholderInitializer_NoDiagnostic()
     {
-        // 智能枚举的状态属性写 = null!，普通枚举写 = default!，都只是给 EF 用的占位
+        // 智能枚举状态属性写 = null!，普通枚举写 = default!，二者均为供 EF Core 使用的占位默认值
         var plainEnum = Aggregate(string.Empty, status: "public SampleStatus Status { get; private set; } = default!;");
         const string SmartEnum = """
             using System;

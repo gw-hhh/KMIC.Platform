@@ -4,21 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Application.Querying;
 
-/// <summary>
-/// 列表分页
-/// </summary>
 public static class PagedQueryableExtensions
 {
-    /// <summary>
-    /// 排序、计数、分页，精确计数
-    /// </summary>
     public static Task<Result<PagedResult<T>>> ToPagedAsync<T>(
         this IQueryable<T> query, PageRequest page, SortRequest sort, SortMap<T> sortMap, CancellationToken ct) =>
         query.ToPagedAsync(page, sort, sortMap, CountMode.Exact, ct);
 
-    /// <summary>
-    /// 排序、计数、分页
-    /// </summary>
+    /// <summary>执行排序、计数与分页查询。</summary>
     public static async Task<Result<PagedResult<T>>> ToPagedAsync<T>(
         this IQueryable<T> query, PageRequest page, SortRequest sort, SortMap<T> sortMap, CountMode count, CancellationToken ct)
     {
@@ -74,7 +66,7 @@ public static class PagedQueryableExtensions
             return (await query.LongCountAsync(ct), true);
         }
 
-        // 多数一行，就能知道有没有超过上限，而不用数完全部
+        // 多统计一行即可判断是否超出上限，避免全量计数
         var counted = await query.Take(count.Cap + 1).CountAsync(ct);
         return counted > count.Cap ? (count.Cap, false) : (counted, true);
     }

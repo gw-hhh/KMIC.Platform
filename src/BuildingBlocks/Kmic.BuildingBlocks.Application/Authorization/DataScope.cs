@@ -3,14 +3,11 @@ using Kmic.BuildingBlocks.Application.Execution;
 
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-/// <summary>
-/// 数据权限
-/// </summary>
 internal sealed class DataScope(IExecutionContext execution) : IDataScope
 {
     private static readonly EffectiveScope _nothing = new(false, null, []);
 
-    // 一次查询会读取多次，按范围对象缓存
+    // 单次请求内可能多次读取，按范围对象缓存计算结果
     private readonly Dictionary<string, EffectiveScope> _computed = new(StringComparer.Ordinal);
 
     public bool Unrestricted => execution.User.IsSystem;
@@ -34,7 +31,7 @@ internal sealed class DataScope(IExecutionContext execution) : IDataScope
             return EffectiveScope.Unrestricted;
         }
 
-        // 匿名请求看不到任何有归属的数据
+        // 匿名请求无法访问任何受归属约束的数据
         if (execution.Access is not { } access)
         {
             return _nothing;

@@ -5,9 +5,7 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.SetDataScopes;
 
-/// <summary>
-/// 整体替换角色的数据范围：默认等级和各范围对象单独设置的等级
-/// </summary>
+/// <summary>整体替换角色的数据范围（默认等级与各范围对象单独配置）。</summary>
 /// <param name="Id">角色 ID</param>
 /// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="DefaultLevel">默认等级</param>

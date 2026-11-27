@@ -6,9 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Support;
 
-/// <summary>
-/// 请求头 X-Test-User 有值就视为已登录，没有就是匿名
-/// </summary>
+// 请求头 X-Test-User 有值视为已登录，否则视为匿名
 internal sealed class TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {

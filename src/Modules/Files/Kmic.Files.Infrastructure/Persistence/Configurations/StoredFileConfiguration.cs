@@ -27,7 +27,7 @@ internal sealed class StoredFileConfiguration : IEntityTypeConfiguration<StoredF
         builder.Property(f => f.PurgeReason).HasMaxLength(500);
         builder.Property(f => f.HistoryPurgeNote).HasMaxLength(500);
 
-        // 队列列按状态条件更新，不经聚合
+        // 删除队列字段按状态条件直接更新，不经过聚合
         builder.Property<Guid?>(LeaseToken).HasComment("删除队列的领取令牌").AuditHidden();
         builder.Property<DateTimeOffset?>(LeaseUntil).HasComment("删除队列的领取到期时间");
         builder.Property<int>(DeleteAttempts).HasComment("删除队列领取次数，人工重试时清零");
@@ -36,7 +36,7 @@ internal sealed class StoredFileConfiguration : IEntityTypeConfiguration<StoredF
         builder.HasMany(f => f.References).WithOne().HasForeignKey("StoredFileId").OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(f => f.References).AutoInclude();
 
-        // 清理按到期时间找候选；删除工作器按状态领取；管理列表按上传人、上传配置筛选
+        // 清理任务按到期时间查询候选；删除队列按状态领取；管理列表按上传人、上传配置筛选
         builder.HasIndex(f => new { f.Status, f.ExpiresAt });
         builder.HasIndex(f => new { f.UploadedBy, f.UploadedAt });
         builder.HasIndex(f => f.Profile);

@@ -5,12 +5,8 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.ContractQueries;
 
-/// <summary>
-/// 为其他模块提供示例引用查询
-/// </summary>
 public sealed class SpecimenReferences(IContractQuerySender sender) : ISpecimenReferences
 {
-    /// <inheritdoc />
     public async Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(ids);

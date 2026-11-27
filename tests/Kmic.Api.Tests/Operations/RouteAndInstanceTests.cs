@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 订阅路由与运行中的实例：宿主启动后登记路由和心跳，列表能看到每个订阅现在由哪些构建声明，端到端
-/// </summary>
 public sealed class RouteAndInstanceTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>
@@ -29,12 +26,12 @@ public sealed class RouteAndInstanceTests(ClassDatabase<ApiTemplate> database, A
         return await JsonAsync(response);
     }
 
-    // 宿主第一次被用到才启动，心跳在启动任务做完之后登记，所以要等一等
+    // 宿主在首次访问时启动，心跳在启动任务完成后注册，因此需等待心跳落库
     private async Task<JsonElement> LiveInstanceAsync(string token) =>
         await Eventually.UntilAsync(
             async _ => (await InstancesAsync(token)).EnumerateArray().FirstOrDefault(i => i.GetProperty("isAlive").GetBoolean()),
             instance => instance.ValueKind == JsonValueKind.Object,
-            "宿主登记了心跳",
+            "宿主完成心跳注册",
             TimeSpan.FromSeconds(20),
             Ct);
 
@@ -94,7 +91,7 @@ public sealed class RouteAndInstanceTests(ClassDatabase<ApiTemplate> database, A
         var retiring = all.EnumerateArray().Single(r => Is(r, "subscription", "Test.Retiring." + marker));
         retiring.GetProperty("status").GetString().ShouldBe("Retiring");
         retiring.GetProperty("retiredReason").GetString().ShouldBe("不再需要");
-        retiring.GetProperty("declaredByBuilds").GetArrayLength().ShouldBe(0, "没有运行中的实例还在声明它");
+        retiring.GetProperty("declaredByBuilds").GetArrayLength().ShouldBe(0, "当前无运行中实例声明该订阅");
         retiringOnly.EnumerateArray().ShouldAllBe(r => Is(r, "status", "Retiring"));
         retiringOnly.EnumerateArray().Any(r => Is(r, "subscription", "Test.Retiring." + marker)).ShouldBeTrue();
     }

@@ -4,12 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 彻底删除文件并保留元数据记录，存储对象由删除工作器处理
-/// </summary>
-/// <remarks>
-/// 不可恢复
-/// </remarks>
+/// <summary>彻底删除文件并保留元数据记录（不可恢复），存储对象由删除队列异步清理</summary>
 /// <param name="Id">文件 ID</param>
 /// <param name="Reason">删除原因</param>
 /// <param name="ExpectedVersion">预期版本号</param>

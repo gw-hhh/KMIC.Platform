@@ -11,9 +11,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Http;
 
-/// <summary>
-/// Result 转 HTTP：成功的几种写法、六种 ErrorType 的状态码、ProblemDetails 的字段
-/// </summary>
 public sealed class ResultHttpTests : IAsyncLifetime
 {
     private ApiHost _api = null!;
@@ -61,7 +58,7 @@ public sealed class ResultHttpTests : IAsyncLifetime
         response.Headers.Location!.OriginalString.ShouldBe($"/api/v1/samples/things/{id.Value}");
         var body = await response.JsonAsync();
 
-        // 响应里只有 id 和 version：AggregateId 是框架回填版本号用的，不对外
+        // 响应体仅包含 id 和 version：AggregateId 仅用于框架回填版本号，不对外输出
         body.EnumerateObject().Select(p => p.Name).ShouldBe(["id", "version"]);
         body.GetProperty("id").GetString().ShouldBe(id.Value.ToString());
         body.GetProperty("version").GetInt64().ShouldBe(1);

@@ -10,9 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Operations.Application.Audit.Export;
 
-/// <summary>
-/// 把审计记录流式导出为 CSV 文件
-/// </summary>
 public sealed class ExportAuditJobHandler(
     IExportReader<IOperationsQueryDb> reader,
     IGeneratedFiles generatedFiles,
@@ -20,12 +17,8 @@ public sealed class ExportAuditJobHandler(
     IOptions<AuditExportOptions> options,
     TimeProvider time) : IJobHandler<ExportAuditJob>
 {
-    /// <summary>
-    /// 生成文件的来源标识
-    /// </summary>
     public const string Source = "Operations.AuditExport";
 
-    /// <inheritdoc />
     public async Task<Result<JobOutcome>> ExecuteAsync(ExportAuditJob job, IJobContext context, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(job);
@@ -96,7 +89,7 @@ public sealed class ExportAuditJobHandler(
             : new JobOutcome(written.Value.FileId, new AuditExportSummary(rows, written.Value.Name));
     }
 
-    // 同一个人在导出里会出现很多次，每人只查一次
+    // 按用户缓存显示名，避免导出同一用户时重复查询
     private async Task<string?> NameOfAsync(Dictionary<Guid, string?> cache, UserId? userId, CancellationToken ct)
     {
         if (userId is not { } user)

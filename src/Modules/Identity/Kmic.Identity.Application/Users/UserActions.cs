@@ -5,12 +5,9 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users;
 
-/// <summary>
-/// 用户管理操作目录，用于计算详情中的可用操作
-/// </summary>
+/// <summary>用户管理操作目录，用于计算详情中的可用操作。</summary>
 public sealed class UserActions : ResourceActionCatalog<UserTarget, UserAdminAction>
 {
-    /// <inheritdoc />
     protected override void Define(IResourceActionBuilder<UserTarget, UserAdminAction> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

@@ -2,18 +2,9 @@ using Mediator;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 端点声明的扩展方法
-/// </summary>
 public static class EndpointConventionExtensions
 {
-    /// <summary>
-    /// 声明本端点发送的命令或查询
-    /// </summary>
-    /// <remarks>
-    /// 一个端点发送且只发送一个消息
-    /// </remarks>
-    /// <typeparam name="TMessage">命令或查询的类型</typeparam>
+    /// <summary>声明当前端点发送的命令或查询消息（每个端点仅允许声明一个）</summary>
     public static RouteHandlerBuilder Sends<TMessage>(this RouteHandlerBuilder builder)
         where TMessage : IMessage
     {

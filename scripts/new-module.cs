@@ -59,7 +59,7 @@ static string FindRepositoryRoot()
         directory = directory.Parent;
     }
 
-    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录里运行。");
+    return directory?.FullName ?? throw new InvalidOperationException("找不到 Kmic.slnx，请在仓库目录下运行。");
 }
 
 // 检查模块名称、编号和登记情况，避免与已有模块冲突
@@ -68,7 +68,7 @@ static List<string> Validate(string root, string module, int number)
     var problems = new List<string>();
     if (!Regex.IsMatch(module, "^[A-Z][A-Za-z0-9]*$", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)))
     {
-        problems.Add("模块名要写成大驼峰的单个英文名词，如 Sales。");
+        problems.Add("模块名须为大驼峰格式的单个英文名词，如 Sales。");
     }
 
     if (string.Equals(module, "BuildingBlocks", StringComparison.Ordinal) || string.Equals(module, "Customer", StringComparison.Ordinal))
@@ -85,11 +85,11 @@ static List<string> Validate(string root, string module, int number)
     var row = registry.FirstOrDefault(l => l.StartsWith($"| {module} |", StringComparison.Ordinal));
     if (row is null)
     {
-        problems.Add($"先在 docs/modules/README.md 的登记表里登记 {module}。");
+        problems.Add($"请先在 docs/modules/README.md 登记表中注册 {module}。");
     }
     else if (!row.Contains($"| {number} |", StringComparison.Ordinal))
     {
-        problems.Add($"登记表里 {module} 的编号不是 {number}。");
+        problems.Add($"登记表中 {module} 的编号与输入 {number} 不一致。");
     }
 
     var others = registry.Where(l => l.Contains($"| {number} |", StringComparison.Ordinal) && !l.StartsWith($"| {module} |", StringComparison.Ordinal));
@@ -100,7 +100,7 @@ static List<string> Validate(string root, string module, int number)
 
     if (Directory.Exists(Path.Combine(root, "src", "Modules", module)))
     {
-        problems.Add($"src/Modules/{module} 已经存在。");
+        problems.Add($"src/Modules/{module} 已存在。");
     }
 
     return problems;
@@ -130,14 +130,14 @@ static int AddToSolution(string root, string module)
 
 static int Register(string root, string module)
 {
-    // 宿主引用服务端与接口层两个项目，并在 Program.cs 里登记
+    // 宿主引用 Infrastructure 与 Presentation 项目，并在 Program.cs 中注册
     var api = Path.Combine(root, "src", "Hosts", "Kmic.Api", "Kmic.Api.csproj");
     InsertAfterLast(api, "<ProjectReference ", $"""
         <ProjectReference Include="../../Modules/{module}/Kmic.{module}.Infrastructure/Kmic.{module}.Infrastructure.csproj" />
         <ProjectReference Include="../../Modules/{module}/Kmic.{module}.Presentation/Kmic.{module}.Presentation.csproj" />
         """);
 
-    // 架构测试按项目列出引用，新模块的五个层都要加
+    // 架构测试显式引用各层项目，需同步加入新模块的五个分层
     var architecture = Path.Combine(root, "tests", "Kmic.ArchitectureTests", "Kmic.ArchitectureTests.csproj");
     var layers = new[] { "Domain", "Contracts", "Application", "Infrastructure", "Presentation" };
     InsertAfterLast(architecture, "<ProjectReference ", string.Join(Environment.NewLine, layers.Select(l =>
@@ -149,7 +149,7 @@ static int Register(string root, string module)
     text = text.Replace("builder.AddKmicHost(host => host", $"builder.AddKmicHost(host => host{Environment.NewLine}    .AddModule<{module}Module, {module}Endpoints>()", StringComparison.Ordinal);
     File.WriteAllText(program, text);
 
-    // 在迁移程序中单独登记模块及其项目引用
+    // 在迁移程序中注册模块并添加项目引用
     var directory = Path.Combine(root, "src", "Hosts", MigrationRunner);
     InsertAfterLast(Path.Combine(directory, $"{MigrationRunner}.csproj"), "<ProjectReference ", $"""<ProjectReference Include="../../Modules/{module}/Kmic.{module}.Infrastructure/Kmic.{module}.Infrastructure.csproj" />""");
     var toolProgram = Path.Combine(directory, "Program.cs");
@@ -161,7 +161,7 @@ static int Register(string root, string module)
     return Run(root, "dotnet", "restore Kmic.slnx --force-evaluate");
 }
 
-// 在文件里最后一个包含 marker 的行后面插入新行，缩进与那一行相同
+// 在最后一个匹配 marker 的行之后插入新行，并保持相同缩进
 static void InsertAfterLast(string file, string marker, string newLines)
 {
     var lines = File.ReadAllLines(file).ToList();
@@ -171,7 +171,7 @@ static void InsertAfterLast(string file, string marker, string newLines)
     File.WriteAllLines(file, lines);
 }
 
-// dotnet ef 要可执行的启动项目：用宿主。生成后在 Up 开头补模块 schema 的初始化与授权
+// dotnet ef 需指定可执行启动项目（此处用 Kmic.Api）；生成迁移后在 Up 开头补充模块 schema 初始化与授权
 static int Migration(string root, string module)
 {
     var arguments = $"ef migrations add InitializeModuleSchema --project src/Modules/{module}/Kmic.{module}.Infrastructure --startup-project src/Hosts/Kmic.Api --context {module}DbContext --output-dir Persistence/Migrations";
@@ -190,7 +190,7 @@ static int Migration(string root, string module)
     return Run(root, "dotnet", "build Kmic.slnx --nologo");
 }
 
-// dotnet 工具按 CRLF 写文件（迁移还带 BOM）：新建的模块、改过的文件统一成 UTF-8 无 BOM、LF
+// dotnet CLI 生成的文件默认使用 CRLF（迁移文件还含 BOM），需统一转换为 UTF-8 无 BOM 与 LF 换行
 static int Normalize(string root, string module)
 {
     var files = Directory.GetFiles(Path.Combine(root, "src", "Modules", module), "*", SearchOption.AllDirectories)

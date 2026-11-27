@@ -1,29 +1,18 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 重建轮次的状态取值
-/// </summary>
-/// <remarks>
-/// 存为 smallint，SQL 直接按数字写，取值不能改
-/// </remarks>
+// 读模型重建轮次状态（存为 smallint，SQL 直接按数字写，取值不可改）
 internal static class RebuildRunStatus
 {
-    /// <summary>
-    /// 排队或进行中
-    /// </summary>
+    // 排队或进行中
     public const short Active = 0;
 
-    /// <summary>
-    /// 源端没找到的行太多，暂停等运维确认
-    /// </summary>
+    // 源端缺失行数超限，暂停等运维确认
     public const short AwaitingConfirmation = 1;
 
     public const short Completed = 2;
 
     public const short Abandoned = 3;
 
-    /// <summary>
-    /// 作业失败或被取消，轮次也跟着结束
-    /// </summary>
+    // 作业失败或被取消，对应轮次随之结束
     public const short Failed = 4;
 }

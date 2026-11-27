@@ -20,7 +20,7 @@ const form = reactive({ oldPassword: '', newPassword: '', confirm: '' });
 const submitting = ref(false);
 const errorMessage = ref('');
 
-// 独立页面不在标签里，不能用 usePage
+// 独立认证页不属于工作区标签页，不具备 PageInstance 上下文，不可调用 usePage
 if (!standalone) {
   usePage().trackDirty(() => form.oldPassword !== '' || form.newPassword !== '' || form.confirm !== '');
 }

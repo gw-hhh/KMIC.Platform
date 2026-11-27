@@ -1,11 +1,6 @@
 namespace Kmic.Identity.Presentation.Authentication;
 
-/// <summary>
-/// 网页客户端的刷新令牌 Cookie
-/// </summary>
-/// <remarks>
-/// __Host- 前缀要求 Secure、Path=/、不设 Domain
-/// </remarks>
+// __Host- 前缀要求启用 Secure、Path=/ 且不设置 Domain
 internal static class RefreshCookie
 {
     public const string Name = "__Host-kmic-rt";

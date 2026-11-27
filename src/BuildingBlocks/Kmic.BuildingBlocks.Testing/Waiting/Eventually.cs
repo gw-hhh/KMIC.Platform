@@ -1,24 +1,13 @@
 namespace Kmic.BuildingBlocks.Testing.Waiting;
 
-/// <summary>
-/// 等待后台处理完成
-/// </summary>
-/// <remarks>
-/// 按真实时间轮询，和宿主里的 FakeTimeProvider 无关
-/// </remarks>
+/// <summary>异步轮询等待辅助工具（按系统真实时间轮询，不受宿主内 FakeTimeProvider 影响）。</summary>
 public static class Eventually
 {
-    /// <summary>
-    /// 默认超时
-    /// </summary>
     public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(10);
 
     private static readonly TimeSpan _interval = TimeSpan.FromMilliseconds(50);
 
-    /// <summary>
-    /// 反复读取，直到结果满足条件，返回那次的结果
-    /// </summary>
-    /// <exception cref="TimeoutException">超时仍未满足</exception>
+    /// <summary>周期性探测直至结果满足条件并返回最终结果，超时时抛出 <see cref="TimeoutException" />。</summary>
     public static async Task<T> UntilAsync<T>(
         Func<CancellationToken, Task<T>> probe,
         Func<T, bool> done,
@@ -48,10 +37,7 @@ public static class Eventually
         }
     }
 
-    /// <summary>
-    /// 反复检查，直到条件成立
-    /// </summary>
-    /// <exception cref="TimeoutException">超时仍未成立</exception>
+    /// <summary>周期性检查直至条件成立，超时时抛出 <see cref="TimeoutException" />。</summary>
     public static Task UntilAsync(
         Func<CancellationToken, Task<bool>> condition,
         string because,

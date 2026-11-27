@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 每个测试用自己的评审，按聚合 ID 读历史
-/// </summary>
 public sealed class StateHistoryTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

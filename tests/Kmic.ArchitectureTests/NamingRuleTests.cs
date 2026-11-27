@@ -5,9 +5,6 @@ using Shouldly;
 
 namespace Kmic.ArchitectureTests;
 
-/// <summary>
-/// 命名与形态：命令、查询、处理器、校验器、端点、领域事件、强类型 ID、错误目录
-/// </summary>
 public sealed class NamingRuleTests
 {
     private static readonly Type[] _bad = [.. typeof(BadSamples).GetNestedTypes(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)];

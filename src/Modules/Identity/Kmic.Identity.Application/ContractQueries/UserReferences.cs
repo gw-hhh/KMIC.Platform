@@ -5,12 +5,9 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Identity.Application.ContractQueries;
 
-/// <summary>
-/// 通过查询管道分批解析用户引用
-/// </summary>
+/// <summary>通过查询管道分批解析用户引用</summary>
 public sealed class UserReferences(IContractQuerySender sender) : IUserReferences
 {
-    /// <inheritdoc />
     public async Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(ids);

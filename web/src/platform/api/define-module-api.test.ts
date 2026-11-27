@@ -19,7 +19,6 @@ afterAll(() => {
   server.close();
 });
 
-// 示例：用平台模块现有的接口
 const jobsApi = defineModuleApi('operations', ({ query, command }) => ({
   myJobs: query('/api/v1/operations/my-jobs'),
   myJob: query('/api/v1/operations/my-jobs/{module}/{id}'),
@@ -34,8 +33,8 @@ function setup() {
   return { session, api, queryClient: createKmicQueryClient({ api, session }) };
 }
 
-describe('模块的查询', () => {
-  it('查询键是 kmic、模块、路径加参数，all 是不带参数的前缀', () => {
+describe('模块查询定义', () => {
+  it('查询键包含 kmic、模块名、路径与参数，all 为不含参数的前缀', () => {
     const params = { path: { module: 'Sample', id: 'j1' } };
 
     expect(jobsApi.myJob.key({ params })).toEqual([
@@ -48,7 +47,7 @@ describe('模块的查询', () => {
     expect(jobsApi.myJobs.all).toEqual(['kmic', 'operations', '/api/v1/operations/my-jobs']);
   });
 
-  it('按参数拼出路径和查询字符串，经 QueryClient 拿到请求客户端', async () => {
+  it('按参数拼接路径与查询字符串，并通过 QueryClient 获取请求客户端', async () => {
     let url = '';
     server.use(
       http.get(`${origin}/api/v1/operations/my-jobs`, ({ request }) => {
@@ -79,13 +78,13 @@ describe('模块的查询', () => {
   });
 });
 
-describe('模块的命令', () => {
-  it('按 OpenAPI 的 x-idempotent 判断要不要幂等键', () => {
+describe('模块命令定义', () => {
+  it('依据 OpenAPI 的 x-idempotent 标记判断是否需要幂等键', () => {
     expect(jobsApi.cancel.idempotent).toBe(true);
     expect(jobsApi.markRead.idempotent).toBe(false);
   });
 
-  it('带上给定的幂等键和路径参数', async () => {
+  it('发送请求时携带指定的幂等键与路径参数', async () => {
     let seen: { url: string; key: string | null } | null = null;
     server.use(
       http.post(`${origin}/api/v1/operations/my-jobs/:module/:id/cancel`, ({ request }) => {

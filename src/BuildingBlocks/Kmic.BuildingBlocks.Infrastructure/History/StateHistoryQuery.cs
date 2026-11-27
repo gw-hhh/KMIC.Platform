@@ -8,14 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Infrastructure.History;
 
-/// <summary>
-/// <see cref="IStateHistoryQuery"/> 的实现：从聚合所在模块的历史表读，人员和角色经 <see cref="IActorReferences"/> 取显示名
-/// </summary>
 internal sealed class StateHistoryQuery(ModuleQueryContexts contexts, IActorReferences actors) : IStateHistoryQuery
 {
     private static readonly FrozenDictionary<Guid, ReferenceInfo> _none = FrozenDictionary<Guid, ReferenceInfo>.Empty;
 
-    /// <inheritdoc />
     public async Task<IReadOnlyList<StateHistoryItem>> GetAsync<TAggregate>(Guid aggregateId, CancellationToken ct)
         where TAggregate : IAggregateRoot
     {
@@ -56,7 +52,7 @@ internal sealed class StateHistoryQuery(ModuleQueryContexts contexts, IActorRefe
         ];
     }
 
-    // 查不到的按已删除显示，保留 ID
+    // 未查到引用时按已删除处理并保留原始 ID
     private static ReferenceInfo? Find(IReadOnlyDictionary<Guid, ReferenceInfo> resolved, Guid? id) =>
         id is { } value
             ? resolved.GetValueOrDefault(value) ?? new ReferenceInfo(value, "已删除", null, ReferenceStatus.Deleted)

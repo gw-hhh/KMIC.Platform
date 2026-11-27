@@ -24,7 +24,7 @@ internal sealed class EntityFinder(IExecutionContext execution, ISecurityEventWr
             return found;
         }
 
-        // 软删除的过滤仍然生效：已删除的对象不算“被数据范围挡住”
+        // 软删除过滤保持生效：已删除对象不计入数据权限拦截
         if (await query.WithoutDataScope().AnyAsync(EntityPredicates.HasId<TEntity, TId>(id), cancellationToken))
         {
             securityEvents.Write(new SecurityEvent("AuthorizationDenied", SecuritySeverity.Warning, nameof(DenialReason.OutOfDataScope))

@@ -5,18 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Customer.Infrastructure.Persistence;
 
-/// <summary>
-/// Customer 模块的查询上下文，不跟踪实体
-/// </summary>
+// 只读查询上下文，禁用实体跟踪
 internal sealed class CustomerQueryDbContext(DbContextOptions<CustomerQueryDbContext> options, ModuleDbContextServices services)
     : ModuleQueryDbContext(options, services), ICustomerQueryDb
 {
-    /// <inheritdoc />
     public override string Module => CustomerModuleInfo.Name;
 
-    /// <inheritdoc />
     protected override void ConfigureModuleConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // 与写入上下文使用相同的强类型 ID 转换器
+        // 复用与写入上下文一致的强类型 ID 值转换器
     }
 }

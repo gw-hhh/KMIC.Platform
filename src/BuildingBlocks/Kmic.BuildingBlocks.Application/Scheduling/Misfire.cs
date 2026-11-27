@@ -1,17 +1,10 @@
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 错过触发时的处理方式
-/// </summary>
 public enum Misfire
 {
-    /// <summary>
-    /// 恢复后马上补执行一次，再按原计划继续
-    /// </summary>
+    /// <summary>恢复后立即补执行一次，随后按原计划继续。</summary>
     FireOnceNow,
 
-    /// <summary>
-    /// 跳过错过的，等下一次计划时刻
-    /// </summary>
+    /// <summary>跳过已错过的触发，等待下一次计划时刻。</summary>
     Skip,
 }

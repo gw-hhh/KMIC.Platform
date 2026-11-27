@@ -1,18 +1,11 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 容量保护的判断：由上一轮的状态和这一轮的采样得出新状态
-/// </summary>
+// 容量保护状态判定策略
 internal static class AdmissionPolicy
 {
-    // 解除软线要连续这么多个周期的未完成消息量不高于低水位
     internal const int LowWaterPeriodsToRecover = 2;
 
-    /// <param name="Previous">上一轮的状态</param>
-    /// <param name="LowWaterPeriods">上一轮已连续低于低水位的周期数</param>
-    /// <param name="DatabaseBytes">数据库已用空间</param>
-    /// <param name="UnfinishedBytes">各模块 Outbox、Inbox 里未完成的消息量</param>
-    /// <param name="CapacityBytes">已分配容量；还没有设置时为空，这时保持原状态</param>
+    // CapacityBytes 未配置时为 null，保持原状态不变
     internal sealed record Input(AdmissionState Previous, int LowWaterPeriods, long DatabaseBytes, long UnfinishedBytes, long? CapacityBytes);
 
     internal sealed record Decision(AdmissionState State, int LowWaterPeriods);
@@ -36,7 +29,7 @@ internal static class AdmissionPolicy
             return new Decision(softConditionHolds ? AdmissionState.Soft : AdmissionState.Normal, 0);
         }
 
-        // 原来是软线，或者硬线刚解除：队列要连续几个周期降到低水位才恢复，不要求已用空间回落
+        // 原为软线或硬线刚解除时，需连续多个周期低于低水位方可恢复正常状态，不要求已用空间回落
         var periods = input.UnfinishedBytes <= options.LowWaterBytes ? input.LowWaterPeriods + 1 : 0;
         return periods >= LowWaterPeriodsToRecover
             ? new Decision(AdmissionState.Normal, 0)

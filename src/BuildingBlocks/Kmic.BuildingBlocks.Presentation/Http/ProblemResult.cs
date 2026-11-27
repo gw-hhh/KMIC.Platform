@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Presentation.Limits;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 把一个业务错误写成 ProblemDetails 响应
-/// </summary>
 internal sealed class ProblemResult(Error error) : IResult
 {
     public async Task ExecuteAsync(HttpContext httpContext)
@@ -25,7 +22,7 @@ internal sealed class ProblemResult(Error error) : IResult
 
         if (error.Type == ErrorType.Unauthenticated)
         {
-            // 没有凭据或凭据无效的响应要说明认证方案，Bearer 令牌的客户端据此判断是否去刷新
+            // 未认证响应需附带 WWW-Authenticate 认证方案，便于 Bearer 客户端决定是否刷新令牌
             httpContext.Response.Headers.WWWAuthenticate = "Bearer";
         }
 

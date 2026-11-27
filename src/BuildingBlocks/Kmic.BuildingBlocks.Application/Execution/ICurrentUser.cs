@@ -2,46 +2,21 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Execution;
 
-/// <summary>
-/// 当前身份
-/// </summary>
 public interface ICurrentUser
 {
-    /// <summary>
-    /// 用户 ID，系统身份和匿名请求时为空
-    /// </summary>
+    /// <summary>用户 ID；系统身份或匿名请求时为 null。</summary>
     UserId? UserId { get; }
 
-    /// <summary>
-    /// 角色
-    /// </summary>
     RoleId? RoleId { get; }
 
-    /// <summary>
-    /// 是否系统身份
-    /// </summary>
     bool IsSystem { get; }
 
-    /// <summary>
-    /// 是否在模拟登录
-    /// </summary>
     bool IsImpersonating { get; }
 
-    /// <summary>
-    /// 实际操作人
-    /// </summary>
     UserId? ActualUserId { get; }
 
-    /// <summary>
-    /// 会话
-    /// </summary>
     SessionId? SessionId { get; }
 
-    /// <summary>
-    /// 原始操作人：系统身份处理事件时，引发事件的用户
-    /// </summary>
-    /// <remarks>
-    /// 只用于审计
-    /// </remarks>
+    /// <summary>原始操作人（以系统身份处理事件时最初触发该事件的用户），仅用于审计追踪。</summary>
     UserId? OnBehalfOf { get; }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 登录、改密码、选角色等登录前后的独立页面：左边介绍区，右边表单，排版照 Vben Admin 的 authentication 布局（MIT）
+// 登录、修改密码与角色选择等独立认证页布局：左侧品牌展示区，右侧表单区，参考 Vben Admin 的 authentication 布局（MIT）
 import { ConfigProvider } from 'antdv-next';
 import { computed } from 'vue';
 import { shellTexts } from '@/platform/texts/shell';
@@ -34,7 +34,7 @@ function toggleTheme(event: MouseEvent): void {
       </KTooltip>
     </div>
 
-    <!-- 介绍区：以后换成公司提供的插画 -->
+    <!-- 品牌展示区：后续可替换为企业定制插画 -->
     <div class="intro">
       <div class="intro-glow" />
       <div class="intro-content enter-x">
@@ -49,7 +49,6 @@ function toggleTheme(event: MouseEvent): void {
       <div class="form-content enter-x">
         <h1 class="title">{{ title }}</h1>
         <p v-if="description" class="description">{{ description }}</p>
-        <!-- 和 Vben 一样，独立页面的输入框和按钮用大号 -->
         <ConfigProvider component-size="large">
           <div class="body">
             <slot />
@@ -123,7 +122,7 @@ function toggleTheme(event: MouseEvent): void {
   }
 }
 
-// 介绍区只在宽屏显示，底色比表单区深一档，中间斜着一道主色的模糊光
+// 展示区仅在宽屏显示，底色较表单区深一阶，中央叠加斜向主色光晕
 .intro {
   position: relative;
   display: none;
@@ -184,7 +183,6 @@ function toggleTheme(event: MouseEvent): void {
   font-size: 24px;
 }
 
-// 上下浮动，减少动画时不动
 @keyframes float {
   0%,
   100% {
@@ -252,7 +250,7 @@ function toggleTheme(event: MouseEvent): void {
   margin-top: 28px;
 }
 
-// 进场：从右侧 50px 淡入，各块错开一点
+// 进场动效：自右侧 50px 错峰淡入
 .enter-x > * {
   opacity: 0;
   transform: translateX(50px);

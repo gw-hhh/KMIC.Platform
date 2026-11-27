@@ -11,9 +11,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Grants.GrantRole;
 
-/// <summary>
-/// 为用户授予角色
-/// </summary>
 public sealed class GrantRoleCommandHandler(
     IUserRepository users,
     IIdentityCommandReads db,
@@ -23,7 +20,6 @@ public sealed class GrantRoleCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<GrantRoleCommand, VersionedResponse<UserId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<UserId>>> ExecuteAsync(GrantRoleCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await GrantLoading.LoadForAsync(users, db, authorizer, command.Id, command.ExpectedVersion, command.RoleId, GrantAction.Grant, access, cancellationToken);

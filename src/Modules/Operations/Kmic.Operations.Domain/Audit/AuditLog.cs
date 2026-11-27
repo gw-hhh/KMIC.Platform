@@ -4,12 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Operations.Domain.Audit;
 
-/// <summary>
-/// 审计记录
-/// </summary>
-/// <remarks>
-/// 只追加，运行账号不能改也不能删
-/// </remarks>
+/// <summary>审计记录（仅支持追加，运行账号不可修改或删除）。</summary>
 public sealed class AuditLog : AggregateRoot<AuditLogId>
 {
     private AuditLog(AuditLogId id)
@@ -87,9 +82,7 @@ public sealed class AuditLog : AggregateRoot<AuditLogId>
     /// </summary>
     public string Details { get; private set; } = "{}";
 
-    /// <summary>
-    /// 根据审计消息创建记录
-    /// </summary>
+    /// <summary>根据审计消息创建记录。</summary>
     public static AuditLog Record(
         AuditLogId id,
         DateTimeOffset occurredAt,

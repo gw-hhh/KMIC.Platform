@@ -7,30 +7,22 @@ using Microsoft.AspNetCore.OpenApi;
 
 namespace Kmic.BuildingBlocks.Presentation.OpenApi;
 
-/// <summary>
-/// OpenAPI 文档的框架转换器
-/// </summary>
 public static class OpenApiOptionsExtensions
 {
-    /// <summary>
-    /// 加入框架的文档约定：强类型 ID、智能枚举、错误响应、用例声明、目录导出
-    /// </summary>
-    /// <remarks>
-    /// 要由宿主在 AddOpenApi 里调用，否则读不到 XML 注释
-    /// </remarks>
+    /// <summary>注册框架 OpenAPI 约定（须由宿主在 AddOpenApi 中直接调用，否则无法加载 XML 注释）</summary>
     public static OpenApiOptions AddKmicConventions(this OpenApiOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        // 智能枚举要出现在 components 里（x-kmic-enums 的键用架构名），默认只有对象才会；强类型 ID 就是个 UUID 字符串，不单独成架构。
-        // 架构名就是前端生成的类型名，全系统唯一：两个类型同名时生成文档失败，而不是悄悄合并成一个
+        // 智能枚举须独立纳入 components 架构（x-kmic-enums 以架构名为键），强类型 ID 则内联为 UUID 字符串；
+        // 架构名同时对应前端生成类型名且需全局唯一，若发生同名冲突则直接拒绝生成文档而非静默合并
         var names = new ConcurrentDictionary<string, Type>(StringComparer.Ordinal);
         options.CreateSchemaReferenceId = type =>
         {
             var id = ReferenceId(type);
             return id is null || names.GetOrAdd(id, type.Type) == type.Type
                 ? id
-                : throw new DeclarationException($"OpenAPI 架构名“{id}”被 {names[id].FullName} 和 {type.Type.FullName} 同时使用。架构名全系统唯一，类名要带上资源名或用例名。");
+                : throw new DeclarationException($"OpenAPI 架构名“{id}”被 {names[id].FullName} 与 {type.Type.FullName} 重复使用。架构名须全局唯一，请在类名中体现资源名或用例名。");
         };
         options.AddSchemaTransformer(new KmicSchemaTransformer());
         options.AddOperationTransformer(new KmicOperationTransformer());
@@ -45,8 +37,8 @@ public static class OpenApiOptionsExtensions
             return type.Type.Name;
         }
 
-        // 强类型 ID 就是 UUID 字符串；JsonElement 是“任意 JSON 值”，没有结构可言：都内联，不生成同名的架构。
-        // 可空的 JsonElement 和不可空的算同一个类型，不然同一个名字会被两个类型占用
+        // 强类型 ID 固定映射为 UUID 字符串，JsonElement 表示任意 JSON 值，二者均直接内联而不生成独立架构；
+        // 可空与非空 JsonElement 归为同一底层类型处理，避免因命名冲突导致文档生成失败
         var underlying = Nullable.GetUnderlyingType(type.Type) ?? type.Type;
         return typeof(IStronglyTypedId).IsAssignableFrom(underlying) || underlying == typeof(JsonElement)
             ? null

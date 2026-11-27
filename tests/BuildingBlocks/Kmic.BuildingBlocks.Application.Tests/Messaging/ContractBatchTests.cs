@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Application.Tests.Messaging;
 
-/// <summary>
-/// 批量查询的分批与合并
-/// </summary>
 public sealed class ContractBatchTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

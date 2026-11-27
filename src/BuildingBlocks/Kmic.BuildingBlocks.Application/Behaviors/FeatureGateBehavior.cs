@@ -7,15 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Application.Behaviors;
 
-/// <summary>
-/// 功能开关检查
-/// </summary>
+/// <summary>检查用例声明的功能开关，未启用时直接拦截请求。</summary>
 public sealed partial class FeatureGateBehavior<TMessage, TResponse>(UseCaseCatalog catalog, IFeatureFlags features, ILogger<FeatureGateBehavior<TMessage, TResponse>> logger)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage
     where TResponse : Result, IResultFactory<TResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<TResponse> Handle(TMessage message, MessageHandlerDelegate<TMessage, TResponse> next, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(next);

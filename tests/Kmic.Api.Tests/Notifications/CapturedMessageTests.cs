@@ -15,9 +15,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 非生产环境捕获的内容：查看列表和详情、权限、过期清理。捕获默认开启
-/// </summary>
 public sealed class CapturedMessageTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {

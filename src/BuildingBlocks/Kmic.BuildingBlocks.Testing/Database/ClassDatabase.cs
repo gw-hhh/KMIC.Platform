@@ -3,13 +3,8 @@ using Xunit;
 
 namespace Kmic.BuildingBlocks.Testing.Database;
 
-/// <summary>
-/// 测试类的数据库：从模板库克隆，类结束时删除
-/// </summary>
-/// <remarks>
-/// 同一个类的测试共用它，各自只断言自己的数据
-/// </remarks>
-/// <typeparam name="TTemplate">模板库</typeparam>
+/// <summary>测试类级隔离数据库（从模板库克隆，类结束时自动删除）；同一测试类共用该库，各用例应仅断言自身写入的数据。</summary>
+/// <typeparam name="TTemplate">模板数据库类型</typeparam>
 public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetime
     where TTemplate : PostgresTemplateDatabase
 {
@@ -18,34 +13,20 @@ public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetim
     private string? _name;
     private NpgsqlDataSource? _dataSource;
 
-    /// <summary>
-    /// 库名
-    /// </summary>
     public string Name => _name ?? throw NotInitialized();
 
-    /// <summary>
-    /// 连接串
-    /// </summary>
     public string ConnectionString => template.ConnectionString(Name);
 
-    /// <summary>
-    /// 数据源，用来直接执行 SQL
-    /// </summary>
+    /// <summary>数据源实例，用于直接执行 SQL。</summary>
     public NpgsqlDataSource DataSource => _dataSource ?? throw NotInitialized();
 
-    /// <inheritdoc />
     public async ValueTask InitializeAsync()
     {
         _name = await template.CloneAsync(TestContext.Current.CancellationToken);
         _dataSource = NpgsqlDataSource.Create(template.ConnectionString(_name));
     }
 
-    /// <summary>
-    /// 取同一个测试类共用的对象（如测试宿主），第一次取时创建
-    /// </summary>
-    /// <remarks>
-    /// 同一类型只创建一次，之后传入的 create 不再调用
-    /// </remarks>
+    /// <summary>获取或创建测试类共享对象（同一类型仅创建一次，后续调用不再执行 create）。</summary>
     public T Shared<T>(Func<T> create)
         where T : class, IAsyncDisposable
     {
@@ -63,10 +44,9 @@ public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetim
         }
     }
 
-    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        // 先释放共用对象再删库：宿主的后台循环还连着这个库，确保它们先停下
+        // 先释放共享对象再删库：宿主后台循环仍持有该库连接，需确保其先停止
         for (var i = _shared.Count - 1; i >= 0; i--)
         {
             await _shared[i].DisposeAsync();
@@ -77,7 +57,7 @@ public sealed class ClassDatabase<TTemplate>(TTemplate template) : IAsyncLifetim
             await _dataSource.DisposeAsync();
         }
 
-        // 测试已结束，取消令牌可能已经触发，但删除必须做完，不然本地容器里的克隆库会越积越多
+        // 忽略取消令牌以强制清理克隆库，避免本地容器产生残留
         if (_name is not null)
         {
             await template.DropAsync(_name, CancellationToken.None);

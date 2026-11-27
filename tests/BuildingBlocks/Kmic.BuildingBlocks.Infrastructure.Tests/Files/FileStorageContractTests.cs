@@ -4,9 +4,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Files;
 
-/// <summary>
-/// 本地和 S3 存储通过同一套契约测试。每个测试用自己的前缀，互不影响
-/// </summary>
 public abstract class FileStorageContractTests
 {
     private readonly string _prefix = "test/" + Guid.CreateVersion7().ToString("N") + "/";
@@ -89,7 +86,7 @@ public abstract class FileStorageContractTests
         return buffer.ToArray();
     }
 
-    // 不能回到开头、也不知道总长度的流，模拟请求体
+    // 不可寻址且未知总长度的流，用于模拟 HTTP 请求体
     private sealed class NonSeekableStream(int length) : Stream
     {
         private readonly IncrementalHash _hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);

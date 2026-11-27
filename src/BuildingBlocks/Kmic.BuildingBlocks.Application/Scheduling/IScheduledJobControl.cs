@@ -2,33 +2,20 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Scheduling;
 
-/// <summary>
-/// 定时任务的运行控制，给 Operations 的管理命令用
-/// </summary>
 public interface IScheduledJobControl
 {
-    /// <summary>
-    /// 本实例有没有声明这个任务
-    /// </summary>
+    /// <summary>检查当前实例是否已声明指定任务。</summary>
     bool IsDeclared(string name);
 
-    /// <summary>
-    /// 本实例声明的全部定时任务（模块的和框架的），带调度库里的实际状态
-    /// </summary>
+    /// <summary>列出当前实例声明的所有定时任务及其调度状态。</summary>
     Task<IReadOnlyList<ScheduledJobInfo>> ListAsync(CancellationToken ct);
 
-    /// <summary>
-    /// 把代码里的默认值和设置表里的覆盖值同步到触发器，整个集群即时生效
-    /// </summary>
+    /// <summary>将代码默认值与设置表覆盖值同步至集群触发器。</summary>
     Task SyncAsync(CancellationToken ct);
 
-    /// <summary>
-    /// 马上执行一次，由运行着调度器的实例执行；任务忙或已有手动触发在排队时拒绝，执行记录里的触发方式是手动
-    /// </summary>
+    /// <summary>手动触发一次定时任务；任务运行中或已有触发排队时拒绝。</summary>
     Task<ScheduledJobTriggerOutcome> TriggerAsync(string name, UserId by, CancellationToken ct);
 
-    /// <summary>
-    /// 检查一个 Cron 表达式并算出接下来几次触发的时间，按业务时区解释
-    /// </summary>
+    /// <summary>校验 Cron 表达式并按业务时区计算后续触发时间。</summary>
     CronPreview Preview(string cron, DateTimeOffset after, int count);
 }

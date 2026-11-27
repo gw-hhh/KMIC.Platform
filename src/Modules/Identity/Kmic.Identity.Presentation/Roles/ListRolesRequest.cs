@@ -1,8 +1,5 @@
 namespace Kmic.Identity.Presentation.Roles;
 
-/// <summary>
-/// 查询角色列表的参数
-/// </summary>
 /// <param name="Q">关键字</param>
 /// <param name="Status">状态编码</param>
 /// <param name="Page">页码</param>

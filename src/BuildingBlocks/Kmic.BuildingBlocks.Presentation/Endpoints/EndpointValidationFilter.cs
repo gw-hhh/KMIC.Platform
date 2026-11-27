@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Kmic.BuildingBlocks.Presentation.Endpoints;
 
-/// <summary>
-/// 启动时校验全部模块端点的声明，有问题就拒绝启动
-/// </summary>
+// 启动时校验所有模块端点声明，存在问题时拒绝启动
 internal sealed class EndpointValidationFilter : IStartupFilter
 {
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)

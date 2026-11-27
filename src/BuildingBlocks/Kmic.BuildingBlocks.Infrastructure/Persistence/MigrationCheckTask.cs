@@ -8,9 +8,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
-/// <summary>
-/// 启动时核对数据库结构
-/// </summary>
 internal sealed class MigrationCheckTask(
     IServiceProvider services,
     IOptions<DatabaseOptions> options,

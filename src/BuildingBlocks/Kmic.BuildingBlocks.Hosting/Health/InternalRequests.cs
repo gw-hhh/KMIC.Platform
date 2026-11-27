@@ -3,15 +3,10 @@ using System.Net.Sockets;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 判断请求是不是直接来自内网
-/// </summary>
-/// <remarks>
-/// 经反向代理转发的请求一律不算内网
-/// </remarks>
+// 判断是否为内网直连请求（经反向代理转发均不视为直连）
 internal static class InternalRequests
 {
-    // X-Original-For 是转发头中间件处理完可信代理的请求后留下的：它会清掉 X-Forwarded-For，所以也要认
+    // 转发头中间件处理可信代理请求后会清除 X-Forwarded-For 并写入 X-Original-For，需一并识别
     private static readonly string[] _forwardingHeaders = ["X-Forwarded-For", "Forwarded", "X-Real-IP", "X-Original-For"];
 
     public static bool IsInternal(HttpContext http)
@@ -23,7 +18,7 @@ internal static class InternalRequests
             return false;
         }
 
-        // 没有远端地址表示不是 IP 连接（本机套接字、进程内的测试服务器）
+        // 无远端地址表明非 IP 连接（如本机套接字或进程内测试服务器）
         return http.Connection.RemoteIpAddress is not { } address || IsPrivate(address.IsIPv4MappedToIPv6 ? address.MapToIPv4() : address);
     }
 

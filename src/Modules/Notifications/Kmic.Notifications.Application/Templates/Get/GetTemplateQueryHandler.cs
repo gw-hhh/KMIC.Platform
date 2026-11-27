@@ -9,12 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Notifications.Application.Templates.Get;
 
-/// <summary>
-/// 查询通知模板及其版本
-/// </summary>
 public sealed class GetTemplateQueryHandler(INotificationsQueryDb db, NotificationTemplateCatalog catalog) : IQueryHandler<GetTemplateQuery, TemplateDetailResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<TemplateDetailResponse>> Handle(GetTemplateQuery query, CancellationToken cancellationToken)
     {
         var template = await db.Templates.FirstOrDefaultAsync(t => t.Key == query.Key, cancellationToken);
@@ -25,7 +21,7 @@ public sealed class GetTemplateQueryHandler(INotificationsQueryDb db, Notificati
 
         var versions = await db.TemplateVersions.Where(v => v.TemplateId == template.Id).OrderByDescending(v => v.Version).ToListAsync(cancellationToken);
 
-        // 代码里已经删掉的模板没有默认内容、变量和示例，只剩数据库里的记录
+        // 已从代码中移除声明的模板仅保留数据库记录，无默认内容、变量和示例数据
         var definition = catalog.Find(template.Key);
         var active = NotificationTemplate.ParseActiveVersions(template.ActiveVersions);
         var channels = template.ChannelList.Select(channel => ChannelOf(channel, definition, active, versions)).ToList();

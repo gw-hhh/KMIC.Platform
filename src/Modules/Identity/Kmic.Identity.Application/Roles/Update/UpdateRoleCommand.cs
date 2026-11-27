@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Application.Roles.Update;
 
-/// <summary>
-/// 修改角色的名称、说明和次序
-/// </summary>
+/// <summary>修改角色的名称、说明和次序。</summary>
 /// <param name="Id">角色 ID</param>
 /// <param name="ExpectedVersion">预期版本号</param>
 /// <param name="Name">名称</param>

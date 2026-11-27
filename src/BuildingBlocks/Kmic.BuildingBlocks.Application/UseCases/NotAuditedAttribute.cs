@@ -1,13 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 不记录审计
-/// </summary>
+/// <summary>声明用例无需记录审计并说明原因。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class NotAuditedAttribute(string reason) : Attribute
 {
-    /// <summary>
-    /// 原因
-    /// </summary>
     public string Reason { get; } = reason;
 }

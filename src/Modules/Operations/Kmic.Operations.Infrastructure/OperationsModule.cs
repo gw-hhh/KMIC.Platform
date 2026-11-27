@@ -22,18 +22,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kmic.Operations.Infrastructure;
 
-/// <summary>
-/// Operations 模块的服务端注册类
-/// </summary>
 public sealed class OperationsModule : IModule
 {
-    /// <inheritdoc />
     public string Name => OperationsModuleInfo.Name;
 
-    /// <inheritdoc />
     public Assembly ApplicationAssembly => typeof(IOperationsQueryDb).Assembly;
 
-    /// <inheritdoc />
     public void AddServices(IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -48,16 +42,14 @@ public sealed class OperationsModule : IModule
         services.AddScoped<IMessagingCapacitySource, MessagingCapacitySource>();
     }
 
-    /// <inheritdoc />
     public void ConfigureMessaging(IMessagingBuilder messaging)
     {
         ArgumentNullException.ThrowIfNull(messaging);
 
-        // 订阅名存进收件箱，发布后不能改
+        // 订阅名会写入收件箱，发布后不可变更
         messaging.Subscribe<AuditRecorded, RecordAuditCommand>("Operations.RecordAudit", (message, _) => new RecordAuditCommand(message));
     }
 
-    /// <inheritdoc />
     public void DeclareDependencies(IModuleDependencies dependencies)
     {
         ArgumentNullException.ThrowIfNull(dependencies);

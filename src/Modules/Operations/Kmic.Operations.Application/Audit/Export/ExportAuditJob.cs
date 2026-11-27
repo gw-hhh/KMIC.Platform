@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Operations.Application.Audit.Export;
 
-/// <summary>
-/// 审计导出作业的参数：和 <see cref="ExportAuditCommand"/> 一样的筛选条件
-/// </summary>
+/// <summary>审计导出作业参数，沿用 <see cref="ExportAuditCommand"/> 的筛选条件。</summary>
 /// <param name="From">起始时间</param>
 /// <param name="To">结束时间</param>
 /// <param name="ActorUserId">操作人</param>
@@ -25,8 +23,5 @@ public sealed record ExportAuditJob(
     string? ResourceType,
     Guid? ResourceId) : IBackgroundJob
 {
-    /// <summary>
-    /// 作业类型名
-    /// </summary>
     public const string Name = "Operations.ExportAudit";
 }

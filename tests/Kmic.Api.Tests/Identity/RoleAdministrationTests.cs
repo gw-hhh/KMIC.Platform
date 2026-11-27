@@ -7,9 +7,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Identity;
 
-/// <summary>
-/// 角色管理：增改、权限点与数据范围、停用启用，以及受保护角色、内置角色、版本冲突这些规则，端到端
-/// </summary>
 public sealed class RoleAdministrationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(database, template),
         IClassFixture<ClassDatabase<ApiTemplate>>

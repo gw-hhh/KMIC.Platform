@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Messaging;
 
-/// <summary>
-/// 消息发送
-/// </summary>
 internal sealed class Sender(Mediator.ISender mediator, ExecutionScope scope) : ISender
 {
     public ValueTask<Result> SendAsync(ICommand command, CancellationToken ct)
@@ -28,7 +25,7 @@ internal sealed class Sender(Mediator.ISender mediator, ExecutionScope scope) : 
 
     private async ValueTask<TResult> SendCommandAsync<TResult>(Func<ValueTask<TResult>> send)
     {
-        // 一个请求只执行一个命令，命令里再发命令是代码写错了
+        // 单次请求仅允许执行一个命令，禁止在命令内嵌套发送命令
         using var marker = scope.EnterCommand();
         return await send();
     }

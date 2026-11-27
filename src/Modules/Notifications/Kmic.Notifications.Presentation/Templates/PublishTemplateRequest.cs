@@ -2,9 +2,6 @@ using Kmic.Notifications.Domain.Templates;
 
 namespace Kmic.Notifications.Presentation.Templates;
 
-/// <summary>
-/// 发布模板新版本的请求
-/// </summary>
 /// <param name="Channel">渠道：Email、Sms、InApp</param>
 /// <param name="Subject">主题</param>
 /// <param name="Body">正文</param>

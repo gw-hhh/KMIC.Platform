@@ -1,11 +1,6 @@
 namespace Kmic.Customer.Domain.Errors;
 
-/// <summary>
-/// Customer 模块的错误目录
-/// </summary>
-/// <remarks>
-/// 错误码写成“Customer.错误名”，按聚合分文件时拆成多个 *Errors 静态类
-/// </remarks>
+/// <summary>Customer 领域错误目录（错误码格式为“Customer.错误名”，可按聚合拆分为多个 *Errors 类）</summary>
 public static class CustomerErrors
 {
 }

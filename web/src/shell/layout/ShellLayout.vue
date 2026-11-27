@@ -39,24 +39,24 @@ const shellSettings = useShellSettingsStore();
 const settings = computed(() => shellSettings.settings);
 const me = computed(() => currentUser.me);
 
-// 小于 1280 自动折叠成图标，小于 768 改为抽屉
-// 窄屏时侧栏固定收成图标，折叠和固定按钮都不显示
+// 视口宽度小于 1280px 时自动折叠侧栏，小于 768px 时切换为抽屉模式
+// 紧凑模式下侧栏固定为折叠态，隐藏折叠与固定切换按钮
 const isCompact = useMediaQuery('(max-width: 1279px)');
 const isMobile = useMediaQuery('(max-width: 767px)');
 const mobileOpen = ref(false);
 const hovering = ref(false);
-// 拖动侧栏边缘时，侧栏先不动，只有一条线跟着鼠标走，松手后才改宽度
+// 拖拽调整侧栏宽度时仅实时移动参考线，释放鼠标后再应用目标宽度
 const drag = ref<{ offset: number; out: boolean } | null>(null);
 const maximized = ref(false);
 const settingsOpen = ref(false);
 const searchOpen = ref(false);
 
-// 窄屏一律按垂直布局显示
+// 移动端视口统一回退为垂直布局
 const layout = computed(() => (isMobile.value ? 'vertical' : settings.value.layout));
 
 const nodes = computed(() => catalog.menu((permission) => currentUser.has(permission)));
 
-// 没有菜单项的页面，高亮上级菜单
+// 无独立菜单项的页面（如详情页），在菜单中高亮其上级路由
 const activeRouteName = computed(
   () => workspace.tabs.value.find((tab) => tab.key === workspace.activeKey.value)?.routeName ?? null,
 );
@@ -72,7 +72,7 @@ const crumbs = computed(() =>
   activeRouteName.value === null ? [] : toCrumbViews(catalog.breadcrumb(activeRouteName.value), nodes.value),
 );
 
-// 双列和混合垂直时，侧栏只显示选中的一级目录下的菜单
+// 双列及混合垂直布局下，侧栏仅展示当前选中一级目录的子菜单
 const selectedRootKey = ref<string | null>(null);
 const previewRootKey = ref<string | null>(null);
 watch(
@@ -89,11 +89,11 @@ const sideNodes = computed(() => (layout.value === 'vertical' ? nodes.value : (s
 
 const collapsed = computed(() => settings.value.sidebar.collapsed || (isCompact.value && !isMobile.value));
 const expandedWidth = computed(() => settings.value.sidebar.width);
-// 双列布局下不隐藏，只折叠
+// 双列布局下仅支持折叠，不支持完全隐藏
 const hidden = computed(() => settings.value.sidebar.hidden && !isMobile.value && layout.value !== 'mixed-column');
 const hasSideMenu = computed(() => sideNodes.value.length > 0);
 
-// 双列：第一列固定宽度；第二列折叠时隐藏，鼠标移到侧栏上时浮出来
+// 双列布局：首列固定宽度；次列在折叠态下隐藏，悬停侧栏时浮动展开
 const columnWidth = shellSizes.mixedColumnWidth;
 const panelPinned = computed(() => !collapsed.value && hasSideMenu.value);
 const panelVisible = computed(() => hasSideMenu.value && (!collapsed.value || hovering.value));
@@ -110,7 +110,7 @@ const menuCollapsed = computed(
   () => layout.value !== 'mixed-column' && collapsed.value && !hoverExpanded.value && !isMobile.value,
 );
 
-// 悬停展开的侧栏浮在内容上，不改变内容宽度
+// 悬停展开的侧栏浮动覆盖在内容区之上，不挤压主内容区宽度
 const layoutWidth = computed(() => {
   if (isMobile.value || maximized.value || hidden.value) {
     return 0;
@@ -140,7 +140,7 @@ const dragBarVisible = computed(
     showSidebar.value && !isMobile.value && !collapsed.value && (layout.value !== 'mixed-column' || panelPinned.value),
 );
 
-// 顶栏按钮：隐藏或显示整个侧栏；窄屏时开关抽屉
+// 顶栏侧栏开关：桌面端控制侧栏显隐（双列布局下切换折叠），移动端控制抽屉开关
 function toggleSidebar(): void {
   if (isMobile.value) {
     mobileOpen.value = !mobileOpen.value;
@@ -153,7 +153,6 @@ function toggleSidebar(): void {
   }
 }
 
-// 侧栏底部按钮：折叠成图标或展开
 function toggleCollapsed(): void {
   shellSettings.update((draft) => {
     draft.sidebar.collapsed = !collapsed.value;
@@ -165,7 +164,7 @@ async function openRoute(routeName: string): Promise<void> {
   await workspace.open(routeName);
 }
 
-// 站内消息的链接是站内路径，按路由目录换成页面和参数再开标签
+// 将站内消息携带的站内路径解析为路由名称与参数并打开对应标签页
 async function openLink(path: string): Promise<void> {
   const target = router.resolve(path);
   const name = typeof target.name === 'string' ? target.name : null;
@@ -215,13 +214,13 @@ function startDrag(event: MouseEvent): void {
   const stopUp = useEventListener(window, 'mouseup', (up: MouseEvent) => {
     stopMove();
     stopUp();
-    // 只是点了一下（比如双击恢复宽度），不算拖动
+    // 未发生实际位移的点击（如双击重置宽度）不触发宽度变更
     if (drag.value === null) {
       return;
     }
     drag.value = null;
     const width = clamp(widthAt(up.clientX));
-    // 拖到最窄就折叠成图标
+    // 拖拽至最小宽度阈值时自动折叠侧栏
     shellSettings.update((draft) => {
       if (width <= min) {
         draft.sidebar.collapsed = true;
@@ -232,7 +231,7 @@ function startDrag(event: MouseEvent): void {
   });
 }
 
-// 取消固定：侧栏收起，鼠标还在上面所以先保持展开，移开后收回；固定：一直展开
+// 取消固定时收起侧栏并开启悬停展开（因光标仍在侧栏上故暂保持展开）；固定后恢复常驻展开
 function togglePinned(): void {
   const unpin = !hoverExpanded.value;
   shellSettings.update((draft) => {
@@ -242,7 +241,7 @@ function togglePinned(): void {
   hovering.value = unpin;
 }
 
-// 双列：取消固定后第二列收起，鼠标还在上面所以先浮着，移开后收回
+// 双列布局：取消固定后次列切换为悬停浮动展开，移开光标后自动收起
 function togglePanelPinned(): void {
   shellSettings.update((draft) => {
     draft.sidebar.collapsed = panelPinned.value;
@@ -284,7 +283,7 @@ async function switchRole(roleId: string): Promise<void> {
     return;
   }
   await auth.switchRole(roleId);
-  // 偏好有角色默认层，换了角色要重新读
+  // 偏好设置包含角色默认配置层，切换角色后需重新加载
   await shellSettings.load();
   workspace.onEpochChange();
   message.success(t.header.roleSwitched.replace('{role}', me.value?.currentRole.name ?? ''));
@@ -501,7 +500,7 @@ async function resetSettings(): Promise<void> {
   background: var(--kmic-sidebar-background);
   border-right: 1px solid var(--kmic-sidebar-border);
 
-  // 内容区宽度一次到位，避免表格逐帧重算
+  // 仅侧栏使用过渡动画，内容区宽度一步到位，避免表格等组件逐帧重算
   transition:
     width var(--kmic-motion-slow) var(--kmic-easing-drawer),
     transform var(--kmic-motion-slow) var(--kmic-easing-drawer);
@@ -608,7 +607,7 @@ async function resetSettings(): Promise<void> {
   font-weight: 600;
 }
 
-// 底部 42px 留给折叠、固定按钮，菜单不会被挡住
+// 底部预留 42px 空间给折叠与固定按钮，避免遮挡菜单项
 .menu-scroll {
   flex: 1;
   margin-bottom: 42px;
@@ -668,7 +667,7 @@ async function resetSettings(): Promise<void> {
   top: var(--kmic-header-height);
 }
 
-// 拖动时盖一层，鼠标移到哪都保持拖动的光标，也不会选中文字
+// 拖拽全局遮罩层：维持调整光标样式并禁止文本选中
 .drag-overlay {
   position: fixed;
   inset: 0;

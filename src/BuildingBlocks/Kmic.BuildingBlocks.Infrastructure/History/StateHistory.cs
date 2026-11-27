@@ -9,20 +9,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.BuildingBlocks.Infrastructure.History;
 
-/// <summary>
-/// 业务历史：有状态机的聚合每次流转写一行
-/// </summary>
+// 状态流转历史记录器（每次状态机流转后写入只追加记录）
 internal static class StateHistory
 {
-    /// <summary>
-    /// 标记只追加的表：建表迁移会收回运行账号的修改和删除权限
-    /// </summary>
+    // 建表迁移据此回收运行账号的 UPDATE/DELETE 权限
     public const string AppendOnlyAnnotation = "Kmic:AppendOnly";
 
     private const string TableSuffix = "StateHistory";
     private const BindingFlags StaticMembers = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
-    // 聚合根里有一个状态机的静态成员，就是有状态的聚合
+    // 凡包含状态机静态成员的聚合根均视为有状态聚合
     public static bool IsStateful(Type type)
     {
         for (var current = type; current is not null; current = current.BaseType)
@@ -38,9 +34,6 @@ internal static class StateHistory
 
     public static string TableName(Type aggregate) => aggregate.Name + TableSuffix;
 
-    /// <summary>
-    /// 给模型里每个有状态的聚合映射一张历史表
-    /// </summary>
     public static void Map(ModelBuilder modelBuilder)
     {
         var aggregates = modelBuilder.Model.GetEntityTypes()
@@ -64,15 +57,12 @@ internal static class StateHistory
                 history.Property(r => r.Reason).HasMaxLength(2000);
                 history.Property(r => r.TraceId).HasMaxLength(32);
 
-                // 不建外键：聚合被物理删除之后，历史还要留着
+                // 不建立外键约束，确保聚合根物理删除后历史记录仍保留
                 history.HasIndex(r => new { r.AggregateId, r.OccurredAt });
             });
         }
     }
 
-    /// <summary>
-    /// 把聚合里记着的流转写进历史表，写完清掉
-    /// </summary>
     public static void Write(DbContext context, IExecutionContext execution, DateTimeOffset now)
     {
         var roots = context.ChangeTracker.Entries<IAggregateRoot>().Where(e => e.Entity.StateTransitions.Count > 0).ToList();
@@ -88,7 +78,7 @@ internal static class StateHistory
             var name = TableName(root.Metadata.ClrType);
             if (context.Model.FindEntityType(name) is null)
             {
-                throw new InvalidOperationException($"{root.Metadata.ClrType.Name} 有状态流转，但模型里没有 {name} 表。聚合根要用 private static readonly 字段声明状态机。");
+                throw new InvalidOperationException($"{root.Metadata.ClrType.Name} 存在状态流转，但模型中未配置 {name} 表。聚合根须通过 private static readonly 字段声明状态机。");
             }
 
             var aggregateId = ((IStronglyTypedId)root.Property(nameof(Entity<>.Id)).CurrentValue!).Value;

@@ -4,13 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Kmic.ArchitectureTests.Support;
 
-/// <summary>
-/// 读方法体的 IL，列出里面调用的方法
-/// </summary>
-/// <remarks>
-/// 架构规则里“某类型不得调用某方法”用它检查。async 方法和 lambda 的方法体在编译器生成的嵌套类型里，
-/// 所以一个类型调用了什么，要把它的嵌套类型（递归）也算进去
-/// </remarks>
+// 解析方法体 IL 指令（含 async 与 lambda 生成的嵌套类型）提取方法调用
 internal static class IlCalls
 {
     private const BindingFlags AllMembers = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -35,9 +29,6 @@ internal static class IlCalls
         }
     }
 
-    /// <summary>
-    /// 类型自己和它的编译器生成的嵌套类型里调用的全部方法
-    /// </summary>
     public static IEnumerable<MethodBase> CalledBy(Type type)
     {
         foreach (var method in type.GetMethods(AllMembers).Cast<MethodBase>().Concat(type.GetConstructors(AllMembers)))

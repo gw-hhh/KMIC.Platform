@@ -5,12 +5,9 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens;
 
-/// <summary>
-/// 示例的操作权限
-/// </summary>
+/// <summary>仅允许示例负责人执行操作</summary>
 public sealed class SpecimenPolicy : IResourcePolicy<Specimen, SpecimenAction>
 {
-    /// <inheritdoc />
     public PolicyDecision Evaluate(IAccessContext access, Specimen resource, SpecimenAction action)
     {
         ArgumentNullException.ThrowIfNull(access);

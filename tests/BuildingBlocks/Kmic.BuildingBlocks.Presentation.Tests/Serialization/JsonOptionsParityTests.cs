@@ -9,10 +9,7 @@ using HttpJsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Serialization;
 
-/// <summary>
-/// 写进 ASP.NET Core 的选项和全系统共用的选项逐项相同：
-/// 否则 HTTP 与幂等记录、Outbox 的序列化结果会不一致
-/// </summary>
+// 校验 ASP.NET Core 与全局共用的 JsonSerializerOptions 逐项一致，防止 HTTP 与幂等/Outbox 序列化结果不一致
 public sealed class JsonOptionsParityTests
 {
     // 解析器链和只读状态不是“设置”，转换器单独比较

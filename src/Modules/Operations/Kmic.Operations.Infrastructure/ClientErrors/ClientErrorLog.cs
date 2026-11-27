@@ -4,17 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.Operations.Infrastructure.ClientErrors;
 
-/// <summary>
-/// 把前端上报的错误写成 Warning 级结构化日志，分类 Kmic.ClientErrors
-/// </summary>
-/// <remarks>
-/// 日志分类固定，不随类型改名
-/// </remarks>
 internal sealed partial class ClientErrorLog(ILoggerFactory loggers) : IClientErrorLog
 {
-    /// <summary>
-    /// 日志分类，观测平台上的筛选条件
-    /// </summary>
+    // 日志分类固定，作观测平台筛选条件，不随类型重命名
     public const string Category = "Kmic.ClientErrors";
 
     private readonly ILogger _logger = loggers.CreateLogger(Category);

@@ -11,17 +11,9 @@ using Quartz;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 定时任务注册
-/// </summary>
 public static class SchedulingServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册调度器（待机）、定时任务目录和启动同步，两种角色都要调用
-    /// </summary>
-    /// <remarks>
-    /// 只调用它的实例不执行任务，要执行再调用 <see cref="AddKmicSchedulerWorker"/>
-    /// </remarks>
+    /// <summary>注册调度器客户端、定时任务目录与启动同步任务（Api 与 Worker 均需调用；Worker 须额外调用 AddKmicSchedulerWorker）</summary>
     public static IServiceCollection AddKmicScheduler(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -41,7 +33,7 @@ public static class SchedulingServiceCollectionExtensions
         services.TryAddSingleton<IScheduledJobControl, ScheduledJobControl>();
         services.AddTransient<CommandJob>();
         services.AddScoped<IStartupTask, SyncSchedulesTask>();
-        // 调度器用容器里的 TimeProvider。不在这里指定：Quartz 会把它注册成全容器的时钟，盖掉宿主的
+        // 调度器直接复用 DI 容器中的 TimeProvider；此处不显式配置，避免 Quartz 将其注册为全局时钟并覆盖宿主时钟
         services.AddQuartz(q =>
         {
             q.UsePersistentStore(store =>
@@ -60,9 +52,7 @@ public static class SchedulingServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 在本实例上执行定时任务，Worker 角色调用
-    /// </summary>
+    /// <summary>启用本实例的定时任务调度与执行能力（供 Worker 角色调用）</summary>
     public static IServiceCollection AddKmicSchedulerWorker(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

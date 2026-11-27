@@ -3,9 +3,6 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.Identity.Infrastructure.Access;
 
-/// <summary>
-/// 一个请求或作业的访问上下文
-/// </summary>
 internal sealed record AccessContext : IAccessContext
 {
     public required UserId UserId { get; init; }

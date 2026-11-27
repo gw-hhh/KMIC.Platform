@@ -1,23 +1,13 @@
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 安全事件表
-/// </summary>
-/// <remarks>
-/// 表属于 Identity 模块，由它的迁移执行这里的建表语句
-/// </remarks>
+/// <summary>安全事件表定义（归属 Identity 模块，由其迁移执行建表）</summary>
 public static class SecurityEventTable
 {
-    /// <summary>
-    /// 带 schema 的表名
-    /// </summary>
     public const string Name = """
         "Identity"."SecurityEvent"
         """;
 
-    /// <summary>
-    /// 建表语句，含索引、表注释，并收回运行账号的修改与删除权限
-    /// </summary>
+    /// <summary>建表 DDL（含索引、表注释，并收回运行账号的更新与删除权限）</summary>
     public const string CreateSql = """
         CREATE TABLE "Identity"."SecurityEvent" (
             "Id" uuid NOT NULL,

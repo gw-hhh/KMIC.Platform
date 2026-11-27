@@ -5,17 +5,17 @@ export interface RouteCatalog {
   readonly entries: readonly RouteEntry[];
   readonly groups: readonly MenuGroup[];
   find(name: string): RouteEntry | undefined;
-  /** 标签键，同一个键只开一个标签 */
+  /** 生成标签页唯一键；相同键仅保留单个标签页 */
   tabKey(name: string, params: RouteParams, instance?: string): string;
   menu(has: (permission: PermissionCode) => boolean): readonly MenuNode[];
   breadcrumb(name: string): readonly Crumb[];
 }
 
-/** 汇总各模块的路由并校验 */
+/** 汇总各模块路由与菜单分组并执行完整性校验 */
 export function createRouteCatalog(entries: readonly RouteEntry[], groups: readonly MenuGroup[]): RouteCatalog {
   const problems = validate(entries, groups);
   if (problems.length > 0) {
-    throw new Error(`路由目录有问题：\n${problems.map((problem) => `- ${problem}`).join('\n')}`);
+    throw new Error(`路由目录校验失败：\n${problems.map((problem) => `- ${problem}`).join('\n')}`);
   }
 
   const byName = new Map(entries.map((entry) => [entry.name, entry]));
@@ -28,7 +28,7 @@ export function createRouteCatalog(entries: readonly RouteEntry[], groups: reado
     tabKey(name, params, instance) {
       const entry = byName.get(name);
       if (!entry) {
-        throw new Error(`路由 ${name} 不在目录里`);
+        throw new Error(`路由 ${name} 不在目录中`);
       }
       switch (entry.tab.mode) {
         case 'singleton':
@@ -71,7 +71,7 @@ function validate(entries: readonly RouteEntry[], groups: readonly MenuGroup[]):
   }
   for (const group of groups) {
     if (group.parent !== undefined && !groupKeys.has(group.parent)) {
-      problems.push(`菜单目录 ${group.key} 的上级 ${group.parent} 没有声明`);
+      problems.push(`菜单目录 ${group.key} 的上级目录 ${group.parent} 未声明`);
     }
   }
 
@@ -88,18 +88,18 @@ function validate(entries: readonly RouteEntry[], groups: readonly MenuGroup[]):
     paths.set(entry.path, entry.name);
 
     if (entry.menu && !groupKeys.has(entry.menu.group)) {
-      problems.push(`路由 ${entry.name} 的菜单目录 ${entry.menu.group} 没有声明`);
+      problems.push(`路由 ${entry.name} 关联的菜单目录 ${entry.menu.group} 未声明`);
     }
     if (entry.tab.mode === 'byParams') {
       for (const param of entry.tab.params.filter((p) => !entry.path.includes(`:${p}`))) {
-        problems.push(`路由 ${entry.name} 按参数 ${param} 区分标签，但路径 ${entry.path} 里没有这个参数`);
+        problems.push(`路由 ${entry.name} 按参数 ${param} 区分标签页，但路径 ${entry.path} 中缺少该参数`);
       }
     }
   }
 
   for (const entry of entries) {
     if (entry.parent !== undefined && !names.has(entry.parent)) {
-      problems.push(`路由 ${entry.name} 的上级 ${entry.parent} 不在目录里`);
+      problems.push(`路由 ${entry.name} 的上级路由 ${entry.parent} 不在目录中`);
     }
   }
   return problems;
@@ -128,7 +128,7 @@ function buildMenu(
 
     for (const group of groups.filter((g) => g.parent === parent)) {
       const children = build(group.key);
-      // 目录下没有可显示的条目时不显示
+      // 隐藏无可见子项的菜单目录
       if (children.length > 0) {
         items.push({
           order: group.order,

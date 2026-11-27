@@ -7,16 +7,12 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Attachments.Remove;
 
-/// <summary>
-/// 移除示例的附件
-/// </summary>
 public sealed class RemoveSpecimenAttachmentCommandHandler(
     ISpecimenRepository specimens,
     IResourceAuthorizer<Specimen, SpecimenAction> authorizer,
     IFileAttachments files)
     : ICommandHandler<RemoveSpecimenAttachmentCommand, VersionedResponse<SpecimenId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(RemoveSpecimenAttachmentCommand command, CancellationToken cancellationToken)
     {
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

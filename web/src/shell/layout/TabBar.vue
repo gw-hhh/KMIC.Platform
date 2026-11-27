@@ -45,7 +45,6 @@ function menuFor(tab: Tab): MenuProps {
     tabs.value.some((other, otherIndex) => !other.pinned && other.key !== tab.key && predicate(other, otherIndex));
   const isHome = tab.routeName === homeRouteName;
   const icon = (name: IconName) => h(KIcon, { name, size: 16 });
-  // 顺序、图标、分隔照 Vben 的标签右键菜单
   return {
     items: [
       { key: 'close', label: t.close, icon: icon('close'), disabled: tab.pinned },
@@ -108,7 +107,7 @@ async function runMenuAction(action: string, tab: Tab, index: number): Promise<v
 const activeTab = computed(() => tabs.value.find((tab) => tab.key === workspace.activeKey.value));
 
 function onMouseDown(event: MouseEvent, tab: Tab): void {
-  // 中键关闭，和浏览器一致
+  // 鼠标中键关闭标签页
   if (event.button === 1 && !tab.pinned) {
     event.preventDefault();
     void workspace.close(tab.key);
@@ -153,7 +152,7 @@ function onWheel(event: WheelEvent): void {
   }
 }
 
-// 当前标签滚动到可见位置
+// 自动将当前活动标签页滚动至可视区域内
 watch(
   () => workspace.activeKey.value,
   async () => {
@@ -181,7 +180,7 @@ onMounted(() => {
         if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
           return;
         }
-        // 先还原 DOM，顺序由工作区修改
+        // 还原 Sortable 产生的 DOM 变更，统一交由工作区状态驱动视图排序
         from.removeChild(item);
         from.insertBefore(item, from.children[oldIndex] ?? null);
         workspace.move(oldIndex, newIndex);
@@ -299,7 +298,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
-// 尺寸、颜色、动画照 Vben Admin 的 tabs-ui（MIT）
+// 尺寸、配色与动效参考 Vben Admin 的 tabs-ui（MIT）
 $gap: 7px;
 
 .tab-bar {
@@ -377,7 +376,7 @@ $gap: 7px;
   }
 }
 
-// 新增、关闭标签时从左侧滑入滑出，其余标签平移让位
+// 标签页增删时自左侧滑入滑出，其余标签页平滑位移让位
 .tab-slide-enter-active,
 .tab-slide-leave-active {
   transition:
@@ -453,7 +452,7 @@ $gap: 7px;
   }
 }
 
-// 关闭按钮一直显示，贴在标签内侧右边
+// 关闭按钮常驻显示，固定贴合于标签内侧右端
 .extra {
   position: absolute;
   top: 50%;
@@ -488,7 +487,6 @@ $gap: 7px;
   }
 }
 
-// 谷歌样式
 .style-chrome {
   .scroller {
     padding-top: 3px;
@@ -595,7 +593,6 @@ $gap: 7px;
   }
 }
 
-// 卡片、朴素、轻快：标题左右 12/16px，关闭按钮离右边 6px，当前标签的关闭按钮跟着变色
 .style-card,
 .style-plain,
 .style-brisk {
@@ -651,7 +648,7 @@ $gap: 7px;
   }
 }
 
-// 轻快：底部主色线，悬停时从左往右展开
+// 轻快风格：底部主色指示线在悬停或激活时自左向右展开
 .style-brisk .tab {
   &::after {
     position: absolute;

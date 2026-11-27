@@ -3,16 +3,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Observability;
 
-/// <summary>
-/// 数据库侧观测的服务注册
-/// </summary>
 public static class ObservabilityServiceCollectionExtensions
 {
     private static readonly TimeSpan _minSampleInterval = TimeSpan.FromSeconds(5);
 
-    /// <summary>
-    /// 注册配置与慢查询拦截器，数据库上下文创建时挂上，由 AddKmicPersistence 调用
-    /// </summary>
     internal static IServiceCollection AddKmicSlowQueryLog(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -25,9 +19,7 @@ public static class ObservabilityServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 注册积压采样：每个实例定期统计消息、作业与定时任务的积压，积压量表读取采样结果
-    /// </summary>
+    /// <summary>注册积压采样后台服务，定期采集消息、作业及定时任务积压指标</summary>
     public static IServiceCollection AddKmicBacklogSampling(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -37,10 +29,7 @@ public static class ObservabilityServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 登记模块的积压量表，由积压采样器定期读取
-    /// </summary>
-    /// <typeparam name="T">量表的实现</typeparam>
+    /// <summary>注册模块积压量表</summary>
     public static IServiceCollection AddKmicBacklogGauges<T>(this IServiceCollection services)
         where T : class, IBacklogGauges
     {

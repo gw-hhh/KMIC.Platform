@@ -13,12 +13,10 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Kmic.Identity.Infrastructure.Access;
 
-/// <summary>
-/// 加载访问上下文，会话和用户状态每次查库
-/// </summary>
+// 每次实时查库核对会话与用户状态，角色与组织树快照按版本缓存
 internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCache cache, PermissionCatalog permissions, TimeProvider time) : IAccessContextLoader
 {
-    // 后台作业没有会话，访问上下文里的会话用这个固定值
+    // 后台作业无会话，访问上下文中的会话 ID 使用固定占位值
     private static readonly SessionId _jobSession = SessionId.From(new Guid("00000000-0000-0000-0000-0000000000a1"));
 
     private static readonly HybridCacheEntryOptions _versionedEntry = new()
@@ -29,11 +27,9 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
 
     private static readonly DataScopeGrant _selfOnly = new(ScopeLevel.Self, FrozenDictionary<string, ScopeLevel>.Empty, [], FrozenDictionary<string, IReadOnlyList<Guid>>.Empty);
 
-    /// <inheritdoc />
     public async Task<AccessLoadResult> LoadForRequestAsync(UserId user, SessionId session, RoleId role, CancellationToken ct) =>
         await queries.RunAsync<IdentityQueryDbContext, AccessLoadResult>(CallOrigin.Http, (db, token) => LoadRequestAsync(db, user, session, role, token), ct);
 
-    /// <inheritdoc />
     public async Task<IAccessContext?> LoadForJobAsync(UserId user, RoleId role, CancellationToken ct) =>
         await queries.RunAsync<IdentityQueryDbContext, IAccessContext?>(CallOrigin.BackgroundJob, (db, token) => LoadJobAsync(db, user, role, token), ct);
 
@@ -159,7 +155,7 @@ internal sealed class AccessContextLoader(IQueryScopeFactory queries, HybridCach
                 .SingleOrDefaultAsync(r => r.Id == roleId, ct)
                 ?? throw new InvalidOperationException($"授予指向不存在的角色 {roleId.Value}。");
 
-            // 全权限角色使用当前目录的全部权限，其余角色过滤掉已退役权限
+            // 全权限角色使用当前目录全部权限，其余角色过滤已废弃权限
             var codes = role.GrantsAllPermissions
                 ? catalog.All.Select(p => p.Code)
                 : role.Permissions.Select(p => p.PermissionCode).Where(catalog.Contains);

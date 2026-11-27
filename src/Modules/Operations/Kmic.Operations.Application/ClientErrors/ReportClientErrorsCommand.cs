@@ -3,13 +3,8 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Operations.Application.ClientErrors;
 
-/// <summary>
-/// 批量上报前端错误
-/// </summary>
-/// <remarks>
-/// 超限返回 429，前端不要重试
-/// </remarks>
-/// <param name="Errors">一批错误</param>
+/// <summary>批量上报前端错误（超限时返回 429，前端不应重试）。</summary>
+/// <param name="Errors">错误列表</param>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]

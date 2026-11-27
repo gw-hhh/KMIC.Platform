@@ -1,6 +1,6 @@
 namespace Kmic.BuildingBlocks.Application.Authorization;
 
-// 注册时不知道资源和动作的类型参数，通过它读取权限点
+// 服务注册阶段尚未确定资源与动作的泛型参数，通过此非泛型接口读取权限点
 internal interface IResourceActionCatalog
 {
     IEnumerable<string> Permissions { get; }

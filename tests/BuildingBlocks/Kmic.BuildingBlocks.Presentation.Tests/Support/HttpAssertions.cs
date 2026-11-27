@@ -14,9 +14,6 @@ internal static class HttpAssertions
         return document.RootElement.Clone();
     }
 
-    /// <summary>
-    /// 断言是统一格式的错误响应，返回解析后的响应体
-    /// </summary>
     public static async Task<JsonElement> ShouldBeProblemAsync(this HttpResponseMessage response, int status, string code)
     {
         ((int)response.StatusCode).ShouldBe(status);

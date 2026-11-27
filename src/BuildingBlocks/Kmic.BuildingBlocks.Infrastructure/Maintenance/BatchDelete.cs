@@ -2,15 +2,9 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
-/// <summary>
-/// 分批删除
-/// </summary>
+// 按条件分批删除，每批独立提交直至清空
 internal static class BatchDelete
 {
-    /// <summary>
-    /// 按条件一批一批删，每批单独提交，删完为止
-    /// </summary>
-    /// <returns>删除的总行数</returns>
     public static async Task<long> RunAsync(
         NpgsqlDataSource database, string table, string condition, IReadOnlyDictionary<string, object> parameters, int batchSize, CancellationToken ct)
     {
@@ -32,7 +26,7 @@ internal static class BatchDelete
                 return total;
             }
 
-            // 批与批之间让一下，别的事务能拿到锁
+            // 批次间短暂让出，减少对其他事务的锁竞争
             await Task.Yield();
         }
     }

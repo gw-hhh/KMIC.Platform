@@ -1,8 +1,6 @@
 namespace Kmic.Identity.Domain.Sessions;
 
-/// <summary>
-/// 一次轮换的结果与新令牌
-/// </summary>
+/// <summary>刷新令牌轮换结果。</summary>
 public sealed class Rotation
 {
     private Rotation(RotationOutcome outcome, RefreshToken? newToken)
@@ -11,14 +9,9 @@ public sealed class Rotation
         NewToken = newToken;
     }
 
-    /// <summary>
-    /// 结果
-    /// </summary>
     public RotationOutcome Outcome { get; }
 
-    /// <summary>
-    /// 轮换成功时的新令牌
-    /// </summary>
+    /// <summary>轮换成功时签发的新令牌。</summary>
     public RefreshToken? NewToken { get; }
 
     internal static Rotation Rotated(RefreshToken newToken) => new(RotationOutcome.Rotated, newToken);

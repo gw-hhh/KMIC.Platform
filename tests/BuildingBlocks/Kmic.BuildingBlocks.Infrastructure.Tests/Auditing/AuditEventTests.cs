@@ -14,9 +14,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Auditing;
 
-/// <summary>
-/// 审计事件和业务数据同一事务写进 Outbox。每个测试用自己的单据，按单据 ID 找自己的事件
-/// </summary>
 public sealed class AuditEventTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));

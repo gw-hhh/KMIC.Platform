@@ -11,9 +11,6 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Files.Application.Attachments;
 
-/// <summary>
-/// 写入并请求登记模块生成的文件
-/// </summary>
 public sealed class GeneratedFiles(
     IFileUploadProcessor processor,
     IStorageKeyFactory keys,
@@ -22,7 +19,6 @@ public sealed class GeneratedFiles(
     IOptions<FilesOptions> options,
     TimeProvider time) : IGeneratedFiles
 {
-    /// <inheritdoc />
     public async Task<Result<GeneratedFile>> WriteAsync(string source, string fileName, Stream content, TimeSpan retention, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
@@ -71,7 +67,6 @@ public sealed class GeneratedFiles(
             now + retention);
     }
 
-    /// <inheritdoc />
     [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = "实现 IGeneratedFiles.Register，需在此构造登记请求")]
     public void Register(GeneratedFile file)
     {

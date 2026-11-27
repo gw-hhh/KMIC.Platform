@@ -4,7 +4,7 @@ namespace Kmic.BuildingBlocks.Infrastructure.Persistence;
 
 internal static class EntityKinds
 {
-    // 框架表和读模型不继承 Entity<TId>，审计列、版本号这些约定只加在继承它的业务实体上
+    // 框架表与读模型不继承 Entity<TId>，审计列及并发版本号等约定仅应用于继承它的业务实体
     public static bool IsBusinessEntity(Type? type)
     {
         for (var current = type; current is not null; current = current.BaseType)

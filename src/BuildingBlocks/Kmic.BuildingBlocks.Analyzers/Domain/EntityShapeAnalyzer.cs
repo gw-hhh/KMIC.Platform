@@ -5,9 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
-/// <summary>
-/// KM0103～KM0105：实体通过工厂方法创建，属性对外只读，不公开可变集合
-/// </summary>
+/// <summary>KM0103～KM0105：规范实体的构造方式、属性只读性与集合封装。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EntityShapeAnalyzer : DiagnosticAnalyzer
 {
@@ -15,27 +13,25 @@ public sealed class EntityShapeAnalyzer : DiagnosticAnalyzer
         "KM0103",
         Rules.DomainCategory,
         "实体的构造函数必须私有",
-        "实体 {0} 的构造函数要改为 private（抽象基类可以是 protected），通过工厂方法创建",
-        "实体只能通过工厂方法创建，创建时的校验才不会被绕过。");
+        "实体 {0} 的构造函数必须为 private（抽象基类可为 protected），请通过工厂方法创建实例",
+        "实体仅能通过工厂方法创建，以确保创建时的校验逻辑不被绕过。");
 
     internal static readonly DiagnosticDescriptor WritableProperty = Rules.Create(
         "KM0104",
         Rules.DomainCategory,
         "实体属性对外只读",
-        "实体属性 {0} 只能有 private set，去掉非私有的 setter 或 init",
-        "实体的状态只能通过它的业务方法修改。");
+        "实体属性 {0} 仅允许 private set，请移除非私有的 setter 或 init",
+        "实体的状态只能通过其业务方法变更。");
 
     internal static readonly DiagnosticDescriptor MutableCollection = Rules.Create(
         "KM0105",
         Rules.DomainCategory,
-        "实体不能公开可变集合",
-        "实体成员 {0} 公开了可变集合，改为 private readonly List<T> 字段加 IReadOnlyList<T> 属性",
-        "外部拿到可变集合就能直接增删元素，绕过实体的业务方法。");
+        "实体禁止公开可变集合",
+        "实体成员 {0} 公开了可变集合，请改为 private readonly List<T> 字段并对外暴露 IReadOnlyList<T> 属性",
+        "外部若直接持有可变集合，可能跳过实体的业务方法直接增删元素。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [NonPrivateConstructor, WritableProperty, MutableCollection];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -66,7 +62,7 @@ public sealed class EntityShapeAnalyzer : DiagnosticAnalyzer
                 || (type.IsAbstract && constructor.DeclaredAccessibility is Accessibility.Protected or Accessibility.ProtectedAndInternal);
             if (!allowed)
             {
-                // 没写构造函数时编译器会补一个公开的无参构造函数，报在类型上
+                // 未显式声明构造函数时，编译器会生成隐式 public 无参构造函数，此时将诊断定位到类型声明处
                 var location = constructor.IsImplicitlyDeclared ? type.Locations[0] : constructor.Locations[0];
                 context.ReportDiagnostic(Diagnostic.Create(NonPrivateConstructor, location, type.Name));
             }

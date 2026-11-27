@@ -21,9 +21,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 处理一个模块 Inbox 里的消息
-/// </summary>
 internal sealed class InboxProcessor(
     ModuleFrameworkTables tables,
     DataSources dataSources,
@@ -35,9 +32,6 @@ internal sealed class InboxProcessor(
 {
     private NpgsqlDataSource Database => dataSources.Transactions(CallOrigin.Inbox);
 
-    /// <summary>
-    /// 领取一批并处理，返回领取到的条数
-    /// </summary>
     public async Task<int> ProcessBatchAsync(string module, CancellationToken ct)
     {
         var token = Guid.CreateVersion7();
@@ -58,8 +52,8 @@ internal sealed class InboxProcessor(
             return [];
         }
 
-        // 只领取本实例代码认识的订阅：新订阅的消息留给新版本的实例处理
-        // 有序订阅：同一个键前面还有没完成或进了死信的消息时，这条先不领
+        // 仅领取当前实例已注册的订阅消息，未知或新增订阅留待对应版本的实例处理
+        // 有序订阅：若同一顺序键存在尚未完成或已进入死信的前置消息，则暂不领取后续消息
         var inbox = tables.For(module).Inbox;
         await using var command = Database.CreateCommand(
             $"""
@@ -111,7 +105,7 @@ internal sealed class InboxProcessor(
         return claimed;
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "处理器的任何异常都只影响这一条消息，记为可重试的失败，循环继续处理别的消息")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "单条消息处理异常仅记录为当前消息失败，不中断循环继续处理后续消息")]
     public async Task<InboxResult> ProcessAsync(string module, ClaimedInboxMessage message, Guid token, CancellationToken ct)
     {
         var started = TimeProvider.System.GetTimestamp();
@@ -124,15 +118,15 @@ internal sealed class InboxProcessor(
     {
         if (subscriptions.Find(message.Subscription, message.SchemaVersion) is not { } subscription)
         {
-            return await RecordFailureAsync(module, message, token, $"本实例的订阅 {message.Subscription} 不处理版本 {message.SchemaVersion}。", dead: true, null, ct);
+            return await RecordFailureAsync(module, message, token, $"当前实例的订阅 {message.Subscription} 不支持处理版本 {message.SchemaVersion}。", dead: true, null, ct);
         }
 
         object payload;
         MessageHeaders headers;
         try
         {
-            payload = JsonSerializer.Deserialize(message.Payload, subscription.Message.ClrType, KmicJsonOptions.Stored) ?? throw new JsonException("消息内容是 null。");
-            headers = JsonSerializer.Deserialize<MessageHeaders>(message.Headers, KmicJsonOptions.Stored) ?? throw new JsonException("信封是 null。");
+            payload = JsonSerializer.Deserialize(message.Payload, subscription.Message.ClrType, KmicJsonOptions.Stored) ?? throw new JsonException("消息载荷反序列化结果为空。");
+            headers = JsonSerializer.Deserialize<MessageHeaders>(message.Headers, KmicJsonOptions.Stored) ?? throw new JsonException("消息信封反序列化结果为空。");
         }
         catch (JsonException exception)
         {
@@ -185,17 +179,17 @@ internal sealed class InboxProcessor(
             return InboxResult.TakenOver;
         }
 
-        // 容量保护拒绝了处理时要产生的消息：消息本身没有问题，不能消耗尝试次数，也不会进死信
+        // 因容量保护拒绝写入衍生消息时，原消息本身无异常，不计入重试次数且不进入死信
         if (string.Equals(result.Error.Code, CommonErrors.MessagingSuspended.Code, StringComparison.Ordinal))
         {
             return await RecordFailureAsync(module, message, token, $"{result.Error.Code}：{result.Error.Message}", dead: false, null, ct, suspended: true);
         }
 
-        // 暂时不满足的会自己好起来，按退避重试；其余业务失败重试也没用，直接进死信等人看
+        // 暂时性错误按退避策略重试；其余业务错误直接进入死信队列待人工处理
         return await RecordFailureAsync(module, message, token, $"{result.Error.Code}：{result.Error.Message}", dead: !IsRetryable(result.Error), null, ct);
     }
 
-    // 处理消息不是原请求的一部分：开新的追踪，链接回发布它的请求，两边都能顺着链接找到对方
+    // 开启独立追踪并关联原始发布请求，便于双向溯源
     private static Activity? StartActivity(ClaimedInboxMessage message, MessageHeaders headers)
     {
         IEnumerable<ActivityLink> links = ActivityContext.TryParse(headers.TraceParent, headers.TraceState, out var origin) ? [new ActivityLink(origin)] : [];
@@ -262,7 +256,7 @@ internal sealed class InboxProcessor(
         return InboxResult.Failed;
     }
 
-    // 记录失败影响了 0 行：重新读出来看实际状态，不猜测，也不重新执行
+    // 更新失败状态未命中行时重新读取实际状态，不猜测也不重复执行
     private async Task<InboxResult> ClassifyAsync(string inbox, ClaimedInboxMessage message, Guid token, CancellationToken ct)
     {
         await using var command = Database.CreateCommand($"""SELECT "Status", "LeaseToken" FROM {inbox} WHERE "Id" = @id""");

@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Configuration.Application.Dictionaries.Admin;
 
-/// <summary>
-/// 查询字典类型列表
-/// </summary>
 public sealed class ListDictionaryTypesQueryHandler(IConfigurationQueryDb db) : IQueryHandler<ListDictionaryTypesQuery, IReadOnlyList<DictionaryTypeListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<IReadOnlyList<DictionaryTypeListItem>>> Handle(ListDictionaryTypesQuery query, CancellationToken cancellationToken)
     {
         List<DictionaryTypeListItem> items = await db.DictionaryTypes

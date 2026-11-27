@@ -10,13 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Identity.Application.Organization.Disable;
 
-/// <summary>
-/// 停用组织单元
-/// </summary>
 public sealed class DisableOrgUnitCommandHandler(IOrgTreeRepository trees, IIdentityCommandReads db, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<DisableOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<OrgTreeId>>> ExecuteAsync(DisableOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         // 与用户组织分配操作使用同一组织树锁，防止停用检查期间新增所属用户

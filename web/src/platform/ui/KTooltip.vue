@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 悬停提示：浅灰底、细边框、鼠标一移上去就出现，样式照 Vben Admin 的提示（MIT）
+// 悬停提示：浅灰底色、细边框与零延迟触发，样式参考 Vben Admin（MIT）
 import { Tooltip, type TooltipProps } from 'antdv-next';
 
 const {
@@ -9,7 +9,7 @@ const {
 } = defineProps<{
   title: string;
   placement?: TooltipProps['placement'];
-  /** 按钮打开了弹出面板时关掉提示，免得盖住面板 */
+  /** 弹出面板打开时隐藏提示，避免遮挡 */
   disabled?: boolean;
 }>();
 </script>
@@ -28,7 +28,7 @@ const {
 </template>
 
 <style lang="scss">
-// 浮层挂在 body 下，只能用不带 scoped 的样式
+// 浮层挂载于 body，需使用全局非 scoped 样式
 .k-tooltip .ant-tooltip-container {
   min-height: 0;
   padding: 6px 12px;

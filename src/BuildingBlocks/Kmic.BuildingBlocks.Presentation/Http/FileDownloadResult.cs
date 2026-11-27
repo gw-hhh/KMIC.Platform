@@ -5,9 +5,6 @@ using Microsoft.Net.Http.Headers;
 
 namespace Kmic.BuildingBlocks.Presentation.Http;
 
-/// <summary>
-/// 把一个 <see cref="FileDownload" /> 写成响应：先打开对象，打不开按错误响应，打开了才写头和内容
-/// </summary>
 internal sealed class FileDownloadResult(FileDownload file, bool inline) : IResult
 {
     private const string InlinePolicy = "sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'";
@@ -23,7 +20,7 @@ internal sealed class FileDownloadResult(FileDownload file, bool inline) : IResu
         }
         catch (FileNotFoundException)
         {
-            // 记录在、对象不在：对象被删除标记覆盖或丢失，等运维还原；不能让人误以为是权限问题
+            // 元数据存在但存储对象缺失（可能被删除标记覆盖或物理丢失），需提示运维排查，避免误判为权限问题
             await new ProblemResult(CommonErrors.FileContentMissing).ExecuteAsync(httpContext);
             return;
         }

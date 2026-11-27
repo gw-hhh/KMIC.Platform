@@ -3,9 +3,6 @@ using Shouldly;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 写入数据库已分配容量：真实数据库，先用迁移程序建好结构，再跑运维命令
-/// </summary>
 public sealed class OperationsOperatorTests(ToolsTemplate template) : IAsyncLifetime
 {
     private const string Key = "Operations.MessagingCapacity";
@@ -53,7 +50,7 @@ public sealed class OperationsOperatorTests(ToolsTemplate template) : IAsyncLife
 
         (await SetAsync(TwentyGiB)).ExitCode.ShouldBe(0);
 
-        (await UpdatedAtAsync()).ShouldBeGreaterThan(rewound, "据此判断容量有没有过期，每小时写一次，值没变时也要往前走");
+        (await UpdatedAtAsync()).ShouldBeGreaterThan(rewound, "据此判断容量数据是否过期；每小时写入一次，即使容量值未变化也应更新时间戳");
         (await CountAsync($"""SELECT count(*) FROM "Configuration"."SystemSettingChange" WHERE "Key" = '{Key}'""")).ShouldBe(1);
     }
 

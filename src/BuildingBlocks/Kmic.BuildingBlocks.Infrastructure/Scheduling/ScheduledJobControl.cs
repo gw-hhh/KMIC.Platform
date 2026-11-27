@@ -9,9 +9,6 @@ using Quartz;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// <see cref="IScheduledJobControl" /> 的实现：包装同步器和调度器，给 Operations 的管理命令用
-/// </summary>
 internal sealed class ScheduledJobControl(
     ISchedulerFactory schedulers,
     ScheduledTasks tasks,
@@ -44,8 +41,8 @@ internal sealed class ScheduledJobControl(
             return ScheduledJobTriggerOutcome.NotFound;
         }
 
-        // Quartz 不让同一个任务并发执行，任务忙时再触发只会排在后面再跑一遍，所以忙时直接拒绝。
-        // 同一任务的手动触发按任务名排队：持锁检查、提交触发，提交完才放锁，后来的请求能看到前一个排队的触发
+        // Quartz 禁止同一任务并发执行，任务运行中再次触发会导致排队重复执行，因此处于忙碌状态时直接拒绝。
+        // 按任务名对手动触发操作加锁排队：依次完成状态检查与触发提交后再释放锁，确保后续请求可观测到前序排队的触发记录
         await using var connection = await dataSources.Transactions(CallOrigin.ScheduledJob).OpenConnectionAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
         await using (var command = new NpgsqlCommand("SELECT pg_advisory_xact_lock(hashtext('Kmic.ScheduledJobTrigger:' || @name))", connection, transaction))
@@ -92,7 +89,7 @@ internal sealed class ScheduledJobControl(
         return new CronPreview(null, times);
     }
 
-    // 看集群共享的表，任务可能在别的实例上：已被领取或正在执行（含即将按计划执行的），或者还有没执行的手动触发
+    // 查询集群共享表以覆盖跨实例场景：检查任务是否已被领取、正在执行（含即将按计划触发）或存在待执行的手动触发
     private static async Task<bool> IsBusyAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, string name, CancellationToken ct)
     {
         await using var command = new NpgsqlCommand(

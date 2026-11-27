@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 上传端点：登记、流式写存储、检查类型与大小、登记结果，每一步的失败都有对应的状态码和文件状态
-/// </summary>
 public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -38,7 +35,7 @@ public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemp
         (await ColumnAsync<string>(seed, fileId, "Sha256")).ShouldBe(Convert.ToHexStringLower(SHA256.HashData(content)));
         (await ColumnAsync<Guid>(seed, fileId, "UploadedBy")).ShouldBe(Alice.UserId.Value);
         var key = (await ColumnAsync<string>(seed, fileId, "StorageKey"))!;
-        key.ShouldNotContain("合同", customMessage: "存储键由文件 ID 生成，和文件名无关");
+        key.ShouldNotContain("合同", customMessage: "存储键应基于文件 ID 生成，与原始文件名无关");
         (await File.ReadAllBytesAsync(StoragePathOf(key), Ct)).ShouldBe(content);
     }
 
@@ -93,7 +90,7 @@ public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemp
         (await JsonAsync(response)).GetProperty("code").GetString().ShouldBe("Files.TooLarge");
         (await RowsAsync(seed, "Rejected")).ShouldBe(before + 1);
         var key = await seed.ScalarAsync<string>("""SELECT "StorageKey" FROM "Files"."StoredFile" WHERE "OriginalName" = '太大.pdf' ORDER BY "UploadedAt" DESC LIMIT 1""");
-        File.Exists(StoragePathOf(key!)).ShouldBeFalse("超过上限时写到一半的内容由存储自己清理");
+        File.Exists(StoragePathOf(key!)).ShouldBeFalse("超出大小限制时，已写入的部分内容应由存储层自动清理");
     }
 
     [Fact]
@@ -107,7 +104,7 @@ public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemp
         var response = await UploadAsync(alice, "声明太大.pdf", Pdf(), declaredSize: Limit * 2);
 
         response.StatusCode.ShouldBe(HttpStatusCode.RequestEntityTooLarge);
-        (await seed.CountAsync("""SELECT count(*) FROM "Files"."StoredFile" """)).ShouldBe(before, "声明就超限的，连登记行都不建");
+        (await seed.CountAsync("""SELECT count(*) FROM "Files"."StoredFile" """)).ShouldBe(before, "声明大小已超限时不应创建文件登记记录");
         metrics.Of("kmic.files.rejected").ShouldHaveSingleItem().Tags["reason"].ShouldBe("too_large");
     }
 
@@ -125,7 +122,7 @@ public sealed class FileUploadTests(ClassDatabase<ApiTemplate> database, ApiTemp
     [Fact]
     public async Task Upload_WithoutThePermissionOfTheProfile_IsForbidden()
     {
-        // 丙有查看和创建，没有“编辑”，而这个档案要的是编辑
+        // 丙仅拥有查看与创建权限，缺少该上传档案所需的编辑权限
         using var carol = ClientFor(Carol);
 
         var response = await UploadAsync(carol, "合同.pdf", Pdf());

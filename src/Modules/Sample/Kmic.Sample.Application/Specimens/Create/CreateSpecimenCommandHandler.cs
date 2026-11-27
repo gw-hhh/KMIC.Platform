@@ -7,13 +7,9 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Create;
 
-/// <summary>
-/// 创建示例
-/// </summary>
 public sealed class CreateSpecimenCommandHandler(ISpecimenRepository specimens, INumberGenerator numbers, IExecutionContext execution)
     : ICommandHandler<CreateSpecimenCommand, CreatedResponse<SpecimenId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<CreatedResponse<SpecimenId>>> Handle(CreateSpecimenCommand command, CancellationToken cancellationToken)
     {
         // 必须明确所属组织，才能按组织限制数据访问范围

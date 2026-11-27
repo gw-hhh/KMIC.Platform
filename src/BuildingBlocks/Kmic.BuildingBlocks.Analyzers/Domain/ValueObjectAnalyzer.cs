@@ -6,52 +6,48 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Kmic.BuildingBlocks.Analyzers.Domain;
 
-/// <summary>
-/// KM0201～KM0205：Domain 里的 record 都按值对象检查，领域事件除外
-/// </summary>
+/// <summary>KM0201～KM0205：领域层中的 record 均按值对象规范检查（领域事件除外）。</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
 {
     internal static readonly DiagnosticDescriptor Shape = Rules.Create(
         "KM0201",
         Rules.DomainCategory,
-        "值对象必须是 sealed record，不用位置参数",
-        "值对象 {0} 要改为 sealed record class，不用位置参数写法",
-        "位置参数会生成公开的构造函数和 init 属性，类型外就能绕过工厂方法创建，或用 with 修改。");
+        "值对象必须为非位置参数的 sealed record",
+        "值对象 {0} 必须声明为 sealed record class，且不能使用位置参数",
+        "位置参数会生成公开构造函数及公有 init 属性，导致外部可绕过工厂方法直接实例化或通过 with 表达式篡改。");
 
     internal static readonly DiagnosticDescriptor NonPrivateConstructor = Rules.Create(
         "KM0202",
         Rules.DomainCategory,
         "值对象的构造函数必须私有",
-        "值对象 {0} 的构造函数要改为 private，通过返回 Result 的工厂方法创建",
-        "值对象只能通过工厂方法创建，校验才不会被绕过。");
+        "值对象 {0} 的构造函数必须为 private，请通过返回 Result 的工厂方法创建",
+        "值对象仅能通过工厂方法创建，以确保校验逻辑不被绕过。");
 
     internal static readonly DiagnosticDescriptor PropertyAccessor = Rules.Create(
         "KM0203",
         Rules.DomainCategory,
         "值对象属性必须是 { get; private init; }",
-        "值对象属性 {0} 要写成 {{ get; private init; }}",
-        "只有 getter 的属性 EF 不会映射，漏了也不报错。private init 还能挡住类型外的 with 表达式。");
+        "值对象属性 {0} 必须声明为 {{ get; private init; }}",
+        "仅有 getter 的属性不会被 EF 映射且遗漏时不报错；private init 同时可防止外部通过 with 表达式修改。");
 
     internal static readonly DiagnosticDescriptor MissingFactory = Rules.Create(
         "KM0204",
         Rules.DomainCategory,
         "值对象必须有返回 Result 的工厂方法",
-        "值对象 {0} 至少要有一个返回 Result<{0}> 的静态工厂方法",
-        "构造函数是私有的，只能通过工厂方法创建，校验失败时返回错误而不是抛异常。");
+        "值对象 {0} 至少须提供一个返回 Result<{0}> 的静态工厂方法",
+        "因构造函数为私有，实例须通过工厂方法创建，并在校验失败时返回 Error 而非抛出异常。");
 
     internal static readonly DiagnosticDescriptor CollectionProperty = Rules.Create(
         "KM0205",
         Rules.DomainCategory,
-        "值对象的集合属性必须只读，并自己实现相等比较",
-        "值对象属性 {0} 是集合，类型要改为 IReadOnlyList<T>，值对象要自己实现 Equals",
-        "record 默认按引用比较集合，两个内容相同的值对象会被判为不相等。");
+        "值对象的集合属性必须只读且自定义相等比较",
+        "值对象集合属性 {0} 必须使用 IReadOnlyList<T> 类型，且值对象须自行实现 Equals",
+        "record 默认按引用比较集合成员，会导致元素内容相同的两个值对象被判为不相等。");
 
-    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         [Shape, NonPrivateConstructor, PropertyAccessor, MissingFactory, CollectionProperty];
 
-    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -123,7 +119,7 @@ public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
             && SymbolEqualityComparer.Default.Equals(returned.OriginalDefinition, resultOfT)
             && SymbolEqualityComparer.Default.Equals(value, type));
 
-    // 计算属性本来就不映射，不受 KM0203 约束
+    // 计算属性无需持久化映射，不受 KM0203 约束
     private static bool IsAutoProperty(IPropertySymbol property, CancellationToken ct) =>
         property.DeclaringSyntaxReferences.All(reference =>
             reference.GetSyntax(ct) is PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors }

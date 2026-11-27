@@ -10,42 +10,40 @@ export type CommandResult<Data> = { ok: true; data: Data } | { ok: false; error:
 export interface CommandHandle<Input, Data> {
   readonly state: Readonly<Ref<CommandState>>;
   readonly error: Readonly<Ref<KmicError | null>>;
-  /** 结果未知，可以用原来的幂等键和内容再发一次确认 */
+  /** 处于结果未知状态，可使用原幂等键与冻结的请求内容重发确认 */
   readonly canConfirm: ComputedRef<boolean>;
-  /** 发起一次提交；保存中重复调用返回同一次的结果 */
+  /** 发起提交；若正处于保存中则返回当前在途请求的 Promise */
   run(input: Input): Promise<CommandResult<Data>>;
-  /** 结果未知时用原键原内容重发，已生效的服务端会重放第一次的结果 */
+  /** 结果未知时以原幂等键重发确认；若服务端已处理，将重放首次结果 */
   confirm(): Promise<CommandResult<Data>>;
-  /** 用户核对过结果后放弃这次提交 */
+  /** 用户核对结果后放弃本次提交，重置为初始状态 */
   reset(): void;
 }
 
 export interface CommandRunnerOptions<Input, Data> {
   def: CommandDef<Input, Data>;
   api: ApiClient;
-  /** 成功后调用，用来失效相关查询 */
+  /** 提交成功后的回调，用于使关联查询缓存失效 */
   onSucceeded?: (data: Data) => void;
   newId?: () => string;
   sleep?: (ms: number) => Promise<void>;
 }
 
-/** 同一个键的请求还在处理时（409 Common.RequestInProgress）的重试间隔 */
+/** 同幂等键请求仍在服务端处理中（409 Common.RequestInProgress）时的重试退避间隔（毫秒） */
 export const inProgressDelays = [1000, 2000, 4000, 4000, 4000] as const;
 
 const unconfirmed = (): KmicError =>
-  new KmicError({ kind: 'client', message: '上次提交的结果还没确认，请先重试确认或核对后再提交' });
+  new KmicError({ kind: 'client', message: '上次提交结果待确认，请先重试确认或核对后再提交' });
 
 const nothingToConfirm = (): KmicError => new KmicError({ kind: 'client', message: '没有需要确认的提交' });
 
 interface Intent<Input> {
-  /** 首次发送时冻结，之后修改表单不影响重试的内容 */
+  /** 首次发送时深拷贝冻结，避免后续表单修改影响重试载荷 */
   input: Input;
   idempotencyKey: string | undefined;
 }
 
-/**
- * 一次提交意图的状态：幂等键、冻结内容、结果未知后的确认
- */
+/** 管理单次提交意图的生命周期：幂等键、载荷冻结与结果未知后的重发确认 */
 export function createCommandRunner<Input, Data>(
   options: CommandRunnerOptions<Input, Data>,
 ): CommandHandle<Input, Data> {
@@ -120,7 +118,7 @@ export function createCommandRunner<Input, Data>(
         }
         error.value = caught;
         if (caught.outcome === 'unknown') {
-          // 没有幂等键的不能安全重发，只能等用户核对
+          // 未启用幂等键时无法安全重发，仅标记为 unknown 等待用户核对
           state.value = 'unknown';
         } else {
           intent = null;
@@ -134,7 +132,7 @@ export function createCommandRunner<Input, Data>(
   return { state: readonly(state), error: readonly(error), canConfirm, run, confirm, reset };
 }
 
-// 请求体本来就要序列化成 JSON，按 JSON 复制一份，也去掉了 Vue 的响应式代理
+// 深拷贝并剥离 Vue 响应式代理
 function freeze<T>(input: T): T {
   return input === undefined ? input : (JSON.parse(JSON.stringify(input)) as T);
 }

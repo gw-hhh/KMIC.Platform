@@ -6,9 +6,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Persistence;
 
-/// <summary>
-/// 每个测试改坏一处，各用一个新克隆的库
-/// </summary>
 public sealed class CaseInsensitiveCollationTests(ProbeTemplate template)
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

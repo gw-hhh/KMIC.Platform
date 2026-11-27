@@ -9,16 +9,12 @@ using Kmic.Configuration.Domain.Settings;
 
 namespace Kmic.Configuration.Application.Settings.Reset;
 
-/// <summary>
-/// 恢复系统设置默认值
-/// </summary>
 public sealed class ResetSettingCommandHandler(
     SystemSettingCatalog catalog,
     ISystemSettingRepository settings,
     IResourceAuthorizer<SettingTarget, SettingAction> authorizer,
     IAfterCommit afterCommit) : ICommandHandler<ResetSettingCommand, VersionedResponse<SystemSettingValueId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SystemSettingValueId>>> Handle(ResetSettingCommand command, CancellationToken cancellationToken)
     {
         var definition = catalog.Find(command.Key);

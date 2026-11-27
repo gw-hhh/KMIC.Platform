@@ -8,9 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Files.Infrastructure.Storage;
 
-/// <summary>
-/// 存储问题的量表
-/// </summary>
 internal sealed class StorageIssueGauges(IQueryScopeFactory queries) : IBacklogGauges
 {
     private const string RestorePending = "kmic.files.restore_pending";
@@ -19,7 +16,7 @@ internal sealed class StorageIssueGauges(IQueryScopeFactory queries) : IBacklogG
 
     public IReadOnlyList<BacklogGauge> Gauges { get; } =
     [
-        new(RestorePending, "{file}", "对象丢失但能从版本还原、还没处理的文件数"),
+        new(RestorePending, "{file}", "对象丢失但可从历史版本还原的待处理文件数"),
     ];
 
     public async Task<IReadOnlyList<BacklogReading>> ReadAsync(CancellationToken ct)

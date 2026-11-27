@@ -53,7 +53,7 @@ public sealed class IntegrationMessageCatalogTests
     [Fact]
     public void Build_ValidSecretDeclaration_OnlyComplainsAboutModule()
     {
-        // 测试程序集不属于任何平台模块，所以请求型消息总会因为模块被拒；这里只确认含密声明本身没有被挑出毛病
+        // 测试程序集不属于任何平台模块，请求型消息会因模块校验被拒绝；此处仅验证含密声明本身合法
         var thrown = Should.Throw<DeclarationException>(() => IntegrationMessageCatalog.Build([typeof(SendCodeLike)]));
 
         thrown.Problems.ShouldNotContain(p => p.Contains("CarriesSecret", StringComparison.Ordinal) || p.Contains("SecretLifetimeSeconds", StringComparison.Ordinal));

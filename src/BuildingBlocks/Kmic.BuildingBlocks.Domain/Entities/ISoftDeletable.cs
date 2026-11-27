@@ -1,9 +1,4 @@
 namespace Kmic.BuildingBlocks.Domain.Entities;
 
-/// <summary>
-/// 软删除
-/// </summary>
-/// <remarks>
-/// 只能加在聚合根上
-/// </remarks>
+/// <summary>软删除标记接口，仅限聚合根实现。</summary>
 public interface ISoftDeletable;

@@ -2,7 +2,7 @@ import { inject, provide, type InjectionKey, type Ref } from 'vue';
 
 export interface MenuContext {
   activeKey: Readonly<Ref<string | null>>;
-  /** 当前页面所在的各级目录 */
+  /** 当前活动页面所属的各级祖先目录键集合 */
   activeAncestors: Readonly<Ref<ReadonlySet<string>>>;
   openKeys: Readonly<Ref<ReadonlySet<string>>>;
   collapsed: Readonly<Ref<boolean>>;
@@ -20,7 +20,7 @@ export function provideMenu(context: MenuContext): void {
 export function useMenu(): MenuContext {
   const context = inject(menuContextKey, null);
   if (context === null) {
-    throw new Error('菜单项只能放在 SidebarMenu 里');
+    throw new Error('MenuItem 必须在 SidebarMenu 组件内部使用');
   }
   return context;
 }

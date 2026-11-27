@@ -9,13 +9,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 写安全事件：补全身份和时间，放进队列就返回
-/// </summary>
 internal sealed class SecurityEventWriter(
     IExecutionContext execution, TimeProvider time, SecurityEventQueue queue, FrameworkMetrics metrics, ILogger<SecurityEventWriter> logger) : ISecurityEventWriter
 {
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "记录安全事件不能让原来的请求失败，出任何错都只记日志")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "记录安全事件失败时仅记录日志，不能阻断主请求流程")]
     public void Write(SecurityEvent securityEvent)
     {
         ArgumentNullException.ThrowIfNull(securityEvent);

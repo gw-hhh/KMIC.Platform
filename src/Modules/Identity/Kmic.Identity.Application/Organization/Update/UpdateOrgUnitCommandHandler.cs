@@ -8,13 +8,9 @@ using Kmic.Identity.Domain.Organization;
 
 namespace Kmic.Identity.Application.Organization.Update;
 
-/// <summary>
-/// 修改组织单元名称和编码
-/// </summary>
 public sealed class UpdateOrgUnitCommandHandler(IOrgTreeRepository trees, ISecurityEventWriter securityEvents, IOperatorRecheck recheck, IExecutionContext execution)
     : AuthorizationAdminCommandHandler<UpdateOrgUnitCommand, VersionedResponse<OrgTreeId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<OrgTreeId>>> ExecuteAsync(UpdateOrgUnitCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var loaded = await trees.GetForUpdateAsync(OrgTreeId.Default, command.ExpectedVersion, cancellationToken);

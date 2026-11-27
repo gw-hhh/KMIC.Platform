@@ -11,9 +11,6 @@ using Kmic.Identity.Domain.Roles;
 
 namespace Kmic.Identity.Application.Roles.SetDataScopes;
 
-/// <summary>
-/// 替换角色数据范围
-/// </summary>
 public sealed class SetRoleDataScopesCommandHandler(
     IRoleRepository roles,
     IIdentityCommandReads db,
@@ -23,7 +20,6 @@ public sealed class SetRoleDataScopesCommandHandler(
     IOperatorRecheck recheck,
     IExecutionContext execution) : AuthorizationAdminCommandHandler<SetRoleDataScopesCommand, VersionedResponse<RoleId>>(recheck, execution)
 {
-    /// <inheritdoc />
     protected override async ValueTask<Result<VersionedResponse<RoleId>>> ExecuteAsync(SetRoleDataScopesCommand command, IAccessContext access, CancellationToken cancellationToken)
     {
         var unknown = command.Overrides.Keys.Where(code => !catalog.Contains(code)).ToList();

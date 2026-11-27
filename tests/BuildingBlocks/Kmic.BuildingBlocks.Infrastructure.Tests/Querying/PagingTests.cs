@@ -8,9 +8,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Querying;
 
-/// <summary>
-/// 分页在真实 PostgreSQL 上执行：每个测试建 25 张标题带唯一前缀的单据，金额只有五种，大量同值
-/// </summary>
 public sealed class PagingTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const int Count = 25;
@@ -122,7 +119,7 @@ public sealed class PagingTests(ClassDatabase<ProbeTemplate> database) : IClassF
     [Fact]
     public async Task TiedSortKeys_PageWithoutDuplicatesOrGaps()
     {
-        // 25 条记录只有五种金额：按金额分页，同值的记录要靠追加的 Id 才有固定的先后
+        // 25 条记录仅分布于 5 种金额：按金额分页时需依靠追加的 Id 稳定排序键，保证跨页无重复或遗漏
         var seen = new List<TicketId>();
         for (var page = 1; page <= 7; page++)
         {

@@ -1,32 +1,19 @@
 namespace Kmic.BuildingBlocks.Contracts.Notifications;
 
-/// <summary>
-/// 通知模板的数据模型
-/// </summary>
-/// <remarks>
-/// 值要在发送时准备好，渲染时不再查数据
-/// </remarks>
-/// <typeparam name="TSelf">模型自身</typeparam>
+/// <summary>通知模板的数据模型；所有字段值须在发送前准备完毕，模板渲染阶段不再回查数据。</summary>
+/// <typeparam name="TSelf">模板模型自身类型</typeparam>
 public interface INotificationModel<TSelf>
     where TSelf : INotificationModel<TSelf>
 {
-    /// <summary>
-    /// 示例数据：管理页预览和启动时检查默认内容能否渲染都用它
-    /// </summary>
+    /// <summary>示例数据，供管理页预览及启动时校验默认模板渲染。</summary>
     static abstract TSelf Example { get; }
 
-    /// <summary>
-    /// 默认主题；站内消息里是标题
-    /// </summary>
+    /// <summary>默认主题（站内消息中作为标题）。</summary>
     static abstract string DefaultSubject { get; }
 
-    /// <summary>
-    /// 默认正文；邮件用，可以是 HTML
-    /// </summary>
+    /// <summary>默认正文（邮件渠道支持 HTML）。</summary>
     static abstract string DefaultBody { get; }
 
-    /// <summary>
-    /// 短信与站内消息的默认正文，必须是纯文本；不写时沿用 <see cref="DefaultBody" />
-    /// </summary>
+    /// <summary>纯文本默认正文，供短信与站内消息使用；未指定时沿用 <see cref="DefaultBody" />。</summary>
     static virtual string DefaultTextBody => TSelf.DefaultBody;
 }

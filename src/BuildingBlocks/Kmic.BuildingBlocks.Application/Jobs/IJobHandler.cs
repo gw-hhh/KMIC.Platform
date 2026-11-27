@@ -2,17 +2,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.BuildingBlocks.Application.Jobs;
 
-/// <summary>
-/// 后台作业的处理器
-/// </summary>
-/// <remarks>
-/// 不在事务里执行，只通过 ISender 发查询和命令
-/// </remarks>
+/// <summary>后台作业处理器；不在事务中执行，须通过 ISender 发送查询与命令。</summary>
 public interface IJobHandler<in TJob>
     where TJob : IBackgroundJob
 {
-    /// <summary>
-    /// 执行作业
-    /// </summary>
     Task<Result<JobOutcome>> ExecuteAsync(TJob job, IJobContext context, CancellationToken ct);
 }

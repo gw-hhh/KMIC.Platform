@@ -4,12 +4,8 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Identity.Application.Roles.Catalogs;
 
-/// <summary>
-/// 查询权限目录
-/// </summary>
 public sealed class ListPermissionsQueryHandler(PermissionCatalog catalog) : IQueryHandler<ListPermissionsQuery, IReadOnlyList<PermissionItem>>
 {
-    /// <inheritdoc />
     public ValueTask<Result<IReadOnlyList<PermissionItem>>> Handle(ListPermissionsQuery query, CancellationToken cancellationToken)
     {
         List<PermissionItem> items =

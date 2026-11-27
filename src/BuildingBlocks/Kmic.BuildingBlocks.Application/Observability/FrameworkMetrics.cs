@@ -4,17 +4,10 @@ using Kmic.BuildingBlocks.Application.Files;
 
 namespace Kmic.BuildingBlocks.Application.Observability;
 
-/// <summary>
-/// 框架指标
-/// </summary>
-/// <remarks>
-/// 维度只能是有限取值，不能放用户 ID、资源 ID 这类
-/// </remarks>
+/// <summary>框架运行时指标；标签维度须为有限枚举值，禁止包含用户 ID、资源 ID 等高基数数据。</summary>
 public sealed class FrameworkMetrics
 {
-    /// <summary>
-    /// Meter 的名称，宿主按这个名字订阅
-    /// </summary>
+    /// <summary>Meter 名称，宿主按此名称订阅指标。</summary>
     public const string MeterName = "Kmic.Framework";
 
     private readonly Counter<long> _requests;
@@ -43,9 +36,6 @@ public sealed class FrameworkMetrics
     private Func<BacklogSnapshot?>? _backlog;
     private Func<AdmissionReading?>? _admission;
 
-    /// <summary>
-    /// 创建全部指标
-    /// </summary>
     public FrameworkMetrics(IMeterFactory factory)
     {
         ArgumentNullException.ThrowIfNull(factory);
@@ -55,7 +45,7 @@ public sealed class FrameworkMetrics
         _requestDuration = meter.CreateHistogram<double>("kmic.mediator.request.duration", "s", "命令和查询的执行时长");
         _authzDenied = meter.CreateCounter<long>("kmic.authz.denied", "{denial}", "授权拒绝的次数");
         _securityEvents = meter.CreateCounter<long>("kmic.security_event.count", "{event}", "产生的安全事件数");
-        _securityEventsDropped = meter.CreateCounter<long>("kmic.security_event.dropped", "{event}", "队列满了丢弃的安全事件数");
+        _securityEventsDropped = meter.CreateCounter<long>("kmic.security_event.dropped", "{event}", "队列已满时丢弃的安全事件数");
         _commitOutcomeUnknown = meter.CreateCounter<long>("kmic.commit.outcome_unknown", "{commit}", "提交结果无法判定的次数");
         _messageHandleDuration = meter.CreateHistogram<double>("kmic.messaging.handle.duration", "s", "订阅处理一条消息的时长");
         _backgroundJobDuration = meter.CreateHistogram<double>("kmic.background_job.duration", "s", "后台作业从开始到结束的时长");
@@ -68,16 +58,13 @@ public sealed class FrameworkMetrics
         _uploads = meter.CreateCounter<long>("kmic.files.uploads", "{upload}", "文件上传次数");
         _uploadBytes = meter.CreateHistogram<long>("kmic.files.upload_bytes", "By", "写入存储的文件大小");
         _uploadsRejected = meter.CreateCounter<long>("kmic.files.rejected", "{upload}", "被拒绝的上传次数");
-        _rebuildPaused = meter.CreateCounter<long>("kmic.readmodel.rebuild_paused", "{run}", "因为找不到的行太多而暂停的重建轮次");
-        _terminalConflicts = meter.CreateCounter<long>("kmic.readmodel.terminal_conflicts", "{row}", "已是终态、源端却还返回存在的行数");
-        _readAuditFailures = meter.CreateCounter<long>("kmic.audit.read_write_failures", "{failure}", "读审计写不进去的次数");
+        _rebuildPaused = meter.CreateCounter<long>("kmic.readmodel.rebuild_paused", "{run}", "因源端缺失行过多而暂停的重建轮次");
+        _terminalConflicts = meter.CreateCounter<long>("kmic.readmodel.terminal_conflicts", "{row}", "本地已终态但源端仍返回存在的行数");
+        _readAuditFailures = meter.CreateCounter<long>("kmic.audit.read_write_failures", "{failure}", "读取审计写入失败次数");
         _slowQueries = meter.CreateCounter<long>("kmic.db.slow_queries", "{query}", "超过慢查询阈值的 SQL 次数");
         _admissionRejected = meter.CreateCounter<long>("kmic.messaging.admission.rejected", "{write}", "容量保护拒绝或跳过的消息写入次数");
     }
 
-    /// <summary>
-    /// 一个命令或查询执行完了，结果是“success”或错误码，抛异常时是“exception”
-    /// </summary>
     public void Request(string module, string message, string result, TimeSpan elapsed)
     {
         var tags = new TagList { { "module", module }, { "message", message }, { "result", result } };
@@ -85,35 +72,17 @@ public sealed class FrameworkMetrics
         _requestDuration.Record(elapsed.TotalSeconds, tags);
     }
 
-    /// <summary>
-    /// 授权被拒绝
-    /// </summary>
     public void AuthzDenied(string reason) => _authzDenied.Add(1, new TagList { { "reason", reason } });
 
-    /// <summary>
-    /// 产生了一条安全事件
-    /// </summary>
     public void SecurityEvent(string type, string severity) => _securityEvents.Add(1, new TagList { { "type", type }, { "severity", severity } });
 
-    /// <summary>
-    /// 安全事件队列满了，丢弃了一条
-    /// </summary>
     public void SecurityEventDropped() => _securityEventsDropped.Add(1);
 
-    /// <summary>
-    /// 提交结果无法判定，entry 是入口（HTTP、Inbox、后台作业等）
-    /// </summary>
     public void CommitOutcomeUnknown(string entry) => _commitOutcomeUnknown.Add(1, new TagList { { "entry", entry } });
 
-    /// <summary>
-    /// 订阅处理完一条消息，结果是 processed、failed 或 dead
-    /// </summary>
     public void MessageHandled(string subscription, string result, TimeSpan elapsed) =>
         _messageHandleDuration.Record(elapsed.TotalSeconds, new TagList { { "subscription", subscription }, { "result", result } });
 
-    /// <summary>
-    /// 后台作业结束，结果是 Succeeded、Failed 或 Cancelled
-    /// </summary>
     public void BackgroundJobFinished(string module, string type, string result, TimeSpan elapsed)
     {
         var tags = new TagList { { "module", module }, { "type", type }, { "result", result } };
@@ -124,9 +93,6 @@ public sealed class FrameworkMetrics
         }
     }
 
-    /// <summary>
-    /// 定时任务执行完一次
-    /// </summary>
     public void ScheduledJobFinished(string task, bool succeeded, TimeSpan elapsed)
     {
         _scheduledJobDuration.Record(elapsed.TotalSeconds, new TagList { { "task", task } });
@@ -136,15 +102,9 @@ public sealed class FrameworkMetrics
         }
     }
 
-    /// <summary>
-    /// 读取了一次缓存
-    /// </summary>
     public void CacheRequest(string category, bool hit) =>
         _cacheRequests.Add(1, new TagList { { "category", category }, { "result", hit ? "hit" : "miss" } });
 
-    /// <summary>
-    /// 上传的文件流处理结束
-    /// </summary>
     public void FileUploaded(string profile, UploadOutcome outcome, long bytes)
     {
         if (outcome == UploadOutcome.Stored)
@@ -158,94 +118,59 @@ public sealed class FrameworkMetrics
         _uploadsRejected.Add(1, new TagList { { "profile", profile }, { "reason", ReasonOf(outcome) } });
     }
 
-    /// <summary>
-    /// 上传的文件流处理中断，如客户端断开、超时或存储写入失败
-    /// </summary>
+    /// <summary>记录因客户端断开、超时或存储写入失败导致的上传中断。</summary>
     public void FileUploadFailed(string profile) => _uploads.Add(1, new TagList { { "profile", profile }, { "result", "failed" } });
 
-    /// <summary>
-    /// 发出了一条缓存失效广播
-    /// </summary>
     public void CacheInvalidationBroadcast() => _cacheBroadcasts.Add(1);
 
-    /// <summary>
-    /// 监听连接断开后重新连上了
-    /// </summary>
     public void ListenerReconnected() => _listenerReconnects.Add(1);
 
-    /// <summary>
-    /// 读模型重建因为找不到的行超过阈值而暂停
-    /// </summary>
     public void RebuildPaused(string module, string readModel) => _rebuildPaused.Add(1, new TagList { { "module", module }, { "readmodel", readModel } });
 
-    /// <summary>
-    /// 终态的行源端还返回存在
-    /// </summary>
     public void TerminalConflicts(string module, string readModel, int count) =>
         _terminalConflicts.Add(count, new TagList { { "module", module }, { "readmodel", readModel } });
 
-    /// <summary>
-    /// 读审计没有写进去
-    /// </summary>
     public void ReadAuditFailed() => _readAuditFailures.Add(1);
 
-    /// <summary>
-    /// 一条 SQL 超过了慢查询阈值，module 是发起查询的数据库上下文所在的模块
-    /// </summary>
     public void SlowQuery(string module) => _slowQueries.Add(1, new TagList { { "module", module } });
 
-    /// <summary>
-    /// 容量保护拒绝了一次消息写入（业务事务随之回滚），或跳过了一次不该让业务失败的写入
-    /// </summary>
-    /// <param name="state">当时的状态，soft 或 hard</param>
-    /// <param name="origin">发起写入的来源</param>
-    /// <param name="skipped">true 是跳过（不报错），false 是拒绝</param>
+    /// <summary>记录容量保护拦截或跳过的消息写入；<paramref name="state"/> 为 soft/hard，<paramref name="skipped"/> 为 true 表示跳过、false 表示拒绝。</summary>
     public void MessagingAdmissionRejected(string state, string origin, bool skipped) =>
         _admissionRejected.Add(1, new TagList { { "state", state }, { "origin", origin }, { "outcome", skipped ? "skipped" : "rejected" } });
 
-    /// <summary>
-    /// 登记积压量表的数据来源，只能登记一次
-    /// </summary>
-    /// <remarks>
-    /// 回调返回 null 表示还没有可信数据，这时不输出数值
-    /// </remarks>
+    /// <summary>注册积压指标采样回调，仅允许注册一次。</summary>
     public void ObserveBacklog(Func<BacklogSnapshot?> read)
     {
         ArgumentNullException.ThrowIfNull(read);
         if (Interlocked.CompareExchange(ref _backlog, read, null) is not null)
         {
-            throw new InvalidOperationException("积压量表已经登记过了。");
+            throw new InvalidOperationException("积压指标量表已注册，禁止重复登记。");
         }
 
         Gauge("kmic.outbox.pending", "{message}", "待投递的消息条数", s => s.Outbox.Select(o => Measure(o.Pending, ("module", o.Module))));
-        Gauge("kmic.outbox.oldest_age", "s", "最老的待投递消息产生至今的时间", s => s.Outbox.Select(o => Measure(o.OldestAge.TotalSeconds, ("module", o.Module))));
+        Gauge("kmic.outbox.oldest_age", "s", "最早的待投递消息产生至今时长", s => s.Outbox.Select(o => Measure(o.OldestAge.TotalSeconds, ("module", o.Module))));
         Gauge("kmic.inbox.pending", "{message}", "待处理的消息条数，不含待终结订阅", s => Active(s).Select(i => Measure(i.Pending, Subscription(i))));
-        Gauge("kmic.inbox.oldest_age", "s", "最老的待处理消息收到至今的时间，不含待终结订阅", s => Active(s).Select(i => Measure(i.OldestAge.TotalSeconds, Subscription(i))));
+        Gauge("kmic.inbox.oldest_age", "s", "最早的待处理消息接收至今时长，不含待终结订阅", s => Active(s).Select(i => Measure(i.OldestAge.TotalSeconds, Subscription(i))));
         Gauge("kmic.inbox.dead", "{message}", "死信条数", s => s.Inbox.Select(i => Measure(i.Dead, Subscription(i))));
-        Gauge("kmic.inbox.blocked_keys", "{key}", "有序订阅里被死信挡住的顺序键个数", s => s.Inbox.Select(i => Measure(i.BlockedKeys, Subscription(i))));
-        Gauge("kmic.inbox.retiring_pending", "{message}", "待终结订阅的积压", s => s.Inbox.Where(i => i.Retiring).Select(i => Measure(i.Pending, Subscription(i))));
+        Gauge("kmic.inbox.blocked_keys", "{key}", "有序订阅中被死信阻塞的顺序键数量", s => s.Inbox.Select(i => Measure(i.BlockedKeys, Subscription(i))));
+        Gauge("kmic.inbox.retiring_pending", "{message}", "待终结订阅的积压消息数", s => s.Inbox.Where(i => i.Retiring).Select(i => Measure(i.Pending, Subscription(i))));
         Gauge("kmic.background_job.queued", "{job}", "排队中的后台作业数", s => s.Jobs.Select(j => Measure(j.Queued, ("module", j.Module), ("type", j.Type))));
-        Gauge("kmic.background_job.oldest_queued", "s", "最老的排队作业已等待的时间", s => s.Jobs.Select(j => Measure(j.OldestQueued.TotalSeconds, ("module", j.Module), ("type", j.Type))));
-        Gauge("kmic.scheduled_job.last_success_age", "s", "定时任务距上次成功的时间", s => s.ScheduledJobs.Select(t => Measure(t.LastSuccessAge.TotalSeconds, ("task", t.Task))));
+        Gauge("kmic.background_job.oldest_queued", "s", "最早的排队作业已等待时长", s => s.Jobs.Select(j => Measure(j.OldestQueued.TotalSeconds, ("module", j.Module), ("type", j.Type))));
+        Gauge("kmic.scheduled_job.last_success_age", "s", "定时任务距上次成功的时长", s => s.ScheduledJobs.Select(t => Measure(t.LastSuccessAge.TotalSeconds, ("task", t.Task))));
     }
 
-    /// <summary>
-    /// 登记容量保护状态的数据来源，只能登记一次
-    /// </summary>
-    /// <remarks>
-    /// 回调返回 null 表示还没有读到状态，这时不输出数值
-    /// </remarks>
+    /// <summary>注册容量保护状态回调，仅允许注册一次。</summary>
     public void ObserveAdmission(Func<AdmissionReading?> read)
     {
         ArgumentNullException.ThrowIfNull(read);
         if (Interlocked.CompareExchange(ref _admission, read, null) is not null)
         {
-            throw new InvalidOperationException("容量保护量表已经登记过了。");
+            throw new InvalidOperationException("容量保护指标量表已注册，禁止重复登记。");
         }
 
-        _meter.CreateObservableGauge("kmic.messaging.admission.state", StateReading, "{state}", "消息写入的状态：0 正常、1 软线、2 硬线");
-        _meter.CreateObservableGauge("kmic.messaging.admission.sample_age", SampleAgeReading, "s", "容量保护的判断已经多久没有更新");
-        _meter.CreateObservableGauge("kmic.messaging.admission.capacity_age", CapacityAgeReading, "s", "数据库容量设置已经多久没有更新");
+        _meter.CreateObservableGauge("kmic.messaging.admission.state", StateReading, "{state}", "消息写入容量保护状态：0 正常、1 软线、2 硬线");
+        _meter.CreateObservableGauge("kmic.messaging.admission.sample_age", SampleAgeReading, "s", "容量保护判断结果距上次更新的时长");
+        _meter.CreateObservableGauge("kmic.messaging.admission.capacity_age", CapacityAgeReading, "s", "数据库容量配置距上次更新的时长");
     }
 
     private IEnumerable<Measurement<long>> StateReading() => _admission?.Invoke() is { } r ? [new Measurement<long>(r.State)] : [];
@@ -260,7 +185,7 @@ public sealed class FrameworkMetrics
         UploadOutcome.TooLarge => "too_large",
         UploadOutcome.Empty => "empty",
         UploadOutcome.TypeNotAllowed => "type_not_allowed",
-        _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, "只有被拒绝的上传才有拒绝原因。"),
+        _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, "仅被拒绝的上传存在拒绝原因。"),
     };
 
     private static IEnumerable<InboxBacklog> Active(BacklogSnapshot snapshot) => snapshot.Inbox.Where(i => !i.Retiring);

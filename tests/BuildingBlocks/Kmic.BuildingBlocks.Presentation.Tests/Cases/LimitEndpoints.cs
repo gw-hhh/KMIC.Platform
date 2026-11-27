@@ -5,9 +5,6 @@ using static Kmic.BuildingBlocks.Presentation.Tests.Support.Messages;
 
 namespace Kmic.BuildingBlocks.Presentation.Tests.Cases;
 
-/// <summary>
-/// 声明了并发限制的端点，和一个处理时间很长的端点
-/// </summary>
 internal static class LimitEndpoints
 {
     public static readonly Type[] All = [typeof(HeavyEndpoint), typeof(HeavyPerUserEndpoint), typeof(HeavyBothEndpoint), typeof(SlowEndpoint), typeof(LightEndpoint)];

@@ -11,9 +11,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 放弃之前的检查：按消息名找到类型，在系统身份的作用域里取接收方注册的检查，没有注册的直接放行，看不懂的消息不放行
-/// </summary>
 public sealed class AbandonGuardTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private static readonly Error _refused = Error.BusinessRule("Test.StillAttached", "引用的文件还没有归属，只能重试");
@@ -53,7 +50,7 @@ public sealed class AbandonGuardTests(ClassDatabase<ProbeTemplate> database) : I
     [Fact]
     public async Task AMessageWithoutAPolicy_CanBeAbandonedAtOnce()
     {
-        // 没有为 TicketClosedNotice 注册检查：放弃之前没有什么要核对的
+        // TicketClosedNotice 未注册任何放弃策略，应直接允许放弃
         var detail = Detail("BuildingBlocks.TicketClosedNotice", """{"ticketId":"6f2a0f6e-0f64-4d8e-9a53-3a2b45c0b7aa"}""");
 
         var result = await Guard.CheckAsync(detail, Ct);
@@ -75,7 +72,7 @@ public sealed class AbandonGuardTests(ClassDatabase<ProbeTemplate> database) : I
         unknownVersion.ShouldBeFailure(CommonErrors.MessageUnknown);
         unreadable.ShouldBeFailure(CommonErrors.MessagePayloadUnreadable);
         notJson.ShouldBeFailure(CommonErrors.MessagePayloadUnreadable);
-        _policy.Seen.ShouldBeEmpty("看不懂的消息连检查都不调用");
+        _policy.Seen.ShouldBeEmpty("未知消息或载荷无法反序列化时，不应调用业务放弃策略");
     }
 
     private sealed class RecordingPolicy : IAbandonPolicy<TicketChanged>

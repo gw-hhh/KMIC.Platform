@@ -101,7 +101,7 @@ public sealed class SlowQueryLogTests(ClassDatabase<ProbeTemplate> database) : I
         await using (var work = harness.Begin(TestIdentity.User("甲")))
         {
             var context = work.Services.GetRequiredService<ProbeQueryDbContext>();
-            // 除数在子查询里，到执行时才会算出 0：先睡 0.2 秒，再报错
+            // 通过子查询构造运行时除零错误：查询先休眠 0.2 秒以触发慢查询阈值，随后抛出异常
             await Should.ThrowAsync<PostgresException>(
                 () => context.Database.ExecuteSqlRawAsync("SELECT pg_sleep(0.2), 1 / (SELECT count(*)::int FROM pg_class WHERE false)", Ct));
         }

@@ -16,10 +16,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// Echo 的 TicketSummary 从 Probe 的单据快照重建。单据的 ID 按序号排好，扫描顺序和数据库里的顺序一致；
-/// 每个测试开始前清空 Echo 的读模型、作业和轮次，订阅的路由也重置
-/// </summary>
 public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private const string Module = "Echo";
@@ -138,7 +134,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         Source.Set("二", version: 1, Id(2));
         Source.Set("三", version: 1, Id(3));
 
-        // 扫描读第二页之前，源端新建了排在前面的单据，实时事件已经把它写进读模型，扫描不会再经过它
+        // 扫描读取第二页前，源端新增了排序靠前的单据且已通过实时事件写入读模型，后续扫描不会再次覆盖该位置
         Source.BeforePage = async (page, _) =>
         {
             if (page == 2)
@@ -204,13 +200,13 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         (await SummaryOfJobAsync(run.JobId)).GetProperty("awaitingConfirmation").GetBoolean().ShouldBeTrue();
         (await JobStatusAsync(run.JobId)).ShouldBe(JobStatus.Succeeded);
 
-        // 暂停的一轮还占着位置，不会再排新的
+        // 处于待确认暂停状态的轮次仍占用当前重建槽位，不会重复排队新轮次
         var again = await harness.Services.GetRequiredService<RebuildRunStore>()
             .QueueAsync(CallOrigin.Startup, Module, ProbeHarness.MirrorSubscription, nameof(TicketSummary), Ct);
         again.ShouldBeNull();
     }
 
-    // 找不到的行太多而暂停的一轮：三行本地有、源端没有，上限设成 1
+    // 构造因缺失行数超限而暂停的重建轮次：本地存在 3 条源端已缺失的记录，缺失上限设为 1
     private static ProbeHarness PausingHarness(string connectionString) =>
         new(
             connectionString,
@@ -244,7 +240,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         var admin = harness.Services.GetRequiredService<IReadModelRebuildAdmin>();
 
         (await admin.ConfirmAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.Done);
-        (await RunAsync(runId)).Status.ShouldBe(RebuildRunStatus.Active, "确认之后回到进行中，另排的作业只做收尾");
+        (await RunAsync(runId)).Status.ShouldBe(RebuildRunStatus.Active, "管理员确认后轮次应恢复为进行中状态，并由后续作业完成收尾标记");
         await harness.Services.RunJobsAsync(Ct);
 
         var run = await RunAsync(runId);
@@ -254,7 +250,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         rows[Id(1)].IsTerminal.ShouldBeFalse();
         new[] { Id(2), Id(3), Id(4) }.ShouldAllBe(id => rows[id].IsTerminal);
         (await NeedsInitializationAsync()).ShouldBeFalse();
-        (await admin.ConfirmAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.NotAwaitingConfirmation, "已经完成的不能再确认");
+        (await admin.ConfirmAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.NotAwaitingConfirmation, "已完成的轮次不应再次被确认");
     }
 
     [Fact]
@@ -270,7 +266,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         var run = await RunAsync(runId);
         run.Status.ShouldBe(RebuildRunStatus.Abandoned);
         run.FinishedAt.ShouldNotBeNull();
-        (await NeedsInitializationAsync()).ShouldBeFalse("放弃就是“我已处理”，之后不再自动排队");
+        (await NeedsInitializationAsync()).ShouldBeFalse("放弃重建即视为人工确认处理完毕，后续不再自动触发初始化排队");
         (await SummariesAsync()).Values.ShouldAllBe(r => !r.IsTerminal);
         (await admin.AbandonAsync(ProbeHarness.MirrorSubscription, Ct)).ShouldBe(RebuildAdminOutcome.NotAwaitingConfirmation);
     }
@@ -319,7 +315,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         var claimed = (await Executor.ClaimAsync(Module, 1, token, Ct)).ShouldHaveSingleItem();
         (await Executor.RunAsync(Module, claimed, token, shutdown.Token)).ShouldBe(JobRunResult.Released);
 
-        // 第一页已经和检查点一起提交，第二页没有开始
+        // 第一页数据已随检查点提交，第二页尚未开始处理
         (await SummariesAsync()).Keys.ShouldBe([Id(1), Id(2)]);
         (await JobStatusAsync((await RunAsync(runId)).JobId)).ShouldBe(JobStatus.Queued);
 
@@ -395,7 +391,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
 
     public ValueTask DisposeAsync() => _harness.DisposeAsync();
 
-    // 单据的 ID 按序号排好
+    // 按序号生成有序的单据 ID
     private static Guid Id(int n) => Guid.Parse($"00000000-0000-0000-0000-{n:D12}");
 
     private static TicketSummary Row(Guid id, string title, long version, ReferenceStatus status = ReferenceStatus.Active) =>
@@ -409,7 +405,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         ct.ThrowIfCancellationRequested();
     }
 
-    // 直接排队，不经过路由表里的“需要初始化”标记
+    // 直接将重建轮次入队，绕过路由表中的初始化状态标记
     private async Task<Guid> QueueAsync(ProbeHarness? harness = null)
     {
         var queued = await (harness ?? _harness).Services.GetRequiredService<RebuildRunStore>()
@@ -417,7 +413,7 @@ public sealed class ReadModelRebuildTests(ClassDatabase<ProbeTemplate> database)
         return queued ?? throw new InvalidOperationException("没有排上队。");
     }
 
-    // 宿主启动时和重建有关的两个启动任务：登记路由，再给还没初始化的订阅排队
+    // 执行宿主启动阶段与重建相关的两个启动任务：注册消息路由并为未初始化的订阅排队重建
     private async Task RunStartupTasksAsync(ProbeHarness? harness = null)
     {
         await using var work = (harness ?? _harness).BeginAsSystem();

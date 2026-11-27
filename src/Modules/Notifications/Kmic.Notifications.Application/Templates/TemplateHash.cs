@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.Notifications;
 
 namespace Kmic.Notifications.Application.Templates;
 
-/// <summary>
-/// 模板同步用的哈希，包含声明属性和默认内容，不含模型结构和示例数据
-/// </summary>
+// 仅纳入声明属性与默认内容，不含模型结构与示例数据
 internal static class TemplateHash
 {
     public static string Of(NotificationTemplateDefinition definition)

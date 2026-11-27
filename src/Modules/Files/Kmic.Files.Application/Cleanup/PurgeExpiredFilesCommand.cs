@@ -4,9 +4,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Files.Application.Cleanup;
 
-/// <summary>
-/// 将到期的临时文件、已解除关联文件和被拒绝文件标记为“删除中”
-/// </summary>
+/// <summary>将到期的临时文件、已解除关联文件和被拒绝文件标记为“删除中”</summary>
 /// <param name="ScheduledFireTime">计划的触发时间</param>
 [SystemOnly]
 [NotAudited("状态变更记入文件历史，清理结果记入作业运行记录")]

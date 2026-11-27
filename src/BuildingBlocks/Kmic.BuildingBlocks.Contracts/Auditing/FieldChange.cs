@@ -1,8 +1,6 @@
 namespace Kmic.BuildingBlocks.Contracts.Auditing;
 
-/// <summary>
-/// 字段变更
-/// </summary>
+/// <summary>字段变更。</summary>
 /// <param name="Field">字段名</param>
 /// <param name="Old">原值</param>
 /// <param name="New">新值</param>

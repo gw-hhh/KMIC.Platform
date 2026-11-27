@@ -13,9 +13,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Messaging;
 
-/// <summary>
-/// 容量保护的采样与判断：真实的数据库大小、各模块 Outbox 与 Inbox 的未完成量，容量用替身。判断时间用 SQL 改，周期才可以控制
-/// </summary>
 public sealed class AdmissionSamplerTests : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncLifetime
 {
     private static readonly TestOrgTree _org = TestOrgTree.Create(t => t.Unit("总部"));
@@ -125,7 +122,7 @@ public sealed class AdmissionSamplerTests : IClassFixture<ClassDatabase<ProbeTem
 
         await AgeSampleAsync();
         await Sampler.CycleAsync(Ct);
-        (await ReadRowAsync()).State.ShouldBe((short)1, "队列刚排空，还要再观察一个周期");
+        (await ReadRowAsync()).State.ShouldBe((short)1, "队列刚排空时需再维持一个低水位观察周期，尚不能恢复正常");
 
         await AgeSampleAsync();
         await Sampler.CycleAsync(Ct);
@@ -141,7 +138,7 @@ public sealed class AdmissionSamplerTests : IClassFixture<ClassDatabase<ProbeTem
         await Sampler.CycleAsync(Ct);
         await ClearQueueAsync();
 
-        // 不改判断时间：另一个实例刚判断过，这一轮不能再算一次，否则低水位的周期数会多记
+        // 保持采样时间不变以模拟另一实例刚完成本周期判定，当前实例应跳过以免重复累加低水位周期数
         await Sampler.CycleAsync(Ct);
 
         (await ReadRowAsync()).LowWaterPeriods.ShouldBe(0);
@@ -210,7 +207,7 @@ public sealed class AdmissionSamplerTests : IClassFixture<ClassDatabase<ProbeTem
         await using var command = _database.DataSource.CreateCommand(
             "SELECT \"State\", \"LowWaterPeriods\", \"UnfinishedBytes\", \"CapacityBytes\" FROM \"Operations\".\"MessagingAdmission\" WHERE \"Id\" = 1");
         await using var reader = await command.ExecuteReaderAsync(Ct);
-        (await reader.ReadAsync(Ct)).ShouldBeTrue("判断之后应该有一行状态");
+        (await reader.ReadAsync(Ct)).ShouldBeTrue("完成采样判定后应写入一行状态记录");
         long? capacity = await reader.IsDBNullAsync(3, Ct) ? null : reader.GetInt64(3);
         return new AdmissionRow(reader.GetInt16(0), reader.GetInt32(1), reader.GetInt64(2), capacity);
     }

@@ -25,7 +25,7 @@ internal sealed class SessionRepository(IdentityDbContext context)
             return null;
         }
 
-        // 先锁会话行再读取：并发的两个刷新请求在这里排队，后到的读到的是前一个提交之后的令牌状态
+        // 先锁定会话行再读取：并发刷新请求在此排队，后续请求读取前一请求提交后的令牌状态
         var locked = await GetForUpdateLockedAsync(sessionId.Value, null, ct);
         return locked.IsSuccess ? locked.Value : null;
     }

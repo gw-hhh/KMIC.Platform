@@ -4,12 +4,8 @@ using Kmic.Operations.Domain.Errors;
 
 namespace Kmic.Operations.Application.ScheduledJobs;
 
-/// <summary>
-/// 定时任务的资源动作目录
-/// </summary>
 public sealed class ScheduledJobActions : ResourceActionCatalog<ScheduledJobTarget, ScheduledJobAction>
 {
-    /// <inheritdoc />
     protected override void Define(IResourceActionBuilder<ScheduledJobTarget, ScheduledJobAction> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

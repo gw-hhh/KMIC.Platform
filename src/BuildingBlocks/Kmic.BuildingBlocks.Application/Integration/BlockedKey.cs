@@ -1,13 +1,4 @@
 namespace Kmic.BuildingBlocks.Application.Integration;
 
-/// <summary>
-/// 被死信挡住的顺序键：有序订阅里，同一个键下排在死信后面的消息都在等它
-/// </summary>
-/// <param name="Module">订阅方模块</param>
-/// <param name="Subscription">有序订阅的名称</param>
-/// <param name="OrderingKey">顺序键</param>
-/// <param name="DeadCount">这个键下的死信条数</param>
-/// <param name="Waiting">排在最早的死信后面、还在等的条数</param>
-/// <param name="FirstDeadId">最早的一条死信的行 ID</param>
-/// <param name="LastError">最早的一条死信最近一次的错误</param>
+/// <summary>被死信阻塞的顺序键；<paramref name="Waiting"/> 为阻塞在最早死信后的待处理消息数，<paramref name="LastError"/> 取自最早死信。</summary>
 public sealed record BlockedKey(string Module, string Subscription, string OrderingKey, long DeadCount, long Waiting, Guid FirstDeadId, string? LastError);

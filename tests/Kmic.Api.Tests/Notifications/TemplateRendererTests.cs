@@ -5,16 +5,13 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 模板渲染（Fluid）：模板来自管理员，不信任。能访问什么、不能访问什么、上限在哪里，都在这里验证
-/// </summary>
 public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(
         database,
         template,
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            // 把上限调小，测试才能在一瞬间触发
+            // 调低资源上限以使测试可快速触发限制保护
             ["Notifications:Template:MaxOutputKb"] = "1",
             ["Notifications:Template:MaxSteps"] = "5000",
             ["Notifications:Template:RenderTimeoutMs"] = "5000",
@@ -52,7 +49,7 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
     [Fact]
     public async Task WhatTheModelDoesNotExpose_CannotBeReached()
     {
-        // 方法、没登记的类型、字符串自己的成员（只能用 Liquid 的过滤器）都读不到
+        // 禁止访问对象方法、未注册类型及字符串原生属性（仅允许使用 Liquid 过滤器）
         (await RenderOkAsync("[{{ Reveal }}]")).ShouldBe("[]");
         (await RenderOkAsync("[{{ Address.GetType }}]")).ShouldBe("[]");
         (await RenderOkAsync("[{{ Number.Length }}]")).ShouldBe("[]");
@@ -107,7 +104,7 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
     [Fact]
     public async Task StrictRendering_AcceptsWhatTheModelHas_AndTemplateOwnVariables()
     {
-        // 属性、嵌套对象与集合元素、assign / capture / for 自己定义的变量、过滤器都不是“没有声明”
+        // 对象属性、嵌套成员、集合元素、assign/capture/for 局部变量及过滤器均应通过变量声明检查
         var text = "{% assign total = 0 %}{% for line in Lines %}{% assign total = total | plus: line.Quantity %}{{ forloop.index }}{% endfor %}"
             + "{% capture note %}{{ Customer | size }}{% endcapture %}{{ Number }}/{{ Address.City }}/{{ total }}/{{ note }}";
 
@@ -122,7 +119,7 @@ public sealed class TemplateRendererTests(ClassDatabase<ApiTemplate> database, A
         (await StrictFailureAsync("单据 {{ Number ")).ShouldNotBeNull().ShouldStartWith("模板有误：");
         (await StrictFailureAsync("{% for i in (1..4000) %}{{ Number }}{% endfor %}")).ShouldNotBeNull().ShouldContain("输出长度超过上限");
 
-        (await RenderOkAsync("[{{ Absent }}]")).ShouldBe("[]", "发通知时没有的变量按空处理，不让通知发不出去");
+        (await RenderOkAsync("[{{ Absent }}]")).ShouldBe("[]", "实际发送通知时，缺失变量应按空值渲染，避免阻塞通知发送");
     }
 
     [Fact]

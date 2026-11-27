@@ -8,13 +8,9 @@ using Kmic.Configuration.Domain.Settings;
 
 namespace Kmic.Configuration.Application.Settings.Purge;
 
-/// <summary>
-/// 清除已移除声明的系统设置值
-/// </summary>
 public sealed class PurgeObsoleteSettingCommandHandler(SystemSettingCatalog catalog, ISystemSettingRepository settings, IAfterCommit afterCommit)
     : ICommandHandler<PurgeObsoleteSettingCommand, VersionedResponse<SystemSettingValueId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SystemSettingValueId>>> Handle(PurgeObsoleteSettingCommand command, CancellationToken cancellationToken)
     {
         if (catalog.Find(command.Key) is not null)

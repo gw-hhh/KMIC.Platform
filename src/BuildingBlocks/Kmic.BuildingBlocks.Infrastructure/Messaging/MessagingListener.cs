@@ -8,12 +8,8 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 监听数据库通知，唤醒投递和处理循环
-/// </summary>
-/// <remarks>
-/// 用同步 Wait：Windows 上 Npgsql 的 WaitAsync 不响应超时，升级 Npgsql 时复查
-/// </remarks>
+// 监听 PG NOTIFY 并唤醒对应处理循环
+// 采用同步 Wait：Windows 平台下 Npgsql WaitAsync 暂不响应超时，升级驱动版本时须复查
 internal sealed class MessagingListener(
     IOptions<DatabaseOptions> database,
     IOptions<MessagingOptions> options,
@@ -32,28 +28,25 @@ internal sealed class MessagingListener(
 
     public bool IsRunning => _thread?.IsAlive == true;
 
-    /// <summary>
-    /// 监听连接现在是否连着。断开后到重连成功之间为 false
-    /// </summary>
     public bool IsConnected => Volatile.Read(ref _connection) is not null;
 
     public void Start()
     {
         if (_thread is not null)
         {
-            throw new InvalidOperationException("监听已经启动。");
+            throw new InvalidOperationException("监听器已启动，请勿重复启动。");
         }
 
         _thread = new Thread(Run) { IsBackground = true, Name = ApplicationName };
         _thread.Start();
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "停机时关掉连接，正在等待的那一侧会抛出各种异常，这里只为结束等待")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "停机关闭连接时阻塞等待侧会抛出异常，此处捕获仅用于正常退出等待循环")]
     public void Stop()
     {
         _stopping.Set();
 
-        // 关掉连接才能结束正在进行的 Wait，否则要等到这一轮超时
+        // 主动关闭连接以立即中断阻塞中的 Wait，避免等待本轮超时
         try
         {
             Volatile.Read(ref _connection)?.Dispose();
@@ -71,9 +64,9 @@ internal sealed class MessagingListener(
         _stopping.Dispose();
     }
 
-    [SuppressMessage("Usage", "CA1849", Justification = "专用线程上的同步等待，原因见类型说明")]
-    [SuppressMessage("Usage", "MA0042", Justification = "同上")]
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "连接断开、数据库重启时都要重连，监听线程不能退出")]
+    [SuppressMessage("Usage", "CA1849", Justification = "专用后台线程上的同步等待，原因见类型注释")]
+    [SuppressMessage("Usage", "MA0042", Justification = "专用后台线程上的同步等待，原因见类型注释")]
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "连接断开或数据库重启时须自动重连，监听线程不应因异常退出")]
     private void Run()
     {
         var failures = 0;
@@ -93,7 +86,7 @@ internal sealed class MessagingListener(
                 Volatile.Write(ref _connection, connection);
                 failures = 0;
 
-                // 刚连上（包括重连）时补查一次：断开期间的通知收不到
+                // 建连或重连成功后触发一次补偿检查，防止断连期间遗漏通知
                 signals.WakeAll();
                 cache.OnReconnected();
                 if (connectedBefore)
@@ -128,7 +121,7 @@ internal sealed class MessagingListener(
         }
     }
 
-    // 缓存失效通知交给缓存，其余的唤醒对应的处理循环
+    // 将缓存失效通知转发至缓存失效器，其余通知按频道唤醒对应处理循环
     private void Dispatch(string channel, string payload)
     {
         if (string.Equals(channel, MessagingChannels.Cache, StringComparison.Ordinal))

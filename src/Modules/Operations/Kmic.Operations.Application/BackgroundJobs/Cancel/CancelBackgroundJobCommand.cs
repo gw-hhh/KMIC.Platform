@@ -3,12 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Operations.Application.BackgroundJobs.Cancel;
 
-/// <summary>
-/// 请求取消任意用户的后台作业
-/// </summary>
-/// <remarks>
-/// 已提交的批次不回滚
-/// </remarks>
+/// <summary>请求取消任意用户的后台作业（已提交的批次不回滚）。</summary>
 /// <param name="Module">作业所在的模块</param>
 /// <param name="JobId">作业 ID</param>
 [RequirePermission(OperationsPermissions.JobsManage)]

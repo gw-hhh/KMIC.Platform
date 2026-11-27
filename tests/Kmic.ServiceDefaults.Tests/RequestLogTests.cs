@@ -83,7 +83,7 @@ public sealed class RequestLogTests
 
         (await app.Client.GetAsync(new Uri("/health/live", UriKind.Relative), Ct)).EnsureSuccessStatusCode();
 
-        // 之后再发一个普通请求，它的摘要出现时健康检查的摘要（如果有）早已出现
+        // 随后发送普通请求；当该请求摘要记录完成时，此前健康检查的摘要（若有）理应已记录
         await app.Client.GetAsync(new Uri("/orders/sentinel", UriKind.Relative), Ct);
         await app.WaitForRequestSummariesAsync(1);
         app.Logs.Events.Where(e => e.IsRequestSummary()).Select(e => e.Text("RoutePattern")).ShouldBe(["/orders/{id}"]);

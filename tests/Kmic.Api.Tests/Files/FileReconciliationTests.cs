@@ -16,13 +16,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Files;
 
-/// <summary>
-/// 对账：存储里多出的对象被删除，库里缺对象的文件记为存储问题；以及存储问题的查看与标记已解决
-/// </summary>
-/// <remarks>
-/// 用自己的存储目录，别的测试类放进去的对象不会被对账碰到。对象的年龄看文件 ID 里的时间，
-/// 所以“老对象”用指定时间生成的 ID 来造
-/// </remarks>
 public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : FilesApiTestBase(
         database,
@@ -52,7 +45,7 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
 
     private static string PathOf(string key) => Path.Combine(_root, key.Replace('/', Path.DirectorySeparatorChar));
 
-    // 在存储里放一个对象，ID 里的时间是 daysOld 天前
+    // 在存储中写入对象，其 ID 嵌入 daysOld 天前的时间戳
     private static async Task<(Guid Id, string Key)> PutObjectAsync(int daysOld)
     {
         var id = Guid.CreateVersion7(TimeProvider.System.GetUtcNow().AddDays(-daysOld));
@@ -68,7 +61,7 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
         return await scope.ServiceProvider.GetRequiredService<ICommandSender>().SendAsync(new ReconcileStorageCommand(TimeProvider.System.GetUtcNow()), Ct);
     }
 
-    // 上传一个文件，把上传时间改老、对象删掉：库里有记录，存储里没有对象
+    // 上传文件后将上传时间回拨并删除存储对象，以构造数据库有记录但存储缺失的场景
     private async Task<(Guid Id, string Key)> FileWithoutObjectAsync(IdentitySeed seed, string name)
     {
         using var alice = ClientFor(Alice);
@@ -93,9 +86,9 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
         var outcome = (await RunAsync()).ShouldBeSuccess();
 
         outcome.ItemsProcessed.ShouldBeGreaterThanOrEqualTo(1);
-        File.Exists(PathOf(oldKey)).ShouldBeFalse("存在三天、库里没有记录");
-        File.Exists(PathOf(recentKey)).ShouldBeTrue("还不到两天，可能还在写入或等登记");
-        File.Exists(PathOf(foreignKey)).ShouldBeTrue("键不是 Files 的写法，不是我们的对象");
+        File.Exists(PathOf(oldKey)).ShouldBeFalse("孤儿对象已超过三天且无数据库记录，应被清理");
+        File.Exists(PathOf(recentKey)).ShouldBeTrue("未满两天的对象可能仍在写入或等待登记，应保留");
+        File.Exists(PathOf(foreignKey)).ShouldBeTrue("非 Files 命名规范的对象键不应被清理");
     }
 
     [Fact]
@@ -112,7 +105,7 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
             ("message", message), ("file", id));
 
         (await RunAsync()).ShouldBeSuccess();
-        File.Exists(PathOf(key)).ShouldBeTrue("登记请求还没处理完，对象不是多余的");
+        File.Exists(PathOf(key)).ShouldBeTrue("登记请求尚未处理完成，该对象不应视为孤儿对象");
 
         await seed.SqlAsync("""UPDATE "Sample"."OutboxMessage" SET "Status" = 2 WHERE "Id" = @message""", ("message", message));
         (await RunAsync()).ShouldBeSuccess();
@@ -145,9 +138,9 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
         (await RunAsync()).ShouldBeSuccess();
         (await RunAsync()).ShouldBeSuccess();
 
-        (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "等运维还原，文件不动");
+        (await ColumnAsync<string>(seed, id, "Status")).ShouldBe("Available", "等待运维恢复期间，文件状态应保持不变");
         (await seed.ScalarAsync<string>($"""SELECT "Kind" FROM "Files"."StorageIssue" WHERE "FileId" = '{id}'""")).ShouldBe("RestorableMissing");
-        (await IssuesOfAsync(seed, id)).ShouldBe(1, "已经有待处理的问题，不重复记");
+        (await IssuesOfAsync(seed, id)).ShouldBe(1, "已存在待处理的存储问题时不应重复记录");
 
         var gauges = Factory.Services.GetServices<IBacklogGauges>().Single(g => string.Equals(g.MeterName, FilesMetrics.MeterName, StringComparison.Ordinal));
         var open = await seed.CountAsync("""SELECT count(*) FROM "Files"."StorageIssue" WHERE "Kind" = 'RestorableMissing' AND "Status" = 'Open'""");
@@ -206,9 +199,7 @@ public sealed class FileReconciliationTests(ClassDatabase<ApiTemplate> database,
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
-    /// <summary>
-    /// 把“版本 v-still-there 还在”告诉对账：本地存储没有版本，用它模拟开了版本控制的桶里被删除标记盖住的对象
-    /// </summary>
+    // 模拟启用版本控制的存储桶：向对账逻辑声明历史版本 v-still-there 仍然存在
     private sealed class VersionedInventory(IStorageInventory inner) : IStorageInventory
     {
         public static void Install(IServiceCollection services)

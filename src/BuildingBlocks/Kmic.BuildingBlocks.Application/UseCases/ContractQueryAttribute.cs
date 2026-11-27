@@ -1,21 +1,11 @@
 namespace Kmic.BuildingBlocks.Application.UseCases;
 
-/// <summary>
-/// 模块间查询
-/// </summary>
+/// <summary>声明模块间契约查询的授权方式。</summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class ContractQueryAttribute(ContractAccess access) : Attribute
 {
-    /// <summary>
-    /// 授权方式
-    /// </summary>
     public ContractAccess Access { get; } = access;
 
-    /// <summary>
-    /// 引用解析查询的返回类型不是 ReferenceInfo 时，写明原因
-    /// </summary>
-    /// <remarks>
-    /// 只能用在 Reference 查询上
-    /// </remarks>
+    /// <summary>引用解析豁免原因（仅限 Reference 类型查询，返回类型非 ReferenceInfo 时须说明）。</summary>
     public string? ResultExemption { get; init; }
 }

@@ -2,44 +2,28 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Maintenance;
 
-/// <summary>
-/// 只追加表的过期数据清理，由迁移账号执行
-/// </summary>
+/// <summary>只追加表过期数据清理工具（由迁移账号执行）</summary>
 public static class AppendOnlyPurge
 {
-    /// <summary>
-    /// 审计日志
-    /// </summary>
     public const string AuditLog = """
         "Operations"."AuditLog"
         """;
 
-    /// <summary>
-    /// 安全事件
-    /// </summary>
     public const string SecurityEvent = """
         "Identity"."SecurityEvent"
         """;
 
-    /// <summary>
-    /// 可以清理的表，名称带 schema
-    /// </summary>
+    /// <summary>支持清理的完整表名列表</summary>
     public static IReadOnlyList<string> Tables { get; } = [AuditLog, SecurityEvent];
 
-    /// <summary>
-    /// 命令行里用的名称对应的表
-    /// </summary>
+    /// <summary>命令行参数到数据库表名的映射</summary>
     public static IReadOnlyDictionary<string, string> Targets { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["audit-log"] = AuditLog,
         ["security-event"] = SecurityEvent,
     };
 
-    /// <summary>
-    /// 分批删除发生时间早于截止时间的行，每批单独提交
-    /// </summary>
-    /// <param name="table">表名，必须是 <see cref="Tables"/> 里的一个</param>
-    /// <returns>删除的行数；表还不存在（对应模块尚未建立）时为 null</returns>
+    /// <summary>分批删除早于 before 的记录（每批独立提交），表未创建时返回 null</summary>
     public static async Task<long?> RunAsync(NpgsqlDataSource database, string table, DateTimeOffset before, int batchSize, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(database);

@@ -8,9 +8,6 @@ using NpgsqlTypes;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// <see cref="IMessageRouteAdmin"/> 的实现
-/// </summary>
 internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFrameworkTables tables, TimeProvider time) : IMessageRouteAdmin
 {
     private static readonly JsonSerializerOptions _probeOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -131,7 +128,7 @@ internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFramework
             return new RedeliverResult(RouteAdminOutcome.NotFound, 0, 0);
         }
 
-        // 已终结的不再投递，补投进去也没人处理，要先重新激活
+        // 已终结的订阅不再投递消息，须先重新激活方可补投
         if (route.Status == MessageRouteTable.Finalized)
         {
             return new RedeliverResult(RouteAdminOutcome.WrongStatus, 0, 0);
@@ -156,8 +153,8 @@ internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFramework
         return new RedeliverResult(RouteAdminOutcome.Done, ids.Count, written);
     }
 
-    // 先锁住来源行再写入：和正常投递是同一个复核，来源行被清理之后不会再有迟到的补投。只补已经投递过的，
-    // 还没投递的、死信不在这里处理。多取一条，用来判断是不是超过了一次的上限
+    // 先锁定来源行再执行写入，与正常投递共用同一复核逻辑，防止来源行清理后产生迟到补投；
+    // 仅补投已投递消息（忽略待投递与死信），多查询一条用于判断是否超出单次补投上限
     private async Task<List<Guid>> LockSourceRowsAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, string sourceModule, string messageType, long fromSeq, long toSeq, CancellationToken ct)
     {
@@ -184,7 +181,7 @@ internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFramework
         return ids;
     }
 
-    // 和正常投递写同样的列，序号沿用来源的序号；订阅已经收到过的（同一条消息同一个订阅）由唯一约束挡住
+    // 写入列与正常投递保持一致并沿用来源发布序号，重复投递由 (消息, 订阅) 唯一约束拦截
     private async Task<long> InsertAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, string sourceModule, string targetModule, string subscription, List<Guid> ids, CancellationToken ct)
     {
@@ -225,7 +222,7 @@ internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFramework
         return await reader.ReadAsync(ct) ? new RouteState(reader.GetInt16(0), reader.GetString(1)) : null;
     }
 
-    // 实例登记的订阅清单里写着消息名称和订阅名，用包含运算匹配；超过时限没有心跳的实例不算
+    // 基于实例心跳登记的订阅清单执行包含匹配，超时未上报心跳的实例不计入活跃实例
     private async Task<bool> IsDeclaredByLiveInstanceAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, string messageType, string subscription, TimeSpan aliveWithin, CancellationToken ct)
     {
@@ -240,7 +237,7 @@ internal sealed class MessageRouteAdmin(DataSources dataSources, ModuleFramework
         return (bool)(await command.ExecuteScalarAsync(ct))!;
     }
 
-    // 正在处理且占用还没到期的，或者没处理完的：待处理、死信，以及占用已经到期的处理中
+    // 统计未完成消息（含待处理、死信，以及占用未到期或已过期的处理中记录）
     private static async Task<long> CountAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, string inbox, string subscription, bool inFlight, CancellationToken ct)
     {
         var condition = inFlight

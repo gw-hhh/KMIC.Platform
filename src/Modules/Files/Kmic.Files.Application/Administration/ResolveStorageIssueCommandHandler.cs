@@ -6,13 +6,9 @@ using Kmic.Files.Domain.Files;
 
 namespace Kmic.Files.Application.Administration;
 
-/// <summary>
-/// 将存储问题标记为已解决
-/// </summary>
 public sealed class ResolveStorageIssueCommandHandler(IStorageIssueRepository issues, IExecutionContext execution, TimeProvider time)
     : ICommandHandler<ResolveStorageIssueCommand, VersionedResponse<StorageIssueId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<StorageIssueId>>> Handle(ResolveStorageIssueCommand command, CancellationToken cancellationToken)
     {
         var loaded = await issues.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

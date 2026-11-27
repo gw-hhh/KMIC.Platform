@@ -10,8 +10,8 @@ internal sealed class ChangePasswordEndpoint : IEndpoint
     public void Map(IEndpointRouteBuilder group) =>
         group.MapPost("/auth/change-password", HandleAsync)
             .Sends<ChangePasswordCommand>()
-            .WithSummary("修改自己的密码")
-            .WithDescription("已有密码时须提供旧密码，包括管理员重置的临时密码；尚未设置密码时无需提供。成功后其他会话全部失效，当前会话保留。");
+            .WithSummary("修改当前用户密码")
+            .WithDescription("已有密码（含临时密码）时须传旧密码，未设密码时可空；成功后仅保留当前会话，其余会话全部失效");
 
     private static async Task<IResult> HandleAsync(ChangePasswordRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new ChangePasswordCommand(request.OldPassword, request.NewPassword), ct)).ToNoContent();

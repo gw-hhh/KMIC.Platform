@@ -5,9 +5,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 就绪检查：数据库可连接、启动任务已完成、不在停机中
-/// </summary>
 internal sealed class ReadinessHealthCheck(StartupState startup, IHostApplicationLifetime lifetime, DatabaseProbe database) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
@@ -21,7 +18,7 @@ internal sealed class ReadinessHealthCheck(StartupState startup, IHostApplicatio
 
         if (!startup.IsCompleted)
         {
-            return HealthCheckResult.Unhealthy("启动任务还没有完成");
+            return HealthCheckResult.Unhealthy("启动任务尚未完成");
         }
 
         try

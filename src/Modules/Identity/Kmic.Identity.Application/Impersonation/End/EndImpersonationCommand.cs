@@ -3,9 +3,7 @@ using Kmic.BuildingBlocks.Application.UseCases;
 
 namespace Kmic.Identity.Application.Impersonation.End;
 
-/// <summary>
-/// 结束当前的模拟会话，只读的模拟会话里也能执行
-/// </summary>
+/// <summary>结束当前身份模拟会话（只读模拟会话亦可调用）</summary>
 [AllowAuthenticated]
 [AllowWhenPasswordChangeRequired]
 [AllowWhenImpersonationReadOnly]

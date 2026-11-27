@@ -12,9 +12,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 处理发送请求：渲染、给每个收件人在每个渠道生成投递或站内消息；去重；跳过；非生产捕获
-/// </summary>
 public sealed class NotificationProcessingTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -68,7 +65,7 @@ public sealed class NotificationProcessingTests(ClassDatabase<ApiTemplate> datab
         (await ReasonOfAsync(noEmail)).ShouldBe("Skipped:NoAddress");
         (await ReasonOfAsync(disabled)).ShouldBe("Skipped:UserDisabled");
         (await ReasonOfAsync(unknown)).ShouldBe("Skipped:UnknownUser");
-        (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."SiteMessage" WHERE "RecipientUserId" IN ('{disabled}', '{unknown}')""")).ShouldBe(0, "已禁用和不存在的用户没有站内消息");
+        (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."SiteMessage" WHERE "RecipientUserId" IN ('{disabled}', '{unknown}')""")).ShouldBe(0, "已禁用或不存在的用户不应生成站内消息");
     }
 
     [Fact]
@@ -109,8 +106,8 @@ public sealed class NotificationProcessingTests(ClassDatabase<ApiTemplate> datab
         (await SendAsync(Submitted(dedup, Recipient.OfUser(user)), source)).ShouldBeSuccess();
         (await SendAsync(Submitted(dedup, Recipient.OfUser(user)))).ShouldBeSuccess();
 
-        (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBe(1, "同一个去重键同一个收件人同一个渠道只发一次");
-        (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."Notification" WHERE "SourceMessageId" = '{source}'""")).ShouldBe(1, "同一条来源消息只处理一次");
+        (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."Delivery" WHERE "DedupKey" = '{dedup}'""")).ShouldBe(1, "相同去重键、收件人与渠道组合仅应生成一条投递记录");
+        (await seed.CountAsync($"""SELECT count(*) FROM "Notifications"."Notification" WHERE "SourceMessageId" = '{source}'""")).ShouldBe(1, "同一来源消息仅应处理一次");
     }
 
     [Fact]

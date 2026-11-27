@@ -7,13 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.Notifications.Application.Captured.List;
 
-/// <summary>
-/// 查询捕获内容列表
-/// </summary>
 public sealed class ListCapturedQueryHandler(INotificationsQueryDb db, IOptions<NotificationsCaptureOptions> capture)
     : IQueryHandler<ListCapturedQuery, PagedResult<CapturedListItem>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<PagedResult<CapturedListItem>>> Handle(ListCapturedQuery query, CancellationToken cancellationToken)
     {
         if (!capture.Value.Enabled)

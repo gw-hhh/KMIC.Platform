@@ -13,9 +13,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Operations;
 
-/// <summary>
-/// 前端错误上报：登录就能报、白名单与长度上限、按用户限流、只写日志
-/// </summary>
 public sealed class ClientErrorTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : IdentityAdminApiTestBase(
         database,
@@ -70,7 +67,7 @@ public sealed class ClientErrorTests(ClassDatabase<ApiTemplate> database, ApiTem
     [Fact]
     public async Task AnAccountThatMustChangeItsPassword_CanStillReport()
     {
-        // 出错的页面恰好可能是改密码页，这时更需要上报
+        // 修改密码页面也可能发生前端异常，需确保仅登录即可上报而不受额外权限限制
         var role = await Seed.RoleAsync("无权限点的角色", []);
         var user = await Seed.UserAsync("client-error-must-change", Password, mustChange: true);
         await Seed.GrantAsync(user, role);
@@ -102,7 +99,7 @@ public sealed class ClientErrorTests(ClassDatabase<ApiTemplate> database, ApiTem
 
         (await JsonAsync(tooMany)).GetProperty("errors")[0].GetProperty("path").GetString().ShouldBe("errors");
         (await JsonAsync(tooLong)).GetProperty("errors")[0].GetProperty("path").GetString().ShouldBe("errors[0].message");
-        _log.Written.Count.ShouldBe(before, "被拒绝的请求一条也不写");
+        _log.Written.Count.ShouldBe(before, "被校验拒绝的请求不应写入任何日志");
     }
 
     [Fact]

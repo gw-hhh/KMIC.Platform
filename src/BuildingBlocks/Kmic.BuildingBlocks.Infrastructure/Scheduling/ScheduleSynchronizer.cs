@@ -8,9 +8,6 @@ using Quartz;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Scheduling;
 
-/// <summary>
-/// 把代码里的默认值和运维改过的覆盖值同步到 Quartz
-/// </summary>
 internal sealed class ScheduleSynchronizer(
     ISchedulerFactory schedulers,
     ScheduledTasks tasks,
@@ -19,12 +16,12 @@ internal sealed class ScheduleSynchronizer(
     DataSources dataSources,
     ILogger<ScheduleSynchronizer> logger)
 {
-    // 作业上记下最后同步它的构建，旧版本的实例不覆盖新版本写下的
+    // 在作业元数据中记录最后同步的构建版本，防止旧版本实例回退覆盖新版本的同步配置
     private const string BuildKey = "kmic.build";
 
     public async Task SyncAsync(string build, CancellationToken ct)
     {
-        // 多个实例同时启动时排队做，后来的看到已经一致就什么都不改
+        // 多实例并发启动时通过分布式锁串行同步，后续实例若检测到配置已一致则跳过更新
         await using var connection = await dataSources.Transactions(CallOrigin.Startup).OpenConnectionAsync(ct);
         await using (var lockCommand = connection.CreateCommand())
         {
@@ -56,10 +53,7 @@ internal sealed class ScheduleSynchronizer(
         }
     }
 
-    /// <summary>
-    /// 马上执行一次，可以在只调度不执行的实例上调用，由正在运行调度器的实例执行
-    /// </summary>
-    /// <returns>Quartz 里没有这个任务时返回 false</returns>
+    // 立即触发一次任务（可在非执行节点调用，交由集群中运行调度器的 Worker 实例执行）
     public async Task<bool> TriggerAsync(string name, UserId? by, CancellationToken ct)
     {
         var scheduler = await schedulers.GetScheduler(ct);
@@ -73,9 +67,6 @@ internal sealed class ScheduleSynchronizer(
         return true;
     }
 
-    /// <summary>
-    /// 按默认值和覆盖值得到的 Cron 触发器
-    /// </summary>
     internal static ITrigger BuildTrigger(ScheduleEntry job, string cron, TimeZoneInfo zone) =>
         TriggerBuilder.Create()
             .WithIdentity(job.Name, CommandJob.Group)
@@ -89,7 +80,7 @@ internal sealed class ScheduleSynchronizer(
     private static bool IsNewer(string? recorded, string build) =>
         ParseBuild(recorded) is { } theirs && ParseBuild(build) is { } ours && theirs > ours;
 
-    // 构建号取版本号中“+”“-”之前的部分；读不出来的（如本机开发的 unknown）不参与比较
+    // 提取版本号中 '+' 或 '-' 之前的构建号；无法解析的版本（如本地开发的 unknown）不参与版本新旧比较
     private static Version? ParseBuild(string? build)
     {
         if (build is null)
@@ -160,14 +151,14 @@ internal sealed class ScheduleSynchronizer(
                 continue;
             }
 
-            // 新版本加的任务，旧版本的实例不认识，也不删
+            // 保留新版本新增的任务，避免旧版本实例因无法识别而误删
             var detail = await scheduler.GetJobDetail(key, ct);
             if (detail is not null && detail.JobDataMap.TryGetValue(BuildKey, out var recorded) && IsNewer(recorded as string, build))
             {
                 continue;
             }
 
-            // 覆盖值保留：回滚到还有这个任务的版本时，运维改过的设置还在
+            // 保留历史运维覆盖配置，以便后续版本回滚恢复该任务时原有运维调整仍有效
             await scheduler.DeleteJob(key, ct);
             removed++;
         }

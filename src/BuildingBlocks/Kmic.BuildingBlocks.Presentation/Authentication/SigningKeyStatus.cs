@@ -1,17 +1,11 @@
 namespace Kmic.BuildingBlocks.Presentation.Authentication;
 
-/// <summary>
-/// 签名密钥的用途
-/// </summary>
+/// <summary>签名密钥用途</summary>
 public enum SigningKeyStatus
 {
-    /// <summary>
-    /// 用于签发，同时用于验证；恰好一个
-    /// </summary>
+    /// <summary>活跃密钥：同时用于签发与验证（全局唯一）</summary>
     Active,
 
-    /// <summary>
-    /// 只用于验证：轮换期间新旧密钥的另一个
-    /// </summary>
+    /// <summary>过渡密钥：仅用于密钥轮换期间的验签</summary>
     ValidationOnly,
 }

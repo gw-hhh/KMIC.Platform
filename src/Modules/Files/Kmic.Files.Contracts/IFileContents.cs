@@ -2,17 +2,9 @@ using Kmic.BuildingBlocks.Domain.Results;
 
 namespace Kmic.Files.Contracts;
 
-/// <summary>
-/// 读取文件内容，只给系统身份用
-/// </summary>
-/// <remarks>
-/// 用户下载走 IFileDownloads
-/// </remarks>
+/// <summary>读取文件内容，仅限系统身份调用；用户下载请使用 <see cref="IFileDownloads" /></summary>
 public interface IFileContents
 {
-    /// <summary>
-    /// 打开文件内容
-    /// </summary>
-    /// <returns>文件内容，流由调用方释放</returns>
+    /// <summary>打开文件内容，返回的流由调用方释放</summary>
     Task<Result<FileContent>> OpenReadAsync(Guid fileId, CancellationToken ct);
 }

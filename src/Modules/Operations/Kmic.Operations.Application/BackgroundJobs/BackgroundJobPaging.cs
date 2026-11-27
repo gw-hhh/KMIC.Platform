@@ -8,9 +8,6 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.BackgroundJobs;
 
-/// <summary>
-/// 归并跨模块后台作业分页结果，并补充提交人和取消请求人的名称
-/// </summary>
 internal static class BackgroundJobPaging
 {
     public static async Task<Result<CursorPage<BackgroundJobItem>>> PageAsync(

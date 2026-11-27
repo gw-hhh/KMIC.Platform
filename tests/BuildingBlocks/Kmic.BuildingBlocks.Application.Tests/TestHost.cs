@@ -13,12 +13,7 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Kmic.BuildingBlocks.Application.Tests;
 
-/// <summary>
-/// 应用层的测试宿主
-/// </summary>
-/// <remarks>
-/// 注册方式和管道顺序与真实宿主一致。异常转换、幂等、事务属于 Infrastructure，在那边的测试里覆盖
-/// </remarks>
+// 应用层测试宿主，管道顺序与真实宿主一致（异常转换、幂等与事务在 Infrastructure 测试覆盖）
 internal sealed class TestHost : IAsyncDisposable
 {
     private readonly ServiceProvider _provider;

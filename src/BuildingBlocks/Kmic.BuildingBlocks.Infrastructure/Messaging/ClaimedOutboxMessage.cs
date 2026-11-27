@@ -1,8 +1,5 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 投递程序领取到的一条 Outbox 消息
-/// </summary>
 internal sealed record ClaimedOutboxMessage
 {
     public required Guid Id { get; init; }

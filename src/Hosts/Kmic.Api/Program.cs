@@ -19,7 +19,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 日志、追踪、指标的默认配置，要在模块注册之前
+// 配置默认日志、追踪与指标，须在模块注册之前调用
 builder.AddKmicServiceDefaults();
 
 // 显式注册模块；Sample 为参考模块，仅在非生产环境注册
@@ -31,7 +31,7 @@ builder.AddKmicHost(host => host
     .AddModule<IdentityModule, IdentityEndpoints>()
     .AddModule<SampleModule, SampleEndpoints>(onlyIn: KmicEnvironments.NonProduction));
 
-// 选项必须是编译期常量，源码生成器要读取。数组顺序就是管道里的执行顺序
+// 选项须为编译期常量以便源码生成器读取；数组顺序即为请求管道的执行顺序
 builder.Services.AddMediator(options =>
 {
     options.ServiceLifetime = ServiceLifetime.Scoped;
@@ -49,11 +49,11 @@ builder.Services.AddMediator(options =>
     ];
 });
 
-// XML 注释只在调用 AddOpenApi 的项目里读取，所以由宿主调用
+// XML 文档注释仅在调用 AddOpenApi 的程序集内被读取，因此由宿主统一注册
 builder.Services.AddOpenApi("v1", options => options.AddKmicConventions());
 
 var app = builder.Build();
-// 请求摘要日志在最前面，错误处理之前，500 也能记到
+// 请求摘要日志须置于最外层（错误处理中间件之前），确保 500 异常也能被记录
 app.UseKmicRequestLogging();
 app.UseKmicHost();
 
@@ -66,7 +66,5 @@ if (!app.Environment.IsProduction())
 
 await app.RunAsync();
 
-/// <summary>
-/// 给 WebApplicationFactory 用的入口类型
-/// </summary>
+/// <summary>供集成测试 WebApplicationFactory 引用的宿主入口类型</summary>
 public partial class Program;

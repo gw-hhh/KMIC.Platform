@@ -8,16 +8,12 @@ using Kmic.Identity.Contracts;
 
 namespace Kmic.Configuration.Application.Preferences.Layers;
 
-/// <summary>
-/// 移除系统或角色层的偏好设置
-/// </summary>
 public sealed class ResetPreferenceLayerCommandHandler(
     PreferenceCatalog catalog,
     IPreferenceRepository preferences,
     IRoleReferences roles,
     IAfterCommit afterCommit) : ICommandHandler<ResetPreferenceLayerCommand, VersionedResponse<PreferenceValueId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<PreferenceValueId>>> Handle(ResetPreferenceLayerCommand command, CancellationToken cancellationToken)
     {
         var found = PreferenceSubject.Find(catalog, command.Key);

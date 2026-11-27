@@ -1,8 +1,5 @@
 namespace Kmic.BuildingBlocks.Infrastructure.SecurityEvents;
 
-/// <summary>
-/// 一条待写库的安全事件，身份、时间和追踪 ID 已经补全
-/// </summary>
 internal sealed record SecurityEventRecord
 {
     public required Guid Id { get; init; }

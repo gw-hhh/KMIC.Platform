@@ -50,7 +50,7 @@ const refreshed = (token: string) =>
   });
 
 describe('读请求', () => {
-  it('带访问令牌，成功时返回数据', async () => {
+  it('携带访问令牌并在成功时返回响应数据', async () => {
     let authorization: string | null = null;
     server.use(
       http.get(`${origin}/api/v1/identity/me`, ({ request }) => {
@@ -66,7 +66,7 @@ describe('读请求', () => {
     expect(data).toEqual({ displayName: '甲' });
   });
 
-  it('读请求不带幂等键', async () => {
+  it('读请求不携带幂等键', async () => {
     let key: string | null = 'unset';
     server.use(
       http.get(
@@ -83,7 +83,7 @@ describe('读请求', () => {
 });
 
 describe('错误转换', () => {
-  it('服务端的问题转成 KmicError，保留错误码、字段错误、版本和追踪号', async () => {
+  it('将服务端 ProblemDetails 转换为 KmicError，并保留错误码、字段错误、版本号与追踪 ID', async () => {
     server.use(
       http.post(`${origin}/api/v1/identity/auth/change-password`, () =>
         problem(400, 'Common.ValidationFailed', {
@@ -113,7 +113,7 @@ describe('错误转换', () => {
     expect(error.outcome).toBe('failed');
   });
 
-  it('429 带 Retry-After', async () => {
+  it('429 响应保留 Retry-After 秒数', async () => {
     server.use(
       http.get(`${origin}/api/v1/identity/me`, () =>
         HttpResponse.json(
@@ -136,7 +136,7 @@ describe('错误转换', () => {
     expect([error.status, error.retryAfterSeconds]).toEqual([429, 12]);
   });
 
-  it('不是 ProblemDetails 的响应按状态码归类', async () => {
+  it('非 ProblemDetails 响应按状态码归类', async () => {
     server.use(
       http.get(
         `${origin}/api/v1/identity/me`,
@@ -154,7 +154,7 @@ describe('错误转换', () => {
     expect([error.kind, error.status, error.code, error.traceId]).toEqual(['problem', 502, undefined, 'gw-1']);
   });
 
-  it('断网：读请求没有结局，写请求是结果未知', async () => {
+  it('网络异常时读请求不标记结果状态，写请求标记为结果未知', async () => {
     server.use(
       http.get(`${origin}/api/v1/identity/me`, () => HttpResponse.error()),
       http.post(`${origin}/api/v1/identity/auth/logout`, () => HttpResponse.error()),
@@ -168,7 +168,7 @@ describe('错误转换', () => {
     expect([write.kind, write.outcome]).toEqual(['network', 'unknown']);
   });
 
-  it('写请求遇到 500 或 503“结果未知”算结果未知，其他情况是确定没有生效', async () => {
+  it('写请求遇到 500 或 503 结果未知错误时标记为结果未知，其余 503 标记为确定失败', async () => {
     server.use(
       http.post(`${origin}/api/v1/identity/auth/logout`, () => problem(500, 'Common.Unexpected')),
       http.post(`${origin}/api/v1/identity/auth/switch-role`, () => problem(503, 'Common.ResultUnknown')),
@@ -187,7 +187,7 @@ describe('错误转换', () => {
     expect([a.outcome, b.outcome, c.outcome]).toEqual(['unknown', 'unknown', 'failed']);
   });
 
-  it('调用方取消是 aborted，不当作错误提示', async () => {
+  it('调用方主动取消时归类为 aborted，不作为错误提示', async () => {
     server.use(
       http.get(`${origin}/api/v1/identity/me`, async () => (await new Promise(() => {}), HttpResponse.json({}))),
     );
@@ -200,7 +200,7 @@ describe('错误转换', () => {
     expect(((await pending) as KmicError).kind).toBe('aborted');
   });
 
-  it('超时', async () => {
+  it('请求超时时归类为 timeout', async () => {
     server.use(
       http.get(`${origin}/api/v1/identity/me`, async () => (await new Promise(() => {}), HttpResponse.json({}))),
     );
@@ -213,7 +213,7 @@ describe('错误转换', () => {
 });
 
 describe('幂等键', () => {
-  it('写请求自动带幂等键，调用方给了就用调用方的', async () => {
+  it('写请求默认自动生成幂等键，若调用方已指定则沿用该键值', async () => {
     const keys: (string | null)[] = [];
     server.use(
       http.post(
@@ -230,8 +230,8 @@ describe('幂等键', () => {
   });
 });
 
-describe('401 与刷新', () => {
-  it('刷新成功后重放原请求一次，写请求用同一个幂等键', async () => {
+describe('401 鉴权与令牌刷新', () => {
+  it('令牌刷新成功后重放原请求一次，写请求沿用原幂等键', async () => {
     const seen: { auth: string | null; key: string | null }[] = [];
     let refreshCalls = 0;
     server.use(
@@ -258,7 +258,7 @@ describe('401 与刷新', () => {
     expect(session.token).toBe('token-2');
   });
 
-  it('同一标签页并发的 401 共享一次刷新', async () => {
+  it('同一标签页并发触发 401 时共享同一次刷新请求', async () => {
     let refreshCalls = 0;
     server.use(
       http.get(`${origin}/api/v1/identity/me`, ({ request }) =>
@@ -284,7 +284,7 @@ describe('401 与刷新', () => {
     expect(results.map((r) => r.data)).toEqual([{ ok: true }, { ok: true }, { ok: true }]);
   });
 
-  it('刷新被拒绝：登录失效，原来的 401 报给调用方并通知监听者', async () => {
+  it('刷新被拒绝时判定会话失效，向调用方返回原 401 错误并通知监听者', async () => {
     server.use(
       http.get(`${origin}/api/v1/identity/me`, () => problem(401, 'Common.Unauthenticated')),
       http.post(`${origin}/api/v1/identity/auth/refresh`, () => problem(401, 'Identity.SessionExpired')),
@@ -300,7 +300,7 @@ describe('401 与刷新', () => {
     expect([session.token, expiredCalls, session.epoch > epoch]).toEqual([null, 1, true]);
   });
 
-  it('登录和刷新自己的 401 不再触发刷新', async () => {
+  it('登录与刷新接口自身的 401 不再触发令牌刷新', async () => {
     let refreshCalls = 0;
     server.use(
       http.post(`${origin}/api/v1/identity/auth/login`, () => problem(401, 'Identity.LoginFailed')),
@@ -315,7 +315,7 @@ describe('401 与刷新', () => {
     expect([error.code, refreshCalls]).toEqual(['Identity.LoginFailed', 0]);
   });
 
-  it('刷新挂住时按超时失败并释放锁，之后的刷新照常进行', async () => {
+  it('刷新请求挂起超时后失败并释放锁，后续刷新可正常执行', async () => {
     let refreshCalls = 0;
     let held = 0;
     const locks = {
@@ -353,7 +353,7 @@ describe('401 与刷新', () => {
     expect([refreshCalls, session.token]).toEqual([2, 'token-2']);
   });
 
-  it('跨标签页的锁：刷新在锁里执行', async () => {
+  it('跨标签页互斥锁：刷新流程在锁保护内执行', async () => {
     const order: string[] = [];
     const locks = {
       async request<T>(name: string, callback: () => Promise<T>) {
@@ -382,7 +382,7 @@ describe('401 与刷新', () => {
 });
 
 describe('epoch', () => {
-  it('响应回来时身份已经变了：丢弃，不当作错误提示', async () => {
+  it('响应返回时若身份已变更则丢弃结果，不作为错误提示', async () => {
     const { client, session } = newClient();
     server.use(
       http.get(`${origin}/api/v1/identity/me`, async () => {

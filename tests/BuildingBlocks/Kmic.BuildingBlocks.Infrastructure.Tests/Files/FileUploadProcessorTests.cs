@@ -103,7 +103,7 @@ public sealed class FileUploadProcessorTests : IDisposable
         var result = await _processor.StoreAsync(_profile, "a.pdf", endless, "env/endless", Ct);
 
         result.Outcome.ShouldBe(UploadOutcome.TooLarge);
-        endless.BytesServed.ShouldBeLessThan(_profile.MaxBytes + 1_000_000, "超过上限就停止读取，不会把一个无限的流读完");
+        endless.BytesServed.ShouldBeLessThan(_profile.MaxBytes + 1_000_000, "超出大小上限后应立即中止读取，不应耗尽无限流");
         (await StoredKeysAsync()).ShouldBeEmpty();
     }
 
@@ -154,7 +154,7 @@ public sealed class FileUploadProcessorTests : IDisposable
         (await StoredKeysAsync()).ShouldBeEmpty();
     }
 
-    // 客户端一直发，发不完
+    // 模拟客户端持续发送数据且无终止的流
     private sealed class EndlessStream : Stream
     {
         public long BytesServed { get; private set; }

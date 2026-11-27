@@ -7,12 +7,6 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Authentication.ChangePassword;
 
-/// <summary>
-/// 修改当前用户密码
-/// </summary>
-/// <remarks>
-/// 旧密码输错和登录失败共用一份失败计数，猜密码的总次数有上限
-/// </remarks>
 public sealed class ChangePasswordCommandHandler(
     IUserRepository users,
     IExecutionContext execution,
@@ -22,10 +16,9 @@ public sealed class ChangePasswordCommandHandler(
     ISecurityEventWriter securityEvents,
     TimeProvider time) : ICommandHandler<ChangePasswordCommand>
 {
-    /// <inheritdoc />
     public async ValueTask<Result> Handle(ChangePasswordCommand command, CancellationToken cancellationToken)
     {
-        var access = execution.Access ?? throw new InvalidOperationException("修改密码需要已登录的访问上下文。");
+        var access = execution.Access ?? throw new InvalidOperationException("修改密码需要已登录的用户身份。");
         var loaded = await users.GetForUpdateAsync(access.UserId, null, cancellationToken);
         if (loaded.IsFailure)
         {
@@ -35,6 +28,8 @@ public sealed class ChangePasswordCommandHandler(
         var user = loaded.Value;
         var now = time.GetUtcNow();
         var key = LoginNames.Hash(user.Account);
+
+        // 旧密码校验与登录共用失败计数，限制密码爆破尝试总次数
         if (!string.IsNullOrEmpty(user.PasswordHash))
         {
             if (LoginThrottlePolicy.Remaining(await throttles.GetAsync(key, cancellationToken), now) is { } wait)

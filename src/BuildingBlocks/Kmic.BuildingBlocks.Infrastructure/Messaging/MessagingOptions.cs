@@ -1,100 +1,56 @@
 namespace Kmic.BuildingBlocks.Infrastructure.Messaging;
 
-/// <summary>
-/// 集成消息配置
-/// </summary>
+/// <summary>集成消息配置</summary>
 public sealed class MessagingOptions
 {
-    /// <summary>
-    /// 配置节名称
-    /// </summary>
     public const string Section = "Kmic:Messaging";
 
-    /// <summary>
-    /// 单条消息内容的上限（字节）
-    /// </summary>
+    /// <summary>单条消息载荷上限（字节）</summary>
     public int MaxPayloadBytes { get; set; } = 256 * 1024;
 
-    /// <summary>
-    /// 一个事务写入 Outbox 的上限（字节）
-    /// </summary>
+    /// <summary>单个事务写入 Outbox 的总字节上限</summary>
     public int MaxOutboxBytesPerTransaction { get; set; } = 1024 * 1024;
 
-    /// <summary>
-    /// 投递时每次领取的条数
-    /// </summary>
+    /// <summary>Outbox 单次领取条数</summary>
     public int OutboxBatchSize { get; set; } = 100;
 
-    /// <summary>
-    /// 投递时领取后的占用时长
-    /// </summary>
+    /// <summary>Outbox 领取租约时长</summary>
     public TimeSpan OutboxLease { get; set; } = TimeSpan.FromSeconds(30);
 
-    /// <summary>
-    /// 处理时每次领取的条数
-    /// </summary>
+    /// <summary>Inbox 单次领取条数</summary>
     public int InboxBatchSize { get; set; } = 20;
 
-    /// <summary>
-    /// 处理时领取后的占用时长
-    /// </summary>
-    /// <remarks>
-    /// 处理器要在这段时间内完成，耗时的工作改成后台作业
-    /// </remarks>
+    /// <summary>Inbox 领取租约时长（处理器须在此时间内完成，耗时操作请拆分为后台作业）</summary>
     public TimeSpan InboxLease { get; set; } = TimeSpan.FromMinutes(2);
 
-    /// <summary>
-    /// 第一次重试前的等待时长
-    /// </summary>
+    /// <summary>首次重试等待时长</summary>
     public TimeSpan RetryBaseDelay { get; set; } = TimeSpan.FromSeconds(5);
 
-    /// <summary>
-    /// 每次重试等待时长的倍数
-    /// </summary>
+    /// <summary>退避重试间隔乘数</summary>
     public double RetryFactor { get; set; } = 2;
 
-    /// <summary>
-    /// 重试等待时长的上限
-    /// </summary>
+    /// <summary>重试最大等待时长</summary>
     public TimeSpan RetryMaxDelay { get; set; } = TimeSpan.FromMinutes(30);
 
-    /// <summary>
-    /// 最多尝试次数，用完进入死信
-    /// </summary>
+    /// <summary>最大重试次数，耗尽后转入死信队列</summary>
     public int MaxAttempts { get; set; } = 10;
 
-    /// <summary>
-    /// 等待时长的随机浮动比例
-    /// </summary>
+    /// <summary>重试间隔随机抖动比例</summary>
     public double RetryJitter { get; set; } = 0.2;
 
-    /// <summary>
-    /// 兜底轮询的间隔，只在通知丢失时起作用
-    /// </summary>
+    /// <summary>兜底轮询间隔（仅在 PG NOTIFY 丢失时补充唤醒）</summary>
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(10);
 
-    /// <summary>
-    /// 实例登记心跳的间隔，运维界面据此看哪些实例还活着
-    /// </summary>
+    /// <summary>实例心跳上报间隔</summary>
     public TimeSpan HeartbeatInterval { get; set; } = TimeSpan.FromSeconds(30);
 
-    /// <summary>
-    /// 每个模块同时处理 Inbox 消息的数量
-    /// </summary>
+    /// <summary>单个模块 Inbox 消息的并发处理上限</summary>
     public int InboxParallelism { get; set; } = 4;
 
-    /// <summary>
-    /// 停机时等待进行中的处理完成的时长，超时就取消
-    /// </summary>
+    /// <summary>停机等待在途消息完成的宽限时长，超时后强制取消</summary>
     public TimeSpan ShutdownGrace { get; set; } = TimeSpan.FromSeconds(30);
 
-    /// <summary>
-    /// 容量保护
-    /// </summary>
     public AdmissionOptions Admission { get; } = new();
 
-    /// <summary>
-    /// 读模型重建
-    /// </summary>
     public RebuildOptions Rebuild { get; } = new();
 }

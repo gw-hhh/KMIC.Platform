@@ -2,10 +2,10 @@
 #:property PublishAot=false
 
 // 本机运行：dotnet run scripts/dev.cs -- up
-// 起数据库容器 → 建库与运行账号 → 迁移 → 首次建管理员 → 启动 Api（含后台处理）。再次运行会复用已有的库和账号。
-// 需要 Docker 和 .NET 10 SDK。生成的密码、签名密钥、上传的文件都放在仓库根目录的 .local 文件夹里，不进仓库。
-// 命令：up（默认，在前台运行 Api，Ctrl+C 停止）｜ status（看现在是什么状态）｜ reset（删掉本机的库，下次 up 重新建）
-// up --dashboard：另起可观测面板（Aspire Dashboard 独立镜像），Api 的日志、追踪、指标发到它，浏览器打开 http://localhost:18888
+// 启动数据库容器 → 初始化库与运行账号 → 执行迁移 → 首次创建管理员 → 启动 Api（含后台任务）。重复执行会复用已有库与账号。
+// 依赖 Docker 与 .NET 10 SDK。生成的密码、签名密钥及本地上传文件存放于仓库根目录 .local 下（不纳入版本控制）。
+// 命令：up（默认，前台运行 Api，Ctrl+C 停止）｜ status（查看当前环境状态）｜ reset（删除本地数据库，下次 up 时重建）
+// up --dashboard：额外启动可观测面板（Aspire Dashboard 独立镜像）并接收 Api 遥测数据，访问 http://localhost:18888
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -36,7 +36,7 @@ return command switch
     "up" => await UpAsync(),
     "status" => Status(),
     "reset" => Reset(),
-    _ => Fail($"不认识的命令 {command}。可用：up、status、reset"),
+    _ => Fail($"未知命令 {command}。可用：up、status、reset"),
 };
 
 async Task<int> UpAsync()
@@ -50,22 +50,22 @@ async Task<int> UpAsync()
     var migrate = RunDotnet("src/Hosts/Kmic.MigrationRunner", ["migrate"], Env(("Kmic__Migration__ConnectionString", superConnection), ("DOTNET_ENVIRONMENT", "Development")));
     if (migrate != 0)
     {
-        return Fail("迁移失败，上面有原因。");
+        return Fail("迁移失败，详见上方输出。");
     }
 
     EnsureAdministrator(superConnection);
     EnsureSigningKey();
     if (dashboard && !EnsureDashboard())
     {
-        return Fail("可观测面板没有起来，上面有原因。");
+        return Fail("可观测面板启动失败，详见上方输出。");
     }
 
     Console.WriteLine("== 启动 Api");
     Console.WriteLine($"   接口文档：http://localhost:{ApiPort}/scalar");
-    Console.WriteLine($"   管理员账号：{AdminAccount}（密码见 {Path.Combine(".local", "dev.json")}，首次登录要先改密码）");
+    Console.WriteLine($"   管理员账号：{AdminAccount}（密码见 {Path.Combine(".local", "dev.json")}，首次登录后须修改密码）");
     Console.WriteLine("   Ctrl+C 停止；数据库容器会继续运行");
     var runtime = RuntimeConnection(Get("AppPassword"));
-    // 只有打开面板时才导出遥测，Kmic.ServiceDefaults 看到这个地址才导出
+    // 仅在启用面板时导出遥测；Kmic.ServiceDefaults 检测到此环境变量后开启 OTLP 导出
     (string, string)[] telemetry = dashboard
         ? [("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{OtlpPort}"), ("OTEL_SERVICE_NAME", "kmic-api")]
         : [];
@@ -80,13 +80,13 @@ async Task<int> UpAsync()
         ("Kmic__Auth__SigningKeys__0__Kid", "local-1"),
         ("Kmic__Auth__SigningKeys__0__Status", "Active"),
         ("Kmic__Auth__SigningKeys__0__PrivateKeyPath", Path.Combine(local, "keys", "private.pem")),
-        // 前端开发服务的地址，刷新令牌时要校验来源
+        // 前端开发服务器地址，用于刷新令牌时的来源校验
         ("Identity__Cookie__TrustedOrigins__0", "http://localhost:5173"),
         ("Identity__Cookie__TrustedOrigins__1", "http://127.0.0.1:5173"),
         ("Files__Storage__LocalRoot", Path.Combine(local, "files"))]));
 }
 
-// 面板只绑本机地址、免登录，只用于开发；数据在容器内存里，重启即清空
+// 面板仅绑定本机回环地址且免登录，限本地开发使用；数据存储在容器内存中，重启后清空
 bool EnsureDashboard()
 {
     Console.WriteLine("== 可观测面板");
@@ -110,11 +110,11 @@ bool EnsureDashboard()
 int Status()
 {
     var exists = Capture("docker", ["ps", "-a", "--filter", $"name=^{Container}$", "--format", "{{.Status}}"]).Output.Trim();
-    Console.WriteLine($"数据库容器 {Container}：{(exists.Length == 0 ? "还没有" : exists)}");
+    Console.WriteLine($"数据库容器 {Container}：{(exists.Length == 0 ? "未创建" : exists)}");
     if (exists.StartsWith("Up", StringComparison.Ordinal))
     {
         var built = string.Equals(Psql("postgres", $"SELECT 1 FROM pg_database WHERE datname = '{Database}'").Output.Trim(), "1", StringComparison.Ordinal);
-        Console.WriteLine($"数据库 {Database}：{(built ? "已建" : "还没有")}");
+        Console.WriteLine($"数据库 {Database}：{(built ? "已创建" : "未创建")}");
         if (built)
         {
             var users = Psql(Database, "SELECT count(*) FROM \"Identity\".\"User\" WHERE \"Kind\" = 'Normal'").Output.Trim();
@@ -122,9 +122,9 @@ int Status()
         }
     }
 
-    Console.WriteLine($"Api 地址：http://localhost:{ApiPort}（运行时才有）");
+    Console.WriteLine($"Api 地址：http://localhost:{ApiPort}（仅在运行时可用）");
     var panel = Capture("docker", ["ps", "-a", "--filter", $"name=^{DashboardContainer}$", "--format", "{{.Status}}"]).Output.Trim();
-    Console.WriteLine($"可观测面板 {DashboardContainer}：{(panel.Length == 0 ? "没有（up --dashboard 时才起）" : $"{panel}，http://localhost:{DashboardPort}")}");
+    Console.WriteLine($"可观测面板 {DashboardContainer}：{(panel.Length == 0 ? "未启动（需通过 up --dashboard 启动）" : $"{panel}，http://localhost:{DashboardPort}")}");
     return 0;
 }
 
@@ -144,7 +144,7 @@ int Reset()
     }
 
     Set("AdminPassword", null);
-    Console.WriteLine($"已删除数据库 {Database}。再运行 up 会重新迁移并建管理员。");
+    Console.WriteLine($"已删除数据库 {Database}，下次执行 up 时将重新迁移并创建管理员。");
     return 0;
 }
 
@@ -153,12 +153,12 @@ void EnsureDocker()
     var info = Capture("docker", ["info", "--format", "{{.ServerVersion}}"]);
     if (info.ExitCode != 0)
     {
-        Console.WriteLine("Docker 没有运行：先打开 Docker Desktop，等它就绪再试。");
+        Console.WriteLine("Docker 未运行，请先启动 Docker Desktop 并等待就绪后重试。");
         Environment.Exit(1);
     }
 }
 
-// 数据库容器：已经有就启动，没有就新建。返回超级用户密码
+// 确保数据库容器存在并处于运行状态（不存在时新建），返回超级用户密码
 string EnsureDatabaseContainer()
 {
     var existing = Capture("docker", ["ps", "-a", "--filter", $"name=^{Container}$", "--format", "{{.Status}}"]).Output.Trim();
@@ -211,7 +211,7 @@ string EnsureDatabaseContainer()
         Thread.Sleep(1000);
     }
 
-    Fail("数据库 60 秒内没有就绪。");
+    Fail("数据库在 60 秒内未就绪。");
     return password;
 }
 
@@ -221,7 +221,7 @@ string ReadContainerPassword()
     var line = env.Split('\n').FirstOrDefault(l => l.StartsWith("POSTGRES_PASSWORD=", StringComparison.Ordinal));
     if (line is null)
     {
-        Fail($"读不到容器 {Container} 的数据库密码。");
+        Fail($"无法读取容器 {Container} 的数据库密码。");
         return string.Empty;
     }
 
@@ -232,11 +232,11 @@ void EnsureDatabaseAndRoles()
 {
     if (!string.Equals(Psql("postgres", $"SELECT 1 FROM pg_database WHERE datname = '{Database}'").Output.Trim(), "1", StringComparison.Ordinal))
     {
-        Console.WriteLine($"== 建数据库 {Database}");
+        Console.WriteLine($"== 创建数据库 {Database}");
         Check(Psql("postgres", $"CREATE DATABASE {Database}"));
     }
 
-    // 运行账号：迁移里的授权要求 kmic_runtime 组角色先存在，应用用它的成员 kmic_app 登录
+    // 运行账号：迁移脚本中的授权依赖 kmic_runtime 组角色，应用运行时通过其成员 kmic_app 登录
     var appPassword = Get("AppPassword") ?? RandomPassword();
     Check(Psql("postgres", "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'kmic_runtime') THEN CREATE ROLE kmic_runtime NOLOGIN; END IF; END $$"));
     Check(Psql("postgres", "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'kmic_app') THEN CREATE ROLE kmic_app LOGIN IN ROLE kmic_runtime; END IF; END $$"));
@@ -265,7 +265,7 @@ void EnsureAdministrator(string superConnection)
         password);
     if (code != 0)
     {
-        Fail("创建管理员失败，上面有原因。");
+        Fail("创建管理员失败，详见上方输出。");
         return;
     }
 
@@ -286,7 +286,7 @@ void EnsureSigningKey()
     using var rsa = RSA.Create(2048);
     File.WriteAllText(privatePath, rsa.ExportPkcs8PrivateKeyPem());
     File.WriteAllText(Path.Combine(keys, "public.pem"), rsa.ExportSubjectPublicKeyInfoPem());
-    Console.WriteLine("== 已生成本机用的令牌签名密钥");
+    Console.WriteLine("== 已生成本机令牌签名密钥");
 }
 
 string SuperConnection(string password) => $"Host=127.0.0.1;Port={DatabasePort};Database={Database};Username=postgres;Password={password}";
@@ -316,7 +316,7 @@ static Dictionary<string, string> Env(params (string Name, string Value)[] pairs
 int RunDotnet(string project, string[] programArgs, Dictionary<string, string> environment, string? stdin = null)
 {
     var startInfo = new ProcessStartInfo("dotnet") { WorkingDirectory = root, UseShellExecute = false, RedirectStandardInput = stdin is not null };
-    // 不用 Visual Studio 生成的启动配置，端口和环境变量以这里给的为准
+    // 忽略 launchSettings.json，端口与环境变量以脚本传入为准
     foreach (var part in new[] { "run", "--no-launch-profile", "--project", project, "--" }.Concat(programArgs))
     {
         startInfo.ArgumentList.Add(part);
@@ -357,7 +357,7 @@ static (int ExitCode, string Output, string Error) Capture(string fileName, stri
     return (process.ExitCode, output.ToString(), error.ToString());
 }
 
-// 字符表去掉了容易看混的 I、l、O、0、1
+// 字符表剔除了易混淆字符 I、l、O、0、1
 // cspell:disable-next-line
 static string RandomPassword() => RandomNumberGenerator.GetString("ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789", 20) + "#7";
 
@@ -371,7 +371,7 @@ static string FindRepositoryRoot()
         }
     }
 
-    throw new InvalidOperationException("找不到仓库根目录（Kmic.slnx）。请在仓库里运行。");
+    throw new InvalidOperationException("找不到仓库根目录（Kmic.slnx）。请在仓库目录下运行。");
 }
 
 string? Get(string key) => state.GetValueOrDefault(key);

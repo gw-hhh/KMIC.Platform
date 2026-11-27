@@ -3,9 +3,6 @@ using Shouldly;
 
 namespace Kmic.Tools.Tests;
 
-/// <summary>
-/// 首个管理员初始化与应急重置：真实数据库，先用迁移程序建好结构，再跑运维命令
-/// </summary>
 public sealed class IdentityOperatorTests(ToolsTemplate template) : IAsyncLifetime
 {
     private const string Password = "correct horse battery";

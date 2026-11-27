@@ -2,9 +2,6 @@ using Kmic.BuildingBlocks.Domain.Entities;
 
 namespace Kmic.Identity.Domain.Roles;
 
-/// <summary>
-/// 角色权限点
-/// </summary>
 public sealed class RolePermissionEntry : Entity<RolePermissionEntryId>
 {
     private RolePermissionEntry(RolePermissionEntryId id, string permissionCode)

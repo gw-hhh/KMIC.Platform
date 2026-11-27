@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 本人最近的后台作业：进度、状态、取消。有没结束的作业时每 2 秒刷新，页面不可见时暂停
+// 当前用户的后台作业列表：存在进行中作业时每 2 秒轮询，页面不可见时暂停
 import { useQuery } from '@tanstack/vue-query';
 import { Badge, Popconfirm, Popover, Progress, Spin, Tag, message } from 'antdv-next';
 import { computed, ref, watch } from 'vue';
@@ -12,8 +12,6 @@ import KTooltip from '@/platform/ui/KTooltip.vue';
 const t = shellTexts.jobs;
 const format = useFormat();
 const open = ref(false);
-
-/** 有没结束的作业时的刷新间隔 */
 const pollInterval = 2000;
 
 const jobs = useQuery(
@@ -57,7 +55,7 @@ async function cancelJob(job: BackgroundJob): Promise<void> {
   if (result.ok) {
     message.success(t.cancelRequested);
   } else {
-    // 结果不明也不用确认：刷新列表就能看到作业的实际状态
+    // 即使结果未知也无需确认，刷新列表即可获取作业实际状态
     cancel.reset();
     message.error(result.error.message);
     void jobs.refetch();

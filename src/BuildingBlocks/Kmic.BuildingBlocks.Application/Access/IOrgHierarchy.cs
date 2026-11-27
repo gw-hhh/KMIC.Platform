@@ -2,28 +2,16 @@ using Kmic.BuildingBlocks.Domain.Identifiers;
 
 namespace Kmic.BuildingBlocks.Application.Access;
 
-/// <summary>
-/// 组织树
-/// </summary>
 public interface IOrgHierarchy
 {
-    /// <summary>
-    /// 树版本号
-    /// </summary>
     long Version { get; }
 
-    /// <summary>
-    /// 组织是否存在，含已停用的
-    /// </summary>
+    /// <summary>判断组织是否存在（含已停用组织）。</summary>
     bool Exists(OrgUnitId id);
 
-    /// <summary>
-    /// 自身及全部下级，含已停用的下级
-    /// </summary>
+    /// <summary>返回自身及全部下级组织（含已停用下级）。</summary>
     IReadOnlySet<OrgUnitId> SelfAndDescendants(OrgUnitId id);
 
-    /// <summary>
-    /// 全部上级，由近到远
-    /// </summary>
+    /// <summary>返回全部上级组织，按由近及远排序。</summary>
     IReadOnlyList<OrgUnitId> Ancestors(OrgUnitId id);
 }

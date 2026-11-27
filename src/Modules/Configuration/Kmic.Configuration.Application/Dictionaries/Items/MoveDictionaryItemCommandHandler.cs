@@ -5,13 +5,9 @@ using Kmic.Configuration.Domain.Dictionaries;
 
 namespace Kmic.Configuration.Application.Dictionaries.Items;
 
-/// <summary>
-/// 调整字典项的父项
-/// </summary>
 public sealed class MoveDictionaryItemCommandHandler(IDictionaryTypeRepository types, IAfterCommit afterCommit)
     : ICommandHandler<MoveDictionaryItemCommand, VersionedResponse<DictionaryTypeId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<DictionaryTypeId>>> Handle(MoveDictionaryItemCommand command, CancellationToken cancellationToken)
     {
         var loaded = await types.GetByCodeForUpdateAsync(command.TypeCode, command.ExpectedVersion, cancellationToken);

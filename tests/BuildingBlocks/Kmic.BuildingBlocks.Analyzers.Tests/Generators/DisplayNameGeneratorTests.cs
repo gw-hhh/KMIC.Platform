@@ -80,7 +80,7 @@ public sealed class DisplayNameGeneratorTests
         return string.Concat(result.GeneratedTrees.Select(t => t.ToString()));
     }
 
-    // 测试进程加载的框架程序集已经够编译这段源码
+    // 测试进程已加载的框架程序集足以编译该段源码
     private static IEnumerable<MetadataReference> PlatformReferences() =>
         (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string ?? "")
             .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)

@@ -3,9 +3,6 @@ using Npgsql;
 
 namespace Kmic.BuildingBlocks.Hosting.Health;
 
-/// <summary>
-/// 数据库
-/// </summary>
 internal sealed class DatabaseDependencyCheck(DatabaseProbe database) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)

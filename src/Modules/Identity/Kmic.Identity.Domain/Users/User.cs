@@ -7,12 +7,7 @@ using Kmic.Identity.Domain.Users.Events;
 
 namespace Kmic.Identity.Domain.Users;
 
-/// <summary>
-/// 用户：能登录系统的人，以及代表“系统”的固定账号
-/// </summary>
-/// <remarks>
-/// 用户只禁用不删除
-/// </remarks>
+/// <summary>用户聚合（可登录的自然人账号或内置系统账号），仅禁用不删除。</summary>
 public sealed class User : AggregateRoot<UserId>
 {
     private static readonly StateMachine<User, UserStatus, UserAction> _machine =
@@ -110,9 +105,7 @@ public sealed class User : AggregateRoot<UserId>
     /// </summary>
     public bool CanLogin => Kind == UserKind.Normal && Status == UserStatus.Active;
 
-    /// <summary>
-    /// 创建用户，不设置密码、所属组织或角色
-    /// </summary>
+    /// <summary>创建用户（暂不设置密码、所属组织和角色）。</summary>
     public static Result<User> Create(string? account, string? displayName, string? englishName, string? employeeNo, string? mobile, string? email, string? reason = null)
     {
         var fields = ReadFields(account, displayName, englishName, employeeNo, mobile, email);
@@ -127,9 +120,6 @@ public sealed class User : AggregateRoot<UserId>
         return user;
     }
 
-    /// <summary>
-    /// 修改资料
-    /// </summary>
     public Result UpdateProfile(string? account, string? displayName, string? englishName, string? employeeNo, string? mobile, string? email)
     {
         var mutable = EnsureMutable();
@@ -148,9 +138,7 @@ public sealed class User : AggregateRoot<UserId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 账号或手机号是否变化
-    /// </summary>
+    /// <summary>检查传入账号或手机号规范化后是否发生变化。</summary>
     public bool WouldChangeCredentials(string? account, string? mobile)
     {
         var newAccount = UserFields.Account(account);
@@ -159,9 +147,6 @@ public sealed class User : AggregateRoot<UserId>
             || (newMobile.IsSuccess && !string.Equals(newMobile.Value, Mobile, StringComparison.Ordinal));
     }
 
-    /// <summary>
-    /// 设置所属组织；组织是否存在、是否启用由调用方先确认
-    /// </summary>
     public Result AssignOrgUnit(OrgUnitId? orgUnitId)
     {
         var mutable = EnsureMutable();
@@ -174,9 +159,7 @@ public sealed class User : AggregateRoot<UserId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 禁用：他的全部会话随之作废
-    /// </summary>
+    /// <summary>禁用用户并发布禁用事件，由事件处理器在同一事务内作废其全部会话。</summary>
     public Result Disable(string? reason = null)
     {
         var mutable = EnsureMutable();
@@ -194,18 +177,13 @@ public sealed class User : AggregateRoot<UserId>
         return fired;
     }
 
-    /// <summary>
-    /// 启用
-    /// </summary>
     public Result Enable(string? reason = null)
     {
         var mutable = EnsureMutable();
         return mutable.IsFailure ? mutable : _machine.Fire(this, UserAction.Enable, reason);
     }
 
-    /// <summary>
-    /// 设置密码哈希
-    /// </summary>
+    /// <summary>设置密码哈希并发布密码变更事件。</summary>
     public Result SetPassword(string passwordHash, bool mustChange, bool byAdministrator, DateTimeOffset now)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
@@ -223,28 +201,17 @@ public sealed class User : AggregateRoot<UserId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 升级密码哈希参数，保留原改密时间，不发布密码变更事件
-    /// </summary>
+    /// <summary>升级密码哈希参数，保留原改密时间且不发布密码变更事件。</summary>
     public void RehashPassword(string passwordHash)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
         PasswordHash = passwordHash;
     }
 
-    /// <summary>
-    /// 记下上次使用的角色
-    /// </summary>
     public void RecordRoleUsed(RoleId roleId) => LastRoleId = roleId;
 
-    /// <summary>
-    /// 是否拥有某个角色
-    /// </summary>
     public bool HasRole(RoleId roleId) => _grants.Exists(g => g.RoleId == roleId);
 
-    /// <summary>
-    /// 授予角色；角色是否存在、是否启用、锚点是否启用由调用方先确认
-    /// </summary>
     public Result<UserRoleGrant> Grant(RoleId roleId, UserId grantedBy, DateTimeOffset now, IEnumerable<OrgUnitId> anchors)
     {
         ArgumentNullException.ThrowIfNull(anchors);
@@ -265,9 +232,7 @@ public sealed class User : AggregateRoot<UserId>
         return grant;
     }
 
-    /// <summary>
-    /// 收回角色
-    /// </summary>
+    /// <summary>收回角色；若收回的是最近使用角色则一并清空。</summary>
     public Result Revoke(RoleId roleId)
     {
         var mutable = EnsureMutable();
@@ -291,9 +256,7 @@ public sealed class User : AggregateRoot<UserId>
         return Result.Success();
     }
 
-    /// <summary>
-    /// 整体替换某个授予上的锚点
-    /// </summary>
+    /// <summary>整体替换指定角色授予的组织锚点。</summary>
     public Result SetAnchors(RoleId roleId, IEnumerable<OrgUnitId> anchors)
     {
         ArgumentNullException.ThrowIfNull(anchors);

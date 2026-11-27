@@ -3,16 +3,14 @@ using Kmic.Operations.Domain.Jobs;
 
 namespace Kmic.Operations.Application.BackgroundJobs;
 
-/// <summary>
-/// 后台作业信息，不含作业参数
-/// </summary>
+/// <summary>后台作业信息（不含作业参数）。</summary>
 /// <param name="Id">作业 ID</param>
 /// <param name="Module">作业所在的模块</param>
 /// <param name="JobType">作业类型名</param>
 /// <param name="JobName">作业显示名称</param>
 /// <param name="Status">状态</param>
 /// <param name="SubmittedBy">提交人 ID，系统提交时为空</param>
-/// <param name="SubmittedByName">提交人的名称，用户已经不存在时为空</param>
+/// <param name="SubmittedByName">提交人名称，用户已不存在时为空</param>
 /// <param name="SubmittedAt">提交时间</param>
 /// <param name="StartedAt">首次执行时间</param>
 /// <param name="FinishedAt">结束时间</param>

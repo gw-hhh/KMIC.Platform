@@ -1,15 +1,8 @@
 namespace Kmic.BuildingBlocks.Application.Security;
 
-/// <summary>
-/// 安全事件写入
-/// </summary>
-/// <remarks>
-/// 不在业务事务里，业务回滚后仍然保留
-/// </remarks>
+/// <summary>安全事件写入器；独立于业务事务之外，业务事务回滚后仍会保留。</summary>
 public interface ISecurityEventWriter
 {
-    /// <summary>
-    /// 写入安全事件，不等待也不抛异常，队列满时丢弃并告警
-    /// </summary>
+    /// <summary>异步写入安全事件，不阻塞且不抛异常；队列满时丢弃并记录告警。</summary>
     void Write(SecurityEvent securityEvent);
 }

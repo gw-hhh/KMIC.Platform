@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { formatDateTime, timeZoneNote } from './date-time';
 
-describe('时刻的显示', () => {
-  it('按业务时区换算，和浏览器所在时区无关', () => {
+describe('时间格式化与时区说明', () => {
+  it('按业务时区换算显示，不受浏览器本地时区影响', () => {
     expect(formatDateTime('2026-11-25T16:30:00Z', 'Asia/Shanghai')).toBe('2026-11-26 00:30');
     expect(formatDateTime('2026-11-25T16:30:00+08:00', 'Asia/Shanghai')).toBe('2026-11-25 16:30');
   });

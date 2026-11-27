@@ -13,7 +13,7 @@ internal sealed class SubmitSpecimenEndpoint : IEndpoint
         group.MapPost("/specimens/{id}/submit", HandleAsync)
             .Sends<SubmitSpecimenCommand>()
             .WithSummary("提交示例")
-            .WithDescription("只有负责人可以提交草稿，且至少需要一项明细。成功后状态变为已提交。");
+            .WithDescription("仅负责人可提交含至少一项明细的草稿");
 
     private static async Task<IResult> HandleAsync([Description("示例 ID")] SpecimenId id, SubmitSpecimenRequest request, ICommandSender sender, CancellationToken ct) =>
         (await sender.SendAsync(new SubmitSpecimenCommand(id, request.ExpectedVersion), ct)).ToOk();

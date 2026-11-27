@@ -4,9 +4,7 @@ using Kmic.Identity.Domain.Users;
 
 namespace Kmic.Identity.Application.Users.Get;
 
-/// <summary>
-/// 用户详情
-/// </summary>
+/// <summary>用户详情。</summary>
 /// <param name="Id">用户 ID</param>
 /// <param name="ConcurrencyVersion">版本号</param>
 /// <param name="Account">登录名</param>
@@ -23,8 +21,8 @@ namespace Kmic.Identity.Application.Users.Get;
 /// <param name="PasswordChangedAt">最近密码修改时间</param>
 /// <param name="LoginLockedUntil">登录等待或锁定的截止时间，无限制时为空</param>
 /// <param name="Grants">角色授予</param>
-/// <param name="ActiveSessionCount">未作废且未到绝对到期时间的会话数</param>
-/// <param name="AllowedActions">当前用户可对该用户执行的管理动作</param>
+/// <param name="ActiveSessionCount">有效会话数，未作废且未到绝对到期时间</param>
+/// <param name="AllowedActions">可用操作，当前用户可执行的用户管理操作</param>
 public sealed record UserDetailResponse(
     UserId Id,
     [property: JsonPropertyName("version")] long ConcurrencyVersion,

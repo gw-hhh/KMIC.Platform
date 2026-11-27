@@ -9,9 +9,6 @@ using Shouldly;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Tests.Numbering;
 
-/// <summary>
-/// 导入旧数据之后抬高计数。每个测试用自己的年份，同一个库里的计数互不影响。Probe 的表在 Probe schema 里
-/// </summary>
 public sealed class NumberCountersTests(ClassDatabase<ProbeTemplate> database) : IClassFixture<ClassDatabase<ProbeTemplate>>, IAsyncDisposable
 {
     private const string Schema = "Probe";

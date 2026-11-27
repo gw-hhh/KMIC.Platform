@@ -16,17 +16,10 @@ using Microsoft.Extensions.Options;
 
 namespace Kmic.BuildingBlocks.Infrastructure.Hosting;
 
-/// <summary>
-/// 把框架各项配置接到配置文件和环境变量上
-/// </summary>
+/// <summary>框架配置选项 DI 注册</summary>
 public static class FrameworkOptionsServiceCollectionExtensions
 {
-    /// <summary>
-    /// 把框架的配置类绑定到各自的配置节，由宿主调用
-    /// </summary>
-    /// <remarks>
-    /// 不调用它，部署配置就改不了框架参数
-    /// </remarks>
+    /// <summary>绑定框架各配置类到配置节（宿主启动时须调用，否则部署配置不生效）</summary>
     public static IServiceCollection AddKmicFrameworkOptions(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -43,12 +36,12 @@ public static class FrameworkOptionsServiceCollectionExtensions
         services.AddOptions<SecurityEventOptions>().BindConfiguration(SecurityEventOptions.Section);
         services.AddOptions<DatabaseDiagnosticsOptions>().BindConfiguration(DatabaseDiagnosticsOptions.Section);
 
-        // 多个实例的游标签名密钥必须一致，所以生产环境一定要配置；开发和测试可以不配，每个进程随机一个
+        // 多实例间游标签名密钥必须保持一致，生产环境强制配置；开发与测试环境未配置时由各进程随机生成
         services.AddOptions<CursorOptions>()
             .BindConfiguration(CursorOptions.Section)
             .Validate<IHostEnvironment>(
                 (options, environment) => !environment.IsProduction() || !string.IsNullOrWhiteSpace(options.SigningKey),
-                "生产环境必须配置 Kmic:Paging:SigningKey（游标签名密钥，Base64，至少 32 字节），多个实例用同一个值")
+                "生产环境必须配置 Kmic:Paging:SigningKey（游标签名密钥，Base64 编码，至少 32 字节），且多实例间须保持一致")
             .ValidateOnStart();
         return services;
     }

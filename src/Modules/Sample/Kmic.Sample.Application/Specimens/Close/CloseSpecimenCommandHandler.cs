@@ -5,13 +5,9 @@ using Kmic.Sample.Domain.Specimens;
 
 namespace Kmic.Sample.Application.Specimens.Close;
 
-/// <summary>
-/// 关闭示例
-/// </summary>
 public sealed class CloseSpecimenCommandHandler(ISpecimenRepository specimens, IResourceAuthorizer<Specimen, SpecimenAction> authorizer)
     : ICommandHandler<CloseSpecimenCommand, VersionedResponse<SpecimenId>>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<VersionedResponse<SpecimenId>>> Handle(CloseSpecimenCommand command, CancellationToken cancellationToken)
     {
         var loaded = await specimens.GetForUpdateAsync(command.Id, command.ExpectedVersion, cancellationToken);

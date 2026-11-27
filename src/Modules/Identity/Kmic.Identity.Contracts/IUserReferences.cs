@@ -2,16 +2,8 @@ using Kmic.BuildingBlocks.Contracts.References;
 
 namespace Kmic.Identity.Contracts;
 
-/// <summary>
-/// 供其他模块批量解析用户引用
-/// </summary>
-/// <remarks>
-/// 找不到的 ID 不返回，禁用的也能查到
-/// </remarks>
+/// <summary>跨模块批量解析用户引用，仅返回存在的记录（含已禁用用户）。</summary>
 public interface IUserReferences
 {
-    /// <summary>
-    /// 批量解析用户引用
-    /// </summary>
     Task<IReadOnlyDictionary<Guid, ReferenceInfo>> ResolveAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct);
 }

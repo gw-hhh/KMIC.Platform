@@ -2,9 +2,6 @@ using Kmic.BuildingBlocks.Application.Files;
 
 namespace Kmic.Sample.Application;
 
-/// <summary>
-/// 示例附件的上传配置
-/// </summary>
 [UploadProfile(
     "Sample.SpecimenAttachment",
     "示例附件",

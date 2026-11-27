@@ -24,6 +24,6 @@ internal sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.HasIndex(a => new { a.ActorUserId, a.OccurredAt }).IsDescending(false, true);
         builder.HasIndex(a => new { a.Action, a.OccurredAt }).IsDescending(false, true);
         builder.HasIndex(a => a.Targets).HasMethod("gin").HasOperators("jsonb_path_ops");
-        builder.HasNoDataScope("运维数据按权限点管理，审计人员需要看到全部");
+        builder.HasNoDataScope("运维数据按权限点管理，审计人员需查看全部记录");
     }
 }

@@ -48,7 +48,7 @@ const entries: RouteEntry[] = [
 ];
 
 describe('路由目录', () => {
-  it('按权限生成菜单，没有可见条目的目录整个隐藏', () => {
+  it('按权限过滤生成菜单，无可见子项的目录整体隐藏', () => {
     const catalog = createRouteCatalog(entries, groups);
 
     const menu = catalog.menu((permission) => permission === 'Sample.Specimen.View');
@@ -66,7 +66,7 @@ describe('路由目录', () => {
     expect(menu.map((node) => node.title)).toEqual(['销售', '系统']);
   });
 
-  it('标签键按模式计算', () => {
+  it('按标签模式计算各路由的标签键', () => {
     const catalog = createRouteCatalog(entries, groups);
 
     expect(catalog.tabKey('sample.list', {})).toBe('sample.list');
@@ -74,14 +74,14 @@ describe('路由目录', () => {
     expect(catalog.tabKey('sample.create', {}, 'a1')).toBe('sample.create#a1');
   });
 
-  it('面包屑含目录和上级页面', () => {
+  it('面包屑导航同时包含所属目录与上级页面', () => {
     const catalog = createRouteCatalog(entries, groups);
 
     expect(catalog.breadcrumb('sample.list').map((crumb) => crumb.title)).toEqual(['销售', '订单', '示例列表']);
     expect(catalog.breadcrumb('sample.detail').map((crumb) => crumb.title)).toEqual(['示例列表', '示例详情']);
   });
 
-  it('一次列出目录里所有的问题', () => {
+  it('校验路由目录时汇总报告全部配置错误', () => {
     const broken = [
       entry({ name: 'a.one', path: '/a' }),
       entry({ name: 'a.one', path: '/b', menu: { group: 'nowhere', order: 1 } }),
@@ -98,7 +98,7 @@ describe('路由目录', () => {
 });
 
 describe('定义模块路由', () => {
-  it('名字必须以模块名开头', () => {
+  it('路由名称必须以模块名为前缀', () => {
     expect(() => defineModuleRoutes('sample', [entry({ name: 'other.list', path: '/x' })])).toThrow(/sample\./);
   });
 });

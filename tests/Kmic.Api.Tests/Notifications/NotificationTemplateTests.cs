@@ -16,9 +16,6 @@ using Shouldly;
 
 namespace Kmic.Api.Tests.Notifications;
 
-/// <summary>
-/// 通知模板：启动时同步代码里的声明，发布版本、恢复默认、预览，以及发布之后新的通知用哪一版内容
-/// </summary>
 public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> database, ApiTemplate template)
     : ApiTestBase(database, template), IClassFixture<ClassDatabase<ApiTemplate>>
 {
@@ -44,7 +41,7 @@ public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> databas
     private static async Task<long> VersionOfAsync(HttpClient client, string key = SubmittedKey) =>
         (await JsonAsync(await client.GetAsync($"{Root}/{key}", Ct))).GetProperty("version").GetInt64();
 
-    // 同一个测试类共用一个数据库，别的测试发布过的版本还在，所以版本号取最新的，不写死
+    // 同一测试类共用同一数据库，其他测试可能已发布过版本，因此动态查询最新版本号而非硬编码
     private static async Task<int> LatestVersionAsync(HttpClient client) =>
         (await JsonAsync(await client.GetAsync($"{Root}/{SubmittedKey}", Ct))).GetProperty("versions").EnumerateArray().First().GetProperty("version").GetInt32();
 
@@ -107,7 +104,7 @@ public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> databas
         (await seed.ScalarAsync<string>("""SELECT "DisplayName" FROM "Notifications"."NotificationTemplate" WHERE "Key" = 'Sample.SpecimenSubmitted'""")).ShouldBe(definition.DisplayName);
         (await seed.ScalarAsync<string>("""SELECT "Status" FROM "Notifications"."NotificationTemplate" WHERE "Key" = 'Sample.Gone'""")).ShouldBe("Retired");
 
-        // 声明没变，再同步什么也不做；退役的模板重新出现就恢复启用
+        // 声明未变更时重复同步应保持幂等；曾退役的模板重新声明后应恢复启用
         (await SyncAsync()).ShouldBe(new TemplateSyncResult(0, 0, 0));
         await seed.SqlAsync("""UPDATE "Notifications"."NotificationTemplate" SET "Status" = 'Retired' WHERE "Key" = 'Sample.SpecimenSubmitted'""");
         (await SyncAsync()).ShouldBe(new TemplateSyncResult(0, 1, 0));
@@ -129,7 +126,7 @@ public sealed class NotificationTemplateTests(ClassDatabase<ApiTemplate> databas
         (await DeliveryOfAsync(seed, "after-publish")).ShouldBe($"新主题 SP-7|<p>样品 已提交</p>|{latest}");
         (await seed.ScalarAsync<string>("""SELECT "TemplateVersions"->>'Email' || ',' || ("TemplateVersions"->>'InApp') FROM "Notifications"."Notification" WHERE "DedupKey" = 'after-publish'""")).ShouldBe($"{latest},0");
         var title = await seed.ScalarAsync<string>($"""SELECT "Title" FROM "Notifications"."SiteMessage" WHERE "RecipientUserId" = '{user}'""");
-        title.ShouldNotBeNull().ShouldNotContain("新主题", customMessage: "没发布过版本的渠道还用代码里的内容");
+        title.ShouldNotBeNull().ShouldNotContain("新主题", customMessage: "未发布自定义版本的渠道仍应使用代码声明的默认模板");
 
         var reverted = await PostActionAsync(admin, $"{Root}/{SubmittedKey}/revert", new { channel = "Email", expectedVersion = (long?)null });
         reverted.StatusCode.ShouldBe(HttpStatusCode.OK);

@@ -1,8 +1,5 @@
 namespace Kmic.Sample.Presentation.Specimens;
 
-/// <summary>
-/// 查询示例列表的参数
-/// </summary>
 /// <param name="Q">关键字</param>
 /// <param name="Status">状态编码</param>
 /// <param name="Page">页码</param>

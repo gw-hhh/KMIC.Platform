@@ -4,9 +4,6 @@ using Npgsql;
 
 namespace Kmic.Operator;
 
-/// <summary>
-/// 运维命令共用的配置、标准输入输出及时间服务
-/// </summary>
 internal sealed class OperatorContext(IConfiguration configuration, TextReader input, TextWriter output, TimeProvider time)
 {
     public TextWriter Output => output;
@@ -16,7 +13,7 @@ internal sealed class OperatorContext(IConfiguration configuration, TextReader i
     public string ConnectionString() =>
         configuration[OperatorApp.ConnectionStringKey] is { Length: > 0 } connection
             ? KmicConnectionString.Normalize(connection)
-            : throw new InvalidOperationException($"没有配置运维账号的连接串 {OperatorApp.ConnectionStringKey}。");
+            : throw new InvalidOperationException($"未配置运维账号连接字符串 {OperatorApp.ConnectionStringKey}。");
 
     // 密码仅读取标准输入首行，输入结束或空行均视为缺失
     public async Task<string> ReadPasswordAsync()

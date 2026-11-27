@@ -9,13 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kmic.Sample.Application.Specimens.GetDetail;
 
-/// <summary>
-/// 查询示例详情
-/// </summary>
 public sealed class GetSpecimenDetailQueryHandler(ISampleQueryDb db, IEntityFinder finder, IAllowedActions<Specimen> allowedActions)
     : IQueryHandler<GetSpecimenDetailQuery, SpecimenDetailResponse>
 {
-    /// <inheritdoc />
     public async ValueTask<Result<SpecimenDetailResponse>> Handle(GetSpecimenDetailQuery query, CancellationToken cancellationToken)
     {
         // 范围外与不存在均返回 NotFound；仅范围外访问记安全事件
